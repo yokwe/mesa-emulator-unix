@@ -12,7 +12,7 @@ clean:
 	echo "PATH = $(PATH)"
 	rm -rf tmp/build
 	mkdir  tmp/build
-	mkdir  tmp/build/mesa
+	mkdir  tmp/build/main
 	mkdir  tmp/build/util
 
 distclean: clean
@@ -26,11 +26,12 @@ qmake:
 	( cd src/util; qmake )
 	( cd src/main; qmake )
 
-main:
+util:
 	( cd src/util; make all )
+
+main: util
 	( cd src/main; make all )
 
 run-main: main
 	echo -n >tmp/debug.log
 	tmp/build/main/main
-

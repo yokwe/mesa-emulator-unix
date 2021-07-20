@@ -2,25 +2,22 @@
 # BSDmakefile
 #
 
-# Linux
-.if exists(/usr/bin/bash)
-SHELL := /usr/bin/bash
-.export-env SHELL
-.endif
 
-# FreeBSD
-.if exists(/usr/local/bin/bash)
-SHELL := /usr/local/bin/bash
-.export-env SHELL
-.endif
+UNAME != uname
+.export-env UNAME
 
-# Darwin
-.if exists(/bin/bash)
-SHELL := /bin/bash
-.export-env SHELL
+.if exists(/opt/local/libexec/qt5/bin/qmake)
+QMAKE := /opt/local/libexec/qt5/bin/qmake
+.else
+QMAKE != which qmake
 .endif
+.export-env QMAKE
+
+SHELL != which bash
+.export-env SHELL
 
 LOG4CPP_CONFIG    := data/debug.properties
 .export-env LOG4CPP_CONFIG
+
 
 include Makefile

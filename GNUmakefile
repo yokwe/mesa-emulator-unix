@@ -2,24 +2,15 @@
 # GNUmakefile
 #
 
-# Linux
-ifneq ("$(wildcard /usr/bin/bash)","")
-SHELL := /usr/bin/bash
-export SHELL
+ifneq ("$(wildcard /opt/local/libexec/qt5/bin/qmake)","")
+QMAKE := /opt/local/libexec/qt5/bin/qmake
+else
+QMAKE := $(shell which qmake)
 endif
+export QMAKE
 
-# FreeBSD
-ifneq ("$(wildcard /usr/local/bin/bash)","")
-SHELL := /usr/local/bin/bash
+SHELL := $(shell which bash)
 export SHELL
-endif
-
-# Darwin
-ifneq ("$(wildcard /bin/bash)","")
-SHELL := /bin/bash
-export SHELL
-endif
-
 
 LOG4CPP_CONFIG    := data/debug.properties
 export LOG4CPP_CONFIG

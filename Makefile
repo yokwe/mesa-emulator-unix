@@ -23,12 +23,12 @@ distclean: clean
 	rm -f  src/*/object_script.*.Release
 
 qmake:
-	cd src/util; $(QMAKE)
-	cd src/main; $(QMAKE)
+	( cd src/util; qmake )
+	( cd src/main; qmake )
 
 main:
-	cd src/util; make all
-	cd src/main; make all
+	( cd src/util; make all )
+	( cd src/main; make all )
 
 run-main: main
 	echo -n >tmp/debug.log

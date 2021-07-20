@@ -10,6 +10,8 @@ macx {
 
 QMAKE_CXXFLAGS += -std=c++17 -Wall -Werror -g
 
+QMAKE_LFLAGS   += -g -rdynamic
+
 DESTDIR     = ../../tmp/build/$$TARGET
 OBJECTS_DIR = ../../tmp/build/$$TARGET
 MOC_DIR     = ../../tmp/build/$$TARGET

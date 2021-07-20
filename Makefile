@@ -23,8 +23,8 @@ distclean: clean
 	rm -f  src/*/object_script.*.Release
 
 qmake:
-	cd src/util; qmake
-	cd src/main; qmake
+	cd src/util; $(QMAKE)
+	cd src/main; $(QMAKE)
 
 main:
 	cd src/util; make all

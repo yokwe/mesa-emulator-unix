@@ -1,12 +1,9 @@
+TARGET   = main
+
 TEMPLATE = app
 
-QMAKE_LFLAGS   += -g -rdynamic
-
-# no gui
-macx {
-	CONFIG -= app_bundle
-}
-
+# run from comand line - no gui in osx
+CONFIG += cmdline
 
 LIBS += ../../tmp/build/util/libutil.a
 

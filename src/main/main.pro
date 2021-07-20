@@ -1,9 +1,10 @@
 TEMPLATE = app
 
-QMAKE_LFLAGS   += -g
+QMAKE_LFLAGS   += -g -rdynamic
 
-unix {
-	QMAKE_LFLAGS   += -rdynamic
+# no gui
+macx {
+	CONFIG -= app_bundle
 }
 
 

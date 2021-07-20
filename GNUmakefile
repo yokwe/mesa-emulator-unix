@@ -16,7 +16,7 @@ endif
 
 # Darwin
 ifneq ("$(wildcard /bin/bash)","")
-SHELL := /usr/bash
+SHELL := /bin/bash
 export SHELL
 endif
 

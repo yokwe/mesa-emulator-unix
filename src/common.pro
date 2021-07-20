@@ -3,6 +3,11 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 INCLUDEPATH += .
 
+macx {
+	INCLUDEPATH += /opt/local/include
+	LIBS        += -L/opt/local/lib
+}
+
 QMAKE_CXXFLAGS += -std=c++17 -Wall -Werror -g
 
 DESTDIR     = ../../tmp/build/$$TARGET

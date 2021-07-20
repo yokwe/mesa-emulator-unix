@@ -1,0 +1,5 @@
+tmp/
+data/Dawn/
+data/GVWin*/
+src/*/Makefile
+src/*/.qmake.stash

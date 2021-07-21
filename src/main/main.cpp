@@ -1,6 +1,4 @@
 /*******************************************************************************
- * BSD 3-Clause License
- *
  * Copyright (c) 2021, Yasuhiro Hasegawa
  * All rights reserved.
  *
@@ -36,6 +34,12 @@ static log4cpp::Category& logger = Logger::getLogger("main");
 
 int main(int, char**) {
 	logger.info("START");
+
+	setSignalHandler(SIGSEGV);
+	setSignalHandler(SIGILL);
+
+	DEBUG_TRACE();
+
 	logger.info("STOP");
 	return 0;
 }

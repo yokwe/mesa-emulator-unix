@@ -8,6 +8,7 @@ CONFIG += cmdline
 LIBS += ../../tmp/build/util/libutil.a
 
 LIBS += -llog4cpp
+LIBS += -lexecinfo
 
 POST_TARGETDEPS += ../../tmp/build/util/libutil.a
 

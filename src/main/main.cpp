@@ -32,6 +32,9 @@
 
 static log4cpp::Category& logger = Logger::getLogger("main");
 
+#include "../util/Preference.h"
+
+
 int main(int, char**) {
 	logger.info("START");
 
@@ -39,6 +42,10 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 
 	DEBUG_TRACE();
+
+	{
+		Preference::getInstance("GVWin");
+	}
 
 	logger.info("STOP");
 	return 0;

@@ -32,6 +32,9 @@
 // Util.h
 //
 
+#ifndef UTIL_H__
+#define UTIL_H__
+
 #include <log4cpp/Category.hh>
 
 #include <signal.h>
@@ -108,3 +111,4 @@ public:
 	}
 };
 
+#endif

@@ -1,6 +1,4 @@
 /*******************************************************************************
- * BSD 3-Clause License
- *
  * Copyright (c) 2021, Yasuhiro Hasegawa
  * All rights reserved.
  *
@@ -36,10 +34,77 @@
 
 #include <log4cpp/Category.hh>
 
+#include <signal.h>
+
 #include <QtCore>
 #include <QtGlobal>
+
+
+#define DEBUG_TRACE() logger.debug("****  TRACE  %-20s %5d %s", __FUNCTION__, __LINE__, __FILE__)
+
+class Error {
+public:
+	const char *func;
+	const char *file;
+	const int   line;
+
+	Error(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
+};
+
+#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw Error(__FUNCTION__, __FILE__, __LINE__); }
+
+void logBackTrace();
+void setSignalHandler(int signum = SIGSEGV);
+
 
 class Logger {
 public:
 	static log4cpp::Category& getLogger(const char *name);
+
+	static void pushPriority(log4cpp::Priority::Value newValue);
+	static void popPriority();
 };
+
+
+class Util {
+public:
+	// misc functions
+	static void    msleep(quint32 milliSeconds);
+	static quint32 getUnixTime();
+
+	static void*   mapFile  (const QString& path, quint32& mapSize);
+	static void    unmapFile(void* page);
+
+	static void    toBigEndian  (quint16* source, quint16* dest, int size);
+	static void    fromBigEndian(quint16* source, quint16* dest, int size);
+
+	//From System.mesa
+	//-- Time of day
+	//
+	//GreenwichMeanTime: TYPE = RECORD [LONG CARDINAL];
+	//-- A greenwich mean time t represents the time which is t-gmtEpoch seconds after
+	//-- midnight, 1 January 1968, the time chosen as the epoch or beginning of the Pilot
+	//-- time standard.  Within the range in which they overlap, the Alto and Pilot time
+	//-- standards assign identical bit patterns, but the Pilot standard runs an additional
+	//-- 67 years before overflowing.
+	//-- Greenwich mean times should be compared directly only for equality; to find which of
+	//-- two gmt's comes first, apply SecondsSinceEpoch to each and compare the result.  If t2
+	//-- is a gmt known to occur after t1, then t2-t1 is the seconds between t1 and t2.  If t
+	//-- is a gmt, then System.GreenwichMeanTime[t+60] is the gmt one minute after t.
+	//gmtEpoch: GreenwichMeanTime = [2114294400];
+	//-- = (67 years * 365 days + 16 leap days) * 24 hours * 60 minutes * 60 seconds
+	//GetGreenwichMeanTime: PROCEDURE RETURNS [gmt: GreenwichMeanTime];
+
+	// Unix Time Epoch  1970-01-01 00:00:00
+	// Mesa Time Epoch  1968-01-01 00:00:00
+	//   Difference between above 2 date is 731 days.
+	static const quint32 EPOCH_DIFF = (quint32)2114294400 + (quint32)(731 * 60 * 60 * 24);
+
+	static quint32 toMesaTime(quint32 unixTime) {
+		return unixTime + EPOCH_DIFF;
+	}
+	static quint32 toUnixTime(quint32 mesaTime) {
+		return mesaTime - EPOCH_DIFF;
+	}
+};
+

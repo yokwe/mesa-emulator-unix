@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Preference>
+<preference>
 
 <!-- 
   Copyright (c) 2021, Yasuhiro Hasegawa
@@ -30,41 +30,33 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  -->
-
-	<ActiveEntry name="GVWin21" />
 	
-	<Entry name="DEFAULT">
-		<proerty name="DisplayWidth"  value="1024" />
-		<proerty name="DisplayHeight" value="640 " />
-		
-		<proerty name="DiskPath" value="data/GVWin21/GVWIN%1.DSK" />
-		<proerty name="GermPath" value="data/GVWin21/GVWIN.GRM" />
-		<proerty name="BootPath" value="data/GVWin21/NSINSTLR.DAT" />
-		
-		<proerty name="FloppyPath" value="tmp/floppy/image/floppy144" />
-		
-		<!-- GVWin Oy{|}\346\347\350\377 -->
-		<proerty name="BootSwitch" value="Oy{|}\346\347\350\377" />
-		
-		<!-- BootDevice can be DISK, ETHER or STREAM -->
-		<proerty name="BootDevice" value="DISK" />
+	<entry name="GVWin">
+		<display width    ="1024"
+		 	     height   ="640" />
+		<file    disk     ="data/GVWin/GVWIN%1.DSK"
+			     germ     ="data/GVWin/GVWIN.GRM"
+			     boot     ="data/GVWin/NSINSTLR.DAT"
+			     floppy   ="tmp/floppy/image/floppy144" />
+		<boot    switch   ="Oy{|}\346\347\350\377"
+				 device   ="DISK" />
+		<memory  vmbits   ="23"
+				 rmbits   ="22" />
+		<network interface="ens224" />
+	</entry>
+	
+	<entry name="Dawn">
+		<display width    ="1024"
+		 	     height   ="640" />
+		<file    disk     ="data/Dawn/Dawn.dsk"
+			     germ     ="data/Dawn/Dawn.germ"
+			     boot     ="data/GVWin/NSINSTLR.DAT"
+			     floppy   ="tmp/floppy/image/floppy144" />
+		<boot    switch   ="8Wy{|}\346\347\350\377"
+				 device   ="DISK" />
+		<memory  vmbits   ="23"
+				 rmbits   ="22" />
+		<network interface="ens224" />
+	</entry>
 
-		<proerty name="VMBits" value="23" />
-		<proerty name="RMBits" value="22" />
-		
-		<proerty name="NetworkInterface" value="ens224" />
-	</Entry>
-
-	<Entry name="GVWin21">
-	</Entry>
-
-	<Entry name="Dawn">
-		<proerty name="DiskPath" value="data/Dawn/Dawn.dsk" />
-		<proerty name="GermPath" value="data/Dawn/Dawn.germ" />
-
-		<!-- Dawn  8W -->
-		<!-- Dawn  8Wy{|}\346\347\350\377 -->
-		<proerty name="BootSwitch" value="8Wy{|}\346\347\350\377" />
-	</Entry>
-
-</Preference>
+</preference>

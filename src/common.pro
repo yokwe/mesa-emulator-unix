@@ -8,6 +8,13 @@ macx {
 	LIBS        += -L/opt/local/lib
 }
 
+LIBS += -llog4cpp
+
+freebsd {
+	LIBS += -lexecinfo
+}
+
+
 QMAKE_CXXFLAGS += -std=c++17 -Wall -Werror -g
 
 QMAKE_LFLAGS   += -g -rdynamic

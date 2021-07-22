@@ -40,12 +40,15 @@ int main(int, char**) {
 
 	setSignalHandler(SIGSEGV);
 	setSignalHandler(SIGILL);
+	setSignalHandler(SIGABRT);
 
 	DEBUG_TRACE();
 
 	{
 		Setting::getInstance("GVWin");
 	}
+
+	ERROR();
 
 	logger.info("STOP");
 	return 0;

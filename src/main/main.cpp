@@ -48,7 +48,7 @@ int main(int, char**) {
 		Setting::getInstance("GVWin");
 	}
 
-	ERROR();
+//	ERROR();
 
 	logger.info("STOP");
 	return 0;

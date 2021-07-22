@@ -32,7 +32,7 @@
 
 static log4cpp::Category& logger = Logger::getLogger("main");
 
-#include "../util/Preference.h"
+#include "../util/Setting.h"
 
 
 int main(int, char**) {
@@ -44,7 +44,7 @@ int main(int, char**) {
 	DEBUG_TRACE();
 
 	{
-		Preference::getInstance("GVWin");
+		Setting::getInstance("GVWin");
 	}
 
 	logger.info("STOP");

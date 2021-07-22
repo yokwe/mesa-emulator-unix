@@ -35,7 +35,7 @@
 
 #include <QtCore>
 
-class Preference {
+class Setting {
 public:
 	class Display {
 	public:
@@ -43,6 +43,7 @@ public:
 		quint32 height;
 
 		Display() : width(0), height(0) {}
+		Display(QXmlStreamReader& reader);
 	};
 
 	class File {
@@ -53,14 +54,16 @@ public:
 		QString floppy;
 
 		File() : disk(""), germ(""), boot(""), floppy("") {}
+		File(QXmlStreamReader& reader);
 	};
 
 	class Boot {
 	public:
-		QString switchString;
+		QString switch_; // To avoid using keyword as variable name, append underscore
 		QString device;
 
-		Boot() : switchString(""), device("") {}
+		Boot() : switch_(""), device("") {}
+		Boot(QXmlStreamReader& reader);
 	};
 
 	class Memory {
@@ -69,26 +72,31 @@ public:
 		quint32 rmbits;
 
 		Memory() : vmbits(0), rmbits(0) {}
+		Memory(QXmlStreamReader& reader);
 	};
+
 	class Network {
 	public:
 		QString interface;
 
 		Network() : interface("") {}
+		Network(QXmlStreamReader& reader);
 	};
 
-	QString name;
-	Display display;
-	File    file;
-	Boot    boot;
-	Memory  memory;
-	Network network;
+	class Entry {
+	public:
+		QString name; // attribute
+		Display display;
+		File    file;
+		Boot    boot;
+		Memory  memory;
+		Network network;
 
-	Preference() {}
-	Preference(QXmlStreamReader& reader);
+		Entry() : name("") {}
+		Entry(QXmlStreamReader& reader);
+	};
 
-	static Preference getInstance(QString name);
-
+	static Entry getInstance(QString name);
 };
 
 #endif

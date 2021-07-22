@@ -4,8 +4,8 @@ TEMPLATE = lib
 CONFIG  += staticlib
 
 # Input
-HEADERS += Util.h   Preference.h
-SOURCES += Util.cpp Preference.cpp
+HEADERS += Util.h   Setting.h
+SOURCES += Util.cpp Setting.cpp
 
 
 ###############################################

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<preference>
 
 <!-- 
   Copyright (c) 2021, Yasuhiro Hasegawa
@@ -30,33 +29,35 @@
   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  -->
+ 
+<setting>
 	
-	<entry name="GVWin">
-		<display width    ="1024"
-		 	     height   ="640" />
-		<file    disk     ="data/GVWin/GVWIN%1.DSK"
-			     germ     ="data/GVWin/GVWIN.GRM"
-			     boot     ="data/GVWin/NSINSTLR.DAT"
-			     floppy   ="tmp/floppy/image/floppy144" />
-		<boot    switch   ="Oy{|}\346\347\350\377"
-				 device   ="DISK" />
-		<memory  vmbits   ="23"
-				 rmbits   ="22" />
-		<network interface="ens224" />
+	<entry       name      ="GVWin">
+		<display width     ="1024"
+		 	     height    ="640" />
+		<file    disk      ="data/GVWin/GVWIN%1.DSK"
+			     germ      ="data/GVWin/GVWIN.GRM"
+			     boot      ="data/GVWin/NSINSTLR.DAT"
+			     floppy    ="tmp/floppy/image/floppy144" />
+		<boot    switch    ="Oy{|}\346\347\350\377"
+				 device    ="DISK" />
+		<memory  vmbits    ="23"
+				 rmbits    ="22" />
+		<network interface ="ens224" />
 	</entry>
 	
-	<entry name="Dawn">
-		<display width    ="1024"
-		 	     height   ="640" />
-		<file    disk     ="data/Dawn/Dawn.dsk"
-			     germ     ="data/Dawn/Dawn.germ"
-			     boot     ="data/GVWin/NSINSTLR.DAT"
-			     floppy   ="tmp/floppy/image/floppy144" />
-		<boot    switch   ="8Wy{|}\346\347\350\377"
-				 device   ="DISK" />
-		<memory  vmbits   ="23"
-				 rmbits   ="22" />
-		<network interface="ens224" />
+	<entry        name      ="Dawn">
+		<display width     ="1024"
+		 	     height    ="640" />
+		<file    disk      ="data/Dawn/Dawn.dsk"
+			     germ      ="data/Dawn/Dawn.germ"
+			     boot      ="data/GVWin/NSINSTLR.DAT"
+			     floppy    ="tmp/floppy/image/floppy144" />
+		<boot    switch    ="8Wy{|}\346\347\350\377"
+				 device    ="DISK" />
+		<memory  vmbits    ="23"
+				 rmbits    ="22" />
+		<network interface ="ens224" />
 	</entry>
 
-</preference>
+</setting>

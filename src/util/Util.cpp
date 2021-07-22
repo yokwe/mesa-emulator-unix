@@ -36,14 +36,11 @@
 
 #include <log4cpp/PropertyConfigurator.hh>
 
-#if defined(__linux__) || defined(__FreeBSD__)
 #include <execinfo.h>
-#endif
 
 static log4cpp::Category& logger = Logger::getLogger("util");
 
 void logBackTrace() {
-#if defined(__linux__) || defined(__FreeBSD__)
 	const int BUFFER_SIZE = 100;
 	void *buffer[BUFFER_SIZE];
 
@@ -56,7 +53,6 @@ void logBackTrace() {
 	for(int i = 0; i < size; i++) {
 		logger.fatal("%3d %s", i, msg[i]);
 	}
-#endif
 }
 
 static void signalHandler(int signum) {

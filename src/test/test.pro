@@ -1,5 +1,9 @@
 TARGET   = test
+
 TEMPLATE = app
+
+# run from comand line - no gui in osx
+CONFIG += cmdline
 
 # Input
 HEADERS += base.h

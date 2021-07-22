@@ -31,8 +31,6 @@
 #ifndef PREFERENCE_H__
 #define PREFERENCE_H__
 
-#include "../util/Util.h"
-
 #include <QtCore>
 
 class Setting {

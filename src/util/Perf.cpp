@@ -28,33 +28,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "../util/Util.h"
 
-static log4cpp::Category& logger = Logger::getLogger("main");
+//
+// Perf.cpp
+//
 
-#include "../util/Setting.h"
+#include "Perf.h"
 
-#include "../util/Perf.h"
+int perf_stop_at_mp_8000 = 0;
 
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	Setting::getInstance("GVWin");
-
-	PERF_INC(Dispatch)
-	PERF_LOG()
-
-
-//	ERROR();
-
-	logger.info("STOP");
-	return 0;
-}
-
-
+PERF_DEFFINE(Dispatch)
+PERF_DEFFINE(Fetch)
+PERF_DEFFINE(Store)
+PERF_DEFFINE(ReadDbl)
+PERF_DEFFINE(FetchMds)
+PERF_DEFFINE(StoreMds)
+PERF_DEFFINE(ReadDblMds)
+PERF_DEFFINE(FetchLF)
+PERF_DEFFINE(StoreLF)
+PERF_DEFFINE(ReadDblLF)
+PERF_DEFFINE(FetchCode)
+PERF_DEFFINE(GetCodeByte)
+PERF_DEFFINE(GetCodeWord)
+PERF_DEFFINE(FetchByte)
+PERF_DEFFINE(StoreByte)
+PERF_DEFFINE(ReadField)
+PERF_DEFFINE(WriteField)
+PERF_DEFFINE(WriteMap)
+PERF_DEFFINE(GetAddress)
+PERF_DEFFINE(FetchPda)
+PERF_DEFFINE(StorePda)
+PERF_DEFFINE(MemoryFetch)
+PERF_DEFFINE(MemoryStore)
+// Fault
+PERF_DEFFINE(FrameFault)
+PERF_DEFFINE(PageFault)
+// Trap
+PERF_DEFFINE(CodeTrap)
+PERF_DEFFINE(EscOpcodeTrap)
+PERF_DEFFINE(OpcodeTrap)
+PERF_DEFFINE(UnboundTrap)

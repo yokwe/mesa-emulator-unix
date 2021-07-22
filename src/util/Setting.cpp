@@ -28,9 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
+#include "../util/Util.h"
+static log4cpp::Category& logger = Logger::getLogger("setting");
+
 #include "Setting.h"
 
-static log4cpp::Category& logger = Logger::getLogger("setting");
 
 static const QString PATH_FILE = QStringLiteral("data/Guam/setting.xml");
 

@@ -28,16 +28,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
 //
 // Util.cpp
 //
 
-#include "./Util.h"
-
 #include <log4cpp/PropertyConfigurator.hh>
-
 #include <execinfo.h>
 
+#include "./Util.h"
 static log4cpp::Category& logger = Logger::getLogger("util");
 
 void logBackTrace() {

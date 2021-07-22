@@ -32,35 +32,49 @@
 
 static log4cpp::Category& logger = Logger::getLogger("setting");
 
-static const char* PATH_FILE = "data/Guam/setting.xml";
+static const QString PATH_FILE = QStringLiteral("data/Guam/setting.xml");
 
-static const char* XML_SETTING = "setting";
+static const QString XML_SETTING    = QStringLiteral("setting");
 
-static const char* XML_DISPLAY = "display";
-static const char* XML_WIDTH   = "width";
-static const char* XML_HEIGHT  = "height";
+static const QString XML_DISPLAY    = QStringLiteral("display");
+static const QString XML_WIDTH      = QStringLiteral("width");
+static const QString XML_HEIGHT     = QStringLiteral("height");
 
-static const char* XML_FILE   = "file";
-static const char* XML_DISK   = "disk";
-static const char* XML_GERM   = "germ";
-static const char* XML_BOOT   = "boot";
-static const char* XML_FLOPPY = "floppy";
+static const QString XML_FILE       = QStringLiteral("file");
+static const QString XML_DISK       = QStringLiteral("disk");
+static const QString XML_GERM       = QStringLiteral("germ");
+static const QString XML_BOOT       = QStringLiteral("boot");
+static const QString XML_FLOPPY     = QStringLiteral("floppy");
 
-//const char* XML_BOOT   = "boot";
-static const char* XML_SWITCH = "switch";
-static const char* XML_DEVICE = "device";
+//const char* XML_BOOT   = QStringLiteral("boot");
+static const QString XML_SWITCH     = QStringLiteral("switch");
+static const QString XML_DEVICE     = QStringLiteral("device");
 
-static const char* XML_MEMORY = "memory";
-static const char* XML_VMBITS = "vmbits";
-static const char* XML_RMBITS = "rmbits";
+static const QString XML_MEMORY     = QStringLiteral("memory");
+static const QString XML_VMBITS     = QStringLiteral("vmbits");
+static const QString XML_RMBITS     = QStringLiteral("rmbits");
 
-static const char* XML_NETWORK   = "network";
-static const char* XML_INTERFACE = "interface";
+static const QString XML_NETWORK    = QStringLiteral("network");
+static const QString XML_INTERFACE  = QStringLiteral("interface");
 
-static const char* XML_ENTRY = "entry";
-static const char* XML_NAME  = "name";
+static const QString XML_ENTRY      = QStringLiteral("entry");
+static const QString XML_NAME       = QStringLiteral("name");
+
+static const QString XML_LEVELVKEYS = QStringLiteral("levelVKeys");
+static const QString XML_KEYBOARD   = QStringLiteral("keyboard");
+static const QString XML_KEYMAP     = QStringLiteral("keyMap");
+static const QString XML_MOUSE      = QStringLiteral("mouse");
+static const QString XML_BUTTONMAP  = QStringLiteral("buttonMap");
+static const QString XML_KEY        = QStringLiteral("key");
+static const QString XML_KEYNAME    = QStringLiteral("keyName");
+static const QString XML_SCANCODE   = QStringLiteral("scanCode");
+static const QString XML_BUTTON     = QStringLiteral("button");
+static const QString XML_BITMASK    = QStringLiteral("bitMask");
+
 
 static void readAttribute(QXmlStreamAttributes& attributes, QString name, QString& value) {
+	QStringLiteral("a");
+
 	if (attributes.hasAttribute(name)) {
 		value = attributes.value(name).toString();
 	} else {
@@ -71,7 +85,7 @@ static void readAttribute(QXmlStreamAttributes& attributes, QString name, QStrin
 
 static quint32 toInt(QString string) {
 	bool ok;
-	quint32 ret = string.toInt(&ok, 10);
+	quint32 ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
 
 	if (!ok) {
 		logger.error("Unexpected valueString %s!", string.toLocal8Bit().constData());
@@ -87,6 +101,255 @@ static void readAttribute(QXmlStreamAttributes& attributes, QString name, quint3
 	readAttribute(attributes, name, stringValue);
 
 	value = toInt(stringValue);
+}
+
+
+class LevelVKeys {
+public:
+	class Key {
+	public:
+		QString name;
+		quint32 keyName;
+
+		Key() : name(""), keyName(0) {}
+		Key(QXmlStreamReader& reader);
+	};
+
+	QList<Key> keyList;
+
+	LevelVKeys() {}
+	LevelVKeys(QXmlStreamReader& reader);
+};
+LevelVKeys::Key::Key(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_KEY) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	QXmlStreamAttributes attributes = reader.attributes();
+	readAttribute(attributes, XML_NAME,    name);
+	readAttribute(attributes, XML_KEYNAME, keyName);
+	reader.skipCurrentElement();
+}
+LevelVKeys::LevelVKeys(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_LEVELVKEYS) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	while(reader.readNextStartElement()) {
+		Key key(reader);
+		keyList.append(key);
+	}
+}
+
+
+class Keyboard {
+public:
+	class Key {
+	public:
+		QString name;
+		quint32 scanCode;
+
+		Key() : name(""), scanCode(0) {}
+		Key(QXmlStreamReader& reader);
+	};
+
+	QList<Key> keyList;
+	Keyboard() {}
+	Keyboard(QXmlStreamReader& reader);
+};
+Keyboard::Key::Key(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_KEY) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	QXmlStreamAttributes attributes = reader.attributes();
+	readAttribute(attributes, XML_NAME,     name);
+	readAttribute(attributes, XML_SCANCODE, scanCode);
+	reader.skipCurrentElement();
+}
+Keyboard::Keyboard(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_KEYBOARD) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	while(reader.readNextStartElement()) {
+		Key key(reader);
+		keyList.append(key);
+	}
+}
+
+
+class KeyMap {
+public:
+	class Key {
+	public:
+		QString levelVKeys;
+		QString keyboard;
+
+		Key() : levelVKeys(""), keyboard("") {}
+		Key(QXmlStreamReader& reader);
+	};
+
+	QList<Key> keyList;
+
+	KeyMap() {}
+	KeyMap(QXmlStreamReader& reader);
+};
+KeyMap::Key::Key(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_KEY) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	QXmlStreamAttributes attributes = reader.attributes();
+	readAttribute(attributes, XML_LEVELVKEYS, levelVKeys);
+	readAttribute(attributes, XML_KEYBOARD,   keyboard);
+	reader.skipCurrentElement();
+}
+KeyMap::KeyMap(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_KEYMAP) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	while(reader.readNextStartElement()) {
+		Key key(reader);
+		keyList.append(key);
+	}
+}
+
+
+class Mouse {
+public:
+	class Button {
+	public:
+		QString name;
+		quint32 bitMask;
+
+		Button() : name(""), bitMask(0) {}
+		Button(QXmlStreamReader& reader);
+	};
+
+	QList<Button> buttonList;
+
+	Mouse() {}
+	Mouse(QXmlStreamReader& reader);
+};
+Mouse::Button::Button(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_BUTTON) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	QXmlStreamAttributes attributes = reader.attributes();
+	readAttribute(attributes, XML_NAME,    name);
+	readAttribute(attributes, XML_BITMASK, bitMask);
+	reader.skipCurrentElement();
+}
+Mouse::Mouse(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_MOUSE) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	while(reader.readNextStartElement()) {
+		Button button(reader);
+		buttonList.append(button);
+	}
+}
+
+
+class ButtonMap {
+public:
+	class Button {
+	public:
+		QString levelVKeys;
+		QString button;
+
+		Button() : levelVKeys(""), button("") {}
+		Button(QXmlStreamReader& reader);
+	};
+
+	QList<Button> buttonList;
+
+	ButtonMap() {}
+	ButtonMap(QXmlStreamReader& reader);
+};
+ButtonMap::Button::Button(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_BUTTON) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	QXmlStreamAttributes attributes = reader.attributes();
+	readAttribute(attributes, XML_LEVELVKEYS, levelVKeys);
+	readAttribute(attributes, XML_BUTTON,     button);
+	reader.skipCurrentElement();
+}
+ButtonMap::ButtonMap(QXmlStreamReader& reader) {
+	// sanity check
+	if (!reader.isStartElement()) {
+		logger.error("Unexpected %s!", reader.tokenString().toLocal8Bit().constData());
+		ERROR();
+	}
+	if (reader.name() != XML_BUTTONMAP) {
+		logger.error("Unexpected  %s!", reader.name().toLocal8Bit().constData());
+		ERROR();
+	}
+
+	while(reader.readNextStartElement()) {
+		Button button(reader);
+		buttonList.append(button);
+	}
 }
 
 
@@ -224,7 +487,8 @@ Setting::Network::Network(QXmlStreamReader& reader) {
 	reader.skipCurrentElement();
 }
 
-void initialize(QMap<QString, Setting::Entry>& map) {
+
+static void initialize() {
 	QString path(PATH_FILE);
 
 	QFile file(path);
@@ -233,6 +497,13 @@ void initialize(QMap<QString, Setting::Entry>& map) {
 		ERROR();
 	}
 
+	// For keyMap and buttonMap
+	LevelVKeys levelVKeys;
+	Keyboard   keyboard;
+	KeyMap     keyMap;
+	Mouse      mouse;
+	ButtonMap  buttonMap;
+
 	// Open file
 	file.open(QFile::ReadOnly);
 	QXmlStreamReader reader(&file);
@@ -240,14 +511,35 @@ void initialize(QMap<QString, Setting::Entry>& map) {
 	if (reader.readNextStartElement()) {
 		// sanity check
 		if (reader.name() != XML_SETTING) {
-			logger.error("Unexpected token %s!", reader.tokenString().toLocal8Bit().constData());
+			logger.error("Unexpected %s!", reader.name().toLocal8Bit().constData());
 			ERROR();
 		}
 
 		while(reader.readNextStartElement()) {
-			Setting::Entry entry(reader);
-			map[entry.name] = entry;
-			logger.info("entry   %s", entry.name.toLocal8Bit().constData());
+			if (reader.name() == XML_ENTRY) {
+				Setting::Entry entry(reader);
+				Setting::entryMap[entry.name] = entry;
+
+				logger.info("entry %s", entry.name.toLocal8Bit().constData());
+			} else if (reader.name() == XML_LEVELVKEYS) {
+				LevelVKeys newValue(reader);
+				levelVKeys = newValue;
+			} else if (reader.name() == XML_KEYBOARD) {
+				Keyboard newValue(reader);
+				keyboard = newValue;
+			} else if (reader.name() == XML_KEYMAP) {
+				KeyMap newValue(reader);
+				keyMap = newValue;
+			} else if (reader.name() == XML_MOUSE) {
+				Mouse newValue(reader);
+				mouse = newValue;
+			} else if (reader.name() == XML_BUTTONMAP) {
+				ButtonMap newValue(reader);
+				buttonMap = newValue;
+			} else {
+				logger.warn("Unexpected %s!", reader.name().toLocal8Bit().constData());
+				reader.skipCurrentElement();
+			}
 		}
 	} else {
 		logger.error("Unexpected token %s!", reader.tokenString().toLocal8Bit().constData());
@@ -255,17 +547,156 @@ void initialize(QMap<QString, Setting::Entry>& map) {
 	}
 	// Close files
 	file.close();
-}
 
-static QMap<QString, Setting::Entry> map;
 
-Setting::Entry Setting::getInstance(QString name) {
-	if (map.isEmpty()) {
-		initialize(map);
+	// sanity check
+	{
+		bool foundError = false;
+
+		// levelVKeys
+		{
+			QMap<quint32, QString> map;
+			for(auto e: levelVKeys.keyList) {
+				if (map.contains(e.keyName)) {
+					logger.error("levelVkeys duplicate keyName %d  %s  %s", e.keyName, e.name.toLocal8Bit().constData(), map[e.keyName].toLocal8Bit().constData());
+					foundError = true;
+				} else {
+					map[e.keyName] = e.name;
+				}
+			}
+		}
+		{
+			QMap<QString, quint32> map;
+			for(auto e: levelVKeys.keyList) {
+				if (map.contains(e.name)) {
+					logger.error("levelVkeys duplicate name %s  %d  %d", e.name.toLocal8Bit().constData(), e.keyName, map[e.name]);
+					foundError = true;
+				} else {
+					map[e.name] = e.keyName;
+				}
+			}
+		}
+
+		// keyboard
+		{
+			QMap<quint32, QString> map;
+			for(auto e: keyboard.keyList) {
+				if (map.contains(e.scanCode)) {
+					logger.error("keyboard duplicate scanCode %d  %s  %s", e.scanCode, e.name.toLocal8Bit().constData(), map[e.scanCode].toLocal8Bit().constData());
+					foundError = true;
+				} else {
+					map[e.scanCode] = e.name;
+				}
+			}
+		}
+		{
+			QMap<QString, quint32> map;
+			for(auto e: keyboard.keyList) {
+				if (map.contains(e.name)) {
+					logger.error("keyboard duplicate name %s  %d  %d", e.name.toLocal8Bit().constData(), e.scanCode, map[e.name]);
+					foundError = true;
+				} else {
+					map[e.name] = e.scanCode;
+				}
+			}
+		}
+
+		// keyMap
+		{
+			QMap<QString, QString> map;
+			for(auto e: keyMap.keyList) {
+				if (e.keyboard.isEmpty()) continue;
+
+				if (map.contains(e.keyboard)) {
+					logger.error("keyMap duplicate keyboard %s  %s  %s", e.keyboard.toLocal8Bit().constData(), e.levelVKeys.toLocal8Bit().constData(), map[e.keyboard].toLocal8Bit().constData());
+					foundError = true;
+				} else {
+					map[e.keyboard] = e.levelVKeys;
+				}
+			}
+		}
+		{
+			QMap<QString, QString> map;
+			for(auto e: keyMap.keyList) {
+				if (e.keyboard.isEmpty()) continue;
+
+				if (map.contains(e.levelVKeys)) {
+					logger.error("keyMap duplicate levelVKeys %s  %s  %s", e.levelVKeys.toLocal8Bit().constData(), e.keyboard.toLocal8Bit().constData(), map[e.keyboard].toLocal8Bit().constData());
+					foundError = true;
+				} else {
+					map[e.levelVKeys] = e.keyboard;
+				}
+			}
+		}
+
+		if (foundError) {
+			ERROR();
+		}
 	}
 
-	if (map.contains(name)) {
-		return map[name];
+	{
+		// build Setting::keyMap
+		QMap<QString, quint32> nameToScanCode;
+		for(auto e: keyboard.keyList) {
+			nameToScanCode[e.name] = e.scanCode;
+		}
+		QMap<QString, quint32> nameToKeyName;
+		for(auto e: levelVKeys.keyList) {
+			nameToKeyName[e.name] = e.keyName;
+		}
+
+		for(auto e: keyMap.keyList) {
+			if (e.keyboard.isEmpty()) continue;
+
+			quint32 scanCode = nameToScanCode[e.keyboard];
+			quint32 keyName  = nameToKeyName[e.levelVKeys];
+
+			Setting::keyMap[scanCode] = keyName;
+
+//				logger.info("keyMap    %-16s %02X => %-16s %3d", e.keyboard.toLocal8Bit().constData(), scanCode, e.levelVKeys.toLocal8Bit().constData(), keyName);
+		}
+
+		// build Setting::buttonMap
+		QMap<QString, quint32> nameToBitmask;
+		for(auto e: mouse.buttonList) {
+			nameToBitmask[e.name] = e.bitMask;
+		}
+
+		for(auto e: buttonMap.buttonList) {
+			Qt::MouseButton bitMask = (Qt::MouseButton)nameToBitmask[e.button];
+			quint32         keyName = nameToKeyName[e.levelVKeys];
+
+			Setting::buttonMap[bitMask] = keyName;
+
+//				logger.info("buttonMap %-16s %02X => %-16s %3d", e.button.toLocal8Bit().constData(), bitMask, e.levelVKeys.toLocal8Bit().constData(), keyName);
+		}
+	}
+
+	logger.info("entry      %3d", Setting::entryMap.size());
+	logger.info("keyMap     %3d", Setting::keyMap.size());
+	logger.info("buttonMap  %3d", Setting::buttonMap.size());
+
+//	logger.info("levelVKeys %3d", levelVKeys.keyList.size());
+//	logger.info("keyboard   %3d", keyboard.keyList.size());
+//	logger.info("keyMap     %3d", keyMap.keyList.size());
+//	logger.info("mouse      %3d", mouse.buttonList.size());
+//	logger.info("buttonMap  %3d", buttonMap.buttonList.size());
+
+}
+
+QMap<QString,          Setting::Entry> Setting::entryMap;
+QHash<quint32,         quint32>        Setting::keyMap;
+//    scanCode         keyName
+QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
+//    Qt::MouseButton  keyName
+
+Setting::Entry Setting::getInstance(QString name) {
+	if (entryMap.isEmpty()) {
+		initialize();
+	}
+
+	if (entryMap.contains(name)) {
+		return entryMap[name];
 	} else {
 		logger.error("Unexpected name %s", name.toLocal8Bit().constData());
 		ERROR();

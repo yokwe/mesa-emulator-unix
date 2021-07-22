@@ -96,6 +96,13 @@ public:
 		Entry(QXmlStreamReader& reader);
 	};
 
+	static QMap<QString,          Setting::Entry> entryMap;
+	//          name              entry
+	static QHash<quint32,         quint32>        keyMap;
+	//           scanCode         bitPosition
+	static QHash<Qt::MouseButton, quint32>        buttonMap;
+	//           Qt::MouseButton  bitPosition
+
 	static Entry getInstance(QString name);
 };
 

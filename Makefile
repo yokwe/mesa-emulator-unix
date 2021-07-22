@@ -14,6 +14,7 @@ clean:
 	mkdir  tmp/build
 	mkdir  tmp/build/main
 	mkdir  tmp/build/util
+	mkdir  tmp/build/test
 
 distclean: clean
 	rm -f  src/*/Makefile
@@ -23,8 +24,9 @@ distclean: clean
 	rm -f  src/*/object_script.*.Release
 
 qmake:
-	( cd src/util; qmake )
 	( cd src/main; qmake )
+	( cd src/util; qmake )
+	( cd src/test; qmake )
 
 util:
 	( cd src/util; make all )
@@ -35,3 +37,10 @@ main: util
 run-main: main
 	echo -n >tmp/debug.log
 	tmp/build/main/main
+
+test: util
+	( cd src/test; make all )
+
+run-test: test
+	echo -n >tmp/debug.log
+	tmp/build/test/test

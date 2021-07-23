@@ -2,19 +2,20 @@
 # Makefile
 #
 
+MODULE := main util test mesa agent opcode guam-headless
+
 all:
 	echo "all"
 	@echo "--------"
 	env
 	@echo "--------"
+	@echo "MODULE $(MODULE)!"
 	
 clean:
 	echo "PATH = $(PATH)"
 	rm -rf tmp/build
-	mkdir  tmp/build
-	mkdir  tmp/build/main
-	mkdir  tmp/build/util
-	mkdir  tmp/build/test
+	@echo "MODULE $(MODULE)!"
+	@for i in $(MODULE); do echo "mkdir -p tmp/build/$$i"; mkdir -p tmp/build/$$i; done
 
 distclean: clean
 	rm -f  src/*/Makefile
@@ -24,9 +25,8 @@ distclean: clean
 	rm -f  src/*/object_script.*.Release
 
 qmake:
-	( cd src/main; qmake )
-	( cd src/util; qmake )
-	( cd src/test; qmake )
+	echo "MODULE $(MODULE)!"
+	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
 
 util:
 	( cd src/util; make all )
@@ -38,9 +38,30 @@ run-main: main
 	echo -n >tmp/debug.log
 	tmp/build/main/main
 
-test: util
+test: util mesa agent opcode
 	( cd src/test; make all )
 
 run-test: test
 	echo -n >tmp/debug.log
 	tmp/build/test/test
+
+mesa: util agent opcode
+	( cd src/mesa; make all )
+
+agent: util mesa
+	( cd src/agent; make all )
+
+opcode: util mesa
+	( cd src/opcode; make all )
+
+guam-headless: util mesa agent opcode
+	( cd src/guam-headless; make all )
+
+run-guam-headless: guam-headless
+	echo -n >tmp/debug.log
+	tmp/build/guam-headless/guam-headless
+
+
+fix-permission:
+	find . -type d -exec chmod 0755 {} \;
+	find . -type f -exec chmod 0644 {} \;

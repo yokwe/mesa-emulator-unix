@@ -35,8 +35,6 @@
 
 #include "Perf.h"
 
-int perf_stop_at_mp_8000 = 0;
-
 PERF_DEFFINE(Dispatch)
 PERF_DEFFINE(Fetch)
 PERF_DEFFINE(Store)

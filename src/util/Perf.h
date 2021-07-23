@@ -54,8 +54,6 @@
 
 static const int PERF_ENABLE    = 1;
 
-extern int perf_stop_at_mp_8000;
-
 PERF_DECLARE(Dispatch)
 PERF_DECLARE(Fetch)
 PERF_DECLARE(Store)

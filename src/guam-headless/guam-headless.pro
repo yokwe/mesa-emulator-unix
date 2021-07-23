@@ -13,7 +13,6 @@ LIBS += ../../tmp/build/agent/libagent.a
 LIBS += ../../tmp/build/util/libutil.a
 
 LIBS += -llog4cpp
-LIBS += -lexecinfo
 
 POST_TARGETDEPS += ../../tmp/build/opcode/libopcode.a
 POST_TARGETDEPS += ../../tmp/build/mesa/libmesa.a

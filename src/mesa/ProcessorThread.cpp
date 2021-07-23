@@ -196,15 +196,15 @@ CARD16 ProcessorThread::getMP() {
 }
 void ProcessorThread::setMP(CARD16 newValue) {
 	mp = newValue;
-	if (stopAtMPSet.contains(mp)) {
-		logger.info("stop at MP %4d", mp);
-		stop();
-	}
 	if (stopMessageUntilMPSet.contains(mp)) {
 		Logger::popPriority();
 		logger.info("show message at MP %4d", mp);
 		// clear stopMessageUntilMPSet to prevent call twice
 		stopMessageUntilMPSet.clear();
+	}
+	if (stopAtMPSet.contains(mp)) {
+		logger.info("stop at MP %4d", mp);
+		stop();
 	}
 }
 void ProcessorThread::stopMessageUntilMP(CARD16 newValue) {

@@ -79,7 +79,10 @@ int main(int argc, char** argv) {
 	quint32 rmBits           = entry.memory.rmbits;
 
 	// stop at MP 8000
-	perf_stop_at_mp_8000 = 1;
+	ProcessorThread::stopAtMP( 915);
+	ProcessorThread::stopAtMP(8000);
+
+//	ProcessorThread::stopMessageUntilMP(930);
 
 	MesaProcessor mesaProcessor;
 

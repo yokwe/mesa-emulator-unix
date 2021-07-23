@@ -81,6 +81,10 @@ public:
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
 		}
+		// if stopThread is true, throw RequestReschedule
+		if (stopThread) {
+			ERROR_RequestReschedule();
+		}
 	}
 
 	void run();

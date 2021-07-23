@@ -35,7 +35,7 @@ static log4cpp::Category& logger = Logger::getLogger("setting");
 #include "Setting.h"
 
 
-static const QString PATH_FILE = QStringLiteral("data/Guam/setting.xml");
+static const QString PATH_FILE = QStringLiteral("data/setting.xml");
 
 static const QString XML_SETTING    = QStringLiteral("setting");
 

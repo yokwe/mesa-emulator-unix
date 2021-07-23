@@ -5,10 +5,7 @@ TEMPLATE = app
 # run from comand line - no gui in osx
 CONFIG += cmdline
 
-linux {
-	QMAKE_POST_LINK = sudo setcap CAP_NET_RAW+pe $(TARGET)
-}
-
+linux: QMAKE_POST_LINK = sudo setcap CAP_NET_RAW+pe $(TARGET)
 
 LIBS += ../../tmp/build/opcode/libopcode.a
 LIBS += ../../tmp/build/mesa/libmesa.a

@@ -3,12 +3,12 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 INCLUDEPATH += .
 
+LIBS += -llog4cpp
+
 macx {
 	INCLUDEPATH += /opt/local/include
 	LIBS        += -L/opt/local/lib
 }
-
-LIBS += -llog4cpp
 
 freebsd {
 	LIBS += -lexecinfo

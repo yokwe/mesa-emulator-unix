@@ -123,11 +123,7 @@ public:
 	static QWaitCondition cvRunning;
 
 	static int getRunning() {
-#if (QT_VERSION_CHECK(5, 0, 0) <= QT_VERSION)
 		return running.loadAcquire();
-#else
-		return (int)running;
-#endif
 	}
 	static void startRunning(); // running = 1
 	static void stopRunning();  // running = 0
@@ -138,11 +134,7 @@ public:
 	static void requestRescheduleInterrupt();
 
 	static int getRequestReschedule() {
-#if (QT_VERSION_CHECK(5, 0, 0) <= QT_VERSION)
 		return requestReschedule.loadAcquire();
-#else
-		return (int)requestReschedule;
-#endif
 	}
 
 	static void checkRequestReschedule() {
@@ -165,11 +157,7 @@ private:
 	static QMutex     mutexRequestReschedule;
 
 	static void setRequestReschedule(int newValue) {
-#if (QT_VERSION_CHECK(5, 0, 0) <= QT_VERSION)
 		requestReschedule.storeRelease(newValue);
-#else
-		requestReschedule = newValue;
-#endif
 	}
 };
 

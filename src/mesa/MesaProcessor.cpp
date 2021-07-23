@@ -278,18 +278,10 @@ void MesaProcessor::setBootRequestStream() {
 }
 
 void MesaProcessor::setRunning(int newValue) {
-#if (QT_VERSION_CHECK(5, 0, 0) <= QT_VERSION)
 	running.storeRelease(newValue);
-#else
-	running = newValue;
-#endif
 }
 
 int MesaProcessor::getRunning() {
-#if (QT_VERSION_CHECK(5, 0, 0) <= QT_VERSION)
 	return running.loadAcquire();
-#else
-	return (int)running;
-#endif
 }
 

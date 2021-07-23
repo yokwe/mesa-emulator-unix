@@ -33,8 +33,8 @@
 // Interpreter.h
 //
 
-#ifndef INTERPRETER_H_
-#define INTERPRETER_H_
+#ifndef INTERPRETER_H__
+#define INTERPRETER_H__
 
 #include "Opcode.h"
 

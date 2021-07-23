@@ -30,18 +30,34 @@
 
 
 //
-// base.h
+// testAgent.cpp
 //
 
-#ifndef BASE_H__
-#define BASE_H__
+#include "../util/Util.h"
+static log4cpp::Category& logger = Logger::getLogger("testAgent");
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "testBase.h"
 
-class base : public CppUnit::TestFixture {
+#include "../mesa/Type.h"
+#include "../mesa/Pilot.h"
+
+#include "../agent/AgentBeep.h"
+#include "../agent/AgentDisk.h"
+#include "../agent/AgentProcessor.h"
+
+
+class testAgent : public testBase {
+
+	CPPUNIT_TEST_SUITE(testAgent);
+
+	CPPUNIT_TEST(testDummy);
+
+	CPPUNIT_TEST_SUITE_END();
+
+
 public:
-	void setUp();
-	void tearDown();
+
+	void testDummy() {}
 };
 
-#endif
+CPPUNIT_TEST_SUITE_REGISTRATION(testAgent);

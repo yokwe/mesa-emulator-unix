@@ -29,27 +29,27 @@
  *******************************************************************************/
 
 
-
-
 //
-// memory.h
+// testMain.cpp
 //
+
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/ui/text/TestRunner.h>
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("memory");
+static log4cpp::Category& logger = Logger::getLogger("testMain");
 
-#include "base.h"
+int main() {
+	CppUnit::TextUi::TestRunner runner;
 
-class memory : public base {
+	CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+	runner.addTest(registry.makeTest());
 
-	CPPUNIT_TEST_SUITE(memory);
-	CPPUNIT_TEST(test);
-	CPPUNIT_TEST_SUITE_END();
+	setSignalHandler();
 
-public:
-	void test() {
-		logger.info("test");
-	}
-};
+	logger.debug("START");
+	runner.run();
+	logger.debug("STOP");
 
-CPPUNIT_TEST_SUITE_REGISTRATION(memory);
+	return 0;
+}

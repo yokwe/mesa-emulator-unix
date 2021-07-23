@@ -29,16 +29,56 @@
  *******************************************************************************/
 
 
-#include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("base");
+//
+// testBase.h
+//
 
-#include "base.h"
+#ifndef TESTBASE_H__
+#define TESTBASE_H__
 
-void base::setUp() {
-	logger.info("setUp");
-}
+#include <cppunit/extensions/HelperMacros.h>
 
-void base::tearDown() {
-	logger.info("tearDown");
-}
+#include "../mesa/Constant.h"
+#include "../mesa/Type.h"
+#include "../mesa/Memory.h"
+#include "../mesa/Function.h"
+#include "../mesa/MesaThread.h"
 
+#include "../mesa/Pilot.h"
+
+#include "../opcode/Interpreter.h"
+
+
+class testBase : public CppUnit::TestFixture {
+protected:
+	void initRegister();
+	void initAV(CARD16 origin, CARD16 limit);
+	void initGFT();
+	void initSD();
+	void initETT();
+	void initPDA();
+
+	CARD16 *page_PDA;
+	CARD16 *page_GFT;
+	CARD16 *page_CB;
+	CARD16 *page_MDS;
+	CARD16 *page_AV;
+	CARD16 *page_SD;
+	CARD16 *page_ETT;
+	CARD16 *page_LF;
+	CARD16 *page_GF;
+
+	CARD16 GFI_GF;
+	CARD16 GFI_SD;
+	CARD16 GFI_ETT;
+	CARD16 GFI_EFC;
+
+	CARD16 pc_SD;
+	CARD16 pc_ETT;
+
+public:
+	void setUp();
+	void tearDown();
+};
+
+#endif

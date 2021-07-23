@@ -6,15 +6,22 @@ TEMPLATE = app
 CONFIG += cmdline
 
 # Input
-HEADERS += base.h
-SOURCES += base.cpp
+HEADERS += testBase.h
+SOURCES += testBase.cpp
 
-SOURCES += main.cpp memory.cpp
+SOURCES += testAgent.cpp testMain.cpp testMemory.cpp testOpcode_000.cpp testOpcode_100.cpp testOpcode_200.cpp
+SOURCES += testOpcode_300.cpp testOpcode_esc.cpp testPilot.cpp testType.cpp
 
+LIBS += ../../tmp/build/mesa/libmesa.a
+LIBS += ../../tmp/build/opcode/libopcode.a
+LIBS += ../../tmp/build/agent/libagent.a
 LIBS += ../../tmp/build/util/libutil.a
 
-LIBS += -lcppunit -llog4cpp
+LIBS += -lcppunit
 
+POST_TARGETDEPS += ../../tmp/build/mesa/libmesa.a
+POST_TARGETDEPS += ../../tmp/build/opcode/libopcode.a
+POST_TARGETDEPS += ../../tmp/build/agent/libagent.a
 POST_TARGETDEPS += ../../tmp/build/util/libutil.a
 
 ###############################################

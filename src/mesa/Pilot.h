@@ -1,28 +1,32 @@
-/*
-Copyright (c) 2014, Yasuhiro Hasegawa
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-  1. Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
-  3. The name of the author may not be used to endorse or promote products derived
-     from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
-OF SUCH DAMAGE.
-*/
+/*******************************************************************************
+ * Copyright (c) 2021, Yasuhiro Hasegawa
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
 
 
 //
@@ -126,8 +130,8 @@ public:
 
 	//PatternParm: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- used with Src to describe pattern brick
-	//  reserved: [0..7] � 0,
-	//  unpacked: BOOLEAN � FALSE, -- must be FALSE for bit source
+	//  reserved: [0..7] = 0,
+	//  unpacked: BOOLEAN = FALSE, -- must be FALSE for bit source
 	//  yOffset: [0..15],
 	//  widthMinusOne: [0..15],
 	//  -- restricted to 0 for bit source
@@ -177,13 +181,13 @@ public:
 
 	//ColorBltFlags: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- determines the ColorBlt function
-	//  direction: Direction � forward,
-	//  srcType: PixelType � bit,
-	//  dstType: PixelType � bit,
-	//  pattern: BOOLEAN � FALSE,
-	//  srcFunc: SrcFunc � null,
-	//  dstFunc: DstFunc � src,
-	//  reserved: [0..255] � 0];
+	//  direction: Direction = forward,
+	//  srcType: PixelType = bit,
+	//  dstType: PixelType = bit,
+	//  pattern: BOOLEAN = FALSE,
+	//  srcFunc: SrcFunc = null,
+	//  dstFunc: DstFunc = src,
+	//  reserved: [0..255] = 0];
 	union ColorBltFlags {
 		CARD16 u;
 		struct {
@@ -1227,12 +1231,12 @@ public:
 
 	//Operation: TYPE = MACHINE DEPENDENT RECORD [
 	//  clientHeader(0): DiskAddress,  -- address of first sector of request
-	//  reserved1(2): LONG POINTER � NIL,
+	//  reserved1(2): LONG POINTER = NIL,
 	//  -- reserved1 reserves space for backwards compatibility.  MUST BE NIL
 	//  dataPtr(4): LONG POINTER,  -- first (page aligned) data address of operation
 	//  incrementDataPtr(6:0..0): BOOLEAN,  -- if TRUE, add wordsPerPage to dataPtr
 	//  -- after each successful data write
-	//  enableTrackBuffer(6:1..1): BOOLEAN � FALSE,
+	//  enableTrackBuffer(6:1..1): BOOLEAN = FALSE,
 	//  command(6:2..7): Command,  -- six bits for backward compatibility
 	//  tries(6:8..15): Tries,
 	//    -- Indication of how hard the Face should retry the operation in the presence
@@ -1240,8 +1244,8 @@ public:
 	//    -- effort should be expended in retrying the failing operation.  Retries
 	//    -- include device specific recovery (ECC, recalibrates, ...)
 	//  pageCount(7): CARDINAL,  -- sectors remaining for this operation.
-	//  deviceStatus(10B): RECORD [a, b: UNSPECIFIED] � NULL,
-	//  diskHeader(12B): DiskAddress � NULL,  -- readHeader commands put header here.
+	//  deviceStatus(10B): RECORD [a, b: UNSPECIFIED] = NULL,
+	//  diskHeader(12B): DiskAddress = NULL,  -- readHeader commands put header here.
 	//  device(14B): DeviceHandle];
 	struct Operation {
 		DiskAddress clientHeader;     // address of first sector of request
@@ -1304,7 +1308,7 @@ public:
 	//FileID: TYPE = MACHINE DEPENDENT RECORD [
 	//  name(0): SELECT OVERLAID * FROM
 	//    volumeRelative => [
-	//      fileID(0): File.ID, pad(2): ARRAY [0..3) OF WORD � ALL[0]],
+	//      fileID(0): File.ID, pad(2): ARRAY [0..3) OF WORD = ALL[0]],
 	//    unique => [id(0): System.UniversalID]
 	//    ENDCASE];
 	union FileID {
@@ -1392,7 +1396,7 @@ public:
 	//  deviceOrdinal (1): CARDINAL,  -- position of device within all those of same type
 	//  vp (2): SELECT OVERLAID * FROM
 	//    disk => [diskFileID (2): DiskFileID],
-	//    ethernetOne => [bootFileNumber (2): CARDINAL, net (3), host (4): CARDINAL � 0],
+	//    ethernetOne => [bootFileNumber (2): CARDINAL, net (3), host (4): CARDINAL = 0],
 	//    ethernet => [ethernetRequest (2): EthernetRequest],
 	//    any => [a (2), b (3), c (4), d (5), e (6), f (7), g (10B), h (11B): UNSPECIFIED],
 	//    ENDCASE];
@@ -1412,20 +1416,20 @@ public:
 	//Request: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- Basic portion of Request: (format known by the initial microcode)
 	//  -- IF YOU CHANGE THE FORMAT OF THIS PORTION, YOU MUST INCREMENT currentRequestBasicVersion AND GENERATE NEW INITIAL MICROCODE!
-	//  requestBasicVersion (0B): CARDINAL � currentRequestBasicVersion,
+	//  requestBasicVersion (0B): CARDINAL = currentRequestBasicVersion,
 	//  action (1B): Action,
 	//  location (2B): Location,
-	//  switches (16B): System.Switches � System.defaultSwitches,  -- When calling OutLoad, these are the default switches to be used for system when InLoaded later.  When calling InLoad, these are switches to be used for system being InLoaded; defaultSwitches means use the ones built into the boot file.  When returning from InLoad, these are the switches passed from caller of InLoad or, if he passed defaultSwitches, the switches built into the boot file.
+	//  switches (16B): System.Switches = System.defaultSwitches,  -- When calling OutLoad, these are the default switches to be used for system when InLoaded later.  When calling InLoad, these are switches to be used for system being InLoaded; defaultSwitches means use the ones built into the boot file.  When returning from InLoad, these are the switches passed from caller of InLoad or, if he passed defaultSwitches, the switches built into the boot file.
 	//
 	//  -- Extension portion of Request: (not used by the initial microcode)
-	//  requestExtensionVersion (15B): CARDINAL � currentRequestExtensionVersion,
+	//  requestExtensionVersion (15B): CARDINAL = currentRequestExtensionVersion,
 	//
 	//   -- Extensions for InLoad - "results":
 	//  pStartListHeader  (36B): StartList.Base,  -- only valid after inload of virgin boot file.
 	//
 	//  -- Extensions for OutLoad - "arguments":
 	//  inLoadMode (40B): BootFile.InLoadMode,  -- real page numbers significant?
-	//  -- As a side-effect of the cross-mds call mechanism, the entry point of the system being outLoaded is stored in pInitialLink� in the caller's mds and the mds of the system being outLoaded is passed to the Germ.
+	//  -- As a side-effect of the cross-mds call mechanism, the entry point of the system being outLoaded is stored in pInitialLink in the caller's mds and the mds of the system being outLoaded is passed to the Germ.
 	//
 	//  -- Extensions for OutLoad - "results":
 	//  session (41B): Session ];  -- just finished OutLoad, or InLoaded later?
@@ -1492,11 +1496,11 @@ public:
 	static const CARD16 LC_spare    = 3;
 
 	//VolumeLock: TYPE = MACHINE DEPENDENT RECORD [
-	//  owner (0): Volume.ID � Volume.nullID,
+	//  owner (0): Volume.ID = Volume.nullID,
 	//  lock (5:0..15): SELECT stateTag (5:0..1): LockState FROM
-	//    unlocked => [null (5:2..15): [0..16384) � 0],
-	//    write => [null (5:2..15): [0..16384) � 0],
-	//    read => [count (5:2..5): [0..16) � 0, null (5:6..15): [0..1024) � 0],
+	//    unlocked => [null (5:2..15): [0..16384) = 0],
+	//    write => [null (5:2..15): [0..16384) = 0],
+	//    read => [count (5:2..5): [0..16) = 0, null (5:6..15): [0..1024) = 0],
 	//  ENDCASE];
 	struct VolumeLock {
 		System::UniversalID owner;
@@ -1515,31 +1519,31 @@ public:
 	//  seal(0):          CARDINAL  -- absolutely must be 1st field
 	//  version(1):       CARDINAL  -- absolutely must be 2nd field
 	//  vID(2):           Volume.ID,
-	//  labelLength(7):   CARDINAL [0..maxLogicalVolumeLabelLength] � 0,
-	//  label(10B):       LabelArray � nullName,
+	//  labelLength(7):   CARDINAL [0..maxLogicalVolumeLabelLength] = 0,
+	//  label(10B):       LabelArray = nullName,
 	//  type(34B):        Volume.Type,
 	//  volumeSize(35B):  Volume.PageCount,
-	//  bootingInfo(37B): Boot.LVBootFiles � nullBoot,
-	//  pad(125B):	      CARDINAL � 0,
-	//  pad1(126B:0..14):  [0..77777B] � 0,
-	//  changing(126B:15..15): BOOLEAN � TRUE,  -- see documentation for semantics.
-	//  freePageCount(127B):       Volume.PageCount � 0,
-	//  vamStart(131B):            Volume.PageNumber � 1,
-	//  primaryETableStartPage(133B): Volume.PageNumber � 0,
-	//  copyETableStartPage(135B): Volume.PageNumber � 0,
+	//  bootingInfo(37B): Boot.LVBootFiles = nullBoot,
+	//  pad(125B):	      CARDINAL = 0,
+	//  pad1(126B:0..14):  [0..77777B] = 0,
+	//  changing(126B:15..15): BOOLEAN = TRUE,  -- see documentation for semantics.
+	//  freePageCount(127B):       Volume.PageCount = 0,
+	//  vamStart(131B):            Volume.PageNumber = 1,
+	//  primaryETableStartPage(133B): Volume.PageNumber = 0,
+	//  copyETableStartPage(135B): Volume.PageNumber = 0,
 	//  lowerBound(137B):          Volume.PageNumber
-	//  volumeRootDirectory(141B): File.ID � File.nullID,
+	//  volumeRootDirectory(141B): File.ID = File.nullID,
 	//  rootFileID(143B):          ARRAY PilotFileTypes.PilotRootFileType OF File.ID
 	//  lastIDAllocated(165B):     LONG CARDINAL
 	//  scavengerLogVolume(167B):  Volume.ID
-	//  lastTimeOpendForWrite(174B):         System.GreenwichMeanTime �
-	//  statusPrimaryETableFile(176B:0..7):  [0..400B) � 0,
-	//  statusCopyETableFile(176B:8..15):    [0..400B) � 0,
-	//  numberOfFile(177B):        LONG CARDINAL � 0,
+	//  lastTimeOpendForWrite(174B):         System.GreenwichMeanTime =
+	//  statusPrimaryETableFile(176B:0..7):  [0..400B) = 0,
+	//  statusCopyETableFile(176B:8..15):    [0..400B) = 0,
+	//  numberOfFile(177B):        LONG CARDINAL = 0,
 	//  lock(201B): VolumeLock,
-	//  numberOfBadPagesLastTime(207B): Volume.PageCount � 0,
-	//  fill(211B):                ARRAY [0..377B - 211B) OF WORD � ALL[0],
-	//  checksum(377B):            CARDINAL � 0];  -- MUST be the last field
+	//  numberOfBadPagesLastTime(207B): Volume.PageCount = 0,
+	//  fill(211B):                ARRAY [0..377B - 211B) OF WORD = ALL[0],
+	//  checksum(377B):            CARDINAL = 0];  -- MUST be the last field
 
 #pragma pack(push, 1)
 	struct Descriptor {
@@ -1628,25 +1632,25 @@ public:
 
 	//  Descriptor: TYPE = MACHINE DEPENDENT RECORD [
 	//    -- the following information is relatively static
-	//    seal(0): CARDINAL � Seal,  -- must be 1st field
-	//    version(1): CARDINAL � currentVersion,  -- must be 2nd field
-	//    labelLength(2): CARDINAL [0..physicalVolumeLabelLength] � 0,
+	//    seal(0): CARDINAL = Seal,  -- must be 1st field
+	//    version(1): CARDINAL = currentVersion,  -- must be 2nd field
+	//    labelLength(2): CARDINAL [0..physicalVolumeLabelLength] = 0,
 	//    pvID(3): System.PhysicalVolumeID,
-	//    bootingInfo(10B): Boot.PVBootFiles � nullPVBootFiles,
+	//    bootingInfo(10B): Boot.PVBootFiles = nullPVBootFiles,
 	//    -- must be at this offset as the microcode knows where to find it.
-	//    label(54B): LabelArray � nullLabel | NULL,
+	//    label(54B): LabelArray = nullLabel | NULL,
 	//    subVolumeCount(100B): CARDINAL [0..maxSubVols],
-	//    subVolumeMarkerID(101B): MarkerID � [System.nullID],
-	//    badPageCount(106B): PageCount � 0,
-	//    maxBadPages(110B): PageCount � maxNumberBadPages,
-	//    dataLostPageCount(112B): PageCount � 0,
-	//    maxDataLostPages(114B): PageCount � maxNumberDataLostPages,
-	//    onLineCount(116B): CARDINAL � 0,  -- TEMPORARILY unused.
+	//    subVolumeMarkerID(101B): MarkerID = [System.nullID],
+	//    badPageCount(106B): PageCount = 0,
+	//    maxBadPages(110B): PageCount = maxNumberBadPages,
+	//    dataLostPageCount(112B): PageCount = 0,
+	//    maxDataLostPages(114B): PageCount = maxNumberDataLostPages,
+	//    onLineCount(116B): CARDINAL = 0,  -- TEMPORARILY unused.
 	//    subVolumes(117B): ARRAY [0..maxSubVols) OF SubVolumeDesc,
-	//    fill1(321B): ARRAY [0..374B - 321B) OF WORD � ALL[0],  -- fill to whole page
-	//    localTimeParametersValid(374B:0..15): BOOLEAN � FALSE,
-	//    localTimeParameters(375B): System.LocalTimeParameters � LOOPHOLE[LONG[0]],
-	//    checksum(377B): CARDINAL � 0,  -- MUST be the last field of this page
+	//    fill1(321B): ARRAY [0..374B - 321B) OF WORD = ALL[0],  -- fill to whole page
+	//    localTimeParametersValid(374B:0..15): BOOLEAN = FALSE,
+	//    localTimeParameters(375B): System.LocalTimeParameters = LOOPHOLE[LONG[0]],
+	//    checksum(377B): CARDINAL = 0,  -- MUST be the last field of this page
 	//
 	//    -- followed, on immediately following pages, by a BadPageList with maxBadPages entries
 	//
@@ -2101,24 +2105,24 @@ public:
 	};
 
 	//TransferRec: TYPE = MACHINE DEPENDENT RECORD [
-	//  subSequence(0): INTEGER � 0,
-	//  filler1(1): WORD � 0,
-	//  filler2(2:0..12): [0..8191] � 0,
-	//  endStream(2:13..13): BOOLEAN � FALSE,
-	//  endRecord(2:14..14): BOOLEAN � FALSE,
-	//  endSST(2:15..15): BOOLEAN � FALSE,
-	//  filler3(3): WORD � 0,
-	//  bytesWritten(4): CARDINAL � 0,
-	//  filler5(5): WORD � 0,
-	//  bytesRead(6): CARDINAL � 0,
-	//  filler7(7): WORD � 0,
-	//  hTask(8): UNSPECIFIED � 0,
-	//  interruptMesa(9): BOOLEAN � FALSE,
-	//  buffer(10): LONG POINTER � NIL,
-	//  bufferSize(12): CARDINAL � 0,
-	//  filler13(13): WORD � 0,
-	//  writeLockedByMesa(14): BOOLEAN � FALSE,
-	//  filler15(15): WORD � 0];
+	//  subSequence(0): INTEGER = 0,
+	//  filler1(1): WORD = 0,
+	//  filler2(2:0..12): [0..8191] = 0,
+	//  endStream(2:13..13): BOOLEAN = FALSE,
+	//  endRecord(2:14..14): BOOLEAN = FALSE,
+	//  endSST(2:15..15): BOOLEAN = FALSE,
+	//  filler3(3): WORD = 0,
+	//  bytesWritten(4): CARDINAL = 0,
+	//  filler5(5): WORD = 0,
+	//  bytesRead(6): CARDINAL = 0,
+	//  filler7(7): WORD = 0,
+	//  hTask(8): UNSPECIFIED = 0,
+	//  interruptMesa(9): BOOLEAN = FALSE,
+	//  buffer(10): LONG POINTER = NIL,
+	//  bufferSize(12): CARDINAL = 0,
+	//  filler13(13): WORD = 0,
+	//  writeLockedByMesa(14): BOOLEAN = FALSE,
+	//  filler15(15): WORD = 0];
 	struct TransferRec {
 		INT16 subSequence;
 		CARD16 filler1;
@@ -2148,15 +2152,15 @@ public:
 	//CoProcessorIOCBPtr: TYPE = LONG POINTER TO CoProcessorIOCBType;
 	//CoProcessorIOCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  serverID(0): LONG CARDINAL,
-	//  mesaConnectionState(2): ConnectionStateType � idle,
-	//  filler3(3): WORD � 0,
-	//  pcConnectionState(4): ConnectionStateType � idle,
-	//  filler5(5): WORD � 0,
-	//  mesaPut(6): TransferRec � [],
-	//  mesaGet(22): TransferRec � [],
-	//  nextIOCB(38): CoProcessorIOCBPtr � NIL,
-	//  mesaIsServer(40): BOOLEAN � FALSE,
-	//  filler41(41): WORD � 0];
+	//  mesaConnectionState(2): ConnectionStateType = idle,
+	//  filler3(3): WORD = 0,
+	//  pcConnectionState(4): ConnectionStateType = idle,
+	//  filler5(5): WORD = 0,
+	//  mesaPut(6): TransferRec = [],
+	//  mesaGet(22): TransferRec = [],
+	//  nextIOCB(38): CoProcessorIOCBPtr = NIL,
+	//  mesaIsServer(40): BOOLEAN = FALSE,
+	//  filler41(41): WORD = 0];
 	struct CoProcessorIOCBType {
 		CARD32      serverID;
 		CARD16      mesaConnectionState;
@@ -2292,9 +2296,9 @@ public:
 	//    incrementDataPtr(18): BOOLEAN,
 	//    command(19): PilotDiskFace.Command,
 	//    pageCount(20): CARDINAL,
-	//    status(21): PilotDiskFace.Status � inProgress,
-	//    nextIOCB(22): DiskIOCBPtr � NIL,
-	//    agentOperationData(24): ARRAY [0..10) OF WORD � ALL[0] ];
+	//    status(21): PilotDiskFace.Status = inProgress,
+	//    nextIOCB(22): DiskIOCBPtr = NIL,
+	//    agentOperationData(24): ARRAY [0..10) OF WORD = ALL[0] ];
 	struct DiskIOCBType {
 		PilotDiskFace::Operation   operation;              // PilotDiskFace.Operation
 		CARD16                     deviceIndex;
@@ -2498,9 +2502,9 @@ public:
 	//  actualLength(3): CARDINAL, -- of received packet, in bytes
 	//  dequeued(4:0..0): BOOLEAN,
 	//  packetType(4:1..7): {receive, transmit},
-	//  status(4:8..15): EthernetIOCBStatus � inProgress,
-	//  retries(5): CARDINAL � 0,
-	//  nextIOCB(6): EthernetIOCBPtr � NIL];
+	//  status(4:8..15): EthernetIOCBStatus = inProgress,
+	//  retries(5): CARDINAL = 0,
+	//  nextIOCB(6): EthernetIOCBPtr = NIL];
 	struct EthernetIOCBType {
 		CARD32 bufferAddress;
 		CARD16 bufferLength;
@@ -2567,10 +2571,10 @@ public:
 	//    density(8): FloppyDiskFace.Density,
 	//    sectorLength(9): CARDINAL, -- in words
 	//    sectorsPerTrack(10): CARDINAL,
-	//    status(11): FloppyDiskFace.Status � inProgress,
-	//    nextIOCB(12): FloppyIOCBPtr � NIL,
-	//    retries(14): CARDINAL � 0,
-	//    logStatus(15): UNSPECIFIED � 0];
+	//    status(11): FloppyDiskFace.Status = inProgress,
+	//    nextIOCB(12): FloppyIOCBPtr = NIL,
+	//    retries(14): CARDINAL = 0,
+	//    logStatus(15): UNSPECIFIED = 0];
 	struct FloppyIOCBType {
 		FloppyDiskFace::Operation operation;
 		CARD16 density;            // FloppyDiskFace.Density
@@ -2677,8 +2681,8 @@ public:
 	//  port(3): CARDINAL,
 	//  transferMode(4): BiParallelPortFace.TransferMode,
 	//  controlOrData(5): BiParallelPortFace.ControlOrData,
-	//  nextIOCB(6): ParallelIOCBPtr � NIL,
-	//  status(8): ParallelIOCBStatus � inProgress,
+	//  nextIOCB(6): ParallelIOCBPtr = NIL,
+	//  status(8): ParallelIOCBStatus = inProgress,
 	//  bytesTransferred(9): CARDINAL];
 	struct ParallelIOCBType {
 		BiParallelPortFace::Operation operation;
@@ -2795,9 +2799,9 @@ public:
 	//  operation(0): NewRS232CFace.Operation,
 	//  dequeued(3:0..0): BOOLEAN,
 	//  iocbType(3:1..15): {receive, transmit},
-	//  actualLength(4): CARDINAL � 0,
-	//  status(5): NewRS232CFace.TransferStatus � inProgress,
-	//  nextIOCB(6): SerialIOCBPtr � NIL];
+	//  actualLength(4): CARDINAL = 0,
+	//  status(5): NewRS232CFace.TransferStatus = inProgress,
+	//  nextIOCB(6): SerialIOCBPtr = NIL];
 	struct SerialIOCBType {
 		NewRS232CFace::Operation operation;
 		union {
@@ -2924,7 +2928,7 @@ public:
 	//largestArraySize: CARDINAL = 4086;	-- supports almost 32 MB of real memory
 	//
 	//--RealMemory.--
-	//allocMap: PUBLIC DESCRIPTOR FOR ARRAY OF WORD � DESCRIPTOR[allocMapArray];
+	//allocMap: PUBLIC DESCRIPTOR FOR ARRAY OF WORD = DESCRIPTOR[allocMapArray];
 	//allocMapArray: ARRAY [0..largestArraySize) OF WORD;  -- (initial state not important)
 	static const int largestArraySize = 4086;
 };
@@ -3141,8 +3145,8 @@ public:
 //		 codebase: PrincOps.GlobalCodebase],
 //	   free => [
 //		 next: GFTHandle,
-//	     fill0: CARDINAL � 0,
-//	     nullCodebase: LONG CARDINAL � 0]
+//	     fill0: CARDINAL = 0,
+//	     nullCodebase: LONG CARDINAL = 0]
 //	   ENDCASE];
 	struct GFTItem {
 		CARD32      globalFrame;

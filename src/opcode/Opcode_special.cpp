@@ -42,7 +42,7 @@ static log4cpp::Category& logger = Logger::getLogger("special");
 #include "../mesa/Type.h"
 #include "../mesa/Memory.h"
 #include "../mesa/Function.h"
-#include "../mesa/MesaThread.h"
+#include "../mesa/ProcessorThread.h"
 
 #include "../agent/Agent.h"
 

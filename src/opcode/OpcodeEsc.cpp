@@ -40,7 +40,9 @@ static log4cpp::Category& logger = Logger::getLogger("esc");
 #include "../util/GuiOp.h"
 #include "../util/Perf.h"
 
-#include "../mesa/MesaThread.h"
+#include "../mesa/InterruptThread.h"
+#include "../mesa/TimerThread.h"
+#include "../mesa/ProcessorThread.h"
 
 #include "Opcode.h"
 #include "Interpreter.h"

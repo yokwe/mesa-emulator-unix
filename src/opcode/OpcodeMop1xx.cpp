@@ -39,8 +39,6 @@ static log4cpp::Category& logger = Logger::getLogger("1xx");
 #include "../util/Debug.h"
 #include "../util/Perf.h"
 
-#include "../mesa/MesaThread.h"
-
 #include "Opcode.h"
 #include "Interpreter.h"
 

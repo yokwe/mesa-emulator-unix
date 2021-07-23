@@ -30,11 +30,11 @@
 
 
 //
-// MesaThread.cpp
+// ProcessorThread.cpp
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("mesathread");
+static log4cpp::Category& logger = Logger::getLogger("processorthread");
 
 #include "../util/Debug.h"
 
@@ -43,11 +43,9 @@ static log4cpp::Category& logger = Logger::getLogger("mesathread");
 
 #include "../opcode/Interpreter.h"
 
-#include "MesaThread.h"
-#include "Type.h"
-#include "Variable.h"
-#include "Function.h"
-#include "Memory.h"
+#include "ProcessorThread.h"
+#include "InterruptThread.h"
+#include "TimerThread.h"
 
 
 //
@@ -56,16 +54,15 @@ static log4cpp::Category& logger = Logger::getLogger("mesathread");
 QWaitCondition ProcessorThread::cvRunning;
 QAtomicInt     ProcessorThread::running;
 int            ProcessorThread::stopThread;
-int            ProcessorThread::rescheduleRequestCount;
+
+int            ProcessorThread::rescheduleRequestCount = 0;
+int            ProcessorThread::startRunningCount      = 0;
+int            ProcessorThread::stopRunningCount       = 0;
+int            ProcessorThread::abortCount             = 0;
+int            ProcessorThread::rescheduleCount        = 0;
+
 QAtomicInt     ProcessorThread::requestReschedule;
 QMutex         ProcessorThread::mutexRequestReschedule;
-
-static int startRunningCount = 0;
-static int stopRunningCount = 0;
-static int timerCount = 0;
-static int interruptCount = 0;
-static int notifyCount = 0;
-static int notifyWakeupCount = 0;
 
 void ProcessorThread::startRunning() {
 	if (running.testAndSetOrdered(0, 1)) {
@@ -97,8 +94,6 @@ void ProcessorThread::run() {
 	logger.info("GFI = %04X  CB  = %08X  GF = %08X", GFI, CodeCache::CB(), GF);
 	logger.info("PC  = %04X  MDS = %08X  LF = %04X", PC, Memory::MDS(), LFCache::LF());
 
-	int abortCount = 0;
-	int rescheduleCount = 0;
 	stopThread = 0;
 	try {
 		for(;;) {
@@ -172,10 +167,6 @@ exitLoop:
 	logger.info("abortCount             = %8u", abortCount);
 	logger.info("rescheduleCount        = %8u", rescheduleCount);
 	logger.info("rescheduleRequestCount = %8u", rescheduleRequestCount);
-	logger.info("timerCount             = %8u", timerCount);
-	logger.info("interruptCount         = %8u", interruptCount);
-	logger.info("notifyCount            = %8u", notifyCount);
-	logger.info("notifyWakeupCount      = %8u", notifyWakeupCount);
 	logger.info("startRunningCount      = %8u", startRunningCount);
 	logger.info("stopRunningCount       = %8u", stopRunningCount);
 	logger.info("ProcessorThread::run STOP");
@@ -189,148 +180,4 @@ void ProcessorThread::requestRescheduleInterrupt() {
 	QMutexLocker locker(&mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUSEST_RESCHEDULE_INTERRUPT);
 	if (!getRunning()) cvRunning.wakeOne();
-}
-
-
-//
-// TimerThread
-//
-CARD16         TimerThread::PTC;
-qint64         TimerThread::lastTimeoutTime;
-int            TimerThread::stopThread;
-QMutex         TimerThread::mutexTimer;
-QWaitCondition TimerThread::cvTimer;
-
-void TimerThread::stop() {
-	logger.info("TimerThread::stop");
-	stopThread = 1;
-}
-void TimerThread::setPTC(CARD16 newValue) {
-	PTC = newValue;
-	lastTimeoutTime = QDateTime::currentMSecsSinceEpoch();
-}
-void TimerThread::run() {
-	logger.info("TimerThread::run START");
-	QThread::currentThread()->setPriority(PRIORITY);
-
-	lastTimeoutTime = QDateTime::currentMSecsSinceEpoch();
-	stopThread = 0;
-	QMutexLocker locker(&mutexTimer);
-	for (;;) {
-		if (stopThread) break;
-		timerCount++;
-		qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
-		// I will wait until TIMER_INTERVAL is elapsed since preveiousTime.
-		qint64 waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
-		if (waitTime < 0) {
-			// already elapsed
-			if (-waitTime < TIMER_INTERVAL) {
-				// Time difference is not significant. Hope it will recover.
-			} else {
-				// Time difference is significant. Assign value to lastTimeoutTime.
-				lastTimeoutTime = currentTime;
-				logger.warn("Timer lost.  lost = %d ms",(quint32) (-waitTime));
-			}
-		} else {
-			// need to wait until TIMER_INTERVAL is elapsed since preveiousTime.
-			Util::msleep((quint32) waitTime);
-		}
-
-		{
-			ProcessorThread::requestRescheduleTimer();
-			// wait procesTimeout is invoked
-			for(;;) {
-				bool ret = cvTimer.wait(&mutexTimer, WAIT_INTERVAL);
-				if (ret) break;
-				if (stopThread) goto exitLoop;
-			}
-		}
-	}
-exitLoop:
-	logger.info("TimerThread::run STOP");
-}
-
-int TimerThread::processTimeout() {
-	QMutexLocker locker(&mutexTimer);
-	//logger.debug("processTimeout START");
-	// Don't update lastTimeoutTimer, until actual process is performed
-	lastTimeoutTime += TIMER_INTERVAL;
-
-	PTC = PTC + 1;
-	if (PTC == 0) PTC = PTC + 1;
-
-	int ret = TimeoutScan();
-	cvTimer.wakeOne();
-	//logger.debug("processTimeout FINISH");
-	return ret;
-}
-
-
-//
-// InterruptThread
-//
-CARD16         InterruptThread::WP;
-CARD16         InterruptThread::WDC;
-QMutex         InterruptThread::mutexWP;
-QWaitCondition InterruptThread::cvWP;
-int            InterruptThread::stopThread;
-
-void InterruptThread::stop() {
-	logger.info("InterruptThread::stop");
-	stopThread = 1;
-}
-CARD16 InterruptThread::getWP() {
-	return WP;
-}
-void InterruptThread::setWP(CARD16 newValue) {
-	QMutexLocker locker(&mutexWP);
-	CARD16 oldValue = WP;
-	WP = newValue;
-	if (oldValue && !newValue) {
-		// become no interrupt
-	} else if (!oldValue && newValue) {
-		// start interrupt, wake waiting thread
-		cvWP.wakeOne();
-	}
-}
-void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	QMutexLocker locker(&mutexWP);
-	notifyCount++;
-	CARD16 newValue = (WP | interruptSelector);
-	//
-	CARD16 oldValue = WP;
-	WP = newValue;
-	if (oldValue && !newValue) {
-		// become no interrupt
-	} else if (!oldValue && newValue) {
-		// start interrupt, wake waiting thread
-		cvWP.wakeOne();
-		notifyWakeupCount++;
-	}
-}
-//int InterruptThread::isPending() {
-//	return WP && isEnabled();
-//}
-
-void InterruptThread::run() {
-	logger.info("InterruptThread::run START");
-	QThread::currentThread()->setPriority(PRIORITY);
-
-	stopThread = 0;
-	QMutexLocker locker(&mutexWP);
-	for (;;) {
-		if (stopThread) break;
-		interruptCount++;
-
-		// wait until interrupt is arrived
-		for(;;) {
-			bool ret = cvWP.wait(&mutexWP, WAIT_INTERVAL);
-			if (ret) break;
-			if (stopThread) goto exitLoop;
-		}
-
-		ProcessorThread::requestRescheduleInterrupt();
-	}
-exitLoop:
-	logger.info("InterruptThread::run STOP");
 }

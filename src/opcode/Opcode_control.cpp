@@ -43,7 +43,7 @@ static log4cpp::Category& logger = Logger::getLogger("control");
 #include "../mesa/Type.h"
 #include "../mesa/Memory.h"
 #include "../mesa/Function.h"
-#include "../mesa/MesaThread.h"
+#include "../mesa/InterruptThread.h"
 
 #include "Opcode.h"
 

@@ -41,7 +41,6 @@ static log4cpp::Category& logger = Logger::getLogger("tcp");
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/MesaThread.h"
 
 #include "Agent.h"
 #include "AgentStream.h"

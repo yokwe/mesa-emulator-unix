@@ -30,57 +30,58 @@
 
 
 //
-// testBase.h
+// InterruptThread.h
 //
 
-#ifndef TESTBASE_H__
-#define TESTBASE_H__
+#ifndef INTERRUPT_THREAD_H__
+#define INTERRUPT_THREAD_H__
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "MesaBasic.h"
+#include "Constant.h"
 
-#include "../mesa/Constant.h"
-#include "../mesa/Type.h"
-#include "../mesa/Memory.h"
-#include "../mesa/Function.h"
-#include "../mesa/InterruptThread.h"
-#include "../mesa/TimerThread.h"
-#include "../mesa/ProcessorThread.h"
+#include <QtCore>
 
-#include "../mesa/Pilot.h"
-
-#include "../opcode/Interpreter.h"
-
-
-class testBase : public CppUnit::TestFixture {
-protected:
-	void initRegister();
-	void initAV(CARD16 origin, CARD16 limit);
-	void initGFT();
-	void initSD();
-	void initETT();
-	void initPDA();
-
-	CARD16 *page_PDA;
-	CARD16 *page_GFT;
-	CARD16 *page_CB;
-	CARD16 *page_MDS;
-	CARD16 *page_AV;
-	CARD16 *page_SD;
-	CARD16 *page_ETT;
-	CARD16 *page_LF;
-	CARD16 *page_GF;
-
-	CARD16 GFI_GF;
-	CARD16 GFI_SD;
-	CARD16 GFI_ETT;
-	CARD16 GFI_EFC;
-
-	CARD16 pc_SD;
-	CARD16 pc_ETT;
-
+class InterruptThread : public QRunnable {
 public:
-	void setUp();
-	void tearDown();
+	static const QThread::Priority PRIORITY = QThread::NormalPriority;
+
+	// Wait interval in milliseconds for QWaitCondition::wait
+	static const int WAIT_INTERVAL = 1000;
+
+	static CARD16 getWP();
+	static void   setWP(CARD16 newValue);
+
+	// WDC is changed from processor thread only, so there is no race condition.
+	static inline CARD16 getWDC() {
+		return WDC;
+	}
+	static inline void   setWDC(CARD16 newValue) {
+		WDC = newValue;
+	}
+	static inline void enable() {
+		setWDC(WDC - 1);
+	}
+	static inline void disable() {
+		setWDC(WDC + 1);
+	}
+	static inline int isEnabled() {
+		return WDC == 0;
+	}
+//	static int  isPending();
+	static void notifyInterrupt(CARD16 interruptSelector);
+	static void stop();
+
+	void run();
+private:
+	static CARD16         WP;
+	static CARD16         WDC;
+	static QMutex         mutexWP;
+	static QWaitCondition cvWP;
+	static int            stopThread;
+
+	static int interruptCount;
+	static int notifyCount;
+	static int notifyWakeupCount;
 };
 
 #endif

@@ -37,19 +37,18 @@ static log4cpp::Category& logger = Logger::getLogger("copyPaste");
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/MesaThread.h"
 
 #include "Agent.h"
 #include "AgentStream.h"
 #include "StreamCopyPaste.h"
 
 
-//stream � OpenStream[];
+//stream = OpenStream[];
 //PutTextData[stream, buffer];
-//[problem, ] � GetAck[stream, putDataAck];
+//[problem, ] = GetAck[stream, putDataAck];
 //PutCommand[stream, endStream, cpMsgLen[endStream]];
 //Stream.SendNow[stream, TRUE];
-//[] � GetAck[stream, endStreamAck ! ANY => CONTINUE];
+//[] = GetAck[stream, endStreamAck ! ANY => CONTINUE];
 //CloseStream[stream];
 
 //PutTextData
@@ -83,11 +82,11 @@ static log4cpp::Category& logger = Logger::getLogger("copyPaste");
 //    PutCommand[stream, putData, cpMsgLen[putData] + str.length];
 //    PutLongNumber[stream, CP.Format.text.ORD]; -- Text format
 //    PutLongNumber[stream, str.length]; -- number of bytes in data buffer
-//    Stream.PutBlock[stream, [LOOPHOLE[@str.text], 0, str.length + 1], FALSE�TRUE�];
+//    Stream.PutBlock[stream, [LOOPHOLE[@str.text], 0, str.length + 1], FALSE ? TRUE ?];
 //    Stream.SendNow[stream, TRUE];
 //    END; -- PutTextData
 
-//PutCommand: PROC [stream: Stream.Handle, msgID: CP.MsgId, msgLen: LONG CARDINAL, status: CP.Status � success] =
+//PutCommand: PROC [stream: Stream.Handle, msgID: CP.MsgId, msgLen: LONG CARDINAL, status: CP.Status = success] =
 //BEGIN
 //    PutLongNumber[stream, msgID.ORD];
 //    PutLongNumber[stream, msgLen]; --  total byte len in the message.

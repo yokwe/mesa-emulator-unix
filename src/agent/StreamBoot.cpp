@@ -41,7 +41,7 @@ static log4cpp::Category& logger = Logger::getLogger("boot");
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/MesaThread.h"
+#include "../mesa/InterruptThread.h"
 
 #include "Agent.h"
 #include "AgentStream.h"

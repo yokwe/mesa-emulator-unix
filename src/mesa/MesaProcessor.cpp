@@ -47,9 +47,6 @@ static log4cpp::Category& logger = Logger::getLogger("mesaproc");
 #include "../agent/StreamTCP.h"
 #include "../agent/StreamWWC.h"
 
-#include "Memory.h"
-#include "Pilot.h"
-#include "MesaThread.h"
 #include "MesaProcessor.h"
 
 

@@ -49,7 +49,9 @@
 #include "../agent/AgentProcessor.h"
 #include "../agent/AgentStream.h"
 
-#include "MesaThread.h"
+#include "InterruptThread.h"
+#include "TimerThread.h"
+#include "ProcessorThread.h"
 
 class MesaProcessor {
 public:

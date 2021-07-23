@@ -30,86 +30,20 @@
 
 
 //
-// MesaThread.h
+// ProcessorThread.h
 //
 
-#ifndef MESA_THREAD_H__
-#define MESA_THREAD_H__
+#ifndef PROCESSOR_THREAD_H__
+#define PROCESSOR_THREAD_H__
 
 #include "MesaBasic.h"
 #include "Constant.h"
 
-#include "../util/Util.h"
-
 #include <QtCore>
 
-class TimerThread : public QRunnable {
-public:
-	static const QThread::Priority PRIORITY = QThread::NormalPriority;
+#include "../util/Util.h"
 
-	// Wait interval in milliseconds for QWaitCondition::wait
-	static const int WAIT_INTERVAL = 1000;
-
-	// Timer interval in milliseconds
-	static const int TIMER_INTERVAL = cTick;
-
-	static CARD16 getPTC() {
-		return PTC;
-	}
-	static void   setPTC(CARD16 newValue);
-	static void   stop();
-
-	// To process timeout in other thread, create processTimeout
-	static int    processTimeout();
-
-	void run();
-private:
-	static CARD16         PTC;
-	static qint64         lastTimeoutTime;
-	static int            stopThread;
-	static QMutex         mutexTimer;
-	static QWaitCondition cvTimer;
-};
-
-
-class InterruptThread : public QRunnable {
-public:
-	static const QThread::Priority PRIORITY = QThread::NormalPriority;
-
-	// Wait interval in milliseconds for QWaitCondition::wait
-	static const int WAIT_INTERVAL = 1000;
-
-	static CARD16 getWP();
-	static void   setWP(CARD16 newValue);
-
-	// WDC is changed from processor thread only, so there is no race condition.
-	static inline CARD16 getWDC() {
-		return WDC;
-	}
-	static inline void   setWDC(CARD16 newValue) {
-		WDC = newValue;
-	}
-	static inline void enable() {
-		setWDC(WDC - 1);
-	}
-	static inline void disable() {
-		setWDC(WDC + 1);
-	}
-	static inline int isEnabled() {
-		return WDC == 0;
-	}
-//	static int  isPending();
-	static void notifyInterrupt(CARD16 interruptSelector);
-	static void stop();
-
-	void run();
-private:
-	static CARD16         WP;
-	static CARD16         WDC;
-	static QMutex         mutexWP;
-	static QWaitCondition cvWP;
-	static int            stopThread;
-};
+#include "InterruptThread.h"
 
 
 class ProcessorThread : public QRunnable {
@@ -148,8 +82,15 @@ public:
 
 private:
 	static QAtomicInt running;
-	static int        stopThread;
-	static int        rescheduleRequestCount;
+
+	static int stopThread;
+
+	static int rescheduleRequestCount;
+	static int startRunningCount;
+	static int stopRunningCount;
+	static int abortCount;
+	static int rescheduleCount;
+
 	//
 	static const int  REQUESET_RESCHEDULE_TIMER     = 0x01;
 	static const int  REQUSEST_RESCHEDULE_INTERRUPT = 0x02;

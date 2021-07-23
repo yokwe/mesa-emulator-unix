@@ -41,7 +41,8 @@ static log4cpp::Category& logger = Logger::getLogger("agentnet");
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/MesaThread.h"
+#include "../mesa/InterruptThread.h"
+#include "../mesa/ProcessorThread.h"
 
 #include "Agent.h"
 #include "AgentNetwork.h"

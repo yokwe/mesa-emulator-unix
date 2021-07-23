@@ -56,6 +56,26 @@ public:
 
 #define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw Error(__FUNCTION__, __FILE__, __LINE__); }
 
+class Abort {
+public:
+	const char *func;
+	const char *file;
+	const int line;
+
+	Abort(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
+};
+#define ERROR_Abort() throw Abort(__FUNCTION__, __FILE__, __LINE__)
+
+class RequestReschedule {
+public:
+	const char *func;
+	const char *file;
+	const int line;
+
+	RequestReschedule(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
+};
+#define ERROR_RequestReschedule() throw RequestReschedule(__FUNCTION__, __FILE__, __LINE__)
+
 void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);
 
@@ -72,6 +92,7 @@ public:
 class Util {
 public:
 	// misc functions
+	static quint32 getMicroTime();
 	static void    msleep(quint32 milliSeconds);
 	static quint32 getUnixTime();
 

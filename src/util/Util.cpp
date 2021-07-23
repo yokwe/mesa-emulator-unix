@@ -167,6 +167,18 @@ namespace {
 	};
 }
 
+static int elapsedTimer_needStart = 1;
+static QElapsedTimer elapsedTimer;
+quint32 Util::getMicroTime() {
+	if (elapsedTimer_needStart) {
+		elapsedTimer.start();
+		elapsedTimer_needStart = 0;
+	}
+	quint64 time = elapsedTimer.nsecsElapsed();
+	// convert from nanoseconds to microseconds
+	return (quint32)(time / 1000);
+}
+
 quint32 Util::getUnixTime() {
 	return QDateTime::currentSecsSinceEpoch();
 }

@@ -44,13 +44,12 @@ static log4cpp::Category& logger = Logger::getLogger("timerthread");
 #include "ProcessorThread.h"
 
 
-static int timerCount = 0;
-
 CARD16         TimerThread::PTC;
 qint64         TimerThread::lastTimeoutTime;
 int            TimerThread::stopThread;
 QMutex         TimerThread::mutexTimer;
 QWaitCondition TimerThread::cvTimer;
+int            TimerThread::timerCount = 0;
 
 void TimerThread::stop() {
 	logger.info("TimerThread::stop");
@@ -98,6 +97,7 @@ void TimerThread::run() {
 		}
 	}
 exitLoop:
+	logger.info("timerCount             = %8u", timerCount);
 	logger.info("TimerThread::run STOP");
 }
 

@@ -67,6 +67,8 @@ private:
 	static int            stopThread;
 	static QMutex         mutexTimer;
 	static QWaitCondition cvTimer;
+
+	static int            timerCount;
 };
 
 #endif

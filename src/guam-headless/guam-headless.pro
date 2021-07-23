@@ -2,6 +2,9 @@ TARGET = guam-headless
 
 TEMPLATE = app
 
+# run from comand line - no gui in osx
+CONFIG += cmdline
+
 linux {
 	QMAKE_POST_LINK = sudo setcap CAP_NET_RAW+pe $(TARGET)
 }

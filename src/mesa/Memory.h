@@ -36,8 +36,8 @@
  *      Author: hasegawa
  */
 
-#ifndef MEMORY_H_
-#define MEMORY_H_ 1
+#ifndef MEMORY_H__
+#define MEMORY_H__
 
 #include "../util/Util.h"
 #include "../util/Perf.h"

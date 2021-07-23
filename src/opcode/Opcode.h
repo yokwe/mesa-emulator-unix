@@ -33,8 +33,8 @@
 // Opcode.h
 //
 
-#ifndef OPCODE_H_
-#define OPCODE_H_ 1
+#ifndef OPCODE_H__
+#define OPCODE_H__
 
 #include "../util/Debug.h"
 

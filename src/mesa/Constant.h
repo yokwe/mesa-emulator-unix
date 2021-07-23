@@ -33,8 +33,8 @@
 // Constants.h
 //
 
-#ifndef CONSTANT_H_
-#define CONSTANT_H_ 1
+#ifndef CONSTANT_H__
+#define CONSTANT_H__
 
 #include "MesaBasic.h"
 

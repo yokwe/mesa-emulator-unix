@@ -34,7 +34,7 @@
 //
 
 #ifndef PILOT_H__
-#define PILOT_H__ 1
+#define PILOT_H__
 
 #include "MesaBasic.h"
 

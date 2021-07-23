@@ -33,8 +33,8 @@
 // Function
 //
 
-#ifndef FUNCTIONE_H_
-#define FUNCTIONE_H_ 1
+#ifndef FUNCTIONE_H__
+#define FUNCTIONE_H__
 
 #include "Type.h"
 #include "Variable.h"

@@ -33,8 +33,8 @@
 // Types.h
 //
 
-#ifndef TYPE_H_
-#define TYPE_H_ 1
+#ifndef TYPE_H__
+#define TYPE_H__
 
 #include "../util/Util.h"
 

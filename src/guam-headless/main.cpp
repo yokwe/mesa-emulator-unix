@@ -45,19 +45,20 @@ static log4cpp::Category& logger = Logger::getLogger("main");
 
 #include <QtCore>
 
-int main() {
+int main(int argc, char** argv) {
 	logger.info("START");
 
 	GuiOp::setContext(new NullGuiOp);
 
-//	QString entryName = "GVWin";
-	QString entryName = "Dawn";
-
+	// sanity check
+	if (argc != 2) {
+		logger.error("Unexpected argc %d", argc);
+		ERROR();
+	}
+	QString entryName = argv[1];
 	logger.info("Section = %s", entryName.toLocal8Bit().constData());
 
-
 	Setting::Entry entry = Setting::getInstance(entryName);
-
 
 	CARD32  displayWidth     = entry.display.width;
 	CARD32  displayHeight    = entry.display.height;

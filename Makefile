@@ -57,9 +57,13 @@ opcode: util mesa
 guam-headless: util mesa agent opcode
 	( cd src/guam-headless; make all )
 
-run-guam-headless: guam-headless
+run-guam-headless-gvwin: guam-headless
 	echo -n >tmp/debug.log
-	tmp/build/guam-headless/guam-headless
+	tmp/build/guam-headless/guam-headless GVWin
+
+run-guam-headless-dawn: guam-headless
+	echo -n >tmp/debug.log
+	tmp/build/guam-headless/guam-headless Dawn
 
 
 fix-permission:

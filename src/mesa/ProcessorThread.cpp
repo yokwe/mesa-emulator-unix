@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("processorthread");
+static log4cpp::Category& logger = Logger::getLogger("procthread");
 
 #include "../util/Debug.h"
 
@@ -88,7 +88,7 @@ void ProcessorThread::run() {
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 
 	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data, bootLink.tag, bootLink.fill, bootLink.u);
-	if (DEBUG_STOP_MESSAGE_UNTIL_MP) Logger::pushPriority(QtFatalMsg);
+	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
 
 	XFER(bootLink.u, 0, XT_call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF = %08X", GFI, CodeCache::CB(), GF);
@@ -180,4 +180,35 @@ void ProcessorThread::requestRescheduleInterrupt() {
 	QMutexLocker locker(&mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUSEST_RESCHEDULE_INTERRUPT);
 	if (!getRunning()) cvRunning.wakeOne();
+}
+
+
+QSet<CARD16> ProcessorThread::stopAtMPSet;
+QSet<CARD16> ProcessorThread::stopMessageUntilMPSet;
+CARD16       ProcessorThread::mp = 0;
+
+void ProcessorThread::stopAtMP(CARD16 newValue) {
+	stopAtMPSet += newValue;
+	logger.info("stopAtMP %4d", newValue);
+}
+CARD16 ProcessorThread::getMP() {
+	return mp;
+}
+void ProcessorThread::setMP(CARD16 newValue) {
+	mp = newValue;
+	if (stopAtMPSet.contains(mp)) {
+		logger.info("stop at MP %4d", mp);
+		stop();
+	}
+	if (stopMessageUntilMPSet.contains(mp)) {
+		Logger::popPriority();
+		logger.info("show message at MP %4d", mp);
+		// clear stopMessageUntilMPSet to prevent call twice
+		stopMessageUntilMPSet.clear();
+	}
+}
+void ProcessorThread::stopMessageUntilMP(CARD16 newValue) {
+	stopMessageUntilMPSet += newValue;
+	logger.info("stopMessageUntilMP %4d", newValue);
+
 }

@@ -397,7 +397,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 	CARDINAL nPC = GetCodeWord();
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  zLFC %04X", savedPC, nPC);
+	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
 	if (DEBUG_TRACE_XFER) logger.debug("LFC   nPC = %6o", nPC);
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
 	if (nPC == 0) UnboundTrap(0);

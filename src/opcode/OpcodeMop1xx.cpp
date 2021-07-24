@@ -415,7 +415,7 @@ void E_WLDILP() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_RS_(CARD16 arg) {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  zRS %3d", savedPC, arg);
+	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  RS %3d", savedPC, arg);
 	CARDINAL index = Pop();
 	LONG_POINTER ptr = LengthenPointer(Pop());
 	CARD16 t = FetchByte(ptr, arg + index);
@@ -429,7 +429,7 @@ void E_RS() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_RLS_(CARD16 arg) {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  zRLS %3d", savedPC, arg);
+	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  RLS %3d", savedPC, arg);
 	CARDINAL index = Pop();
 	LONG_POINTER ptr = PopLong();
 	CARD16 t = FetchByte(ptr, arg + index);
@@ -443,7 +443,7 @@ void E_RLS() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_WS_(CARD16 arg) {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  zWS %3d", savedPC, arg);
+	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  WS %3d", savedPC, arg);
 	CARDINAL index = Pop();
 	LONG_POINTER ptr = LengthenPointer(Pop());
 	BYTE data = LowByte(Pop());
@@ -456,7 +456,7 @@ void E_WS() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_WLS_(CARD16 arg) {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  zWLS %3d", savedPC, arg);
+	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  WLS %3d", savedPC, arg);
 	CARDINAL index = Pop();
 	LONG_POINTER ptr = PopLong();
 	BYTE data = LowByte(Pop());

@@ -56,7 +56,7 @@ void NetworkPacket::attach(const QString& name_) {
 
 void NetworkPacket::discardRecievedPacket() {
 	int count = 0;
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("discards %d packet", count);
+	if (DEBUG_SHOW_NETWORK_PACKET_PACKET) logger.debug("discards %d packet", count);
 }
 void NetworkPacket::discardOnePacket() {
 }

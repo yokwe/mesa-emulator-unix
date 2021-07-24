@@ -41,10 +41,6 @@
 #include "../mesa/MesaBasic.h"
 #include "../mesa/Memory.h"
 
-// Trace switch
-static const int OPCODE_SHOW_OPCODE     = 0;
-static const int OPCODE_SHOW_XFER       = 0;
-static const int OPCODE_SHOW_DUMMY_IMPL = 0;
 
 class Opcode {
 public:

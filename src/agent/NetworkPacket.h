@@ -54,9 +54,6 @@
 #include <QtCore>
 
 
-static const int NETWORK_PACKET_SHOW_BYTES  = 0;
-static const int NETWORK_PACKET_SHOW_PACKET = 0;
-
 class NetworkPacket {
 public:
 	// packet type of Xerox IDP

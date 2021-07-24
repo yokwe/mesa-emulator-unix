@@ -36,20 +36,29 @@
 #ifndef DEBUG_H__
 #define DEBUG_H__
 
+// Opcode
+static const int DEBUG_SHOW_OPCODE       = 0;
+static const int DEBUG_SHOW_XFER         = 0;
+static const int DEBUG_SHOW_DUMMY_OPCODE = 0;
+static const int DEBUG_SHOW_OPCODE_STATS = 0;
+
+// NetworkPacket
+static const int DEBUG_SHOW_NETWORK_PACKET_BYTES  = 0;
+static const int DEBUG_SHOW_NETWORK_PACKET_PACKET = 0;
+
 // Keyboard and Mouse
-static const int DEBUG_SHOW_EVENT_KEY       = 0;
-static const int DEBUG_SHOW_EVENT_MOUSE     = 0;
+static const int DEBUG_SHOW_EVENT_KEY   = 0;
+static const int DEBUG_SHOW_EVENT_MOUSE = 0;
 
-// Debug emulator
-static const int DEBUG_SHOW_RUNNING           = 0;
-static const int DEBUG_SHOW_OPCODE_STATS      = 0;
+// Reschedule
+static const int DEBUG_SHOW_RUNNING = 0;
 
-// Show Fault
+// Fault
 static const int DEBUG_SHOW_FRAME_FAULT         = 0;
 static const int DEBUG_SHOW_PAGE_FAULT          = 0;
 static const int DEBUG_SHOW_WRITE_PROTECT_FAULT = 1;
 
-// Show Trap
+// Trap
 static const int DEBUG_SHOW_BOUNDS_TRAP     = 0;
 static const int DEBUG_SHOW_BREAK_TRAP      = 0;
 static const int DEBUG_SHOW_CODE_TRAP       = 0;
@@ -67,7 +76,7 @@ static const int DEBUG_SHOW_UNBOUND_TRAP    = 1;
 static const int DEBUG_SHOW_HARDWARE_ERROR  = 1;
 static const int DEBUG_SHOW_XFER_TRAP       = 1;
 
-// Show Agent
+// Agent
 static const int DEBUG_SHOW_AGENT_BEEP      = 0;
 static const int DEBUG_SHOW_AGENT_DISK      = 0;
 static const int DEBUG_SHOW_AGENT_DISPLAY   = 0;

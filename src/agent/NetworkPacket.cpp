@@ -147,7 +147,7 @@ void NetworkPacket::transmit(Result& result, Data& data) {
 		Util::toBigEndian(src, dst, sizeof(buffer) / 2);
 	}
 
-	if (NETWORK_PACKET_SHOW_BYTES) {
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
 		logger.debug("TRANS    dataLen = %d", data.dataLen);
 		char buf[ETH_FRAME_LEN * 2 + 1];
 		char* q = buf;
@@ -166,7 +166,7 @@ void NetworkPacket::transmit(Result& result, Data& data) {
 
 	result.returnValue = ::send(fd, buffer, data.dataLen, 0);
 	result.errNo       = errno;
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("%-8s data = %p  dataLen = %4d  errNo = %3d  ret = %4d", __FUNCTION__, data.data, data.dataLen, result.errNo, result.returnValue);
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) logger.debug("%-8s data = %p  dataLen = %4d  errNo = %3d  ret = %4d", __FUNCTION__, data.data, data.dataLen, result.errNo, result.returnValue);
 
 	// Sanity check
 	if (result.returnValue == -1) {
@@ -198,7 +198,7 @@ void NetworkPacket::receive(Result& result, Data& data) {
 
 		Util::toBigEndian(src, dst, data.dataLen / 2);
 
-		if (NETWORK_PACKET_SHOW_BYTES) {
+		if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
 			logger.debug("RECV     ret = %d", result.returnValue);
 			char buf[ETH_FRAME_LEN * 2 + 1];
 			char* q = buf;
@@ -216,7 +216,7 @@ void NetworkPacket::receive(Result& result, Data& data) {
 		data.dataLen = 0;
 	}
 
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("%-8s data = %p  dataLen = %4d  errNo = %3d  ret = %4d", __FUNCTION__, data.data, data.dataLen, result.errNo, result.returnValue);
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) logger.debug("%-8s data = %p  dataLen = %4d  errNo = %3d  ret = %4d", __FUNCTION__, data.data, data.dataLen, result.errNo, result.returnValue);
 }
 
 
@@ -238,7 +238,7 @@ void NetworkPacket::discardRecievedPacket() {
 			count++;
 		}
 	}
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("discards %d packet", count);
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) logger.debug("discards %d packet", count);
 }
 void NetworkPacket::discardOnePacket() {
 	int dataLen = ETH_FRAME_LEN;
@@ -300,7 +300,7 @@ int NetworkPacket::transmit(CARD8* data, CARD32 dataLen, int& opErrno) {
 	}
 
 
-	if (NETWORK_PACKET_SHOW_BYTES) {
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
 		logger.debug("TRANS    dataLen = %d", dataLen);
 		char buf[dataLen * 2 + 1];
 		char* q = buf;
@@ -317,7 +317,7 @@ int NetworkPacket::transmit(CARD8* data, CARD32 dataLen, int& opErrno) {
 
 	int ret = send(fd, buffer, dataLen, 0);
 	opErrno = errno;
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("%-8s data = %p  dataLen = %4d  opErrno = %3d  ret = %4d", __FUNCTION__, data, dataLen, opErrno, ret);
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) logger.debug("%-8s data = %p  dataLen = %4d  opErrno = %3d  ret = %4d", __FUNCTION__, data, dataLen, opErrno, ret);
 	return ret;
 }
 
@@ -387,7 +387,7 @@ int NetworkPacket::receive(CARD8* data, CARD32 dataLen, int& opErrno) {
 			Util::fromBigEndian(p, q, dataLen / 2);
 		}
 
-		if (NETWORK_PACKET_SHOW_BYTES) {
+		if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
 			logger.debug("RECV     ret = %d", ret);
 			char buf[ret * 2 + 1];
 			char* q = buf;
@@ -403,7 +403,7 @@ int NetworkPacket::receive(CARD8* data, CARD32 dataLen, int& opErrno) {
 		}
 	}
 
-	if (NETWORK_PACKET_SHOW_PACKET) logger.debug("%-8s data = %p  dataLen = %4d  opErrno = %3d  ret = %4d", __FUNCTION__, data, dataLen, opErrno, ret);
+	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) logger.debug("%-8s data = %p  dataLen = %4d  opErrno = %3d  ret = %4d", __FUNCTION__, data, dataLen, opErrno, ret);
 	return ret;
 }
 

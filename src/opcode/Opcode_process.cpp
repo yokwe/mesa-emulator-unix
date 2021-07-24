@@ -480,7 +480,7 @@ int TimeoutScan() {
 // zME - 0361
 void E_ME() {
 	LONG_POINTER m = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  ME  %08X", savedPC, m);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  ME  %08X", savedPC, m);
 	MINIMAL_STACK();
 	Monitor mon = {*Fetch(m)};
 	if (!mon.locked) {
@@ -496,7 +496,7 @@ void E_ME() {
 // zMX - 0362
 void E_MX() {
 	LONG_POINTER m = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  MX  %08X", savedPC, m);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  MX  %08X", savedPC, m);
 	MINIMAL_STACK();
 	// Reschedule must be placed at very end of implementation of opcode.
 	if (Exit(m)) Reschedule();
@@ -508,7 +508,7 @@ void E_MW() {
 	Ticks t = Pop();
 	LONG_POINTER c = PopLong();
 	LONG_POINTER m = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  MW  %08X  %08X  %04X", savedPC, m, c, t);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  MW  %08X  %08X  %04X", savedPC, m, c, t);
 	MINIMAL_STACK();
 	CleanupCondition(c);
 	int requeue = Exit(m);
@@ -535,7 +535,7 @@ void E_MW() {
 void E_MR() {
 	LONG_POINTER c = PopLong();
 	LONG_POINTER m = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  MR  %08X  %08X", savedPC, m, c);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  MR  %08X  %08X", savedPC, m, c);
 	MINIMAL_STACK();
 	Monitor mon = {*Fetch(m)};
 	if (!mon.locked) {
@@ -559,7 +559,7 @@ void E_MR() {
 // aNC - 04
 void E_NC() {
 	LONG_POINTER c = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  NC  %08X", savedPC, c);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  NC  %08X", savedPC, c);
 	MINIMAL_STACK();
 	CleanupCondition(c);
 	Condition cond = {*Fetch(c)};
@@ -573,7 +573,7 @@ void E_NC() {
 // aBC - 05
 void E_BC() {
 	LONG_POINTER c = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  BC  %08X", savedPC, c);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  BC  %08X", savedPC, c);
 	MINIMAL_STACK();
 	int requeue = 0;
 	CleanupCondition(c);
@@ -589,7 +589,7 @@ void E_REQ() {
 	PsbHandle psb = Pop();
 	QueueHandle dstque = PopLong();
 	QueueHandle srcque = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  REQ  %08X  %08X  %04X", savedPC, srcque, dstque, psb);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  REQ  %08X  %08X  %04X", savedPC, srcque, dstque, psb);
 	MINIMAL_STACK();
 	Requeue(srcque, dstque, Index(psb));
 	// Reschedule must be placed at very end of implementation of opcode.
@@ -598,7 +598,7 @@ void E_REQ() {
 // aSPP - 017
 void E_SPP() {
 	CARD16 priority = Pop();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  SPP  %d", savedPC, priority);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SPP  %d", savedPC, priority);
 	MINIMAL_STACK();
 	PsbLink link = {*FetchPda(OFFSET_PDA3(block, PSB, link))};
 	link.priority = priority;

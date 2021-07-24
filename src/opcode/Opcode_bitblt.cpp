@@ -671,7 +671,7 @@ MonoBlt* MonoBlt::getInstance(ColorBlt::ColorBltTable& arg) {
 
 
 void E_COLORBLT() {
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  COLORBLT  %d", savedPC, SP);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  COLORBLT  %d", savedPC, SP);
 	if (SP == 1) {
 		ColorBlt::ColorBltTable arg;
 
@@ -724,7 +724,7 @@ void E_COLORBLT() {
 
 
 void E_BITBLT() {
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  BITBLT  %d", savedPC, SP);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  BITBLT  %d", savedPC, SP);
 	if (SP == 1) {
 		ColorBlt::ColorBltTable arg;
 
@@ -917,7 +917,7 @@ static inline CARD16 ReadPixel(ColorBlt::Address address, int offset, CARD16 typ
 }
 
 void OP_COLORBLT() {
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  aCOLORBLT  %d", savedPC, SP);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  aCOLORBLT  %d", savedPC, SP);
 
 	ColorBlt::ColorBltTable arg;
 	int line;

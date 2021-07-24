@@ -51,7 +51,7 @@ static log4cpp::Category& logger = Logger::getLogger("special");
 // CallAgent: PROC [devIndex: AgentDeviceIndex] = MACHINE CODE
 //	  {Mopcodes.zESC, aCALLAGENT};
 void E_CALLAGENT() {
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  CALLAGENT %2d", savedPC, stack[SP - 1]);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  CALLAGENT %2d", savedPC, stack[SP - 1]);
 	CARD16 index = Pop();
 	Agent::CallAgent(index);
 }
@@ -67,7 +67,7 @@ void E_MAPDISPLAY() {
 	CARD16 totalPageCount       = Pop();
 	CARD32 startingRealPage     = PopLong();
 	CARD32 startingVirtualPage  = PopLong();
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  MAPDISPLAY  %6X  %6X %2d %2d", savedPC, startingVirtualPage, startingRealPage, totalPageCount, pageCountInEachBlock);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  MAPDISPLAY  %6X  %6X %2d %2d", savedPC, startingVirtualPage, startingRealPage, totalPageCount, pageCountInEachBlock);
 	if (totalPageCount != pageCountInEachBlock) ERROR();
 
 	if (startingRealPage != Memory::getDisplayRealPage()) ERROR(); // sanity check
@@ -94,7 +94,7 @@ void E_STOPEMULATOR() {
 //Version: PROCEDURE RETURNS [VersionResult] = MACHINE CODE {
 //  Mopcodes.zESC, ESCAlpha.aVERSION};
 void E_VERSION() {
-	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  VERSION", savedPC);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  VERSION", savedPC);
 	ProcessorFaceExtras::VersionResult result;
 
 	result.machineType   = ProcessorFaceExtras::MT_daybreak;
@@ -112,7 +112,7 @@ void E_VERSION() {
 
 // a214
 void E_214() {
-	if (OPCODE_SHOW_DUMMY_IMPL | OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  A214", savedPC);
+	if (DEBUG_SHOW_DUMMY_OPCODE | DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  A214", savedPC);
 	// TODO Implements OP_A214
 	PopLong();
 	PopLong();
@@ -132,7 +132,7 @@ void E_214() {
 
 // a305
 void E_305() {
-	if (OPCODE_SHOW_DUMMY_IMPL | OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  A305", savedPC);
+	if (DEBUG_SHOW_DUMMY_OPCODE | DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  A305", savedPC);
 	// TODO Implements OP_A305
 }
 
@@ -141,7 +141,7 @@ void E_305() {
 // a306
 void E_306() {
 	CARD16 n = Pop();
-	if (OPCODE_SHOW_DUMMY_IMPL | OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  A306  %d", savedPC, n);
+	if (DEBUG_SHOW_DUMMY_OPCODE | DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  A306  %d", savedPC, n);
 	// TODO Implements OP_A306
 	Push(0);
 }

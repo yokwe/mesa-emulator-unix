@@ -47,7 +47,7 @@ int main(int, char**) {
 
 	Setting::getInstance("GVWin");
 
-	PERF_INC(Dispatch)
+	PERF_COUNT(Dispatch)
 	PERF_LOG()
 
 

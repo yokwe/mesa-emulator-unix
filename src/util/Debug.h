@@ -40,16 +40,9 @@
 static const int DEBUG_SHOW_EVENT_KEY       = 0;
 static const int DEBUG_SHOW_EVENT_MOUSE     = 0;
 
-// Network
-static const int DEBUG_SHOW_NETWORK_PACKET  = 0;
-static const int DEBUG_TRACE_NETWORK_PACKET = 0;
-
 // Debug emulator
-static const int DEBUG_SHOW_DUMMY_IMPL_OPCODE = 0;
 static const int DEBUG_SHOW_RUNNING           = 0;
-static const int DEBUG_TRACE_OPCODE           = 0;
 static const int DEBUG_SHOW_OPCODE_STATS      = 0;
-static const int DEBUG_TRACE_XFER             = 0;
 
 // Show Fault
 static const int DEBUG_SHOW_FRAME_FAULT         = 0;

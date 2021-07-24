@@ -15,7 +15,7 @@ freebsd {
 }
 
 
-QMAKE_CXXFLAGS += -std=c++17 -Wall -Werror -g
+QMAKE_CXXFLAGS += -std=c++17 -Werror -g
 
 QMAKE_LFLAGS   += -g -rdynamic
 

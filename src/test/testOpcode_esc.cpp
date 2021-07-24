@@ -1490,7 +1490,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(n, MP);
+		CPPUNIT_ASSERT_EQUAL(n, ProcessorThread::getMP());
 	}
 	void testRRPSB() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRPSB;

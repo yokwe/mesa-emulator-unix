@@ -41,8 +41,8 @@
 			     floppy    ="tmp/floppy/image/floppy144" />
 		<boot    switch    ="Oy{|}\346\347\350\377"
 				 device    ="DISK" />
-		<memory  vmbits    ="23"
-				 rmbits    ="22" />
+		<memory  vmbits    ="25"
+				 rmbits    ="24" />
 		<network interface ="ens224" />
 	</entry>
 	

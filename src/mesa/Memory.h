@@ -274,15 +274,15 @@ public:
 
 // 3.1.3 Virtual Memory Access
 static inline CARD16* Fetch(CARD32 virtualAddress) {
-	if (PERF_ENABLE) perf_Fetch++;
+	PERF_COUNT(Fetch)
 	return PageCache::fetch(virtualAddress);
 }
 static inline CARD16* Store(CARD32 virtualAddress) {
-	if (PERF_ENABLE) perf_Store++;
+	PERF_COUNT(Store)
 	return PageCache::store(virtualAddress);
 }
 static inline CARD32 ReadDbl(CARD32 virtualAddress) {
-	if (PERF_ENABLE) perf_ReadDbl++;
+	PERF_COUNT(ReadDbl)
 	const CARD16* p0 = Fetch(virtualAddress);
 	const CARD16* p1 = ((virtualAddress & (PageSize - 1)) == (PageSize - 1)) ? Fetch(virtualAddress + 1) : (p0 + 1);
 //	Long t;
@@ -297,15 +297,15 @@ __attribute__((always_inline)) static inline CARD32 LengthenPointer(CARD16 point
 	return Memory::lengthenPointer(pointer);
 }
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
-	if (PERF_ENABLE) perf_FetchMds++;
+	PERF_COUNT(FetchMds)
 	return PageCache::store(Memory::lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
-	if (PERF_ENABLE) perf_StoreMds++;
+	PERF_COUNT(StoreMds)
 	return PageCache::store(Memory::lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
-	if (PERF_ENABLE) perf_ReadDblMds++;
+	PERF_COUNT(ReadDblMds)
 	const CARD16* p0 = PageCache::store(Memory::lengthenPointer(ptr + 0));
 	const CARD16* p1 = (ptr & (PageSize - 1)) == (PageSize - 1) ? PageCache::store(Memory::lengthenPointer(ptr + 1)) : (p0 + 1);
 //	Long t;
@@ -344,15 +344,15 @@ protected:
 	static CARD16* store(CARD32 ptr);
 };
 __attribute__((always_inline)) static inline CARD16* FetchLF(CARD16 ptr) {
-	if (PERF_ENABLE) perf_FetchLF++;
+	PERF_COUNT(FetchLF)
 	return LFCache::storeLF(ptr);
 }
 __attribute__((always_inline)) static inline CARD16* StoreLF(CARD16 ptr) {
-	if (PERF_ENABLE) perf_StoreLF++;
+	PERF_COUNT(StoreLF)
 	return LFCache::storeLF(ptr);
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblLF(CARD16 ptr) {
-	if (PERF_ENABLE) perf_ReadDblLF++;
+	PERF_COUNT(ReadDblLF)
 	const CARD16* p0 = LFCache::storeLF(ptr + 0);
 	const CARD16* p1 = LFCache::storeLF(ptr + 1);
 //	Long t;
@@ -410,7 +410,7 @@ private:
 	}
 };
 static inline CARD16* FetchCode(CARD16 offset) {
-	if (PERF_ENABLE) perf_FetchCode++;
+	PERF_COUNT(FetchCode)
 	return PageCache::fetch(CodeCache::CB() + offset);
 }
 static inline CARD16 ReadCode(CARD16 offset) {
@@ -419,17 +419,17 @@ static inline CARD16 ReadCode(CARD16 offset) {
 
 // 4.3 Instruction Fetch
 __attribute__((always_inline)) static inline CARD8 GetCodeByte() {
-	if (PERF_ENABLE) perf_GetCodeByte++;
+	PERF_COUNT(GetCodeByte)
 	return CodeCache::getCodeByte();
 }
 __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
-	if (PERF_ENABLE) perf_GetCodeWord++;
+	PERF_COUNT(GetCodeWord)
 	return CodeCache::getCodeWord();
 }
 
 // 7.4 String Instructions
 static inline BYTE FetchByte(LONG_POINTER ptr, LONG_CARDINAL offset) {
-	if (PERF_ENABLE) perf_FetchByte++;
+	PERF_COUNT(FetchByte)
 	ptr += offset / 2;
 	BytePair word = {*Fetch(ptr)};
 	return ((offset % 2) == 0) ? (BYTE)word.left : (BYTE)word.right;
@@ -441,7 +441,7 @@ static inline CARD16 FetchWord(LONG_POINTER ptr, LONG_CARDINAL offset) {
 	return ret.u;
 }
 static inline void StoreByte(LONG_POINTER ptr, LONG_CARDINAL offset, BYTE data) {
-	if (PERF_ENABLE) perf_StoreByte++;
+	PERF_COUNT(StoreByte)
 	ptr += offset / 2;
 	CARD16* p = Store(ptr);
 	BytePair word = {*p};
@@ -463,7 +463,7 @@ static inline CARD16 Field_MaskTable(CARD8 n) {
 }
 
 static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
-	if (PERF_ENABLE) perf_ReadField++;
+	PERF_COUNT(ReadField)
 	FieldSpec spec = {spec8};
 
 	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
@@ -473,7 +473,7 @@ static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
 	return (source >> shift) & Field_MaskTable(spec.size);
 }
 static inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
-	if (PERF_ENABLE) perf_WriteField++;
+	PERF_COUNT(WriteField)
 	FieldSpec spec = {spec8};
 
 	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
@@ -504,11 +504,11 @@ static inline POINTER OffsetPda(LONG_POINTER ptr) {
 }
 
 static inline CARD16* FetchPda(POINTER ptr) {
-	if (PERF_ENABLE) perf_FetchPda++;
+	PERF_COUNT(FetchPda)
 	return PageCache::fetch(LengthenPdaPtr(ptr));
 }
 static inline CARD16* StorePda(POINTER ptr) {
-	if (PERF_ENABLE) perf_StorePda++;
+	PERF_COUNT(StorePda)
 	return PageCache::store(LengthenPdaPtr(ptr));
 }
 

@@ -51,7 +51,7 @@ public:
 	}
 
 	__attribute__((always_inline)) static inline void dispatchMop(CARD32 opcode) {
-		if (PERF_ENABLE) perf_Dispatch++;
+		PERF_COUNT(Dispatch)
 		tableMop[opcode].execute();
 		// increment stat counter after execution. We don't count ABORTED instruction.
 		if (DEBUG_SHOW_OPCODE_STATS) statMop[opcode]++;

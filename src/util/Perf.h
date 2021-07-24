@@ -47,7 +47,7 @@
 #define PERF_DECLARE(name) extern long long PERF_NAME(name);
 #define PERF_DEFFINE(name) long long PERF_NAME(name) = 0;
 
-#define PERF_INC(name) { PERF_NAME(name)++; }
+#define PERF_COUNT(name) { if (PERF_ENABLE) PERF_NAME(name)++; }
 
 #define PERF_DUMP(name) logger.info("%-22s = %10llu", PPSTR(PERF_NAME(name)), PERF_NAME(name));
 

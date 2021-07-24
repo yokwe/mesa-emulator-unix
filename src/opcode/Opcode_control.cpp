@@ -91,7 +91,7 @@ void BreakTrap() {
 	TrapZero(SD + OFFSET_SD(sBreakTrap));
 }
 void CodeTrap(GFTHandle gfi) {
-	if (PERF_ENABLE) perf_CodeTrap++;
+	PERF_COUNT(CodeTrap)
 	if (DEBUG_SHOW_CODE_TRAP) logger.debug("%s %04X", __FUNCTION__, gfi);
 	TrapOne(SD + OFFSET_SD(sCodeTrap), gfi);
 }
@@ -109,7 +109,7 @@ void DivZeroTrap() {
 	TrapZero(SD + OFFSET_SD(sDivZeroTrap));
 }
 void EscOpcodeTrap(BYTE opcode) {
-	if (PERF_ENABLE) perf_EscOpcodeTrap++;
+	PERF_COUNT(EscOpcodeTrap)
 	if (DEBUG_SHOW_ESC_OPCODE_TRAP) logger.debug("%s %03o", __FUNCTION__, opcode);
 	if (DEBUG_STOP_AT_OPCODE_TRAP) ERROR();
 	TrapOne(ETT + OFFSET_ETT(opcode), opcode);
@@ -119,7 +119,7 @@ void InterruptError() {
 	TrapZero(SD + OFFSET_SD(sInterruptError));
 }
 void OpcodeTrap(BYTE opcode) {
-	if (PERF_ENABLE) perf_OpcodeTrap++;
+	PERF_COUNT(OpcodeTrap)
 	if (DEBUG_SHOW_OPCODE_TRAP) logger.debug("%s %03o", __FUNCTION__, opcode);
 	if (DEBUG_STOP_AT_OPCODE_TRAP) ERROR();
 	TrapOne(SD + OFFSET_SD(sOpcodeTrap), opcode);
@@ -146,7 +146,7 @@ void StackError() {
 	TrapZero(SD + OFFSET_SD(sStackError));
 }
 void UnboundTrap(ControlLink dst) {
-	if (PERF_ENABLE) perf_UnboundTrap++;
+	PERF_COUNT(UnboundTrap)
 	if (DEBUG_SHOW_UNBOUND_TRAP) logger.debug("%s %08X", __FUNCTION__, dst);
 	if (DEBUG_STOP_AT_UNBOUND_TRAP) ERROR();
 	TrapTwo(SD + OFFSET_SD(sUnboundTrap), dst);

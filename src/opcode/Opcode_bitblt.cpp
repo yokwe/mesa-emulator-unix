@@ -45,7 +45,7 @@ static log4cpp::Category& logger = Logger::getLogger("bitblt");
 
 #include "Opcode.h"
 
-#include <memory>
+//#include <memory>
 
 class MonoBlt {
 public:
@@ -671,7 +671,7 @@ MonoBlt* MonoBlt::getInstance(ColorBlt::ColorBltTable& arg) {
 
 
 void E_COLORBLT() {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  COLORBLT  %d", savedPC, SP);
+	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  COLORBLT  %d", savedPC, SP);
 	if (SP == 1) {
 		ColorBlt::ColorBltTable arg;
 
@@ -724,7 +724,7 @@ void E_COLORBLT() {
 
 
 void E_BITBLT() {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  BITBLT  %d", savedPC, SP);
+	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  BITBLT  %d", savedPC, SP);
 	if (SP == 1) {
 		ColorBlt::ColorBltTable arg;
 
@@ -917,7 +917,7 @@ static inline CARD16 ReadPixel(ColorBlt::Address address, int offset, CARD16 typ
 }
 
 void OP_COLORBLT() {
-	if (DEBUG_TRACE_OPCODE) logger.debug("TRACE %6o  aCOLORBLT  %d", savedPC, SP);
+	if (OPCODE_SHOW_OPCODE) logger.debug("TRACE %6o  aCOLORBLT  %d", savedPC, SP);
 
 	ColorBlt::ColorBltTable arg;
 	int line;

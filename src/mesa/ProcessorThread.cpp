@@ -91,8 +91,8 @@ void ProcessorThread::run() {
 	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
 
 	XFER(bootLink.u, 0, XT_call, 0);
-	logger.info("GFI = %04X  CB  = %08X  GF = %08X", GFI, CodeCache::CB(), GF);
-	logger.info("PC  = %04X  MDS = %08X  LF = %04X", PC, Memory::MDS(), LFCache::LF());
+	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CodeCache::CB(), GF);
+	logger.info("LF  = %04X  PC  = %5d     MDS = %08X", LFCache::LF(), PC, Memory::MDS());
 
 	stopThread = 0;
 	try {

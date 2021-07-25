@@ -47,8 +47,8 @@ static log4cpp::Category& logger = Logger::getLogger("control");
 
 #include "Opcode.h"
 
-//#define TRACE_XFER
-#define TRACE_CODETRAP
+#define TRACE_XFER
+
 
 // 9.5.2 Trap Processing
 // Trap: PROC[ptr: POINTER TO ControlLink]
@@ -188,7 +188,9 @@ static inline LocalFrameHandle Alloc(FSIndex fsi) {
 		if (FSIndex_SIZE <= item.data) ERROR();
 		slot = item.data;
 	}
-	if (item.tag == AT_empty) FrameFault(fsi);
+	if (item.tag == AT_empty) {
+		FrameFault(fsi);
+	}
 	*StoreMds(AV + OFFSET_AV(slot)) = *FetchMds(AVLink(item.u));
 	return AVFrame(item.u);
 }
@@ -212,11 +214,6 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	int push = 0;
 	ControlLink nDst = dst;
 
-#ifdef TRACE_XFER
-	CARD16 oldLF  = LFCache::LF();
-	CARD16 oldGFI = GFI;
-#endif
-
 	if (type == XT_trap && freeFlag) ERROR();
 	while (ControlLinkType(nDst) == LT_indirect ) {
 		IndirectLink link = MakeIndirectLink(nDst);
@@ -224,6 +221,13 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		nDst = ReadDblMds(link);
 		push = 1;
 	}
+
+#ifdef TRACE_XFER
+	const char* xferTypeString = getXferType(type);
+	CARD16 oldGFI = GFI;
+	CARD16 oldLF  = LFCache::LF();
+	CARD16 oldPC  = savedPC;
+#endif
 
 	switch (ControlLinkType(nDst)) {
 	case LT_oldProcedure : {
@@ -240,8 +244,9 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(GFI, codebase)));
 		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-#ifdef TRACE_CODETRAP
-			logger.debug("XFER  CODETRAP  OLD  GFI = %04X  GF = %08X  CB = %08X", GFI, GF, CodeCache::CB());
+
+#ifdef TRACE_XFER
+			logger.debug("XFER %-8s  %4X  FROM  %4X %04X%s %5d    TO     %4X *CODETRAP*", xferTypeString, PSB, oldGFI, oldLF, (freeFlag) ? "*" : " ", oldPC, GFI);
 #endif
 			CodeTrap(GFI);
 		}
@@ -272,8 +277,9 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(GFI, codebase)));
 		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-#ifdef TRACE_CODETRAP
-			logger.debug("XFER  CODETRAP  FRA  GFI = %04X  GF = %08X  CB = %08X", GFI, GF, CodeCache::CB());
+
+#ifdef TRACE_XFER
+			logger.debug("XFER %-8s  %4X  FROM  %4X %04X%s %5d    TO     %4X *CODETRAP*", xferTypeString, PSB, oldGFI, oldLF, (freeFlag) ? "*" : " ", oldPC, GFI);
 #endif
 			CodeTrap(GFI);
 		}
@@ -297,8 +303,9 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(GFI, codebase)));
 		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-#ifdef TRACE_CODETRAP
-			logger.debug("XFER  CODETRAP  NEW  GFI = %04X  GF = %08X  CB = %08X", GFI, GF, CodeCache::CB());
+
+#ifdef TRACE_XFER
+			logger.debug("XFER %-8s  %4X  FROM  %4X %04X%s %5d    TO     %4X *CODETRAP*", xferTypeString, PSB, oldGFI, oldLF, (freeFlag) ? "*" : " ", oldPC, GFI);
 #endif
 			CodeTrap(GFI);
 		}
@@ -323,12 +330,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	}
 
 #ifdef TRACE_XFER
-	if (7600 <= MP) {
-		const char* xferType = getXferType(type);
-		const char* linkType = getControlLinkType(nDst);
-
-		logger.debug("XFER %-6s  %-5s %s%04X+%04X-%04X  %04X+%04X-%04X", xferType, linkType, (freeFlag ? "#" : " "), oldGFI, savedPC, oldLF, GFI, nPC, nLF);
-	}
+	logger.debug("XFER %-8s  %4X  FROM  %4X %04X%s %5d    TO     %4X %04X %5d", xferTypeString, PSB, oldGFI, oldLF, (freeFlag) ? "*" : " ", oldPC, GFI, nLF, nPC);
 #endif
 
 	if (push) {
@@ -396,6 +398,13 @@ void E_EFCB() {
 }
 // zLFC - 0355
 void  E_LFC() {
+#ifdef TRACE_XFER
+	const char* xferTypeString = "LOCAL";
+	CARD16 oldGFI = GFI;
+	CARD16 oldLF  = LFCache::LF();
+	CARD16 oldPC  = savedPC;
+#endif
+
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
 	if (DEBUG_SHOW_XFER) logger.debug("LFC   nPC = %6o", nPC);
@@ -411,6 +420,10 @@ void  E_LFC() {
 	*StoreMds(LO_OFFSET(nLF, returnlink)) = LFCache::LF();
 	LFCache::setLF(nLF);
 	PC = nPC;
+
+#ifdef TRACE_XFER
+	logger.debug("LFC  %-8s  %4X  FROM  %4X %04X%s %5d    TO     %4X %04X %5d", xferTypeString, PSB, oldGFI, oldLF, " ", oldPC, GFI, nLF, nPC);
+#endif
 
 	ProcDesc dst;
 	dst.taggedGF = GFI | 1;
@@ -530,7 +543,7 @@ const char* getXferType(XferType type) {
 	case XT_call:
 		return "CALL";
 	case XT_localCall:
-		return "LCALL";
+		return "LOCAL_CALL";
 	case XT_port:
 		return "PORT";
 	case XT_xfer:

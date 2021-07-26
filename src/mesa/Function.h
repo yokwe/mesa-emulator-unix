@@ -89,9 +89,4 @@ extern int CheckForInterrupt();
 extern int TimeoutScan();
 extern int CheckForTimeouts();
 
-
-// Debug
-extern const char* getControlLinkType(ControlLink link);
-extern const char* getXferType(XferType type);
-
 #endif

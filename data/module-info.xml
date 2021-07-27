@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+  Copyright (c) 2021, Yasuhiro Hasegawa
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  
+  1. Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+  
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+  
+  3. Neither the name of the copyright holder nor the names of its
+     contributors may be used to endorse or promote products derived from
+     this software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ -->
+
+<module-info>
+
+<!-- From APilot/15.3/Pilot/Private/Guam.loadmap -->
+<!-- 
+Global Frames for Modules in GermGuam.bcd:
+			    Frame      Code (* = code links)
+  BootChannelDisk           0B30H    1691H     28H
+  BootChannelFloppy         0AFCH    1679H     24H
+  BootChannelSPP            0B7CH    188DH     2CH
+  BootChannelStream         0D64H    1DBDH     38H
+  CoProcessorHeadGuam       0A7CH    1115H     18H
+  DiskHeadGuam              0A48H    0F25H     10H
+  EthernetHeadGuam          0A60H    102DH     14H
+  FloppyHeadGuam            0A2CH    2001H     0CH
+  GermGuamStart             0D84H    1E2DH     3CH
+  GermMarkersImpl           0D94H    0E01H     44H
+  GermOpsImpl               0AB0H    1209H     1CH
+  GermOpsImplGuam           0D8CH    1E31H     40H
+  GermOpsLinkageImpl        0AD4H    1625H     20H
+  HeadStartChainPlug        0A04H    0F01H       4
+  ProcessorHeadGuam         0A0CH    0F05H       8
+  SimpleNSIOEthernetImpl    0BACH    19EDH     30H
+  TeledebugImpl             0BF8H    1B31H     34H
+  
+  Find: ([A-Za-z]+)\s+([0-9A-FH]+)\s+([0-9A-FH]+)\s+([0-9A-FH]+)
+  Replace with: <module name="$1" gf="$2" cb="$3" gfi="$4" />
+ -->
+
+	<module name="HeadStartChainPlug"     gf="0A04H" cb="0F01H" gfi="4" />
+	<module name="ProcessorHeadGuam"      gf="0A0CH" cb="0F05H" gfi="8" />
+	<module name="FloppyHeadGuam"         gf="0A2CH" cb="2001H" gfi="0CH" />
+	<module name="DiskHeadGuam"           gf="0A48H" cb="0F25H" gfi="10H" />
+	<module name="EthernetHeadGuam"       gf="0A60H" cb="102DH" gfi="14H" />
+	<module name="CoProcessorHeadGuam"    gf="0A7CH" cb="1115H" gfi="18H" />
+	<module name="GermOpsImpl"            gf="0AB0H" cb="1209H" gfi="1CH" />
+	<module name="GermOpsLinkageImpl"     gf="0AD4H" cb="1625H" gfi="20H" />
+	<module name="BootChannelFloppy"      gf="0AFCH" cb="1679H" gfi="24H" />
+	<module name="BootChannelDisk"        gf="0B30H" cb="1691H" gfi="28H" />
+	<module name="BootChannelSPP"         gf="0B7CH" cb="188DH" gfi="2CH" />
+	<module name="SimpleNSIOEthernetImpl" gf="0BACH" cb="19EDH" gfi="30H" />
+	<module name="TeledebugImpl"          gf="0BF8H" cb="1B31H" gfi="34H" />	
+	<module name="BootChannelStream"      gf="0D64H" cb="1DBDH" gfi="38H" />
+	<module name="GermGuamStart"          gf="0D84H" cb="1E2DH" gfi="3CH" />
+	<module name="GermOpsImplGuam"        gf="0D8CH" cb="1E31H" gfi="40H" />
+	<module name="GermMarkersImpl"        gf="0D94H" cb="0E01H" gfi="44H" />
+
+<!-- From APilot/15.3/Pilot/Private/GermGuam.map -->
+	<entry pc="10B"        module="GermMarkersImpl"           proc="MAIN" />
+	<entry pc="12B"        module="GermMarkersImpl"           proc="GatesOfHellMarker" />
+	<entry pc="14B"        module="GermMarkersImpl"           proc="HeadFirstSwapMarker" />
+	<entry pc="16B"        module="GermMarkersImpl"           proc="HeadSecondSwapMarker" />
+	<entry pc="10B"        module="ProcessorHeadGuam"         proc="CountCSBanks" />
+	<entry pc="14B"        module="ProcessorHeadGuam"         proc="DoveMachineTypeInfo" />
+	<entry pc="20B"        module="ProcessorHeadGuam"         proc="GetNextAvailableVM" />
+	<entry pc="62B"        module="ProcessorHeadGuam"         proc="MachineTypeInfo" />
+	<entry pc="66B"        module="ProcessorHeadGuam"         proc="SetMP" />
+	<entry pc="10B"        module="DiskHeadGuam"              proc="DetermineDiskShape" />
+	<entry pc="17B"        module="DiskHeadGuam"              proc="GetControllerAttributes" />
+	<entry pc="23B"        module="DiskHeadGuam"              proc="GetDeviceAttributes" />
+	<entry pc="67B"        module="DiskHeadGuam"              proc="GetDriveInfo" />
+	<entry pc="103B"       module="DiskHeadGuam"              proc="GetNextController" />
+	<entry pc="116B"       module="DiskHeadGuam"              proc="GetNextDevice" />
+	<entry pc="143B"       module="DiskHeadGuam"              proc="InitializeController" />
+	<entry pc="224B"       module="DiskHeadGuam"              proc="InitializeTrackBuffer" />
+	<entry pc="231B"       module="DiskHeadGuam"              proc="Initiate" />
+	<entry pc="520B"       module="DiskHeadGuam"              proc="PagesForTrackBuffering" />
+	<entry pc="524B"       module="DiskHeadGuam"              proc="Poll" />
+	<entry pc="722B"       module="DiskHeadGuam"              proc="Reset" />
+	<entry pc="1007B"      module="DiskHeadGuam"              proc="SuggestedTries" />
+	<entry pc="10B"        module="EthernetHeadGuam"          proc="GetNextDevice" />
+	<entry pc="23B"        module="EthernetHeadGuam"          proc="GetPacketLength" />
+	<entry pc="37B"        module="EthernetHeadGuam"          proc="GetStatus" />
+	<entry pc="252B"       module="EthernetHeadGuam"          proc="QueueInput" />
+	<entry pc="365B"       module="EthernetHeadGuam"          proc="QueueOutput" />
+	<entry pc="513B"       module="EthernetHeadGuam"          proc="TurnOff" />
+	<entry pc="556B"       module="EthernetHeadGuam"          proc="TurnOn" />
+	<entry pc="10B"        module="CoProcessorHeadGuam"       proc="Get" />
+	<entry pc="257B"       module="CoProcessorHeadGuam"       proc="InitiateConnection" />
+	<entry pc="470B"       module="CoProcessorHeadGuam"       proc="InitiateDisconnection" />
+	<entry pc="631B"       module="CoProcessorHeadGuam"       proc="Poll" />
+	<entry pc="10B"        module="GermOpsImpl"               proc="Create" />
+	<entry pc="24B"        module="GermOpsImpl"               proc="ProcessRequests" />
+	<entry pc="752B"       module="GermOpsImpl"               proc="GermWorldError" />
+	<entry pc="1043B"      module="GermOpsImpl"               proc="PointerFromPage" />
+	<entry pc="1074B"      module="GermOpsImpl"               proc="DoTransfer" />
+	<entry pc="1120B"      module="GermOpsImpl"               proc="DoInLoad" />
+	<entry pc="2167B"      module="GermOpsImpl"               proc="FlushMemory" />
+	<entry pc="2260B"      module="GermOpsImpl"               proc="DoOutLoad" />
+	<entry pc="2720B"      module="GermOpsImpl"               proc="IsBound" />
+	<entry pc="2736B"      module="GermOpsImpl"               proc="Error" />
+	<entry pc="2746B"      module="GermOpsImpl"               proc="CompactVM" />
+	<entry pc="3110B"      module="GermOpsImpl"               proc="GetNextPilotVM" />
+	<entry pc="3316B"      module="GermOpsImpl"               proc="FreeTempResidentMemory" />
+	<entry pc="3364B"      module="GermOpsImpl"               proc="ControlTrap" />
+	<entry pc="3377B"      module="GermOpsImpl"               proc="RescheduleErrorTrap" />
+	<entry pc="3412B"      module="GermOpsImpl"               proc="SignalHandler" />
+	<entry pc="3424B"      module="GermOpsImpl"               proc="ShowCodeInMP" />
+	<entry pc="3451B"      module="GermOpsImpl"               proc="ShowCardinalInMP" />
+	<entry pc="3477B"      module="GermOpsImpl"               proc="MakeNode" />
+	<entry pc="3624B"      module="GermOpsImpl"               proc="FreeNode" />
+	<entry pc="3630B"      module="GermOpsImpl"               proc="AllocateMDSLocal" />
+	<entry pc="3754B"      module="GermOpsImpl"               proc="AllocateLocal" />
+	<entry pc="3765B"      module="GermOpsImpl"               proc="FreeLocal" />
+	<entry pc="3772B"      module="GermOpsImpl"               proc="MicrosecondsToPulses" />
+	<entry pc="4010B"      module="GermOpsImpl"               proc="Times10" />
+	<entry pc="4030B"      module="GermOpsImpl"               proc="LongDivide" />
+	<entry pc="10B"        module="GermOpsLinkageImpl"        proc="InitializeLinkage" />
+	<entry pc="154B"       module="GermOpsLinkageImpl"        proc="InitializeMdsSwitcher" />
+	<entry pc="10B"        module="BootChannelFloppy"         proc="Create" />
+	<entry pc="10B"        module="BootChannelDisk"           proc="Create" />
+	<entry pc="430B"       module="BootChannelDisk"           proc="FillCache" />
+	<entry pc="743B"       module="BootChannelDisk"           proc="Transfer" />
+	<entry pc="1321B"      module="BootChannelDisk"           proc="FinishRequest" />
+	<entry pc="1476B"      module="BootChannelDisk"           proc="RotateOpns" />
+	<entry pc="1542B"      module="BootChannelDisk"           proc="NewAddress" />
+	<entry pc="1702B"      module="BootChannelDisk"           proc="SubmitRequest" />
+	<entry pc="10B"        module="BootChannelSPP"            proc="Create" />
+	<entry pc="202B"       module="BootChannelSPP"            proc="InitializeReadPage" />
+	<entry pc="1114B"      module="BootChannelSPP"            proc="Transfer" />
+	<entry pc="1243B"      module="BootChannelSPP"            proc="FreeBuffer" />
+	<entry pc="10B"        module="SimpleNSIOEthernetImpl"    proc="GetRawBufferSize" />
+	<entry pc="15B"        module="SimpleNSIOEthernetImpl"    proc="Initialize" />
+	<entry pc="156B"       module="SimpleNSIOEthernetImpl"    proc="Error" />
+	<entry pc="164B"       module="SimpleNSIOEthernetImpl"    proc="EtherTurnOn" />
+	<entry pc="201B"       module="SimpleNSIOEthernetImpl"    proc="Finalize" />
+	<entry pc="250B"       module="SimpleNSIOEthernetImpl"    proc="ReceivePacket" />
+	<entry pc="566B"       module="SimpleNSIOEthernetImpl"    proc="TimeExpired" />
+	<entry pc="620B"       module="SimpleNSIOEthernetImpl"    proc="TestChecksum" />
+	<entry pc="651B"       module="SimpleNSIOEthernetImpl"    proc="LevelZeroWordsFromLevelOneBytes" />
+	<entry pc="671B"       module="SimpleNSIOEthernetImpl"    proc="ReturnPacket" />
+	<entry pc="734B"       module="SimpleNSIOEthernetImpl"    proc="SendBuffer" />
+	<entry pc="1104B"      module="SimpleNSIOEthernetImpl"    proc="SendPacket" />
+	<entry pc="1170B"      module="SimpleNSIOEthernetImpl"    proc="SetChecksum" />
+	<entry pc="10B"        module="TeledebugImpl"             proc="GetTeledebugged" />
+	<entry pc="1320B"      module="TeledebugImpl"             proc="PacketExchangeReceive" />
+	<entry pc="1517B"      module="TeledebugImpl"             proc="ImplementedAndMapped" />
+	<entry pc="1543B"      module="TeledebugImpl"             proc="ProtocolFlagsFromPageMapFlags" />
+	<entry pc="1572B"      module="TeledebugImpl"             proc="MakeWritable" />
+	<entry pc="1615B"      module="TeledebugImpl"             proc="DiskTransfer" />
+	<entry pc="1754B"      module="TeledebugImpl"             proc="MaybeInitDisk" />
+	<entry pc="2151B"      module="TeledebugImpl"             proc="SetDA" />
+	<entry pc="2206B"      module="TeledebugImpl"             proc="ExecuteDiskCommand" />
+	<entry pc="2322B"      module="TeledebugImpl"             proc="HandleResult" />
+	<entry pc="2347B"      module="TeledebugImpl"             proc="NewerOrSame" />
+	<entry pc="2402B"      module="TeledebugImpl"             proc="TestTeledebugging" />
+	<entry pc="10B"        module="BootChannelStream"         proc="Create" />
+	<entry pc="46B"        module="BootChannelStream"         proc="CreateInternal" />
+	<entry pc="164B"       module="BootChannelStream"         proc="Transfer" />
+	<entry pc="10B"        module="GermOpsImplGuam"           proc="BoundsReservedMemory" />
+	<entry pc="23B"        module="GermOpsImplGuam"           proc="ProcessMachineDependentSwitches" />
+	<entry pc="21000B"     module="GermMarkersImpl"           proc="BeforeMarker" />
+	<entry pc="10B"        module="FloppyHeadGuam"            proc="DiskChangeClear" />
+	<entry pc="36B"        module="FloppyHeadGuam"            proc="GetContext" />
+	<entry pc="62B"        module="FloppyHeadGuam"            proc="GetDeviceAttributes" />
+	<entry pc="270B"       module="FloppyHeadGuam"            proc="GetLogStatus" />
+	<entry pc="301B"       module="FloppyHeadGuam"            proc="GetNextDevice" />
+	<entry pc="333B"       module="FloppyHeadGuam"            proc="GetStatistics" />
+	<entry pc="343B"       module="FloppyHeadGuam"            proc="GetTapeParameters" />
+	<entry pc="347B"       module="FloppyHeadGuam"            proc="Initialize" />
+	<entry pc="433B"       module="FloppyHeadGuam"            proc="Initiate" />
+	<entry pc="616B"       module="FloppyHeadGuam"            proc="LogicalAddressToPhysicalAddress" />
+	<entry pc="621B"       module="FloppyHeadGuam"            proc="Poll" />
+	<entry pc="703B"       module="FloppyHeadGuam"            proc="Retention" />
+	<entry pc="730B"       module="FloppyHeadGuam"            proc="SetContext" />
+	<entry pc="1065B"      module="FloppyHeadGuam"            proc="SuggestedTries" />
+	<entry pc="12535B"     module="BootChannelFloppy"         proc="CreateInternal" />
+	<entry pc="13005B"     module="BootChannelFloppy"         proc="GetBootfileFromAnotherFloppy" />
+	<entry pc="13316B"     module="BootChannelFloppy"         proc="Transfer" />
+	<entry pc="13446B"     module="BootChannelFloppy"         proc="FinishRequest" />
+	<entry pc="13607B"     module="BootChannelFloppy"         proc="RotateOps" />
+	<entry pc="13653B"     module="BootChannelFloppy"         proc="SubmitRequest" />
+	<entry pc="13722B"     module="BootChannelFloppy"         proc="NewAddress" />
+	<entry pc="25000B"     module="GermMarkersImpl"           proc="MiddleMarker" />
+	<entry pc="25000B"     module="HeadStartChainPlug"        proc="MAIN" />
+	<entry pc="25002B"     module="HeadStartChainPlug"        proc="Start" />
+	<entry pc="24774B"     module="ProcessorHeadGuam"         proc="MAIN" />
+	<entry pc="24776B"     module="ProcessorHeadGuam"         proc="Start" />
+	<entry pc="25140B"     module="ProcessorHeadGuam"         proc="UnimplementedTrapHandler" />
+	<entry pc="25151B"     module="ProcessorHeadGuam"         proc="BootButton" />
+	<entry pc="25156B"     module="ProcessorHeadGuam"         proc="GetGreenwichMeanTime" />
+	<entry pc="25206B"     module="ProcessorHeadGuam"         proc="PowerOff" />
+	<entry pc="25252B"     module="ProcessorHeadGuam"         proc="ResetAutomaticPowerOn" />
+	<entry pc="25264B"     module="ProcessorHeadGuam"         proc="SetAutomaticPowerOn" />
+	<entry pc="25272B"     module="ProcessorHeadGuam"         proc="SetGreenwichMeanTime" />
+	<entry pc="4320B"      module="FloppyHeadGuam"            proc="MAIN" />
+	<entry pc="4371B"      module="FloppyHeadGuam"            proc="Start" />
+	<entry pc="25264B"     module="DiskHeadGuam"              proc="MAIN" />
+	<entry pc="25326B"     module="DiskHeadGuam"              proc="Start" />
+	<entry pc="25331B"     module="DiskHeadGuam"              proc="GetDeviceType" />
+	<entry pc="25353B"     module="DiskHeadGuam"              proc="GetFormattingUnit" />
+	<entry pc="25357B"     module="DiskHeadGuam"              proc="InitializeCleanup" />
+	<entry pc="25516B"     module="DiskHeadGuam"              proc="Recalibrate" />
+	<entry pc="24501B"     module="EthernetHeadGuam"          proc="MAIN" />
+	<entry pc="24567B"     module="EthernetHeadGuam"          proc="Start" />
+	<entry pc="24572B"     module="EthernetHeadGuam"          proc="AddCleanup" />
+	<entry pc="25046B"     module="EthernetHeadGuam"          proc="GetPacketsMissed" />
+	<entry pc="25062B"     module="EthernetHeadGuam"          proc="GetRetries" />
+	<entry pc="25073B"     module="EthernetHeadGuam"          proc="RemoveCleanup" />
+	<entry pc="24156B"     module="CoProcessorHeadGuam"       proc="MAIN" />
+	<entry pc="24212B"     module="CoProcessorHeadGuam"       proc="Start" />
+	<entry pc="24215B"     module="CoProcessorHeadGuam"       proc="Initialize" />
+	<entry pc="23350B"     module="GermOpsImpl"               proc="MAIN" />
+	<entry pc="24300B"     module="GermOpsImpl"               proc="Start" />
+	<entry pc="24412B"     module="GermOpsImpl"               proc="CodeTrap" />
+	<entry pc="20423B"     module="GermOpsLinkageImpl"        proc="MAIN" />
+	<entry pc="20166B"     module="BootChannelFloppy"         proc="MAIN" />
+	<entry pc="20110B"     module="BootChannelDisk"           proc="MAIN" />
+	<entry pc="16122B"     module="BootChannelSPP"            proc="MAIN" />
+	<entry pc="14627B"     module="SimpleNSIOEthernetImpl"    proc="MAIN" />
+	<entry pc="13430B"     module="TeledebugImpl"             proc="MAIN" />
+	<entry pc="11025B"     module="BootChannelStream"         proc="MAIN" />
+	<entry pc="10467B"     module="GermGuamStart"             proc="MAIN" />
+	<entry pc="10524B"     module="GermGuamStart"             proc="Start" />
+	<entry pc="10517B"     module="GermOpsImplGuam"           proc="MAIN" />
+	<entry pc="31000B"     module="GermMarkersImpl"           proc="AfterMarker" />
+
+</module-info>

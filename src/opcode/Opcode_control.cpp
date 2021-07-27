@@ -38,6 +38,7 @@ static log4cpp::Category& logger = Logger::getLogger("control");
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"
+#include "../util/ModuleInfo.h"
 
 #include "../mesa/Constant.h"
 #include "../mesa/Type.h"
@@ -71,12 +72,45 @@ class DebugControl {
 	static CARD16      oldGFI;
 	static CARD16      oldLF;
 	static CARD16      oldPC;
+	static LinkType    linkType;
+
+	static const char* getLinkType(LinkType type) {
+		switch(type) {
+		case LT_newProcedure:
+			return "NEWPROC";
+		case LT_oldProcedure:
+			return "OLDPROC";
+		case LT_frame:
+			return "FRAME";
+		case LT_indirect:
+			return "INDIRECT";
+		default:
+			ERROR();
+			return "ERROR";
+		}
+	}
 
 	static void message(const char* opcode, CARD32 dst, XferType xferType, int freeFlag, CARD16 nGFI, CARD16 nPC, CARD16 nLF) {
-		if (xferType == XT_trap) {
-			logger.debug("%-4s %-8s  %4X  FROM  %4X-%04X %04X%s    TO     %4X-%04X %04X  %s", opcode, getXferType(xferType), PSB, oldGFI, oldPC, oldLF, (freeFlag) ? "*" : " ", nGFI, nPC, nLF, getTrapName(dst));
-		} else {
-			logger.debug("%-4s %-8s  %4X  FROM  %4X-%04X %04X%s    TO     %4X-%04X %04X",     opcode, getXferType(xferType), PSB, oldGFI, oldPC, oldLF, (freeFlag) ? "*" : " ", nGFI, nPC, nLF);
+		const char* name = ModuleInfo::getName(nGFI, nPC).toLocal8Bit().constData();
+		const char* xfer = getXferType(xferType);
+		const char* link = getLinkType(linkType);
+		const char* free = freeFlag ? "*" : " ";
+
+		// XT_return = 0, XT_call = 1, XT_localCall = 2, XT_port = 3, XT_xfer = 4, XT_trap = 5, XT_processSwitch = 6
+		switch(xferType) {
+		case XT_trap:
+			logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %-40s %s",     opcode, xfer, PSB, oldGFI, oldPC, oldLF, free, nGFI, nPC, nLF, link, name, getTrapName(dst));
+			break;
+		case XT_call:
+		case XT_return:
+		case XT_port:
+		case XT_xfer:
+		case XT_processSwitch:
+			logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %-40s",     opcode, xfer, PSB, oldGFI, oldPC, oldLF, free, nGFI, nPC, nLF, link, name);
+			break;
+		default:
+			ERROR();
+			break;
 		}
 	}
 
@@ -146,7 +180,7 @@ public:
 				std::sort(list.begin(), list.end(), std::less<CARD16>());
 
 				for(auto pc: list) {
-					pcList += QString("%1").arg(pc);
+					pcList += QString("%1").arg(pc, 4, 16, QChar('0'));
 				}
 			}
 
@@ -155,14 +189,15 @@ public:
 		}
 	}
 
-	static void enterXfer() {
+	static void enterXfer(LinkType linkType_) {
 		oldGFI   = GFI;
 		oldLF    = LFCache::LF();
 		oldPC    = savedPC;
+		linkType = linkType_;
 	}
 
 	static void codeTrapMessage(XferType xferType, int freeFlag, CARD16 nGFI) {
-		logger.debug("XFER %-8s  %4X  FROM  %4X-%04X %04X%s    TO     %4X            *CODETRAP*", getXferType(xferType), PSB, oldGFI, oldPC, oldLF, (freeFlag) ? "*" : " ", nGFI);
+		logger.debug("XFER %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X            *CODETRAP*", getXferType(xferType), PSB, oldGFI, oldPC, oldLF, (freeFlag) ? "*" : " ", nGFI);
 	}
 
 	static void xferMessage(CARD32 dst, XferType xferType, int freeFlag, CARD16 nGFI, CARD16 nPC, CARD16 nLF) {
@@ -178,6 +213,7 @@ QMap<CARD16, QSet<CARD16>> DebugControl::entryMap;
 CARD16      DebugControl::oldGFI;
 CARD16      DebugControl::oldLF;
 CARD16      DebugControl::oldPC;
+LinkType    DebugControl::linkType;
 
 void dumpEntryMap() {
 	DebugControl::dumpEntryMap();
@@ -360,7 +396,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	}
 
 #ifdef TRACE_XFER
-	DebugControl::enterXfer();
+	DebugControl::enterXfer(ControlLinkType(nDst));
 #endif
 
 	// FIXME After GFI, GF, CB is updated, CodeTrap or FrameFault can be generated
@@ -468,8 +504,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 
 #ifdef TRACE_XFER
 	// nPC - 1 to show fsi byte position
-	DebugControl::xferMessage(dst, type, freeFlag, nGFI, nLF, nPC - 1);
-	DebugControl::addEntryMap(GFI, nPC - 1);
+	DebugControl::xferMessage(dst, type, freeFlag, nGFI, nPC - 1, nLF);
+	DebugControl::addEntryMap(nGFI, nPC - 1);
 #endif
 
 	if (push) {
@@ -539,7 +575,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 #ifdef TRACE_XFER
-	DebugControl::enterXfer();
+	DebugControl::enterXfer(LT_newProcedure);
 #endif
 
 	CARDINAL nPC = GetCodeWord();
@@ -559,7 +595,7 @@ void  E_LFC() {
 	PC = nPC;
 
 #ifdef TRACE_XFER
-	DebugControl::lfcMessage(GFI, nLF, nPC - 1);
+	DebugControl::lfcMessage(GFI, nPC - 1, nLF);
 	DebugControl::addEntryMap(GFI, nPC - 1);
 #endif
 

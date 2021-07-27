@@ -25,7 +25,7 @@ distclean: clean
 	rm -f  src/*/object_script.*.Release
 
 qmake:
-	echo "MODULE $(MODULE)!"
+	@echo "MODULE $(MODULE)!"
 	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
 
 util:
@@ -65,6 +65,8 @@ run-guam-headless-dawn: guam-headless
 	echo -n >tmp/debug.log
 	tmp/build/guam-headless/guam-headless Dawn
 
+gen-entry:
+	awk -f data/map/genEntry.awk data/map/GermGuam.map >tmp/a
 
 fix-permission:
 	find . -type d -exec chmod 0755 {} \;

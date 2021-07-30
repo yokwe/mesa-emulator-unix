@@ -88,6 +88,7 @@ public:
 	static void popPriority();
 };
 
+int toInt(const QString& string);
 
 class Util {
 public:

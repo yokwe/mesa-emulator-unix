@@ -60,29 +60,6 @@ static void readAttribute(QXmlStreamAttributes& attributes, QString name, QStrin
 	}
 }
 
-static quint32 toInt(QString string) {
-	bool ok;
-	quint32 ret;
-
-	if (string.endsWith("H")) {
-		// mesa style octal number
-		ret = string.left(string.length() - 1).toInt(&ok, 16);
-	} else if (string.endsWith("B")) {
-		// mesa style hexadecimal number
-		ret = string.left(string.length() - 1).toInt(&ok, 8);
-	} else {
-		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
-	}
-//	logger.debug("toInt %s = %d", string.toLocal8Bit().constData(), ret); // FIXME
-
-	if (!ok) {
-		logger.error("Unexpected valueString %s!", string.toLocal8Bit().constData());
-		ERROR();
-	}
-
-	return ret;
-}
-
 static void readAttribute(QXmlStreamAttributes& attributes, QString name, quint32& value) {
 	QString stringValue;
 

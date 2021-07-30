@@ -17,7 +17,7 @@ freebsd {
 
 QMAKE_CXXFLAGS += -std=c++17 -Werror -g
 
-QMAKE_LFLAGS   += -g -rdynamic
+QMAKE_LFLAGS   += -g -rdynamic -v
 
 DESTDIR     = ../../tmp/build/$$TARGET
 OBJECTS_DIR = ../../tmp/build/$$TARGET

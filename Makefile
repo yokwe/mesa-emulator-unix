@@ -36,7 +36,7 @@ main: util
 
 run-main: main
 	echo -n >tmp/debug.log
-	tmp/build/main/main
+	tmp/build/main/main | c++filt
 
 test: util mesa agent opcode
 	( cd src/test; make all )

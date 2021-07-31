@@ -35,7 +35,7 @@ static log4cpp::Category& logger = Logger::getLogger("setting");
 #include "Setting.h"
 
 
-static const QString PATH_FILE = QStringLiteral("data/setting.json");
+static const QString PATH_FILE("data/setting.json");
 
 
 // Setting::Entry::Display
@@ -202,43 +202,18 @@ QJsonObject Setting::toJsonObject() const {
 }
 
 Setting Setting::getInstance() {
-	QByteArray fileContents;
-
-	{
-		QFile file(PATH_FILE);
-		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", file.errorString().toLocal8Bit().constData());
-			ERROR();
-		}
-		fileContents = file.readAll();
-		file.close();
-	}
-//	logger.info("fileContents = %d", fileContents.size());
-
 	Setting setting;
-
 	{
-		QJsonParseError jsonParseError;
-
-		QJsonDocument jsonDocument = QJsonDocument::fromJson(fileContents, &jsonParseError);
-		if (jsonParseError.error != QJsonParseError::NoError) {
-			logger.error("Json Parse error");
-			logger.error("  errorString  = %s", jsonParseError.errorString().toLocal8Bit().constData());
-			logger.error("  offset       = %d", jsonParseError.offset);
-			logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
-			ERROR();
-		}
-		QJsonObject jsonObject = jsonDocument.object();
-
+		QJsonObject jsonObject = JSONUtil::loadObject(PATH_FILE);
 		setting.fromJsonObject(jsonObject);
-
-		logger.info("entryList      %3d", setting.entryList.size());
-		logger.info("levelVKeysList %3d", setting.levelVKeysList.size());
-		logger.info("keyboardList   %3d", setting.keyboardList.size());
-		logger.info("keyMapList     %3d", setting.keyMapList.size());
-		logger.info("mouseList      %3d", setting.mouseList.size());
-		logger.info("buttonMapList  %3d", setting.buttonMapList.size());
 	}
+
+	logger.info("entryList      %3d", setting.entryList.size());
+	logger.info("levelVKeysList %3d", setting.levelVKeysList.size());
+	logger.info("keyboardList   %3d", setting.keyboardList.size());
+	logger.info("keyMapList     %3d", setting.keyMapList.size());
+	logger.info("mouseList      %3d", setting.mouseList.size());
+	logger.info("buttonMapList  %3d", setting.buttonMapList.size());
 
 	// sanity check
 	{

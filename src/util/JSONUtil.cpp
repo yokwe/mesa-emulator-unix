@@ -102,12 +102,6 @@ QString JSONUtil::dump(const QJsonValue& value) {
 	}
 }
 
-QString JSONUtil::dump(const QJsonArray& jsonArray) {
-	return JSONUtil::dump(QJsonValue(jsonArray));
-}
-QString JSONUtil::dump(const QJsonObject& jsonObject) {
-	return JSONUtil::dump(QJsonValue(jsonObject));
-}
 
 QJsonValue JSONUtil::toJsonValue(const QString&     value) {
 	return QJsonValue(value);
@@ -139,6 +133,8 @@ QString     JSONUtil::toString(const QJsonValue& jsonValue) {
 int         JSONUtil::toInt   (const QJsonValue& jsonValue) {
 	if (jsonValue.isDouble()) {
 		return jsonValue.toInt();
+	} else if (jsonValue.isString()) {
+		return toInt(jsonValue.toString());
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Double");

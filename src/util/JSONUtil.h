@@ -51,8 +51,12 @@ public:
 namespace JSONUtil {
 	QString toString(QJsonValue::Type type);
 	QString dump(const QJsonValue& jsonValue);
-	QString dump(const QJsonArray& jsonArray);
-	QString dump(const QJsonObject& jsonObject);
+	inline QString dump(const QJsonArray& jsonArray) {
+		return JSONUtil::dump(QJsonValue(jsonArray));
+	}
+	inline QString dump(const QJsonObject& jsonArray) {
+		return JSONUtil::dump(QJsonValue(jsonArray));
+	}
 
 	QJsonValue toJsonValue(const QString&     value);
 	QJsonValue toJsonValue(const int&         value);
@@ -70,143 +74,92 @@ namespace JSONUtil {
 	// reference of jsonObject[key] at LHS
 	QJsonValueRef    toJsonValueRef(QJsonObject& jsonObject, const QString& key);
 	// reference of jsonObject[key] at RHS
-	// Add const to prevent use at LHS of expression
+	// Add const to function return to prevent use at LHS of expression
 	const QJsonValue toJsonValue(const QJsonObject& jsonObject, const QString& key);
 
-	template <class T> inline void set(T& target, const QJsonObject& jsonObject, const QString& key) {
-		target.fromJsonObject(JSONUtil::toObject(JSONUtil::toJsonValue(jsonObject, key)));
+	// jsonObject[key] = value
+	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const T& value) {
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value.toJsonObject());
 	}
-	template <> inline void set(QString& target, const QJsonObject& jsonObject, const QString& key) {
-		target = JSONUtil::toString(JSONUtil::toJsonValue(jsonObject, key));
+	void inline setJsonObject(QJsonObject& jsonObject, const QString& key, const QString& value) {
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
-	template <> inline void set(int& target, const QJsonObject& jsonObject, const QString& key) {
-		target = JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, key));
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const int      value) {
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
-	template <> inline void set(bool& target, const QJsonObject& jsonObject, const QString& key) {
-		target = JSONUtil::toBool(JSONUtil::toJsonValue(jsonObject, key));
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const bool     value) {
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
+	}
+
+	// value = jsonObject[key]
+	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, T& value) {
+		value.fromJsonObject(JSONUtil::toObject(JSONUtil::toJsonValue(jsonObject, key)));
+	}
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QString& value) {
+		value = JSONUtil::toString(JSONUtil::toJsonValue(jsonObject, key));
+	}
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, int&     value) {
+		value = JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, key));
+	}
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, bool&    value) {
+		value = JSONUtil::toBool(JSONUtil::toJsonValue(jsonObject, key));
 	}
 
 
-	template <class T> inline void set(QList<T>& target, const QJsonObject& jsonObject, const QString& key) {
+	// jsonObject[key] = list
+	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<T>& list) {
+		QJsonArray jsonArray;
+		for(auto e: list) {
+			jsonArray.append(JSONUtil::toJsonValue(e.toJsonObject()));
+		}
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
+	}
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<QString>& list) {
+		QJsonArray jsonArray;
+		for(auto e: list) {
+			jsonArray.append(JSONUtil::toJsonValue(e));
+		}
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
+	}
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<int>&     list) {
+		QJsonArray jsonArray;
+		for(auto e: list) {
+			jsonArray.append(JSONUtil::toJsonValue(e));
+		}
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
+	}
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<bool>&    list) {
+		QJsonArray jsonArray;
+		for(auto e: list) {
+			jsonArray.append(JSONUtil::toJsonValue(e));
+		}
+		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
+	}
+
+	// list = jsonObject[key]
+	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<T>& list) {
 		for(auto e: JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key))) {
 			T element;
 			element.fromJsonObject(JSONUtil::toObject(e));
-			target.append(element);
+			list.append(element);
 		}
 	}
-	template <> inline void set(QList<QString>& target, const QJsonObject& jsonObject, const QString& key) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<QString>& list) {
 		for(auto e: JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key))) {
 			QString element = JSONUtil::toString(e);
-			target.append(element);
+			list.append(element);
 		}
 	}
-	template <> inline void set(QList<int>& target, const QJsonObject& jsonObject, const QString& key) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<int>&     list) {
 		for(auto e: JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key))) {
 			int element = JSONUtil::toInt(e);
-			target.append(element);
+			list.append(element);
 		}
 	}
-	template <> inline void set(QList<bool>& target, const QJsonObject& jsonObject, const QString& key) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<bool>&    list) {
 		for(auto e: JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key))) {
 			bool element = JSONUtil::toBool(e);
-			target.append(element);
-		}
-	}
-
-
-	template <class T> inline void set(QJsonObject& jsonObject, const QString& key, const T& value) {
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value.toJsonObject());
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const QString& value) {
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const int& value) {
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const bool& value) {
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
-	}
-
-
-	template <class T> inline void set(QJsonObject& jsonObject, const QString& key, const QList<T>& list) {
-		QJsonArray jsonArray;
-		for(auto e: list) {
-			jsonArray.append(e.toJsonValue());
-		}
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const QList<QString>& list) {
-		QJsonArray jsonArray;
-		for(auto e: list) {
-			jsonArray.append(JSONUtil::toJsonValue(e));
-		}
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const QList<int>& list) {
-		QJsonArray jsonArray;
-		for(auto e: list) {
-			jsonArray.append(JSONUtil::toJsonValue(e));
-		}
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
-	}
-	template <> inline void set(QJsonObject& jsonObject, const QString& key, const QList<bool>& list) {
-		QJsonArray jsonArray;
-		for(auto e: list) {
-			jsonArray.append(JSONUtil::toJsonValue(e));
-		}
-		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
-	}
-
-
-	// class T must extends JSONBase fro toJsonValue method
-	template <class T> inline void set(QJsonArray& target, QList<T> list) {
-		for(auto e: list) {
-			QJsonValue element(e.toJsonObject());
-			target.append(element);
-		}
-	}
-	template <> inline void set(QJsonArray& target, QList<int> list) {
-		for(auto e: list) {
-			QJsonValue element(e);
-			target.append(element);
-		}
-	}
-	template <> inline void set(QJsonArray& target, QList<bool> list) {
-		for(auto e: list) {
-			QJsonValue element(e);
-			target.append(element);
-		}
-	}
-	template <> inline void set(QJsonArray& target, QList<QString> list) {
-		for(auto e: list) {
-			QJsonValue element(e);
-			target.append(element);
-		}
-	}
-
-	template <class T> inline void set(QList<T>& target, const QJsonArray& jsonArray) {
-		for(auto e: jsonArray) {
-			T element;
-			element.fromJsonObject(toObject(e));
-			target.append(element);
-		}
-	}
-	template <> inline void set(QList<int>& target, const QJsonArray& jsonArray) {
-		for(auto e: jsonArray) {
-			int element = toInt(e);
-			target.append(element);
-		}
-	}
-	template <> inline void set(QList<bool>& target, const QJsonArray& jsonArray) {
-		for(auto e: jsonArray) {
-			bool element = toBool(e);
-			target.append(element);
-		}
-	}
-	template <> inline void set(QList<QString>& target, const QJsonArray& jsonArray) {
-		for(auto e: jsonArray) {
-			QString element = toString(e);
-			target.append(element);
+			list.append(element);
 		}
 	}
 

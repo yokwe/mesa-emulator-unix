@@ -88,7 +88,7 @@ public:
 	static void popPriority();
 };
 
-int toInt(const QString& string);
+int toIntMesaNumber(const QString& string);
 
 class Util {
 public:

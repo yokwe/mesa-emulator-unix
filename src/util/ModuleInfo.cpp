@@ -65,14 +65,14 @@ static void readAttribute(QXmlStreamAttributes& attributes, QString name, quint3
 
 	readAttribute(attributes, name, stringValue);
 
-	value = toInt(stringValue);
+	value = toIntMesaNumber(stringValue);
 }
 static void readAttribute(QXmlStreamAttributes& attributes, QString name, quint16& value) {
 	QString stringValue;
 
 	readAttribute(attributes, name, stringValue);
 
-	value = (quint16)toInt(stringValue);
+	value = (quint16)toIntMesaNumber(stringValue);
 }
 
 ModuleInfo::Entry::Entry(QXmlStreamReader& reader) {

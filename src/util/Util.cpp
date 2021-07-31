@@ -96,16 +96,16 @@ void Logger::popPriority() {
 }
 
 
-int toInt(const QString& string) {
+int toIntMesaNumber(const QString& string) {
 	bool ok;
 	quint32 ret;
 
 	if (string.endsWith("B")) {
 		// MESA style octal number
-		ret = string.left(string.length() - 1).toInt(&ok, 16);
+		ret = string.left(string.length() - 1).toInt(&ok, 8);
 	} else if (string.endsWith("H")) {
 		// MESA style hexadecimal number
-		ret = string.left(string.length() - 1).toInt(&ok, 8);
+		ret = string.left(string.length() - 1).toInt(&ok, 16);
 	} else {
 		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
 	}

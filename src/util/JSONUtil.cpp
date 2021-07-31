@@ -39,68 +39,10 @@ static log4cpp::Category& logger = Logger::getLogger("jsonutil");
 #include "JSONUtil.h"
 
 
-static QMap<QJsonValue::Type, QString> initTypeNameMap() {
-	QMap<QJsonValue::Type, QString> ret;
-	ret[QJsonValue::Null]      = "NULL";
-	ret[QJsonValue::Bool]      = "Bool";
-	ret[QJsonValue::Double]    = "Double";
-	ret[QJsonValue::String]    = "String";
-	ret[QJsonValue::Array]     = "Array";
-	ret[QJsonValue::Object]    = "Object";
-	ret[QJsonValue::Undefined] = "Undefined";
-
-	return ret;
-}
-static QMap<QJsonValue::Type, QString> typeNameMap = initTypeNameMap();
-
-QString JSONUtil::toString(QJsonValue::Type type) {
-	if (typeNameMap.contains(type)) {
-		return typeNameMap[type];
-	} else {
-		logger.fatal("Unexpected type");
-		logger.fatal("  type = %d", type);
-		ERROR();
-	}
+QString JSONUtil::toJsonString(QJsonDocument jsonDocument) {
+	return QString::fromUtf8(jsonDocument.toJson(QJsonDocument::JsonFormat::Indented));
 }
 
-QString JSONUtil::dump(const QJsonValue& value) {
-	QJsonValue::Type type = value.type();
-	switch(type) {
-	case QJsonValue::Type::Null:
-		return "{Null}";
-	case QJsonValue::Type::Bool:
-		return QString::asprintf("{Bool %s}", value.toBool() ? "true" : "false");
-	case QJsonValue::Type::Double:
-		return QString("{Double %1}").arg(QString::number(value.toDouble()));
-	case QJsonValue::Type::String:
-		return QString("{String \"%1\"}").arg(value.toString());
-	case QJsonValue::Type::Array:
-	{
-		QStringList list;
-		for(auto e: value.toArray()) {
-			list << JSONUtil::dump(e);
-		}
-		return QString("{Array %1 [%2]}").arg(list.size()).arg(list.join(", "));
-	}
-	case QJsonValue::Type::Object:
-	{
-		QStringList list;
-
-		QJsonObject jsonObject = value.toObject();
-		for(auto key: jsonObject.keys()) {
-			QJsonValue value = jsonObject[key];
-			list << QString("{\"%1\": %2}").arg(key).arg(JSONUtil::dump(value));
-		}
-		return QString("{Object %1 [%2]}").arg(list.size()).arg(list.join(", "));
-	}
-	case QJsonValue::Type::Undefined:
-		return "{Undefined}";
-	default:
-		logger.fatal("Unexpected type");
-		logger.fatal("  type      = %d", type);
-		ERROR();
-	}
-}
 
 
 QJsonValue JSONUtil::toJsonValue(const QString&     value) {
@@ -126,7 +68,7 @@ QString     JSONUtil::toString(const QJsonValue& jsonValue) {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = String");
 		logger.fatal("  type      = %s", toString(jsonValue.type()).toLocal8Bit().constData());
-		logger.fatal("  jsonValue = %s", JSONUtil::dump(jsonValue).toLocal8Bit().constData());
+		logger.fatal("  jsonValue = %s", JSONUtil::toJsonString(jsonValue).toLocal8Bit().constData());
 		ERROR();
 	}
 }
@@ -139,7 +81,7 @@ int         JSONUtil::toInt   (const QJsonValue& jsonValue) {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Double");
 		logger.fatal("  type      = %s", toString(jsonValue.type()).toLocal8Bit().constData());
-		logger.fatal("  jsonValue = %s", JSONUtil::dump(jsonValue).toLocal8Bit().constData());
+		logger.fatal("  jsonValue = %s", JSONUtil::toJsonString(jsonValue).toLocal8Bit().constData());
 		ERROR();
 	}
 }
@@ -150,7 +92,7 @@ bool        JSONUtil::toBool  (const QJsonValue& jsonValue) {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Bool");
 		logger.fatal("  type      = %s", toString(jsonValue.type()).toLocal8Bit().constData());
-		logger.fatal("  jsonValue = %s", JSONUtil::dump(jsonValue).toLocal8Bit().constData());
+		logger.fatal("  jsonValue = %s", JSONUtil::toJsonString(jsonValue).toLocal8Bit().constData());
 		ERROR();
 	}
 }
@@ -161,7 +103,7 @@ QJsonObject JSONUtil::toObject(const QJsonValue& jsonValue) {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Object");
 		logger.fatal("  type      = %s", toString(jsonValue.type()).toLocal8Bit().constData());
-		logger.fatal("  jsonValue = %s", JSONUtil::dump(jsonValue).toLocal8Bit().constData());
+		logger.fatal("  jsonValue = %s", JSONUtil::toJsonString(jsonValue).toLocal8Bit().constData());
 		ERROR();
 	}
 }
@@ -172,7 +114,7 @@ QJsonArray  JSONUtil::toArray (const QJsonValue& jsonValue) {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Array");
 		logger.fatal("  type      = %s", toString(jsonValue.type()).toLocal8Bit().constData());
-		logger.fatal("  jsonValue = %s", JSONUtil::dump(jsonValue).toLocal8Bit().constData());
+		logger.fatal("  jsonValue = %s", JSONUtil::toJsonString(jsonValue).toLocal8Bit().constData());
 		ERROR();
 	}
 }

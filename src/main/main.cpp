@@ -34,7 +34,12 @@ static log4cpp::Category& logger = Logger::getLogger("main");
 
 #include "../util/Perf.h"
 #include "../util/JSONUtil.h"
-#include "../util/Setting.h"
+
+
+#include "../trace/ModuleMap.h"
+#include "../trace/ModuleMap.cpp"
+
+
 
 int main(int, char**) {
 	logger.info("START");
@@ -51,34 +56,20 @@ int main(int, char**) {
 //	PERF_LOG()
 
 	{
-		QJsonObject jsonObject;
+		QList<ModuleMap::Module> list = ModuleMap::Module::load("data/map/Guam.loadmap");
+		logger.info("list %d", list.size());
 
-		JSONUtil::toJsonValueRef(jsonObject, "aaa") = JSONUtil::toJsonValue(123);
-
-		logger.info("aaa = %d", JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, "aaa")));
-
-	}
-
-	{
-		const char* string = "0x10";
-		logger.info("check %s %5d", string, toInt(string));
+		QJsonArray jsonArray;
+		JSONUtil::setJsonArray(jsonArray, list);
+		logger.info("moduleList = %s", JSONUtil::toJsonString(jsonArray).toLocal8Bit().constData());
 	}
 	{
-		const char* string = "010";
-		logger.info("check %s %5d", string, toInt(string));
-	}
-	{
-		const char* string = "010H";
-		logger.info("check %s %5d", string, toInt(string));
-	}
-	{
-		const char* string = "010B";
-		logger.info("check %s %5d", string, toInt(string));
-	}
+		QList<ModuleMap::Map> list = ModuleMap::Map::load("data/map/GermGuam.map");
+		logger.info("list %d", list.size());
 
-	{
-		Setting setting = Setting::getInstance();
-		logger.info("setting = %s", JSONUtil::toJsonString(setting.toJsonObject()).toLocal8Bit().constData());
+		QJsonArray jsonArray;
+		JSONUtil::setJsonArray(jsonArray, list);
+		logger.info("mapList = %s", JSONUtil::toJsonString(jsonArray).toLocal8Bit().constData());
 	}
 
 

@@ -64,6 +64,16 @@ namespace JSONUtil {
 		return toJsonString(jsonObject);
 	}
 
+	QJsonDocument fromJsonString(const QByteArray &byteArray);
+	inline QJsonDocument fromJsonString(QString string) {
+		return fromJsonString(string.toUtf8());
+	}
+
+	QJsonDocument load(const QString& path);
+	QJsonObject   loadObject(const QString& path);
+	QJsonArray    loadArray (const QString& path);
+
+
 	QJsonValue toJsonValue(const QString&     value);
 	QJsonValue toJsonValue(const int&         value);
 	QJsonValue toJsonValue(const bool&        value);

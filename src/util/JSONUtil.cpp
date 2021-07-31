@@ -43,6 +43,65 @@ QString JSONUtil::toJsonString(QJsonDocument jsonDocument) {
 	return QString::fromUtf8(jsonDocument.toJson(QJsonDocument::JsonFormat::Indented));
 }
 
+QJsonDocument JSONUtil::fromJsonString(const QByteArray &byteArray) {
+	QJsonParseError jsonParseError;
+
+	QJsonDocument jsonDocument = QJsonDocument::fromJson(byteArray, &jsonParseError);
+	if (jsonParseError.error != QJsonParseError::NoError) {
+		logger.error("Json Parse error");
+		logger.error("  errorString  = %s", jsonParseError.errorString().toLocal8Bit().constData());
+		logger.error("  offset       = %d", jsonParseError.offset);
+		logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
+		ERROR();
+	}
+	return jsonDocument;
+}
+
+
+QJsonDocument JSONUtil::load(const QString& path) {
+	QByteArray byteArray;
+	{
+		QFile file(path);
+		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
+			logger.fatal("File open error %s", file.errorString().toLocal8Bit().constData());
+			ERROR();
+		}
+		byteArray = file.readAll();
+		file.close();
+	}
+	QJsonDocument jsonDocument = JSONUtil::fromJsonString(byteArray);
+	return jsonDocument;
+}
+
+QJsonObject JSONUtil::loadObject(const QString& path) {
+	QJsonDocument jsonDocument = load(path);
+	if (jsonDocument.isObject()) {
+		return jsonDocument.object();
+	} else if (jsonDocument.isArray()) {
+		logger.fatal("jsonDocument is Array");
+		ERROR();
+	} else {
+		logger.fatal("Unexpected");
+		logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
+		ERROR();
+	}
+}
+QJsonArray  JSONUtil::loadArray (const QString& path) {
+	QJsonDocument jsonDocument = load(path);
+	if (jsonDocument.isObject()) {
+		logger.fatal("jsonDocument is Object");
+		logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
+		ERROR();
+	} else if (jsonDocument.isArray()) {
+		return jsonDocument.array();
+	} else {
+		logger.fatal("Unexpected");
+		logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
+		ERROR();
+	}
+}
+
+
 
 
 QJsonValue JSONUtil::toJsonValue(const QString&     value) {

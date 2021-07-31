@@ -78,6 +78,7 @@ int main(int, char**) {
 
 	{
 		Setting setting = Setting::getInstance();
+		logger.info("setting = %s", JSONUtil::toJsonString(setting.toJsonObject()).toLocal8Bit().constData());
 	}
 
 

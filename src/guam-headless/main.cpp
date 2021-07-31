@@ -38,7 +38,7 @@ static log4cpp::Category& logger = Logger::getLogger("main");
 
 #include "../util/Perf.h"
 
-#include "../util/Setting.h"
+#include "../util/SettingXML.h"
 
 #include "../util/GuiOp.h"
 
@@ -119,6 +119,9 @@ int main(int argc, char** argv) {
 	//MonoBlt_stats();
 
 	logger.info("elapsedTime = %lld msec", elapsedTime / (1000 * 1000)); // display as milliseconds
+
+	extern void dumpEntryMap(); // FIXME
+	dumpEntryMap();
 
 	logger.info("STOP");
 	return 0;

@@ -32,9 +32,9 @@
 
 static log4cpp::Category& logger = Logger::getLogger("main");
 
-#include "../util/Setting.h"
-
 #include "../util/Perf.h"
+#include "../util/JSONUtil.h"
+#include "../util/Setting.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -45,10 +45,40 @@ int main(int, char**) {
 
 	DEBUG_TRACE();
 
-	Setting::getInstance("GVWin");
+//	Setting::getInstance("GVWin");
 
-	PERF_COUNT(Dispatch)
-	PERF_LOG()
+//	PERF_COUNT(Dispatch)
+//	PERF_LOG()
+
+	{
+		QJsonObject jsonObject;
+
+		JSONUtil::toJsonValueRef(jsonObject, "aaa") = JSONUtil::toJsonValue(123);
+
+		logger.info("aaa = %d", JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, "aaa")));
+
+	}
+
+	{
+		const char* string = "0x10";
+		logger.info("check %s %5d", string, toInt(string));
+	}
+	{
+		const char* string = "010";
+		logger.info("check %s %5d", string, toInt(string));
+	}
+	{
+		const char* string = "010H";
+		logger.info("check %s %5d", string, toInt(string));
+	}
+	{
+		const char* string = "010B";
+		logger.info("check %s %5d", string, toInt(string));
+	}
+
+	{
+		Setting setting = Setting::getInstance();
+	}
 
 
 //	ERROR();

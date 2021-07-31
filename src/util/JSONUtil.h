@@ -49,13 +49,19 @@ public:
 };
 
 namespace JSONUtil {
-	QString toString(QJsonValue::Type type);
-	QString dump(const QJsonValue& jsonValue);
-	inline QString dump(const QJsonArray& jsonArray) {
-		return JSONUtil::dump(QJsonValue(jsonArray));
+	QString toJsonString(QJsonDocument jsonDocument);
+	inline QString toJsonString(QJsonObject   jsonObject) {
+		QJsonDocument jsonDocument(jsonObject);
+		return toJsonString(jsonDocument);
 	}
-	inline QString dump(const QJsonObject& jsonArray) {
-		return JSONUtil::dump(QJsonValue(jsonArray));
+	inline QString toJsonString(QJsonArray jsonArray) {
+		QJsonDocument jsonDocument(jsonArray);
+		return toJsonString(jsonDocument);
+	}
+	inline QString toJsonString(QJsonValue jsonValue) {
+		QJsonObject jsonObject;
+		jsonObject["jsonValue"] = jsonValue;
+		return toJsonString(jsonObject);
 	}
 
 	QJsonValue toJsonValue(const QString&     value);
@@ -71,11 +77,18 @@ namespace JSONUtil {
 	QJsonArray  toArray (const QJsonValue& jsonValue);
 
 
-	// reference of jsonObject[key] at LHS
+	// Reference of jsonObject[key] at LHS
 	QJsonValueRef    toJsonValueRef(QJsonObject& jsonObject, const QString& key);
-	// reference of jsonObject[key] at RHS
+	// Reference of jsonObject[key] at RHS
 	// Add const to function return to prevent use at LHS of expression
 	const QJsonValue toJsonValue(const QJsonObject& jsonObject, const QString& key);
+
+	// helper macro to invoke setJsonObject / getJsonObject
+#define SET_JSON_OBJECT(name) SET_JSON_OBJECT2(name, name)
+#define SET_JSON_OBJECT2(key, field) JSONUtil::setJsonObject(jsonObject, #key, field);
+
+#define GET_JSON_OBJECT(name) GET_JSON_OBJECT2(name, name)
+#define GET_JSON_OBJECT2(key, field) JSONUtil::getJsonObject(jsonObject, #key, field);
 
 	// jsonObject[key] = value
 	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const T& value) {
@@ -162,8 +175,6 @@ namespace JSONUtil {
 			list.append(element);
 		}
 	}
-
 };
-
 
 #endif

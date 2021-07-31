@@ -154,9 +154,9 @@ public:
 	class LevelVKeys : public JSONBase {
 	public:
 		QString name;
-		QString keyName;
+		int     keyName;
 
-		LevelVKeys() : name(""), keyName("") {}
+		LevelVKeys() : name(""), keyName(0) {}
 		LevelVKeys(const LevelVKeys& that) : name(that.name), keyName(that.keyName) {}
 		LevelVKeys& operator= (const LevelVKeys& that) {
 			this->name    = that.name;
@@ -172,9 +172,9 @@ public:
 	class Keyboard : public JSONBase {
 	public:
 		QString name;
-		QString scanCode;
+		int     scanCode;
 
-		Keyboard() : name(""), scanCode("") {}
+		Keyboard() : name(""), scanCode(0) {}
 		Keyboard(const Keyboard& that) : name(that.name), scanCode(that.scanCode) {}
 		Keyboard& operator= (const Keyboard& that) {
 			this->name     = that.name;
@@ -208,9 +208,9 @@ public:
 	class Mouse : public JSONBase {
 	public:
 		QString name;
-		QString bitMask;
+		int     bitMask;
 
-		Mouse() : name(""), bitMask("") {}
+		Mouse() : name(""), bitMask(0) {}
 		Mouse(const Mouse& that) : name(that.name), bitMask(that.bitMask) {}
 		Mouse& operator= (const Mouse& that) {
 			this->name    = that.name;
@@ -241,14 +241,31 @@ public:
 	};
 
 
-	static QMap<QString,          Setting::Entry> entryMap;
-	//          name              entry
-	static QHash<int,         int>        keyMap;
-	//           scanCode         bitPosition
-	static QHash<Qt::MouseButton, int>        buttonMap;
-	//           Qt::MouseButton  bitPosition
+	QList<Setting::Entry>      entryList;
+	QList<Setting::LevelVKeys> levelVKeysList;
+	QList<Setting::Keyboard>   keyboardList;
+	QList<Setting::KeyMap>     keyMapList;
+	QList<Setting::Mouse>      mouseList;
+	QList<Setting::ButtonMap>  buttonMapList;
 
-	static Entry getInstance(QString name);
+	Setting() {}
+	Setting(const Setting& that) :
+		entryList(that.entryList), levelVKeysList(that.levelVKeysList), keyboardList(that.keyboardList),
+		keyMapList(that.keyMapList), mouseList(that.mouseList), buttonMapList(that.buttonMapList) {}
+	Setting& operator= (const Setting& that) {
+		this->entryList      = that.entryList;
+		this->levelVKeysList = that.levelVKeysList;
+		this->keyboardList   = that.keyboardList;
+		this->keyMapList     = that.keyMapList;
+		this->mouseList      = that.mouseList;
+		this->buttonMapList  = that.buttonMapList;
+		return *this;
+	}
+
+	void fromJsonObject(const QJsonObject& jsonObject);
+	QJsonObject toJsonObject() const;
+
+	static Setting getInstance();
 };
 
 #endif

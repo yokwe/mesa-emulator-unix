@@ -37,193 +37,167 @@ static log4cpp::Category& logger = Logger::getLogger("setting");
 
 static const QString PATH_FILE = QStringLiteral("data/setting.json");
 
-static const QString JSON_NAME       = QStringLiteral("name");
-static const QString JSON_KEYNAME    = QStringLiteral("keyName");
-static const QString JSON_SCANCODE   = QStringLiteral("scanCode");
-static const QString JSON_LEVELVKEYS = QStringLiteral("levelVKeys");
-static const QString JSON_KEYBOARD   = QStringLiteral("keyboard");
-static const QString JSON_KEYMAP     = QStringLiteral("keyMap");
-static const QString JSON_BITMASK    = QStringLiteral("bitMask");
-static const QString JSON_MOUSE      = QStringLiteral("mouse");
-static const QString JSON_BUTTON     = QStringLiteral("button");
-static const QString JSON_BUTTONMAP  = QStringLiteral("buttonMap");
-static const QString JSON_WIDTH      = QStringLiteral("width");
-static const QString JSON_HEIGHT     = QStringLiteral("height");
-static const QString JSON_DISK       = QStringLiteral("disk");
-static const QString JSON_GERM       = QStringLiteral("germ");
-static const QString JSON_BOOT       = QStringLiteral("boot");
-static const QString JSON_FLOPPY     = QStringLiteral("floppy");
-static const QString JSON_SWITCH     = QStringLiteral("switch");
-static const QString JSON_DEVICE     = QStringLiteral("device");
-static const QString JSON_VMBITS     = QStringLiteral("vmbits");
-static const QString JSON_RMBITS     = QStringLiteral("rmbits");
-static const QString JSON_INTERFACE  = QStringLiteral("interface");
-static const QString JSON_ENTRY      = QStringLiteral("entry");
-static const QString JSON_DISPLAY    = QStringLiteral("display");
-static const QString JSON_FILE       = QStringLiteral("file");
-static const QString JSON_MEMORY     = QStringLiteral("memory");
-static const QString JSON_NETWORK    = QStringLiteral("network");
-
 
 // Setting::Entry::Display
 void Setting::Entry::Display::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_WIDTH,  width);
-	JSONUtil::getJsonObject(jsonObject, JSON_HEIGHT, height);
+	GET_JSON_OBJECT(width);
+	GET_JSON_OBJECT(height);
 }
 QJsonObject Setting::Entry::Display::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_WIDTH,  width);
-	JSONUtil::setJsonObject(jsonObject, JSON_HEIGHT, height);
+	SET_JSON_OBJECT(width);
+	SET_JSON_OBJECT(height);
 	return jsonObject;
 }
 
 // Setting::Entry::File
 void Setting::Entry::File::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_DISK,   disk);
-	JSONUtil::getJsonObject(jsonObject, JSON_GERM,   germ);
-	JSONUtil::getJsonObject(jsonObject, JSON_BOOT,   boot);
-	JSONUtil::getJsonObject(jsonObject, JSON_FLOPPY, floppy);
+	GET_JSON_OBJECT(disk);
+	GET_JSON_OBJECT(germ);
+	GET_JSON_OBJECT(boot);
+	GET_JSON_OBJECT(floppy);
 }
 QJsonObject Setting::Entry::File::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_DISK,   disk);
-	JSONUtil::setJsonObject(jsonObject, JSON_GERM,   germ);
-	JSONUtil::setJsonObject(jsonObject, JSON_BOOT,   boot);
-	JSONUtil::setJsonObject(jsonObject, JSON_FLOPPY, floppy);
+	SET_JSON_OBJECT(disk);
+	SET_JSON_OBJECT(germ);
+	SET_JSON_OBJECT(boot);
+	SET_JSON_OBJECT(floppy);
 	return jsonObject;
 }
 
 // Setting::Entry::Boot
 void Setting::Entry::Boot::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_SWITCH, switch_);
-	JSONUtil::getJsonObject(jsonObject, JSON_DEVICE, device);
+	GET_JSON_OBJECT2(switch, switch_);
+	GET_JSON_OBJECT(device);
 }
 QJsonObject Setting::Entry::Boot::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_SWITCH, switch_);
-	JSONUtil::setJsonObject(jsonObject, JSON_DEVICE, device);
+	SET_JSON_OBJECT2(switch, switch_);
+	SET_JSON_OBJECT(device);
 	return jsonObject;
 }
 
 // Setting::Entry::Memory
 void Setting::Entry::Memory::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_VMBITS, vmbits);
-	JSONUtil::getJsonObject(jsonObject, JSON_RMBITS, rmbits);}
+	GET_JSON_OBJECT(vmbits);
+	GET_JSON_OBJECT(rmbits);
+}
 QJsonObject Setting::Entry::Memory::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_VMBITS, vmbits);
-	JSONUtil::setJsonObject(jsonObject, JSON_RMBITS, rmbits);
+	SET_JSON_OBJECT(vmbits);
+	SET_JSON_OBJECT(rmbits);
 	return jsonObject;
 }
 
 // Setting::Entry::Network
 void Setting::Entry::Network::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_INTERFACE, interface);
+	GET_JSON_OBJECT(interface);
 }
 QJsonObject Setting::Entry::Network::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_INTERFACE, interface);
+	SET_JSON_OBJECT(interface);
 	return jsonObject;
 }
 
 // Setting::Entry
 void Setting::Entry::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::getJsonObject(jsonObject, JSON_DISPLAY, display);
-	JSONUtil::getJsonObject(jsonObject, JSON_FILE,    file);
-	JSONUtil::getJsonObject(jsonObject, JSON_BOOT,    boot);
-	JSONUtil::getJsonObject(jsonObject, JSON_MEMORY,  memory);
-	JSONUtil::getJsonObject(jsonObject, JSON_NETWORK, network);
+	GET_JSON_OBJECT(name);
+	GET_JSON_OBJECT(display);
+	GET_JSON_OBJECT(file);
+	GET_JSON_OBJECT(boot);
+	GET_JSON_OBJECT(memory);
+	GET_JSON_OBJECT(network);
 }
 QJsonObject Setting::Entry::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::setJsonObject(jsonObject, JSON_DISPLAY, display);
-	JSONUtil::setJsonObject(jsonObject, JSON_FILE,    file);
-	JSONUtil::setJsonObject(jsonObject, JSON_BOOT,    boot);
-	JSONUtil::setJsonObject(jsonObject, JSON_MEMORY,  memory);
-	JSONUtil::setJsonObject(jsonObject, JSON_NETWORK, network);
+	SET_JSON_OBJECT(name);
+	SET_JSON_OBJECT(display);
+	SET_JSON_OBJECT(file);
+	SET_JSON_OBJECT(boot);
+	SET_JSON_OBJECT(memory);
+	SET_JSON_OBJECT(network);
 	return jsonObject;
 }
 
 // Setting::LevelVKeys
 void Setting::LevelVKeys::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::getJsonObject(jsonObject, JSON_KEYNAME, keyName);
+	GET_JSON_OBJECT(name);
+	GET_JSON_OBJECT(keyName);
 }
 QJsonObject Setting::LevelVKeys::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::setJsonObject(jsonObject, JSON_KEYNAME, keyName);
+	SET_JSON_OBJECT(name);
+	SET_JSON_OBJECT(keyName);
 	return jsonObject;
 }
 
 // Setting::Keyboard
 void Setting::Keyboard::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_NAME,     name);
-	JSONUtil::getJsonObject(jsonObject, JSON_SCANCODE, scanCode);
+	GET_JSON_OBJECT(name);
+	GET_JSON_OBJECT(scanCode);
 }
 QJsonObject Setting::Keyboard::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_NAME,     name);
-	JSONUtil::setJsonObject(jsonObject, JSON_SCANCODE, scanCode);
+	SET_JSON_OBJECT(name);
+	SET_JSON_OBJECT(scanCode);
 	return jsonObject;
 }
 
 // Setting::KeyMap
 void Setting::KeyMap::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeys);
-	JSONUtil::getJsonObject(jsonObject, JSON_KEYBOARD,   keyboard);
+	GET_JSON_OBJECT(levelVKeys);
+	GET_JSON_OBJECT(keyboard);
 }
 QJsonObject Setting::KeyMap::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeys);
-	JSONUtil::setJsonObject(jsonObject, JSON_KEYBOARD,   keyboard);
+	SET_JSON_OBJECT(levelVKeys);
+	SET_JSON_OBJECT(keyboard);
 	return jsonObject;
 }
 
 // Setting::Mouse
 void Setting::Mouse::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::getJsonObject(jsonObject, JSON_BITMASK, bitMask);
+	GET_JSON_OBJECT(name);
+	GET_JSON_OBJECT(bitMask);
 }
 QJsonObject Setting::Mouse::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_NAME,    name);
-	JSONUtil::setJsonObject(jsonObject, JSON_BITMASK, bitMask);
+	SET_JSON_OBJECT(name);
+	SET_JSON_OBJECT(bitMask);
 	return jsonObject;
 }
 
 // Setting::ButtonMap
 void Setting::ButtonMap::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeys);
-	JSONUtil::getJsonObject(jsonObject, JSON_BUTTON,     button);
+	GET_JSON_OBJECT(levelVKeys);
+	GET_JSON_OBJECT(button);
 }
 QJsonObject Setting::ButtonMap::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeys);
-	JSONUtil::setJsonObject(jsonObject, JSON_BUTTON,     button);
+	SET_JSON_OBJECT(levelVKeys);
+	SET_JSON_OBJECT(button);
 	return jsonObject;
 }
 
 
 // Setting
 void Setting::fromJsonObject(const QJsonObject& jsonObject) {
-	JSONUtil::getJsonObject(jsonObject, JSON_ENTRY,      entryList);
-	JSONUtil::getJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeysList);
-	JSONUtil::getJsonObject(jsonObject, JSON_KEYBOARD,   keyboardList);
-	JSONUtil::getJsonObject(jsonObject, JSON_KEYMAP,     keyMapList);
-	JSONUtil::getJsonObject(jsonObject, JSON_MOUSE,      mouseList);
-	JSONUtil::getJsonObject(jsonObject, JSON_BUTTONMAP,  buttonMapList);
+	GET_JSON_OBJECT2(entry,      entryList);
+	GET_JSON_OBJECT2(levelVKeys, levelVKeysList);
+	GET_JSON_OBJECT2(keyboard,   keyboardList);
+	GET_JSON_OBJECT2(keyMap,     keyMapList);
+	GET_JSON_OBJECT2(mouse,      mouseList);
+	GET_JSON_OBJECT2(buttonMap,  buttonMapList);
 }
 QJsonObject Setting::toJsonObject() const {
 	QJsonObject jsonObject;
-	JSONUtil::setJsonObject(jsonObject, JSON_ENTRY,      entryList);
-	JSONUtil::setJsonObject(jsonObject, JSON_LEVELVKEYS, levelVKeysList);
-	JSONUtil::setJsonObject(jsonObject, JSON_KEYBOARD,   keyboardList);
-	JSONUtil::setJsonObject(jsonObject, JSON_KEYMAP,     keyMapList);
-	JSONUtil::setJsonObject(jsonObject, JSON_MOUSE,      mouseList);
-	JSONUtil::setJsonObject(jsonObject, JSON_BUTTONMAP,  buttonMapList);
+	SET_JSON_OBJECT2(entry,      entryList);
+	SET_JSON_OBJECT2(levelVKeys, levelVKeysList);
+	SET_JSON_OBJECT2(keyboard,   keyboardList);
+	SET_JSON_OBJECT2(keyMap,     keyMapList);
+	SET_JSON_OBJECT2(mouse,      mouseList);
+	SET_JSON_OBJECT2(buttonMap,  buttonMapList);
 	return jsonObject;
 }
 
@@ -256,7 +230,6 @@ Setting Setting::getInstance() {
 		}
 		QJsonObject jsonObject = jsonDocument.object();
 
-		Setting setting;
 		setting.fromJsonObject(jsonObject);
 
 		logger.info("entryList      %3d", setting.entryList.size());

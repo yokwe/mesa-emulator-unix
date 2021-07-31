@@ -135,7 +135,7 @@ int         JSONUtil::toInt   (const QJsonValue& jsonValue) {
 	if (jsonValue.isDouble()) {
 		return jsonValue.toInt();
 	} else if (jsonValue.isString()) {
-		return toInt(jsonValue.toString());
+		return toIntMesaNumber(jsonValue.toString());
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Double");

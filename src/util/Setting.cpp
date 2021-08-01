@@ -300,7 +300,7 @@ Setting Setting::getInstance() {
 		}
 	}
 
-	initMap();
+	initMap(setting);
 
 	return setting;
 }
@@ -317,6 +317,13 @@ Setting::Entry Setting::getEntry(QString name) {
 }
 
 
-void Setting::initMap() {
+QMap<QString,          Setting::Entry> Setting::entryMap;
+QHash<quint32,         quint32>        Setting::keyMap;
+//    scanCode         keyName
+QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
+//    Qt::MouseButton  keyName
+
+void Setting::initMap(const Setting& setting) {
 	// FIXME add code that initialize entryMap, keyMap and buttonMap
+	if (setting.levelVKeysList.size() == 0) ERROR()
 }

@@ -238,8 +238,6 @@ QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
 //    Qt::MouseButton  keyName
 
 void Setting::initMap(const Setting& setting) {
-	// FIXME add code that initialize entryMap, keyMap and buttonMap
-
 	// sanity check
 	{
 		bool foundError = false;
@@ -331,9 +329,11 @@ void Setting::initMap(const Setting& setting) {
 		}
 	}
 
-	keyMap.clear();
-	buttonMap.clear();
+	// build keyMap and buttonMap
 	{
+		keyMap.clear();
+		buttonMap.clear();
+
 		// build Setting::keyMap
 		QMap<QString, quint32> nameToScanCode;
 		for(auto e: setting.keyboardList) {

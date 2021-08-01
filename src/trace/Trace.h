@@ -60,8 +60,9 @@ namespace Trace {
 		// actual LinkType of XFER
 		LinkType         linkType;
 
-		// current PSB
+		// current PSB and MDS
 		CARD16           oldPSB;
+		CARD32           oldMDS;
 
 		// values before XFER
 		GFTHandle        oldGFI;
@@ -73,10 +74,10 @@ namespace Trace {
 		CARD16           newPC;
 		LocalFrameHandle newLF;
 
-		Context() : callType(CT_XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldGFI(0), oldPC(0), oldLF(0), newGFI(0), newPC(0), newLF(0) {}
+		Context() : callType(CT_XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldMDS(0), oldGFI(0), oldPC(0), oldLF(0), newGFI(0), newPC(0), newLF(0) {}
 		Context(const Context& that) :
 			callType(that.callType), dst(that.dst), src(that.src), xferType(that.xferType), freeFlag(that.freeFlag),
-			linkType(that.linkType), oldPSB(that.oldPSB),
+			linkType(that.linkType), oldPSB(that.oldPSB), oldMDS(that.oldMDS),
 			oldGFI(that.oldGFI), oldPC(that.oldPC), oldLF(that.oldLF),
 			newGFI(that.newGFI), newPC(that.newPC), newLF(that.newLF) {}
 		Context& operator= (const Context& that) {
@@ -87,6 +88,7 @@ namespace Trace {
 			this->freeFlag = that.freeFlag;
 			this->linkType = that.linkType;
 			this->oldPSB   = that.oldPSB;
+			this->oldMDS   = that.oldMDS;
 			this->oldGFI   = that.oldGFI;
 			this->oldPC    = that.oldPC;
 			this->oldLF    = that.oldLF;
@@ -98,20 +100,20 @@ namespace Trace {
 
 		void setXFER(
 			ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB,
+			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
 			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldLF);
+				set(CT_XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldMDS, oldGFI, oldPC, oldLF);
 			}
 		}
 		void setLFC(
 			ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB,
+			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
 			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldLF);
+				set(CT_LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldMDS, oldGFI, oldPC, oldLF);
 			}
 		}
 		void setContext(CARD16 newGFI, CARD16 newPC, CARD16 newLF) {
@@ -131,7 +133,7 @@ namespace Trace {
 	private:
 		void set(
 			CallType callType, ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB,
+			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
 			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
 			) {
 			this->callType = callType;
@@ -142,6 +144,7 @@ namespace Trace {
 
 			this->linkType = linkType;
 			this->oldPSB   = oldPSB;
+			this->oldMDS   = oldMDS;
 
 			this->oldGFI   = oldGFI;
 			this->oldPC    = oldPC;

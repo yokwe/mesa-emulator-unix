@@ -213,7 +213,6 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	int push = 0;
 	ControlLink nDst = dst;
 
-
 	// FIXME After GF, CB is updated, CodeTrap or FrameFault can be generated
 	// FIXME In that case, GF and CB has wrong value before XFER is correctly executed.
 	// FIXME We should use nGF and nCB and update GF and CB very end of this method
@@ -228,7 +227,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 
 	LinkType linkType = ControlLinkType(nDst);
 	Trace::Context context;
-	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, LFCache::LF());
+	context.setXFER(dst, src, type, freeFlag, linkType, PSB, Memory::MDS(), GFI, savedPC, LFCache::LF());
 
 	switch (linkType) {
 	case LT_oldProcedure : {
@@ -368,7 +367,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 	Trace::Context context;
-	context.setLFC(0, 0, XT_call, 0, LT_newProcedure, PSB, GFI, savedPC, LFCache::LF());
+	context.setLFC(0, 0, XT_call, 0, LT_newProcedure, PSB, Memory::MDS(), GFI, savedPC, LFCache::LF());
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);

@@ -219,10 +219,10 @@ void Trace::Context::message_() {
 	const char* free = freeFlag ? "*" : " ";
 
 	if (xferType == XT_trap) {
-		logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %s",
-			opcode, xfer, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link, getTrapName(dst));
+		logger.debug("%-4s %-6s %4X %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %s",
+			opcode, xfer, oldMDS >> 16, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link, getTrapName(dst));
 	} else {
-		logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s",
-			opcode, xfer, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link);
+		logger.debug("%-4s %-6s %4X %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s",
+			opcode, xfer, oldMDS >> 16, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link);
 	}
 }

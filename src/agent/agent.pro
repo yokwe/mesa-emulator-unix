@@ -13,7 +13,7 @@ SOURCES += AgentMouse.cpp AgentNetwork.cpp AgentProcessor.cpp AgentStream.cpp Di
 HEADRES += StreamBoot.h   StreamCopyPaste.h   StreamPCFA.h   StreamTCP.h   StreamWWC.h
 SOURCES += StreamBoot.cpp StreamCopyPaste.cpp StreamPCFA.cpp StreamTCP.cpp StreamWWC.cpp
 
-linux  : SOURCES += NetworkPacket.cpp
+linux  : SOURCES += NetworkPacket_linux.cpp
 freebsd: SOURCES += NetworkPacket_dummy.cpp
 macx:    SOURCES += NetworkPacket_dummy.cpp
 

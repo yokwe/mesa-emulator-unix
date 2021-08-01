@@ -30,7 +30,7 @@
 
 
 //
-// NetworkPacket.cpp
+// NetworkPacket_dummy.cpp
 //
 
 #include "../util/Util.h"
@@ -47,7 +47,7 @@ static log4cpp::Category& logger = Logger::getLogger("packet");
 
 void NetworkPacket::attach(const QString& name_) {
 	name = name_;
-    logger.info("DUMMY NETWORK PACKE");
+    logger.info("NetworkPacket dummy");
     logger.info("name     = %s", name.toLatin1().constData());
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 

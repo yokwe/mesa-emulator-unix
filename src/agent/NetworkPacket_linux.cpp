@@ -30,7 +30,7 @@
 
 
 //
-// NetworkPacket.cpp
+// NetworkPacket_linux.cpp
 //
 
 #include "../util/Util.h"
@@ -53,11 +53,12 @@ static log4cpp::Category& logger = Logger::getLogger("packet");
 
 void NetworkPacket::attach(const QString& name_) {
 	name = name_;
+    logger.info("NetworkPacket linux");
     logger.info("name     = %s", name.toLatin1().constData());
+    logger.info("protocol = 0x%04X", ETH_P_IDP);
 
     quint16 proto   = (quint16)ETH_P_IDP;
     quint16 protoBE = qToBigEndian(proto);
-    logger.info("protocol = 0x%04X", proto);
 
 	// open socket
 	fd = socket(AF_PACKET, SOCK_RAW, protoBE);

@@ -266,6 +266,8 @@ public:
 	QJsonObject toJsonObject() const;
 
 	static Setting getInstance();
+	
+	Entry getEntry(QString name);
 };
 
 #endif

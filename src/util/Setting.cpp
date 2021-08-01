@@ -303,3 +303,13 @@ Setting Setting::getInstance() {
 	return setting;
 }
 
+Setting::Entry Setting::getEntry(QString name) {
+	for(Setting::Entry e: entryList) {
+		if (e.name == name) {
+			return e;
+		}
+	}
+	logger.fatal("Unexpected");
+	logger.fatal("  name = %s!", name.toLocal8Bit().constData());
+	ERROR();
+}

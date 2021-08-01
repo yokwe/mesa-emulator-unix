@@ -38,7 +38,6 @@
 
 // Opcode
 static const int DEBUG_SHOW_OPCODE       = 0;
-static const int DEBUG_SHOW_XFER         = 0;
 static const int DEBUG_SHOW_DUMMY_OPCODE = 0;
 static const int DEBUG_SHOW_OPCODE_STATS = 0;
 

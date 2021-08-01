@@ -38,7 +38,6 @@ static log4cpp::Category& logger = Logger::getLogger("control");
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"
-#include "../util/ModuleInfo.h"
 
 #include "../mesa/Constant.h"
 #include "../mesa/Type.h"
@@ -46,180 +45,9 @@ static log4cpp::Category& logger = Logger::getLogger("control");
 #include "../mesa/Function.h"
 #include "../mesa/InterruptThread.h"
 
+#include "../trace/Trace.h"
+
 #include "Opcode.h"
-
-// for std::sort
-#include <QtAlgorithms>
-
-#define TRACE_XFER
-
-
-#ifdef TRACE_XFER
-class DebugControl {
-#define CHECK_TRAP(name) if (controlLink == ReadDblMds(SD + OFFSET_SD(s##name))) return #name;
-	static const char* ettName[256];
-	static QMap<CARD16, QSet<CARD16>> entryMap;
-	//          GFI          PC
-
-	static void initEttName() {
-		char name[10];
-		for(int i = 0; i < 256; i++) {
-			sprintf(name, "ETT-%d", i);
-			ettName[i] = strdup(name);
-		}
-	}
-
-	static CARD16      oldGFI;
-	static CARD16      oldLF;
-	static CARD16      oldPC;
-	static LinkType    linkType;
-
-	static const char* getLinkType(LinkType type) {
-		switch(type) {
-		case LT_newProcedure:
-			return "NEWPROC";
-		case LT_oldProcedure:
-			return "OLDPROC";
-		case LT_frame:
-			return "FRAME";
-		case LT_indirect:
-			return "INDIRECT";
-		default:
-			ERROR();
-			return "ERROR";
-		}
-	}
-
-	static void message(const char* opcode, CARD32 dst, XferType xferType, int freeFlag, CARD16 nGFI, CARD16 nPC, CARD16 nLF) {
-		const char* name = ModuleInfo::getName(nGFI, nPC).toLocal8Bit().constData();
-		const char* xfer = getXferType(xferType);
-		const char* link = getLinkType(linkType);
-		const char* free = freeFlag ? "*" : " ";
-
-		// XT_return = 0, XT_call = 1, XT_localCall = 2, XT_port = 3, XT_xfer = 4, XT_trap = 5, XT_processSwitch = 6
-		switch(xferType) {
-		case XT_trap:
-			logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %-40s %s",     opcode, xfer, PSB, oldGFI, oldPC, oldLF, free, nGFI, nPC, nLF, link, name, getTrapName(dst));
-			break;
-		case XT_call:
-		case XT_return:
-		case XT_port:
-		case XT_xfer:
-		case XT_processSwitch:
-			logger.debug("%-4s %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %-40s",     opcode, xfer, PSB, oldGFI, oldPC, oldLF, free, nGFI, nPC, nLF, link, name);
-			break;
-		default:
-			ERROR();
-			break;
-		}
-	}
-
-public:
-	static const char* getTrapName(ControlLink controlLink) {
-		// init
-		if (ettName[0] == 0) initEttName();
-
-		CHECK_TRAP(Boot)
-		CHECK_TRAP(BoundsTrap)
-		CHECK_TRAP(BreakTrap)
-		CHECK_TRAP(CodeTrap)
-		CHECK_TRAP(ControlTrap)
-		CHECK_TRAP(DivCheckTrap)
-		CHECK_TRAP(DivZeroTrap)
-		CHECK_TRAP(InterruptError)
-		CHECK_TRAP(OpcodeTrap)
-		CHECK_TRAP(PointerTrap)
-		CHECK_TRAP(ProcessTrap)
-		CHECK_TRAP(RescheduleError)
-		CHECK_TRAP(StackError)
-		CHECK_TRAP(UnboundTrap)
-		CHECK_TRAP(XferTrap)
-		CHECK_TRAP(HardwareError)
-
-		for(int i = 0; i < 256; i++) {
-			if (controlLink == ReadDblMds(ETT + OFFSET_ETT(i))) return ettName[i];
-		}
-
-		logger.warn("%s unknown controlLink %X", __FUNCTION__, controlLink);
-		return "??";
-	}
-
-	static const char* getXferType(XferType type) {
-		switch(type) {
-		case XT_return:
-			return "RET";
-		case XT_call:
-			return "CALL";
-		case XT_localCall:
-			return "LOCAL";
-		case XT_port:
-			return "PORT";
-		case XT_xfer:
-			return "XFER";
-		case XT_trap:
-			return "TRAP";
-		case XT_processSwitch:
-			return "SWITCH";
-		default:
-			ERROR();
-			return "ERROR";
-		}
-	}
-
-	static void addEntryMap(CARD16 gfi, CARD16 pc) {
-		if (!entryMap.contains(gfi)) {
-			entryMap[gfi] = QSet<CARD16>();
-		}
-		entryMap[gfi] += pc;
-	}
-	static void dumpEntryMap() {
-		for(auto gfi: entryMap.keys()) {
-			QStringList pcList;
-			{
-				QList<CARD16> list = entryMap[gfi].values();
-				std::sort(list.begin(), list.end(), std::less<CARD16>());
-
-				for(auto pc: list) {
-					pcList += QString("%1").arg(pc, 4, 16, QChar('0'));
-				}
-			}
-
-			QString message = QString("entryMap %1  %2").arg(gfi, 4, 16).toUpper().arg(pcList.join(", "));
-			logger.info("entryMap  %s", message.toLocal8Bit().constData());
-		}
-	}
-
-	static void enterXfer(LinkType linkType_) {
-		oldGFI   = GFI;
-		oldLF    = LFCache::LF();
-		oldPC    = savedPC;
-		linkType = linkType_;
-	}
-
-	static void codeTrapMessage(XferType xferType, int freeFlag, CARD16 nGFI) {
-		logger.debug("XFER %-6s %4X  FROM  %4X-%04X %04X%s  TO   %4X            *CODETRAP*", getXferType(xferType), PSB, oldGFI, oldPC, oldLF, (freeFlag) ? "*" : " ", nGFI);
-	}
-
-	static void xferMessage(CARD32 dst, XferType xferType, int freeFlag, CARD16 nGFI, CARD16 nPC, CARD16 nLF) {
-		message("XFER", dst, xferType, freeFlag, nGFI, nPC, nLF);
-	}
-	static void lfcMessage(CARD16 nGFI, CARD16 nPC, CARD16 nLF) {
-		message("LFC", 0, XferType::XT_call, 0, nGFI, nLF, nPC);
-	}
-
-};
-const char* DebugControl::ettName[256] = {0};
-QMap<CARD16, QSet<CARD16>> DebugControl::entryMap;
-CARD16      DebugControl::oldGFI;
-CARD16      DebugControl::oldLF;
-CARD16      DebugControl::oldPC;
-LinkType    DebugControl::linkType;
-
-void dumpEntryMap() {
-	DebugControl::dumpEntryMap();
-}
-
-#endif
 
 
 // 9.5.2 Trap Processing
@@ -379,13 +207,16 @@ static inline void Free(LocalFrameHandle frame) {
 
 // XFER: PROC[dst: ControlLink, src: ShortControlLink, type: XferType, free: BOOLEAN = FALSE]
 void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0) {
-	if (DEBUG_SHOW_XFER) logger.debug("XFER  dst = %08X  src = %04X  type = %d  freeFlag = %d", dst, src, type, freeFlag);
-
 	CARDINAL nGFI;
 	CARDINAL nPC;
 	CARDINAL nLF;
 	int push = 0;
 	ControlLink nDst = dst;
+
+
+	// FIXME After GF, CB is updated, CodeTrap or FrameFault can be generated
+	// FIXME In that case, GF and CB has wrong value before XFER is correctly executed.
+	// FIXME We should use nGF and nCB and update GF and CB very end of this method
 
 	if (type == XT_trap && freeFlag) ERROR();
 	while (ControlLinkType(nDst) == LT_indirect ) {
@@ -395,70 +226,45 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		push = 1;
 	}
 
-#ifdef TRACE_XFER
-	DebugControl::enterXfer(ControlLinkType(nDst));
-#endif
+	LinkType linkType = ControlLinkType(nDst);
+	Trace::Context context;
+	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, LFCache::LF());
 
-	// FIXME After GFI, GF, CB is updated, CodeTrap or FrameFault can be generated
-	// FIXME In that case, GFI, GF and CB has wrong value before XFER is correctly executed.
-	// FIXME We should use nGFI, nGF and nCB
-
-	switch (ControlLinkType(nDst)) {
+	switch (linkType) {
 	case LT_oldProcedure : {
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  LT_oldProcedure");
 		ProcDesc proc = {MakeProcDesc(nDst)};
 		CARD16 gf = proc.taggedGF & 0xfffc; // 177774
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  gf  = %04X", gf);
 		if (gf == 0) UnboundTrap(dst);
 		nGFI = *FetchMds(GO_OFFSET(gf, word)) & 0xfffc; // 177774
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GFI = %04X", nGFI);
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
 		if (GF != LengthenPointer(gf)) ERROR(); // Sanity check
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-#ifdef TRACE_XFER
-			DebugControl::codeTrapMessage(type, freeFlag, nGFI);
-#endif
 			CodeTrap(nGFI);
 		}
 		nPC = proc.pc;
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nPC = %6o", nPC);
 		if (nPC == 0) UnboundTrap(dst);
 		BytePair word = { ReadCode(nPC / 2) };
 		FSIndex fsi = ((nPC % 2) == 0) ? word.left : word.right;
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  fsi = %2d", fsi);
 		nLF = Alloc(fsi);
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nLF = %04X", nLF);
 		nPC = nPC + 1;
 		*StoreMds(LO_OFFSET(nLF, globallink)) = nGFI;
 		*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
 	}
 		break;
 	case LT_frame : {
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  LT_frame");
 		FrameLink frame = {MakeFrameLink(nDst)};
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  frame = %04X", frame);
 		if (frame == 0) ControlTrap(src);
 		nLF = frame;
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nLF = %04X", nLF);
 		nGFI = *FetchMds(LO_OFFSET(nLF, globallink));
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GFI = %04X", nGFI);
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-
-#ifdef TRACE_XFER
-			DebugControl::codeTrapMessage(type, freeFlag, nGFI);
-#endif
 			CodeTrap(nGFI);
 		}
 		nPC = *FetchMds(LO_OFFSET(nLF, pc));
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nPC = %6o", nPC);
-
 		if (nPC == 0) UnboundTrap(dst);
 		if (type == XT_trap) {
 			*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
@@ -467,29 +273,19 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	}
 		break;
 	case LT_newProcedure : {
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  LT_newProcedure");
 		NewProcDesc proc = {MakeNewProcDesc(nDst)};
 		nGFI = proc.taggedGFI & 0xfffc; // 177774
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GFI = %04X", nGFI);
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
 		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  GF  = %08X  CB = %08X", GF, CodeCache::CB());
 		if (CodeCache::CB() & 1) {
-
-#ifdef TRACE_XFER
-			DebugControl::codeTrapMessage(type, freeFlag, nGFI);
-#endif
 			CodeTrap(nGFI);
 		}
 		nPC = proc.pc;
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nPC = %6o", nPC);
 		if (nPC == 0) UnboundTrap(dst);
 		BytePair word = { ReadCode(nPC / 2) };
 		FSIndex fsi = ((nPC % 2) == 0) ? word.left : word.right;
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  fsi = %2d", fsi);
 		nLF = Alloc(fsi);
-		if (DEBUG_SHOW_XFER) logger.debug("XFER  nLF = %04X", nLF);
 		nPC = nPC + 1;
 		*StoreMds(LO_OFFSET(nLF, globallink)) = nGFI;
 		*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
@@ -502,11 +298,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		break;
 	}
 
-#ifdef TRACE_XFER
-	// nPC - 1 to show fsi byte position
-	DebugControl::xferMessage(dst, type, freeFlag, nGFI, nPC - 1, nLF);
-	DebugControl::addEntryMap(nGFI, nPC - 1);
-#endif
+	context.setContext(nGFI, nPC - 1, nLF);
+	context.message();
 
 	if (push) {
 		Push((CARD16)dst);
@@ -574,30 +367,24 @@ void E_EFCB() {
 }
 // zLFC - 0355
 void  E_LFC() {
-#ifdef TRACE_XFER
-	DebugControl::enterXfer(LT_newProcedure);
-#endif
+	Trace::Context context;
+	context.setLFC(0, 0, XT_call, 0, LT_newProcedure, PSB, GFI, savedPC, LFCache::LF());
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
-	if (DEBUG_SHOW_XFER) logger.debug("LFC   nPC = %6o", nPC);
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
 	if (nPC == 0) UnboundTrap(0);
 	BytePair word = { ReadCode(nPC / 2) };
 	FSIndex fsi = ((nPC % 2) == 0) ? word.left : word.right;
-	if (DEBUG_SHOW_XFER) logger.debug("LFC   fsi = %2d", fsi);
 	CARD16 nLF = Alloc(fsi);
-	if (DEBUG_SHOW_XFER) logger.debug("LFC   nLF = %04X", nLF);
 	nPC = nPC + 1;
 	*StoreMds(LO_OFFSET(nLF, globallink)) = GFI;
 	*StoreMds(LO_OFFSET(nLF, returnlink)) = LFCache::LF();
 	LFCache::setLF(nLF);
 	PC = nPC;
 
-#ifdef TRACE_XFER
-	DebugControl::lfcMessage(GFI, nPC - 1, nLF);
-	DebugControl::addEntryMap(GFI, nPC - 1);
-#endif
+	context.setContext(GFI, nPC - 1, nLF);
+	context.message();
 
 	ProcDesc dst;
 	dst.taggedGF = GFI | 1;

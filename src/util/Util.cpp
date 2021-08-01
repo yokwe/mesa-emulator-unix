@@ -100,7 +100,9 @@ int toIntMesaNumber(const QString& string) {
 	bool ok;
 	quint32 ret;
 
-	if (string.endsWith("B")) {
+	if (string.startsWith("0x") || string.startsWith("0X")) {
+		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
+	} else if (string.endsWith("B")) {
 		// MESA style octal number
 		ret = string.left(string.length() - 1).toInt(&ok, 8);
 	} else if (string.endsWith("H")) {

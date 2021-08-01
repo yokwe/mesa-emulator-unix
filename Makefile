@@ -2,7 +2,7 @@
 # Makefile
 #
 
-MODULE := main util test mesa agent opcode guam-headless
+MODULE := main util test mesa agent opcode trace guam-headless
 
 all:
 	echo "all"
@@ -28,22 +28,11 @@ qmake:
 	@echo "MODULE $(MODULE)!"
 	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
 
-util:
-	( cd src/util; make all )
-
 main: util
 	( cd src/main; make all )
 
-run-main: main
-	echo -n >tmp/debug.log
-	tmp/build/main/main | c++filt
-
-test: util mesa agent opcode
-	( cd src/test; make all )
-
-run-test: test
-	echo -n >tmp/debug.log
-	tmp/build/test/test
+util:
+	( cd src/util; make all )
 
 mesa: util agent opcode
 	( cd src/mesa; make all )
@@ -51,11 +40,25 @@ mesa: util agent opcode
 agent: util mesa
 	( cd src/agent; make all )
 
-opcode: util mesa
+opcode: util mesa trace
 	( cd src/opcode; make all )
 
-guam-headless: util mesa agent opcode
+test: util trace mesa agent
+	( cd src/test; make all )
+
+trace: util mesa opcode
+	( cd src/trace; make all )
+
+guam-headless: util mesa agent opcode trace
 	( cd src/guam-headless; make all )
+
+run-main: main
+	echo -n >tmp/debug.log
+	tmp/build/main/main | c++filt
+
+run-test: test
+	echo -n >tmp/debug.log
+	tmp/build/test/test
 
 run-guam-headless-gvwin: guam-headless
 	echo -n >tmp/debug.log
@@ -64,9 +67,6 @@ run-guam-headless-gvwin: guam-headless
 run-guam-headless-dawn: guam-headless
 	echo -n >tmp/debug.log
 	tmp/build/guam-headless/guam-headless Dawn
-
-gen-entry:
-	awk -f data/map/genEntry.awk data/map/GermGuam.map >tmp/a
 
 fix-permission:
 	find . -type d -exec chmod 0755 {} \;

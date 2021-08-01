@@ -300,6 +300,8 @@ Setting Setting::getInstance() {
 		}
 	}
 
+	initMap();
+
 	return setting;
 }
 
@@ -312,4 +314,9 @@ Setting::Entry Setting::getEntry(QString name) {
 	logger.fatal("Unexpected");
 	logger.fatal("  name = %s!", name.toLocal8Bit().constData());
 	ERROR();
+}
+
+
+void Setting::initMap() {
+	// FIXME add code that initialize entryMap, keyMap and buttonMap
 }

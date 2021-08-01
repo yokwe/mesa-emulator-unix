@@ -268,6 +268,14 @@ public:
 	static Setting getInstance();
 	
 	Entry getEntry(QString name);
+
+	QMap<QString,          Setting::Entry> entryMap;
+	//   name              entry
+	QHash<quint32,         quint32>        keyMap;
+	//    scanCode         bitPosition
+	QHash<Qt::MouseButton, quint32>        buttonMap;
+	//        Qt::MouseButton  bitPosition
+	void initMap();
 };
 
 #endif

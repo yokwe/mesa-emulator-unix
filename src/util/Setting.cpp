@@ -215,12 +215,38 @@ Setting Setting::getInstance() {
 	logger.info("mouseList      %3d", setting.mouseList.size());
 	logger.info("buttonMapList  %3d", setting.buttonMapList.size());
 
+	initMap(setting);
+
+	return setting;
+}
+
+Setting::Entry Setting::getEntry(QString name) {
+	for(Setting::Entry e: entryList) {
+		if (e.name == name) {
+			return e;
+		}
+	}
+	logger.fatal("Unexpected");
+	logger.fatal("  name = %s!", name.toLocal8Bit().constData());
+	ERROR();
+}
+
+
+QHash<quint32,         quint32>        Setting::keyMap;
+//    scanCode         keyName
+QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
+//    Qt::MouseButton  keyName
+
+void Setting::initMap(const Setting& setting) {
+	// FIXME add code that initialize entryMap, keyMap and buttonMap
+
 	// sanity check
 	{
 		bool foundError = false;
 
 		// levelVKeys
 		{
+			// check duplicate of levelVKeys keyname
 			QMap<int, QString> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.keyName)) {
@@ -232,6 +258,7 @@ Setting Setting::getInstance() {
 			}
 		}
 		{
+			// check duplicate of levelVKeys name
 			QMap<QString, QString> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.name)) {
@@ -245,6 +272,7 @@ Setting Setting::getInstance() {
 
 		// keyboard
 		{
+			// check duplicate of keyboard scanCode
 			QMap<int, QString> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.scanCode)) {
@@ -256,6 +284,7 @@ Setting Setting::getInstance() {
 			}
 		}
 		{
+			// check duplicate of keyboard name
 			QMap<QString, QString> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.name)) {
@@ -269,6 +298,7 @@ Setting Setting::getInstance() {
 
 		// keyMap
 		{
+			// check duplicate of keyMap keyboard
 			QMap<QString, QString> map;
 			for(auto e: setting.keyMapList) {
 				if (e.keyboard.isEmpty()) continue;
@@ -282,6 +312,7 @@ Setting Setting::getInstance() {
 			}
 		}
 		{
+			// check duplicate of keyMap levelVKeys
 			QMap<QString, QString> map;
 			for(auto e: setting.keyMapList) {
 				if (e.keyboard.isEmpty()) continue;
@@ -300,30 +331,46 @@ Setting Setting::getInstance() {
 		}
 	}
 
-	initMap(setting);
+	keyMap.clear();
+	buttonMap.clear();
+	{
+		// build Setting::keyMap
+		QMap<QString, quint32> nameToScanCode;
+		for(auto e: setting.keyboardList) {
+			nameToScanCode[e.name] = e.scanCode;
+		}
+		QMap<QString, quint32> nameToKeyName;
+		for(auto e: setting.levelVKeysList) {
+			nameToKeyName[e.name] = e.keyName;
+		}
 
-	return setting;
-}
+		for(auto e: setting.keyMapList) {
+			if (e.keyboard.isEmpty()) continue;
 
-Setting::Entry Setting::getEntry(QString name) {
-	for(Setting::Entry e: entryList) {
-		if (e.name == name) {
-			return e;
+			quint32 scanCode = nameToScanCode[e.keyboard];
+			quint32 keyName  = nameToKeyName[e.levelVKeys];
+
+			Setting::keyMap[scanCode] = keyName;
+
+//			logger.info("keyMap    %-16s %02X => %-16s %3d", e.keyboard.toLocal8Bit().constData(), scanCode, e.levelVKeys.toLocal8Bit().constData(), keyName);
+		}
+
+		// build Setting::buttonMap
+		QMap<QString, quint32> nameToBitmask;
+		for(auto e: setting.mouseList) {
+			nameToBitmask[e.name] = e.bitMask;
+		}
+
+		for(auto e: setting.buttonMapList) {
+			Qt::MouseButton bitMask = (Qt::MouseButton)nameToBitmask[e.button];
+			quint32         keyName = nameToKeyName[e.levelVKeys];
+
+			Setting::buttonMap[bitMask] = keyName;
+
+//			logger.info("buttonMap %-16s %02X => %-16s %3d", e.button.toLocal8Bit().constData(), bitMask, e.levelVKeys.toLocal8Bit().constData(), keyName);
 		}
 	}
-	logger.fatal("Unexpected");
-	logger.fatal("  name = %s!", name.toLocal8Bit().constData());
-	ERROR();
-}
 
-
-QMap<QString,          Setting::Entry> Setting::entryMap;
-QHash<quint32,         quint32>        Setting::keyMap;
-//    scanCode         keyName
-QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
-//    Qt::MouseButton  keyName
-
-void Setting::initMap(const Setting& setting) {
-	// FIXME add code that initialize entryMap, keyMap and buttonMap
-	if (setting.levelVKeysList.size() == 0) ERROR()
+	logger.info("keyMap         %3d", Setting::keyMap.size());
+	logger.info("buttonMap      %3d", Setting::buttonMap.size());
 }

@@ -1,1310 +1,400 @@
 {
-	"buttonMap": [
-		{
-			"button": "LeftButton",
-			"levelVKeys": "Point"
-		},
-		{
-			"button": "RightButton",
-			"levelVKeys": "Adjust"
-		},
-		{
-			"button": "MiddleButton",
-			"levelVKeys": "Menu"
-		}
-	],
 	"entry": [
 		{
-			"boot": {
-				"device": "DISK",
-				"switch": "Oy{|}\\346\\347\\350\\377"
-			},
-			"display": {
-				"height": 640,
-				"width": 1024
-			},
-			"file": {
-				"boot": "data/GVWin/NSINSTLR.DAT",
-				"disk": "data/GVWin/GVWIN%1.DSK",
-				"floppy": "tmp/floppy/image/floppy144",
-				"germ": "data/GVWin/GVWIN.GRM"
-			},
-			"memory": {
-				"rmbits": 24,
-				"vmbits": 25
-			},
 			"name": "GVWin",
-			"network": {
-				"interface": "ends224"
-			}
-		},
-		{
-			"boot": {
-				"device": "DISK",
-				"switch": "8Wy{|}\\346\\347\\350\\377"
-			},
 			"display": {
-				"height": 640,
-				"width": 1024
-			},
+				"width": 1024,
+				"height": 640},
 			"file": {
-				"boot": "data/Dawn/NSINSTLR.DAT",
-				"disk": "data/Dawn/Dawn.dsk",
-				"floppy": "tmp/floppy/image/floppy144",
-				"germ": "data/Dawn/Dawn.germ"
-			},
+				"disk": "data/GVWin/GVWIN%1.DSK",
+			    "germ": "data/GVWin/GVWIN.GRM",
+			    "boot": "data/GVWin/NSINSTLR.DAT",
+			    "floppy": "tmp/floppy/image/floppy144"},
+			"boot": {
+				"switch": "Oy{|}\\346\\347\\350\\377",
+				"device": "DISK"},
 			"memory": {
-				"rmbits": 22,
-				"vmbits": 23
-			},
-			"name": "Dawn",
+				"vmbits": 25,
+				"rmbits": 24},
 			"network": {
-				"interface": "ends224"
-			}
-		}
-	],
-	"keyMap": [
-		{
-			"keyboard": "Escape",
-			"levelVKeys": "Stop"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Undo"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Find"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Same"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Open"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Delete"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Again"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Copy"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Move"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Props"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Center"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Bold"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Italic"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Case"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Strikeout"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Underline"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "SuperSub"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Smaller"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Margins"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Font"
-		},
-		{
-			"keyboard": "BackQuote",
-			"levelVKeys": "Bullet"
-		},
-		{
-			"keyboard": "1",
-			"levelVKeys": "One"
-		},
-		{
-			"keyboard": "2",
-			"levelVKeys": "Two"
-		},
-		{
-			"keyboard": "3",
-			"levelVKeys": "Three"
-		},
-		{
-			"keyboard": "4",
-			"levelVKeys": "Four"
-		},
-		{
-			"keyboard": "5",
-			"levelVKeys": "Five"
-		},
-		{
-			"keyboard": "6",
-			"levelVKeys": "Six"
-		},
-		{
-			"keyboard": "7",
-			"levelVKeys": "Seven"
-		},
-		{
-			"keyboard": "8",
-			"levelVKeys": "Eight"
-		},
-		{
-			"keyboard": "9",
-			"levelVKeys": "Nine"
-		},
-		{
-			"keyboard": "0",
-			"levelVKeys": "Zero"
-		},
-		{
-			"keyboard": "Dash",
-			"levelVKeys": "Dash"
-		},
-		{
-			"keyboard": "Equal",
-			"levelVKeys": "Equal"
-		},
-		{
-			"keyboard": "BackSpace",
-			"levelVKeys": "BS"
-		},
-		{
-			"keyboard": "Tab",
-			"levelVKeys": "ParaTab"
-		},
-		{
-			"keyboard": "Q",
-			"levelVKeys": "Q"
-		},
-		{
-			"keyboard": "W",
-			"levelVKeys": "W"
-		},
-		{
-			"keyboard": "E",
-			"levelVKeys": "E"
-		},
-		{
-			"keyboard": "R",
-			"levelVKeys": "R"
-		},
-		{
-			"keyboard": "T",
-			"levelVKeys": "T"
-		},
-		{
-			"keyboard": "Y",
-			"levelVKeys": "Y"
-		},
-		{
-			"keyboard": "U",
-			"levelVKeys": "U"
-		},
-		{
-			"keyboard": "I",
-			"levelVKeys": "I"
-		},
-		{
-			"keyboard": "O",
-			"levelVKeys": "O"
-		},
-		{
-			"keyboard": "P",
-			"levelVKeys": "P"
-		},
-		{
-			"keyboard": "LeftBracket",
-			"levelVKeys": "LeftBracket"
-		},
-		{
-			"keyboard": "RightBracket",
-			"levelVKeys": "RightBracket"
-		},
-		{
-			"keyboard": "Enter",
-			"levelVKeys": "NewPara"
-		},
-		{
-			"keyboard": "CapsLock",
-			"levelVKeys": "Lock"
-		},
-		{
-			"keyboard": "A",
-			"levelVKeys": "A"
-		},
-		{
-			"keyboard": "S",
-			"levelVKeys": "S"
-		},
-		{
-			"keyboard": "D",
-			"levelVKeys": "D"
-		},
-		{
-			"keyboard": "F",
-			"levelVKeys": "F"
-		},
-		{
-			"keyboard": "G",
-			"levelVKeys": "G"
-		},
-		{
-			"keyboard": "H",
-			"levelVKeys": "H"
-		},
-		{
-			"keyboard": "J",
-			"levelVKeys": "J"
-		},
-		{
-			"keyboard": "K",
-			"levelVKeys": "K"
-		},
-		{
-			"keyboard": "L",
-			"levelVKeys": "L"
-		},
-		{
-			"keyboard": "SemiColon",
-			"levelVKeys": "SemiColon"
-		},
-		{
-			"keyboard": "SingleQuote",
-			"levelVKeys": "SingleQuote"
-		},
-		{
-			"keyboard": "BackSlash",
-			"levelVKeys": "DoubleQuote"
-		},
-		{
-			"keyboard": "LeftShift",
-			"levelVKeys": "LeftShift"
-		},
-		{
-			"keyboard": "LeftAlt",
-			"levelVKeys": "LeftShiftAlt"
-		},
-		{
-			"keyboard": "Z",
-			"levelVKeys": "Z"
-		},
-		{
-			"keyboard": "X",
-			"levelVKeys": "X"
-		},
-		{
-			"keyboard": "C",
-			"levelVKeys": "C"
-		},
-		{
-			"keyboard": "V",
-			"levelVKeys": "V"
-		},
-		{
-			"keyboard": "B",
-			"levelVKeys": "B"
-		},
-		{
-			"keyboard": "N",
-			"levelVKeys": "N"
-		},
-		{
-			"keyboard": "M",
-			"levelVKeys": "M"
-		},
-		{
-			"keyboard": "Comma",
-			"levelVKeys": "Comma"
-		},
-		{
-			"keyboard": "Period",
-			"levelVKeys": "Period"
-		},
-		{
-			"keyboard": "Slash",
-			"levelVKeys": "Slash"
-		},
-		{
-			"keyboard": "RightAlt",
-			"levelVKeys": "RightShiftAlt"
-		},
-		{
-			"keyboard": "RightShift",
-			"levelVKeys": "RightShift"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Special"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Katakana"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Hiragana"
-		},
-		{
-			"keyboard": "Space",
-			"levelVKeys": "Space"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "English"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Expand"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadAdd"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadSubtract"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadAdd"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadSubtract"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadClear"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadSeven"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadEight"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadNine"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Next"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadFour"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadFive"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadSix"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadOne"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadTwo"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadThree"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadZero"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadPeriod"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "KeypadComma"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Point"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Adjust"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Menu"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Quote"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Tab"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "OpenQuote"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Help"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Superscript"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Subscript"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "Defaults"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "null"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "DiagnosticBitTwo"
-		},
-		{
-			"keyboard": "",
-			"levelVKeys": "DiagnosticBitOne"
-		}
-	],
-	"keyboard": [
-		{
-			"name": "Escape",
-			"scanCode": 9
-		},
-		{
-			"name": "F1",
-			"scanCode": 67
-		},
-		{
-			"name": "F2",
-			"scanCode": 68
-		},
-		{
-			"name": "F3",
-			"scanCode": 69
-		},
-		{
-			"name": "F4",
-			"scanCode": 70
-		},
-		{
-			"name": "F5",
-			"scanCode": 71
-		},
-		{
-			"name": "F6",
-			"scanCode": 72
-		},
-		{
-			"name": "F7",
-			"scanCode": 73
-		},
-		{
-			"name": "F8",
-			"scanCode": 74
-		},
-		{
-			"name": "F9",
-			"scanCode": 4
-		},
-		{
-			"name": "F10",
-			"scanCode": 76
-		},
-		{
-			"name": "F11",
-			"scanCode": 95
-		},
-		{
-			"name": "F12",
-			"scanCode": 96
-		},
-		{
-			"name": "Home",
-			"scanCode": 110
-		},
-		{
-			"name": "End",
-			"scanCode": 115
-		},
-		{
-			"name": "Insert",
-			"scanCode": 118
-		},
-		{
-			"name": "Delete",
-			"scanCode": 119
-		},
-		{
-			"name": "BackQuote",
-			"scanCode": 49
-		},
-		{
-			"name": "1",
-			"scanCode": 10
-		},
-		{
-			"name": "2",
-			"scanCode": 0
-		},
-		{
-			"name": "3",
-			"scanCode": 12
-		},
-		{
-			"name": "4",
-			"scanCode": 13
-		},
-		{
-			"name": "5",
-			"scanCode": 14
-		},
-		{
-			"name": "6",
-			"scanCode": 15
-		},
-		{
-			"name": "7",
-			"scanCode": 16
-		},
-		{
-			"name": "8",
-			"scanCode": 17
-		},
-		{
-			"name": "9",
-			"scanCode": 18
-		},
-		{
-			"name": "0",
-			"scanCode": 19
-		},
-		{
-			"name": "Dash",
-			"scanCode": 20
-		},
-		{
-			"name": "Equal",
-			"scanCode": 21
-		},
-		{
-			"name": "BackSpace",
-			"scanCode": 22
-		},
-		{
-			"name": "Tab",
-			"scanCode": 23
-		},
-		{
-			"name": "Q",
-			"scanCode": 24
-		},
-		{
-			"name": "W",
-			"scanCode": 25
-		},
-		{
-			"name": "E",
-			"scanCode": 26
-		},
-		{
-			"name": "R",
-			"scanCode": 1
-		},
-		{
-			"name": "T",
-			"scanCode": 28
-		},
-		{
-			"name": "Y",
-			"scanCode": 29
-		},
-		{
-			"name": "U",
-			"scanCode": 30
-		},
-		{
-			"name": "I",
-			"scanCode": 31
-		},
-		{
-			"name": "O",
-			"scanCode": 32
-		},
-		{
-			"name": "P",
-			"scanCode": 33
-		},
-		{
-			"name": "LeftBracket",
-			"scanCode": 34
-		},
-		{
-			"name": "RightBracket",
-			"scanCode": 35
-		},
-		{
-			"name": "BackSlash",
-			"scanCode": 51
-		},
-		{
-			"name": "CapsLock",
-			"scanCode": 66
-		},
-		{
-			"name": "A",
-			"scanCode": 38
-		},
-		{
-			"name": "S",
-			"scanCode": 39
-		},
-		{
-			"name": "D",
-			"scanCode": 40
-		},
-		{
-			"name": "F",
-			"scanCode": 41
-		},
-		{
-			"name": "G",
-			"scanCode": 42
-		},
-		{
-			"name": "H",
-			"scanCode": 2
-		},
-		{
-			"name": "J",
-			"scanCode": 44
-		},
-		{
-			"name": "K",
-			"scanCode": 45
-		},
-		{
-			"name": "L",
-			"scanCode": 46
-		},
-		{
-			"name": "SemiColon",
-			"scanCode": 47
-		},
-		{
-			"name": "SingleQuote",
-			"scanCode": 48
-		},
-		{
-			"name": "Enter",
-			"scanCode": 36
-		},
-		{
-			"name": "LeftShift",
-			"scanCode": 50
-		},
-		{
-			"name": "Z",
-			"scanCode": 52
-		},
-		{
-			"name": "X",
-			"scanCode": 53
-		},
-		{
-			"name": "C",
-			"scanCode": 54
-		},
-		{
-			"name": "V",
-			"scanCode": 55
-		},
-		{
-			"name": "B",
-			"scanCode": 56
-		},
-		{
-			"name": "N",
-			"scanCode": 57
-		},
-		{
-			"name": "M",
-			"scanCode": 58
-		},
-		{
-			"name": "Comma",
-			"scanCode": 3
-		},
-		{
-			"name": "Period",
-			"scanCode": 60
-		},
-		{
-			"name": "Slash",
-			"scanCode": 61
-		},
-		{
-			"name": "RightShift",
-			"scanCode": 62
-		},
-		{
-			"name": "LeftControl",
-			"scanCode": 37
-		},
-		{
-			"name": "Windows",
-			"scanCode": 133
-		},
-		{
-			"name": "LeftAlt",
-			"scanCode": 64
-		},
-		{
-			"name": "Space",
-			"scanCode": 65
-		},
-		{
-			"name": "RightAlt",
-			"scanCode": 108
-		},
-		{
-			"name": "RightControl",
-			"scanCode": 105
-		},
-		{
-			"name": "PageUp",
-			"scanCode": 112
-		},
-		{
-			"name": "Up",
-			"scanCode": 111
-		},
-		{
-			"name": "PageDown",
-			"scanCode": 117
-		},
-		{
-			"name": "Left",
-			"scanCode": 113
-		},
-		{
-			"name": "Down",
-			"scanCode": 116
-		},
-		{
-			"name": "Right",
-			"scanCode": 114
+				"interface": "ends224"}
+		},
+		{
+			"name": "Dawn",
+			"display": {
+				"width": 1024,
+				"height": 640},
+			"file": {
+				"disk": "data/Dawn/Dawn.dsk",
+			    "germ": "data/Dawn/Dawn.germ",
+			    "boot": "data/Dawn/NSINSTLR.DAT",
+			    "floppy": "tmp/floppy/image/floppy144"},
+			"boot": {
+				"switch": "8Wy{|}\\346\\347\\350\\377",
+				"device": "DISK"},
+			"memory": {
+				"vmbits": 23,
+				"rmbits": 22},
+			"network": {
+				"interface": "ends224"}
 		}
 	],
 	"levelVKeys": [
-		{
-			"keyName": 0,
-			"name": "null"
-		},
-		{
-			"keyName": 1,
-			"name": "Bullet"
-		},
-		{
-			"keyName": 2,
-			"name": "SuperSub"
-		},
-		{
-			"keyName": 3,
-			"name": "Case"
-		},
-		{
-			"keyName": 4,
-			"name": "Strikeout"
-		},
-		{
-			"keyName": 5,
-			"name": "KeypadTwo"
-		},
-		{
-			"keyName": 6,
-			"name": "KeypadThree"
-		},
-		{
-			"keyName": 7,
-			"name": "SingleQuote"
-		},
-		{
-			"keyName": 8,
-			"name": "KeypadAdd"
-		},
-		{
-			"keyName": 9,
-			"name": "KeypadSubtract"
-		},
-		{
-			"keyName": 10,
-			"name": "KeypadMultiply"
-		},
-		{
-			"keyName": 11,
-			"name": "KeypadDivide"
-		},
-		{
-			"keyName": 12,
-			"name": "KeypadClear"
-		},
-		{
-			"keyName": 13,
-			"name": "Point"
-		},
-		{
-			"keyName": 14,
-			"name": "Adjust"
-		},
-		{
-			"keyName": 15,
-			"name": "Menu"
-		},
-		{
-			"keyName": 16,
-			"name": "Five"
-		},
-		{
-			"keyName": 17,
-			"name": "Four"
-		},
-		{
-			"keyName": 18,
-			"name": "Six"
-		},
-		{
-			"keyName": 19,
-			"name": "E"
-		},
-		{
-			"keyName": 20,
-			"name": "Seven"
-		},
-		{
-			"keyName": 21,
-			"name": "D"
-		},
-		{
-			"keyName": 22,
-			"name": "U"
-		},
-		{
-			"keyName": 23,
-			"name": "V"
-		},
-		{
-			"keyName": 24,
-			"name": "Zero"
-		},
-		{
-			"keyName": 25,
-			"name": "K"
-		},
-		{
-			"keyName": 26,
-			"name": "Dash"
-		},
-		{
-			"keyName": 27,
-			"name": "P"
-		},
-		{
-			"keyName": 28,
-			"name": "Slash"
-		},
-		{
-			"keyName": 29,
-			"name": "Font"
-		},
-		{
-			"keyName": 30,
-			"name": "Same"
-		},
-		{
-			"keyName": 31,
-			"name": "BS"
-		},
-		{
-			"keyName": 32,
-			"name": "Three"
-		},
-		{
-			"keyName": 33,
-			"name": "Two"
-		},
-		{
-			"keyName": 34,
-			"name": "W"
-		},
-		{
-			"keyName": 35,
-			"name": "Q"
-		},
-		{
-			"keyName": 36,
-			"name": "S"
-		},
-		{
-			"keyName": 37,
-			"name": "A"
-		},
-		{
-			"keyName": 38,
-			"name": "Nine"
-		},
-		{
-			"keyName": 39,
-			"name": "I"
-		},
-		{
-			"keyName": 40,
-			"name": "X"
-		},
-		{
-			"keyName": 41,
-			"name": "O"
-		},
-		{
-			"keyName": 42,
-			"name": "L"
-		},
-		{
-			"keyName": 43,
-			"name": "Comma"
-		},
-		{
-			"keyName": 44,
-			"name": "Quote"
-		},
-		{
-			"keyName": 45,
-			"name": "RightBracket"
-		},
-		{
-			"keyName": 46,
-			"name": "Open"
-		},
-		{
-			"keyName": 47,
-			"name": "Special"
-		},
-		{
-			"keyName": 48,
-			"name": "One"
-		},
-		{
-			"keyName": 49,
-			"name": "Tab"
-		},
-		{
-			"keyName": 50,
-			"name": "ParaTab"
-		},
-		{
-			"keyName": 51,
-			"name": "F"
-		},
-		{
-			"keyName": 52,
-			"name": "Props"
-		},
-		{
-			"keyName": 53,
-			"name": "C"
-		},
-		{
-			"keyName": 54,
-			"name": "J"
-		},
-		{
-			"keyName": 55,
-			"name": "B"
-		},
-		{
-			"keyName": 56,
-			"name": "Z"
-		},
-		{
-			"keyName": 57,
-			"name": "LeftShift"
-		},
-		{
-			"keyName": 58,
-			"name": "Period"
-		},
-		{
-			"keyName": 59,
-			"name": "SemiColon"
-		},
-		{
-			"keyName": 60,
-			"name": "NewPara"
-		},
-		{
-			"keyName": 61,
-			"name": "OpenQuote"
-		},
-		{
-			"keyName": 62,
-			"name": "Delete"
-		},
-		{
-			"keyName": 63,
-			"name": "Next"
-		},
-		{
-			"keyName": 64,
-			"name": "R"
-		},
-		{
-			"keyName": 65,
-			"name": "T"
-		},
-		{
-			"keyName": 66,
-			"name": "G"
-		},
-		{
-			"keyName": 67,
-			"name": "Y"
-		},
-		{
-			"keyName": 68,
-			"name": "H"
-		},
-		{
-			"keyName": 69,
-			"name": "Eight"
-		},
-		{
-			"keyName": 70,
-			"name": "N"
-		},
-		{
-			"keyName": 71,
-			"name": "M"
-		},
-		{
-			"keyName": 72,
-			"name": "Lock"
-		},
-		{
-			"keyName": 73,
-			"name": "Space"
-		},
-		{
-			"keyName": 74,
-			"name": "LeftBracket"
-		},
-		{
-			"keyName": 75,
-			"name": "Equal"
-		},
-		{
-			"keyName": 76,
-			"name": "RightShift"
-		},
-		{
-			"keyName": 77,
-			"name": "Stop"
-		},
-		{
-			"keyName": 78,
-			"name": "Move"
-		},
-		{
-			"keyName": 79,
-			"name": "Undo"
-		},
-		{
-			"keyName": 80,
-			"name": "Margins"
-		},
-		{
-			"keyName": 81,
-			"name": "KeypadSeven"
-		},
-		{
-			"keyName": 82,
-			"name": "KeypadEight"
-		},
-		{
-			"keyName": 83,
-			"name": "KeypadNine"
-		},
-		{
-			"keyName": 84,
-			"name": "KeypadFour"
-		},
-		{
-			"keyName": 85,
-			"name": "KeypadFive"
-		},
-		{
-			"keyName": 86,
-			"name": "English"
-		},
-		{
-			"keyName": 87,
-			"name": "KeypadSix"
-		},
-		{
-			"keyName": 88,
-			"name": "Katakana"
-		},
-		{
-			"keyName": 89,
-			"name": "Copy"
-		},
-		{
-			"keyName": 90,
-			"name": "Find"
-		},
-		{
-			"keyName": 91,
-			"name": "Again"
-		},
-		{
-			"keyName": 92,
-			"name": "Help"
-		},
-		{
-			"keyName": 93,
-			"name": "Expand"
-		},
-		{
-			"keyName": 94,
-			"name": "KeypadOne"
-		},
-		{
-			"keyName": 95,
-			"name": "DiagnosticBitTwo"
-		},
-		{
-			"keyName": 96,
-			"name": "DiagnosticBitOne"
-		},
-		{
-			"keyName": 97,
-			"name": "Center"
-		},
-		{
-			"keyName": 98,
-			"name": "KeypadZero"
-		},
-		{
-			"keyName": 99,
-			"name": "Bold"
-		},
-		{
-			"keyName": 100,
-			"name": "Italic"
-		},
-		{
-			"keyName": 101,
-			"name": "Underline"
-		},
-		{
-			"keyName": 102,
-			"name": "Superscript"
-		},
-		{
-			"keyName": 103,
-			"name": "Subscript"
-		},
-		{
-			"keyName": 104,
-			"name": "Smaller"
-		},
-		{
-			"keyName": 105,
-			"name": "KeypadPeriod"
-		},
-		{
-			"keyName": 106,
-			"name": "KeypadComma"
-		},
-		{
-			"keyName": 107,
-			"name": "LeftShiftAlt"
-		},
-		{
-			"keyName": 108,
-			"name": "DoubleQuote"
-		},
-		{
-			"keyName": 109,
-			"name": "Defaults"
-		},
-		{
-			"keyName": 110,
-			"name": "Hiragana"
-		},
-		{
-			"keyName": 111,
-			"name": "RightShiftAlt"
-		}
+		{"name": "null",             "keyName": "0"},
+		{"name": "Bullet",           "keyName": "1"},
+		{"name": "SuperSub",         "keyName": "2"},
+		{"name": "Case",             "keyName": "3"},
+		{"name": "Strikeout",        "keyName": "4"},
+		{"name": "KeypadTwo",        "keyName": "5"},
+		{"name": "KeypadThree",      "keyName": "6"},
+		{"name": "SingleQuote",      "keyName": "7"},
+		{"name": "KeypadAdd",        "keyName": "8"},
+		{"name": "KeypadSubtract",   "keyName": "9"},
+	
+		{"name": "KeypadMultiply",   "keyName": "10"},
+		{"name": "KeypadDivide",     "keyName": "11"},
+		{"name": "KeypadClear",      "keyName": "12"},
+		{"name": "Point",            "keyName": "13"},
+		{"name": "Adjust",           "keyName": "14"},
+		{"name": "Menu",             "keyName": "15"},
+		{"name": "Five",             "keyName": "16"},
+		{"name": "Four",             "keyName": "17"},
+		{"name": "Six",              "keyName": "18"},
+		{"name": "E",                "keyName": "19"},
+	
+		{"name": "Seven",            "keyName": "20"},
+		{"name": "D",                "keyName": "21"},
+		{"name": "U",                "keyName": "22"},
+		{"name": "V",                "keyName": "23"},
+		{"name": "Zero",             "keyName": "24"},
+		{"name": "K",                "keyName": "25"},
+		{"name": "Dash",             "keyName": "26"},
+		{"name": "P",                "keyName": "27"},
+		{"name": "Slash",            "keyName": "28"},
+		{"name": "Font",             "keyName": "29"},
+	
+		{"name": "Same",             "keyName": "30"},
+		{"name": "BS",               "keyName": "31"},
+		{"name": "Three",            "keyName": "32"},
+		{"name": "Two",              "keyName": "33"},
+		{"name": "W",                "keyName": "34"},
+		{"name": "Q",                "keyName": "35"},
+		{"name": "S",                "keyName": "36"},
+		{"name": "A",                "keyName": "37"},
+		{"name": "Nine",             "keyName": "38"},
+		{"name": "I",                "keyName": "39"},
+	
+		{"name": "X",                "keyName": "40"},
+		{"name": "O",                "keyName": "41"},
+		{"name": "L",                "keyName": "42"},
+		{"name": "Comma",            "keyName": "43"},
+		{"name": "Quote",            "keyName": "44"},
+		{"name": "RightBracket",     "keyName": "45"},
+		{"name": "Open",             "keyName": "46"},
+		{"name": "Special",          "keyName": "47"},
+		{"name": "One",              "keyName": "48"},
+		{"name": "Tab",              "keyName": "49"},
+	
+		{"name": "ParaTab",          "keyName": "50"},
+		{"name": "F",                "keyName": "51"},
+		{"name": "Props",            "keyName": "52"},
+		{"name": "C",                "keyName": "53"},
+		{"name": "J",                "keyName": "54"},
+		{"name": "B",                "keyName": "55"},
+		{"name": "Z",                "keyName": "56"},
+		{"name": "LeftShift",        "keyName": "57"},
+		{"name": "Period",           "keyName": "58"},
+		{"name": "SemiColon",        "keyName": "59"},
+	
+		{"name": "NewPara",          "keyName": "60"},
+		{"name": "OpenQuote",        "keyName": "61"},
+		{"name": "Delete",           "keyName": "62"},
+		{"name": "Next",             "keyName": "63"},
+		{"name": "R",                "keyName": "64"},
+		{"name": "T",                "keyName": "65"},
+		{"name": "G",                "keyName": "66"},
+		{"name": "Y",                "keyName": "67"},
+		{"name": "H",                "keyName": "68"},
+		{"name": "Eight",            "keyName": "69"},
+	
+		{"name": "N",                "keyName": "70"},
+		{"name": "M",                "keyName": "71"},
+		{"name": "Lock",             "keyName": "72"},
+		{"name": "Space",            "keyName": "73"},
+		{"name": "LeftBracket",      "keyName": "74"},
+		{"name": "Equal",            "keyName": "75"},
+		{"name": "RightShift",       "keyName": "76"},
+		{"name": "Stop",             "keyName": "77"},
+		{"name": "Move",             "keyName": "78"},
+		{"name": "Undo",             "keyName": "79"},
+	
+		{"name": "Margins",          "keyName": "80"},
+		{"name": "KeypadSeven",      "keyName": "81"},
+		{"name": "KeypadEight",      "keyName": "82"},
+		{"name": "KeypadNine",       "keyName": "83"},
+		{"name": "KeypadFour",       "keyName": "84"},
+		{"name": "KeypadFive",       "keyName": "85"},
+		{"name": "English",          "keyName": "86"},
+		{"name": "KeypadSix",        "keyName": "87"},
+		{"name": "Katakana",         "keyName": "88"},
+		{"name": "Copy",             "keyName": "89"},
+	
+		{"name": "Find",             "keyName": "90"},
+		{"name": "Again",            "keyName": "91"},
+		{"name": "Help",             "keyName": "92"},
+		{"name": "Expand",           "keyName": "93"},
+		{"name": "KeypadOne",        "keyName": "94"},
+		{"name": "DiagnosticBitTwo", "keyName": "95"},
+		{"name": "DiagnosticBitOne", "keyName": "96"},
+		{"name": "Center",           "keyName": "97"},
+		{"name": "KeypadZero",       "keyName": "98"},
+		{"name": "Bold",             "keyName": "99"},
+	
+		{"name": "Italic",           "keyName": "100"},
+		{"name": "Underline",        "keyName": "101"},
+		{"name": "Superscript",      "keyName": "102"},
+		{"name": "Subscript",        "keyName": "103"},
+		{"name": "Smaller",          "keyName": "104"},
+		{"name": "KeypadPeriod",     "keyName": "105"},
+		{"name": "KeypadComma",      "keyName": "106"},
+		{"name": "LeftShiftAlt",     "keyName": "107"},
+		{"name": "DoubleQuote",      "keyName": "108"},
+		{"name": "Defaults",         "keyName": "109"},
+	
+		{"name": "Hiragana",         "keyName": "110"},
+		{"name": "RightShiftAlt",    "keyName": "111"}
+	],
+	"keyboard": [
+		{"name": "Escape",       "scanCode": "0x09"},
+		{"name": "F1",           "scanCode": "0x43"},
+		{"name": "F2",           "scanCode": "0x44"},
+		{"name": "F3",           "scanCode": "0x45"},
+		{"name": "F4",           "scanCode": "0x46"},
+		{"name": "F5",           "scanCode": "0x47"},
+		{"name": "F6",           "scanCode": "0x48"},
+		{"name": "F7",           "scanCode": "0x49"},
+		{"name": "F8",           "scanCode": "0x4A"},
+		{"name": "F9",           "scanCode": "0x4B"},
+		{"name": "F10",          "scanCode": "0x4C"},
+		{"name": "F11",          "scanCode": "0x5F"},
+		{"name": "F12",          "scanCode": "0x60"},
+		{"name": "Home",         "scanCode": "0x6E"},
+		{"name": "End",          "scanCode": "0x73"},
+		{"name": "Insert",       "scanCode": "0x76"},
+		{"name": "Delete",       "scanCode": "0x77"},
+		
+		{"name": "BackQuote",    "scanCode": "0x31"},
+		{"name": "1",            "scanCode": "0x0A"},
+		{"name": "2",            "scanCode": "0x0B"},
+		{"name": "3",            "scanCode": "0x0C"},
+		{"name": "4",            "scanCode": "0x0D"},
+		{"name": "5",            "scanCode": "0x0E"},
+		{"name": "6",            "scanCode": "0x0F"},
+		{"name": "7",            "scanCode": "0x10"},
+		{"name": "8",            "scanCode": "0x11"},
+		{"name": "9",            "scanCode": "0x12"},
+		{"name": "0",            "scanCode": "0x13"},
+		{"name": "Dash",         "scanCode": "0x14"},
+		{"name": "Equal",        "scanCode": "0x15"},
+		{"name": "BackSpace",    "scanCode": "0x16"},
+		
+		{"name": "Tab",          "scanCode": "0x17"},
+		{"name": "Q",            "scanCode": "0x18"},
+		{"name": "W",            "scanCode": "0x19"},
+		{"name": "E",            "scanCode": "0x1A"},
+		{"name": "R",            "scanCode": "0x1B"},
+		{"name": "T",            "scanCode": "0x1C"},
+		{"name": "Y",            "scanCode": "0x1D"},
+		{"name": "U",            "scanCode": "0x1E"},
+		{"name": "I",            "scanCode": "0x1F"},
+		{"name": "O",            "scanCode": "0x20"},
+		{"name": "P",            "scanCode": "0x21"},
+		{"name": "LeftBracket",  "scanCode": "0x22"},
+		{"name": "RightBracket", "scanCode": "0x23"},
+		{"name": "BackSlash",    "scanCode": "0x33"},
+		
+		{"name": "CapsLock",     "scanCode": "0x42"},
+		{"name": "A",            "scanCode": "0x26"},
+		{"name": "S",            "scanCode": "0x27"},
+		{"name": "D",            "scanCode": "0x28"},
+		{"name": "F",            "scanCode": "0x29"},
+		{"name": "G",            "scanCode": "0x2A"},
+		{"name": "H",            "scanCode": "0x2B"},
+		{"name": "J",            "scanCode": "0x2C"},
+		{"name": "K",            "scanCode": "0x2D"},
+		{"name": "L",            "scanCode": "0x2E"},
+		{"name": "SemiColon",    "scanCode": "0x2F"},
+		{"name": "SingleQuote",  "scanCode": "0x30"},
+		{"name": "Enter",        "scanCode": "0x24"},
+		
+		{"name": "LeftShift",    "scanCode": "0x32"},
+		{"name": "Z",            "scanCode": "0x34"},
+		{"name": "X",            "scanCode": "0x35"},
+		{"name": "C",            "scanCode": "0x36"},
+		{"name": "V",            "scanCode": "0x37"},
+		{"name": "B",            "scanCode": "0x38"},
+		{"name": "N",            "scanCode": "0x39"},
+		{"name": "M",            "scanCode": "0x3A"},
+		{"name": "Comma",        "scanCode": "0x3B"},
+		{"name": "Period",       "scanCode": "0x3C"},
+		{"name": "Slash",        "scanCode": "0x3D"},
+		{"name": "RightShift",   "scanCode": "0x3E"},
+		
+		{"name": "LeftControl",  "scanCode": "0x25"},
+		{"name": "Windows",      "scanCode": "0x85"},
+		{"name": "LeftAlt",      "scanCode": "0x40"},
+		{"name": "Space",        "scanCode": "0x41"},
+		{"name": "RightAlt",     "scanCode": "0x6C"},
+		{"name": "RightControl", "scanCode": "0x69"},
+		{"name": "PageUp",       "scanCode": "0x70"},
+		{"name": "Up",           "scanCode": "0x6F"},
+		{"name": "PageDown",     "scanCode": "0x75"},
+		{"name": "Left",         "scanCode": "0x71"},
+		{"name": "Down",         "scanCode": "0x74"},
+		{"name": "Right",        "scanCode": "0x72"}
+	],
+	"keyMap": [
+		{"levelVKeys": "Stop",             "keyboard": "Escape"},
+		{"levelVKeys": "Undo",             "keyboard": ""},
+		{"levelVKeys": "Find",             "keyboard": ""},
+		{"levelVKeys": "Same",             "keyboard": ""},
+		{"levelVKeys": "Open",             "keyboard": ""},
+		
+		{"levelVKeys": "Delete",           "keyboard": ""},
+		{"levelVKeys": "Again",            "keyboard": ""},
+		{"levelVKeys": "Copy",             "keyboard": ""},
+		{"levelVKeys": "Move",             "keyboard": ""},
+		{"levelVKeys": "Props",            "keyboard": ""},
+		
+		{"levelVKeys": "Center",           "keyboard": ""},
+		{"levelVKeys": "Bold",             "keyboard": ""},
+		{"levelVKeys": "Italic",           "keyboard": ""},
+		{"levelVKeys": "Case",             "keyboard": ""},
+		
+		{"levelVKeys": "Strikeout",        "keyboard": ""},
+		{"levelVKeys": "Underline",        "keyboard": ""},
+		{"levelVKeys": "SuperSub",         "keyboard": ""},
+		{"levelVKeys": "Smaller",          "keyboard": ""},
+		
+		{"levelVKeys": "Margins",          "keyboard": ""},
+		{"levelVKeys": "Font",             "keyboard": ""},
+		
+		{"levelVKeys": "Bullet",           "keyboard": "BackQuote"},
+		{"levelVKeys": "One",              "keyboard": "1"},
+		{"levelVKeys": "Two",              "keyboard": "2"},
+		{"levelVKeys": "Three",            "keyboard": "3"},
+		{"levelVKeys": "Four",             "keyboard": "4"},
+		{"levelVKeys": "Five",             "keyboard": "5"},
+		{"levelVKeys": "Six",              "keyboard": "6"},
+		{"levelVKeys": "Seven",            "keyboard": "7"},
+		{"levelVKeys": "Eight",            "keyboard": "8"},
+		{"levelVKeys": "Nine",             "keyboard": "9"},
+		{"levelVKeys": "Zero",             "keyboard": "0"},
+		{"levelVKeys": "Dash",             "keyboard": "Dash"},
+		{"levelVKeys": "Equal",            "keyboard": "Equal"},
+		{"levelVKeys": "BS",               "keyboard": "BackSpace"},
+		
+		{"levelVKeys": "ParaTab",          "keyboard": "Tab"},
+		{"levelVKeys": "Q",                "keyboard": "Q"},
+		{"levelVKeys": "W",                "keyboard": "W"},
+		{"levelVKeys": "E",                "keyboard": "E"},
+		{"levelVKeys": "R",                "keyboard": "R"},
+		{"levelVKeys": "T",                "keyboard": "T"},
+		{"levelVKeys": "Y",                "keyboard": "Y"},
+		{"levelVKeys": "U",                "keyboard": "U"},
+		{"levelVKeys": "I",                "keyboard": "I"},
+		{"levelVKeys": "O",                "keyboard": "O"},
+		{"levelVKeys": "P",                "keyboard": "P"},
+		{"levelVKeys": "LeftBracket",      "keyboard": "LeftBracket"},
+		{"levelVKeys": "RightBracket",     "keyboard": "RightBracket"},
+		{"levelVKeys": "NewPara",          "keyboard": "Enter"},
+		
+		{"levelVKeys": "Lock",             "keyboard": "CapsLock"},
+		{"levelVKeys": "A",                "keyboard": "A"},
+		{"levelVKeys": "S",                "keyboard": "S"},
+		{"levelVKeys": "D",                "keyboard": "D"},
+		{"levelVKeys": "F",                "keyboard": "F"},
+		{"levelVKeys": "G",                "keyboard": "G"},
+		{"levelVKeys": "H",                "keyboard": "H"},
+		{"levelVKeys": "J",                "keyboard": "J"},
+		{"levelVKeys": "K",                "keyboard": "K"},
+		{"levelVKeys": "L",                "keyboard": "L"},
+		{"levelVKeys": "SemiColon",        "keyboard": "SemiColon"},
+		{"levelVKeys": "SingleQuote",      "keyboard": "SingleQuote"},
+		{"levelVKeys": "DoubleQuote",      "keyboard": "BackSlash"},
+		
+		{"levelVKeys": "LeftShift",        "keyboard": "LeftShift"},
+		{"levelVKeys": "LeftShiftAlt",     "keyboard": "LeftAlt"},
+		{"levelVKeys": "Z",                "keyboard": "Z"},
+		{"levelVKeys": "X",                "keyboard": "X"},
+		{"levelVKeys": "C",                "keyboard": "C"},
+		{"levelVKeys": "V",                "keyboard": "V"},
+		{"levelVKeys": "B",                "keyboard": "B"},
+		{"levelVKeys": "N",                "keyboard": "N"},
+		{"levelVKeys": "M",                "keyboard": "M"},
+		{"levelVKeys": "Comma",            "keyboard": "Comma"},
+		{"levelVKeys": "Period",           "keyboard": "Period"},
+		{"levelVKeys": "Slash",            "keyboard": "Slash"},
+		{"levelVKeys": "RightShiftAlt",    "keyboard": "RightAlt"},
+		{"levelVKeys": "RightShift",       "keyboard": "RightShift"},
+		
+		{"levelVKeys": "Special",          "keyboard": ""},
+		{"levelVKeys": "Katakana",         "keyboard": ""},
+		{"levelVKeys": "Hiragana",         "keyboard": ""},
+		{"levelVKeys": "Space",            "keyboard": "Space"},
+		{"levelVKeys": "English",          "keyboard": ""},
+		{"levelVKeys": "Expand",           "keyboard": ""},
+		
+		{"levelVKeys": "KeypadAdd",        "keyboard": ""},
+		{"levelVKeys": "KeypadSubtract",   "keyboard": ""},
+		{"levelVKeys": "KeypadAdd",        "keyboard": ""},
+		{"levelVKeys": "KeypadSubtract",   "keyboard": ""},
+		
+		{"levelVKeys": "KeypadClear",      "keyboard": ""},
+		{"levelVKeys": "KeypadSeven",      "keyboard": ""},
+		{"levelVKeys": "KeypadEight",      "keyboard": ""},
+		{"levelVKeys": "KeypadNine",       "keyboard": ""},
+		
+		{"levelVKeys": "Next",             "keyboard": ""},
+		{"levelVKeys": "KeypadFour",       "keyboard": ""},
+		{"levelVKeys": "KeypadFive",       "keyboard": ""},
+		{"levelVKeys": "KeypadSix",        "keyboard": ""},
+		
+		{"levelVKeys": "KeypadOne",        "keyboard": ""},
+		{"levelVKeys": "KeypadTwo",        "keyboard": ""},
+		{"levelVKeys": "KeypadThree",      "keyboard": ""},
+		
+		{"levelVKeys": "KeypadZero",       "keyboard": ""},
+		{"levelVKeys": "KeypadPeriod",     "keyboard": ""},
+		{"levelVKeys": "KeypadComma",      "keyboard": ""},
+		
+		{"levelVKeys": "Point",            "keyboard": ""},
+		{"levelVKeys": "Adjust",           "keyboard": ""},
+		{"levelVKeys": "Menu",             "keyboard": ""},
+		
+		{"levelVKeys": "Quote",            "keyboard": ""},
+		{"levelVKeys": "Tab",              "keyboard": ""},
+		
+		{"levelVKeys": "OpenQuote",        "keyboard": ""},
+		
+		{"levelVKeys": "Help",             "keyboard": ""},
+		
+		{"levelVKeys": "Superscript",      "keyboard": ""},
+		{"levelVKeys": "Subscript",        "keyboard": ""},
+		{"levelVKeys": "Defaults",         "keyboard": ""},
+		
+		{"levelVKeys": "null",             "keyboard": ""},
+		{"levelVKeys": "DiagnosticBitTwo", "keyboard": ""},
+		{"levelVKeys": "DiagnosticBitOne", "keyboard": ""}
 	],
 	"mouse": [
-		{
-			"bitMask": 1,
-			"name": "LeftButton"
-		},
-		{
-			"bitMask": 2,
-			"name": "RightButton"
-		},
-		{
-			"bitMask": 4,
-			"name": "MiddleButton"
-		}
+		{"name": "LeftButton",   "bitMask": "0x00000001"},
+		{"name": "RightButton",  "bitMask": "0x00000002"},
+		{"name": "MiddleButton", "bitMask": "0x00000004"}
+	],
+	"buttonMap": [
+		{"levelVKeys": "Point",  "button": "LeftButton"},
+		{"levelVKeys": "Adjust", "button": "RightButton"},
+		{"levelVKeys": "Menu",   "button": "MiddleButton"}
 	]
 }

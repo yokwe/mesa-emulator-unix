@@ -1,5 +1,6 @@
 tmp/
 data/Dawn/
 data/GVWin*/
+data/floppy/
 src/*/Makefile
 src/*/.qmake.stash

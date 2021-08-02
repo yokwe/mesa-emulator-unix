@@ -58,10 +58,10 @@ namespace Trace {
 			return *this;
 		}
 
-		bool operator== (const Func& that) const noexcept {
+		bool operator== (const Func& that) const {
 			return this->gfi == that.gfi && this->pc == that.pc;
 		}
-		bool operator< (const Func& that) const noexcept {
+		bool operator< (const Func& that) const {
 			if (this->gfi == that.gfi) {
 				return this->pc < that.pc;
 			} else {
@@ -92,7 +92,7 @@ namespace Trace {
 	};
 
 	// For QSet/QHash
-	inline uint qHash(const Trace::Func &key, uint seed = 0) noexcept {
+	inline uint qHash(const Trace::Func &key, uint seed = 0) {
 		return ::qHash(((key.gfi << 16) | key.pc), seed ^ 2941);
 	}
 
@@ -110,10 +110,10 @@ namespace Trace {
 			return *this;
 		}
 
-		bool operator== (const Frame& that) noexcept {
+		bool operator== (const Frame& that) const {
 			return this->mds == that.mds && this->lf == that.lf;
 		}
-		bool operator< (const Frame& that) noexcept {
+		bool operator< (const Frame& that) const {
 			if (this->mds == that.mds) {
 				return this->lf < that.lf;
 			} else {
@@ -234,9 +234,5 @@ namespace Trace {
 		void process_();
 	};
 }
-
-//inline bool operator==(const Trace::Func &a, const Trace::Func &b) {
-//    return a.gfi == b.gfi && a.pc == b.pc;
-//}
 
 #endif

@@ -35,7 +35,7 @@ static log4cpp::Category& logger = Logger::getLogger("setting");
 #include "Setting.h"
 
 
-static const QString PATH_FILE("data/setting.json");
+static const char* PATH_FILE = "tmp/run/setting.json";
 
 
 // Setting::Entry::Display
@@ -202,6 +202,17 @@ QJsonObject Setting::toJsonObject() const {
 }
 
 Setting Setting::getInstance() {
+	logger.info("path       %s", PATH_FILE);
+
+	// sanity check
+	{
+		if (!QFile::exists(PATH_FILE)) {
+			logger.fatal("file does not exist");
+			logger.fatal("  path = %s!", PATH_FILE);
+			ERROR();
+		}
+	}
+
 	Setting setting;
 	{
 		QJsonObject jsonObject = JSONUtil::loadObject(PATH_FILE);

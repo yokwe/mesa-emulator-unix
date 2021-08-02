@@ -4,13 +4,23 @@
 
 MODULE := main util test mesa agent opcode trace guam-headless
 
+.PHONY: all clean distclean gamke
+.PHONY: main util mesa agent opcode test trace guam-headless
+.PHONY: run-main run-test
+.PONEY: prepare-run-guam run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
+.PHONY: fix-permission
+
 all:
 	echo "all"
 	@echo "--------"
 	env
 	@echo "--------"
 	@echo "MODULE $(MODULE)!"
-	
+
+fix-permission:
+	find . -type d -exec chmod 0755 {} \;
+	find . -type f -exec chmod 0644 {} \;
+
 clean:
 	echo "PATH = $(PATH)"
 	rm -rf tmp/build
@@ -52,22 +62,52 @@ trace: util mesa opcode
 guam-headless: util mesa agent opcode trace
 	( cd src/guam-headless; make all )
 
-run-main: main
-	echo -n >tmp/debug.log
+prepare-run-guam:
+	@if [ ! -d tmp/run ]; then \
+		echo "create tmp/run"; \
+		mkdir -p tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/debug.properties ]; then \
+		echo "copy debug.properties"; \
+		cp data/debug.properties tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/setting.json ]; then \
+		echo "copy setting.json"; \
+		cp data/setting.json tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/GVWIN.DSK ]; then \
+		echo "copy GVWIN.DSK"; \
+		cp data/GVWin/GVWIN.DSK tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/GVWIN21.DSK ]; then \
+		echo "copy GVWIN21.DSK"; \
+		cp data/GVWin21/GVWIN21.DSK tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/Dawn.dsk ]; then \
+		echo "copy Dawn.dsk"; \
+		cp data/Dawn/Dawn.dsk tmp/run ; \
+	fi
+	@if [ ! -f tmp/run/floppy144 ]; then \
+		echo "copy floppy144"; \
+		cp data/floppy/floppy144 tmp/run ; \
+	fi
+	
+run-main: main prepare-run-guam
+	echo -n >tmp/run/debug.log
 	tmp/build/main/main | c++filt
 
 run-test: test
-	echo -n >tmp/debug.log
+	echo -n >tmp/run/debug.log
 	tmp/build/test/test
 
-run-guam-headless-gvwin: guam-headless
-	echo -n >tmp/debug.log
+run-guam-headless-gvwin: guam-headless prepare-run-guam
+	echo -n >tmp/run/debug.log
 	tmp/build/guam-headless/guam-headless GVWin
 
-run-guam-headless-dawn: guam-headless
-	echo -n >tmp/debug.log
-	tmp/build/guam-headless/guam-headless Dawn
+run-guam-headless-gvwin21: guam-headless prepare-run-guam
+	echo -n >tmp/run/debug.log
+	tmp/build/guam-headless/guam-headless GVWin21
 
-fix-permission:
-	find . -type d -exec chmod 0755 {} \;
-	find . -type f -exec chmod 0644 {} \;
+run-guam-headless-dawn: guam-headless prepare-run-guam
+	echo -n >tmp/run/debug.log
+	tmp/build/guam-headless/guam-headless Dawn

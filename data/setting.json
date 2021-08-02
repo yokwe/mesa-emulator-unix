@@ -6,10 +6,29 @@
 				"width": 1024,
 				"height": 640},
 			"file": {
-				"disk": "data/GVWin/GVWIN%1.DSK",
-			    "germ": "data/GVWin/GVWIN.GRM",
-			    "boot": "data/GVWin/NSINSTLR.DAT",
-			    "floppy": "tmp/floppy/image/floppy144"},
+			    "floppy": "tmp/run/floppy144",
+				"disk":   "tmp/run/GVWIN.DSK",
+			    "germ":   "data/GVWin/GVWIN.GRM",
+			    "boot":   "data/GVWin/NSINSTLR.DAT"},
+			"boot": {
+				"switch": "Oy{|}\\346\\347\\350\\377",
+				"device": "DISK"},
+			"memory": {
+				"vmbits": 25,
+				"rmbits": 24},
+			"network": {
+				"interface": "ends224"}
+		},
+		{
+			"name": "GVWin21",
+			"display": {
+				"width": 1024,
+				"height": 640},
+			"file": {
+			    "floppy": "tmp/run/floppy144",
+				"disk":   "tmp/run/GVWIN21.DSK",
+			    "germ":   "data/GVWin21/GVWIN.GRM",
+			    "boot":   "data/GVWin21/NSINSTLR.DAT"},
 			"boot": {
 				"switch": "Oy{|}\\346\\347\\350\\377",
 				"device": "DISK"},
@@ -25,10 +44,10 @@
 				"width": 1024,
 				"height": 640},
 			"file": {
-				"disk": "data/Dawn/Dawn.dsk",
-			    "germ": "data/Dawn/Dawn.germ",
-			    "boot": "data/Dawn/NSINSTLR.DAT",
-			    "floppy": "tmp/floppy/image/floppy144"},
+			    "floppy": "tmp/run/floppy144",
+				"disk":   "tmp/run/Dawn.dsk",
+			    "germ":   "data/Dawn/Dawn.germ",
+			    "boot":   "data/Dawn/NSINSTLR.DAT"},
 			"boot": {
 				"switch": "8Wy{|}\\346\\347\\350\\377",
 				"device": "DISK"},

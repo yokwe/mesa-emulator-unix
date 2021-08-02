@@ -142,7 +142,7 @@ QString Trace::Context::toString() const {
 	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %9s %s%s  TO   %9s %s  %-8s",
 			opcode, xfer, oldPSB,
 			oldFunc.toString().toLocal8Bit().constData(), oldFrame.toString().toLocal8Bit().constData(), free,
-			oldFunc.toString().toLocal8Bit().constData(), oldFrame.toString().toLocal8Bit().constData(), link);
+			newFunc.toString().toLocal8Bit().constData(), newFrame.toString().toLocal8Bit().constData(), link);
 
 	return ret;
 }

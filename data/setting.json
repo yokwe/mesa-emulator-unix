@@ -17,7 +17,7 @@
 				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
-				"interface": "ends224"}
+				"interface": "ens192"}
 		},
 		{
 			"name": "GVWin21",
@@ -36,7 +36,7 @@
 				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
-				"interface": "ends224"}
+				"interface": "ens192"}
 		},
 		{
 			"name": "Dawn",
@@ -55,7 +55,7 @@
 				"vmbits": 23,
 				"rmbits": 22},
 			"network": {
-				"interface": "ends224"}
+				"interface": "ens192"}
 		}
 	],
 	"levelVKeys": [

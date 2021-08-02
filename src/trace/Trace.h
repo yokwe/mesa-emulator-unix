@@ -45,6 +45,94 @@ namespace Trace {
 	const char* getXferType(XferType type);
 	const char* getTrapName(ControlLink controlLink);
 
+	class Func {
+	public:
+		CARD16 gfi;
+		CARD16 pc;
+
+		Func() : gfi(0), pc(0) {}
+		Func(const Func& that) : gfi(that.gfi), pc(that.pc) {}
+		Func& operator= (const Func& that) {
+			this->gfi = that.gfi;
+			this->pc  = that.pc;
+			return *this;
+		}
+
+		bool operator== (const Func& that) const noexcept {
+			return this->gfi == that.gfi && this->pc == that.pc;
+		}
+		bool operator< (const Func& that) const noexcept {
+			if (this->gfi == that.gfi) {
+				return this->pc < that.pc;
+			} else {
+				return this->gfi < that.gfi;
+			}
+		}
+
+		QString toString() const {
+			return QString::asprintf("%X-%04X", gfi, pc);
+		}
+
+		static Func getInstance(CARD16 gfi, CARD16 pc) {
+			Func ret(gfi, pc);
+			all.insert(ret);
+			return ret;
+		}
+
+		static QList<Func> toList() {
+			QList<Func> ret = all.values();
+			std::sort(ret.begin(), ret.end());
+			return ret;
+		}
+
+	private:
+		static QSet<Func> all;
+
+		Func(CARD16 gfi_, CARD16 pc_) : gfi(gfi_), pc(pc_) {}
+	};
+
+	// For QSet/QHash
+	inline uint qHash(const Trace::Func &key, uint seed = 0) noexcept {
+		return ::qHash(((key.gfi << 16) | key.pc), seed ^ 2941);
+	}
+
+
+	class Frame {
+	public:
+		CARD16 mds;
+		CARD16 lf; // LF
+
+		Frame() : mds(0), lf(0) {}
+		Frame(const Frame& that) : mds(that.mds), lf(that.lf) {}
+		Frame& operator= (const Frame& that) {
+			this->mds  = that.mds;
+			this->lf   = that.lf;
+			return *this;
+		}
+
+		bool operator== (const Frame& that) noexcept {
+			return this->mds == that.mds && this->lf == that.lf;
+		}
+		bool operator< (const Frame& that) noexcept {
+			if (this->mds == that.mds) {
+				return this->lf < that.lf;
+			} else {
+				return this->mds < that.mds;
+			}
+		}
+
+		QString toString() const {
+			return QString::asprintf("%d+%04X", mds, lf);
+		}
+
+		static Frame getInstance(CARD32 mds, CARD16 lf) {
+			return Frame(mds >> 16, lf);
+		}
+	private:
+		Frame(CARD16 mds_, CARD16 lf_) : mds(mds_), lf(lf_) {}
+	};
+
+
 	class Context {
 	public:
 		enum CallType {CT_XFER, CT_LFC};
@@ -52,34 +140,30 @@ namespace Trace {
 		CallType         callType;
 
 		// XFER parameter
-		ControlLink      dst;
-		ShortControlLink src;
-		XferType         xferType;
-		int              freeFlag;
+		ControlLink dst;
+		CARD16      src;
+		XferType    xferType;
+		int         freeFlag;
 
 		// actual LinkType of XFER
-		LinkType         linkType;
+		LinkType    linkType;
 
 		// current PSB and MDS
-		CARD16           oldPSB;
-		CARD32           oldMDS;
+		CARD16      oldPSB;
 
 		// values before XFER
-		GFTHandle        oldGFI;
-		CARD16           oldPC;
-		LocalFrameHandle oldLF;
+		Func        oldFunc;
+		Frame       oldFrame;
 
 		// destination
-		GFTHandle        newGFI;
-		CARD16           newPC;
-		LocalFrameHandle newLF;
+		Func        newFunc;
+		Frame       newFrame;
 
-		Context() : callType(CT_XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldMDS(0), oldGFI(0), oldPC(0), oldLF(0), newGFI(0), newPC(0), newLF(0) {}
+		Context() : callType(CT_XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldFunc(), oldFrame(), newFunc(), newFrame() {}
 		Context(const Context& that) :
 			callType(that.callType), dst(that.dst), src(that.src), xferType(that.xferType), freeFlag(that.freeFlag),
-			linkType(that.linkType), oldPSB(that.oldPSB), oldMDS(that.oldMDS),
-			oldGFI(that.oldGFI), oldPC(that.oldPC), oldLF(that.oldLF),
-			newGFI(that.newGFI), newPC(that.newPC), newLF(that.newLF) {}
+			linkType(that.linkType), oldPSB(that.oldPSB),
+			oldFunc(that.oldFunc), oldFrame(that.oldFrame), newFunc(that.newFunc), newFrame(that.newFrame) {}
 		Context& operator= (const Context& that) {
 			this->callType = that.callType;
 			this->dst      = that.dst;
@@ -88,53 +172,47 @@ namespace Trace {
 			this->freeFlag = that.freeFlag;
 			this->linkType = that.linkType;
 			this->oldPSB   = that.oldPSB;
-			this->oldMDS   = that.oldMDS;
-			this->oldGFI   = that.oldGFI;
-			this->oldPC    = that.oldPC;
-			this->oldLF    = that.oldLF;
-			this->newGFI   = that.newGFI;
-			this->newPC    = that.newPC;
-			this->newLF    = that.newLF;
+			this->oldFunc  = that.oldFunc;
+			this->oldFrame = that.oldFrame;
+			this->newFunc  = that.newFunc;
+			this->newFrame = that.newFrame;
 			return *this;
 		}
 
+		QString toString() const;
+
 		void setXFER(
-			ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
-			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
+			ControlLink dst, CARD16 src, XferType xferType, int freeFlag,
+			LinkType linkType, CARD16 oldPSB,
+			GFTHandle oldGFI, CARD16 oldPC, CARD32 oldMDS, CARD16 oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldMDS, oldGFI, oldPC, oldLF);
+				set(CT_XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
 			}
 		}
 		void setLFC(
-			ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
-			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
+			ControlLink dst, CARD16 src, XferType xferType, int freeFlag,
+			LinkType linkType, CARD16 oldPSB,
+			CARD16 oldGFI, CARD16 oldPC, CARD32 oldMDS, CARD16 oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldMDS, oldGFI, oldPC, oldLF);
+				set(CT_LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
 			}
 		}
-		void setContext(CARD16 newGFI, CARD16 newPC, CARD16 newLF) {
+		void setContext(CARD16 newGFI, CARD16 newPC, CARD32 newMDS, CARD16 newLF) {
 			if (TRACE_ENABLE_TRACE) {
-				this->newGFI = newGFI;
-				this->newPC  = newPC;
-				this->newLF  = newLF;
+				set(newGFI, newPC, newMDS, newLF);
 			}
 		}
 		void process() {
 			if (TRACE_ENABLE_TRACE) process_();
 		}
-		void message() {
-			if (TRACE_ENABLE_TRACE) message_();
-		}
 
 	private:
 		void set(
 			CallType callType, ControlLink dst, ShortControlLink src, XferType xferType, int freeFlag,
-			LinkType linkType, CARD16 oldPSB, CARD32 oldMDS,
-			GFTHandle oldGFI, CARD16 oldPC, LocalFrameHandle oldLF
+			LinkType linkType, CARD16 oldPSB,
+			CARD16 oldGFI, CARD16 oldPC, CARD32 oldMDS, CARD16 oldLF
 			) {
 			this->callType = callType;
 			this->dst      = dst;
@@ -144,20 +222,21 @@ namespace Trace {
 
 			this->linkType = linkType;
 			this->oldPSB   = oldPSB;
-			this->oldMDS   = oldMDS;
 
-			this->oldGFI   = oldGFI;
-			this->oldPC    = oldPC;
-			this->oldLF    = oldLF;
-
-			this->newGFI   = 0;
-			this->newPC    = 0;
-			this->newLF    = 0;
+			this->oldFunc  = Func::getInstance(oldGFI, oldPC);
+			this->oldFrame = Frame::getInstance(oldMDS, oldLF);
+		}
+		void set(CARD16 newGFI, CARD16 newPC, CARD32 newMDS, CARD16 newLF) {
+			this->newFunc = Func::getInstance(newGFI, newPC);
+			this->newFrame = Frame::getInstance(newMDS, newLF);
 		}
 
 		void process_();
-		void message_();
 	};
-};
+}
+
+//inline bool operator==(const Trace::Func &a, const Trace::Func &b) {
+//    return a.gfi == b.gfi && a.pc == b.pc;
+//}
 
 #endif

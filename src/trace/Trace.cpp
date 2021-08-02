@@ -120,109 +120,37 @@ const char* Trace::getTrapName(ControlLink controlLink) {
 }
 
 
-class ProcessContext {
-public:
-	CARD16                       psb;
-	QMap<CARD16, Trace::Context> active;
-	QStack<Trace::Context>       callStack;
+static void message(const Trace::Context& context, const QString& extraMessae) {
+	QString string = context.toString();
 
-	ProcessContext(CARD16 psb_) : psb(psb_) {}
-
-	ProcessContext() : psb(0) {}
-	ProcessContext(const ProcessContext& that) : psb(that.psb), active(that.active), callStack(that.callStack) {}
-	ProcessContext& operator= (const ProcessContext& that) {
-		this->psb       = that.psb;
-		this->active    = that.active;
-		this->callStack = that.callStack;
-		return *this;
-	}
-
-	void process(const Trace::Context& context);
-};
-
-void ProcessContext::process(const Trace::Context& context) {
-	switch(context.xferType) {
-	case XT_return:
-		if (context.freeFlag) {
-			Trace::Context lastContext = callStack.pop();
-			if (lastContext.newLF == context.oldLF) {
-
-			} else {
-				logger.fatal("Unexpected");
-				ERROR();
-			}
-		} else {
-			logger.fatal("Unexpected");
-			ERROR();
-		}
-		break;
-	case XT_call:
-		if (context.freeFlag) {
-			logger.fatal("Unexpected");
-			ERROR();
-		} else {
-			callStack.push(context);
-		}
-		break;
-	case XT_port:
-		if (context.freeFlag) {
-			logger.fatal("Unexpected");
-			ERROR();
-		} else {
-			//FIXME
-		}
-		break;
-	case XT_xfer:
-		if (context.freeFlag) {
-			// FIXME
-		} else {
-			//FIXME
-		}
-		break;
-	case XT_trap:
-		if (context.freeFlag) {
-			logger.fatal("Unexpected");
-			ERROR();
-		} else {
-			//FIXME
-		}
-		break;
-	case XT_processSwitch:
-		if (context.freeFlag) {
-			logger.fatal("Unexpected");
-			ERROR();
-		} else {
-			//FIXME
-		}
-		break;
-	case XT_localCall:
-	default:
-		logger.fatal("Unexpected");
-		ERROR();
+	if (extraMessae.isEmpty()) {
+		logger.info("%s", string.trimmed().toLocal8Bit().constData());
+	} else {
+		logger.info("%s  %s", string.toLocal8Bit().constData(), extraMessae.toLocal8Bit().constData());
 	}
 }
+static void message(const Trace::Context& context) {
+	message(context, QStringLiteral(""));
+}
 
+QString Trace::Context::toString() const {
+	const char* opcode = (callType == Trace::Context::CallType::CT_XFER) ? "XFER" : "LFC";
+	const char* xfer = Trace::getXferType(xferType);
+	const char* free = freeFlag ? "*" : " ";
+	const char* link = Trace::getLinkType(linkType);
 
-static QMap<CARD16, ProcessContext> contextMap;
-//          PSB          LF
+	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %9s %s%s  TO   %9s %s  %-8s",
+			opcode, xfer, oldPSB,
+			oldFunc.toString().toLocal8Bit().constData(), oldFrame.toString().toLocal8Bit().constData(), free,
+			oldFunc.toString().toLocal8Bit().constData(), oldFrame.toString().toLocal8Bit().constData(), link);
+
+	return ret;
+}
 
 void Trace::Context::process_() {
-	if (!contextMap.contains(oldPSB)) {
-		contextMap[oldPSB] = ProcessContext(oldPSB);
-	}
-	contextMap[oldPSB].process(*this);
+	message(*this);
 }
-void Trace::Context::message_() {
-	const char* opcode = (callType == CT_XFER) ? "XFER" : "LFC";
-	const char* xfer = getXferType(xferType);
-	const char* link = getLinkType(linkType);
-	const char* free = freeFlag ? "*" : " ";
 
-	if (xferType == XT_trap) {
-		logger.debug("%-4s %-6s %4X %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s  %s",
-			opcode, xfer, oldMDS >> 16, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link, getTrapName(dst));
-	} else {
-		logger.debug("%-4s %-6s %4X %4X  FROM  %4X-%04X %04X%s  TO   %4X-%04X %04X  %-8s",
-			opcode, xfer, oldMDS >> 16, oldPSB, oldGFI, oldPC, oldLF, free, newGFI, newPC, newLF, link);
-	}
-}
+
+QSet<Trace::Func> Trace::Func::all;
+

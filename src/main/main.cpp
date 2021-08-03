@@ -32,13 +32,7 @@
 
 static log4cpp::Category& logger = Logger::getLogger("main");
 
-#include "../util/Perf.h"
-#include "../util/JSONUtil.h"
-
-
-#include "../trace/ModuleMap.h"
-#include "../trace/ModuleMap.cpp"
-
+#include <QTextCodec>
 
 
 int main(int, char**) {
@@ -50,28 +44,10 @@ int main(int, char**) {
 
 	DEBUG_TRACE();
 
-//	Setting::getInstance("GVWin");
-
-//	PERF_COUNT(Dispatch)
-//	PERF_LOG()
-
 	{
-		QList<ModuleMap::Module> list = ModuleMap::Module::load("data/map/Guam.loadmap");
-		logger.info("list %d", list.size());
-
-		QJsonArray jsonArray;
-		JSONUtil::setJsonArray(jsonArray, list);
-		logger.info("moduleList = %s", JSONUtil::toJsonString(jsonArray).toLocal8Bit().constData());
+		auto textCodec = QTextCodec::codecForLocale();
+		logger.info("codecForLocale %s", textCodec->name().constData());
 	}
-	{
-		QList<ModuleMap::Map> list = ModuleMap::Map::load("data/map/GermGuam.map");
-		logger.info("list %d", list.size());
-
-		QJsonArray jsonArray;
-		JSONUtil::setJsonArray(jsonArray, list);
-		logger.info("mapList = %s", JSONUtil::toJsonString(jsonArray).toLocal8Bit().constData());
-	}
-
 
 //	ERROR();
 

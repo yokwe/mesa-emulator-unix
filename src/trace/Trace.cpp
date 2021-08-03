@@ -35,6 +35,7 @@ static log4cpp::Category& logger = Logger::getLogger("trace");
 #include "../mesa/Memory.h"
 
 #include "Trace.h"
+#include "Module.h"
 
 #include <QtCore>
 
@@ -124,9 +125,9 @@ static void message(const Trace::Context& context, const QString& extraMessae) {
 	QString string = context.toString();
 
 	if (extraMessae.isEmpty()) {
-		logger.info("%s", string.trimmed().toLocal8Bit().constData());
+		logger.info("%s", toCString(string.trimmed()));
 	} else {
-		logger.info("%s  %s", string.toLocal8Bit().constData(), extraMessae.toLocal8Bit().constData());
+		logger.info("%s  %s", toCString(string), toCString(extraMessae));
 	}
 }
 static void message(const Trace::Context& context) {
@@ -139,10 +140,10 @@ QString Trace::Context::toString() const {
 	const char* free = freeFlag ? "*" : " ";
 	const char* link = Trace::getLinkType(linkType);
 
-	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %9s %s%s  TO   %9s %s  %-8s",
+	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %-30s %s%s  TO  %-40s %s  %-8s",
 			opcode, xfer, oldPSB,
-			oldFunc.toString().toLocal8Bit().constData(), oldFrame.toString().toLocal8Bit().constData(), free,
-			newFunc.toString().toLocal8Bit().constData(), newFrame.toString().toLocal8Bit().constData(), link);
+			toCString(oldFunc.toString()), toCString(oldFrame.toString()), free,
+			toCString(newFunc.toString()), toCString(newFrame.toString()), link);
 
 	return ret;
 }
@@ -153,4 +154,82 @@ void Trace::Context::process_() {
 
 
 QSet<Trace::Func> Trace::Func::all;
+static QMap<CARD16, QString> moduleNameMap;
+//          gfi     moduleName
+static QMap<QString, QMap<CARD16, QString>> funcNameMap;
+//          moduleName    pc      funcName
+
+void initMap() {
+	Trace::Func::readLoadmapFile("data/map/Guam.loadmap");
+	Trace::Func::readMapFile    ("data/map/GermGuam.map");
+//	Trace::Func::readMapFile    ("data/map/BasicHeadsGuam.map");
+}
+QString Trace::Func::toString() const {
+	if (moduleNameMap.isEmpty()) initMap();
+
+	if (moduleNameMap.contains(gfi)) {
+		const QString& moduleName = moduleNameMap[gfi];
+		if (funcNameMap.contains(moduleName)) {
+			const QMap<CARD16, QString>& map = funcNameMap[moduleName];
+			//         pc      funcName
+			if (map.contains(pc)) {
+				const QString& funcName = map[pc];
+				return QString("%1.%2").arg(moduleName).arg(funcName);
+			} else {
+				return QString("%1.%2").arg(moduleName).arg(pc, 4, 16, QChar('0'));
+
+			}
+		} else {
+			return QString("%1.%2").arg(moduleName).arg(pc, 4, 16, QChar('0'));
+		}
+	} else {
+		return QString::asprintf("%X-%04X", gfi, pc);
+	}
+}
+void Trace::Func::addName(CARD16 gfi, const QString& moduleName) {
+	if (moduleNameMap.contains(gfi)) {
+		logger.fatal("Unexpeted");
+		logger.fatal("  gfi = %4X", gfi);
+		logger.fatal("  new = %s!", toCString(moduleName));
+		logger.fatal("  old = %s!", toCString(moduleNameMap[gfi]));
+		ERROR();
+	} else {
+		moduleNameMap[gfi] = moduleName;
+//		logger.debug("addName %4X %s", gfi, toCString(moduleName));
+	}
+}
+void Trace::Func::addName(const QString& moduleName, const QString& funcName, CARD16 pc) {
+	if (!funcNameMap.contains(moduleName)) {
+		QMap<CARD16, QString> entry;
+		funcNameMap[moduleName] = entry;
+	}
+	QMap<CARD16, QString>& map = funcNameMap[moduleName];
+	//   pc      funcName
+	if (map.contains(pc)) {
+		logger.fatal("Unexpeted");
+		logger.fatal("  moduleName = %s!", toCString(moduleName));
+		logger.fatal("  funcName   = %s!", toCString(funcName));
+		logger.fatal("  pc         = %d  0%oB", pc, pc);
+		logger.fatal("  old        = %s!", toCString(map[pc]));
+		ERROR();
+	} else {
+		map[pc] = funcName;
+//		logger.debug("addName %-30s  %-20s  %04X", toCString(moduleName), toCString(funcName), pc);
+	}
+}
+
+void Trace::Func::readLoadmapFile(const QString& path) {
+	QList<Module::LoadmapFile> list = Module::LoadmapFile::loadLoadmapFile(path);
+	for(auto e: list) {
+		addName(e.gfi, e.module);
+	}
+}
+
+void Trace::Func::readMapFile(const QString& path) {
+	QList<Module::MapFile> list = Module::MapFile::loadMapFile(path);
+	for(auto e: list) {
+		addName(e.module, e.proc, e.pc);
+	}
+}
+
 

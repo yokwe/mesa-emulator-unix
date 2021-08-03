@@ -69,10 +69,6 @@ namespace Trace {
 			}
 		}
 
-		QString toString() const {
-			return QString::asprintf("%X-%04X", gfi, pc);
-		}
-
 		static Func getInstance(CARD16 gfi, CARD16 pc) {
 			Func ret(gfi, pc);
 			all.insert(ret);
@@ -85,6 +81,13 @@ namespace Trace {
 			return ret;
 		}
 
+		QString toString() const;
+
+		static void addName(CARD16 gfi, const QString& moduleName);
+		static void addName(const QString& moduleName, const QString& funcName, const CARD16 pc);
+
+		static void readLoadmapFile(const QString& path);
+		static void readMapFile(const QString& path);
 	private:
 		static QSet<Func> all;
 

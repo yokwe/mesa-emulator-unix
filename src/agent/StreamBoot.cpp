@@ -53,21 +53,21 @@ StreamBoot::StreamBoot(QString path_) : Stream("BOOT", CoProcessorServerIDs::boo
 	map  = (quint16*)Util::mapFile(path, mapSize);
 	mapSize /= Environment::bytesPerWord;
 	pos = 0;
-	logger.info("%3d %-8s %s", serverID, name.toLatin1().constData(), path.toLatin1().constData());
+	logger.info("%3d %-8s %s", serverID, TO_CSTRING(name), TO_CSTRING(path));
 }
 
 quint16 StreamBoot::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s idle %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s idle %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamBoot::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s accept %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s accept %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamBoot::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s connect  state mesa = %d  pc = %d", name.toLatin1().constData(), iocb->mesaConnectionState, iocb->pcConnectionState);
+	logger.info("%-8s connect  state mesa = %d  pc = %d", TO_CSTRING(name), iocb->mesaConnectionState, iocb->pcConnectionState);
 	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
 	// Need to assign non-zero to mesaGet.hTaskactually. See CoProcessorFace.Get
 	iocb->mesaGet.hTask = 1;
@@ -76,17 +76,17 @@ quint16 StreamBoot::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/,
 	return CoProcessorIOFaceGuam::R_completed;
 }
 quint16 StreamBoot::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s destroy %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.info("%-8s destroy %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamBoot::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s read %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s read %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
-	if (DEBUG_SHOW_STREAM_BOOT) logger.info("%-8s write %8X+%d", name.toLatin1().constData(), pos, tr.bufferSize);
+	if (DEBUG_SHOW_STREAM_BOOT) logger.info("%-8s write %8X+%d", TO_CSTRING(name), pos, tr.bufferSize);
 	if (tr.writeLockedByMesa) {
 		logger.warn("writeLockedByMesa");
 		return CoProcessorIOFaceGuam::R_inProgress;

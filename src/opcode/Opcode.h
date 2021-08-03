@@ -71,7 +71,7 @@ public:
 	}
 
 	const char* getName() const {
-		return toCString(name);
+		return TO_CSTRING(name);
 	}
 	CARD32 getCode() const {
 		return code;

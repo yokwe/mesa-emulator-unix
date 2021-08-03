@@ -48,20 +48,20 @@ static log4cpp::Category& logger = Logger::getLogger("pcfa");
 
 
 StreamPCFA::StreamPCFA() : Stream("PCFA", CoProcessorServerIDs::fileAccess) {
-	logger.info("%3d %-8s", serverID, name.toLatin1().constData());
+	logger.info("%3d %-8s", serverID, TO_CSTRING(name));
 }
 
 quint16 StreamPCFA::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s idle %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.info("%-8s idle %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_completed;
 }
 quint16 StreamPCFA::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s accept %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s accept %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamPCFA::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", name.toLatin1().constData(), iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
+	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", TO_CSTRING(name), iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
 	return CoProcessorIOFaceGuam::R_error;
 
 //	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
@@ -71,15 +71,15 @@ quint16 StreamPCFA::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/,
 //	return CoProcessorIOFaceGuam::R_completed;
 }
 quint16 StreamPCFA::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s destroy %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.info("%-8s destroy %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamPCFA::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s write %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s write %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamPCFA::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s write %d %d", name.toLatin1().constData(), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s write %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 	logger.info("mesaGet  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
 		tr.subSequence, tr.endStream, tr.endRecord, tr.endSST,

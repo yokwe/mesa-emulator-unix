@@ -114,7 +114,7 @@ int toIntMesaNumber(const QString& string) {
 
 	if (!ok) {
 		logger.error("Unexpected");
-		logger.error("  string %s!", toCString(string));
+		logger.error("  string %s!", TO_CSTRING(string));
 		ERROR();
 	}
 
@@ -129,7 +129,7 @@ public:
 	quint64 size;
 	void*   page;
 
-	MapInfo(QString path) : id(count++), file(path.toLatin1().constData()), size(0), page(0) {}
+	MapInfo(QString path) : id(count++), file(TO_CSTRING(path)), size(0), page(0) {}
 
 	static int count;
 };
@@ -140,7 +140,7 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 	MapInfo* mapInfo = new MapInfo(path);
 
 	if (!mapInfo->file.exists()) {
-		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, path.toLatin1().constData());
+		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, TO_CSTRING(path));
 		ERROR();
 	}
 	mapInfo->size = mapInfo->file.size();

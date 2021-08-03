@@ -54,7 +54,7 @@ static log4cpp::Category& logger = Logger::getLogger("packet");
 void NetworkPacket::attach(const QString& name_) {
 	name = name_;
     logger.info("NetworkPacket linux");
-    logger.info("name     = %s", name.toLatin1().constData());
+    logger.info("name     = %s", TO_CSTRING(name));
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 
     quint16 proto   = (quint16)ETH_P_IDP;
@@ -75,7 +75,7 @@ void NetworkPacket::attach(const QString& name_) {
 			struct ifreq ifr;
 
 			memset(&ifr, 0, sizeof(ifr));
-			strncpy(ifr.ifr_ifrn.ifrn_name, name.toLatin1().constData(), IFNAMSIZ - 1);
+			strncpy(ifr.ifr_ifrn.ifrn_name, TO_CSTRING(name), IFNAMSIZ - 1);
 		    int ret = ioctl(fd, SIOCGIFHWADDR, &ifr);
 		    if (ret) {
 				int myErrno = errno;
@@ -96,7 +96,7 @@ void NetworkPacket::attach(const QString& name_) {
 			struct ifreq ifr;
 
 			memset(&ifr, 0, sizeof(ifr));
-			strncpy(ifr.ifr_ifrn.ifrn_name, name.toLatin1().constData(), IFNAMSIZ - 1);
+			strncpy(ifr.ifr_ifrn.ifrn_name, TO_CSTRING(name), IFNAMSIZ - 1);
 		    int ret = ioctl(fd, SIOCGIFINDEX, &ifr);
 		    if (ret) {
 				int myErrno = errno;

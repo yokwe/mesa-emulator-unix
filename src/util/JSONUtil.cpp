@@ -49,7 +49,7 @@ QJsonDocument JSONUtil::fromJsonString(const QByteArray &byteArray) {
 	QJsonDocument jsonDocument = QJsonDocument::fromJson(byteArray, &jsonParseError);
 	if (jsonParseError.error != QJsonParseError::NoError) {
 		logger.error("Json Parse error");
-		logger.error("  errorString  = %s", toCString(jsonParseError.errorString()));
+		logger.error("  errorString  = %s", TO_CSTRING(jsonParseError.errorString()));
 		logger.error("  offset       = %d", jsonParseError.offset);
 		logger.error("  jsonDocument = %s!", jsonDocument.toJson(QJsonDocument::JsonFormat::Indented).constData());
 		ERROR();
@@ -63,7 +63,7 @@ QJsonDocument JSONUtil::load(const QString& path) {
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", toCString(file.errorString()));
+			logger.fatal("File open error %s", TO_CSTRING(file.errorString()));
 			ERROR();
 		}
 		byteArray = file.readAll();
@@ -78,7 +78,7 @@ void JSONUtil::save(const QString& path, const QJsonDocument& jsonDocument) {
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::WriteOnly)) {
-			logger.fatal("File open error %s", toCString(file.errorString()));
+			logger.fatal("File open error %s", TO_CSTRING(file.errorString()));
 			ERROR();
 		}
 		file.write(byteArray);
@@ -139,8 +139,8 @@ QString     JSONUtil::toString(const QJsonValue& jsonValue) {
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = String");
-		logger.fatal("  type      = %s", toCString(toString(jsonValue.type())));
-		logger.fatal("  jsonValue = %s", toCString(JSONUtil::toJsonString(jsonValue)));
+		logger.fatal("  type      = %s", TO_CSTRING(toString(jsonValue.type())));
+		logger.fatal("  jsonValue = %s", TO_CSTRING(JSONUtil::toJsonString(jsonValue)));
 		ERROR();
 	}
 }
@@ -152,8 +152,8 @@ int         JSONUtil::toInt   (const QJsonValue& jsonValue) {
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Double");
-		logger.fatal("  type      = %s", toCString(toString(jsonValue.type())));
-		logger.fatal("  jsonValue = %s", toCString(JSONUtil::toJsonString(jsonValue)));
+		logger.fatal("  type      = %s", TO_CSTRING(toString(jsonValue.type())));
+		logger.fatal("  jsonValue = %s", TO_CSTRING(JSONUtil::toJsonString(jsonValue)));
 		ERROR();
 	}
 }
@@ -163,8 +163,8 @@ bool        JSONUtil::toBool  (const QJsonValue& jsonValue) {
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Bool");
-		logger.fatal("  type      = %s", toCString(toString(jsonValue.type())));
-		logger.fatal("  jsonValue = %s", toCString(JSONUtil::toJsonString(jsonValue)));
+		logger.fatal("  type      = %s", TO_CSTRING(toString(jsonValue.type())));
+		logger.fatal("  jsonValue = %s", TO_CSTRING(JSONUtil::toJsonString(jsonValue)));
 		ERROR();
 	}
 }
@@ -174,8 +174,8 @@ QJsonObject JSONUtil::toObject(const QJsonValue& jsonValue) {
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Object");
-		logger.fatal("  type      = %s", toCString(toString(jsonValue.type())));
-		logger.fatal("  jsonValue = %s", toCString(JSONUtil::toJsonString(jsonValue)));
+		logger.fatal("  type      = %s", TO_CSTRING(toString(jsonValue.type())));
+		logger.fatal("  jsonValue = %s", TO_CSTRING(JSONUtil::toJsonString(jsonValue)));
 		ERROR();
 	}
 }
@@ -185,8 +185,8 @@ QJsonArray  JSONUtil::toArray (const QJsonValue& jsonValue) {
 	} else {
 		logger.fatal("Unexpected type");
 		logger.fatal("  expect    = Array");
-		logger.fatal("  type      = %s", toCString(toString(jsonValue.type())));
-		logger.fatal("  jsonValue = %s", toCString(JSONUtil::toJsonString(jsonValue)));
+		logger.fatal("  type      = %s", TO_CSTRING(toString(jsonValue.type())));
+		logger.fatal("  jsonValue = %s", TO_CSTRING(JSONUtil::toJsonString(jsonValue)));
 		ERROR();
 	}
 }
@@ -202,7 +202,7 @@ const QJsonValue    JSONUtil::toJsonValue(const QJsonObject& jsonObject, const Q
 		return jsonObject[key];
 	} else {
 		logger.fatal("Unexpected key");
-		logger.fatal("  key = %s!", toCString(key));
+		logger.fatal("  key = %s!", TO_CSTRING(key));
 		ERROR();
 	}
 }

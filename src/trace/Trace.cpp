@@ -39,41 +39,36 @@ static log4cpp::Category& logger = Logger::getLogger("trace");
 
 #include <QtCore>
 
+static QMap<LinkType, const char*> linkTypeMap {
+	{LT_newProcedure, "NEWPROC"},
+	{LT_oldProcedure, "OLDPROC"},
+	{LT_frame,        "FRAME"},
+	{LT_indirect,     "INDIRECT"},
+};
+
 const char* Trace::getLinkType(LinkType type) {
-	switch(type) {
-	case LT_newProcedure:
-		return "NEWPROC";
-	case LT_oldProcedure:
-		return "OLDPROC";
-	case LT_frame:
-		return "FRAME";
-	case LT_indirect:
-		return "INDIRECT";
-	default:
+	if (linkTypeMap.contains(type)) {
+		return linkTypeMap[type];
+	} else {
 		ERROR();
-		return "ERROR";
 	}
 }
 
+static QMap<XferType, const char*> xferTypeMap {
+	{XT_return,        "RET"},
+	{XT_call,          "CALL"},
+	{XT_localCall,     "LOCAL"},
+	{XT_port,          "PORT"},
+	{XT_xfer,          "XFER"},
+	{XT_trap,          "TRAP"},
+	{XT_processSwitch, "SWITCH"},
+};
+
 const char* Trace::getXferType(XferType type) {
-	switch(type) {
-	case XT_return:
-		return "RET";
-	case XT_call:
-		return "CALL";
-	case XT_localCall:
-		return "LOCAL";
-	case XT_port:
-		return "PORT";
-	case XT_xfer:
-		return "XFER";
-	case XT_trap:
-		return "TRAP";
-	case XT_processSwitch:
-		return "SWITCH";
-	default:
+	if (xferTypeMap.contains(type)) {
+		return xferTypeMap[type];
+	} else {
 		ERROR();
-		return "ERROR";
 	}
 }
 
@@ -125,9 +120,9 @@ static void message(const Trace::Context& context, const QString& extraMessae) {
 	QString string = context.toString();
 
 	if (extraMessae.isEmpty()) {
-		logger.info("%s", toCString(string.trimmed()));
+		logger.info("%s", TO_CSTRING(string.trimmed()));
 	} else {
-		logger.info("%s  %s", toCString(string), toCString(extraMessae));
+		logger.info("%s  %s", TO_CSTRING(string), TO_CSTRING(extraMessae));
 	}
 }
 static void message(const Trace::Context& context) {
@@ -142,8 +137,8 @@ QString Trace::Context::toString() const {
 
 	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %-30s %s%s  TO  %-40s %s  %-8s",
 			opcode, xfer, oldPSB,
-			toCString(oldFunc.toString()), toCString(oldFrame.toString()), free,
-			toCString(newFunc.toString()), toCString(newFrame.toString()), link);
+			TO_CSTRING(oldFunc.toString()), TO_CSTRING(oldFrame.toString()), free,
+			TO_CSTRING(newFunc.toString()), TO_CSTRING(newFrame.toString()), link);
 
 	return ret;
 }
@@ -190,12 +185,12 @@ void Trace::Func::addName(CARD16 gfi, const QString& moduleName) {
 	if (moduleNameMap.contains(gfi)) {
 		logger.fatal("Unexpeted");
 		logger.fatal("  gfi = %4X", gfi);
-		logger.fatal("  new = %s!", toCString(moduleName));
-		logger.fatal("  old = %s!", toCString(moduleNameMap[gfi]));
+		logger.fatal("  new = %s!", TO_CSTRING(moduleName));
+		logger.fatal("  old = %s!", TO_CSTRING(moduleNameMap[gfi]));
 		ERROR();
 	} else {
 		moduleNameMap[gfi] = moduleName;
-//		logger.debug("addName %4X %s", gfi, toCString(moduleName));
+//		logger.debug("addName %4X %s", gfi, TO_CSTRING(moduleName));
 	}
 }
 void Trace::Func::addName(const QString& moduleName, const QString& funcName, CARD16 pc) {
@@ -207,14 +202,14 @@ void Trace::Func::addName(const QString& moduleName, const QString& funcName, CA
 	//   pc      funcName
 	if (map.contains(pc)) {
 		logger.fatal("Unexpeted");
-		logger.fatal("  moduleName = %s!", toCString(moduleName));
-		logger.fatal("  funcName   = %s!", toCString(funcName));
+		logger.fatal("  moduleName = %s!", TO_CSTRING(moduleName));
+		logger.fatal("  funcName   = %s!", TO_CSTRING(funcName));
 		logger.fatal("  pc         = %d  0%oB", pc, pc);
-		logger.fatal("  old        = %s!", toCString(map[pc]));
+		logger.fatal("  old        = %s!", TO_CSTRING(map[pc]));
 		ERROR();
 	} else {
 		map[pc] = funcName;
-//		logger.debug("addName %-30s  %-20s  %04X", toCString(moduleName), toCString(funcName), pc);
+//		logger.debug("addName %-30s  %-20s  %04X", TO_CSTRING(moduleName), TO_CSTRING(funcName), pc);
 	}
 }
 

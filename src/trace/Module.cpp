@@ -30,22 +30,22 @@
 
 
 //
-// ModuleMap.cpp
+// ModuleInfo.cpp
 //
 
+#include "Module.h"
+
 #include "../util/Util.h"
-//static log4cpp::Category& logger = Logger::getLogger("modulemap"); // FIXME
-
-#include "ModuleMap.h"
+static log4cpp::Category& logger = Logger::getLogger("module");
 
 
-void ModuleMap::Module::fromJsonObject(const QJsonObject& jsonObject) {
+void Module::LoadmapFile::fromJsonObject(const QJsonObject& jsonObject) {
 	GET_JSON_OBJECT(module);
 	GET_JSON_OBJECT(gf);
 	GET_JSON_OBJECT(cb);
 	GET_JSON_OBJECT(gfi);
 }
-QJsonObject ModuleMap::Module::toJsonObject() const {
+QJsonObject Module::LoadmapFile::toJsonObject() const {
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(module);
 	SET_JSON_OBJECT(gf);
@@ -54,14 +54,14 @@ QJsonObject ModuleMap::Module::toJsonObject() const {
 	return jsonObject;
 }
 
-void ModuleMap::Map::fromJsonObject(const QJsonObject& jsonObject) {
+void Module::MapFile::fromJsonObject(const QJsonObject& jsonObject) {
 	GET_JSON_OBJECT(module);
 	GET_JSON_OBJECT(proc);
 	GET_JSON_OBJECT(bytes);
 	GET_JSON_OBJECT(evi);
 	GET_JSON_OBJECT(pc);
 }
-QJsonObject ModuleMap::Map::toJsonObject() const {
+QJsonObject Module::MapFile::toJsonObject() const {
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(module);
 	SET_JSON_OBJECT(proc);
@@ -71,12 +71,13 @@ QJsonObject ModuleMap::Map::toJsonObject() const {
 	return jsonObject;
 }
 
-QString loadFile(QString path) {
+static QString readFile(const QString& path) {
 	QByteArray byteArray;
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", file.errorString().toLocal8Bit().constData());
+			logger.fatal("File open error %s", toCString(file.errorString()));
+			logger.fatal("  path = %s!", toCString(path));
 			ERROR();
 		}
 		byteArray = file.readAll();
@@ -85,13 +86,27 @@ QString loadFile(QString path) {
 	return QString::fromUtf8(byteArray);
 }
 
-QList<ModuleMap::Module> ModuleMap::Module::load(QString path) {
-	QString string = loadFile(path);
+
+QList<Module::LoadmapFile> Module::LoadmapFile::load(const QString& path) {
+	QList<Module::LoadmapFile> list;
+	QJsonArray jsonArray = JSONUtil::loadArray(path);
+	JSONUtil::getJsonArray(jsonArray, list);
+	return list;
+}
+void Module::LoadmapFile::save(const QString& path, QList<Module::LoadmapFile> list) {
+	QJsonArray jsonArray;
+	JSONUtil::setJsonArray(jsonArray, list);
+	JSONUtil::save(path, jsonArray);
+}
+
+
+QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const QString& path) {
+	QString string = readFile(path);
 
 	// GermOpsImpl 0AB0H 1209H 1CH
 	QRegularExpression re("[A-Za-z0-9]+ [0-9A-FH]+ [0-9A-FH]+ [0-9A-FH]+");
 
-	QList<ModuleMap::Module> ret;
+	QList<Module::LoadmapFile> ret;
 	for(auto e: string.split(QChar('\r'), Qt::SkipEmptyParts)) {
 		QString simplified = e.simplified();
 		auto m = re.match(simplified);
@@ -102,7 +117,7 @@ QList<ModuleMap::Module> ModuleMap::Module::load(QString path) {
 			int     gf     = toIntMesaNumber(token[1]);
 			int     cb     = toIntMesaNumber(token[2]);
 			int     gfi    = toIntMesaNumber(token[3]);
-			Module element(module, gf, cb, gfi);
+			LoadmapFile element(module, gf, cb, gfi);
 			ret += element;
 		}
 	}
@@ -110,14 +125,29 @@ QList<ModuleMap::Module> ModuleMap::Module::load(QString path) {
 	return ret;
 }
 
-QList<ModuleMap::Map> ModuleMap::Map::load(QString path) {
-	QString string = loadFile(path);
+
+QList<Module::MapFile> Module::MapFile::load(const QString& path) {
+	QList<Module::MapFile> list;
+	QJsonArray jsonArray = JSONUtil::loadArray(path);
+	JSONUtil::getJsonArray(jsonArray, list);
+	return list;
+}
+void Module::MapFile::save(const QString& path, QList<Module::MapFile> list) {
+	QJsonArray jsonArray;
+	JSONUtil::setJsonArray(jsonArray, list);
+	JSONUtil::save(path, jsonArray);
+}
+
+
+QList<Module::MapFile> Module::MapFile::loadMapFile(const QString& path) {
+	QString string = readFile(path);
 
 	// Bytes   EVI  Offset    IPC   Module               Procedure
 	//    42B   13   1030B     20B  ProcessorHeadGuam    GetNextAvailableVM
 	QRegularExpression re("[0-7]+B? [0-9]+ [0-7]+B? [0-7]+B? [A-Za-z0-9]+ [A-Za-z0-9]+");
+	//                     0        1      2        3        4            5
 
-	QList<ModuleMap::Map> ret;
+	QList<Module::MapFile> ret;
 	for(auto e: string.split(QChar('\r'), Qt::SkipEmptyParts)) {
 		QString simplified = e.simplified();
 		auto m = re.match(simplified);
@@ -130,7 +160,7 @@ QList<ModuleMap::Map> ModuleMap::Map::load(QString path) {
 			QString module = token[4];
 			QString proc   = token[5];
 
-			ModuleMap::Map element(module, proc, bytes, evi, ipc);
+			Module::MapFile element(module, proc, bytes, evi, ipc);
 			ret += element;
 		}
 	}

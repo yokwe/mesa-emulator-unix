@@ -41,8 +41,8 @@
 #include "QtCore"
 
 
-namespace ModuleMap {
-	class Module : JSONBase {
+namespace Module {
+	class LoadmapFile : JSONBase {
 	public:
 		//Global Frames for Modules in GermGuam.bcd:
 		//			    Frame      Code (* = code links)
@@ -53,9 +53,9 @@ namespace ModuleMap {
 		int     cb;
 		int     gfi;
 
-		Module() : module(""), gf(0), cb(0), gfi(0) {}
-		Module(const Module& that) : module(that.module), gf(that.gf), cb(that.cb), gfi(that.gfi) {}
-		Module& operator= (const Module& that) {
+		LoadmapFile() : module(""), gf(0), cb(0), gfi(0) {}
+		LoadmapFile(const LoadmapFile& that) : module(that.module), gf(that.gf), cb(that.cb), gfi(that.gfi) {}
+		LoadmapFile& operator= (const LoadmapFile& that) {
 			this->module = that.module;
 			this->gf     = that.gf;
 			this->cb     = that.cb;
@@ -63,16 +63,20 @@ namespace ModuleMap {
 			return *this;
 		}
 
-		Module(QString module_, int gf_, int cb_, int gfi_) : module(module_), gf(gf_), cb(cb_), gfi(gfi_) {}
+		LoadmapFile(QString module_, int gf_, int cb_, int gfi_) : module(module_), gf(gf_), cb(cb_), gfi(gfi_) {}
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;
 
-		// read Guam.loadmap and returns QList<Module>
-		static QList<Module> load(QString file);
+		// load/save json file
+		static QList<LoadmapFile> load(const QString& path);
+		static void save(const QString& path, QList<LoadmapFile> list);
+
+		// read Guam.loadmap files
+		static QList<LoadmapFile> loadLoadmapFile(const QString& path);
 	};
 
-	class Map : JSONBase {
+	class MapFile : JSONBase {
 	public:
 		// Bytes   EVI  Offset    IPC   Module               Procedure
 		//    42B   13   1030B     20B  ProcessorHeadGuam    GetNextAvailableVM
@@ -82,9 +86,9 @@ namespace ModuleMap {
 		int     evi;
 		int     pc;
 
-		Map() : module(""), proc(""), bytes(0), evi(0), pc(0) {}
-		Map(const Map& that) : module(that.module), proc(that.proc), bytes(that.bytes), evi(that.evi), pc(that.pc) {}
-		Map& operator= (const Map& that) {
+		MapFile() : module(""), proc(""), bytes(0), evi(0), pc(0) {}
+		MapFile(const MapFile& that) : module(that.module), proc(that.proc), bytes(that.bytes), evi(that.evi), pc(that.pc) {}
+		MapFile& operator= (const MapFile& that) {
 			this->module = that.module;
 			this->proc   = that.proc;
 			this->bytes  = that.bytes;
@@ -93,14 +97,18 @@ namespace ModuleMap {
 			return *this;
 		}
 
-		Map(QString module_, QString proc_, int bytes_, int evi_, int pc_) : module(module_), proc(proc_), bytes(bytes_), evi(evi_), pc(pc_) {}
+		MapFile(QString module_, QString proc_, int bytes_, int evi_, int pc_) : module(module_), proc(proc_), bytes(bytes_), evi(evi_), pc(pc_) {}
 
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;
 
+		// load/save json file
+		static QList<MapFile> load(const QString& path);
+		static void save(const QString& path, QList<MapFile> list);
+
 		// read *.map and returns QList<Map>
-		static QList<Map> load(QString file);
+		static QList<MapFile> loadMapFile(const QString& path);
 	};
 
 };

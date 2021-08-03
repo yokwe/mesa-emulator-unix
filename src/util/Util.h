@@ -90,6 +90,11 @@ public:
 
 int toIntMesaNumber(const QString& string);
 
+// convert to utf8
+inline const char* toCString(const QString& string) {
+	return string.toUtf8().constData();
+}
+
 class Util {
 public:
 	// misc functions

@@ -94,6 +94,28 @@ int toIntMesaNumber(const QString& string);
 #define TO_CSTRING(e) (e).toUtf8().constData()
 
 
+// Helper macro to make toString for enum class
+#define TO_STRING_PROLOGUE(e) \
+	typedef e ENUM; \
+	static QMap<ENUM, QString> map({
+#define MAP_ENTRY(m) {ENUM::m, #m},
+#define TO_STRING_EPILOGUE \
+	}); \
+	if (map.contains(value)) { \
+		return map[value]; \
+	} else { \
+		logger.error("Unknown value = %d", (int)value); \
+		ERROR(); \
+		return QString("%1").arg((int)value); \
+	}
+
+// bitFiled is used in symbols
+quint16 bitField(quint16 word, int startBit, int stopBit);
+__attribute__((always_inline)) static inline quint16 bitField(quint16 word, int startBit) {
+	return bitField(word, startBit, startBit);
+}
+
+
 class Util {
 public:
 	// misc functions

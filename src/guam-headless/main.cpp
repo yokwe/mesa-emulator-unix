@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		ERROR();
 	}
 	QString entryName = argv[1];
-	logger.info("Section = %s", entryName.toLocal8Bit().constData());
+	logger.info("Section = %s", toCString(entryName));
 
 	Setting setting = Setting::getInstance();
 	Setting::Entry entry = setting.getEntry(entryName);

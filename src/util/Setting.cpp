@@ -238,7 +238,7 @@ Setting::Entry Setting::getEntry(QString name) {
 		}
 	}
 	logger.fatal("Unexpected");
-	logger.fatal("  name = %s!", name.toLocal8Bit().constData());
+	logger.fatal("  name = %s!", toCString(name));
 	ERROR();
 }
 
@@ -259,7 +259,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<int, QString> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.keyName)) {
-					logger.error("levelVkeys duplicate keyName %3d  %s  %3d", e.keyName, e.name.toLocal8Bit().constData(), map[e.keyName].toLocal8Bit().constData());
+					logger.error("levelVkeys duplicate keyName %3d  %s  %ss", e.keyName, toCString(e.name), toCString(map[e.keyName]));
 					foundError = true;
 				} else {
 					map[e.keyName] = e.name;
@@ -271,7 +271,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<QString, QString> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.name)) {
-					logger.error("levelVkeys duplicate name %s  %3d  %s", e.name.toLocal8Bit().constData(), e.keyName, map[e.name].toLocal8Bit().constData());
+					logger.error("levelVkeys duplicate name %s  %3d  %s", toCString(e.name), e.keyName, toCString(map[e.name]));
 					foundError = true;
 				} else {
 					map[e.name] = e.keyName;
@@ -285,7 +285,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<int, QString> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.scanCode)) {
-					logger.error("keyboard duplicate scanCode %3d  %s  %4d", e.scanCode, e.name.toLocal8Bit().constData(), map[e.scanCode].toLocal8Bit().constData());
+					logger.error("keyboard duplicate scanCode %3d  %s  %s", e.scanCode, toCString(e.name), toCString(map[e.scanCode]));
 					foundError = true;
 				} else {
 					map[e.scanCode] = e.name;
@@ -297,7 +297,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<QString, QString> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.name)) {
-					logger.error("keyboard duplicate name %s  %d  %s", e.name.toLocal8Bit().constData(), e.scanCode, map[e.name].toLocal8Bit().constData());
+					logger.error("keyboard duplicate name %s  %3d  %s", toCString(e.name), e.scanCode, toCString(map[e.name]));
 					foundError = true;
 				} else {
 					map[e.name] = e.scanCode;
@@ -313,7 +313,7 @@ void Setting::initMap(const Setting& setting) {
 				if (e.keyboard.isEmpty()) continue;
 
 				if (map.contains(e.keyboard)) {
-					logger.error("keyMap duplicate keyboard %s  %s  %s", e.keyboard.toLocal8Bit().constData(), e.levelVKeys.toLocal8Bit().constData(), map[e.keyboard].toLocal8Bit().constData());
+					logger.error("keyMap duplicate keyboard %s  %s  %s", toCString(e.keyboard), toCString(e.levelVKeys), toCString(map[e.keyboard]));
 					foundError = true;
 				} else {
 					map[e.keyboard] = e.levelVKeys;
@@ -327,7 +327,7 @@ void Setting::initMap(const Setting& setting) {
 				if (e.keyboard.isEmpty()) continue;
 
 				if (map.contains(e.levelVKeys)) {
-					logger.error("keyMap duplicate levelVKeys %s  %s  %s", e.levelVKeys.toLocal8Bit().constData(), e.keyboard.toLocal8Bit().constData(), map[e.keyboard].toLocal8Bit().constData());
+					logger.error("keyMap duplicate levelVKeys %s  %s  %s", toCString(e.levelVKeys), toCString(e.keyboard), toCString(map[e.keyboard]));
 					foundError = true;
 				} else {
 					map[e.levelVKeys] = e.keyboard;
@@ -363,7 +363,7 @@ void Setting::initMap(const Setting& setting) {
 
 			Setting::keyMap[scanCode] = keyName;
 
-//			logger.info("keyMap    %-16s %02X => %-16s %3d", e.keyboard.toLocal8Bit().constData(), scanCode, e.levelVKeys.toLocal8Bit().constData(), keyName);
+//			logger.info("keyMap    %-16s %02X => %-16s %3d", toCString(e.keyboard), scanCode, toCString(e.levelVKeys), keyName);
 		}
 
 		// build Setting::buttonMap
@@ -378,7 +378,7 @@ void Setting::initMap(const Setting& setting) {
 
 			Setting::buttonMap[bitMask] = keyName;
 
-//			logger.info("buttonMap %-16s %02X => %-16s %3d", e.button.toLocal8Bit().constData(), bitMask, e.levelVKeys.toLocal8Bit().constData(), keyName);
+//			logger.info("buttonMap %-16s %02X => %-16s %3d", toCString(e.button), bitMask, toCString(e.levelVKeys), keyName);
 		}
 	}
 

@@ -114,7 +114,7 @@ int toIntMesaNumber(const QString& string) {
 
 	if (!ok) {
 		logger.error("Unexpected");
-		logger.error("  string %s!", string.toLocal8Bit().constData());
+		logger.error("  string %s!", toCString(string));
 		ERROR();
 	}
 

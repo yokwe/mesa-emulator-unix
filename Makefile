@@ -2,10 +2,10 @@
 # Makefile
 #
 
-MODULE := main util test mesa agent opcode trace guam-headless
+MODULE := main util test mesa agent opcode trace guam-headless symbols
 
 .PHONY: all clean distclean gamke
-.PHONY: main util mesa agent opcode test trace guam-headless
+.PHONY: main util mesa agent opcode test trace guam-headless symbols
 .PHONY: run-main run-test
 .PONEY: prepare-run-guam run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
 .PHONY: fix-permission
@@ -58,6 +58,9 @@ test: util trace mesa agent
 
 trace: util mesa opcode
 	( cd src/trace; make all )
+
+symbols: util mesa
+	( cd src/symbols; make all )
 
 guam-headless: util mesa agent opcode trace
 	( cd src/guam-headless; make all )

@@ -36,8 +36,6 @@
 #include "../util/Util.h"
 static log4cpp::Category& logger = Logger::getLogger("bcdfile");
 
-#include "../mesa/Memory.h"
-
 #include "BCDFile.h"
 
 #include "BCD.h"
@@ -138,65 +136,4 @@ private:
 
 BCDFile* BCDFile::getInstance(QString path) {
 	return new BCDFileFile(path);
-}
-
-
-//
-// BCDFileMesaMemory
-//
-
-//void PageFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//}
-//void WriteProtectFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//}
-
-class BCDFileMesaMemory : public BCDFile {
-public:
-	BCDFileMesaMemory(CARD32 ptr_) {
-		ptr = ptr_;
-		pos = 0;
-		if (Memory::isVacant(ptr)) {
-			logger.fatal("ptr is not mapped. ptr = %X", ptr);
-			ERROR();
-		}
-	}
-	~BCDFileMesaMemory() {
-	}
-
-	QString getPath() {
-		logger.fatal("Unexpected call of %s", __FUNCTION__);
-		ERROR();
-	}
-	int getPosition() {
-		return pos;
-	}
-	void setPosition(int newPosition) {
-		if (newPosition < 0) ERROR();
-		pos = (CARD32)newPosition;
-	}
-	CARD8 getCARD8() {
-		CARD32 p = ptr + (pos / 2);
-		if (Memory::isVacant(p)) {
-//			logger.fatal("p is not mapped. p = %X", p);
-//			logBackTrace();
-			ERROR_Abort();
-		}
-		BytePair word = {*Fetch(p)};
-		CARD8 data =  ((pos % 2) == 0) ? (BYTE)word.left : (BYTE)word.right;
-
-		pos++;
-		return data;
-	}
-	CARD32 getLength() {
-		return (CARD32)-1;
-	}
-
-private:
-	CARD32 ptr;
-	CARD32 pos;
-};
-BCDFile* BCDFile::getInstance(CARD32 ptr) {
-	return new BCDFileMesaMemory(ptr);
 }

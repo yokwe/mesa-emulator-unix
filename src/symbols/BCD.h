@@ -306,7 +306,6 @@ public:
 	static const CARD16 VersionID = 6103;
 
 	BCD(QString path) : BCD(BCDFile::getInstance(path)) {}
-	BCD(CARD32 ptr) : BCD(BCDFile::getInstance(ptr)) {}
 
 	~BCD();
 

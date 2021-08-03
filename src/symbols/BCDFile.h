@@ -39,14 +39,14 @@
 #include "../util/Util.h"
 #include "../mesa/MesaBasic.h"
 
+#include "../mesa/Pilot.h"
+
 class BCDFile {
 public:
-	static const int BYTES_PER_WORD = 2;
+	static const int BYTES_PER_WORD = Environment::bytesPerWord;
 
 	// File file
 	static BCDFile* getInstance(QString path);
-	// From mesa memory
-	static BCDFile* getInstance(CARD32 ptr);
 
 	// To make call destructor of child class, define virtual desturctor of parent
     virtual ~BCDFile() {}

@@ -4,8 +4,8 @@ TEMPLATE = lib
 CONFIG  += staticlib
 
 # Input
-HEADERS += Trace.h
-SOURCES += Trace.cpp
+HEADERS += Trace.h   Module.h
+SOURCES += Trace.cpp Module.cpp
 
 
 ###############################################

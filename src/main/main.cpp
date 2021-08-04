@@ -31,6 +31,21 @@
 #include "../util/Util.h"
 static log4cpp::Category& logger = Logger::getLogger("main");
 
+#include "../mesa/Type.h"
+#include "../trace/Trace.h"
+
+
+// Define PageFault and WriteProtectFault for Memory.h
+void PageFault(CARD32 ptr) {
+	logger.fatal("%s %X", __FUNCTION__, ptr);
+	ERROR();
+}
+void WriteProtectFault(CARD32 ptr) {
+	logger.fatal("%s %X", __FUNCTION__, ptr);
+	ERROR();
+}
+
+
 int main(int, char**) {
 	logger.info("START");
 

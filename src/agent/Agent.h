@@ -58,16 +58,16 @@ public:
 
 	static void InitializeAgent();
 
-	static Agent* getAgent(CARD16 index);
+	static Agent* getAgent(int index);
 
-	static void CallAgent(CARD16 index) {
+	static void CallAgent(int index) {
 		Agent* agent = getAgent(index);
 		agent->Call();
 	}
 
 	const char *name;
-	const GuamInputOutput::AgentDeviceIndex index;
-	CARD32 fcbAddress;
+	const int   index;
+	CARD32      fcbAddress;
 
 	Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_);
 	virtual ~Agent() {}

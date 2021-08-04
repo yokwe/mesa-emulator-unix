@@ -40,7 +40,7 @@
 
 class AgentKeyboard : public Agent {
 public:
-	AgentKeyboard() : Agent(GuamInputOutput::keyboard, "Keyboard") {
+	AgentKeyboard() : Agent(GuamInputOutput::AgentDeviceIndex::keyboard, "Keyboard") {
 		fcb = 0;
 	}
 

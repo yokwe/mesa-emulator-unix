@@ -108,7 +108,7 @@ void MesaProcessor::initialize() {
 	logger.info("Boot  %s", TO_CSTRING(bootPath));
 
 	// Initialization of Stream handler
-	AgentStream* agentStream = (AgentStream*)Agent::getAgent(GuamInputOutput::stream);
+	AgentStream* agentStream = (AgentStream*)Agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
 	// 110 Boot
 	agentStream->addStream(new StreamBoot(bootPath));
 	// 101 CopyPaste

@@ -41,7 +41,7 @@
 
 class AgentProcessor : public Agent {
 public:
-	AgentProcessor() : Agent(GuamInputOutput::processor, "Processor") {
+	AgentProcessor() : Agent(GuamInputOutput::AgentDeviceIndex::processor, "Processor") {
 		fcb = 0;
 		processorID0 = processorID1 = processorID2 = 0;
 	}

@@ -40,7 +40,7 @@
 
 class AgentBeep : public Agent {
 public:
-	AgentBeep() : Agent(GuamInputOutput::beep, "Beep") {
+	AgentBeep() : Agent(GuamInputOutput::AgentDeviceIndex::beep, "Beep") {
 		fcb = 0;
 	}
 

@@ -85,7 +85,7 @@ public:
 
 	IOThread ioThread;
 
-	AgentDisk() : Agent(GuamInputOutput::disk, "Disk") {
+	AgentDisk() : Agent(GuamInputOutput::AgentDeviceIndex::disk, "Disk") {
 		fcb = 0;
 		dcb = 0;
 	}

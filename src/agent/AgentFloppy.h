@@ -47,7 +47,7 @@ public:
 	// Little endian is better. because od command of intel cpu use little endian
 	static const int USE_LITTLE_ENDIAN = 1;
 
-	AgentFloppy() : Agent(GuamInputOutput::floppy, "Floppy") {
+	AgentFloppy() : Agent(GuamInputOutput::AgentDeviceIndex::floppy, "Floppy") {
 		fcb = 0;
 		dcb = 0;
 	}

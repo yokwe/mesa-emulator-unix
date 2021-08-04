@@ -141,7 +141,7 @@ public:
 	ReceiveThread  receiveThread;
 	TransmitThread transmitThread;
 
-	AgentNetwork() : Agent(GuamInputOutput::network, "Network") {
+	AgentNetwork() : Agent(GuamInputOutput::AgentDeviceIndex::network, "Network") {
 		fcb = 0;
 		networkPacket = 0;
 	}

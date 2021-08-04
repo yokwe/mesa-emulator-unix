@@ -52,7 +52,7 @@ CARD32 Agent::ioRegion = Agent::ioRegionPtr;
 GuamInputOutput::IORegionType *Agent::ioRegionType = 0;
 
 
-Agent* Agent::getAgent(CARD16 index) {
+Agent* Agent::getAgent(int index) {
 	if (GuamInputOutput::AgentDeviceIndex_SIZE <= index) ERROR();
 	Agent* agent = allAgent[index];
 	if (agent == 0) ERROR();
@@ -60,7 +60,8 @@ Agent* Agent::getAgent(CARD16 index) {
 	return agent;
 }
 
-Agent::Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_) : name(name_), index(index_) {
+Agent::Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_) : name(name_), index((int)index_) {
+	int index = (int)index_;
 	if (allAgent[index]) ERROR();
 	allAgent[index] = this;
 	fcbAddress = 0;

@@ -40,7 +40,7 @@
 
 class AgentDisplay : public Agent {
 public:
-	AgentDisplay() : Agent(GuamInputOutput::display, "Display") {
+	AgentDisplay() : Agent(GuamInputOutput::AgentDeviceIndex::display, "Display") {
 		fcb                  = 0;
 		displayWidth         = 0;
 		displayHeight        = 0;

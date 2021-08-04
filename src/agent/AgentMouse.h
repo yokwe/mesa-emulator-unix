@@ -40,7 +40,7 @@
 
 class AgentMouse : public Agent {
 public:
-	AgentMouse() : Agent(GuamInputOutput::mouse, "Mouse") {
+	AgentMouse() : Agent(GuamInputOutput::AgentDeviceIndex::mouse, "Mouse") {
 		fcb = 0;
 	}
 

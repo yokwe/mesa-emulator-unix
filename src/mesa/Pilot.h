@@ -1713,17 +1713,17 @@ public:
 	//   null(0), disk(1), floppy(2), network(3), parallel(4), keyboard(5), beep(6),
 	//   mouse(7), processor(8), stream(9), serial(10), tty(11), display(12),
 	//   reserved3(13), reserved2(14), reserved1(15)};
-	enum AgentDeviceIndex {
+	enum class AgentDeviceIndex {
 		null = 0, disk = 1, floppy = 2, network = 3, parallel = 4,
 		keyboard = 5, beep = 6, mouse = 7, processor = 8, stream = 9,
 		serial = 10, tty = 11, display = 12, reserved3 = 13, reserved2 = 14, reserved1 = 15
 	};
-	static const int AgentDeviceIndex_SIZE = reserved1 + 1;
+	static const int AgentDeviceIndex_SIZE = (int)AgentDeviceIndex::reserved1 + 1;
 
 	// IORegionType: PRIVATE TYPE = MACHINE DEPENDENT RECORD [
 	//   fcbPtrs(0): ARRAY AgentDeviceIndex OF LONG POINTER];
 	struct IORegionType {
-		LONG_POINTER fcbptrs[reserved1 + 1];
+		LONG_POINTER fcbptrs[AgentDeviceIndex_SIZE];
 	};
 	// ioRegionPtr: READONLY LONG POINTER TO IORegionType;
 };

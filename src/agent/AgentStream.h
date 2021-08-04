@@ -60,7 +60,7 @@ public:
 	};
 
 
-	AgentStream() : Agent(GuamInputOutput::stream, "Stream") {
+	AgentStream() : Agent(GuamInputOutput::AgentDeviceIndex::stream, "Stream") {
 		fcb = 0;
 	}
 

@@ -124,7 +124,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 	//"AGENT %s %d", name, fcb->command
 	PilotDiskFace::Command command = (PilotDiskFace::Command)iocb->command;
 	switch(command) {
-	case PilotDiskFace::read: {
+	case PilotDiskFace::Command::read: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		CARD32 dataPtr = iocb->dataPtr;
@@ -135,12 +135,12 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = PilotDiskFace::goodCompletion;
+		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
 		readCount++;
 	}
 		break;
-	case PilotDiskFace::write: {
+	case PilotDiskFace::Command::write: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		CARD32 dataPtr = iocb->dataPtr;
@@ -151,12 +151,12 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = PilotDiskFace::goodCompletion;
+		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
 		writeCount++;
 	}
 		break;
-	case PilotDiskFace::verify: {
+	case PilotDiskFace::Command::verify: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		int ret = 0;
@@ -168,7 +168,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = ret ? PilotDiskFace::dataVerifyError : PilotDiskFace::goodCompletion;
+		iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
 		verifyCount++;
 	}
@@ -241,9 +241,9 @@ void AgentDisk::Call() {
 		DiskFile* diskFile = diskFileList[deviceIndex];
 		PilotDiskFace::Command command = (PilotDiskFace::Command)iocb->command;
 		switch(command) {
-		case PilotDiskFace::read:
-		case PilotDiskFace::write:
-		case PilotDiskFace::verify:
+		case PilotDiskFace::Command::read:
+		case PilotDiskFace::Command::write:
+		case PilotDiskFace::Command::verify:
 			break;
 		default:
 			logger.fatal("AGENT %s command = %d", name, command);
@@ -254,7 +254,7 @@ void AgentDisk::Call() {
 			CARD32 block = diskFile->getBlock(iocb);
 
 			switch(command) {
-			case PilotDiskFace::read: {
+			case PilotDiskFace::Command::read: {
 				logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				CARD32 dataPtr = iocb->dataPtr;
@@ -265,12 +265,12 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = PilotDiskFace::goodCompletion;
+				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
 				readCount++;
 			}
 				break;
-			case PilotDiskFace::write: {
+			case PilotDiskFace::Command::write: {
 				logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				CARD32 dataPtr = iocb->dataPtr;
@@ -281,12 +281,12 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = PilotDiskFace::goodCompletion;
+				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
 				writeCount++;
 			}
 				break;
-			case PilotDiskFace::verify: {
+			case PilotDiskFace::Command::verify: {
 				logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				int ret = 0;
@@ -298,7 +298,7 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = ret ? PilotDiskFace::dataVerifyError : PilotDiskFace::goodCompletion;
+				iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
 				verifyCount++;
 			}

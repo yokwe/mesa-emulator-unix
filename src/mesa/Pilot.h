@@ -1273,7 +1273,7 @@ public:
 	//  reserved16(16), reserved17(17), reserved18(18), reserved19(19)};
 	//-- Use of reserved10 thru reserved19 are available for knowledgeable machine
 	//-- dependent clients (eg. diagnostics) which use them with cooperating heads.
-	enum Command {
+	enum class Command {
 		noOp = 0, read = 1, write = 2, verify = 3,
 		format = 4, readHeader = 5, readHeaderAndData = 6, makeBootable = 7,
 		makeUnbootable = 8, getBootLocation = 9, reserved10 = 10, reserved11 = 11,
@@ -1288,7 +1288,7 @@ public:
 	//  writeFault(12), memoryError(13), memoryFault(14), clientError(15),
 	//  operationReset(16), otherError(17)};
 	//-- reserved6 and reserved9 are provided for backwards compatibility.
-	enum Status {
+	enum class Status {
 		inProgress = 0, goodCompletion = 1, notReady = 2, recalibrateError = 3,
 		seekTimeout = 4, headerCRCError = 5, reserved6 = 6, dataCRCError = 7,
 		headerNotFount = 8, reserved9 = 9, dataVerifyError = 10, overrunError = 11,

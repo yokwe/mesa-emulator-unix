@@ -144,13 +144,13 @@ void AgentFloppy::Call() {
 		DiskFile* diskFile = diskFileList[deviceIndex];
 
 		//"AGENT %s %d", name, fcb->command
-		CARD16 command = iocb->operation.function;
+		FloppyDiskFace::Function command = (FloppyDiskFace::Function)iocb->operation.function;
 		switch(command) {
-		case FloppyDiskFace::F_nop:
+		case FloppyDiskFace::Function::nop:
 			if (DEBUG_SHOW_AGENT_FLOPPY) logger.debug("AGENT %s %1d NOP    %8X (%02d-%d-%02d) + %4d %3d %d  dataPtr = %08X  nextIOCB = %08X", name, deviceIndex, sectorNo, iocb->operation.address.cylinder, iocb->operation.address.head, iocb->operation.address.sector, iocb->operation.count, iocb->sectorLength, iocb->operation.incrementDataPointer, iocb->operation.dataPtr, fcb->nextIOCB);
-			iocb->status = FloppyDiskFace::S_goodCompletion;
+			iocb->status = (CARD16)FloppyDiskFace::Status::goodCompletion;
 			break;
-		case FloppyDiskFace::F_readSector: {
+		case FloppyDiskFace::Function::readSector: {
 			if (DEBUG_SHOW_AGENT_FLOPPY) logger.debug("AGENT %s %1d READ   %8X (%02d-%d-%02d) + %4d %3d %d  dataPtr = %08X  nextIOCB = %08X", name, deviceIndex, sectorNo, iocb->operation.address.cylinder, iocb->operation.address.head, iocb->operation.address.sector, iocb->operation.count, iocb->sectorLength, iocb->operation.incrementDataPointer, iocb->operation.dataPtr, fcb->nextIOCB);
 			if (PageSize < iocb->sectorLength) {
 				logger.fatal("PageSize = %d  iocb->sectorLength = %d", PageSize, iocb->sectorLength);
@@ -178,10 +178,10 @@ void AgentFloppy::Call() {
 				iocb->operation.address = sectorToDiskAddress(dcb, sector);
 			}
 			iocb->operation.count = 0;
-			iocb->status = FloppyDiskFace::S_goodCompletion;
+			iocb->status = (CARD16)FloppyDiskFace::Status::goodCompletion;
 		}
 			break;
-		case FloppyDiskFace::F_writeSector: {
+		case FloppyDiskFace::Function::writeSector: {
 			if (DEBUG_SHOW_AGENT_FLOPPY) logger.debug("AGENT %s %1d WRITE  %8X (%02d-%d-%02d) + %4d %3d %d  dataPtr = %08X  nextIOCB = %08X", name, deviceIndex, sectorNo, iocb->operation.address.cylinder, iocb->operation.address.head, iocb->operation.address.sector, iocb->operation.count, iocb->sectorLength, iocb->operation.incrementDataPointer, iocb->operation.dataPtr, fcb->nextIOCB);
 			if (PageSize < iocb->sectorLength) {
 				logger.fatal("PageSize = %d  iocb->sectorLength = %d", PageSize, iocb->sectorLength);
@@ -209,10 +209,10 @@ void AgentFloppy::Call() {
 				}
 			}
 			iocb->operation.count = 0;
-			iocb->status = FloppyDiskFace::S_goodCompletion;
+			iocb->status = (CARD16)FloppyDiskFace::Status::goodCompletion;
 		}
 			break;
-		case FloppyDiskFace::F_formatTrack: {
+		case FloppyDiskFace::Function::formatTrack: {
 			if (DEBUG_SHOW_AGENT_FLOPPY) logger.debug("AGENT %s %1d FORMAT %8X (%02d-%d-%02d) + %4d %3d %d  dataPtr = %08X  nextIOCB = %08X", name, deviceIndex, sectorNo, iocb->operation.address.cylinder, iocb->operation.address.head, iocb->operation.address.sector, iocb->operation.count, iocb->sectorLength, iocb->operation.incrementDataPointer, iocb->operation.dataPtr, fcb->nextIOCB);
 			CARD32 sector = diskAddressToSector(dcb, iocb->operation.address);
 			CARD32 count = iocb->operation.count * iocb->sectorsPerTrack;
@@ -221,7 +221,7 @@ void AgentFloppy::Call() {
 				sector++;
 			}
 			iocb->operation.count = 0;
-			iocb->status = FloppyDiskFace::S_goodCompletion;
+			iocb->status = (CARD16)FloppyDiskFace::Status::goodCompletion;
 		}
 			break;
 		default:

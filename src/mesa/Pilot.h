@@ -1786,12 +1786,10 @@ public:
 	//  writeDeletedSector,  --Writes one or more sectors with a deleted data addres mark starting at the specified disk address.
 	//  readID,              --Reads first encountered record ID from the specified disk address (the value of sector in the disk address is ignored).
 	//  formatTrack};        --format one or more tracks starting at the specified disk cylinder & head
-	static const CARD16 F_nop                = 0;
-	static const CARD16 F_readSector         = 1;
-	static const CARD16 F_writeSector        = 2;
-	static const CARD16 F_writeDeletedSector = 3;
-	static const CARD16 F_readID             = 4;
-	static const CARD16 F_formatTrack        = 5;
+	enum class Function {
+		nop = 0, readSector = 1, writeSector = 2, writeDeletedSector = 3, readID = 4,
+		formatTrack = 5,
+	};
 
 	//DiskAddress: TYPE = MACHINE DEPENDENT RECORD [
 	//  cylinder(0):       CARDINAL,           --must be IN [0..numberOfCylinders)
@@ -1847,21 +1845,11 @@ public:
 	//  invalidOperation, -- operation does not make sense
 	//  aborted, -- Reset has been called
 	//  otherError}; -- unexpected software or hardware problem
-	static const CARD16 S_inProgress       =  0;
-	static const CARD16 S_goodCompletion   =  1;
-	static const CARD16 S_diskChange       =  2;
-	static const CARD16 S_notReady         =  3;
-	static const CARD16 S_cylinderError    =  4;
-	static const CARD16 S_deletedData      =  5;
-	static const CARD16 S_recordNotFound   =  6;
-	static const CARD16 S_headerError      =  7;
-	static const CARD16 S_dataError        =  8;
-	static const CARD16 S_dataLost         =  9;
-	static const CARD16 S_writeFault       = 10;
-	static const CARD16 S_memoryError      = 11;
-	static const CARD16 S_invalidOperation = 12;
-	static const CARD16 S_aborted          = 13;
-	static const CARD16 S_otherError       = 14;
+	enum class Status {
+		inProgress = 0, goodCompletion = 1, diskChange = 2, notReady = 3, cylinderError = 4,
+		deletedData = 5, recordNotFound = 6, headerError = 7, dataError = 8, dataLost = 9,
+		writeFault = 10, memoryError = 11, invalidOperation = 12, aborted = 13, otherError = 14,
+	};
 };
 
 

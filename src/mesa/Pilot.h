@@ -46,43 +46,42 @@
 //
 // APilot/15.3/Mesa/Public/Environment.mesa
 //
-class Environment {
-public:
+namespace Environment {
 	//  bitsPerWord: CARDINAL = 16;
-	static const int bitsPerWord = 16;
+	const int bitsPerWord = 16;
 
 	//  logBitsPerWord: CARDINAL = 4; -- logarithm of bitsPerWord
-	static const int logBitsPerWord = 4;
+	const int logBitsPerWord = 4;
 
 	//  bitsPerByte, bitsPerCharacter: CARDINAL = 8;
-	static const int bitsPerByte = 8;
-	static const int bitsPerCharacter = 8;
+	const int bitsPerByte = 8;
+	const int bitsPerCharacter = 8;
 
 	//  logBitsPerByte, logBitsPerChar: CARDINAL = 3; -- logarithm of bitsPerByte
-	static const int logBitsPerByte = 3;
-	static const int logBitsPerChar = 3;
+	const int logBitsPerByte = 3;
+	const int logBitsPerChar = 3;
 
 	//  bytesPerWord, charsPerWord: CARDINAL = bitsPerWord/bitsPerByte;
-	static const int bytesPerWord = bitsPerWord / bitsPerByte;
-	static const int charsPerWord = bitsPerWord / bitsPerCharacter;
+	const int bytesPerWord = bitsPerWord / bitsPerByte;
+	const int charsPerWord = bitsPerWord / bitsPerCharacter;
 
 	//  logBytesPerWord, logCharsPerWord: CARDINAL = logBitsPerWord - logBitsPerByte;  -- logarithm of bytesPerWord
-	static const int logBytesPerWord = logBitsPerWord - logBitsPerByte;
-	static const int logCharsPerWord = logBitsPerWord - logBitsPerChar;
+	const int logBytesPerWord = logBitsPerWord - logBitsPerByte;
+	const int logCharsPerWord = logBitsPerWord - logBitsPerChar;
 
 	//  wordsPerPage: CARDINAL = 256;
-	static const int wordsPerPage = 256;
+	const int wordsPerPage = 256;
 
 	//  bytesPerPage, charsPerPage: CARDINAL = wordsPerPage*bytesPerWord;
-	static const int bytesPerPage = wordsPerPage * bytesPerWord;
-	static const int charsPerPage = wordsPerPage * charsPerWord;
+	const int bytesPerPage = wordsPerPage * bytesPerWord;
+	const int charsPerPage = wordsPerPage * charsPerWord;
 
 	//  logWordsPerPage: CARDINAL = 8; -- logarithm of wordsPerPage
-	static const int logWordsPerPage = 8;
+	const int logWordsPerPage = 8;
 
 	//  logBytesPerPage, logCharsPerPage: CARDINAL = logWordsPerPage + logBytesPerWord;  -- logarithm of bytesPerPage
-	static const int logBytesPerPage = logWordsPerPage + logBytesPerWord;
-	static const int logCharsPerPage = logWordsPerPage + logCharsPerWord;
+	const int logBytesPerPage = logWordsPerPage + logBytesPerWord;
+	const int logCharsPerPage = logWordsPerPage + logCharsPerWord;
 
 
 	//PageNumber: TYPE = LONG CARDINAL --[0..2**24-2]--;
@@ -91,25 +90,25 @@ public:
 	//  --  pre-empted for system purposes.
 
 	//  firstPageNumber: PageNumber = 0;
-	static const int firstPageNumber = 0;
+	const int firstPageNumber = 0;
 
 	//  lastPageNumber: PageNumber = 16777214 --2**24-2--;
-	static const int lastPageNumber = 16777214;
+	const int lastPageNumber = 16777214;
 
 
 	//PageOffset: TYPE = PageNumber;
 	//  firstPageOffset: PageOffset = firstPageNumber;
-	static const int firstPageOffset = firstPageNumber;
+	const int firstPageOffset = firstPageNumber;
 
 	//  lastPageOffset: PageOffset = lastPageNumber;
-	static const int lastPageOffset = lastPageNumber;
+	const int lastPageOffset = lastPageNumber;
 
 	//PageCount: TYPE = LONG CARDINAL --[0..2**24-1]--;
 	//  firstPageCount: PageCount = 0;
-	static const int firstPageCount = 0;
+	const int firstPageCount = 0;
 
 	//  lastPageCount: PageCount = lastPageNumber+1;
-	static const int lastPageCount = lastPageNumber + 1;
+	const int lastPageCount = lastPageNumber + 1;
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -117,9 +116,7 @@ public:
 //
 // APilot/15.3/Mesa/Public/ColorBlt.mesa
 //
-class ColorBlt {
-public:
-
+namespace ColorBlt {
 	//Address: TYPE = MACHINE DEPENDENT RECORD [
 	//  word: LONG POINTER,
 	//  pixel: CARDINAL];
@@ -157,27 +154,27 @@ public:
 	};
 
 	//Direction: TYPE = {forward, backward};
-	static const CARD16 D_forward  = 0;
-	static const CARD16 D_backword = 1;
+	const CARD16 D_forward  = 0;
+	const CARD16 D_backword = 1;
 
 	//PixelType: TYPE = {bit, display};
-	static const CARD16 PT_bit     = 0;
-	static const CARD16 PT_display = 1;
+	const CARD16 PT_bit     = 0;
+	const CARD16 PT_display = 1;
 
 	//SrcFunc: TYPE = {null, complement};
-	static const CARD16 SF_null       = 0;
-	static const CARD16 SF_complement = 1;
+	const CARD16 SF_null       = 0;
+	const CARD16 SF_complement = 1;
 
 	//DstFunc: TYPE = MACHINE DEPENDENT {src(0), srcIfDstLE1(1), srcIf0(2), srcIfDstNot0(3), srcIfNot0(4), srcIfDst0(5), pixelXor(6), srcXorDst(7)};
 	//-- pixelXor: src if dst=0, else dst if src=0, else 0
-	static const CARD16 DF_src          = 0;
-	static const CARD16 DF_srcIfDstLE1  = 1;
-	static const CARD16 DF_srcIf0       = 2;
-	static const CARD16 DF_srcIfDstNot0 = 3;
-	static const CARD16 DF_srcIfNot0    = 4;
-	static const CARD16 DF_srcIfDst0    = 5;
-	static const CARD16 DF_pixelXor     = 6;
-	static const CARD16 DF_srcXorDst    = 7;
+	const CARD16 DF_src          = 0;
+	const CARD16 DF_srcIfDstLE1  = 1;
+	const CARD16 DF_srcIf0       = 2;
+	const CARD16 DF_srcIfDstNot0 = 3;
+	const CARD16 DF_srcIfNot0    = 4;
+	const CARD16 DF_srcIfDst0    = 5;
+	const CARD16 DF_pixelXor     = 6;
+	const CARD16 DF_srcXorDst    = 7;
 
 	//ColorBltFlags: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- determines the ColorBlt function
@@ -244,9 +241,8 @@ public:
 //
 // APilot/15.3/Mesa/Public/LevelVKeys.mesa
 //
-class LevelVKeys {
-public:
-	  enum KeyName {
+namespace LevelVKeys {
+    enum KeyName {
 	    null             = 0,
 	    Bullet           = 1,
 	    SuperSub         = 2,
@@ -370,7 +366,7 @@ public:
 	    //
 	    Hiragana         = 110,
 	    RightShiftAlt    = 111
-	  };
+    };
 };
 
 
@@ -379,25 +375,24 @@ public:
 //
 // APilot/15.3/Faces/Friends/ProcessorFaceExtras.mesa
 //
-class ProcessorFaceExtras {
-public:
+namespace ProcessorFaceExtras {
 	//MachineType: TYPE = MACHINE DEPENDENT {
 	//  altoI (1), altoII (2), altoIIXM (3), dolphin (4), dorado (5), dandelion (6),
 	//  dicentra (7), daybreak(8), daisy(9), kiku(10), daylight(11),
 	//  tridlion(12), dahlia(13), (17B)};
-	static const CARD16 MT_altoI     =  1;
-	static const CARD16 MT_altoII    =  2;
-	static const CARD16 MT_altoIIXM  =  3;
-	static const CARD16 MT_dolphin   =  4;
-	static const CARD16 MT_dorado    =  5;
-	static const CARD16 MT_dandelion =  6;
-	static const CARD16 MT_dicentra  =  7;
-	static const CARD16 MT_daybreak  =  8;
-	static const CARD16 MT_daisy     =  9;
-	static const CARD16 MT_kiku      = 10;
-	static const CARD16 MT_daylight  = 11;
-	static const CARD16 MT_tridlion  = 12;
-	static const CARD16 MT_dahlia    = 13;
+	const CARD16 MT_altoI     =  1;
+	const CARD16 MT_altoII    =  2;
+	const CARD16 MT_altoIIXM  =  3;
+	const CARD16 MT_dolphin   =  4;
+	const CARD16 MT_dorado    =  5;
+	const CARD16 MT_dandelion =  6;
+	const CARD16 MT_dicentra  =  7;
+	const CARD16 MT_daybreak  =  8;
+	const CARD16 MT_daisy     =  9;
+	const CARD16 MT_kiku      = 10;
+	const CARD16 MT_daylight  = 11;
+	const CARD16 MT_tridlion  = 12;
+	const CARD16 MT_dahlia    = 13;
 
 	//VersionResult: TYPE = MACHINE DEPENDENT RECORD [
 	//  machineType (0: 0..3): MachineType,
@@ -427,29 +422,28 @@ public:
 //
 // APilot/15.0.1/Mesa/Public/Device.mesa
 //
-class Device {
-public:
+namespace Device {
 	//Type: TYPE = PRIVATE RECORD [CARDINAL];
 	//nullType:  Type = [0];
 	//Ethernet:  TYPE = CARDINAL [5..16);
 	//Floppy: TYPE = CARDINAL [17..24);
 	//PilotDisk: TYPE = CARDINAL [64..1024);
 
-	static const CARD16 T_nullType     =  0;
-	static const CARD16 T_ethernet     =  6;
-	static const CARD16 T_anyFloppy    = 17;
-	static const CARD16 T_anyPilotDisk = 64;
+	const CARD16 T_nullType     =  0;
+	const CARD16 T_ethernet     =  6;
+	const CARD16 T_anyFloppy    = 17;
+	const CARD16 T_anyPilotDisk = 64;
 
 	// APilot/15.3/Faces/Private/FloppyHeadGuam.mesa
 	//   microFloppy: Device.Type = [23]; -- 1.44MB, 3 1/2" disks
 	//   microFloppyQuad: Device.Type = [22]; -- 2.88MB, 3 1/2" disks
-	static const CARD16 T_microFloppy     = 23;
-	static const CARD16 T_microFloppyQuad = 22;
+	const CARD16 T_microFloppy     = 23;
+	const CARD16 T_microFloppyQuad = 22;
 
 	// APilot/15.3/Pilot/Public/DeviceTypesExtras11.mesa
     //   Stream: TYPE = CARDINAL [4000..4010);
     //   simpleDataStream: Device.Type = [FIRST[Stream]]; -- Guam Stream.
-	static const CARD16 T_simpleDataStream = 4000;
+	const CARD16 T_simpleDataStream = 4000;
 };
 
 
@@ -458,8 +452,7 @@ public:
 //
 // APilot/15.0.1/Mesa/Public/PrincOps.mesa
 //
-class PrincOps {
-public:
+namespace PrincOps {
 	//  FSIndex: TYPE = CARDINAL[0..256);
 	//  AllocationVector: TYPE = ARRAY FSIndex OF AVItem;
 	//  AVHandle: TYPE = POINTER TO AllocationVector;
@@ -469,17 +462,24 @@ public:
 	//  AVHeap: TYPE = ARRAY [0..AVHeapSize) OF AVItem;
 
 	// AVHeapSize is actual number of AVItem in AV
-	static const CARD32 AVHeapSize = 32; // 040
+	const CARD32 AVHeapSize = 32; // 040
 
 	//AVHeap: TYPE = ARRAY [0..AVHeapSize) OF AVItem;
 	//LastAVHeapSlot: CARDINAL = AVHeapSize - 2;
-	static const CARD32 LastAVHeapSlot = AVHeapSize - 2;
+	const CARD32 LastAVHeapSlot = AVHeapSize - 2;
 
 	//FrameSizeIndex: TYPE = [0..LastAVHeapSlot];
 	//FrameVec, frameSizeMap: ARRAY FrameSizeIndex OF [0..MaxFrameSize] = [
 	// 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 68, 80, 96, 112, 128, 148, 168, 192,
 	// 224, 252, 508, 764, 1020, 1276, 1532, 1788, 2044, 2556, 3068, 3580, 4092];
-	static const int FrameSizeMap[LastAVHeapSlot + 1];
+	const int FrameSizeMap[LastAVHeapSlot + 1] = {
+		   8,   12,   16,   20,   24,
+		  28,   32,   40,   48,   56,
+		  68,   80,   96,  112,  128,
+		 148,  168,  192,  224,  252,
+		 508,  764, 1020, 1276, 1532,
+		1788, 2044, 2556, 3068, 3580, 4092
+	};
 };
 
 
@@ -488,8 +488,7 @@ public:
 //
 // APilot/15.0.1/Mesa/Public/VM.mesa
 //
-class VM {
-public:
+namespace VM {
 	//Interval: TYPE = RECORD [page: Environment.PageNumber, count: PageCount];
 	struct Interval {
 		CARD32 page;
@@ -506,8 +505,7 @@ public:
 // APilot/15.0.1/Mesa/Public/Space.mesa
 //
 
-class Space {
-public:
+namespace Space {
 	//Usage: TYPE = [0..2048);
 
 	//Class: TYPE = MACHINE DEPENDENT{
@@ -528,13 +526,12 @@ public:
 //
 // APilot/15.3/Faces/Public/ColorDisplayFace.mesa
 //
-class ColorDisplayFace {
-public:
+namespace ColorDisplayFace {
 	// white: Color = 0;
 	// black: Color = 1;
 
-	static const CARD16 white = 0;
-	static const CARD16 black = 1;
+	const CARD16 white = 0;
+	const CARD16 black = 1;
 };
 
 
@@ -543,8 +540,7 @@ public:
 //
 // APilot/15.0.1/Pilot/Friends/BackingStore.mesa
 //
-class BackingStore {
-public:
+namespace BackingStore {
 	//Data: TYPE = RECORD [
 	//  data: ARRAY [0..7) OF UNSPECIFIED];
 	//-- Describes backing storage of a run of virtual memory pages.
@@ -561,8 +557,7 @@ public:
 //
 // From APilot/15.0.1/Pilot/Private/VMData.mesa
 //
-class VMData {
-public:
+namespace VMData {
 	//State: TYPE = RECORD [
 	//  access: Space.Access,
 	//  life: Space.Life,
@@ -580,8 +575,7 @@ public:
 // From APilot/15.0.1/Pilot/Private/VMDataInternal.mesa
 //
 
-class VMDataInternal {
-public:
+namespace VMDataInternal {
 	//SwapUnitAvailability: TYPE = {available, busy};
 
 	//SwapUnitState: TYPE = RECORD [  -- 4 bits.
@@ -659,10 +653,10 @@ public:
 	} __attribute__((packed));
 
 	//countRunPad: CARDINAL = 1;
-	static const CARD16 countRunPad = 1;
+	const CARD16 countRunPad = 1;
 	//PRun: TYPE = RunBase RELATIVE ORDERED POINTER [0..LAST[CARDINAL]] TO Run;
 	//pRunFirst: PRun = FIRST[PRun] + countRunPad*SIZE[Run];  -- first real entry of table
-	static const CARD16 pRunFirst = 0 + countRunPad * SIZE(Run);
+	const CARD16 pRunFirst = 0 + countRunPad * SIZE(Run);
 };
 
 
@@ -671,8 +665,7 @@ public:
 //
 // APilot/15.0.1/Mesa/Friends/TimeStamp.mesa
 //
-class TimeStamp {
-public:
+namespace TimeStamp {
 	//Stamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
 	//Null: Stamp = Stamp[net: 0, host: 0, time: 0];
 
@@ -696,22 +689,21 @@ public:
 //
 // APilot/15.0.1/Mesa/Friends/BcdDefs.mesa
 //
-class BcdDefs {
-public:
+namespace BcdDefs {
 	// From BcdDefsExtras.mesa
 	//GFTVersionID: CARDINAL = 12206;
 	//Spare4: TYPE = PACKED ARRAY [0..4) OF BOOLEAN;
 	//NewMesaModule: Spare4 = [TRUE, FALSE, FALSE, FALSE];
 	//OldMesaModule: Spare4 = ALL[FALSE];
-	static const CARD16 GFTVersionID  = 12206;
-	static const CARD16 NewMesaModule =  0x04;
-	static const CARD16 OldMesaModule =  0x00;
+	const CARD16 GFTVersionID  = 12206;
+	const CARD16 NewMesaModule =  0x04;
+	const CARD16 OldMesaModule =  0x00;
 
 	// VersionID: CARDINAL = 6103;
-	static const CARD16 VersionID = 6103;
+	const CARD16 VersionID = 6103;
 
 	// tLimit: CARDINAL = 177777B; -- was Table.Limit-1;
-	static const CARD16 tLimit = 65535U;
+	const CARD16 tLimit = 65535U;
 
 	// define XXIndex
 	typedef CARD16 ATIndex;
@@ -740,10 +732,10 @@ public:
 	//    import => [impi: IMPIndex],
 	//    export => [expi: EXPIndex]
 	//    ENDCASE];
-	static const CARD16 N_config = 0;
-	static const CARD16 N_module = 1;
-	static const CARD16 N_import = 2;
-	static const CARD16 N_export = 3;
+	const CARD16 N_config = 0;
+	const CARD16 N_module = 1;
+	const CARD16 N_import = 2;
+	const CARD16 N_export = 3;
 	struct Namee {
 		CARD16 type;
 		union {
@@ -757,11 +749,11 @@ public:
 
 	//NameRecord: TYPE = RECORD [CARDINAL];
 	//NullName: NameRecord = [1];
-	static const CARD16 NullName = 1;
+	const CARD16 NullName = 1;
 
 	//NTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO NTRecord;
 	//NTNull: NTIndex = LAST[NTIndex];
-	static const CARD16 NTNull = tLimit;
+	const CARD16 NTNull = tLimit;
 
 
 	//-- Configuration Table
@@ -789,7 +781,7 @@ public:
 
 	//CTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO CTRecord;
 	//CTNull: CTIndex = LAST[CTIndex];
-	static const CARD16 CTNull = tLimit;
+	const CARD16 CTNull = tLimit;
 
 
 	//FTRecord: TYPE = RECORD [name: NameRecord, version: VersionStamp];
@@ -800,14 +792,14 @@ public:
 	//FTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO FTRecord;
 	//FTNull: FTIndex = LAST[FTIndex];
 	//FTSelf: FTIndex = LAST[FTIndex] - 1;
-	static const CARD16 FTNull = tLimit;
-	static const CARD16 FTSelf = tLimit - 1;
+	const CARD16 FTNull = tLimit;
+	const CARD16 FTSelf = tLimit - 1;
 
 	//SegClass: TYPE = {code, symbols, acMap, other};
-	static const CARD16 SC_code    = 0;
-	static const CARD16 SC_symbols = 1;
-	static const CARD16 SC_acMap   = 2;
-	static const CARD16 SC_other   = 3;
+	const CARD16 SC_code    = 0;
+	const CARD16 SC_symbols = 1;
+	const CARD16 SC_acMap   = 2;
+	const CARD16 SC_other   = 3;
 
 	//SGRecord: TYPE = RECORD [
 	//  file: FTIndex, base: CARDINAL,
@@ -834,10 +826,10 @@ public:
 	//    ENDCASE];
 	//NullLink, nullLink: Link = [procedure[0, 0]];
 	//UnboundLink, unboundLink: Link = [variable[0, 0]];
-	static const CARD16 LT_prodecure = 0;
-	static const CARD16 LT_signal    = 1;
-	static const CARD16 LT_variable  = 2;
-	static const CARD16 LT_type      = 3;
+	const CARD16 LT_prodecure = 0;
+	const CARD16 LT_signal    = 1;
+	const CARD16 LT_variable  = 2;
+	const CARD16 LT_type      = 3;
 	struct Link {
 		union {
 			struct {
@@ -863,13 +855,13 @@ public:
 
 	//  LFIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO LinkFrag;
 	//  LFNull: LFIndex = LAST[LFIndex];
-	static const CARD16 LFNull = tLimit;
+	const CARD16 LFNull = tLimit;
 
 	//-- Module Table
 	//LinkLocation: TYPE = {frame, code, dontcare};
-	static const CARD16 LL_frame    = 0;
-	static const CARD16 LL_code     = 1;
-	static const CARD16 LL_dontcare = 2;
+	const CARD16 LL_frame    = 0;
+	const CARD16 LL_code     = 1;
+	const CARD16 LL_dontcare = 2;
 
 	//CodeDesc: TYPE = RECORD [
 	//  sgi: SGIndex, offset, length: CARDINAL];
@@ -926,7 +918,7 @@ public:
 
 	//MTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO MTRecord;
 	//MTNull: MTIndex = LAST[MTIndex];
-	static const CARD16 MTNull = tLimit;
+	const CARD16 MTNull = tLimit;
 
 
 	//-- Entry Vector Table
@@ -938,12 +930,12 @@ public:
 	} __attribute__((packed));
 	//ENIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO ENRecord;
 	//ENNull: ENIndex = LAST[ENIndex];
-	static const CARD16 ENNull = tLimit;
+	const CARD16 ENNull = tLimit;
 
 	//-- Portable Type
 	//Portable: TYPE = {module, interface};
-	static const CARD16 P_module    = 0;
-	static const CARD16 P_interface = 1;
+	const CARD16 P_module    = 0;
+	const CARD16 P_interface = 1;
 
 	//IMPRecord: TYPE = RECORD [
 	//  name: NameRecord,
@@ -1099,14 +1091,86 @@ public:
 //
 // APilot/15.0.1/Mesa/Friends/SDDefs.mesa
 //
-class SDDefs {
-public:
-	static const CARD16 sGermChecksum     = 0120;
-	static const CARD16 sSystemDate       = 0121;
-	static const CARD16 sFirstPilot       = 0260;
-	static const CARD16 sFirstGermRequest = 0320;
-	static const CARD16 sLastGermRequest  = 0377;
-};
+namespace SDDefs {
+	  // [0..37B] are known by microcode
+	  const CARD16 sBreakTrap       = 0;
+	  const CARD16 sBoot            = 1;  // @SD[sBoot] MOD 4 = 2
+	  const CARD16 sStackError      = 2;
+	  const CARD16 sRescheduleError = 3;
+	  const CARD16 sXferTrap        = 4;
+	  const CARD16 sOpcodeTrap      = 5;
+	  const CARD16 sControlTrap     = 6;
+	  const CARD16 sCodeTrap        = 7;
+	  const CARD16 sHardwareError   = 010;
+	  const CARD16 sUnboundTrap     = 011;
+	  const CARD16 sDivZeroTrap     = 012;
+	  const CARD16 sDivCheckTrap    = 013;
+	  const CARD16 sInterruptError  = 014;
+	  const CARD16 sProcessTrap     = 015;
+	  const CARD16 sBoundsTrap      = 016;
+	  const CARD16 sPointerTrap     = 017;
+
+	  // Signalss
+	  const CARD16 sSignalList      = 040;
+	  const CARD16 sSignal          = 041;
+	  const CARD16 sErrorList       = 042;
+	  const CARD16 sError           = 043;
+	  const CARD16 sReturnErrorList = 044;
+	  const CARD16 sReturnError     = 045;
+	  const CARD16 sUnnamedError    = 046;
+	  const CARD16 sNarrowFault     = 047;
+
+	  // Instructions
+	  const CARD16 sStringInit = 050;
+
+	  // Processes
+	  const CARD16 sFork = 052;
+	  const CARD16 sJoin = 053;
+
+	  // Frames
+	  const CARD16 sCopy    = 054;
+	  const CARD16 sUnNew   = 055;
+	  const CARD16 sStart   = 056;
+	  const CARD16 sRestart = 057;
+
+	  const CARD16 sPerfMonitor     = 072;
+	  const CARD16 sLogging         = 073;
+	  const CARD16 sXferTrapMonitor = 074;
+
+	  const CARD16 sGermChecksum = 0120;
+	  const CARD16 sSystemDate   = 0121;
+
+	  const CARD16 sFirstCedar = 0140;
+	  const CARD16 sLastCedar  = 0257;
+
+	  const CARD16 sFirstPilot        = 0260;
+	  const CARD16 sGermFirstReadonly = 0315;
+	  const CARD16 sGermLastReadonly  = 0316;
+	  const CARD16 sLastPilot         = 0316;
+
+	  // [317B..377B] are known by germ
+	  const CARD16 sGermCount        = 0317;
+	  const CARD16 sFirstGermRequest = 0320;
+	  const CARD16 sLastGermRequest  = 0377;
+
+	  const CARD16 sLastSD = 0377;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+//
+// APilot/15.0.1/Mesa/Friends/SDDefsExtras.mesa
+//
+namespace SDDefsExtras {
+	// known by microcode
+	// eventually goes to SDDefs.mesa
+	const CARD16 sBytePointerTrap = 020;
+
+	const CARD16 sEmptyGFTHandle  = 0130;  // should be a PrincOpsExtras2.GFTHandle, but this will make it easier to bootstrap!!!
+	const CARD16 sGFTSize         = 0131;
+	const CARD16 sLocalFramePages = 0132;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1114,8 +1178,7 @@ public:
 //
 // APilot/15.0.1/Pilot/Public/Pilot.bootmesa
 //
-class PilotBootmesa {
-public:
+namespace PilotBootmesa {
 	//-- Priority levels 3, 4, 6, and 7 are reserved for Pilot.  If you add a
 	//-- faultable process at one of those levels, you must also add a state
 	//-- vector for it.
@@ -1130,7 +1193,10 @@ public:
 	//STATEVECTORCOUNT: 5, 1;  -- Faultable real time devices
 	//STATEVECTORCOUNT: 6, 3;  -- Real Time Processes + 1 for SA800Requester.
 	//STATEVECTORCOUNT: 7, 1;  -- FrameFaultProcess.
-	static const int StateVectorCountMap[8];
+	const int StateVectorCountMap[8] = {
+		 // 0  1  2  3  4  5  6  7 - priority level
+			1, 3, 2, 2, 4, 1, 3, 1
+	};
 
 	// From Pilot.bootmesa
 	//FRAMEWEIGHT: 0, 20;
@@ -1164,8 +1230,16 @@ public:
 	//FRAMEWEIGHT: 28, 0;
 	//FRAMEWEIGHT: 29, 0;
 	//FRAMEWEIGHT: 30, 0;  -- "30" = PrincOps.LastAVSlot.
-	static const int FrameWeightMap[PrincOps::AVHeapSize - 1];
-};
+	const int FrameWeightMap[PrincOps::AVHeapSize - 1] = {
+		20, 26, 15, 16, 16,
+		12,  8,  8,  5,  5,
+		 7,  2,  2,  1,  1,
+		 1,  1,  1,  1,  0,
+		 0,  0,  0,  0,  0,
+		 0,  0,  0,  0,  0, 0
+	};
+
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1173,8 +1247,7 @@ public:
 //
 // From APilot/15.0.1/Pilot/Public/System.mesa
 //
-class System {
-public:
+namespace System {
 	//Switches: TYPE = PACKED ARRAY CHARACTER OF UpDown;
 	//UpDown: TYPE = MACHINE DEPENDENT {up (0), down (1)};
 	//defaultSwitches: Switches = ALL[up];
@@ -1206,7 +1279,7 @@ public:
 		HostNumber    host;
 		SocketNumber  socket;
 	} __attribute__((packed));
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1214,8 +1287,7 @@ public:
 //
 // From APilot/15.3/Faces/Friends/PilotDiskFace.mesa
 //
-class PilotDiskFace {
-public:
+namespace PilotDiskFace {
 	//DiskAddress: TYPE = MACHINE DEPENDENT RECORD [
 	//  cylinder(0): CARDINAL, head(1:0..7): [0..256), sector(1:8..15): [0..256)];
 	struct DiskAddress {
@@ -1295,7 +1367,7 @@ public:
 		writeFault = 12, memoryError = 13, memoryFault = 14, clientError = 15,
 		operationReset = 16, otherError = 17
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1303,8 +1375,7 @@ public:
 //
 // From APilot/15.0.1/Pilot/Friends/PilotDisk.mesa
 //
-class PilotDisk {
-public:
+namespace PilotDisk {
 	//FileID: TYPE = MACHINE DEPENDENT RECORD [
 	//  name(0): SELECT OVERLAID * FROM
 	//    volumeRelative => [
@@ -1318,7 +1389,7 @@ public:
 		} __attribute__((packed));
 		System::UniversalID id;
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1326,29 +1397,28 @@ public:
 //
 // From APilot/15.0.1/Pilot/Friends/Boot.mesa
 //
-class Boot {
-public:
+namespace Boot {
 	//mdsiGerm: BootFile.MDSIndex = 0;
 	//-- the MDS of the Germ, as defned in the PrincOps.  Known to the initial microcode.
-	static const int mdsiGerm = 0;
+	const int mdsiGerm = 0;
 
 	//pageGerm: Environment.PageNumber = 1;
 	//--  Page where Germ's image starts (within Germ's MDS).  Known to the initial microcode.
-	static const int pageGerm = 1;
+	const int pageGerm = 1;
 
 	//countGermVM: Environment.PageCount = 96 - pageGerm;
 	//-- Amount of virtual memory reserved for Germ and its buffers.
-	static const int countGermVM = 96 - pageGerm;
+	const int countGermVM = 96 - pageGerm;
 
 	//currentRequestBasicVersion: CARDINAL = 3456B;
-	static const CARD16 currentRequestBasicVersion     = 03456;
+	const CARD16 currentRequestBasicVersion     = 03456;
 
 	//currentRequestExtensionVersion: CARDINAL = 7654B;
-	static const CARD16 currentRequestExtensionVersion = 07654;
+	const CARD16 currentRequestExtensionVersion = 07654;
 
 	//Session: TYPE = {continuingAfterOutLoad, newSession};
-	static const CARD16 S_continuingAfterOutLoad = 0;
-	static const CARD16 S_newSession             = 1;
+	const CARD16 S_continuingAfterOutLoad = 0;
+	const CARD16 S_newSession             = 1;
 
 	//Action: TYPE = MACHINE DEPENDENT RECORD [act(0): CARDINAL];
 	//inLoad: Action = [0];
@@ -1360,11 +1430,11 @@ public:
 	//teledebug: Action = [3];
 	//-- speak to Ethernet as Teledebug Server.  Return when commanded to.
 	//noOp: Action = [4];  -- simply enter and exit the Germ.
-	static const CARD16 A_inLoad             = 0;
-	static const CARD16 A_outLoad            = 1;
-	static const CARD16 A_bootPhysicalVolume = 2;
-	static const CARD16 A_teledebug          = 3;
-	static const CARD16 A_noOp               = 4;
+	const CARD16 A_inLoad             = 0;
+	const CARD16 A_outLoad            = 1;
+	const CARD16 A_bootPhysicalVolume = 2;
+	const CARD16 A_teledebug          = 3;
+	const CARD16 A_noOp               = 4;
 
 
 	//DiskFileID: TYPE = MACHINE DEPENDENT RECORD [
@@ -1452,13 +1522,13 @@ public:
 	//BootFileType: TYPE = MACHINE DEPENDENT{
 	//  hardMicrocode (0), softMicrocode (1), germ (2), pilot (3), debugger (4),
 	//  debuggee (5), initialMicrocode (6)};
-	static const CARD16 BFT_hardMicrocode    = 0;
-	static const CARD16 BFT_softMicrocode    = 1;
-	static const CARD16 BFT_germ             = 2;
-	static const CARD16 BFT_pilot            = 3;
-	static const CARD16 BFT_debugger         = 4;
-	static const CARD16 BFT_debuggee         = 5;
-	static const CARD16 BFT_initialMicrocode = 6;
+	const CARD16 BFT_hardMicrocode    = 0;
+	const CARD16 BFT_softMicrocode    = 1;
+	const CARD16 BFT_germ             = 2;
+	const CARD16 BFT_pilot            = 3;
+	const CARD16 BFT_debugger         = 4;
+	const CARD16 BFT_debuggee         = 5;
+	const CARD16 BFT_initialMicrocode = 6;
 
 	//PVBootFiles: TYPE = ARRAY BootFileType [hardMicrocode..pilot] OF DiskFileID;
 	struct PVBootFiles {
@@ -1470,7 +1540,7 @@ public:
 		DiskFileID bootFile[6];  // 0..5
 	} __attribute__((packed));
 
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1478,22 +1548,21 @@ public:
 //
 // APilot/15.0.1/Pilot/Private/LogicalVolumeFormat.mesa
 //
-class LogicalVolumeFormat {
-public:
+namespace LogicalVolumeFormat {
 	//maxLogicalVolumeLabelLength: CARDINAL = 40;  -- DO NOT EVER CHANGE THIS VALUE!
-	static const CARD16 maxLogicalVolumeLabelLength = 40;
+	const CARD16 maxLogicalVolumeLabelLength = 40;
 
 	//lvRootSeal: CARDINAL = CARDINAL[131313B];  -- DO NOT EVER CHANGE THIS VALUE!
-	static const CARD16 lvRootSeal = 0131313;
+	const CARD16 lvRootSeal = 0131313;
 
 	//currentVersion: CARDINAL = 9;
-	static const CARD16 currentVersion = 9;
+	const CARD16 currentVersion = 9;
 
 	//LockState: TYPE = MACHINE DEPENDENT {unlocked(0), write(1), read(2), spare(3)};
-	static const CARD16 LC_unlocked = 0;
-	static const CARD16 LC_write    = 1;
-	static const CARD16 LC_read     = 2;
-	static const CARD16 LC_spare    = 3;
+	const CARD16 LC_unlocked = 0;
+	const CARD16 LC_write    = 1;
+	const CARD16 LC_read     = 2;
+	const CARD16 LC_spare    = 3;
 
 	//VolumeLock: TYPE = MACHINE DEPENDENT RECORD [
 	//  owner (0): Volume.ID = Volume.nullID,
@@ -1588,7 +1657,7 @@ public:
 		CARD16              checksum;
 	} __attribute__((packed));
 #pragma pack(pop)
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1596,16 +1665,15 @@ public:
 //
 // APilot/15.0.1/Pilot/Private/PhysicalVolumeFormat.mesa
 //
-class PhysicalVolumeFormat {
-public:
+namespace PhysicalVolumeFormat {
 	//  seal, Seal: CARDINAL = 121212B;
-	static const CARD16 seal = 0121212;
+	const CARD16 seal = 0121212;
 
 	//  currentVersion: CARDINAL = 7;
-	static const CARD16 currentVersion = 7;
+	const CARD16 currentVersion = 7;
 
 	//  maxSubVols: CARDINAL [10..10] = 10;
-	static const CARD16 maxSubVols = 10;
+	const CARD16 maxSubVols = 10;
 
 	//  -- SubVolumeDesc as stored on disk in physical volume root page and in
 	//  -- marker pages.
@@ -1628,7 +1696,7 @@ public:
 	//  physicalVolumeLabelLength: CARDINAL = 40;
 	//
 	//  LabelArray: TYPE = PACKED ARRAY [0..physicalVolumeLabelLength) OF CHARACTER;
-	static const CARD16 physicalVolumeLabelLength = 40;
+	const CARD16 physicalVolumeLabelLength = 40;
 
 	//  Descriptor: TYPE = MACHINE DEPENDENT RECORD [
 	//    -- the following information is relatively static
@@ -1677,7 +1745,7 @@ public:
 		CARD16              checksum;
 	} __attribute__((packed));
 #pragma pack(pop)
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1685,14 +1753,13 @@ public:
 //
 // From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
 //
-class GermOpsImpl {
-public:
+namespace GermOpsImpl {
 	//pageGerm: PageNumber = Boot.pageGerm + Boot.mdsiGerm*Environment.maxPagesInMDS;
 	//pageEndGermVM: PageNumber = pageGerm + Boot.countGermVM;
 	//-- end VM page usable by Germ.
-	static const CARD32 pageGerm = Boot::pageGerm + Boot::mdsiGerm * 1;
-	static const CARD32 pageEndGermVM = pageGerm + Boot::countGermVM;
-};
+	const CARD32 pageGerm = Boot::pageGerm + Boot::mdsiGerm * 1;
+	const CARD32 pageEndGermVM = pageGerm + Boot::countGermVM;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1700,14 +1767,13 @@ public:
 //
 // From APilot/15.3/Faces/Private/GuamInputOutput.mesa
 //
-class GuamInputOutput {
-public:
+namespace GuamInputOutput {
 	// aCALLAGENT: ESCAlpha.alpha = 211B;
 	// aMAPDISPLAY: ESCAlpha.alpha = 212B;
 	// aSTOPEMULATOR: ESCAlpha.alpha = 213B;
-	static const CARD8 aCALLAGENT    = 0211;
-	static const CARD8 aMAPDISPLAY   = 0212;
-	static const CARD8 aSTOPEMULATOR = 0213;
+	const CARD8 aCALLAGENT    = 0211;
+	const CARD8 aMAPDISPLAY   = 0212;
+	const CARD8 aSTOPEMULATOR = 0213;
 
 	// AgentDeviceIndex: TYPE = MACHINE DEPENDENT {
 	//   null(0), disk(1), floppy(2), network(3), parallel(4), keyboard(5), beep(6),
@@ -1718,7 +1784,7 @@ public:
 		keyboard = 5, beep = 6, mouse = 7, processor = 8, stream = 9,
 		serial = 10, tty = 11, display = 12, reserved3 = 13, reserved2 = 14, reserved1 = 15
 	};
-	static const int AgentDeviceIndex_SIZE = (int)AgentDeviceIndex::reserved1 + 1;
+	const int AgentDeviceIndex_SIZE = (int)AgentDeviceIndex::reserved1 + 1;
 
 	// IORegionType: PRIVATE TYPE = MACHINE DEPENDENT RECORD [
 	//   fcbPtrs(0): ARRAY AgentDeviceIndex OF LONG POINTER];
@@ -1726,7 +1792,7 @@ public:
 		LONG_POINTER fcbptrs[AgentDeviceIndex_SIZE];
 	};
 	// ioRegionPtr: READONLY LONG POINTER TO IORegionType;
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1734,8 +1800,7 @@ public:
 //
 // From APilot/15.3/Faces/Public/BiParallelPortFace.mesa
 //
-class BiParallelPortFace {
-public:
+namespace BiParallelPortFace {
 	//Operation: TYPE = RECORD [
 	//  dataBufferPtr: LONG POINTER,	-- ptr to buffer that contains data to be transferred out
 	//  					--	or will contain data transferred in
@@ -1747,13 +1812,13 @@ public:
 	} __attribute__((packed));
 
 	//TransferMode: TYPE = { put, get };
-	static const CARD16 TM_put = 0;
-	static const CARD16 TM_get = 1;
+	const CARD16 TM_put = 0;
+	const CARD16 TM_get = 1;
 
 	//ControlOrData: TYPE = { control, data };
-	static const CARD16 CD_control;
-	static const CARD16 CD_data;
-};
+	const CARD16 CD_control = 0;
+	const CARD16 CD_data    = 1;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1761,13 +1826,12 @@ public:
 //
 // From APilot/15.3/Faces/Friends/DisplayFace.mesa
 //
-class DisplayFace {
-public:
+namespace DisplayFace {
 	//Cursor: TYPE = ARRAY [0..16) OF WORD;
 	struct Cursor {
 		CARD16 word[16];
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1775,8 +1839,7 @@ public:
 //
 // From APilot/15.3/Faces/Friends/FloppyDiskFace.mesa
 //
-class FloppyDiskFace {
-public:
+namespace FloppyDiskFace {
 	//Density: TYPE = MACHINE DEPENDENT {single, double}; --Selection of either FM (single density) or MFM (double density) recording. This is an available selection when formatting a new diskette. When accessng a previously recorded diskette, the client must provide the correct setting. (Note that track00 on IBM format 8" diskettes and all tracks of Troy format diskettes will be single density.)
 
 	//Function: TYPE = MACHINE DEPENDENT {
@@ -1850,7 +1913,7 @@ public:
 		deletedData = 5, recordNotFound = 6, headerError = 7, dataError = 8, dataLost = 9,
 		writeFault = 10, memoryError = 11, invalidOperation = 12, aborted = 13, otherError = 14,
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1858,8 +1921,7 @@ public:
 //
 // From APilot/15.3/RS232C/Public/RS232CEnvironment.mesa
 //
-class RS232CEnvironment {
-public:
+namespace RS232CEnvironment {
 	//CharLength: TYPE = [5..8];
 
 	//Correspondent: TYPE = RECORD [[0..255]];
@@ -1873,46 +1935,46 @@ public:
 		CARD16 xOn;
 		CARD16 xOff;
 	};
-	static const CARD16 FCT_none    = 0;
-	static const CARD16 FCT_xOnXOff = 1;
+	const CARD16 FCT_none    = 0;
+	const CARD16 FCT_xOnXOff = 1;
 
 	//LineSpeed: TYPE = {
 	//  bps50, bps75, bps110, bps134p5, bps150, bps300, bps600, bps1200, bps2400,
 	//  bps3600, bps4800, bps7200, bps9600, bps19200, bps28800, bps38400, bps48000,
 	//  bps56000, bps57600};
-	static const CARD16 LS_bps50    =  0;
-	static const CARD16 LS_bps75    =  1;
-	static const CARD16 LS_bps110   =  2;
-	static const CARD16 LS_bps134p5 =  3;
-    static const CARD16 LS_bps150   =  4;
-    static const CARD16 LS_bps300   =  5;
-    static const CARD16 LS_bps600   =  6;
-    static const CARD16 LS_bps1200  =  7;
-    static const CARD16 LS_bps2400  =  8;
-    static const CARD16 LS_bps3600  =  9;
-    static const CARD16 LS_bps4800  = 10;
-    static const CARD16 LS_bps7200  = 11;
-    static const CARD16 LS_bps9600  = 12;
-    static const CARD16 LS_bps19200 = 13;
-    static const CARD16 LS_bps28800 = 14;
-    static const CARD16 LS_bps38400 = 15;
-    static const CARD16 LS_bps48000 = 16;
-    static const CARD16 LS_bps56000 = 17;
-    static const CARD16 LS_bps57600 = 18;
+	const CARD16 LS_bps50    =  0;
+	const CARD16 LS_bps75    =  1;
+	const CARD16 LS_bps110   =  2;
+	const CARD16 LS_bps134p5 =  3;
+    const CARD16 LS_bps150   =  4;
+    const CARD16 LS_bps300   =  5;
+    const CARD16 LS_bps600   =  6;
+    const CARD16 LS_bps1200  =  7;
+    const CARD16 LS_bps2400  =  8;
+    const CARD16 LS_bps3600  =  9;
+    const CARD16 LS_bps4800  = 10;
+    const CARD16 LS_bps7200  = 11;
+    const CARD16 LS_bps9600  = 12;
+    const CARD16 LS_bps19200 = 13;
+    const CARD16 LS_bps28800 = 14;
+    const CARD16 LS_bps38400 = 15;
+    const CARD16 LS_bps48000 = 16;
+    const CARD16 LS_bps56000 = 17;
+    const CARD16 LS_bps57600 = 18;
 
 	//LineType: TYPE = {
 	//  bitSynchronous, byteSynchronous, asynchronous, autoRecognition};
-    static const CARD16 LT_bitSynchronous  = 0;
-    static const CARD16 LT_byteSynchronous = 1;
-    static const CARD16 LT_asynchronous    = 2;
-    static const CARD16 LT_autoRecognition = 3;
+    const CARD16 LT_bitSynchronous  = 0;
+    const CARD16 LT_byteSynchronous = 1;
+    const CARD16 LT_asynchronous    = 2;
+    const CARD16 LT_autoRecognition = 3;
 
 	//Parity: TYPE = {none, odd, even, one, zero};
-    static const CARD16 P_none = 0;
-    static const CARD16 P_odd  = 1;
-    static const CARD16 P_even = 2;
-    static const CARD16 P_one  = 3;
-    static const CARD16 P_zero = 4;
+    const CARD16 P_none = 0;
+    const CARD16 P_odd  = 1;
+    const CARD16 P_even = 2;
+    const CARD16 P_one  = 3;
+    const CARD16 P_zero = 4;
 
 	//StopBits: TYPE = [1..2];
 
@@ -1920,7 +1982,7 @@ public:
 
 	//SyncCount
 	//SyncCount: TYPE = [0..7];
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -1928,8 +1990,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/NewRS232CFace.mesa
 //
-class NewRS232CFace {
-public:
+namespace NewRS232CFace {
 	//ParameterRecord: TYPE = MACHINE DEPENDENT RECORD [
 	//  charLength(0:8..10): RS232CEnvironment.CharLength,
 	//  clientType(2:1..7): ClientType,
@@ -1996,9 +2057,9 @@ public:
 	} __attribute__((packed));
 
 	//ClientType: TYPE = MACHINE DEPENDENT {ascii, ebcdic, unknown};
-	static const CARD16 CT_ascii    = 0;
-	static const CARD16 CT_ebicidic = 1;
-	static const CARD16 CT_unknown  = 2;
+	const CARD16 CT_ascii    = 0;
+	const CARD16 CT_ebicidic = 1;
+	const CARD16 CT_unknown  = 2;
 
 	//ControlRecord: TYPE = MACHINE DEPENDENT RECORD [
 	//  dataTerminalReady(0:0..0): BOOLEAN,
@@ -2039,11 +2100,11 @@ public:
 	};
 
 	//ParameterStatus: TYPE = MACHINE DEPENDENT {inProgress, completed, unimplemented, rejected};
-	static const CARD16 PS_inProgress   = 0;
-	static const CARD16 PS_completed    = 1;
-	static const CARD16 PS_unimplmented = 2;
-	static const CARD16 PS_rejected     = 3;
-};
+	const CARD16 PS_inProgress   = 0;
+	const CARD16 PS_completed    = 1;
+	const CARD16 PS_unimplmented = 2;
+	const CARD16 PS_rejected     = 3;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2051,14 +2112,13 @@ public:
 //
 // From APilot/15.3/Faces/Private/BeepIOFaceGuam.mesa
 //
-class BeepIOFaceGuam {
-public:
+namespace BeepIOFaceGuam {
 	//  BeepFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//    frequency(0): CARDINAL]; -- 0 to disable beep
 	struct BeepFCBType {
 		CARD16 frequency;
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2066,8 +2126,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/CoProcessorIOFaceGuam.mesa
 //
-class CoProcessorIOFaceGuam {
-public:
+namespace CoProcessorIOFaceGuam {
 	//CoProcessorFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  iocbHead(0): CoProcessorIOCBPtr,
 	//  iocbNext(2): CoProcessorIOCBPtr,
@@ -2164,26 +2223,26 @@ public:
 
 	//CommandType: TYPE = MACHINE DEPENDENT
 	//  {idle(0), accept(1), connect(2), delete(3), read(4), write(5)};
-	static const CARD16 C_idle    = 0;
-	static const CARD16 C_accept  = 1;
-	static const CARD16 C_connect = 2;
-	static const CARD16 C_delete  = 3;
-	static const CARD16 C_read    = 4;
-	static const CARD16 C_write   = 5;
+	const CARD16 C_idle    = 0;
+	const CARD16 C_accept  = 1;
+	const CARD16 C_connect = 2;
+	const CARD16 C_delete  = 3;
+	const CARD16 C_read    = 4;
+	const CARD16 C_write   = 5;
 
 	//ConnectionStateType: TYPE = MACHINE DEPENDENT
 	//  {idle(0), accepting(1), connected(2), deleted(3)};
-	static const CARD16 S_idle      = 0;
-	static const CARD16 S_accepting = 1;
-	static const CARD16 S_connected = 2;
-	static const CARD16 S_deleted   = 3;
+	const CARD16 S_idle      = 0;
+	const CARD16 S_accepting = 1;
+	const CARD16 S_connected = 2;
+	const CARD16 S_deleted   = 3;
 
 	//ResultType: TYPE = MACHINE DEPENDENT
 	//  {completed(0), inProgress(1), error(2)};
-	static const CARD16 R_completed  = 0;
-	static const CARD16 R_inProgress = 1;
-	static const CARD16 R_error      = 2;
-};
+	const CARD16 R_completed  = 0;
+	const CARD16 R_inProgress = 1;
+	const CARD16 R_error      = 2;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2191,50 +2250,49 @@ public:
 //
 // From APilot/15.3/CoProcessorStream/Public/CoProcessorServerIDs.mesa
 //
-class CoProcessorServerIDs {
-public:
+namespace CoProcessorServerIDs {
 	// msdosFileService, fileAccess: ServerID = 1;  -- service on DOS end.
-	static const CARD32 msdosFileService                       = 1;
-	static const CARD32 fileAccess                             = 1;
+	const CARD32 msdosFileService                       = 1;
+	const CARD32 fileAccess                             = 1;
 	// unixFileService, windowToUNIXFileService: ServerID = 2;  -- service on UNIX end.
 	// triggerApplicationService, triggerApp: ServerID = 5;  -- service on nonGV end?
 
 	// TcpStreamGuamImpl.tcpService = CoProcessorServerIDsExtra.tcpService
-	static const CARD32 tcpService                             = 21;
+	const CARD32 tcpService                             = 21;
 
 	// mswindowsCopyAndPasteService, copyPaste: ServerID = 101;  -- service on MS Windows end.
-	static const CARD32 mswindowsCopyAndPasteService           = 101;
-	static const CARD32 copyPaste                              = 101;
+	const CARD32 mswindowsCopyAndPasteService           = 101;
+	const CARD32 copyPaste                              = 101;
 	// interpressToPostScriptPrintingService, psPrntSrv: ServerID = 102;  -- service on nonGV end.
-	static const CARD32 interpressToPostScriptPrintingService  = 102;
-	static const CARD32 psPrntSrv                              = 102;
+	const CARD32 interpressToPostScriptPrintingService  = 102;
+	const CARD32 psPrntSrv                              = 102;
 	// documentConversionService, docCnvSrv: ServerID = 103;  -- service on nonGV end.
-	static const CARD32 documentConversionService              = 103;
-	static const CARD32 docCnvSrv                              = 103;
+	const CARD32 documentConversionService              = 103;
+	const CARD32 docCnvSrv                              = 103;
 	// dragAndDropToGVService, dragAndDropBWSID: ServerID = 104;  -- service on GlobalView end.
 	// helpService, help: ServerID = 105;  -- service on nonGV end.
-	static const CARD32 helpService                            = 105;
-	static const CARD32 help                                   = 105;
+	const CARD32 helpService                            = 105;
+	const CARD32 help                                   = 105;
 	// workspaceWindowControlGVService, wkspWinCtrlMesaServerID: ServerID = 106;  -- service on GlobalView end.
-	static const CARD32 workspaceWindowControlGVService        = 106;
-	static const CARD32 wkspWinCtrlMesaServerID                = 106;
+	const CARD32 workspaceWindowControlGVService        = 106;
+	const CARD32 wkspWinCtrlMesaServerID                = 106;
 	// dragAndDropToMSWindowsService, dragAndDropAgentID: ServerID = 107;  -- service on MSWindows end.
-	static const CARD32 dragAndDropToMSWindowsService          = 107;
-	static const CARD32 dragAndDropAgentID                     = 107;
+	const CARD32 dragAndDropToMSWindowsService          = 107;
+	const CARD32 dragAndDropAgentID                     = 107;
 	// workspaceWindowControlMSWindowsService, wkspWinCtrlPCServerID: ServerID = 108;  -- service on MSWindows end.
-	static const CARD32 workspaceWindowControlMSWindowsService = 108;
-	static const CARD32 wkspWinCtrlPCServerID                  = 108;
+	const CARD32 workspaceWindowControlMSWindowsService = 108;
+	const CARD32 wkspWinCtrlPCServerID                  = 108;
 	// windowInstallerToTTYService, windowInstallerAgentID: ServerID = 109;  -- service on MSWindows end to communicate with Stream-To-TTY Interface of the NSInstaller.
-	static const CARD32 windowInstallerToTTYService            = 109;
-	static const CARD32 windowInstallerAgentID                 = 109;
+	const CARD32 windowInstallerToTTYService            = 109;
+	const CARD32 windowInstallerAgentID                 = 109;
 	// bootStreamAgentService, bootAgentID:  ServerID = 110; --service on MSWindows end. Communication with bootloader.
-	static const CARD32 bootStreamAgentService                 = 110;
-	static const CARD32 bootAgentID                            = 110;
+	const CARD32 bootStreamAgentService                 = 110;
+	const CARD32 bootAgentID                            = 110;
 	// installerStreamAgentService, installerAgentID: ServerID = 111; --service on MSWindows end.
-	static const CARD32 installerStreamAgentService            = 111;
-	static const CARD32 installerAgentID                       = 111;
+	const CARD32 installerStreamAgentService            = 111;
+	const CARD32 installerAgentID                       = 111;
 	// scanService: ServerID = 715;  -- service on nonGV end.
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2242,8 +2300,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/DiskIOFaceGuam.mesa
 //
-class DiskIOFaceGuam {
-public:
+namespace DiskIOFaceGuam {
 	//  DiskDCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//    deviceType(0): Device.Type,
 	//    numberOfCylinders(1): CARDINAL,
@@ -2299,7 +2356,7 @@ public:
 		CARD32                     nextIOCB;               // DiskIOCBPtr = NIL
 		CARD16                     agentOperationData[10]; // ALL[0]
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2307,19 +2364,18 @@ public:
 //
 // From APilot/15.3/Faces/Private/DisplayIOFaceGuam.mesa
 //
-class DisplayIOFaceGuam {
-public:
+namespace DisplayIOFaceGuam {
 	//DisplayCommand: TYPE = MACHINE DEPENDENT {
 	//  nop(0), setCLTEntry(1), getCLTEntry(2), setBackground(3), setCursorPattern(4),
 	//  updateRectangle(5), copyRectangle(6), patternFillRectangle(7)};
-	static const CARD16 C_nop                  = 0;
-	static const CARD16 C_setCLTEntry          = 1;
-	static const CARD16 C_getCLTEntry          = 2;
-	static const CARD16 C_setBackground        = 3;
-	static const CARD16 C_setCursorPattern     = 4;
-	static const CARD16 C_updateRectangle      = 5;
-	static const CARD16 C_copyRectangle        = 6;
-	static const CARD16 C_patternFillRectangle = 7;
+	const CARD16 C_nop                  = 0;
+	const CARD16 C_setCLTEntry          = 1;
+	const CARD16 C_getCLTEntry          = 2;
+	const CARD16 C_setBackground        = 3;
+	const CARD16 C_setCursorPattern     = 4;
+	const CARD16 C_updateRectangle      = 5;
+	const CARD16 C_copyRectangle        = 6;
+	const CARD16 C_patternFillRectangle = 7;
 
 	//DisplayCoordinate: TYPE = MACHINE DEPENDENT RECORD [
 	//  x(0): CARDINAL,
@@ -2342,18 +2398,18 @@ public:
 	//DisplayStatus: TYPE = MACHINE DEPENDENT {
 	//  success(0), generalFailure(1), invalidCLTIndex(2), readOnlyCLT(3),
 	//  invalidDestRectangle(4), invalidSourceRectangle(5)};
-	static const CARD16 S_success                = 0;
-	static const CARD16 S_generalFailure         = 1;
-	static const CARD16 S_invalidCLTIndex        = 2;
-	static const CARD16 S_readOnlyCLT            = 3;
-	static const CARD16 S_invalidDestRectangle   = 4;
-	static const CARD16 S_invalidSourceRectangle = 5;
+	const CARD16 S_success                = 0;
+	const CARD16 S_generalFailure         = 1;
+	const CARD16 S_invalidCLTIndex        = 2;
+	const CARD16 S_readOnlyCLT            = 3;
+	const CARD16 S_invalidDestRectangle   = 4;
+	const CARD16 S_invalidSourceRectangle = 5;
 
 	//DisplayType: TYPE = MACHINE DEPENDENT {
 	//  monochrome(0), fourBitPlaneColor(1), byteColor(2)};
-	static const CARD16 T_monochrome        = 0;
-	static const CARD16 T_fourBitPlaneColor = 1;
-	static const CARD16 T_byteColor         = 2;
+	const CARD16 T_monochrome        = 0;
+	const CARD16 T_fourBitPlaneColor = 1;
+	const CARD16 T_byteColor         = 2;
 
 	//-- Fields in LookupTableEntry are arranged from high to low within a 32-bit word.
 	//LookupTableEntry: TYPE = MACHINE DEPENDENT RECORD [
@@ -2380,10 +2436,10 @@ public:
 
 	//PatternFillMode: TYPE = MACHINE DEPENDENT {
 	//  copy(0), and(1), or(2), xor(3)};
-	static const CARD16 PFM_copy = 0;
-	static const CARD16 PFM_and  = 1;
-	static const CARD16 PFM_or   = 2;
-	static const CARD16 PFM_xor  = 3;
+	const CARD16 PFM_copy = 0;
+	const CARD16 PFM_and  = 1;
+	const CARD16 PFM_or   = 2;
+	const CARD16 PFM_xor  = 3;
 
 	//-- Fields in DisplayFCBType have been arranged by function, not by position.
 	//DisplayFCBType: TYPE = MACHINE DEPENDENT RECORD [
@@ -2447,7 +2503,7 @@ public:
 		CARD16              displayWidth;
 		CARD16              displayHeight;
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2455,8 +2511,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/EthernetIOFaceGuam.mesa
 //
-class EthernetIOFaceGuam {
-public:
+namespace EthernetIOFaceGuam {
 	//EthernetFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  receiveIOCB(0): EthernetIOCBPtr,
 	//  transmitIOCB(2): EthernetIOCBPtr,
@@ -2510,20 +2565,20 @@ public:
 	};
 
 	// packetType(4:1..7): {receive, transmit},
-	static const CARD16 PT_receive  = 0;
-	static const CARD16 PT_transmit = 1;
+	const CARD16 PT_receive  = 0;
+	const CARD16 PT_transmit = 1;
 
 	//EthernetIOCBStatus: TYPE = MACHINE DEPENDENT {
 	//  inProgress(1), completedOK(2), tooManyCollisions(4), badCRC(8), alignmentError(16),
 	//  packetTooLong(32), badCRCAndAlignmentError(128)};
-	static const CARD16 S_inProgress              =   1;
-	static const CARD16 S_completedOK             =   2;
-	static const CARD16 S_tooManyCollisions       =   4;
-	static const CARD16 S_badCRC                  =   8;
-	static const CARD16 S_alignmentError          =  16;
-	static const CARD16 S_packetTooLong           =  32;
-	static const CARD16 S_bacCRDAndAlignmentError = 128;
-};
+	const CARD16 S_inProgress              =   1;
+	const CARD16 S_completedOK             =   2;
+	const CARD16 S_tooManyCollisions       =   4;
+	const CARD16 S_badCRC                  =   8;
+	const CARD16 S_alignmentError          =  16;
+	const CARD16 S_packetTooLong           =  32;
+	const CARD16 S_bacCRDAndAlignmentError = 128;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2531,8 +2586,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/FloppyIOFaceGuam.mesa
 //
-class FloppyIOFaceGuam {
-public:
+namespace FloppyIOFaceGuam {
 	//  FloppyDCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//    deviceType(0): Device.Type,
 	//    numberOfCylinders(1): CARDINAL,
@@ -2589,7 +2643,7 @@ public:
 		CARD16 numberOfDCBs;      // BOOLEAN
 		FloppyDCBType dcbs[0];    // SEQUENCE COMPUTED CARDINAL OF FloppyDCBType
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2597,14 +2651,13 @@ public:
 //
 // From APilot/15.3/Faces/Private/KeyboardIOFaceGuam.mesa
 //
-class KeyboardIOFaceGuam {
-public:
+namespace KeyboardIOFaceGuam {
 	//KeyboardFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  keyStates: ARRAY [0..7) OF WORD];
 	struct KeyboardFCBType {
 		CARD16 keyStates[7];
 	};
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2612,8 +2665,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/MouseIOFaceGuam.mesa
 //
-class MouseIOFaceGuam {
-public:
+namespace MouseIOFaceGuam {
 	//MousePositionType: TYPE = MACHINE DEPENDENT RECORD [
 	//  mouseXCoord(0): INTEGER,
 	//  mouseYCoord(1): INTEGER];
@@ -2636,10 +2688,10 @@ public:
 
 	//MouseCommandType: TYPE = MACHINE DEPENDENT {
 	//  nop(0), setPosition(1), setCursorPosition(2)};
-	static const CARD16 C_nop = 0;
-	static const CARD16 C_setPosition = 1;
-	static const CARD16 C_setCursorPosition = 2;
-};
+	const CARD16 C_nop = 0;
+	const CARD16 C_setPosition = 1;
+	const CARD16 C_setCursorPosition = 2;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2647,8 +2699,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/ParallelIOFaceGuam.mesa
 //
-class ParallelIOFaceGuam {
-public:
+namespace ParallelIOFaceGuam {
 	//ParallelFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  nextIOCB(0): ParallelIOCBPtr,
 	//  interruptSelector(2): GuamInputOutput.InterruptSelectorType,
@@ -2684,10 +2735,10 @@ public:
 
 	//ParallelIOCBStatus: TYPE = MACHINE DEPENDENT {
 	//  inProgress(0), completed(1), aborted(2)};
-	static const CARD16 S_inProgress = 0;
-	static const CARD16 S_completed  = 1;
-	static const CARD16 S_aborted    = 2;
-};
+	const CARD16 S_inProgress = 0;
+	const CARD16 S_completed  = 1;
+	const CARD16 S_aborted    = 2;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2695,8 +2746,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/ProcessorIOFaceGuam.mesa
 //
-class ProcessorIOFaceGuam {
-public:
+namespace ProcessorIOFaceGuam {
 	//  ProcessorFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//    processorID(0): ProcessorFace.ProcessorID,
 	//    microsecondsPerHundredPulses(3): CARDINAL,
@@ -2721,16 +2771,16 @@ public:
 
 	//  ProcessorCommand: TYPE = MACHINE DEPENDENT {
 	//    noop(0), readGMT(1), writeGMT(2)};
-	static const CARD16 C_noop     = 0;
-	static const CARD16 C_readGMT  = 1;
-	static const CARD16 C_writeGMT = 2;
+	const CARD16 C_noop     = 0;
+	const CARD16 C_readGMT  = 1;
+	const CARD16 C_writeGMT = 2;
 
 	//  ProcessorStatus: TYPE = MACHINE DEPENDENT {
 	//    inProgress(0), success(1), failure(2)};
-	static const CARD16 S_inProgress = 0;
-	static const CARD16 S_success    = 1;
-	static const CARD16 S_failure    = 2;
-};
+	const CARD16 S_inProgress = 0;
+	const CARD16 S_success    = 1;
+	const CARD16 S_failure    = 2;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2738,8 +2788,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/SerialIOFaceGuam.mesa
 //
-class SerialIOFaceGuam {
-public:
+namespace SerialIOFaceGuam {
 	//SerialFaceFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  txIOCB(0): SerialIOCBPtr,
 	//  rxIOCB(2): SerialIOCBPtr,
@@ -2769,18 +2818,18 @@ public:
 	//SerialCommand: TYPE = MACHINE DEPENDENT {
 	//  noOp(0), abortReceive(1), abortTransmit(2), breakOff(3), breakOn(4), getDeviceStatus(5),
 	//  off(6), on(7), receive(8), setControlBits(9), setParameters(10), transmit(11)};
-	static const CARD16 C_noOp            =  0;
-	static const CARD16 C_abortReceive    =  1;
-	static const CARD16 C_abortTransmit   =  2;
-	static const CARD16 C_breakOff        =  3;
-	static const CARD16 C_breakOn         =  4;
-	static const CARD16 C_getDeviceStatus =  5;
-	static const CARD16 C_off             =  6;
-	static const CARD16 C_on              =  7;
-	static const CARD16 C_receive         =  8;
-	static const CARD16 C_setControlBits  =  9;
-	static const CARD16 C_setParameters   = 10;
-	static const CARD16 C_transmit        = 11;
+	const CARD16 C_noOp            =  0;
+	const CARD16 C_abortReceive    =  1;
+	const CARD16 C_abortTransmit   =  2;
+	const CARD16 C_breakOff        =  3;
+	const CARD16 C_breakOn         =  4;
+	const CARD16 C_getDeviceStatus =  5;
+	const CARD16 C_off             =  6;
+	const CARD16 C_on              =  7;
+	const CARD16 C_receive         =  8;
+	const CARD16 C_setControlBits  =  9;
+	const CARD16 C_setParameters   = 10;
+	const CARD16 C_transmit        = 11;
 
 	//SerialIOCBPtr: TYPE = LONG POINTER TO SerialIOCBType;
 	//SerialIOCBType: TYPE = MACHINE DEPENDENT RECORD [
@@ -2803,9 +2852,9 @@ public:
 		CARD16 status;
 		CARD32 nextIOCB;
 	};
-	static const CARD16 T_receive = 0;
-	static const CARD16 T_ransmit = 1;
-};
+	const CARD16 T_receive = 0;
+	const CARD16 T_ransmit = 1;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2813,8 +2862,7 @@ public:
 //
 // From APilot/15.3/Faces/Private/TTYPortIOFaceGuam.mesa
 //
-class TTYPortIOFaceGuam {
-public:
+namespace TTYPortIOFaceGuam {
 	//TTYFCBType: TYPE = MACHINE DEPENDENT RECORD [
 	//  ttyInterruptSelector(0):	GuamInputOutput.InterruptSelectorType,
 	//  command(1):			TTYCommandType,
@@ -2851,59 +2899,59 @@ public:
 
 	//TTYCommandType: TYPE = MACHINE DEPENDENT {
 	//  nop(0), transmit(1), receive(2), open(3), close(4), setParams(5), sendBreak(6)};
-	static const CARD16 C_nop       = 0;
-	static const CARD16 C_transmit  = 1;
-	static const CARD16 C_receive   = 2;
-	static const CARD16 C_open      = 3;
-	static const CARD16 C_close     = 4;
-	static const CARD16 C_setParam  = 5;
-	static const CARD16 C_sendBreak = 6;
+	const CARD16 C_nop       = 0;
+	const CARD16 C_transmit  = 1;
+	const CARD16 C_receive   = 2;
+	const CARD16 C_open      = 3;
+	const CARD16 C_close     = 4;
+	const CARD16 C_setParam  = 5;
+	const CARD16 C_sendBreak = 6;
 
 	//TTYStatusType: TYPE = MACHINE DEPENDENT {
 	//  success(0), breakDetected(1), dataLost(2), parityError(3), framingError(4)};
-	static const CARD16 S_success       = 0;
-	static const CARD16 S_breakDetected = 1;
-	static const CARD16 S_dataLost      = 2;
-	static const CARD16 S_parityError   = 3;
-	static const CARD16 S_framingError  = 4;
+	const CARD16 S_success       = 0;
+	const CARD16 S_breakDetected = 1;
+	const CARD16 S_dataLost      = 2;
+	const CARD16 S_parityError   = 3;
+	const CARD16 S_framingError  = 4;
 
 	//CharLengthType: TYPE = MACHINE DEPENDENT
 	//  {lengthIs5bits, lengthIs6bits, lengthIs7bits, lengthIs8bits};
-	static const CARD16 CL_lengthIs5bits = 0;
-	static const CARD16 CL_lengthIs6bits = 1;
-	static const CARD16 CL_lengthIs7bits = 2;
-	static const CARD16 CL_lengthIs8bits = 3;
+	const CARD16 CL_lengthIs5bits = 0;
+	const CARD16 CL_lengthIs6bits = 1;
+	const CARD16 CL_lengthIs7bits = 2;
+	const CARD16 CL_lengthIs8bits = 3;
 
 	//LineSpeedType: TYPE = MACHINE DEPENDENT
 	//  {bps50, bps75, bps110, bps150, bps300, bps600, bps1200, bps1800, bps2000, bps2400, bps3600, bps4800, bps7200, bps9600, bps19200};
-	static const CARD16 LS_bps50    =  0;
-	static const CARD16 LS_bps75    =  1;
-	static const CARD16 LS_bps110   =  2;
-	static const CARD16 LS_bps150   =  3;
-	static const CARD16 LS_bps300   =  4;
-	static const CARD16 LS_bps600   =  5;
-	static const CARD16 LS_bps1200  =  6;
-	static const CARD16 LS_bps1800  =  7;
-	static const CARD16 LS_bps2000  =  8;
-	static const CARD16 LS_bps2400  =  9;
-	static const CARD16 LS_bps3600  = 10;
-	static const CARD16 LS_bps4800  = 11;
-	static const CARD16 LS_bps7200  = 12;
-	static const CARD16 LS_bps9600  = 13;
-	static const CARD16 LS_bps19200 = 14;
+	const CARD16 LS_bps50    =  0;
+	const CARD16 LS_bps75    =  1;
+	const CARD16 LS_bps110   =  2;
+	const CARD16 LS_bps150   =  3;
+	const CARD16 LS_bps300   =  4;
+	const CARD16 LS_bps600   =  5;
+	const CARD16 LS_bps1200  =  6;
+	const CARD16 LS_bps1800  =  7;
+	const CARD16 LS_bps2000  =  8;
+	const CARD16 LS_bps2400  =  9;
+	const CARD16 LS_bps3600  = 10;
+	const CARD16 LS_bps4800  = 11;
+	const CARD16 LS_bps7200  = 12;
+	const CARD16 LS_bps9600  = 13;
+	const CARD16 LS_bps19200 = 14;
 
 	//ParityType: TYPE = MACHINE DEPENDENT
 	//  {none, odd, even};
-	static const CARD16 P_none = 0;
-	static const CARD16 P_odd  = 1;
-	static const CARD16 P_even = 2;
+	const CARD16 P_none = 0;
+	const CARD16 P_odd  = 1;
+	const CARD16 P_even = 2;
 
 	//StopBitsType: TYPE = MACHINE DEPENDENT
 	//  {one, oneAndHalf, two};
-	static const CARD16 SB_one        = 0;
-	static const CARD16 SB_oneAndHalf = 1;
-	static const CARD16 SB_two        = 2;
-};
+	const CARD16 SB_one        = 0;
+	const CARD16 SB_oneAndHalf = 1;
+	const CARD16 SB_two        = 2;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2911,15 +2959,14 @@ public:
 //
 // From APilot/15.3/Faces/Private/RealMemoryImplGuam.mesa
 //
-class RealMemoryImplGuam {
-public:
+namespace RealMemoryImplGuam {
 	//largestArraySize: CARDINAL = 4086;	-- supports almost 32 MB of real memory
 	//
 	//--RealMemory.--
 	//allocMap: PUBLIC DESCRIPTOR FOR ARRAY OF WORD = DESCRIPTOR[allocMapArray];
 	//allocMapArray: ARRAY [0..largestArraySize) OF WORD;  -- (initial state not important)
-	static const int largestArraySize = 4086;
-};
+	const int largestArraySize = 4086;
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -2927,14 +2974,13 @@ public:
 //
 // From APilot/15.0.1/Mesa/Friends/LoadStateFormat.mesa
 //
-class LoadStateFormat {
-public:
+namespace LoadStateFormat {
 	//VersionID: CARDINAL = 06113;
-	static const CARD16 VersionID = 6113;
+	const CARD16 VersionID = 6113;
 
 	//Index: TYPE = CARDINAL;
 	//nullIndex: Index = LAST[Index];
-	static const CARD16 nullIndex = (CARD16)~0U;
+	const CARD16 nullIndex = (CARD16)~0U;
 
 	//ModuleInfoIndex: TYPE = Handle RELATIVE POINTER TO ARRAY [0..0) OF ModuleInfo;
 	//BcdInfoIndex:    TYPE = Handle RELATIVE POINTER TO ARRAY Index[0..0) OF BcdInfo;
@@ -3006,7 +3052,7 @@ public:
 		CARD16 moduleInfo;
 		CARD16 bcdInfo;
 	} __attribute__((packed));
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -3014,11 +3060,10 @@ public:
 //
 // From APilot/15.0.1/Pilot/Friends/CPSwapDefs.mesa
 //
-class CPSwapDefs {
-public:
+namespace CPSwapDefs {
 	//oldVersion: CARDINAL = 01054;
 	//currentVersion: CARDINAL = 01055;
-	static const CARD16 currentVersion = 1055;
+	const CARD16 currentVersion = 1055;
 
 	//SwapInfo: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- This is the actual usage of PSB.PDA.available.
@@ -3031,12 +3076,12 @@ public:
 		CARD16 availableE;
 	} __attribute__((packed));
 
-	static const CARD32 SWAPINFO = PDA + OFFSET(ProcessDataArea, available);
+	const CARD32 SWAPINFO = PDA + OFFSET(ProcessDataArea, available);
 
 
 	//PESV: PROCEDURE[] RETURNS [LONG POINTER TO ExternalStateVector] = INLINE {
 	//  RETURN[LOOPHOLE[PSB.PDA.available, SwapInfo].externalStateVector]};
-	static const CARD32 PSEV = SWAPINFO + OFFSET(SwapInfo, externalStateVector);
+	const CARD32 PSEV = SWAPINFO + OFFSET(SwapInfo, externalStateVector);
 
 	//ExternalStateVector: TYPE = MACHINE DEPENDENT RECORD [
 	//	-- Items describing the boot session in general:
@@ -3085,7 +3130,7 @@ public:
 		CARD16 spareA;
 		CARD16 spareB;
 	} __attribute__((packed));
-};
+}
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -3093,13 +3138,12 @@ public:
 //
 // APilot/15.0.1/Mesa/Public/PrincOpsExtras2.mesa
 //
-class PrincOpsExtras2 {
-public:
+namespace PrincOpsExtras2 {
 //  -- GFT
 //
 //  GFTIndex: TYPE = CARDINAL[0..16384);
-	static const CARD16 GFTIndex_FIRST = 0;
-	static const CARD16 GFTIndex_LAST  = 16383;
+	const CARD16 GFTIndex_FIRST = 0;
+	const CARD16 GFTIndex_LAST  = 16383;
 //
 //  GlobalFrameTable: TYPE = LONG BASE POINTER TO ARRAY GFTIndex OF GFTItem;
 //
@@ -3109,22 +3153,22 @@ public:
 //
 //  EmptyGFTItem: GFTItem = [inuse[globalFrame: NIL, codebase: [code[NIL]]]];
 //  nullGFI: GFTIndex = FIRST[GFTIndex];
-	static const CARD16 nullGFI = 0;
+	const CARD16 nullGFI = 0;
 
 //  nullGFH: GFTHandle = FIRST[GFTHandle];
 //
 //	-- First page reserved for Germ
 //  GermUseOnly: TYPE = GFTIndex[0..64);  -- Environment.wordsPerPage / SIZE[GFTItem]
-	static const CARD16 GermUseOnly_FIRST =  0;
-	static const CARD16 GermUseOnly_LAST  = 63;
+	const CARD16 GermUseOnly_FIRST =  0;
+	const CARD16 GermUseOnly_LAST  = 63;
 
 //	-- reserved for Pilot use
 //  Reserved: TYPE = GFTIndex[LAST[GermUseOnly]+1..LAST[GermUseOnly]+6);
-	static const CARD16 Reserved_FIRST = GermUseOnly_LAST + 1;
-	static const CARD16 Reserved_LAST  = GermUseOnly_LAST + 6;
+	const CARD16 Reserved_FIRST = GermUseOnly_LAST + 1;
+	const CARD16 Reserved_LAST  = GermUseOnly_LAST + 6;
 
 //  CrossMDSSlot: GFTIndex = FIRST[Reserved];  -- used for crossMDS linkage in Germ
-	static const CARD16 CrossMDSSlot = Reserved_FIRST;
+	const CARD16 CrossMDSSlot = Reserved_FIRST;
 //
 //  GFTItem: TYPE = MACHINE DEPENDENT RECORD [
 //	 SELECT OVERLAID * FROM
@@ -3150,6 +3194,6 @@ public:
 //
 //  GFTHandleToIndex: PROCEDURE [gfh: GFTHandle] RETURNS [GFTIndex] = INLINE {
 //	RETURN[ LOOPHOLE[gfh] / SIZE[GFTItem] ] };
-};
+}
 
 #endif

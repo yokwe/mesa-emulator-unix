@@ -36,27 +36,27 @@
 #include "../util/Util.h"
 //static log4cpp::Category& logger = Logger::getLogger("pilot");
 
-#include "Pilot.h"
-
-const int PrincOps::FrameSizeMap[PrincOps::AVHeapSize - 1] = {
-	   8,   12,   16,   20,   24,
-	  28,   32,   40,   48,   56,
-	  68,   80,   96,  112,  128,
-	 148,  168,  192,  224,  252,
-	 508,  764, 1020, 1276, 1532,
-	1788, 2044, 2556, 3068, 3580, 4092
-};
-
-const int PilotBootmesa::StateVectorCountMap[8] = {
- // 0  1  2  3  4  5  6  7 - priority level
-	1, 3, 2, 2, 4, 1, 3, 1
-};
-
-const int PilotBootmesa::FrameWeightMap[PrincOps::AVHeapSize - 1] = {
-	20, 26, 15, 16, 16,
-	12,  8,  8,  5,  5,
-	 7,  2,  2,  1,  1,
-	 1,  1,  1,  1,  0,
-	 0,  0,  0,  0,  0,
-	 0,  0,  0,  0,  0, 0
-};
+//#include "Pilot.h"
+//
+//const int PrincOps::FrameSizeMap[PrincOps::AVHeapSize - 1] = {
+//	   8,   12,   16,   20,   24,
+//	  28,   32,   40,   48,   56,
+//	  68,   80,   96,  112,  128,
+//	 148,  168,  192,  224,  252,
+//	 508,  764, 1020, 1276, 1532,
+//	1788, 2044, 2556, 3068, 3580, 4092
+//};
+//
+//const int PilotBootmesa::StateVectorCountMap[8] = {
+// // 0  1  2  3  4  5  6  7 - priority level
+//	1, 3, 2, 2, 4, 1, 3, 1
+//};
+//
+//const int PilotBootmesa::FrameWeightMap[PrincOps::AVHeapSize - 1] = {
+//	20, 26, 15, 16, 16,
+//	12,  8,  8,  5,  5,
+//	 7,  2,  2,  1,  1,
+//	 1,  1,  1,  1,  0,
+//	 0,  0,  0,  0,  0,
+//	 0,  0,  0,  0,  0, 0
+//};

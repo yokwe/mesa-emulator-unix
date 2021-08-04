@@ -682,7 +682,7 @@ LocalFrameHandle AVFrame(CARD16 u);
 POINTER AVLink(CARD16 u);
 
 // 9.3 Control Transfer primitives
-enum XferType { XT_return = 0, XT_call = 1, XT_localCall = 2, XT_port = 3, XT_xfer = 4, XT_trap = 5, XT_processSwitch = 6, XT_unused = 7};
+enum class XferType { return_ = 0, call = 1, localCall = 2, port = 3, xfer = 4, trap = 5, processSwitch = 6, unused = 7};
 
 
 // 9.4.5 Coroutine Transfers

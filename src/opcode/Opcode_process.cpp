@@ -248,7 +248,7 @@ void Reschedule(int preemption) {
 //	running = 1;
 //	ProcessorThread::startRunning();
 	//logger.debug("%s XFER PSB = %4d  GFI = %04X  CB = %08X  PC = %04X  LF = %04X", __FUNCTION__, PSB, GFI, CB, PC, LF);
-	XFER((CARD32)LFCache::LF(), 0, XT_processSwitch, 0);
+	XFER((CARD32)LFCache::LF(), 0, XferType::processSwitch, 0);
 	return;
 BusyWait:
 	if (!InterruptThread::isEnabled()) RescheduleError();

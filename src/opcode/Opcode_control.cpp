@@ -57,7 +57,7 @@ static inline void Trap(POINTER ptr) {
 	PC = savedPC;
 	SP = savedSP;
 	if (ValidContext()) *StoreLF(LO_OFFSET(0, pc)) = PC;
-	XFER(handler, LFCache::LF(), XT_trap, 0);
+	XFER(handler, LFCache::LF(), XferType::trap, 0);
 }
 
 // TrapZero: PROC[ptr: POINTER TO ControlLink]
@@ -158,7 +158,7 @@ void HardwareError() {
 
 // 9.5.5 Xfer Traps
 // CheckForXferTraps: PROC[dst: ConrolLink, type: XferType]
-static inline void CheckForXferTraps(ControlLink dst, int type) {
+static inline void CheckForXferTraps(ControlLink dst, XferType type) {
 	if (Odd(XTS)) {
 		GlobalWord word = {*Fetch(GO_OFFSET(GF, word))};
 		if (word.trapxfers) {
@@ -167,7 +167,7 @@ static inline void CheckForXferTraps(ControlLink dst, int type) {
 			Trap(SD + OFFSET_SD(sXferTrap));
 			*StoreLF(0) = LowHalf(dst);
 			*StoreLF(1) = HighHalf(dst);
-			*StoreLF(2) = type;
+			*StoreLF(2) = (CARD16)type;
 			ERROR_Abort();
 		}
 	} else {
@@ -217,10 +217,10 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	// FIXME In that case, GF and CB has wrong value before XFER is correctly executed.
 	// FIXME We should use nGF and nCB and update GF and CB very end of this method
 
-	if (type == XT_trap && freeFlag) ERROR();
+	if (type == XferType::trap && freeFlag) ERROR();
 	while (ControlLinkType(nDst) == LinkType::indirect) {
 		IndirectLink link = MakeIndirectLink(nDst);
-		if (type == XT_trap) ERROR();
+		if (type == XferType::trap) ERROR();
 		nDst = ReadDblMds(link);
 		push = 1;
 	}
@@ -265,7 +265,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		}
 		nPC = *FetchMds(LO_OFFSET(nLF, pc));
 		if (nPC == 0) UnboundTrap(dst);
-		if (type == XT_trap) {
+		if (type == XferType::trap) {
 			*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
 			InterruptThread::disable();
 		}
@@ -318,7 +318,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 // Call: PROC[dst: ControlLink]
 static inline void Call(ControlLink dst) {
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
-	XFER(dst, LFCache::LF(), XT_call, 0);
+	XFER(dst, LFCache::LF(), XferType::call, 0);
 }
 ///////////////////////////////////////////////////////////////////////
 
@@ -367,7 +367,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 	Trace::Context context;
-	context.setLFC(0, 0, XT_call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
+	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
@@ -388,7 +388,7 @@ void  E_LFC() {
 	ProcDesc dst;
 	dst.taggedGF = GFI | 1;
 	dst.pc = PC - 1;
-	CheckForXferTraps(dst.u, XT_localCall);
+	CheckForXferTraps(dst.u, XferType::localCall);
 }
 // zSFC - 0356
 void E_SFC() {
@@ -400,7 +400,7 @@ void E_SFC() {
 void E_RET() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RET", savedPC);
 	ControlLink dst = {*FetchLF(LO_OFFSET(0, returnlink))};
-	XFER(dst, 0, XT_return, 1);
+	XFER(dst, 0, XferType::return_, 1);
 }
 // zKFCB - 0360
 void E_KFCB() {
@@ -438,7 +438,7 @@ void E_PO() {
 	PortLink port = Pop();
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
 	*StoreMds(port + OFFSET_PORT(inport)) = LFCache::LF();
-	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XT_port, 0);
+	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
 // aPOR - 016
 void E_POR() {
@@ -448,7 +448,7 @@ void E_POR() {
 	PortLink port = Pop();
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
 	*StoreMds(port + OFFSET_PORT(inport)) = LFCache::LF();
-	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XT_port, 0);
+	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
 
 
@@ -461,7 +461,7 @@ void E_XE() {
 		*StoreLF(LO_OFFSET(0, pc)) = PC; // Store location of next instruction
 		ControlLink      dst = ReadDblLF(ptr + OFFSET(TransferDescriptor, dst));
 		ShortControlLink src = *FetchLF (ptr + OFFSET(TransferDescriptor, src));
-		XFER(dst, src, XT_xfer, 0);
+		XFER(dst, src, XferType::xfer, 0);
 
 		if (InterruptThread::getWDC() == 0) InterruptError();
 		InterruptThread::enable();
@@ -477,5 +477,5 @@ void E_XF() {
 	*StoreLF(LO_OFFSET(0, pc)) = PC;  // Store location of next instruction
 	ControlLink      dst = ReadDblLF(ptr + OFFSET(TransferDescriptor, dst));
 	ShortControlLink src = *FetchLF (ptr + OFFSET(TransferDescriptor, src));
-	XFER(dst, src, XT_xfer, 1);
+	XFER(dst, src, XferType::xfer, 1);
 }

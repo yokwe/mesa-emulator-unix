@@ -55,13 +55,13 @@ const char* Trace::getLinkType(LinkType type) {
 }
 
 static QMap<XferType, const char*> xferTypeMap {
-	{XT_return,        "RET"},
-	{XT_call,          "CALL"},
-	{XT_localCall,     "LOCAL"},
-	{XT_port,          "PORT"},
-	{XT_xfer,          "XFER"},
-	{XT_trap,          "TRAP"},
-	{XT_processSwitch, "SWITCH"},
+	{XferType::return_,       "RET"},
+	{XferType::call,          "CALL"},
+	{XferType::localCall,     "LOCAL"},
+	{XferType::port,          "PORT"},
+	{XferType::xfer,          "XFER"},
+	{XferType::trap,          "TRAP"},
+	{XferType::processSwitch, "SWITCH"},
 };
 
 const char* Trace::getXferType(XferType type) {

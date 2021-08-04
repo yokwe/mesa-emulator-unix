@@ -90,7 +90,7 @@ void ProcessorThread::run() {
 	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data, bootLink.tag, bootLink.fill, bootLink.u);
 	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
 
-	XFER(bootLink.u, 0, XT_call, 0);
+	XFER(bootLink.u, 0, XferType::call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CodeCache::CB(), GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LFCache::LF(), PC, Memory::MDS());
 

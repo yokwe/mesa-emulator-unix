@@ -40,10 +40,10 @@ static log4cpp::Category& logger = Logger::getLogger("trace");
 #include <QtCore>
 
 static QMap<LinkType, const char*> linkTypeMap {
-	{LT_newProcedure, "NEWPROC"},
-	{LT_oldProcedure, "OLDPROC"},
-	{LT_frame,        "FRAME"},
-	{LT_indirect,     "INDIRECT"},
+	{LinkType::newProcedure, "NEWPROC"},
+	{LinkType::oldProcedure, "OLDPROC"},
+	{LinkType::frame,        "FRAME"},
+	{LinkType::indirect,     "INDIRECT"},
 };
 
 const char* Trace::getLinkType(LinkType type) {

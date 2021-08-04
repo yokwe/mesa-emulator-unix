@@ -162,7 +162,7 @@ namespace Trace {
 		Func        newFunc;
 		Frame       newFrame;
 
-		Context() : callType(CallType::XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldFunc(), oldFrame(), newFunc(), newFrame() {}
+		Context() : callType(CallType::XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LinkType::frame), oldPSB(0), oldFunc(), oldFrame(), newFunc(), newFrame() {}
 		Context(const Context& that) :
 			callType(that.callType), dst(that.dst), src(that.src), xferType(that.xferType), freeFlag(that.freeFlag),
 			linkType(that.linkType), oldPSB(that.oldPSB),

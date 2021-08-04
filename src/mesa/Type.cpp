@@ -40,22 +40,22 @@ static log4cpp::Category& logger = Logger::getLogger("type");
 
 
 FrameLink MakeFrameLink(ControlLink link) {
-	if (ControlLinkType(link) != LT_frame) ERROR();
+	if (ControlLinkType(link) != LinkType::frame) ERROR();
 	return (CARD16)link;
 }
 
 IndirectLink MakeIndirectLink(ControlLink link) {
-	if (ControlLinkType(link) != LT_indirect) ERROR();
+	if (ControlLinkType(link) != LinkType::indirect) ERROR();
 	return (CARD16)link;
 }
 
 CARD32 MakeProcDesc(ControlLink link) {
-	if (ControlLinkType(link) != LT_oldProcedure) ERROR();
+	if (ControlLinkType(link) != LinkType::oldProcedure) ERROR();
 	return link;
 }
 
 CARD32 MakeNewProcDesc(ControlLink link) {
-	if (ControlLinkType(link) != LT_newProcedure) ERROR();
+	if (ControlLinkType(link) != LinkType::newProcedure) ERROR();
 	return link;
 }
 

@@ -218,7 +218,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	// FIXME We should use nGF and nCB and update GF and CB very end of this method
 
 	if (type == XT_trap && freeFlag) ERROR();
-	while (ControlLinkType(nDst) == LT_indirect ) {
+	while (ControlLinkType(nDst) == LinkType::indirect) {
 		IndirectLink link = MakeIndirectLink(nDst);
 		if (type == XT_trap) ERROR();
 		nDst = ReadDblMds(link);
@@ -230,7 +230,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
 
 	switch (linkType) {
-	case LT_oldProcedure : {
+	case LinkType::oldProcedure : {
 		ProcDesc proc = {MakeProcDesc(nDst)};
 		CARD16 gf = proc.taggedGF & 0xfffc; // 177774
 		if (gf == 0) UnboundTrap(dst);
@@ -252,7 +252,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
 	}
 		break;
-	case LT_frame : {
+	case LinkType::frame : {
 		FrameLink frame = {MakeFrameLink(nDst)};
 		if (frame == 0) ControlTrap(src);
 		nLF = frame;
@@ -271,7 +271,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		}
 	}
 		break;
-	case LT_newProcedure : {
+	case LinkType::newProcedure : {
 		NewProcDesc proc = {MakeNewProcDesc(nDst)};
 		nGFI = proc.taggedGFI & 0xfffc; // 177774
 		if (nGFI == 0) UnboundTrap(dst);
@@ -367,7 +367,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 	Trace::Context context;
-	context.setLFC(0, 0, XT_call, 0, LT_newProcedure, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
+	context.setLFC(0, 0, XT_call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);

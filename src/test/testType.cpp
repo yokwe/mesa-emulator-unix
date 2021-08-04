@@ -531,13 +531,13 @@ public:
 
 		t.u = 0;
 		t.tag = 0;
-		CPPUNIT_ASSERT_EQUAL(LT_frame, ControlLinkType(t.u));
+		CPPUNIT_ASSERT_EQUAL(LinkType::frame,        ControlLinkType(t.u));
 		t.tag = 1;
-		CPPUNIT_ASSERT_EQUAL(LT_oldProcedure, ControlLinkType(t.u));
+		CPPUNIT_ASSERT_EQUAL(LinkType::oldProcedure, ControlLinkType(t.u));
 		t.tag = 2;
-		CPPUNIT_ASSERT_EQUAL(LT_indirect, ControlLinkType(t.u));
+		CPPUNIT_ASSERT_EQUAL(LinkType::indirect,     ControlLinkType(t.u));
 		t.tag = 3;
-		CPPUNIT_ASSERT_EQUAL(LT_newProcedure, ControlLinkType(t.u));
+		CPPUNIT_ASSERT_EQUAL(LinkType::newProcedure, ControlLinkType(t.u));
 	}
 
 	// 9.1.1 Frame Control Links

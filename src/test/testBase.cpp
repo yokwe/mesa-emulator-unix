@@ -121,7 +121,7 @@ void testBase::initGFT() {
 void testBase::initSD() {
 	// fill with empty
 	for(int i = 0; i < 256; i++) {
-		ControlLink item = LT_newProcedure;
+		ControlLink item = (CARD32)LinkType::newProcedure;
 		page_SD[i * 2 + 0] = LowHalf(item);
 		page_SD[i * 2 + 1] = HighHalf(item);
 	}
@@ -129,7 +129,7 @@ void testBase::initSD() {
 	for(int i = 0; i < 256; i++) {
 		NewProcDesc item;
 		item.pc = pc_SD | i;
-		item.taggedGFI = (CARD16)(GFI_SD | LT_newProcedure);
+		item.taggedGFI = (CARD16)(GFI_SD | (CARD32)LinkType::newProcedure);
 
 		page_SD[i * 2 + 0] = LowHalf(item.u);
 		page_SD[i * 2 + 1] = HighHalf(item.u);
@@ -140,7 +140,7 @@ void testBase::initSD() {
 void testBase::initETT() {
 	//scTrapTable a;
 	// fill with empty
-	ControlLink item = LT_newProcedure;
+	ControlLink item = (CARD32)LinkType::newProcedure;
 	for(int i = 0; i < 256; i++) {
 		page_ETT[i * 2 + 0] = LowHalf(item);
 		page_ETT[i * 2 + 1] = HighHalf(item);
@@ -149,7 +149,7 @@ void testBase::initETT() {
 	for(int i = 0; i < 256; i++) {
 		NewProcDesc item;
 		item.pc = pc_ETT | i;
-		item.taggedGFI = (CARD16)(GFI_ETT | LT_newProcedure);
+		item.taggedGFI = (CARD16)(GFI_ETT | (CARD32)LinkType::newProcedure);
 
 		page_ETT[i * 2 + 0] = LowHalf(item.u);
 		page_ETT[i * 2 + 1] = HighHalf(item.u);

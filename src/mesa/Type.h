@@ -577,7 +577,7 @@ typedef CARD32 ControlLink;
 typedef CARD16 ShortControlLink;
 
 // LinkType: TYPE  =  {frame, procedure, indirect};
-enum LinkType { LT_frame = 0, LT_oldProcedure = 1, LT_indirect = 2, LT_newProcedure = 3 };
+enum class LinkType { frame = 0, oldProcedure = 1, indirect = 2, newProcedure = 3 };
 
 //TaggedControl link: TYPE =  MACHINE DEPENDENT RECORD [
 //  data (0:  0..13): [0 .. 377778];

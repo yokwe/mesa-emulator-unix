@@ -29,11 +29,7 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-
 static log4cpp::Category& logger = Logger::getLogger("main");
-
-#include <QTextCodec>
-
 
 int main(int, char**) {
 	logger.info("START");
@@ -45,11 +41,7 @@ int main(int, char**) {
 	DEBUG_TRACE();
 
 	{
-		auto textCodec = QTextCodec::codecForLocale();
-		logger.info("codecForLocale %s", textCodec->name().constData());
 	}
-
-//	ERROR();
 
 	logger.info("STOP");
 	return 0;

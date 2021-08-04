@@ -183,7 +183,7 @@ public:
 
 	class BodyLink {
 	public:
-		enum Which {SIBLING, PARENT};
+		enum class Which {SIBLING, PARENT};
 		static QString toString(Which);
 
 		static BodyLink* getInstance(Symbols* symbols);
@@ -219,7 +219,7 @@ public:
 
 		static BodyInfo* getInstance(Symbols* symbols);
 
-		enum Tag {INTERNAL, EXTERNAL};
+		enum class Tag {INTERNAL, EXTERNAL};
 		static QString toString(Tag);
 
 		const Tag   tag;

@@ -130,7 +130,7 @@ static void message(const Trace::Context& context) {
 }
 
 QString Trace::Context::toString() const {
-	const char* opcode = (callType == Trace::Context::CallType::CT_XFER) ? "XFER" : "LFC";
+	const char* opcode = (callType == Trace::Context::CallType::XFER) ? "XFER" : "LFC";
 	const char* xfer = Trace::getXferType(xferType);
 	const char* free = freeFlag ? "*" : " ";
 	const char* link = Trace::getLinkType(linkType);

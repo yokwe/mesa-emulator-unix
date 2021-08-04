@@ -138,9 +138,9 @@ namespace Trace {
 
 	class Context {
 	public:
-		enum CallType {CT_XFER, CT_LFC};
+		enum class CallType {XFER, LFC};
 
-		CallType         callType;
+		CallType    callType;
 
 		// XFER parameter
 		ControlLink dst;
@@ -162,7 +162,7 @@ namespace Trace {
 		Func        newFunc;
 		Frame       newFrame;
 
-		Context() : callType(CT_XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldFunc(), oldFrame(), newFunc(), newFrame() {}
+		Context() : callType(CallType::XFER), dst(0), src(0), xferType(XT_return), freeFlag(0), linkType(LT_frame), oldPSB(0), oldFunc(), oldFrame(), newFunc(), newFrame() {}
 		Context(const Context& that) :
 			callType(that.callType), dst(that.dst), src(that.src), xferType(that.xferType), freeFlag(that.freeFlag),
 			linkType(that.linkType), oldPSB(that.oldPSB),
@@ -190,7 +190,7 @@ namespace Trace {
 			GFTHandle oldGFI, CARD16 oldPC, CARD32 oldMDS, CARD16 oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
+				set(CallType::XFER, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
 			}
 		}
 		void setLFC(
@@ -199,7 +199,7 @@ namespace Trace {
 			CARD16 oldGFI, CARD16 oldPC, CARD32 oldMDS, CARD16 oldLF
 			) {
 			if (TRACE_ENABLE_TRACE) {
-				set(CT_LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
+				set(CallType::LFC, dst, src, xferType, freeFlag, linkType, oldPSB, oldGFI, oldPC, oldMDS, oldLF);
 			}
 		}
 		void setContext(CARD16 newGFI, CARD16 newPC, CARD32 newMDS, CARD16 newLF) {

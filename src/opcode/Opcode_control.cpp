@@ -184,11 +184,11 @@ static inline LocalFrameHandle Alloc(FSIndex fsi) {
 	FSIndex slot = fsi;
 	for(;;) {
 		item.u = *FetchMds(AV + OFFSET_AV(slot));
-		if (item.tag != AT_indirect) break;
+		if (item.tag != (CARD16)AVItemType::indirect) break;
 		if (FSIndex_SIZE <= item.data) ERROR();
 		slot = item.data;
 	}
-	if (item.tag == AT_empty) {
+	if (item.tag == (CARD16)AVItemType::empty) {
 		FrameFault(fsi);
 	}
 	*StoreMds(AV + OFFSET_AV(slot)) = *FetchMds(AVLink(item.u));

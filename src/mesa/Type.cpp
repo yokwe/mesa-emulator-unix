@@ -61,12 +61,12 @@ CARD32 MakeNewProcDesc(ControlLink link) {
 
 LocalFrameHandle AVFrame(CARD16 u) {
 	AVItem avi = {u};
-	if (avi.tag != AT_frame) ERROR();
+	if (avi.tag != (CARD16)AVItemType::frame) ERROR();
 	return u;
 }
 
 POINTER AVLink(CARD16 u) {
 	AVItem avi = {u};
-	if (avi.tag != AT_frame) ERROR();
+	if (avi.tag != (CARD16)AVItemType::frame) ERROR();
 	return u;
 }

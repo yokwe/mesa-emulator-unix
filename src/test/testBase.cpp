@@ -46,7 +46,7 @@ void testBase::initAV(CARD16 origin, CARD16 limit) {
 
 	// fill with empty
 	for(int i = 0; i < FSIndex_SIZE; i++) {
-		page_AV[i] = (CARD16)AT_empty;
+		page_AV[i] = (CARD16)AVItemType::empty;
 	}
 
 	// build AllocationVector

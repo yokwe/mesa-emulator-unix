@@ -659,7 +659,7 @@ union AVItem {
 		CARD16 data : 14;
 	};
 };
-enum AVItemTag { AT_frame = 0, AT_empty = 1, AT_indirect = 2, AT_unused = 3 };
+enum class AVItemType { frame = 0, empty = 1, indirect = 2, unused = 3 };
 
 
 #define OFFSET_AV(n) OFFSET3(AllocationVector, item, n)

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("bitblt");
+static const Logger logger = Logger::getLogger("bitblt");
 
 #include "../util/Debug.h"
 #include "../util/GuiOp.h"

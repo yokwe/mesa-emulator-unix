@@ -30,7 +30,7 @@
 
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("trace");
+static const Logger logger = Logger::getLogger("trace");
 
 #include "../mesa/Memory.h"
 
@@ -120,9 +120,9 @@ static void message(const Trace::Context& context, const QString& extraMessae) {
 	QString string = context.toString();
 
 	if (extraMessae.isEmpty()) {
-		logger.info("%s", TO_CSTRING(string.trimmed()));
+		logger.info("%s", string.trimmed());
 	} else {
-		logger.info("%s  %s", TO_CSTRING(string), TO_CSTRING(extraMessae));
+		logger.info("%s  %s", string, extraMessae);
 	}
 }
 static void message(const Trace::Context& context) {
@@ -185,12 +185,12 @@ void Trace::Func::addName(CARD16 gfi, const QString& moduleName) {
 	if (moduleNameMap.contains(gfi)) {
 		logger.fatal("Unexpeted");
 		logger.fatal("  gfi = %4X", gfi);
-		logger.fatal("  new = %s!", TO_CSTRING(moduleName));
-		logger.fatal("  old = %s!", TO_CSTRING(moduleNameMap[gfi]));
+		logger.fatal("  new = %s!", moduleName);
+		logger.fatal("  old = %s!", moduleNameMap[gfi]);
 		ERROR();
 	} else {
 		moduleNameMap[gfi] = moduleName;
-//		logger.debug("addName %4X %s", gfi, TO_CSTRING(moduleName));
+//		logger.debug("addName %4X %s", gfi, moduleName);
 	}
 }
 void Trace::Func::addName(const QString& moduleName, const QString& funcName, CARD16 pc) {
@@ -202,14 +202,14 @@ void Trace::Func::addName(const QString& moduleName, const QString& funcName, CA
 	//   pc      funcName
 	if (map.contains(pc)) {
 		logger.fatal("Unexpeted");
-		logger.fatal("  moduleName = %s!", TO_CSTRING(moduleName));
-		logger.fatal("  funcName   = %s!", TO_CSTRING(funcName));
+		logger.fatal("  moduleName = %s!", moduleName);
+		logger.fatal("  funcName   = %s!", funcName);
 		logger.fatal("  pc         = %d  0%oB", pc, pc);
-		logger.fatal("  old        = %s!", TO_CSTRING(map[pc]));
+		logger.fatal("  old        = %s!", map[pc]);
 		ERROR();
 	} else {
 		map[pc] = funcName;
-//		logger.debug("addName %-30s  %-20s  %04X", TO_CSTRING(moduleName), TO_CSTRING(funcName), pc);
+//		logger.debug("addName %-30s  %-20s  %04X", moduleName, funcName, pc);
 	}
 }
 

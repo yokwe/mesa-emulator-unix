@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agentdisplay");
+static const Logger logger = Logger::getLogger("agentdisplay");
 
 
 #include "../util/Debug.h"

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("diskfile");
+static const Logger logger = Logger::getLogger("diskfile");
 
 #include "DiskFile.h"
 
@@ -69,14 +69,14 @@ int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
 
 void DiskFile::attach(const QString& path_) {
 	path = path_;
-	logger.info("DiskFile::attach %s", TO_CSTRING(path));
+	logger.info("DiskFile::attach %s", path);
 
 	page = (Page*)Util::mapFile(path, size);
 	maxBlock = getBlockSize();
 }
 
 void DiskFile::detach() {
-	logger.info("DiskFile::detach %s", TO_CSTRING(path));
+	logger.info("DiskFile::detach %s", path);
 
 	Util::unmapFile(page);
 	page              = 0;

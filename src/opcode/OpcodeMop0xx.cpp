@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("0xx");
+static const Logger logger = Logger::getLogger("0xx");
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"

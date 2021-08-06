@@ -30,7 +30,7 @@
 
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("testUtil");
+static const Logger logger = Logger::getLogger("testUtil");
 
 #include "testBase.h"
 

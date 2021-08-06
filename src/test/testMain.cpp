@@ -37,7 +37,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("testMain");
+static const Logger logger = Logger::getLogger("testMain");
 
 int main() {
 	CppUnit::TextUi::TestRunner runner;

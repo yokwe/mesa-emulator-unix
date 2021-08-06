@@ -36,7 +36,7 @@
 #include "Module.h"
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("module");
+static const Logger logger = Logger::getLogger("module");
 
 
 void Module::LoadmapFile::fromJsonObject(const QJsonObject& jsonObject) {
@@ -76,8 +76,8 @@ static QString readFile(const QString& path) {
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", TO_CSTRING(file.errorString()));
-			logger.fatal("  path = %s!", TO_CSTRING(path));
+			logger.fatal("File open error %s", file.errorString());
+			logger.fatal("  path = %s!", path);
 			ERROR();
 		}
 		byteArray = file.readAll();

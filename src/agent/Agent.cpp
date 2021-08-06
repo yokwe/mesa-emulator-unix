@@ -35,7 +35,7 @@
 
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agent");
+static const Logger logger = Logger::getLogger("agent");
 
 
 #include "../mesa/Memory.h"

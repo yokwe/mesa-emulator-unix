@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("main");
+static const Logger logger = Logger::getLogger("main");
 
 #include "../util/Perf.h"
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 		ERROR();
 	}
 	QString entryName = argv[1];
-	logger.info("Section = %s", TO_CSTRING(entryName));
+	logger.info("Section = %s", entryName);
 
 	Setting setting = Setting::getInstance();
 	Setting::Entry entry = setting.getEntry(entryName);

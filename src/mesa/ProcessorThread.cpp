@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("procthread");
+static const Logger logger = Logger::getLogger("procthread");
 
 #include "../util/Debug.h"
 
@@ -87,7 +87,7 @@ void ProcessorThread::run() {
 	QThread::currentThread()->setPriority(PRIORITY);
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 
-	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data, bootLink.tag, bootLink.fill, bootLink.u);
+	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data + 0, bootLink.tag + 0, bootLink.fill, bootLink.u);
 	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
 
 	XFER(bootLink.u, 0, XferType::call, 0);

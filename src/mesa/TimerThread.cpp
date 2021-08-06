@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("timerthread");
+static const Logger logger = Logger::getLogger("timerthread");
 
 #include "../util/Debug.h"
 

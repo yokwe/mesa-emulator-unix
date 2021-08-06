@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("test000");
+static const Logger logger = Logger::getLogger("test000");
 
 #include "testBase.h"
 

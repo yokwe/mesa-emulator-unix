@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("symbols");
+static const Logger logger = Logger::getLogger("symbols");
 
 #include "../mesa/Memory.h"
 

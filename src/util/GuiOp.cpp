@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static log4cpp::Category& logger = Logger::getLogger("guicon");
+static const Logger logger = Logger::getLogger("guicon");
 
 #include "GuiOp.h"
 

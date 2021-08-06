@@ -30,7 +30,7 @@ OF SUCH DAMAGE.
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("se");
+static const Logger logger = Logger::getLogger("se");
 
 #include "SEIndex.h"
 #include "BCDFile.h"

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("copyPaste");
+static const Logger logger = Logger::getLogger("copyPaste");
 
 
 #include "../util/Debug.h"
@@ -161,20 +161,20 @@ void StreamCopyPaste::PutBuffer::put32(CARD32 value) {
 }
 
 StreamCopyPaste::StreamCopyPaste() : Stream("CopyPaste", CoProcessorServerIDs::copyPaste) {
-	logger.info("%3d %-8s", serverID, TO_CSTRING(name));
+	logger.info("%3d %-8s", serverID, name);
 }
 
 quint16 StreamCopyPaste::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s idle %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_completed;
 }
 quint16 StreamCopyPaste::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s accept %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamCopyPaste::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", TO_CSTRING(name), iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
+	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", name, iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
 
 	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
 	// Need to assign non-zero to mesaGet.hTaskactually. See CoProcessorFace.Get
@@ -184,33 +184,33 @@ quint16 StreamCopyPaste::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*f
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamCopyPaste::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.info("%-8s destroy %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
+	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamCopyPaste::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s read %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s read %d %d", name, fcb->headCommand, iocb->serverID);
 	{
 		CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaPut;
 		logger.info("mesaPut  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
-			tr.subSequence, tr.endStream, tr.endRecord, tr.endSST,
+			tr.subSequence, tr.endStream + 0, tr.endRecord + 0, tr.endSST + 0,
 			tr.bytesWritten, tr.bytesRead, tr.hTask, tr.interruptMesa, tr.buffer, tr.bufferSize, tr.writeLockedByMesa);
 	}
 	{
 		CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 		logger.info("mesaGet  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
-			tr.subSequence, tr.endStream, tr.endRecord, tr.endSST,
+			tr.subSequence, tr.endStream + 0, tr.endRecord + 0, tr.endSST + 0,
 			tr.bytesWritten, tr.bytesRead, tr.hTask, tr.interruptMesa, tr.buffer, tr.bufferSize, tr.writeLockedByMesa);
 	}
 	return CoProcessorIOFaceGuam::R_error;
 }
 quint16 StreamCopyPaste::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
-	logger.error("%-8s write %d %d", TO_CSTRING(name), fcb->headCommand, iocb->serverID);
+	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 
 	GetBuffer buffer(iocb);
 	{
 		CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaPut;
 		logger.info("mesaPut  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
-			tr.subSequence, tr.endStream, tr.endRecord, tr.endSST,
+			tr.subSequence, tr.endStream + 0, tr.endRecord + 0, tr.endSST + 0,
 			tr.bytesWritten, tr.bytesRead, tr.hTask, tr.interruptMesa, tr.buffer, tr.bufferSize, tr.writeLockedByMesa);
 
 		CARD32 msgID  = buffer.get32();

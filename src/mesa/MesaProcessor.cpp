@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("mesaproc");
+static const Logger logger = Logger::getLogger("mesaproc");
 
 
 #include "../util/Debug.h"
@@ -72,7 +72,7 @@ void MesaProcessor::initialize() {
 		}
 		if (!QFile::exists(path)) break;
 
-		logger.info("Disk  %s", TO_CSTRING(path));
+		logger.info("Disk  %s", path);
 
 		DiskFile* diskFile = new DiskFile;
 		diskFile->attach(path);
@@ -83,12 +83,12 @@ void MesaProcessor::initialize() {
 		if (path == diskPath) break;
 	}
 
-	logger.info("Floppy %s", TO_CSTRING(floppyPath));
+	logger.info("Floppy %s", floppyPath);
 	floppyFile.attach(floppyPath);
 	floppy.addDiskFile(&floppyFile);
 
 	// AgentNetwork use networkPacket
-	logger.info("networkInterfaceName = %s", TO_CSTRING(networkInterfaceName));
+	logger.info("networkInterfaceName = %s", networkInterfaceName);
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
 
@@ -105,7 +105,7 @@ void MesaProcessor::initialize() {
 	Agent::InitializeAgent();
 	logger.info("Agent FCB  %04X %04X", Agent::ioRegionPage * PageSize, Agent::getIORegion());
 
-	logger.info("Boot  %s", TO_CSTRING(bootPath));
+	logger.info("Boot  %s", bootPath);
 
 	// Initialization of Stream handler
 	AgentStream* agentStream = (AgentStream*)Agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
@@ -124,7 +124,7 @@ void MesaProcessor::initialize() {
 	loadGerm(germPath);
 
 	// set boot request
-	logger.info("bootDevice %s", TO_CSTRING(bootDevice));
+	logger.info("bootDevice %s", bootDevice);
 	if (bootDevice == "DISK") {
 		setBootRequestPV();
 	} else if (bootDevice == "ETHER") {
@@ -178,7 +178,7 @@ void MesaProcessor::wait() {
 }
 
 void MesaProcessor::loadGerm(QString& path) {
-	logger.info("germ  path    = %s", TO_CSTRING(path));
+	logger.info("germ  path    = %s", path);
 
 	CARD32 mapSize = 0;
 	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);
@@ -227,7 +227,7 @@ void MesaProcessor::setBootRequestPV(CARD16 deviceOrdinal) {
 	request->location.deviceType    = Device::T_anyPilotDisk;
 	request->location.deviceOrdinal = deviceOrdinal;
 
-	logger.info("bootSwitch = %s", TO_CSTRING(bootSwitch));
+	logger.info("bootSwitch = %s", bootSwitch);
 	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
 void MesaProcessor::setBootRequestEther(CARD16 deviceOrdinal) {
@@ -253,7 +253,7 @@ void MesaProcessor::setBootRequestEther(CARD16 deviceOrdinal) {
 	request->location.ethernetRequest.address.socket.word[0] = 0x000a; // boot socket
 
 
-	logger.info("bootSwitch = %s", TO_CSTRING(bootSwitch));
+	logger.info("bootSwitch = %s", bootSwitch);
 	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
 
@@ -270,7 +270,7 @@ void MesaProcessor::setBootRequestStream() {
 	request->location.deviceType    = Device::T_simpleDataStream;
 	request->location.deviceOrdinal = 0;
 
-	logger.info("bootSwitch = %s", TO_CSTRING(bootSwitch));
+	logger.info("bootSwitch = %s", bootSwitch);
 	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
 

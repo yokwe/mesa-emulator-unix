@@ -33,7 +33,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("dumpSymbol");
+static const Logger logger = Logger::getLogger("dumpSymbol");
 
 #include "DumpSymbol.h"
 

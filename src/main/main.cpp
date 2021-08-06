@@ -29,21 +29,20 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("main");
+static const Logger logger = Logger::getLogger("main");
 
-#include "../mesa/Type.h"
-#include "../trace/Trace.h"
-
-
-// Define PageFault and WriteProtectFault for Memory.h
-void PageFault(CARD32 ptr) {
-	logger.fatal("%s %X", __FUNCTION__, ptr);
-	ERROR();
-}
-void WriteProtectFault(CARD32 ptr) {
-	logger.fatal("%s %X", __FUNCTION__, ptr);
-	ERROR();
-}
+//#include "../mesa/Type.h"
+//#include "../trace/Trace.h"
+//
+//// Define PageFault and WriteProtectFault for Memory.h
+//void PageFault(CARD32 ptr) {
+//	logger.fatal("%s %X", __FUNCTION__, ptr);
+//	ERROR();
+//}
+//void WriteProtectFault(CARD32 ptr) {
+//	logger.fatal("%s %X", __FUNCTION__, ptr);
+//	ERROR();
+//}
 
 
 int main(int, char**) {
@@ -55,8 +54,12 @@ int main(int, char**) {
 
 	DEBUG_TRACE();
 
-	{
-	}
+	QString a = "AA";
+	std::string b = "BB";
+	const char* c = "CC";
+	logger.info("a = %s", a);
+	logger.info("b = %s", b);
+	logger.info("c = %s", c);
 
 	logger.info("STOP");
 	return 0;

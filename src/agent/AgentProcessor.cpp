@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agentproc");
+static const Logger logger = Logger::getLogger("agentproc");
 
 
 #include "../util/Debug.h"

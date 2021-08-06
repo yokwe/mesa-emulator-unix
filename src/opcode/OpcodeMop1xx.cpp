@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("1xx");
+static const Logger logger = Logger::getLogger("1xx");
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"
@@ -511,7 +511,7 @@ void E_RLFS() {
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_RLIPF_(CARD16 arg0, CARD16 arg1) {
 	NibblePair pair = {(CARD8)arg0};
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RLIPF %2d %2d %3d", savedPC, pair.left, pair.right, arg1);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RLIPF %2d %2d %3d", savedPC, pair.left + 0, pair.right + 0, arg1);
 	POINTER ptr = *FetchLF(pair.left);
 	CARD16* p = FetchMds(ptr + pair.right);
 	// NO PAGE FAULT AFTER HERE
@@ -526,7 +526,7 @@ void E_RLIPF() {
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_RLILPF_(CARD16 arg0, CARD16 arg1) {
 	NibblePair pair = {(CARD8)arg0};
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RLILPF %2d %2d %3d", savedPC, pair.left, pair.right, arg1);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RLILPF %2d %2d %3d", savedPC, pair.left + 0, pair.right + 0, arg1);
 	LONG_POINTER ptr = ReadDblLF(pair.left);
 	CARD16* p = Fetch(ptr + pair.right);
 	// NO PAGE FAULT AFTER HERE

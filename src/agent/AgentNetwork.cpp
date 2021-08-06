@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agentnet");
+static const Logger logger = Logger::getLogger("agentnet");
 
 
 #include "../util/Debug.h"
@@ -267,7 +267,7 @@ void AgentNetwork::Call() {
 			CARD16 packetType= iocb->packetType;
 			if (packetType != EthernetIOFaceGuam::PT_receive) ERROR();
 
-			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receive  status = %04X  nextIOCB = %08X", name, iocb->status, iocb->nextIOCB);
+			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receive  status = %04X  nextIOCB = %08X", name, iocb->status + 0, iocb->nextIOCB);
 			receiveThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;
@@ -282,7 +282,7 @@ void AgentNetwork::Call() {
 			CARD16 packetType= iocb->packetType;
 			if (packetType != EthernetIOFaceGuam::PT_transmit) ERROR();
 
-			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  transmit status = %04X  nextIOCB = %08X", name, iocb->status, iocb->nextIOCB);
+			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  transmit status = %04X  nextIOCB = %08X", name, iocb->status + 0, iocb->nextIOCB);
 			transmitThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;

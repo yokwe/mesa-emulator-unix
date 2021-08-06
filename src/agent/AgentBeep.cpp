@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agentbeep");
+static const Logger logger = Logger::getLogger("agentbeep");
 
 
 #include "../util/Debug.h"

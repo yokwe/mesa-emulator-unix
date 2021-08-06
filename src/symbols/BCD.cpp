@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("bcd");
+static const Logger logger = Logger::getLogger("bcd");
 
 #include "../mesa/Memory.h"
 

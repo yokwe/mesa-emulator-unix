@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("agentkyeboard");
+static const Logger logger = Logger::getLogger("agentkyeboard");
 
 
 #include "../util/Debug.h"

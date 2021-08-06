@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("ht");
+static const Logger logger = Logger::getLogger("ht");
 
 #include "HTIndex.h"
 #include "BCDFile.h"

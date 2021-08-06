@@ -30,7 +30,7 @@ OF SUCH DAMAGE.
 //
 
 #include "../util/Util.h"
-static log4cpp::Category& logger = Logger::getLogger("ctx");
+static const Logger logger = Logger::getLogger("ctx");
 
 #include "CTXIndex.h"
 #include "BCDFile.h"

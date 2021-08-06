@@ -37,7 +37,7 @@
 #include <execinfo.h>
 
 #include "./Util.h"
-static log4cpp::Category& logger = Logger::getLogger("util");
+static const Logger logger = Logger::getLogger("util");
 
 void logBackTrace() {
 	const int BUFFER_SIZE = 100;
@@ -67,14 +67,18 @@ void setSignalHandler(int signum) {
 
 
 // Logger
-log4cpp::Category& Logger::getLogger(const char *name) {
-	char *fileName = getenv("LOG4CPP_CONFIG");
+Logger Logger::getLogger(const char *name) {
+	static char *fileName = getenv("LOG4CPP_CONFIG");
+
 	if (fileName) log4cpp::PropertyConfigurator::configure(fileName);
 	if (log4cpp::Category::exists(name)) {
 		log4cpp::Category::getRoot().fatal("Duplicate logger name = %s", name);
 		exit(1);
 	}
-	return log4cpp::Category::getInstance(name);
+
+	(void)log4cpp::Category::getInstance(name);
+	Logger logger(log4cpp::Category::exists(name));
+	return logger;
 }
 
 static void setLoggerPriority(log4cpp::Priority::Value newValue) {
@@ -114,7 +118,7 @@ int toIntMesaNumber(const QString& string) {
 
 	if (!ok) {
 		logger.error("Unexpected");
-		logger.error("  string %s!", TO_CSTRING(string));
+		logger.error("  string %s!", string);
 		ERROR();
 	}
 
@@ -145,7 +149,7 @@ public:
 	quint64 size;
 	void*   page;
 
-	MapInfo(QString path) : id(count++), file(TO_CSTRING(path)), size(0), page(0) {}
+	MapInfo(QString path) : id(count++), file(path), size(0), page(0) {}
 
 	static int count;
 };
@@ -156,7 +160,7 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 	MapInfo* mapInfo = new MapInfo(path);
 
 	if (!mapInfo->file.exists()) {
-		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, TO_CSTRING(path));
+		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, path);
 		ERROR();
 	}
 	mapInfo->size = mapInfo->file.size();

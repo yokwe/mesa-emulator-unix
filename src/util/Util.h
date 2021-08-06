@@ -80,12 +80,59 @@ void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);
 
 
+template<typename T>
+auto std_sprintf_convert_(T&& value) {
+    if constexpr (std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value) {
+    	// std::string => const char*
+        return (value).c_str();
+    } else if constexpr (std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, QString>::value) {
+    	// QTString => const char*
+    	return (value).toUtf8().constData();
+    } else {
+    	// otherwise
+    	return std::forward<T>(value);
+    }
+}
+
+template <typename ... Args>
+std::string std_sprintf_(const char* format, Args&& ... args) {
+    int len = std::snprintf(nullptr, 0, format, args ...);
+    char buf[(int)len + 1];
+    std::snprintf(buf, len + 1, format, args ...);
+    return std::string(buf);
+}
+
+template<typename ... Args>
+std::string std_sprintf(const char* format, Args&& ... args) {
+    return std_sprintf_(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+}
+
 class Logger {
 public:
-	static log4cpp::Category& getLogger(const char *name);
+	static Logger getLogger(const char *name);
 
 	static void pushPriority(log4cpp::Priority::Value newValue);
 	static void popPriority();
+
+    template<typename... Args> void debug(const char* format, Args&& ... args) const {
+    	category->debug(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    }
+    template<typename... Args> void info(const char* format, Args&& ... args) const {
+     	category->info(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+     }
+    template<typename... Args> void warn(const char* format, Args&& ... args) const {
+     	category->warn(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+     }
+    template<typename... Args> void error(const char* format, Args&& ... args) const {
+    	category->error(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    }
+    template<typename... Args> void fatal(const char* format, Args&& ... args) const {
+    	category->fatal(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    }
+
+private:
+	log4cpp::Category* category;
+	Logger(log4cpp::Category* category_) : category(category_) {}
 };
 
 int toIntMesaNumber(const QString& string);

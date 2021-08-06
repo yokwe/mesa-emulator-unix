@@ -44,6 +44,9 @@ static const Logger logger = Logger::getLogger("main");
 //	ERROR();
 //}
 
+// To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
+//	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
+
 
 int main(int, char**) {
 	logger.info("START");

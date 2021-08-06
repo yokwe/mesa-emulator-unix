@@ -202,16 +202,46 @@ void MesaProcessor::loadGerm(QString& path) {
 	Util::unmapFile(map);
 }
 
-static void setSwitches(System::Switches& switches, unsigned char c) {
-	//logger.info("%s c = %c %3o", __FUNCTION__, c, c);
+static void setSwitch(System::Switches& switches, unsigned char c) {
+//	logger.info("setSwitch %c %3o", c, c);
 	int high = (c >> 4) & 0x0f;
 	int low = c & 0x0f;
 
 	switches.word[high] |= (CARD16)(1U << (15 - low));
 }
 static void setSwitches(System::Switches& switches, const char *string) {
-	for(const char *p = string; *p; p++) {
-		setSwitches(switches, (unsigned char)*p);
+	int len = ::strlen(string);
+	for(int i = 0; i < len; i++) {
+		// decode \000 character sequence
+		if (string[i] == '\\') {
+			int n = 0;
+			char c1 = string[i + 1];
+			char c2 = string[i + 2];
+			char c3 = string[i + 3];
+			i += 3;
+
+			if ('0' <= c1 && c1 <= '7') {
+				n = (c1 - '0') * 64;
+			} else {
+				logger.fatal("c1 = %c", c1);
+				ERROR();
+			}
+			if ('0' <= c2 && c2 <= '7') {
+				n += (c2 - '0') * 8;
+			} else {
+				logger.fatal("c2 = %c", c1);
+				ERROR();
+			}
+			if ('0' <= c3 && c3 <= '7') {
+				n += (c3 - '0');
+			} else {
+				logger.fatal("c3 = %c", c1);
+				ERROR();
+			}
+			setSwitch(switches, (char)(n & 0xff));
+		} else {
+			setSwitch(switches, string[i]);
+		}
 	}
 }
 void MesaProcessor::setBootRequestPV(CARD16 deviceOrdinal) {

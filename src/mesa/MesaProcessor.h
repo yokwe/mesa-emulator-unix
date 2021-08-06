@@ -88,9 +88,11 @@ public:
 		networkInterfaceName = networkInterfaceName_;
 	}
 
-	void setBootRequestPV(CARD16 deviceOrdinal = 0);
-	void setBootRequestEther(CARD16 deviceOrdinal = 0);
-	void setBootRequestStream();
+	void setBootRequestPV    (Boot::Request* request, CARD16 deviceOrdinal = 0);
+	void setBootRequestEther (Boot::Request* request, CARD16 deviceOrdinal = 0);
+	void setBootRequestStream(Boot::Request* request);
+
+	void setSwitches(System::Switches& switches, const char *string);
 
 	void initialize();
 	void boot();
@@ -115,29 +117,29 @@ private:
 
 	//
 	QList<DiskFile*> diskFileList;
-	DiskFile       floppyFile;
-	NetworkPacket  networkPacket;
+	DiskFile         floppyFile;
+	NetworkPacket    networkPacket;
 
 	// agent
 	AgentDisk      disk;
 	AgentFloppy    floppy;
 	AgentNetwork   network;
-	//AgentParallel  parallel;
+//	AgentParallel  parallel;
 	AgentKeyboard  keyboard;
 	AgentBeep      beep;
 	AgentMouse     mouse;
 	AgentProcessor processor;
 	AgentStream    stream;
-	//AgentSerial    serial;
-	//AgentTTY       tty;
+//	AgentSerial    serial;
+//	AgentTTY       tty;
 	AgentDisplay   display;
-	//AgentReserved3 reserved3;
+//	AgentReserved3 reserved3;
 
 	ProcessorThread processorThread;
 	InterruptThread interruptThread;
 	TimerThread     timerThread;
 
-	QAtomicInt     running;
+	QAtomicInt      running;
 
 	void loadGerm(QString& path);
 

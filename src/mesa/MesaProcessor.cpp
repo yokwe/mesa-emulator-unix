@@ -124,16 +124,26 @@ void MesaProcessor::initialize() {
 	loadGerm(germPath);
 
 	// set boot request
-	logger.info("bootDevice %s", bootDevice);
-	if (bootDevice == "DISK") {
-		setBootRequestPV();
-	} else if (bootDevice == "ETHER") {
-		setBootRequestEther();
-	} else if (bootDevice == "STREAM") {
-		setBootRequestStream();
-	} else {
-		logger.fatal("Unknown bootFrom");
-		exit(1);
+	{
+		Boot::Request* request = (Boot::Request*)Memory::getAddress(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
+
+		// clear boot request
+		::memset(request, 0, sizeof(*request));
+
+		logger.info("bootDevice %s", bootDevice);
+		if (bootDevice == "DISK") {
+			setBootRequestPV(request);
+		} else if (bootDevice == "ETHER") {
+			setBootRequestEther(request);
+		} else if (bootDevice == "STREAM") {
+			setBootRequestStream(request);
+		} else {
+			logger.fatal("Unknown bootDevice");
+			ERROR()
+		}
+
+		logger.info("bootSwitch = %s", bootSwitch);
+		setSwitches(request->switches, TO_CSTRING(bootSwitch));
 	}
 
 	// setAutoDelete(false) for interruptThread, timerThread and processorThread.
@@ -203,16 +213,16 @@ void MesaProcessor::loadGerm(QString& path) {
 }
 
 static void setSwitch(System::Switches& switches, unsigned char c) {
-//	logger.info("setSwitch %c %3o", c, c);
+	logger.info("setSwitch %c %3o", c, c);
 	int high = (c >> 4) & 0x0f;
 	int low = c & 0x0f;
 
 	switches.word[high] |= (CARD16)(1U << (15 - low));
 }
-static void setSwitches(System::Switches& switches, const char *string) {
+void MesaProcessor::setSwitches(System::Switches& switches, const char *string) {
 	int len = ::strlen(string);
 	for(int i = 0; i < len; i++) {
-		// decode \000 character sequence
+		// decode \[0-3][0-7][0-7] character sequence
 		if (string[i] == '\\') {
 			int n = 0;
 			char c1 = string[i + 1];
@@ -220,7 +230,7 @@ static void setSwitches(System::Switches& switches, const char *string) {
 			char c3 = string[i + 3];
 			i += 3;
 
-			if ('0' <= c1 && c1 <= '7') {
+			if ('0' <= c1 && c1 <= '3') {
 				n = (c1 - '0') * 64;
 			} else {
 				logger.fatal("c1 = %c", c1);
@@ -244,30 +254,13 @@ static void setSwitches(System::Switches& switches, const char *string) {
 		}
 	}
 }
-void MesaProcessor::setBootRequestPV(CARD16 deviceOrdinal) {
-	Boot::Request* request = (Boot::Request*)Memory::getAddress(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
-
-	{
-		CARD16* p = (CARD16*)request;
-		for(CARD32 i = 0; i < SIZE(*request); i++) *p++ = 0;
-	}
-
+void MesaProcessor::setBootRequestPV(Boot::Request* request, CARD16 deviceOrdinal) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_bootPhysicalVolume;
 	request->location.deviceType    = Device::T_anyPilotDisk;
 	request->location.deviceOrdinal = deviceOrdinal;
-
-	logger.info("bootSwitch = %s", bootSwitch);
-	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
-void MesaProcessor::setBootRequestEther(CARD16 deviceOrdinal) {
-	Boot::Request* request = (Boot::Request*)Memory::getAddress(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
-
-	{
-		CARD16* p = (CARD16*)request;
-		for(CARD32 i = 0; i < SIZE(*request); i++) *p++ = 0;
-	}
-
+void MesaProcessor::setBootRequestEther(Boot::Request* request, CARD16 deviceOrdinal) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_inLoad;
 	request->location.deviceType    = Device::T_ethernet;
@@ -281,27 +274,13 @@ void MesaProcessor::setBootRequestEther(CARD16 deviceOrdinal) {
 	request->location.ethernetRequest.address.host.word[1]   = 0xffff;
 	request->location.ethernetRequest.address.host.word[2]   = 0xffff;
 	request->location.ethernetRequest.address.socket.word[0] = 0x000a; // boot socket
-
-
-	logger.info("bootSwitch = %s", bootSwitch);
-	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
 
-void MesaProcessor::setBootRequestStream() {
-	Boot::Request* request = (Boot::Request*)Memory::getAddress(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
-
-	{
-		CARD16* p = (CARD16*)request;
-		for(CARD32 i = 0; i < SIZE(*request); i++) *p++ = 0;
-	}
-
+void MesaProcessor::setBootRequestStream(Boot::Request* request) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_inLoad;
 	request->location.deviceType    = Device::T_simpleDataStream;
 	request->location.deviceOrdinal = 0;
-
-	logger.info("bootSwitch = %s", bootSwitch);
-	setSwitches(request->switches, TO_CSTRING(bootSwitch));
 }
 
 void MesaProcessor::setRunning(int newValue) {

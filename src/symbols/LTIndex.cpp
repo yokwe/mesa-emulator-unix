@@ -54,7 +54,7 @@ void LTIndex::checkAll() {
 		if (e->isNull()) continue;
 		LTRecord* value = LTRecord::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

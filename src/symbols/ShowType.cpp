@@ -1528,19 +1528,19 @@ void ShowType::dump(Symbols* symbols) {
 
 	QFile file(path);
 	if (!file.exists()) {
-		logger.fatal("File does not exist. path = %s", path.toLocal8Bit().constData());
+		logger.fatal("File does not exist. path = %s", path);
 		ERROR();
 	}
 	bool result = file.open(QIODevice::OpenModeFlag::WriteOnly | QIODevice::OpenModeFlag::Truncate);
 	if (!result) {
-		logger.fatal("File open error %s", file.errorString().toLocal8Bit().constData());
+		logger.fatal("File open error %s", file.errorString());
 		ERROR();
 	}
 
 	QTextStream out(&file);
 
     const CTXIndex* outerCtx = symbols->outerCtx;
-    logger.info("dump %s", outerCtx->toString().toLocal8Bit().constData());
+    logger.info("dump %s", outerCtx->toString());
     out << "dump " << outerCtx->toString() << Qt::endl;
     out.flush();
     const SEIndex* sei = outerCtx->getValue().seList;

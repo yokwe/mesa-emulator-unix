@@ -55,7 +55,7 @@ void MDIndex::checkAll() {
 		if (e->isNull()) continue;
 		MDRecord* value = MDRecord::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

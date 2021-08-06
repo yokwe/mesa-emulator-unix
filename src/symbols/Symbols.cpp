@@ -212,54 +212,54 @@ Symbols::Symbols(BCD* bcd_, int symbolBase_) : bcd(bcd_) {
 	version       = Stamp::getInstance(bcd) ;
 	creator       = Stamp::getInstance(bcd) ;
 	sourceVersion = Stamp::getInstance(bcd) ;
-	logger.info("version        %s", version->toString().toLocal8Bit().constData());
-	logger.info("creator        %s", creator->toString().toLocal8Bit().constData());
-	logger.info("source         %s", sourceVersion->toString().toLocal8Bit().constData());
+	logger.info("version        %s", version->toString());
+	logger.info("creator        %s", creator->toString());
+	logger.info("source         %s", sourceVersion->toString());
 
     CARD16 word = file->getCARD16();
     definitionsFile = bitField(word, 15);
     logger.info("definitionFile %d", definitionsFile);
 
     directoryCtx    = CTXIndex::getInstance(this, bitField(word, 1, 15));
-    logger.info("directoryCtx   %s", directoryCtx->toString().toLocal8Bit().constData());
+    logger.info("directoryCtx   %s", directoryCtx->toString());
     importCtx       = CTXIndex::getInstance(this, file->getCARD16());
-    logger.info("importCtx      %s", importCtx->toString().toLocal8Bit().constData());
+    logger.info("importCtx      %s", importCtx->toString());
     outerCtx        = CTXIndex::getInstance(this, file->getCARD16());
-    logger.info("outerCtx       %s", outerCtx->toString().toLocal8Bit().constData());
+    logger.info("outerCtx       %s", outerCtx->toString());
 
 
     hvBlock         = BlockDescriptor::getInstance(bcd);
-    logger.info("hvBlock        %s", hvBlock->toString().toLocal8Bit().constData());
+    logger.info("hvBlock        %s", hvBlock->toString());
     htBlock         = BlockDescriptor::getInstance(bcd);
-    logger.info("htBlock        %s", htBlock->toString().toLocal8Bit().constData());
+    logger.info("htBlock        %s", htBlock->toString());
     ssBlock         = BlockDescriptor::getInstance(bcd);
-    logger.info("ssBlock        %s", ssBlock->toString().toLocal8Bit().constData());
+    logger.info("ssBlock        %s", ssBlock->toString());
     outerPackBlock  = BlockDescriptor::getInstance(bcd);
-//    logger.info("outerPackBlock %s", outerPackBlock->toString().toLocal8Bit().constData());
+//    logger.info("outerPackBlock %s", outerPackBlock->toString());
     innerPackBlock  = BlockDescriptor::getInstance(bcd);
-//    logger.info("innerPackBlock %s", innerPackBlock->toString().toLocal8Bit().constData());
+//    logger.info("innerPackBlock %s", innerPackBlock->toString());
     constBlock      = BlockDescriptor::getInstance(bcd);
-//    logger.info("constBlock     %s", constBlock->toString().toLocal8Bit().constData());
+//    logger.info("constBlock     %s", constBlock->toString());
     seBlock         = BlockDescriptor::getInstance(bcd);
-    logger.info("seBlock        %s", seBlock->toString().toLocal8Bit().constData());
+    logger.info("seBlock        %s", seBlock->toString());
     ctxBlock        = BlockDescriptor::getInstance(bcd);
-    logger.info("ctxBlock       %s", ctxBlock->toString().toLocal8Bit().constData());
+    logger.info("ctxBlock       %s", ctxBlock->toString());
     mdBlock         = BlockDescriptor::getInstance(bcd);
-    logger.info("mdBlock        %s", mdBlock->toString().toLocal8Bit().constData());
+    logger.info("mdBlock        %s", mdBlock->toString());
     bodyBlock       = BlockDescriptor::getInstance(bcd);
-    logger.info("bodyBlock      %s", bodyBlock->toString().toLocal8Bit().constData());
+    logger.info("bodyBlock      %s", bodyBlock->toString());
     extBlock        = BlockDescriptor::getInstance(bcd);
-//    logger.info("extBlock       %s", extBlock->toString().toLocal8Bit().constData());
+//    logger.info("extBlock       %s", extBlock->toString());
     treeBlock       = BlockDescriptor::getInstance(bcd);
-//    logger.info("treeBlock      %s", treeBlock->toString().toLocal8Bit().constData());
+//    logger.info("treeBlock      %s", treeBlock->toString());
     litBlock        = BlockDescriptor::getInstance(bcd);
-//    logger.info("litBlock       %s", litBlock->toString().toLocal8Bit().constData());
+//    logger.info("litBlock       %s", litBlock->toString());
     sLitBlock       = BlockDescriptor::getInstance(bcd);
-//    logger.info("sLitBlock      %s", sLitBlock->toString().toLocal8Bit().constData());
+//    logger.info("sLitBlock      %s", sLitBlock->toString());
     epMapBlock      = BlockDescriptor::getInstance(bcd);
-//    logger.info("epMapBlock     %s", epMapBlock->toString().toLocal8Bit().constData());
+//    logger.info("epMapBlock     %s", epMapBlock->toString());
     spareBlock      = BlockDescriptor::getInstance(bcd);
-//    logger.info("spareBlock     %s", spareBlock->toString().toLocal8Bit().constData());
+//    logger.info("spareBlock     %s", spareBlock->toString());
 
     fgRelPgBase     = file->getCARD16();
 //    logger.info("fgRelPgBase    %d", fgRelPgBase);
@@ -332,7 +332,7 @@ void Symbols::initializeHT(BlockDescriptor* block) {
         HTRecord* record = HTRecord::getInstance(this, index, lastSSIndex);
         ht[index] = record;
 
-        logger.info("ht %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("ht %4d %s", index, record->toString());
         index++;
         lastSSIndex = record->ssIndex;
     }
@@ -363,7 +363,7 @@ void Symbols::initializeMD(BlockDescriptor* block) {
         MDRecord* record = MDRecord::getInstance(this, index);
         md[index] = record;
 
-        logger.info("md %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("md %4d %s", index, record->toString());
         index++;
     }
 
@@ -393,7 +393,7 @@ void Symbols::initializeCTX(BlockDescriptor* block) {
         CTXRecord* record = CTXRecord::getInstance(this, index);
         ctx[index] = record;
 
-        logger.info("ctx %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("ctx %4d %s", index, record->toString());
         index++;
     }
 
@@ -423,7 +423,7 @@ void Symbols::initializeSE(BlockDescriptor* block) {
         SERecord* record = SERecord::getInstance(this, index);
         se[index] = record;
 
-        logger.info("se %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("se %4d %s", index, record->toString());
         index++;
     }
 
@@ -453,7 +453,7 @@ void Symbols::initializeBT(BlockDescriptor* block) {
         BTRecord* record = BTRecord::getInstance(this, index);
         bt[index] = record;
 
-        logger.info("bt %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("bt %4d %s", index, record->toString());
         index++;
     }
 
@@ -483,7 +483,7 @@ void Symbols::initializeExt(BlockDescriptor* block) {
         ExtRecord* record = ExtRecord::getInstance(this, index);
         ext[index] = record;
 
-        logger.info("ext %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("ext %4d %s", index, record->toString());
         index++;
     }
 
@@ -513,7 +513,7 @@ void Symbols::initializeLT(BlockDescriptor* block) {
         LTRecord* record = LTRecord::getInstance(this, index);
         lt[index] = record;
 
-        logger.info("lt %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("lt %4d %s", index, record->toString());
         index++;
     }
 
@@ -543,7 +543,7 @@ void Symbols::initializeTree(BlockDescriptor* block) {
         TreeNode* record = TreeNode::getInstance(this, index);
         tree[index] = record;
 
-        logger.info("tree %4d %s", index, record->toString().toLocal8Bit().constData());
+        logger.info("tree %4d %s", index, record->toString());
         index++;
     }
 

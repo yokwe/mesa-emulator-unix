@@ -270,10 +270,10 @@ BCD::BCD(BCDFile* bcdFile) : file(bcdFile) {
 	unpackagedFile = getFTRecord(unpackagedFileIndex);
 
 	//
-	logger.info("version        %s", version->toString().toLocal8Bit().constData());
-	logger.info("creator        %s", creator->toString().toLocal8Bit().constData());
-	logger.info("sourceFile     %s", sourceFile->toString().toLocal8Bit().constData());
-	logger.info("unpackagedFile %s", unpackagedFile->toString().toLocal8Bit().constData());
+	logger.info("version        %s", version);
+	logger.info("creator        %s", creator->toString());
+	logger.info("sourceFile     %s", sourceFile->toString());
+	logger.info("unpackagedFile %s", unpackagedFile->toString());
 
 	logger.info("nConfigs       %d", nConfigs);
 	logger.info("nModules       %d", nModules);
@@ -350,7 +350,7 @@ MTRecord*   BCD::getMTRecord(CARD16 index) {
 //		NameRecord* record = new NameRecord(index, value);
 //		ss[index] = record;
 //
-//		logger.info("ss %4d %s!", index, record->toString().toLocal8Bit().constData());
+//		logger.info("ss %4d %s!", index, record->toString());
 //	}
 //
 //	// Add special
@@ -403,7 +403,7 @@ void BCD::initializeFTRecord() {
 		FTRecord* record = FTRecord::getInstance(this, index);
 		ft[index] = record;
 
-//		logger.info("ft %3d %s", index, record->toString().toLocal8Bit().constData());
+//		logger.info("ft %3d %s", index, record->toString());
 	}
 
 	// Add special
@@ -425,7 +425,7 @@ void BCD::initializeSGRecord() {
 		SGRecord* record = SGRecord::getInstance(this, index);
 		sg[index] = record;
 
-//		logger.info("sg %3d %s", index, record->toString().toLocal8Bit().constData());
+//		logger.info("sg %3d %s", index, record->toString());
 	}
 
 	// Add special
@@ -446,7 +446,7 @@ void BCD::initializeENRecord() {
 		ENRecord* record = ENRecord::getInstance(this, index);
 		en[index] = record;
 
-//		logger.info("en %3d %s", index, record->toString().toLocal8Bit().constData());
+//		logger.info("en %3d %s", index, record->toString());
 	}
 
 	// Add special
@@ -466,7 +466,7 @@ void BCD::initializeMTRecord() {
 		MTRecord* record = MTRecord::getInstance(this, index);
 		mt[index] = record;
 
-//		logger.info("mt %3d %s", index, record->toString().toLocal8Bit().constData());
+//		logger.info("mt %3d %s", index, record->toString());
 	}
 
 	// Add special

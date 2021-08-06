@@ -51,7 +51,7 @@ void SEIndex::checkAll() {
 		if (e->isNull()) continue;
 		SERecord* value = SERecord::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

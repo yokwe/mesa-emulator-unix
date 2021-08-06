@@ -87,16 +87,16 @@ class BCDFileFile : public BCDFile {
 public:
 	BCDFileFile(QString path_) : path(path_), file(path_) {
 		if (!file.exists()) {
-			logger.fatal("File does not exist. path = %s", path.toLocal8Bit().constData());
+			logger.fatal("File does not exist. path = %s", path);
 			ERROR();
 		}
 		bool result = file.open(QIODevice::OpenModeFlag::ReadOnly);
 		if (!result) {
-			logger.fatal("File open error %s", file.errorString().toLocal8Bit().constData());
+			logger.fatal("File open error %s", file.errorString());
 			ERROR();
 		}
 		capacity = file.size();
-		logger.info("%s  %s  %d", __FUNCTION__, path.toLocal8Bit().constData(), capacity);
+		logger.info("%s  %s  %d", __FUNCTION__, path, capacity);
 	}
 	~BCDFileFile() {
 		if (file.isOpen()) file.close();

@@ -53,7 +53,7 @@ void HTIndex::checkAll() {
 		if (e->isNull()) continue;
 		HTRecord* value = HTRecord::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

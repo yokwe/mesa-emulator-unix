@@ -64,14 +64,14 @@ QString DumpSymbol::indent() {
 void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 	// Check existence of file
 	if (!QFile::exists(filePath)) {
-		logger.fatal("File does not exist. pathFile = %s", filePath.toLocal8Bit().constData());
+		logger.fatal("File does not exist. pathFile = %s", filePath);
 		ERROR();
 	}
 
 	// Read bcd file
 	BCD bcd(filePath);
 	if (!bcd.isBCDFile()) {
-		logger.info("file is no bcd file. pathFile = %s", filePath.toLocal8Bit().constData());
+		logger.info("file is no bcd file. pathFile = %s", filePath);
 		return;
 	}
 
@@ -79,14 +79,14 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 	// Locate target segment
 	int symbolBase = -1;
 	if (bcd.isSymbolsFile()) {
-		logger.info("file is symbol file. pathFile = %s", filePath.toLocal8Bit().constData());
+		logger.info("file is symbol file. pathFile = %s", filePath);
 		symbolBase = 2;
 	} else {
 	   for (SGRecord* p : bcd.sg.values()) {
 			if (p->segClass != SGRecord::SegClass::SYMBOLS)
 				continue;
 			if (p->file->isSelf()) {
-				logger.info("found symbol segment  %s", p->toString().toLocal8Bit().constData());
+				logger.info("found symbol segment  %s", p->toString());
 				symbolBase = p->base;
 				break;
 			}
@@ -105,20 +105,20 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 	{
 		QDir outDir(outDirPath);
 		if (!outDir.exists()) {
-			logger.fatal("outDirPath does not exist. outDirPath = %s", outDir.absolutePath().toLocal8Bit().constData());
+			logger.fatal("outDirPath does not exist. outDirPath = %s", outDir.absolutePath());
 			ERROR();
 		}
 
 		QString fileName(QFileInfo(filePath).baseName() + ".symbol");
 		outFilePath = outDir.absoluteFilePath(fileName);
-		logger.info("outFilePath = %s", outFilePath.toLocal8Bit().constData());
+		logger.info("outFilePath = %s", outFilePath);
 	}
 
 	QFile outFile(outFilePath);
 	{
 		bool result = outFile.open(QIODevice::OpenModeFlag::WriteOnly | QIODevice::OpenModeFlag::Truncate);
 		if (!result) {
-			logger.fatal("File open error %s", outFile.errorString().toLocal8Bit().constData());
+			logger.fatal("File open error %s", outFile.errorString());
 			ERROR();
 		}
 	}
@@ -170,7 +170,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
     nest();
 
     const CTXRecord& outerCtx = symbols.outerCtx->getValue();
-    logger.info(QString::asprintf("ctx %3d - %d", outerCtx.getIndex(), outerCtx.level).toLocal8Bit().constData());
+    logger.info("ctx %3d - %d", outerCtx.getIndex(), outerCtx.level);
 
     for (const SEIndex* sei = outerCtx.seList; !sei->isNull(); sei = sei->nextSe()) {
     	out << indent();

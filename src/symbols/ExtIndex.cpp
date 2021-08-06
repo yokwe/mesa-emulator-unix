@@ -51,7 +51,7 @@ void ExtIndex::checkAll() {
 		if (e->isNull()) continue;
 		ExtRecord* value = ExtRecord::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

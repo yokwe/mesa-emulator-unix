@@ -57,7 +57,7 @@ void TreeIndex::checkAll() {
 		if (e->isNull()) continue;
 		TreeNode* value = TreeNode::find(e->symbols, e->index);
 		if (value == 0) {
-			logger.warn("Bogus %s", e->toString().toLocal8Bit().constData());
+			logger.warn("Bogus %s", e->toString());
 		}
 	}
 }

@@ -23,6 +23,8 @@
     	
     <storageModule moduleId="scannerConfiguration"/>
     	
+    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
     <storageModule moduleId="org.eclipse.cdt.core.pathentry">
         		
         <pathentry include="/usr/local/include" kind="inc" path="" system="true"/>
@@ -33,6 +35,8 @@
         		
         <pathentry include="/usr/local/include/qt5/QtCore" kind="inc" path="" system="true"/>
         		
+        <pathentry include="/usr/include/c++/v1" kind="inc" path="" system="true"/>
+        		
         <pathentry excluding="src/" kind="src" path=""/>
         		
         <pathentry kind="out" path=""/>
@@ -40,7 +44,5 @@
         <pathentry kind="src" path="src"/>
         	
     </storageModule>
-    	
-    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
     
 </cproject>

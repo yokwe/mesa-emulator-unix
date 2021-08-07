@@ -60,7 +60,7 @@ class Abort {
 public:
 	const char *func;
 	const char *file;
-	const int line;
+	const int   line;
 
 	Abort(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
 };
@@ -136,6 +136,10 @@ private:
 };
 
 int toIntMesaNumber(const QString& string);
+int toIntMesaNumber(const std::string& string);
+
+bool startsWith(const std::string& string, const std::string& literal);
+bool endsWith  (const std::string& string, const std::string& literal);
 
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()

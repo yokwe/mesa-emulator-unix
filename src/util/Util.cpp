@@ -125,6 +125,83 @@ int toIntMesaNumber(const QString& string) {
 	return ret;
 }
 
+bool startsWith(const std::string& string, const std::string& literal) {
+	if (string.length() < literal.length()) {
+		return false;
+	} else {
+		std::string::size_type offset = 0;
+		for(std::string::size_type i = 0; i < literal.length(); i++) {
+			if (string[offset + i] != literal[i]) return false;
+		}
+		return true;
+	}
+}
+bool endsWith(const std::string& string, const std::string& literal) {
+	if (string.length() < literal.length()) {
+		return false;
+	} else {
+		std::string::size_type offset = string.length() - literal.length();
+		for(std::string::size_type i = 0; i < literal.length(); i++) {
+			if (string[offset + i] != literal[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+int toIntMesaNumber(const std::string& string) {
+	int radix = 0;
+	std::string numberString;
+
+	if (startsWith(string, "0x") || startsWith(string, "0X")) {
+		// c style hexadecimal
+		radix = 16;
+		numberString = string.substr(2, string.length() - 2);
+	} else if (startsWith(string, "0")) {
+		// c style octal
+		radix = 8;
+		numberString = string.substr(1, string.length() - 1);
+	} else if (endsWith(string, "H")) {
+		// mesa style hexadecimal
+		radix = 16;
+		numberString = string.substr(0, string.length() - 1);
+	} else if (endsWith(string, "B")) {
+		// mesa style octal
+		radix = 8;
+		numberString = string.substr(0, string.length() - 1);
+	} else {
+		// decimal
+		radix = 10;
+		numberString = string;
+	}
+
+	try {
+		size_t idx;
+		int ret = std::stoi(numberString,  &idx, radix);
+		if (numberString.length() != idx) {
+			logger.error("Unexpect");
+			logger.error("  end          = %d", numberString.length());
+			logger.error("  idx          = %d \"%s\"", idx, numberString.substr(idx, numberString.length() - idx));
+			logger.error("  string       = %d \"%s\"", string.length(), string.c_str());
+			logger.error("  numberString = %d \"%s\"", numberString.length(), numberString.c_str());
+			ERROR();
+		}
+		return ret;
+	} catch (const std::invalid_argument& e) {
+		logger.error("exception");
+		logger.error("  name   = %s!", typeid(e).name());
+		logger.error("  what   = %s!", e.what());
+		logger.error("  string = %s!", string);
+		ERROR();
+	} catch (const std::out_of_range& e) {
+		logger.error("exception");
+		logger.error("  name   = %s!", typeid(e).name());
+		logger.error("  what   = %s!", e.what());
+		logger.error("  string = %s!", string);
+		ERROR();
+	}
+}
+
 
 quint16 bitField(quint16 word, int startBit, int stopBit) {
 	const int MAX_BIT = 15;

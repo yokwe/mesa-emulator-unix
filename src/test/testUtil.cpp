@@ -47,9 +47,15 @@ class testUtil : public testBase {
 
 public:
 	void testToIntMesaNumber() {
-		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber("10H"));
-		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber("20B"));
-		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber("0x10"));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(std::string("0x10")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(std::string("10H")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(std::string("20B")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(std::string("16")));
+
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(QString("0x10")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(QString("10H")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(QString("20B")));
+		CPPUNIT_ASSERT_EQUAL(16, toIntMesaNumber(QString("16")));
 	}
 
 };

@@ -88,6 +88,12 @@ void NetworkPacket::attach(const QString& name_) {
 		    }
 		    for(int i = 0; i < ETH_ALEN; i++) address[i] = ifr.ifr_hwaddr.sa_data[i];
 		    logger.info("address  = %02X-%02X-%02X-%02X-%02X-%02X", address[0], address[1], address[2], address[3], address[4], address[5]);
+
+		    {
+			    quint64 t = address[0] << 40 | address[1] << 32 | address[2] << 24 | address[3] << 16 | address[4] << 8 | address[5];
+			    logger.info("address  = %llo", t);
+		    }
+
 		}
 
 		// find interface index

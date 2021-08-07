@@ -107,7 +107,7 @@ QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const QString& p
 	QRegularExpression re("[A-Za-z0-9]+ [0-9A-FH]+ [0-9A-FH]+ [0-9A-FH]+");
 
 	QList<Module::LoadmapFile> ret;
-	for(auto e: string.split(QChar('\r'), Qt::SkipEmptyParts)) {
+	for(auto e: string.split(QChar('\r'))) {
 		QString simplified = e.simplified();
 		auto m = re.match(simplified);
 		if (m.hasMatch()) {
@@ -148,7 +148,7 @@ QList<Module::MapFile> Module::MapFile::loadMapFile(const QString& path) {
 	//                     0        1      2        3        4            5
 
 	QList<Module::MapFile> ret;
-	for(auto e: string.split(QChar('\r'), Qt::SkipEmptyParts)) {
+	for(auto e: string.split(QChar('\r'))) {
 		QString simplified = e.simplified();
 		auto m = re.match(simplified);
 		if (m.hasMatch()) {

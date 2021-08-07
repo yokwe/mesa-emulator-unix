@@ -2,13 +2,14 @@
 # Makefile
 #
 
-MODULE := main util test mesa agent opcode trace guam-headless symbols
+MODULE := main test guam-headless \
+          util mesa agent opcode trace symbols
 
-.PHONY: all clean distclean gamke
-.PHONY: main util mesa agent opcode test trace guam-headless symbols
+.PHONY: all clean distclean gamke fix-permission
+.PHONY: main test guam-headless
 .PHONY: run-main run-test
 .PONEY: prepare-run-guam run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
-.PHONY: fix-permission
+.PHONY: util mesa symbols
 
 all:
 	echo "all"
@@ -16,10 +17,6 @@ all:
 	env
 	@echo "--------"
 	@echo "MODULE $(MODULE)!"
-
-fix-permission:
-	find . -type d -exec chmod 0755 {} \;
-	find . -type f -exec chmod 0644 {} \;
 
 clean:
 	echo "PATH = $(PATH)"
@@ -38,31 +35,30 @@ qmake:
 	@echo "MODULE $(MODULE)!"
 	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
 
-main: util
-	( cd src/main; make all )
+fix-permission:
+	find . -type d -exec chmod 0755 {} \;
+	find . -type f -exec chmod 0644 {} \;
 
 util:
-	( cd src/util; make all )
+	( cd src/util;   make all )
 
-mesa: util agent opcode
-	( cd src/mesa; make all )
+main: util
+	( cd src/main;   make all )
 
-agent: util mesa
-	( cd src/agent; make all )
 
-opcode: util mesa trace
+mesa: util
+	( cd src/agent;  make all )
 	( cd src/opcode; make all )
+	( cd src/mesa;   make all )
+	( cd src/trace;  make all )
 
-test: util trace mesa agent
-	( cd src/test; make all )
-
-trace: util mesa opcode
-	( cd src/trace; make all )
+test: util mesa
+	( cd src/test;   make all )
 
 symbols: util mesa
 	( cd src/symbols; make all )
 
-guam-headless: util mesa agent opcode trace
+guam-headless: util mesa
 	( cd src/guam-headless; make all )
 
 prepare-run-guam:

@@ -313,7 +313,7 @@ int NetworkPacket::transmit(CARD8* data, CARD32 dataLen, int& opErrno) {
 			*q++ = (h2 < 10) ? ('0' + h2) : ('A' + h2 - 10);
 		}
 		*q = 0;
-		logger.debug("TRANS    %s", buf);
+		logger.debug("TRANS    %s", (char*)buf);
 	}
 
 	int ret = send(fd, buffer, dataLen, 0);
@@ -400,7 +400,7 @@ int NetworkPacket::receive(CARD8* data, CARD32 dataLen, int& opErrno) {
 				*q++ = (h2 < 10) ? ('0' + h2) : ('A' + h2 - 10);
 			}
 			*q = 0;
-			logger.debug("RECV     %s", buf);
+			logger.debug("RECV     %s", (char*)buf);
 		}
 	}
 

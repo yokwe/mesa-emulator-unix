@@ -295,7 +295,7 @@ CARD16* Memory::getAddress(CARD32 virtualAddress) {
 	MapFlags mf = p->mf;
 	if (Vacant(mf)) {
 		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, virtualAddress, vp);
-		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u, maps[vp].rp);
+		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
 		ERROR();
 	}
 	Page* page = realPage[p->rp];

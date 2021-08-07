@@ -64,7 +64,7 @@ void E_SM() {
 	map.mf.u = Pop();
 	map.rp = PopLong();
 	CARD32 vp = PopLong();
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SM   vp = %08X  mf = %04X  rp = %08X", savedPC, vp, map.mf.u, map.rp);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SM   vp = %08X  mf = %04X  rp = %08X", savedPC, vp, map.mf.u + 0, map.rp + 0);
 	if (Vacant(map.mf)) map.rp = 0;
 	Memory::WriteMap(vp, map);
 }
@@ -74,7 +74,7 @@ void E_SMF() {
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  vp = %08X  mf = %04X", savedPC, vp, newMF.u);
 	Memory::Map map = Memory::ReadMap(vp);
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  rp = %08X  mf = %04X", savedPC, map.rp, map.mf.u);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
 	Push(map.mf.u);
 	PushLong(map.rp);
 	if (!Vacant(map.mf)) {
@@ -87,7 +87,7 @@ void E_GMF() {
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  vp = %08X", savedPC, vp);
 	Memory::Map map = Memory::ReadMap(vp);
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  rp = %08X  mf = %04X", savedPC, map.rp, map.mf.u);
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
 	if (Vacant(map.mf)) map.rp = 0;
 	Push(map.mf.u);
 	PushLong(map.rp);

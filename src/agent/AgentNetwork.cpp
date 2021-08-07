@@ -249,7 +249,7 @@ void AgentNetwork::Call() {
 		return;
 	} else {
 		if (fcb->receiveStopped) {
-			logger.info("AGENT %s  start  %04X %04X", name, fcb->transmitInterruptSelector, fcb->receiveInterruptSelector);
+			logger.info("AGENT %s  start  %04X %04X", name, fcb->transmitInterruptSelector + 0, fcb->receiveInterruptSelector + 0);
 			receiveThread.reset();
 			receiveThread.setInterruptSelector(fcb->receiveInterruptSelector);
 			transmitThread.reset();
@@ -258,7 +258,7 @@ void AgentNetwork::Call() {
 		fcb->receiveStopped  = 0;
 		fcb->transmitStopped = 0;
 	}
-	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receiveIOCB = %08X  transmitIOCB = %08X", name, fcb->receiveIOCB, fcb->transmitIOCB);
+	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receiveIOCB = %08X  transmitIOCB = %08X", name, fcb->receiveIOCB + 0, fcb->transmitIOCB + 0);
 
 	if (fcb->receiveIOCB) {
 		EthernetIOFaceGuam::EthernetIOCBType* iocb = (EthernetIOFaceGuam::EthernetIOCBType*)Store(fcb->receiveIOCB);

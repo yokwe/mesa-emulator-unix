@@ -90,8 +90,12 @@ void NetworkPacket::attach(const QString& name_) {
 		    logger.info("address  = %02X-%02X-%02X-%02X-%02X-%02X", address[0], address[1], address[2], address[3], address[4], address[5]);
 
 		    {
-			    quint64 t = address[0] << 40 | address[1] << 32 | address[2] << 24 | address[3] << 16 | address[4] << 8 | address[5];
-			    logger.info("address  = %llo", t);
+		    	quint64 t = 0;
+		    	for(int i = 0; i < ETH_ALEN; i++) {
+		    		t = (t << 8) | (address[i] & 0xFF);
+		    	}
+		    	// address for sword remote debug
+			    logger.info("address  = 0.%llob.0", t);
 		    }
 
 		}

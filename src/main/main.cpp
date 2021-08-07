@@ -57,12 +57,9 @@ int main(int, char**) {
 
 	DEBUG_TRACE();
 
-	QString a = "AA";
-	std::string b = "BB";
-	const char* c = "CC";
-	logger.info("a = %s", a);
-	logger.info("b = %s", b);
-	logger.info("c = %s", c);
+	{
+		// write code here
+	}
 
 	logger.info("STOP");
 	return 0;

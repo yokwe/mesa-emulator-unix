@@ -38,7 +38,7 @@
 #include "../mesa/Constant.h"
 #include "../mesa/Type.h"
 
-static const int TRACE_ENABLE_TRACE = 1;
+static const int TRACE_ENABLE_TRACE = 0; // default to 0 for GCC
 
 namespace Trace {
 	const char* getLinkType(LinkType type);

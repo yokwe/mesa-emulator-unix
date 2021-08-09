@@ -133,11 +133,33 @@ namespace Network {
 		void swab() {
 			::swab(value, value, sizeof(value));
 		}
+
+		QString toString() {
+			QString ret = QString::asprintf("%4d ", len);
+
+			char* p = (char*)value;
+			for(int i = 0; i < Ethernet::ADDRESS_SIZE; i++) {
+				ret += QString::asprintf("%02X", *p++);
+			}
+			ret += " ";
+			for(int i = 0; i < Ethernet::ADDRESS_SIZE; i++) {
+				ret += QString::asprintf("%02X", *p++);
+			}
+			ret += " ";
+			for(int i = 0; i < 2; i++) {
+				ret += QString::asprintf("%02X", *p++);
+			}
+			ret += " ";
+			for(int i = 14; i < len; i++) {
+				ret += QString::asprintf("%02X", *p++);
+			}
+
+			return ret;
+		}
 	};
 
 	class Interface {
-		Interface() : ethernet(), fd(0) {}
-
+	public:
 		int select  (int& opError, quint32 timeout); // timeout in seconds
 		int transmit(int& opError, Data& data);      // blocking operation
 		int receive (int& opError, Data& data);      // blocking operation. use select to check data availability
@@ -146,11 +168,18 @@ namespace Network {
 		void discard();
 
 		// get instance of inteface
-		static Interface* getInstance(const QString& name);
+		static Interface* getInstance(const QString& name) {
+			return new Interface(name);
+		}
+		QString getName() {
+			return ethernet.name;
+		}
 
 	private:
 		Ethernet ethernet;
 		int      fd;
+
+		Interface(const QString& name);
 	};
 
 }

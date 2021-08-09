@@ -9,6 +9,11 @@ SOURCES += Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp
 
 HEADERS += Debug.h
 
+HEADERS += Network.h
+linux  : SOURCES += Network_dummy.cpp
+freebsd: SOURCES += Network_freebsd.cpp
+macx:    SOURCES += Network_dummy.cpp
+
 
 ###############################################
 include(../common.pro)

@@ -141,6 +141,8 @@ int toIntMesaNumber(const std::string& string);
 bool startsWith(const std::string& string, const std::string& literal);
 bool endsWith  (const std::string& string, const std::string& literal);
 
+QString toHexString(int size, const quint8* data);
+
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()
 

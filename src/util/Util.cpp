@@ -202,6 +202,15 @@ int toIntMesaNumber(const std::string& string) {
 	}
 }
 
+QString toHexString(int size, const quint8* data) {
+	QString ret;
+
+	for(int i = 0; i < size; i++) {
+		ret += QString::asprintf("%02X", data[i]);
+	}
+	return ret;
+}
+
 
 quint16 bitField(quint16 word, int startBit, int stopBit) {
 	const int MAX_BIT = 15;

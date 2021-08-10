@@ -3,13 +3,13 @@
 #
 
 MODULE := main test guam-headless \
-          util mesa agent opcode trace symbols
+          util mesa agent opcode trace symbols xns
 
 .PHONY: all clean distclean gamke fix-permission
 .PHONY: main test guam-headless
 .PHONY: run-main run-test
 .PONEY: prepare-run-guam run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
-.PHONY: util mesa symbols
+.PHONY: util mesa symbols xns
 
 all:
 	echo "all"
@@ -57,6 +57,9 @@ test: util mesa
 
 symbols: util mesa
 	( cd src/symbols; make all )
+
+xns: util
+	(cd src/xns; make all )
 
 guam-headless: util mesa
 	( cd src/guam-headless; make all )

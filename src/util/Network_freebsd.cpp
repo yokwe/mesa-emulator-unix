@@ -49,36 +49,41 @@ static const Logger logger = Logger::getLogger("net-freebsd");
 
 
 
-static QList<Network::Ethernet> getEthernetList_() {
-	QList<Network::Ethernet> list;
+static QList<XNS::Device> getDeviceList_() {
+	QList<XNS::Device> list;
 
 	struct ifaddrs *ifap;
 	int ret = ::getifaddrs(&ifap);
-	logger.info("getifaddrs %d", ret);
+	if (ret != 0) {
+		int myErrno = errno;
+		logger.error("Unexpected getifaddrs");
+		logger.error("  error = %d  %s", myErrno, strerror(myErrno));
+		ERROR();
+	}
 
 	for(; ifap; ifap = ifap->ifa_next) {
 		struct sockaddr *p = ifap->ifa_addr;
 		if (p->sa_family == AF_LINK) {
 			struct sockaddr_dl *sdl = (struct sockaddr_dl *) ifap->ifa_addr;
 			if (sdl->sdl_alen != 0) {
-				Network::Ethernet ethernet;
+				XNS::Device device;
 
 				// copy name
 				{
 					char* q = sdl->sdl_data;
 					for(int i = 0; i < sdl->sdl_nlen; i++) {
-						ethernet.name.append(q[i]);
+						device.name.append(q[i]);
 					}
 				}
 				// copy address
 				{
-					char* q = sdl->sdl_data + sdl->sdl_nlen;
-					Network::Ethernet::Address address(q);
-					ethernet.address = address;
+					quint8* q = (quint8*)sdl->sdl_data + sdl->sdl_nlen;
+					XNS::Address address(q);
+					device.address = address;
 				}
 
-				list += ethernet;
-//				logger.info("ethernet %s", ethernet.toString());
+				list += device;
+//				logger.info("device %s", device.toString());
 			}
 		}
 	}
@@ -87,94 +92,95 @@ static QList<Network::Ethernet> getEthernetList_() {
 
 	return list;
 }
-QList<Network::Ethernet> Network::getEthernetList() {
-	static QList<Network::Ethernet> list = getEthernetList_();
+
+QList<XNS::Device> Network::getDeviceList() {
+	static QList<XNS::Device> list = getDeviceList_();
 	return list;
 }
 
 
-Network::Interface::Interface(const QString& name) {
-	logger.info("name %s", name);
-	bool foundEthernet = false;
-	for(auto e: Network::getEthernetList()) {
-		if (e.name == name) {
-			this->ethernet = e;
-			foundEthernet = true;
-			break;
-		}
-	}
-	if (!foundEthernet) {
-		logger.error("Unexpected name");
-		logger.error("  name %s!", name);
-		ERROR();
-	}
-
-	{
-		const char deviceNamePattern[] = "/dev/bpf000";
-
-		char deviceName[sizeof(deviceNamePattern)];
-
-		for(int i = 0; i < 999; i++) {
-			sprintf(deviceName, "/dev/bpf%d", i);
-			logger.info("open %s!", deviceName);
-			fd = open( deviceName, O_RDONLY );
-			if (fd == -1) {
-				if (errno == EACCES) {
-					logger.error("need to read and write permission to /dev/bpf");
-					ERROR();
-				}
-				if (errno == ENOENT) {
-					logger.error("device /dev/bpf does not exist");
-					ERROR();
-				}
-				// continue to next device
-				logger.warn("open error");
-				logger.error("  name  = %s", deviceName);
-				logger.error("  error = %d  %s", errno, strerror(errno));
-				continue;
-			}
-			break;
-		}
-		logger.info("fd = %d", fd);
-	}
-
-	// BIOCSETIF
-	{
-		struct ifreq ifr;
-		memset(&ifr, 0, sizeof(ifr));
-		::strncpy(ifr.ifr_name, TO_CSTRING(ethernet.name), IFNAMSIZ - 1);
-	    int ret = ioctl(fd, BIOCSETIF, &ifr);
-		logger.info("BIOCSETIF %d", ret);
-		if (ret == -1) {
-			logger.error("  error = %d  %s", errno, strerror(errno));
-		}
-	}
-	// BIOCPROMISC
-	{
-		int ret = ioctl(fd, BIOCPROMISC, NULL);
-		logger.info("BIOCPROMISC %d", ret);
-		if (ret == -1) {
-			logger.error("  error = %d  %s", errno, strerror(errno));
-		}
-	}
-	// BIOCIMMEDIATE
-	{
-		int value = 1; // 1 for immediate mode
-		int ret = ioctl(fd, BIOCIMMEDIATE, &value);
-		logger.info("BIOCIMMEDIATE %d", ret);
-		if (ret == -1) {
-			logger.error("  error = %d  %s", errno, strerror(errno));
-		}
-	}
-	// BIOCGHDRCMPLT
-	{
-		int value = 1; // 1 for no automatic setting of source address
-		int ret = ioctl(fd, BIOCGHDRCMPLT, &value);
-		logger.info("BIOCGHDRCMPLT %d", ret);
-		if (ret == -1) {
-			logger.error("  error = %d  %s", errno, strerror(errno));
-		}
-	}
-}
+//Network::Interface::Interface(const QString& name) {
+//	logger.info("name %s", name);
+//	bool foundEthernet = false;
+//	for(auto e: Network::getEthernetList()) {
+//		if (e.name == name) {
+//			this->ethernet = e;
+//			foundEthernet = true;
+//			break;
+//		}
+//	}
+//	if (!foundEthernet) {
+//		logger.error("Unexpected name");
+//		logger.error("  name %s!", name);
+//		ERROR();
+//	}
+//
+//	{
+//		const char deviceNamePattern[] = "/dev/bpf000";
+//
+//		char deviceName[sizeof(deviceNamePattern)];
+//
+//		for(int i = 0; i < 999; i++) {
+//			sprintf(deviceName, "/dev/bpf%d", i);
+//			logger.info("open %s!", deviceName);
+//			fd = open( deviceName, O_RDONLY );
+//			if (fd == -1) {
+//				if (errno == EACCES) {
+//					logger.error("need to read and write permission to /dev/bpf");
+//					ERROR();
+//				}
+//				if (errno == ENOENT) {
+//					logger.error("device /dev/bpf does not exist");
+//					ERROR();
+//				}
+//				// continue to next device
+//				logger.warn("open error");
+//				logger.error("  name  = %s", deviceName);
+//				logger.error("  error = %d  %s", errno, strerror(errno));
+//				continue;
+//			}
+//			break;
+//		}
+//		logger.info("fd = %d", fd);
+//	}
+//
+//	// BIOCSETIF
+//	{
+//		struct ifreq ifr;
+//		memset(&ifr, 0, sizeof(ifr));
+//		::strncpy(ifr.ifr_name, TO_CSTRING(ethernet.name), IFNAMSIZ - 1);
+//	    int ret = ioctl(fd, BIOCSETIF, &ifr);
+//		logger.info("BIOCSETIF %d", ret);
+//		if (ret == -1) {
+//			logger.error("  error = %d  %s", errno, strerror(errno));
+//		}
+//	}
+//	// BIOCPROMISC
+//	{
+//		int ret = ioctl(fd, BIOCPROMISC, NULL);
+//		logger.info("BIOCPROMISC %d", ret);
+//		if (ret == -1) {
+//			logger.error("  error = %d  %s", errno, strerror(errno));
+//		}
+//	}
+//	// BIOCIMMEDIATE
+//	{
+//		int value = 1; // 1 for immediate mode
+//		int ret = ioctl(fd, BIOCIMMEDIATE, &value);
+//		logger.info("BIOCIMMEDIATE %d", ret);
+//		if (ret == -1) {
+//			logger.error("  error = %d  %s", errno, strerror(errno));
+//		}
+//	}
+//	// BIOCGHDRCMPLT
+//	{
+//		int value = 1; // 1 for no automatic setting of source address
+//		int ret = ioctl(fd, BIOCGHDRCMPLT, &value);
+//		logger.info("BIOCGHDRCMPLT %d", ret);
+//		if (ret == -1) {
+//			logger.error("  error = %d  %s", errno, strerror(errno));
+//		}
+//	}
+//}
 
 

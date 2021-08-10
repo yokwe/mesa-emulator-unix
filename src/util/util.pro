@@ -4,8 +4,8 @@ TEMPLATE = lib
 CONFIG  += staticlib
 
 # Input
-HEADERS += Util.h   Perf.h   GuiOp.h   JSONUtil.h   Setting.h
-SOURCES += Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp
+HEADERS += Util.h   Perf.h   GuiOp.h   JSONUtil.h   Setting.h   ByteBuffer.h
+SOURCES += Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp ByteBuffer.cpp
 
 HEADERS += Debug.h
 

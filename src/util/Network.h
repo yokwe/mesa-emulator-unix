@@ -41,147 +41,41 @@
 
 #include <QtCore>
 
+#include "../util/ByteBuffer.h"
+#include "../xns/XNS.h"
+
 namespace Network {
-	// op independent network driver for Xerox IDP
-	class Ethernet {
+	//
+	// OS dependent part of network
+	//
+
+	QList<XNS::Device> getDeviceList();
+
+	class Driver {
 	public:
-		static constexpr int ADDRESS_SIZE = 6;
-		static constexpr int FRAME_SIZE   = 1514;
-
-		class Address {
-		public:
-			quint8 value[ADDRESS_SIZE];
-
-			Address() {
-				memset(value, 0, sizeof(value));
-			}
-			Address(const Address& that) {
-				memcpy(value, that.value, sizeof(value));
-			}
-			Address& operator =(const Address& that) {
-				memcpy(value, that.value, sizeof(value));
-				return *this;
-			}
-
-			Address(const quint8* p) {
-				memcpy(value, p, sizeof(value));
-			}
-			Address(const char* p) {
-				memcpy(value, p, sizeof(value));
-			}
-			quint64 toInt64() const {
-				quint64 ret = 0;
-				for(size_t i = 0; i < sizeof(value); i++) {
-					ret <<= 8;
-					ret |= value[i];
-				}
-				return ret;
-			}
-			QString toSting() {
-				QString ret = QString::asprintf("%02X", value[0]);
-				for(size_t i = 1; i < sizeof(value); i++) {
-					ret += QString::asprintf("-%02X", value[i]);
-				}
-				return ret;
-			}
-		};
-
-		QString name;
-		Address address;
-
-		Ethernet() {}
-		Ethernet(const Ethernet& that) : name(that.name), address(that.address) {}
-		Ethernet& operator =(const Ethernet& that) {
-			this->name    = that.name;
-			this->address = that.address;
-			return *this;
-		}
-
-		QString toString() {
-			return QString("{%1 %2}").arg(name).arg(address.toSting());
-		}
-	};
-	QList<Ethernet> getEthernetList();
-
-	class Data {
-	public:
-		int     len;                         // valid length in byte
-		quint8  value[Ethernet::FRAME_SIZE]; // no endian conversion
-
-		Data() : len(0) {
-			memset(value, 0, sizeof(value));
-		}
-		Data(const Data& that) {
-			this->len = that.len;
-			memcpy(value, that.value, that.len);
-		}
-		Data& operator =(const Data& that) {
-			this->len = that.len;
-			memcpy(this->value, that.value, that.len);
-			return *this;
-		}
-		Data(int len_, qint8* value_) {
-			this->len = len_;
-			memcpy(value, value_, len_);
-		}
-
-		void copyFrom(int len_, quint8* value_) {
-			this->len = len_;
-			memcpy(value, value_, len_);
-		}
-		// endian conversion
-		void swab() {
-			::swab(value, value, sizeof(value));
-		}
-
-		QString toString() {
-			QString ret = QString::asprintf("%4d ", len);
-
-			char* p = (char*)value;
-			for(int i = 0; i < Ethernet::ADDRESS_SIZE; i++) {
-				ret += QString::asprintf("%02X", *p++);
-			}
-			ret += " ";
-			for(int i = 0; i < Ethernet::ADDRESS_SIZE; i++) {
-				ret += QString::asprintf("%02X", *p++);
-			}
-			ret += " ";
-			for(int i = 0; i < 2; i++) {
-				ret += QString::asprintf("%02X", *p++);
-			}
-			ret += " ";
-			for(int i = 14; i < len; i++) {
-				ret += QString::asprintf("%02X", *p++);
-			}
-
-			return ret;
-		}
-	};
-
-	class Interface {
-	public:
-		int select  (int& opError, quint32 timeout); // timeout in seconds
-		int transmit(int& opError, Data& data);      // blocking operation
-		int receive (int& opError, Data& data);      // blocking operation. use select to check data availability
+		virtual int select  (int& opError, quint32 timeout = 1) = 0; // returns return value of of select().  default timeout is 1 second
+		virtual int transmit(int& opError, XNS::Packet& data)   = 0; // returns return value of send()
+		virtual int receive (int& opError, XNS::Packet& data)   = 0; // returns return value of of recv()
 
 		// discard received packet
-		void discard();
+		virtual void discard() = 0;
 
-		// get instance of inteface
-		static Interface* getInstance(const QString& name) {
-			return new Interface(name);
-		}
+		Driver(const XNS::Device& device_) : device(device_), fd(0) {}
+		virtual ~Driver() {}
+
 		QString getName() {
-			return ethernet.name;
+			return device.name;
+		}
+		XNS::Address getAddress() {
+			return device.address;
 		}
 
-	private:
-		Ethernet ethernet;
-		int      fd;
-
-		Interface(const QString& name);
+	protected:
+		XNS::Device device;
+		int         fd;
 	};
 
+	Driver* getInstance(const XNS::Device& device);
 }
 
 #endif

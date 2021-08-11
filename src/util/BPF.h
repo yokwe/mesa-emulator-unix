@@ -55,6 +55,105 @@ public:
 	void attach(const QString& name);
 	void close();
 
+	// BIOCGBLEN
+	//   Returns the required buffer length	for reads on bpf files
+	void getBufferLength(u_int& value);
+	// BIOCSBLEN
+	//   Sets the buffer length for	reads on bpf files
+	void setBufferLength(u_int value);
+	// BIOCGDLT
+	//   Returns the type of the data link layer underlying the attached interface
+	// BIOCGDLTLIST
+	//   Returns an array of the available types of the data link layer underlying the attached interface
+	// BIOCSDLT
+	//   Changes the type of the data link layer underlying the attached interface
+	// BIOCPROMISC
+	//   Forces the interface into promiscuous mode
+	void setPromisciousMode();
+	// BIOCFLUSH
+	//   Flushes the buffer	of incoming packets, and resets	the statistics
+	void flush();
+	// BIOCGETIF
+	//   Returns the name of the hardware interface that the file is listening
+	// BIOCSETIF
+	//   Sets the hardware interface associate with the file.
+	void setInterface(const QString& value);
+	// BIOCSRTIMEOUT
+	//   Sets or gets the read timeout parameter
+	void setTimeout(struct timeval value);
+	// BIOCGRTIMEOUT
+	//   Gets or gets the read timeout parameter
+	//   Default value is 0. Which means no timeout.
+	void setTimeout(timeval& value);
+	// BIOCGSTATS
+	//   Returns packet statistics
+	// BIOCIMMEDIATE
+	//   Enables or	disables "immediate mode"
+	//   When immediate more is enabled, reads return immediately upon packet reception
+	//   When immediate mode is disabled, read will block until buffer become full or timeout.
+	void immediateMode(u_int value);
+	// BIOCSETF
+	//   Sets the read filter program with BIOCFLUSH
+	// BIOCSETFNR
+	//   Sets the read filter program
+	void setReadFilter(struct bpf_program& value);
+	// BIOCSETWF
+	//   Sets the write filter program
+	void setWriteFilter(struct bpf_program& value);
+	// BIOCVERSION
+	//   Returns the major and	minor version numbers of the filter language
+	// BIOCGRSIG
+	//   Sets the status of	the "header complete" flag.
+	// BIOCSRSIG
+	//   Gets the status of	the "header complete" flag.
+	//   When value is 0, source address is filled automatically
+	//   When value is 1, source address is not filled automatically
+	//   Default value is 0
+	void setHeaderCoplete(u_int value);
+	// BIOCSDIRECTION
+	//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+	//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
+	//   Default is BPF_D_INOUT
+	void setDirection(u_int value);
+	// BIOCSDIRECTION
+	//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+	// BIOCSTSTAMP
+	//   Set format and resolution of the time stamps returned by BPF
+	// BIOCGTSTAMP
+	//   Get format and resolution of the time stamps returned by BPF
+	// BIOCFEEDBACK
+	//   Set packet feedback mode
+	// BIOCLOCK
+	//   Set the locked flag on the	bpf descriptor
+	// BIOCGETBUFMODE
+	//   Get the current bpf buffering mode
+	void setBufferMode(u_int value);
+	// BIOCSETBUFMODE
+	//   Set the current bpf buffering mode
+	//   value must be BPF_BUFMODE_BUFFER or BPF_BUFMODE_ZBUF
+	void getBufferMode(u_int& value);
+	// BIOCSETZBUF
+	//   Set the current zero-copy buffer locations
+	// BIOCGETZMAX
+	//   Get the largest individual zero-copy buffer size allowed
+	// BIOCROTZBUF
+	//   Force ownership of	the next buffer
+	// FIONREAD
+	//   Returns the number of bytes that are immediately available for	reading
+	void nonBlockingRead(int& value);
+	// SIOCGIFADDR
+	//   Returns the address associated	with the interface.
+	// FIONBIO
+	//   Sets or clears non-blocking I/O
+	//   If arg is non-zero, then doing a read(2) when no data is available will return -1 and errno will be set to EAGAIN
+	void setNonBlocking(int value);
+	// FIOASYNC
+	//   Enables or disables async I/O
+	// FIOSETOWN
+	//   Sets the process or process group
+	// FIOGETOWN
+	//   Gets the process or process group
+
 };
 
 #endif

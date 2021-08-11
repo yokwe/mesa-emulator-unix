@@ -62,6 +62,8 @@ void BPF::open() {
 		}
 		path = buf;
 	}
+	// BIOCGBLEN
+	//   Returns the required buffer length for reads on bpf files.
 	{
 		int value;
 		int ret;
@@ -91,6 +93,7 @@ void BPF::attach(const QString& name_) {
 	int ret;
 
 	// BIOCSETIF
+	//   Sets the hardware interface associated with the file
 	{
 		struct ifreq ifr;
 		memset(&ifr, 0, sizeof(ifr));
@@ -98,18 +101,21 @@ void BPF::attach(const QString& name_) {
 		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETIF, &ifr))
 	}
 	// BIOCPROMISC
+	//   Forces the	interface into promiscuous mode
 	{
 		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCPROMISC, NULL))
 	}
 	// BIOCIMMEDIATE
+	//   Enables or	disables "immediate mode"
 	{
 		int value = 1; // 1 for immediate mode
 		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCIMMEDIATE, &value))
 	}
-	// BIOCGHDRCMPLT
+	// BIOCSHDRCMPLT
+	//   Sets the status of	the "header complete" flag
 	{
 		int value = 1; // 1 for no automatic setting of source address
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGHDRCMPLT, &value))
+		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSHDRCMPLT, &value))
 	}
 
 }

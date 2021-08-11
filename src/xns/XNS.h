@@ -33,6 +33,9 @@
 // xns.h
 //
 
+#ifndef XNS_H__
+#define XNS_H__
+
 #include <QtCore>
 
 #include "../util/ByteBuffer.h"
@@ -66,6 +69,9 @@ namespace XNS {
 
 		bool isBroadcast() const {
 			return value == BROADCAST;
+		}
+		bool isNull() const {
+			return value == 0;
 		}
 		QString toString(QString sep = "") const;
 		QString toOcatlString() const;
@@ -116,3 +122,5 @@ namespace XNS {
 	};
 
 }
+
+#endif

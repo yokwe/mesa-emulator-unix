@@ -53,9 +53,9 @@ namespace Network {
 
 	class Driver {
 	public:
-		virtual int select  (int& opError, quint32 timeout = 1) = 0; // returns return value of of select().  default timeout is 1 second
-		virtual int transmit(int& opError, XNS::Packet& data)   = 0; // returns return value of send()
-		virtual int receive (int& opError, XNS::Packet& data)   = 0; // returns return value of of recv()
+		virtual int select  (int& opErrno, quint32 timeout = 1) = 0; // returns return value of of select().  default timeout is 1 second
+		virtual int transmit(int& opErrno, XNS::Packet& packet) = 0; // returns return value of send()
+		virtual int receive (int& opErrno, XNS::Packet& packet) = 0; // returns return value of of recv()
 
 		// discard received packet
 		virtual void discard() = 0;

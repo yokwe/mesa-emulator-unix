@@ -146,6 +146,10 @@ QString toHexString(int size, const quint8* data);
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()
 
+// helper macro for syscall
+#define LOG_ERRNO(errNo) { logger.error("errno = %d  \"%s\"", errNo, strerror(errNo)); }
+#define LOG_SYSCALL(retVar, syscall)   {retVar = syscall; int errNo = errno; logger.debug("%s = %d", #syscall, retVar); if (retVar < 0) { LOG_ERRNO(errNo) } }
+#define CHECK_SYSCALL(retVar, syscall) {retVar = syscall; if (retVar < 0) {int errNo = errno; logger.error("%s = %d", #syscall, retVar);  LOG_ERRNO(errNo) ERROR() } }
 
 // Helper macro to make toString for enum class
 #define TO_STRING_PROLOGUE(e) \

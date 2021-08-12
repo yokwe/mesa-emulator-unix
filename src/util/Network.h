@@ -50,20 +50,11 @@ namespace Network {
 
 		Packet() : ByteBuffer(SIZE, packetData) {}
 
-		Packet(const Packet& that) : ByteBuffer(that) {
-			memcpy(packetData, that.data(), that.capacity());
-			myData = packetData;
+		Packet(const ByteBuffer& that) : ByteBuffer() {
+			deepCopy(that);
 		}
-		Packet(const ByteBuffer& that) : ByteBuffer(that) {
-			memcpy(packetData, that.data(), that.capacity());
-			myData = packetData;
-		}
-
-		Packet& operator =(const Packet& that) {
-			// call ByteBuffer operator=
-			ByteBuffer::operator=(that);
-			memcpy(packetData, that.data(), that.capacity());
-			myData = packetData;
+		Packet& operator =(const ByteBuffer& that) {
+			deepCopy(that);
 			return *this;
 		}
 
@@ -75,6 +66,20 @@ namespace Network {
 		QString toString(int limit = 65535) const;
 	private:
 		quint8  packetData[SIZE];
+
+	protected:
+		void deepCopy(const ByteBuffer& that) {
+			// copy values from that
+			myPosition = that.position();
+			myLimit    = that.limit();
+			// use packetData for myData
+			myCapacity = SIZE;
+			myData     = packetData;
+			// reset myMarkPos
+			myMarkPos  = INVALID_POS;
+			// copy data from that to packetData
+			memcpy(packetData, that.data(), that.capacity());
+		}
 	};
 
 	class Address {

@@ -44,45 +44,48 @@ class ByteBuffer {
 	int     myPosition;
 	int     myLimit;
 	int     myCapacity;
-	int     myMarkPos;
 	quint8 *myData;
+	int     myMarkPos;
 
 public:
-	ByteBuffer(int capacity, quint8* data) : myPosition(0), myLimit(capacity), myCapacity(capacity), myMarkPos(INVALID_POS), myData(data) {}
+	ByteBuffer(int capacity, quint8* data) : myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
 
 	ByteBuffer(const ByteBuffer& that) {
 		this->myPosition = that.myPosition;
 		this->myLimit    = that.myLimit;
 		this->myCapacity = that.myCapacity;
-		this->myMarkPos  = that.myMarkPos;
 		this->myData     = that.myData;
+		this->myMarkPos  = that.myMarkPos;
 	}
 	ByteBuffer& operator =(const ByteBuffer& that) {
 		this->myPosition = that.myPosition;
 		this->myLimit    = that.myLimit;
 		this->myCapacity = that.myCapacity;
-		this->myMarkPos  = that.myMarkPos;
 		this->myData     = that.myData;
+		this->myMarkPos  = that.myMarkPos;
 		return *this;
 	}
 
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const quint8* data);
 
-	int position() {
+	int position() const {
 		return myPosition;
 	}
-	int limit() {
+	int limit() const {
 		return myLimit;
 	}
-	int capacity() {
+	int capacity() const {
 		return myCapacity;
 	}
+	quint8* data() const {
+		return myData;
+	}
 
-	int remaining() {
+	int remaining() const {
 		return myLimit - myPosition;
 	}
-	bool hasRemaining() {
+	bool hasRemaining() const {
 		return myPosition < myLimit;
 	}
 
@@ -131,11 +134,11 @@ public:
 		myPosition += readSize;
 	}
 
-	void read8 (const int index, quint8&  value);
-	void read16(const int index, quint16& value);
-	void read32(const int index, quint32& value);
-	void read48(const int index, quint64& value);
-	void read  (const int index, const int readSize, quint8* value);
+	void read8 (const int index, quint8&  value) const;
+	void read16(const int index, quint16& value) const;
+	void read32(const int index, quint32& value) const;
+	void read48(const int index, quint64& value) const;
+	void read  (const int index, const int readSize, quint8* value) const;
 
 	// write to ByteBuffer
 	void write8 (quint8  value) {

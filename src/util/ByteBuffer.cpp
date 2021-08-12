@@ -94,7 +94,7 @@ void ByteBuffer::reset() {
 //
 // ByteBuffer::read
 //
-void ByteBuffer::read8(const int index, quint8& value) {
+void ByteBuffer::read8(const int index, quint8& value) const {
 	const int readSize = 1;
 	if ((index + readSize) <= myLimit) {
 		const quint8* data = myData + index;
@@ -107,7 +107,7 @@ void ByteBuffer::read8(const int index, quint8& value) {
 		ERROR();
 	}
 }
-void ByteBuffer::read16(const int index, quint16& value) {
+void ByteBuffer::read16(const int index, quint16& value) const {
 	const int readSize = 2;
 	if ((index + readSize) <= myLimit) {
 		const quint8* data = myData + index;
@@ -120,7 +120,7 @@ void ByteBuffer::read16(const int index, quint16& value) {
 		ERROR();
 	}
 }
-void ByteBuffer::read32(const int index, quint32& value) {
+void ByteBuffer::read32(const int index, quint32& value) const {
 	const int readSize = 4;
 	if ((index + readSize) <= myLimit) {
 		const quint8* data = myData + index;
@@ -133,7 +133,7 @@ void ByteBuffer::read32(const int index, quint32& value) {
 		ERROR();
 	}
 }
-void ByteBuffer::read48(const int index, quint64& value) {
+void ByteBuffer::read48(const int index, quint64& value) const {
 	const int readSize = 6;
 	if ((index + readSize) <= myLimit) {
 		const quint8* data = myData + index;
@@ -148,7 +148,7 @@ void ByteBuffer::read48(const int index, quint64& value) {
 		ERROR();
 	}
 }
-void ByteBuffer::read(const int index, const int readSize, quint8* value) {
+void ByteBuffer::read(const int index, const int readSize, quint8* value) const {
 	if ((index + readSize) <= myLimit) {
 		const quint8* data = myData + index;
 		memcpy(value, data, readSize);

@@ -96,7 +96,7 @@ prepare-run-guam:
 	
 run-main: main prepare-run-guam
 	echo -n >tmp/run/debug.log
-	tmp/build/main/main | c++filt
+	tmp/build/main/main
 
 run-test: test
 	echo -n >tmp/run/debug.log

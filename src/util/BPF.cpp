@@ -43,79 +43,157 @@ static const Logger logger = Logger::getLogger("bpf");
 #include <string.h>
 
 #include "BPF.h"
-#include "Network.h"
 
-void BPF::open() {
-	{
-		const char pathPattern[] = "/dev/bpf00";
-		char buf[sizeof(pathPattern)];
 
-		for(int i = 0; i < 99; i++) {
-			sprintf(buf, "/dev/bpf%d", i);
-			fd = ::open(buf, O_RDWR);
-			if (fd < 0) {
-				int opErrno = errno;
-				LOG_ERRNO(opErrno);
-				continue;
-			}
-			break;
+void BPF::openDevice() {
+	char tempPath[sizeof("/dev/bpf00")];
+	int  tempFD;
+
+	for(int i = 0; i < 99; i++) {
+		sprintf(tempPath, "/dev/bpf%d", i);
+		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
+		if (tempFD < 0) {
+			int opErrno = errno;
+			LOG_ERRNO(opErrno);
+			continue;
 		}
-		path = buf;
+		break;
 	}
-	// BIOCGBLEN
-	//   Returns the required buffer length for reads on bpf files.
-	{
-		int value;
-		int ret;
-
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGBLEN, &value))
-		bufferSize = value;
-		buffer     = new quint8[bufferSize];
-	}
-
-	logger.info("fd     %d", fd);
-	logger.info("buffer %d", bufferSize);
-	logger.info("path   %s", path);
-}
-void BPF::close() {
-	if (0 <= fd) {
-		int ret;
-		LOG_SYSCALL(ret, ::close(fd))
-		fd = -1;
-	}
-	delete buffer;
+	path = tempPath;
+	fd   = tempFD;
 }
 
-void BPF::attach(const QString& name_) {
-	name = name_;
-	logger.info("device %s", name);
-
+void BPF::write(const Network::Packet& value) {
 	int ret;
-
-	// BIOCSETIF
-	//   Sets the hardware interface associated with the file
-	{
-		struct ifreq ifr;
-		memset(&ifr, 0, sizeof(ifr));
-		::strncpy(ifr.ifr_name, TO_CSTRING(name), IFNAMSIZ - 1);
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETIF, &ifr))
-	}
-	// BIOCPROMISC
-	//   Forces the	interface into promiscuous mode
-	{
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCPROMISC, NULL))
-	}
-	// BIOCIMMEDIATE
-	//   Enables or	disables "immediate mode"
-	{
-		int value = 1; // 1 for immediate mode
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCIMMEDIATE, &value))
-	}
-	// BIOCSHDRCMPLT
-	//   Sets the status of	the "header complete" flag
-	{
-		int value = 1; // 1 for no automatic setting of source address
-		CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSHDRCMPLT, &value))
-	}
-
+	CHECK_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
 }
+
+// BIOCGBLEN
+//   Returns the required buffer length	for reads on bpf files
+quint32 BPF::getBufferSize() {
+	int ret;
+	quint32 value;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGBLEN, &value))
+	return value;
+}
+
+// BIOCPROMISC
+//   Forces the interface into promiscuous mode
+void BPF::setPromiscious() {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCPROMISC, NULL))
+}
+// BIOCFLUSH
+//   Flushes the buffer	of incoming packets, and resets	the statistics
+void BPF::flush() {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCFLUSH, NULL))
+}
+
+// BIOCGETIF
+//   Returns the name of the hardware interface that the file is listening
+QString BPF::getInterface() {
+	int ret;
+	struct ifreq ifr;
+	memset(&ifr, 0, sizeof(ifr));
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGETIF, &ifr))
+	QString value = ifr.ifr_name;
+	return value;
+}
+
+// BIOCSETIF
+//   Sets the hardware interface associate with the file.
+void BPF::setInterface(const QString& value) {
+	int ret;
+	struct ifreq ifr;
+	memset(&ifr, 0, sizeof(ifr));
+	::strncpy(ifr.ifr_name, TO_CSTRING(value), IFNAMSIZ - 1);
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETIF, &ifr))
+}
+
+// BIOCSRTIMEOUT
+//   Sets the read timeout parameter
+//   Default value is 0. Which means no timeout.
+void BPF::setReadTimeout(const struct timeval& value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRTIMEOUT, &value))
+}
+
+// BIOCGRTIMEOUT
+//   Gets the read timeout parameter
+void BPF::getReadTimeout(struct timeval& value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGRTIMEOUT, &value))
+}
+
+
+// BIOCIMMEDIATE
+//   Enables or	disables "immediate mode"
+//   When immediate more is enabled, reads return immediately upon packet reception
+//   When immediate mode is disabled, read will block until buffer become full or timeout.
+void BPF::setImmediate(quint32 value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCIMMEDIATE, &value))
+}
+
+// BIOCSETFNR
+//   Sets the read filter program
+void BPF::setReadFilter(struct bpf_program* value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETFNR, value))
+}
+
+// BIOCGRSIG
+//   Sets the status of	the "header complete" flag.
+quint32 BPF::getHeaderComplete() {
+	int ret;
+	quint32 value;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGRSIG, &value))
+	return value;
+}
+
+// BIOCSRSIG
+//   Gets the status of	the "header complete" flag.
+//   When value is 0, source address is filled automatically
+//   When value is 1, source address is not filled automatically
+//   Default value is 0
+void BPF::setHeaderComplete(quint32 value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRSIG, &value))
+}
+
+// BIOCGDIRECTION
+//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+quint32 BPF::getDirection() {
+	int ret;
+	quint32 value;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGDIRECTION, &value))
+	return value;
+}
+
+// BIOCSDIRECTION
+//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
+//   Default is BPF_D_INOUT
+void BPF::setDirection(quint32 value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSDIRECTION, &value))
+}
+
+// FIONREAD
+//   Returns the number of bytes that are immediately available for	reading
+int BPF::getNonBlockingReadBytes() {
+	int ret;
+	int value;
+	CHECK_SYSCALL(ret, ::ioctl(fd, FIONREAD, &value))
+	return value;
+}
+
+// FIONBIO
+//   Sets or clears non-blocking I/O
+//   If arg is non-zero, then doing a read(2) when no data is available will return -1 and errno will be set to EAGAIN
+void BPF::setNonBlockingIO(int value) {
+	int ret;
+	CHECK_SYSCALL(ret, ::ioctl(fd, FIONBIO, &value))
+}
+

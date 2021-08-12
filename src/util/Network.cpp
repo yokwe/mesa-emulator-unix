@@ -58,46 +58,8 @@ QString Network::Packet::toString(int limit) const {
 	return ret;
 }
 
-QString Network::Address::toString(QString sep) const {
-	QStringList list;
-	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 24) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 16) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >>  8) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >>  0) & 0xFF);
-	return list.join(sep);
-}
-QString Network::Address::toOctalString() const {
-	return QString::asprintf("%llob", value);
-}
-QString Network::Address::toDecimalString() const {
-	QStringList list;
-	auto n = value;
-	for(;;) {
-		if (n == 0) break;
-		auto quotient  = n / 1000;
-		auto remainder = (int)(n % 1000);
-
-		list.prepend(QString::asprintf("%d", remainder));
-		n = quotient;
-	}
-
-	return list.join("-");
-}
-
 
 QString Network::Device::toString() const {
-	return QString("{%1 %2}").arg(name).arg(address.toString());
-}
-
-QString Network::Device::toString(const Network::Address& value) const {
-	if (value.isBroadcast()) {
-		return "## ALL ##";
-	} else if (this->address == value) {
-		return "## SELF ##";
-	} else {
-		return value.toString();
-	}
+	return QString("{%1 %2}").arg(name).arg(QString("%1").arg(address, 0, 16).toUpper());
 }
 

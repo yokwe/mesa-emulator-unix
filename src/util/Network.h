@@ -82,49 +82,12 @@ namespace Network {
 		}
 	};
 
-	class Address {
-	public:
-		static constexpr int     SIZE      = 6;
-		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
-
-		quint64 value;
-
-		Address() : value(0) {}
-		Address(const Address& that) : value(that.value) {}
-		Address& operator =(const Address& that) {
-			this->value = that.value;
-			return *this;
-		}
-		bool operator ==(const Address& that) const {
-			return this->value == that.value;
-		}
-		bool operator ==(const quint64 that) const {
-			return this->value == that;
-		}
-
-		Address(quint64 value_) : value(value_) {}
-		Address(quint8* p) {
-			ByteBuffer bb(SIZE, p);
-			bb.read48(value);
-		}
-
-		bool isBroadcast() const {
-			return value == BROADCAST;
-		}
-		bool isNull() const {
-			return value == 0;
-		}
-		QString toString(QString sep = "") const;
-		QString toOctalString() const;
-		QString toDecimalString() const;
-	};
-
 	class Device {
 	public:
-		QString          name;
-		Network::Address address;
+		QString name;
+		quint64 address;
 
-		Device() {}
+		Device() : address(0) {}
 		Device(const Device& that) : name(that.name), address(that.address) {}
 		Device& operator =(const Device& that) {
 			this->name    = that.name;
@@ -133,8 +96,6 @@ namespace Network {
 		}
 
 		QString toString() const;
-
-		QString toString(const Address& value) const;
 	};
 
 	class Driver {
@@ -152,7 +113,7 @@ namespace Network {
 		QString getName() {
 			return device.name;
 		}
-		Address getAddress() {
+		quint64 getAddress() {
 			return device.address;
 		}
 

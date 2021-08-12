@@ -81,8 +81,8 @@ static QList<Network::Device> getDeviceList_() {
 					device.name.append(data[i]);
 				}
 				// copy address
-				Network::Address address(data + sdl->sdl_nlen);
-				device.address = address;
+				ByteBuffer bb(sdl->sdl_alen, data + sdl->sdl_nlen);
+				bb.read48(device.address);
 
 				list += device;
 //				logger.info("device %s", device.toString());

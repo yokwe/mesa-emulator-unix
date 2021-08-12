@@ -41,7 +41,104 @@
 #include "../util/Network.h"
 
 namespace XNS {
+	class XNSBase {
+	public:
+		// this <= ByteBuffer
+		virtual void fromBB(ByteBuffer& bb) = 0;
 
+		// ByteBuffer <= this
+		virtual void toBB(ByteBuffer& bb) const = 0;
+
+		// string representation
+		virtual QString toString() const = 0;
+
+		virtual ~XNSBase() {}
+	};
+
+	class Host : public XNSBase {
+	public:
+		static constexpr int     SIZE      = 6;
+		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
+
+		quint64 value;
+
+		Host() : value(0) {}
+		Host(const Host& that) : value(that.value) {}
+		Host& operator =(const Host& that) {
+			this->value = that.value;
+			return *this;
+		}
+		bool operator ==(const Host& that) const {
+			return this->value == that.value;
+		}
+		bool operator ==(const quint64 that) const {
+			return this->value == that;
+		}
+
+		Host(quint64 value_) : value(value_) {}
+		Host(quint8* p) {
+			ByteBuffer bb(SIZE, p);
+			bb.read48(value);
+		}
+
+		bool isBroadcast() const {
+			return value == BROADCAST;
+		}
+		QString toString(QString sep) const;
+		QString toOctalString() const;
+		QString toDecimalString() const;
+
+		// XNSBase
+		void    fromBB(ByteBuffer& bb);
+		void    toBB(ByteBuffer& bb) const;
+		QString toString() const {
+			return toString("");
+		}
+	};
+
+
+	class PacketType : public XNSBase {
+	public:
+		quint16 packeType;
+
+		// XNSBase
+		void    fromBB(ByteBuffer& bb);
+		void    toBB(ByteBuffer& bb) const;
+		QString toString() const;
+	};
+
+	class Ethernet : public XNSBase {
+	public:
+		Host    dst;
+		Host    src;
+		quint16 type;
+
+		// XNSBase
+		void    fromBB(ByteBuffer& bb);
+		void    toBB(ByteBuffer& bb) const;
+		QString toString() const;
+	};
+
+	class IDP : public XNSBase {
+	public:
+		quint16 checksum;
+		quint16 length;
+		quint8  contro;
+		quint8  type;
+
+		quint32 dstNet;
+		Host    dstHost;
+		quint16 dstSocket;
+
+		quint32 srcNet;
+		Host    srcHost;
+		quint16 srcSocket;
+
+		// XNSBase
+		void    fromBB(ByteBuffer& bb);
+		void    toBB(ByteBuffer& bb) const;
+		QString toString() const;
+	};
 }
 
 #endif

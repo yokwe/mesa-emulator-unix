@@ -33,3 +33,32 @@
 static const Logger logger = Logger::getLogger("xns");
 
 #include "XNS.h"
+
+
+QString XNS::Host::toString(QString sep) const {
+	QStringList list;
+	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 24) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 16) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >>  8) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >>  0) & 0xFF);
+	return list.join(sep);
+}
+QString XNS::Host::toOctalString() const {
+	return QString::asprintf("%llob", value);
+}
+QString XNS::Host::toDecimalString() const {
+	QStringList list;
+	auto n = value;
+	for(;;) {
+		if (n == 0) break;
+		auto quotient  = n / 1000;
+		auto remainder = (int)(n % 1000);
+
+		list.prepend(QString::asprintf("%d", remainder));
+		n = quotient;
+	}
+
+	return list.join("-");
+}

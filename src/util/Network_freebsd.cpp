@@ -32,17 +32,17 @@
 #include "Util.h"
 static const Logger logger = Logger::getLogger("net-freebsd");
 
-#include "Network.h"
-
 #include <net/bpf.h>
 #include <net/if.h>
 #include <net/if_dl.h>
 #include <sys/ioctl.h>
 #include <ifaddrs.h>
-
 #include <unistd.h>
 
 #include <QtCore>
+
+#include "Network.h"
+
 
 // add user to group wheel to get access /dev/bpf
 // OSX
@@ -58,8 +58,8 @@ static const Logger logger = Logger::getLogger("net-freebsd");
 //   sysctl net.link.bridge.pfil_onlyip=0
 
 
-static QList<XNS::Device> getDeviceList_() {
-	QList<XNS::Device> list;
+static QList<Network::Device> getDeviceList_() {
+	QList<Network::Device> list;
 
 	struct ifaddrs *ifap;
 	int ret;
@@ -74,14 +74,14 @@ static QList<XNS::Device> getDeviceList_() {
 				quint8* data = (quint8*)sdl->sdl_data;
 
 				// build device
-				XNS::Device device;
+				Network::Device device;
 
 				// copy name
 				for(int i = 0; i < sdl->sdl_nlen; i++) {
 					device.name.append(data[i]);
 				}
 				// copy address
-				XNS::Address address(data + sdl->sdl_nlen);
+				Network::Address address(data + sdl->sdl_nlen);
 				device.address = address;
 
 				list += device;
@@ -95,8 +95,8 @@ static QList<XNS::Device> getDeviceList_() {
 	return list;
 }
 
-QList<XNS::Device> Network::getDeviceList() {
-	static QList<XNS::Device> list = getDeviceList_();
+QList<Network::Device> Network::getDeviceList() {
+	static QList<Network::Device> list = getDeviceList_();
 	return list;
 }
 
@@ -104,13 +104,13 @@ QList<XNS::Device> Network::getDeviceList() {
 class FreeBSDDriver : public Network::Driver {
 public:
 	int select  (int& opError, quint32 timeout = 1); // returns return value of of select().  default timeout is 1 second
-	int transmit(int& opError, XNS::Packet& data);   // returns return value of send()
-	int receive (int& opError, XNS::Packet& data);   // returns return value of of recv()
+	int transmit(int& opError, Network::Packet& data);   // returns return value of send()
+	int receive (int& opError, Network::Packet& data);   // returns return value of of recv()
 
 	// discard received packet
 	void discard() = 0;
 
-	FreeBSDDriver(const XNS::Device& device_);
+	FreeBSDDriver(const Network::Device& device_);
 
 	void openBPF();
 	void prepareBPF();
@@ -118,7 +118,7 @@ public:
 	int     bufferSize;
 	quint8* buffer;
 
-	std::list<XNS::Packet> list;
+	std::list<Network::Packet> list;
 	QString bpfPath;
 };
 
@@ -139,12 +139,12 @@ int FreeBSDDriver::select  (int& opErrno, quint32 timeout) {
 	opErrno = errno;
 	return ret;
 }
-int FreeBSDDriver::transmit(int& opErrno, XNS::Packet& packet) {
-	int ret = ::send(fd, packet.data, packet.limit(), 0);
+int FreeBSDDriver::transmit(int& opErrno, Network::Packet& packet) {
+	int ret = ::send(fd, packet.data(), packet.limit(), 0);
 	opErrno = errno;
 	return ret;
 }
-int FreeBSDDriver::receive(int& opErrno, XNS::Packet& packet) {
+int FreeBSDDriver::receive(int& opErrno, Network::Packet& packet) {
 	// FIXME
 	(void)opErrno;
 	(void)packet;
@@ -263,7 +263,7 @@ void FreeBSDDriver::prepareBPF() {
 		logger.info("buffer   %d  %p", bufferSize, buffer);
 	}
 }
-FreeBSDDriver::FreeBSDDriver(const XNS::Device& device_) : Driver(device_) {
+FreeBSDDriver::FreeBSDDriver(const Network::Device& device_) : Driver(device_) {
 	openBPF();
 	prepareBPF();
 }

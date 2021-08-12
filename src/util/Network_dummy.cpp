@@ -34,37 +34,37 @@ static const Logger logger = Logger::getLogger("net-dummy");
 
 #include "Network.h"
 
-static QList<XNS::Device> getDeviceList_() {
-	QList<XNS::Device> list;
+static QList<Network::Device> getDeviceList_() {
+	QList<Network::Device> list;
 	return list;
 }
-QList<XNS::Device> Network::getDeviceList() {
-	static QList<XNS::Device> list = getDeviceList_();
+QList<Network::Device> Network::getDeviceList() {
+	static QList<Network::Device> list = getDeviceList_();
 	return list;
 }
 
 class Dummy : public Network::Driver {
 public:
 	int select  (int& opError, quint32 timeout = 1); // returns return value of of select().  default timeout is 1 second
-	int transmit(int& opError, XNS::Packet& data);   // returns return value of send()
-	int receive (int& opError, XNS::Packet& data);   // returns return value of of recv()
+	int transmit(int& opError, Network::Packet& data);   // returns return value of send()
+	int receive (int& opError, Network::Packet& data);   // returns return value of of recv()
 
 	// discard received packet
 	void discard();
 
-	Dummy(const XNS::Device& device) : Network::Driver(device) {}
+	Dummy(const Network::Device& device) : Network::Driver(device) {}
 };
 int Dummy::select(int& opError, quint32 timeout) {
 	opError = 0;
 	(void)timeout;
 	return 0;
 }
-int Dummy::transmit(int& opError, XNS::Packet& data) {
+int Dummy::transmit(int& opError, Network::Packet& data) {
 	opError = ENETDOWN;
 	(void)data;
 	return 0;
 }
-int Dummy::receive (int& opError, XNS::Packet& data) {
+int Dummy::receive (int& opError, Network::Packet& data) {
 	opError = ENETDOWN;
 	(void)data;
 	return 0;
@@ -73,7 +73,7 @@ void Dummy::discard () {
 }
 
 
-Network::Driver* Network::getInstance(const XNS::Device& device) {
+Network::Driver* Network::getInstance(const Network::Device& device) {
 	Dummy* ret = new Dummy(device);
 	return ret;
 }

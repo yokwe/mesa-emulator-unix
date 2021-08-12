@@ -51,12 +51,19 @@ namespace Network {
 		Packet() : ByteBuffer(SIZE, packetData) {}
 
 		Packet(const Packet& that) : ByteBuffer(that) {
-			memcpy(packetData, that.packetData, SIZE);
+			memcpy(packetData, that.data(), that.capacity());
+			myData = packetData;
 		}
+		Packet(const ByteBuffer& that) : ByteBuffer(that) {
+			memcpy(packetData, that.data(), that.capacity());
+			myData = packetData;
+		}
+
 		Packet& operator =(const Packet& that) {
 			// call ByteBuffer operator=
 			ByteBuffer::operator=(that);
-			memcpy(packetData, that.packetData, SIZE);
+			memcpy(packetData, that.data(), that.capacity());
+			myData = packetData;
 			return *this;
 		}
 
@@ -65,7 +72,7 @@ namespace Network {
 			::swab(packetData, packetData, SIZE);
 		}
 
-		QString toString() const;
+		QString toString(int limit = 65535) const;
 	private:
 		quint8  packetData[SIZE];
 	};

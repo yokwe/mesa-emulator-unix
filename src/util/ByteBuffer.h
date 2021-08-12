@@ -51,6 +51,7 @@ protected:
 public:
 	ByteBuffer(int capacity, quint8* data) : myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
 
+	ByteBuffer() : myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
 	ByteBuffer(const ByteBuffer& that) {
 		this->myPosition = that.myPosition;
 		this->myLimit    = that.myLimit;

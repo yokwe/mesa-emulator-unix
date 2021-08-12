@@ -36,13 +36,66 @@
 #include "Util.h"
 static const Logger logger = Logger::getLogger("bpf");
 
-#include <net/bpf.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <sys/ioctl.h>
-#include <unistd.h>
+#include <net/bpf.h>
 #include <net/if.h>
+
 #include <string.h>
+#include <unistd.h>
+
 
 #include "BPF.h"
+
+// copy output from "tcpdump -dd ip"
+static struct bpf_insn ip_insn[] = {
+	{ 0x28, 0, 0, 0x0000000c },
+	{ 0x15, 0, 1, 0x00000800 },
+	{ 0x06, 0, 0, 0x00040000 },
+	{ 0x06, 0, 0, 0x00000000 },
+};
+static struct bpf_program program_ip = {
+	sizeof(ip_insn) / sizeof(ip_insn[0]),
+	ip_insn,
+};
+const struct bpf_program* BPF::PROGRAM_IP = &program_ip;
+
+// copy output from "tcpcump -dd ether proto xnd"
+static struct bpf_insn xns_insn[] = {
+	{ 0x28, 0, 0, 0x0000000c },
+	{ 0x15, 0, 1, 0x00000600 },
+	{ 0x06, 0, 0, 0x00040000 },
+	{ 0x06, 0, 0, 0x00000000 },
+};
+static struct bpf_program program_xns = {
+	sizeof(xns_insn) / sizeof(xns_insn[0]),
+	xns_insn,
+};
+const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;
+
+
+const QList<ByteBuffer>& BPF::read() {
+	int validBufferLen;
+	LOG_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
+
+	logger.info("validBufferLen = %d", validBufferLen);
+	readData.clear();
+
+	for(int i = 0; i < validBufferLen; ) {
+		struct bpf_hdr* p = (struct bpf_hdr*)(buffer + i);
+		int     caplen = (int)(p->bh_caplen);
+		int     hdrlen = (int)(p->bh_hdrlen);
+		quint8* data   = buffer + i + hdrlen;
+
+		ByteBuffer element(caplen, data);
+		readData.append(element);
+
+		i += BPF_WORDALIGN(caplen + hdrlen);
+	}
+
+	return readData;
+}
 
 
 void BPF::openDevice() {
@@ -65,7 +118,7 @@ void BPF::openDevice() {
 
 void BPF::write(const Network::Packet& value) {
 	int ret;
-	CHECK_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
+	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
 }
 
 // BIOCGBLEN
@@ -138,7 +191,7 @@ void BPF::setImmediate(quint32 value) {
 
 // BIOCSETFNR
 //   Sets the read filter program
-void BPF::setReadFilter(struct bpf_program* value) {
+void BPF::setReadFilter(const struct bpf_program* value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETFNR, value))
 }

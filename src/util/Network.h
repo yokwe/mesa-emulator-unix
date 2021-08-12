@@ -42,40 +42,119 @@
 #include <QtCore>
 
 #include "../util/ByteBuffer.h"
-#include "../xns/XNS.h"
 
 namespace Network {
-	//
-	// OS dependent part of network
-	//
+	class Packet : public ByteBuffer {
+	public:
+		static constexpr int SIZE = 1514;
 
-	QList<XNS::Device> getDeviceList();
+		Packet() : ByteBuffer(SIZE, packetData) {}
+
+		Packet(const Packet& that) : ByteBuffer(that) {
+			memcpy(packetData, that.packetData, SIZE);
+		}
+		Packet& operator =(const Packet& that) {
+			// call ByteBuffer operator=
+			ByteBuffer::operator=(that);
+			memcpy(packetData, that.packetData, SIZE);
+			return *this;
+		}
+
+		// endian conversion
+		void swab() {
+			::swab(packetData, packetData, SIZE);
+		}
+
+		QString toString() const;
+	private:
+		quint8  packetData[SIZE];
+	};
+
+	class Address {
+	public:
+		static constexpr int     SIZE      = 6;
+		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
+
+		quint64 value;
+
+		Address() : value(0) {}
+		Address(const Address& that) : value(that.value) {}
+		Address& operator =(const Address& that) {
+			this->value = that.value;
+			return *this;
+		}
+		bool operator ==(const Address& that) const {
+			return this->value == that.value;
+		}
+		bool operator ==(const quint64 that) const {
+			return this->value == that;
+		}
+
+		Address(quint64 value_) : value(value_) {}
+		Address(quint8* p) {
+			ByteBuffer bb(SIZE, p);
+			bb.read48(value);
+		}
+
+		bool isBroadcast() const {
+			return value == BROADCAST;
+		}
+		bool isNull() const {
+			return value == 0;
+		}
+		QString toString(QString sep = "") const;
+		QString toOctalString() const;
+		QString toDecimalString() const;
+	};
+
+	class Device {
+	public:
+		QString          name;
+		Network::Address address;
+
+		Device() {}
+		Device(const Device& that) : name(that.name), address(that.address) {}
+		Device& operator =(const Device& that) {
+			this->name    = that.name;
+			this->address = that.address;
+			return *this;
+		}
+
+		QString toString() const;
+
+		QString toString(const Address& value) const;
+	};
 
 	class Driver {
 	public:
 		virtual int select  (int& opErrno, quint32 timeout = 1) = 0; // returns return value of of select().  default timeout is 1 second
-		virtual int transmit(int& opErrno, XNS::Packet& packet) = 0; // returns return value of send()
-		virtual int receive (int& opErrno, XNS::Packet& packet) = 0; // returns return value of of recv()
+		virtual int transmit(int& opErrno, Packet& packet) = 0; // returns return value of send()
+		virtual int receive (int& opErrno, Packet& packet) = 0; // returns return value of of recv()
 
 		// discard received packet
 		virtual void discard() = 0;
 
-		Driver(const XNS::Device& device_) : device(device_), fd(0) {}
+		Driver(const Device& device_) : device(device_), fd(0) {}
 		virtual ~Driver() {}
 
 		QString getName() {
 			return device.name;
 		}
-		XNS::Address getAddress() {
+		Address getAddress() {
 			return device.address;
 		}
 
 	protected:
-		XNS::Device device;
-		int         fd;
+		Device device;
+		int    fd;
 	};
 
-	Driver* getInstance(const XNS::Device& device);
+	//
+	// OS dependent part of network implementation
+	//
+
+	QList<Device> getDeviceList();
+	Driver*       getInstance(const Device& device);
 }
 
 #endif

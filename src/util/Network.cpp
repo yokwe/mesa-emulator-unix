@@ -38,7 +38,7 @@ static const Logger logger = Logger::getLogger("net");
 
 #include "Network.h"
 
-QString Network::Packet::toString() const {
+QString Network::Packet::toString(int limit) const {
 	ByteBuffer bb(*this);
 	bb.rewind();
 
@@ -53,7 +53,7 @@ QString Network::Packet::toString() const {
 	bb.read16(type);
 
 	ret += QString::asprintf("%12llX  %12llX  %04X ", dst, src, type);
-	ret += toHexString(bb.remaining(), data() + bb.position());
+	ret += toHexString(bb.remaining(), data() + bb.position()).left(limit);
 
 	return ret;
 }

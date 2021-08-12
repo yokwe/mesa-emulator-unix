@@ -38,88 +38,9 @@
 
 #include <QtCore>
 
-#include "../util/ByteBuffer.h"
+#include "../util/Network.h"
 
 namespace XNS {
-	class Address {
-	public:
-		static constexpr int     SIZE      = 6;
-		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
-
-		quint64 value;
-
-		Address() : value(0) {}
-		Address(const Address& that) : value(that.value) {}
-		Address& operator =(const Address& that) {
-			this->value = that.value;
-			return *this;
-		}
-		bool operator ==(const Address& that) const {
-			return this->value == that.value;
-		}
-		bool operator ==(const quint64 that) const {
-			return this->value == that;
-		}
-
-		Address(quint64 value_) : value(value_) {}
-		Address(quint8* p) {
-			ByteBuffer bb(SIZE, p);
-			bb.read48(value);
-		}
-
-		bool isBroadcast() const {
-			return value == BROADCAST;
-		}
-		bool isNull() const {
-			return value == 0;
-		}
-		QString toString(QString sep = "") const;
-		QString toOcatlString() const;
-	};
-
-	class Device {
-	public:
-		QString name;
-		Address address;
-
-		Device() {}
-		Device(const Device& that) : name(that.name), address(that.address) {}
-		Device& operator =(const Device& that) {
-			this->name    = that.name;
-			this->address = that.address;
-			return *this;
-		}
-
-		QString toString() const;
-
-		QString toString(const Address& value) const;
-	};
-
-	class Packet : public ByteBuffer {
-	public:
-		static constexpr int SIZE = 1514;
-
-		quint8  data[SIZE];
-
-		Packet() : ByteBuffer(SIZE, data) {}
-
-		Packet(const Packet& that) : ByteBuffer(that) {
-			memcpy(data, that.data, SIZE);
-		}
-		Packet& operator =(const Packet& that) {
-			// call ByteBuffer operator=
-			ByteBuffer::operator=(that);
-			memcpy(data, that.data, SIZE);
-			return *this;
-		}
-
-		// endian conversion
-		void swab() {
-			::swab(data, data, SIZE);
-		}
-
-		QString toString() const;
-	};
 
 }
 

@@ -70,6 +70,7 @@ namespace Network {
 	protected:
 		void deepCopy(const ByteBuffer& that) {
 			// copy values from that
+			myBase     = that.base();
 			myPosition = that.position();
 			myLimit    = that.limit();
 			// use packetData for myData

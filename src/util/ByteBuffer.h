@@ -42,6 +42,7 @@ class ByteBuffer {
 protected:
 	static constexpr int INVALID_POS = -1;
 
+	int     myBase;
 	int     myPosition;
 	int     myLimit;
 	int     myCapacity;
@@ -49,10 +50,11 @@ protected:
 	int     myMarkPos;
 
 public:
-	ByteBuffer(int capacity, quint8* data) : myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
+	ByteBuffer(int capacity, quint8* data) : myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
 
-	ByteBuffer() : myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
+	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
 	ByteBuffer(const ByteBuffer& that) {
+		this->myBase     = that.myBase;
 		this->myPosition = that.myPosition;
 		this->myLimit    = that.myLimit;
 		this->myCapacity = that.myCapacity;
@@ -60,6 +62,7 @@ public:
 		this->myMarkPos  = that.myMarkPos;
 	}
 	ByteBuffer& operator =(const ByteBuffer& that) {
+		this->myBase     = that.myBase;
 		this->myPosition = that.myPosition;
 		this->myLimit    = that.myLimit;
 		this->myCapacity = that.myCapacity;
@@ -68,11 +71,29 @@ public:
 		return *this;
 	}
 
+	// Create subrange ByteBuffer
+	ByteBuffer newBase(int newValue) {
+		ByteBuffer ret(*this);
+		setBase(newValue);
+		return ret;
+	}
+	ByteBuffer newBase() {
+		return newBase(myPosition);
+	}
+	void setBase(int newValue) {
+		myBase     = newValue;
+		myPosition = newValue;
+		myMarkPos  = INVALID_POS;
+	}
+
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const quint8* data);
 
 	QString toString(int limit = 65536);
 
+	int base() const {
+		return myBase;
+	}
 	int position() const {
 		return myPosition;
 	}
@@ -95,17 +116,17 @@ public:
 
 	// prepare for read buffer from beginning
 	void rewind() {
-		myPosition = 0;
+		myPosition = myBase;
 	}
 	// prepare for read buffer from beginning after write
 	void flip() {
 		myLimit    = myPosition;
-		myPosition = 0;
+		myPosition = myBase;
 	}
 	// prepare for write buffer from beginning
 	void clear() {
-		myPosition = 0;
-		myLimit   = 0;
+		myPosition = myBase;
+		myLimit    = myBase;
 	}
 
 	// set position
@@ -171,6 +192,18 @@ public:
 	void write32(const int index, quint32 value);
 	void write48(const int index, quint64 value);
 	void write  (const int index, const int writeSize, const quint8* value);
+};
+
+
+class ByteBufferBase {
+public:
+	// this <= ByteBuffer
+	virtual void fromByteBuffer(ByteBuffer& bb) = 0;
+
+	// ByteBuffer <= this
+	virtual void toByteBuffer(ByteBuffer& bb) const = 0;
+
+	virtual ~ByteBufferBase() {}
 };
 
 #endif

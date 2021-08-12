@@ -39,6 +39,7 @@
 #include "Util.h"
 
 class ByteBuffer {
+protected:
 	static constexpr int INVALID_POS = -1;
 
 	int     myPosition;
@@ -68,6 +69,8 @@ public:
 
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const quint8* data);
+
+	QString toString(int limit = 65536);
 
 	int position() const {
 		return myPosition;

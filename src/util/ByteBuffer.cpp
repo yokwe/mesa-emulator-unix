@@ -60,6 +60,14 @@ void ByteBuffer::copyFrom(int len, const quint8* data) {
 	myLimit    = len;
 }
 
+QString ByteBuffer::toString(int limit) {
+	QString ret;
+	for(int i = 0; i < myLimit; i++) {
+		ret += QString::asprintf("%02X", myData[i]);
+	}
+	return ret.left(limit);
+}
+
 void ByteBuffer::position(int newValue	) {
 	if (0 <= newValue && newValue <= myLimit) {
 		myPosition = newValue;

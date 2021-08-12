@@ -38,6 +38,7 @@
 
 #include <unistd.h>
 #include <sys/time.h>
+#include <net/bpf.h>
 
 #include <QtCore>
 
@@ -45,10 +46,15 @@
 
 class BPF {
 public:
+	static const struct bpf_program* PROGRAM_IP;
+	static const struct bpf_program* PROGRAM_XNS;
+
 	int     fd;
 	QString path;
 	int     bufferSize;
 	quint8* buffer;
+
+	QList<ByteBuffer> readData;
 
 	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
 	~BPF() { delete buffer; }
@@ -72,7 +78,10 @@ public:
 	}
 
 	void write(const Network::Packet& value);
-	void read(QList<const Network::Packet> list);
+	const QList<ByteBuffer>& read();
+	// read() returns QList<ByteBuffer> readData.
+	// Backing data of ByteBuffer is field buffer.
+	// Copy ByteBuffer to Network::Packet for later use.
 
 	// BIOCGBLEN
 	//   Returns the required buffer length	for reads on bpf files
@@ -140,7 +149,7 @@ public:
 
 	// BIOCSETFNR
 	//   Sets the read filter program
-	void setReadFilter(struct bpf_program* value);
+	void setReadFilter(const struct bpf_program* value);
 
 	// BIOCSETWF
 	//   Sets the write filter program

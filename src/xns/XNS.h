@@ -39,23 +39,10 @@
 #include <QtCore>
 
 #include "../util/Network.h"
+#include "../util/ByteBuffer.h"
 
 namespace XNS {
-	class XNSBase {
-	public:
-		// this <= ByteBuffer
-		virtual void fromBB(ByteBuffer& bb) = 0;
-
-		// ByteBuffer <= this
-		virtual void toBB(ByteBuffer& bb) const = 0;
-
-		// string representation
-		virtual QString toString() const = 0;
-
-		virtual ~XNSBase() {}
-	};
-
-	class Host : public XNSBase {
+	class Host : public ByteBufferBase {
 	public:
 		static constexpr int     SIZE      = 6;
 		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
@@ -88,38 +75,62 @@ namespace XNS {
 		QString toOctalString() const;
 		QString toDecimalString() const;
 
-		// XNSBase
-		void    fromBB(ByteBuffer& bb);
-		void    toBB(ByteBuffer& bb) const;
-		QString toString() const {
-			return toString("");
-		}
+		// ByteBufferBase
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 
-	class PacketType : public XNSBase {
+	// PacketType: TYPE = {routing(1), echo(2), error(3), packetExchange(4), sequencedPacket(5), bootServerPacket(9)};
+	class PacketType : public ByteBufferBase {
 	public:
-		quint16 packeType;
+		quint16 value;
 
-		// XNSBase
-		void    fromBB(ByteBuffer& bb);
-		void    toBB(ByteBuffer& bb) const;
-		QString toString() const;
+		// ByteBufferBase
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
-	class Ethernet : public XNSBase {
+//	WellKnownSocket: TYPE = {
+//	    routing(1), echo(2), error(3), envoy(4), courier(5), clearinghouseOld(7), time(8),
+//	    boot(10), diag(19),
+//	    clearinghouse(20), auth(21), mail(22), netExec(23), wsInfo(24), binding(28),
+//	    germ(35),
+//	    teleDebug(48)
+//	};
+
+	enum class SocketType : quint16 {
+		ROUTING = 1, ECHO = 2, ERROR = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
+		BOOT = 10, DIAG = 19,
+		CHS = 20, AUTH = 21, MAIL = 22, NET_EXEC = 23, WSINFO = 24, BINDING = 28,
+		GERM = 35,
+		TELE_DEBUG = 48,
+	};
+
+
+
+
+	class Socket : public ByteBufferBase {
+	public:
+		quint16 value;
+
+		// ByteBufferBase
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
+	};
+
+	class Ethernet : public ByteBufferBase {
 	public:
 		Host    dst;
 		Host    src;
 		quint16 type;
 
-		// XNSBase
-		void    fromBB(ByteBuffer& bb);
-		void    toBB(ByteBuffer& bb) const;
-		QString toString() const;
+		// ByteBufferBase
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
-	class IDP : public XNSBase {
+	class IDP : public ByteBufferBase {
 	public:
 		quint16 checksum;
 		quint16 length;
@@ -134,10 +145,9 @@ namespace XNS {
 		Host    srcHost;
 		quint16 srcSocket;
 
-		// XNSBase
-		void    fromBB(ByteBuffer& bb);
-		void    toBB(ByteBuffer& bb) const;
-		QString toString() const;
+		// ByteBufferBase
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 }
 

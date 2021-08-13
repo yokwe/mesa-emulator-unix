@@ -42,15 +42,23 @@
 #include "../util/ByteBuffer.h"
 
 namespace XNS {
-	class Host : public ByteBuffer::UINT48 {
+	using ByteBuffer::UINT48;
+	using ByteBuffer::UINT32;
+	using ByteBuffer::UINT16;
+	using ByteBuffer::UINT8;
+	using ByteBuffer::Buffer;
+	using ByteBuffer::Base;
+
+	class Host : public UINT48 {
 	public:
 		static constexpr int     SIZE      = 6;
-		static constexpr quint64 BROADCAST = 0xFFFF'FFFF'FFFFULL;
+		static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
+		static constexpr quint64 UNKNOWN   = 0;
 
 		Host() : UINT48() {}
-		Host(quint64 newValue) : ByteBuffer::UINT48(newValue) {}
+		Host(quint64 newValue) : UINT48(newValue) {}
 		Host(quint8* p) {
-			ByteBuffer::Buffer bb(SIZE, p);
+			Buffer bb(SIZE, p);
 			bb.read48(value);
 		}
 
@@ -80,20 +88,110 @@ namespace XNS {
 		//   QMap<quint64, QString> nameMap = initNameMap();
 		static QMap<quint64, QString> initNameMap() {
 			QMap<quint64, QString> ret;
-			ret[BROADCAST] = "##  ALL   ##";
+			ret[ALL]     = "ALL";
+			ret[UNKNOWN] = "UNKNOWN";
 			return ret;
 		}
 	};
 
+	class Ethernet : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value : quint16 {
+				XNS = 0x600, IP = 0x800,
+			};
 
-	// PacketType: TYPE = {routing(1), echo(2), error(3), packetExchange(4), sequencedPacket(5), bootServerPacket(9)};
-	class PacketType : public ByteBuffer::UINT8 {
+			Type() : UINT16() {}
+
+			static void addNameMap(quint16 value, QString name) {
+				nameMap[value] = name;
+			}
+			QString toName() const {
+				if (nameMap.contains(value)) {
+					return nameMap[value];
+				} else {
+					return toString();
+				}
+			}
+			QString toString() const {
+				return ("");
+			}
+
+		private:
+			static QMap<quint16, QString> nameMap;
+			// initNameMap will be called in source file like this
+			//   QMap<quint64, QString> nameMap = initNameMap();
+			static QMap<quint16, QString> initNameMap() {
+				QMap<quint16, QString> ret;
+
+				nameMap[XNS] = "XNS";
+				nameMap[IP]  = "IPs";
+				return ret;
+			}
+		};
+		Host dst;
+		Host src;
+		Type type;
+
+		QString toString() const {
+			return QString("%1 %2 %3").arg(dst.toName()).arg(src.toName()).arg(type.toName());
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			dst.fromByteBuffer(bb);
+			src.fromByteBuffer(bb);
+			type.fromByteBuffer(bb);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			dst.toByteBuffer(bb);
+			src.toByteBuffer(bb);
+			type.toByteBuffer(bb);
+		}
+	};
+
+	class Net : public UINT32 {
+	public:
+		enum Value : quint32 {
+			ALL     = 0xFFFFFFFF,
+			UNKNOWN = 0,
+		};
+
+		Net() : UINT32() {}
+
+		static void addNameMap(quint32 value, QString name) {
+			nameMap[value] = name;
+		}
+		QString toName() const {
+			if (nameMap.contains(value)) {
+				return nameMap[value];
+			} else {
+				return toString();
+			}
+		}
+		QString toString() const {
+			return QString::asprintf("%04X", value);
+		}
+	private:
+		static QMap<quint32, QString> nameMap;
+		// initNameMap will be called in source file like this
+		//   QMap<quint64, QString> nameMap = initNameMap();
+		static QMap<quint32, QString> initNameMap() {
+			QMap<quint32, QString> ret;
+			ret[ALL]     = "ALL";
+			ret[UNKNOWN] = "UNKNOWN";
+			return ret;
+		}
+	};
+
+	class Type : public UINT8 {
 	public:
 		enum Value : quint8 {
 			ROUTING = 1, ECHO = 2, ERROR = 3, PEX = 4, SPP = 5, BOOT = 9,
 		};
 
-		PacketType() : ByteBuffer::UINT8() {}
+		Type() : UINT8() {}
 
 		static void addNameMap(quint8 value, QString name) {
 			nameMap[value] = name;
@@ -124,8 +222,7 @@ namespace XNS {
 		}
 	};
 
-
-	class Socket : public ByteBuffer::UINT16 {
+	class Socket : public UINT16 {
 	public:
 		enum Value : quint16 {
 			ROUTING = 1, ECHO = 2, ERROR = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
@@ -135,7 +232,7 @@ namespace XNS {
 			TELEDEBUG = 48,
 		};
 
-		Socket() : ByteBuffer::UINT16() {}
+		Socket() : UINT16() {}
 
 		static void addNameMap(quint16 value, QString name) {
 			nameMap[value] = name;
@@ -181,87 +278,61 @@ namespace XNS {
 		}
 	};
 
-
-	class Ethernet : public ByteBuffer::Base {
+	class IDP : public Base {
 	public:
-		class Type : public ByteBuffer::UINT16 {
-		public:
-			enum Value : quint16 {
-				XNS = 0x600, IP = 0x800,
-			};
+		UINT16  checksum;
+		UINT16  length;
+		UINT8   control;
+		Type    type;
 
-			Type() : ByteBuffer::UINT16() {}
-
-			static void addNameMap(quint16 value, QString name) {
-				nameMap[value] = name;
-			}
-			QString toName() const {
-				if (nameMap.contains(value)) {
-					return nameMap[value];
-				} else {
-					return toString();
-				}
-			}
-			QString toString() const {
-				return ("");
-			}
-
-		private:
-			static QMap<quint16, QString> nameMap;
-			// initNameMap will be called in source file like this
-			//   QMap<quint64, QString> nameMap = initNameMap();
-			static QMap<quint16, QString> initNameMap() {
-				QMap<quint16, QString> ret;
-
-				nameMap[XNS] = "XNS";
-				nameMap[IP]  = "IPs";
-				return ret;
-			}
-		};
-		Host dst;
-		Host src;
-		Type type;
-
-		// ByteBufferBase
-		void fromByteBuffer(ByteBuffer::Buffer& bb) {
-			dst.fromByteBuffer(bb);
-			src.fromByteBuffer(bb);
-			type.fromByteBuffer(bb);
-		}
-		void toByteBuffer  (ByteBuffer::Buffer& bb) const {
-			dst.toByteBuffer(bb);
-			src.toByteBuffer(bb);
-			type.toByteBuffer(bb);
-		}
-		QString toString() const {
-			return QString("%1 %2 %3").arg(dst.toName()).arg(src.toName()).arg(type.toName());
-		}
-	};
-
-	class IDP : public ByteBuffer::Base {
-	public:
-		quint16 checksum;
-		quint16 length;
-		quint8  control;
-		PacketType  type;
-
-		quint32 dstNet;
+		Net     dstNet;
 		Host    dstHost;
-		quint16 dstSocket;
+		Socket  dstSocket;
 
-		quint32 srcNet;
+		Net     srcNet;
 		Host    srcHost;
-		quint16 srcSocket;
+		Socket  srcSocket;
 
-		// ByteBufferBase
-		void fromByteBuffer(ByteBuffer::Buffer& bb) {
-			// FIXME
-			(void)bb;
+		QString toString() const {
+			return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
+				arg((quint16)checksum, 4, 16, QChar('0')).
+				arg((quint16)length, 4).
+				arg((quint8)control, 2, 16, QChar('0')).
+				arg(type.toName()).
+				arg(dstNet.toName()).arg(dstHost.toName()).arg(dstSocket.toName()).
+				arg(srcNet.toName()).arg(srcHost.toName()).arg(srcSocket.toName());
 		}
-		void toByteBuffer  (ByteBuffer::Buffer& bb) const {
-			// FIXME
-			(void)bb;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			checksum.fromByteBuffer(bb);
+			length.fromByteBuffer(bb);
+			control.fromByteBuffer(bb);
+			type.fromByteBuffer(bb);
+
+			dstNet.fromByteBuffer(bb);
+			dstHost.fromByteBuffer(bb);
+			dstSocket.fromByteBuffer(bb);
+
+			srcNet.fromByteBuffer(bb);
+			srcHost.fromByteBuffer(bb);
+			srcSocket.fromByteBuffer(bb);
 		}
+		void toByteBuffer  (Buffer& bb) const {
+			checksum.toByteBuffer(bb);
+			length.toByteBuffer(bb);
+			control.toByteBuffer(bb);
+			type.toByteBuffer(bb);
+
+			dstNet.toByteBuffer(bb);
+			dstHost.toByteBuffer(bb);
+			dstSocket.toByteBuffer(bb);
+
+			srcNet.toByteBuffer(bb);
+			srcHost.toByteBuffer(bb);
+			srcSocket.toByteBuffer(bb);
+		}
+
 	};
 }
 

@@ -65,8 +65,9 @@ QString XNS::Host::toHexaDecimalString(QString sep) const {
 	return list.join(sep);
 }
 
-QMap<quint64, QString> XNS::Host::nameMap            = XNS::Host::initNameMap();
-QMap<quint8,  QString> XNS::PacketType::nameMap      = XNS::PacketType::initNameMap();
-QMap<quint16, QString> XNS::Socket::nameMap          = XNS::Socket::initNameMap();
-QMap<quint16,  QString> XNS::Ethernet::Type::nameMap = XNS::Ethernet::Type::initNameMap();
+QMap<quint64, QString> XNS::Host::nameMap           = initNameMap();
+QMap<quint32, QString> XNS::Net::nameMap            = initNameMap();
+QMap<quint16, QString> XNS::Socket::nameMap         = initNameMap();
+QMap<quint8,  QString> XNS::Type::nameMap           = initNameMap();
+QMap<quint16, QString> XNS::Ethernet::Type::nameMap = initNameMap();
 

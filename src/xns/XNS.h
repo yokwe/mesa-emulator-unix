@@ -278,24 +278,56 @@ namespace XNS {
 		}
 	};
 
+	class Checksum : public UINT16 {
+	public:
+		enum Value : quint16 {
+			NOCHECK = 0xFFFF,
+		};
+
+		Checksum() : UINT16() {}
+
+		static void addNameMap(quint16 value, QString name) {
+			nameMap[value] = name;
+		}
+		QString toName() const {
+			if (nameMap.contains(value)) {
+				return nameMap[value];
+			} else {
+				return toString();
+			}
+		}
+		QString toString() const {
+			return QString::asprintf("%04X", value);
+		}
+	private:
+		static QMap<quint16, QString> nameMap;
+		// initNameMap will be called in source file like this
+		//   QMap<quint64, QString> nameMap = initNameMap();
+		static QMap<quint16, QString> initNameMap() {
+			QMap<quint16, QString> ret;
+			ret[NOCHECK]  = "NOCHECK";
+			return ret;
+		}
+	};
+
 	class IDP : public Base {
 	public:
-		UINT16  checksum;
-		UINT16  length;
-		UINT8   control;
-		Type    type;
+		Checksum checksum;
+		UINT16   length;
+		UINT8    control;
+		Type     type;
 
-		Net     dstNet;
-		Host    dstHost;
-		Socket  dstSocket;
+		Net      dstNet;
+		Host     dstHost;
+		Socket   dstSocket;
 
-		Net     srcNet;
-		Host    srcHost;
-		Socket  srcSocket;
+		Net      srcNet;
+		Host     srcHost;
+		Socket   srcSocket;
 
 		QString toString() const {
 			return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
-				arg((quint16)checksum, 4, 16, QChar('0')).
+				arg(checksum.toName()).
 				arg((quint16)length, 4).
 				arg((quint8)control, 2, 16, QChar('0')).
 				arg(type.toName()).

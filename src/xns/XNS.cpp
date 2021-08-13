@@ -69,5 +69,6 @@ QMap<quint64, QString> XNS::Host::nameMap           = initNameMap();
 QMap<quint32, QString> XNS::Net::nameMap            = initNameMap();
 QMap<quint16, QString> XNS::Socket::nameMap         = initNameMap();
 QMap<quint8,  QString> XNS::Type::nameMap           = initNameMap();
+QMap<quint16, QString> XNS::Checksum::nameMap       = initNameMap();
 QMap<quint16, QString> XNS::Ethernet::Type::nameMap = initNameMap();
 

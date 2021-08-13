@@ -34,13 +34,83 @@ static const Logger logger = Logger::getLogger("xns");
 
 #include "XNS.h"
 
+
 //
-// XNS::Host
+// XNS::IDP::Checksum
 //
-QString XNS::Host::toOctalString() const {
+void XNS::IDP::Checksum::addNameMap(quint16 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::IDP::Checksum::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::IDP::Checksum::initNameMap() {
+	QMap<quint16, QString> ret;
+	ret[NOCHECK]  = "NOCHECK";
+	return ret;
+}
+QMap<quint16, QString> XNS::IDP::Checksum::nameMap  = initNameMap();
+
+
+//
+// XNS::IDP::Type
+//
+void XNS::IDP::Type::addNameMap(quint8 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::IDP::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%d", value);
+	}
+}
+QMap<quint8, QString> XNS::IDP::Type::initNameMap() {
+	QMap<quint8, QString> ret;
+	ret[ROUTING] = "ROUTING";
+	ret[ECHO]    = "ECHO";
+	ret[ERROR]   = "ERROR";
+	ret[PEX]     = "PEX";
+	ret[SPP]     = "SPP";
+	ret[BOOT]    = "BOOT";
+	return ret;
+}
+QMap<quint8,  QString> XNS::IDP::Type::nameMap      = initNameMap();
+
+
+//
+// XNS::IDP::Net
+//
+void XNS::IDP::Net::addNameMap(quint32 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::IDP::Net::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint32, QString> XNS::IDP::Net::initNameMap() {
+	QMap<quint32, QString> ret;
+	ret[ALL]     = "ALL";
+	ret[UNKNOWN] = "UNKNOWN";
+	return ret;
+}
+QMap<quint32, QString> XNS::IDP::Net::nameMap       = initNameMap();
+
+
+//
+// XNS::IDP::Host
+//
+QString XNS::IDP::Host::toOctalString() const {
 	return QString::asprintf("%llob", value);
 }
-QString XNS::Host::toDecimalString() const {
+QString XNS::IDP::Host::toDecimalString() const {
 	QStringList list;
 	auto n = value;
 	for(;;) {
@@ -54,7 +124,7 @@ QString XNS::Host::toDecimalString() const {
 
 	return list.join("-");
 }
-QString XNS::Host::toHexaDecimalString(QString sep) const {
+QString XNS::IDP::Host::toHexaDecimalString(QString sep) const {
 	QStringList list;
 	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
 	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
@@ -65,10 +135,145 @@ QString XNS::Host::toHexaDecimalString(QString sep) const {
 	return list.join(sep);
 }
 
-QMap<quint64, QString> XNS::Host::nameMap           = initNameMap();
-QMap<quint32, QString> XNS::Net::nameMap            = initNameMap();
-QMap<quint16, QString> XNS::Socket::nameMap         = initNameMap();
-QMap<quint8,  QString> XNS::Type::nameMap           = initNameMap();
-QMap<quint16, QString> XNS::Checksum::nameMap       = initNameMap();
+void XNS::IDP::Host::addNameMap(quint64 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::IDP::Host::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return toHexaDecimalString("");
+	}
+}
+QMap<quint64, QString> XNS::IDP::Host::initNameMap() {
+	QMap<quint64, QString> ret;
+	ret[ALL]     = "ALL";
+	ret[UNKNOWN] = "UNKNOWN";
+	return ret;
+}
+QMap<quint64, QString> XNS::IDP::Host::nameMap      = initNameMap();
+
+
+//
+// XNS::IDP::Socket
+//
+void XNS::IDP::Socket::addNameMap(quint16 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::IDP::Socket::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::IDP::Socket::initNameMap() {
+	QMap<quint16, QString> ret;
+
+	ret[ROUTING]  = "ROUTING";
+	ret[ECHO]      = "ECHO";
+	ret[ERROR]     = "ERROR";
+	ret[ENVOY]     = "ENVOYE";
+	ret[COURIER]   = "COURIER";
+	ret[CHS_OLD]   = "CHS_OLD";
+	ret[TIME]      = "TIME";
+	ret[BOOT]      = "BOOT";
+	ret[DIAG]      = "DIAG";
+
+	ret[CHS]       = "CHS";
+	ret[AUTH]      = "AUTH";
+	ret[MAIL]      = "MAIL";
+	ret[NETEXEC]   = "NETEXEC";
+	ret[WSINFO]    = "WSINFO";
+	ret[BINDING]   = "BINDING";
+
+	ret[GERM]      = "GERM";
+	ret[TELEDEBUG] = "TELEDEBUG";
+
+	return ret;
+}
+QMap<quint16, QString> XNS::IDP::Socket::nameMap    = initNameMap();
+
+
+//
+// XNS::IDP
+//
+QString XNS::IDP::toString() const {
+	return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
+		arg(checksum.toString()).
+		arg((quint16)length, 4).
+		arg((quint8)control, 2, 16, QChar('0')).
+		arg(type.toString()).
+		arg(dstNet.toString()).arg(dstHost.toString()).arg(dstSocket.toString()).
+		arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
+}
+void XNS::IDP::fromByteBuffer(Buffer& bb) {
+	checksum.fromByteBuffer(bb);
+	length.fromByteBuffer(bb);
+	control.fromByteBuffer(bb);
+	type.fromByteBuffer(bb);
+
+	dstNet.fromByteBuffer(bb);
+	dstHost.fromByteBuffer(bb);
+	dstSocket.fromByteBuffer(bb);
+
+	srcNet.fromByteBuffer(bb);
+	srcHost.fromByteBuffer(bb);
+	srcSocket.fromByteBuffer(bb);
+}
+void XNS::IDP::toByteBuffer  (Buffer& bb) const {
+	checksum.toByteBuffer(bb);
+	length.toByteBuffer(bb);
+	control.toByteBuffer(bb);
+	type.toByteBuffer(bb);
+
+	dstNet.toByteBuffer(bb);
+	dstHost.toByteBuffer(bb);
+	dstSocket.toByteBuffer(bb);
+
+	srcNet.toByteBuffer(bb);
+	srcHost.toByteBuffer(bb);
+	srcSocket.toByteBuffer(bb);
+}
+
+
+//
+// XNS::Ethernet::Type
+//
+void XNS::Ethernet::Type::addNameMap(quint16 value, QString name) {
+	nameMap[value] = name;
+}
+QString XNS::Ethernet::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::Ethernet::Type::initNameMap() {
+	QMap<quint16, QString> ret;
+
+	nameMap[XNS] = "XNS";
+	nameMap[IP]  = "IP";
+	return ret;
+}
 QMap<quint16, QString> XNS::Ethernet::Type::nameMap = initNameMap();
+
+
+//
+// XNS::Ethernet
+//
+QString XNS::Ethernet::toString() const {
+	return QString("%1-%2-%3").arg(dst.toString()).arg(src.toString()).arg(type.toString());
+}
+void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
+	dst.fromByteBuffer(bb);
+	src.fromByteBuffer(bb);
+	type.fromByteBuffer(bb);
+}
+void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
+	dst.toByteBuffer(bb);
+	src.toByteBuffer(bb);
+	type.toByteBuffer(bb);
+}
 

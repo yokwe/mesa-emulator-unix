@@ -54,7 +54,7 @@ public:
 	int     bufferSize;
 	quint8* buffer;
 
-	QList<ByteBuffer> readData;
+	QList<ByteBuffer::Buffer> readData;
 
 	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
 	~BPF() { delete buffer; }
@@ -78,7 +78,7 @@ public:
 	}
 
 	void write(const Network::Packet& value);
-	const QList<ByteBuffer>& read();
+	const QList<ByteBuffer::Buffer>& read();
 	// read() returns QList<ByteBuffer> readData.
 	// Backing data of ByteBuffer is field buffer.
 	// Copy ByteBuffer to Network::Packet for later use.

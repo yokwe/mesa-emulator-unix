@@ -75,7 +75,7 @@ static struct bpf_program program_xns = {
 const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;
 
 
-const QList<ByteBuffer>& BPF::read() {
+const QList<ByteBuffer::Buffer>& BPF::read() {
 	int validBufferLen;
 	LOG_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 
@@ -88,7 +88,7 @@ const QList<ByteBuffer>& BPF::read() {
 		int     hdrlen = (int)(p->bh_hdrlen);
 		quint8* data   = buffer + i + hdrlen;
 
-		ByteBuffer element(caplen, data);
+		ByteBuffer::Buffer element(caplen, data);
 		readData.append(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);

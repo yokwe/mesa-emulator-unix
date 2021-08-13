@@ -34,17 +34,9 @@ static const Logger logger = Logger::getLogger("xns");
 
 #include "XNS.h"
 
-
-QString XNS::Host::toString(QString sep) const {
-	QStringList list;
-	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 24) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >> 16) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >>  8) & 0xFF);
-	list += QString::asprintf("%02X", (int)(value >>  0) & 0xFF);
-	return list.join(sep);
-}
+//
+// XNS::Host
+//
 QString XNS::Host::toOctalString() const {
 	return QString::asprintf("%llob", value);
 }
@@ -62,3 +54,19 @@ QString XNS::Host::toDecimalString() const {
 
 	return list.join("-");
 }
+QString XNS::Host::toHexaDecimalString(QString sep) const {
+	QStringList list;
+	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 24) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >> 16) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >>  8) & 0xFF);
+	list += QString::asprintf("%02X", (int)(value >>  0) & 0xFF);
+	return list.join(sep);
+}
+
+QMap<quint64, QString> XNS::Host::nameMap            = XNS::Host::initNameMap();
+QMap<quint8,  QString> XNS::PacketType::nameMap      = XNS::PacketType::initNameMap();
+QMap<quint16, QString> XNS::Socket::nameMap          = XNS::Socket::initNameMap();
+QMap<quint16,  QString> XNS::Ethernet::Type::nameMap = XNS::Ethernet::Type::initNameMap();
+

@@ -77,9 +77,9 @@ const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;
 
 const QList<ByteBuffer::Buffer>& BPF::read() {
 	int validBufferLen;
-	LOG_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
+	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 
-	logger.info("validBufferLen = %d", validBufferLen);
+//	logger.debug("validBufferLen = %d", validBufferLen);
 	readData.clear();
 
 	for(int i = 0; i < validBufferLen; ) {

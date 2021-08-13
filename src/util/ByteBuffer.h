@@ -36,174 +36,294 @@
 #ifndef BYTEBUFFER_H__
 #define BYTEBUFFER_H__
 
+#include <cstdint>
+
 #include "Util.h"
 
-class ByteBuffer {
-protected:
-	static constexpr int INVALID_POS = -1;
 
-	int     myBase;
-	int     myPosition;
-	int     myLimit;
-	int     myCapacity;
-	quint8 *myData;
-	int     myMarkPos;
+namespace ByteBuffer {
+	class Buffer {
+	protected:
+		static constexpr int INVALID_POS = -1;
 
-public:
-	ByteBuffer(int capacity, quint8* data) : myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
+		int     myBase;
+		int     myPosition;
+		int     myLimit;
+		int     myCapacity;
+		quint8 *myData;
+		int     myMarkPos;
 
-	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
-	ByteBuffer(const ByteBuffer& that) {
-		this->myBase     = that.myBase;
-		this->myPosition = that.myPosition;
-		this->myLimit    = that.myLimit;
-		this->myCapacity = that.myCapacity;
-		this->myData     = that.myData;
-		this->myMarkPos  = that.myMarkPos;
-	}
-	ByteBuffer& operator =(const ByteBuffer& that) {
-		this->myBase     = that.myBase;
-		this->myPosition = that.myPosition;
-		this->myLimit    = that.myLimit;
-		this->myCapacity = that.myCapacity;
-		this->myData     = that.myData;
-		this->myMarkPos  = that.myMarkPos;
-		return *this;
-	}
+	public:
+		Buffer(int capacity, quint8* data) : myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
 
-	// Create subrange ByteBuffer
-	ByteBuffer newBase(int newValue) {
-		ByteBuffer ret(*this);
-		setBase(newValue);
-		return ret;
-	}
-	ByteBuffer newBase() {
-		return newBase(myPosition);
-	}
-	void setBase(int newValue) {
-		myBase     = newValue;
-		myPosition = newValue;
-		myMarkPos  = INVALID_POS;
-	}
+		Buffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
+		Buffer(const Buffer& that) {
+			this->myBase     = that.myBase;
+			this->myPosition = that.myPosition;
+			this->myLimit    = that.myLimit;
+			this->myCapacity = that.myCapacity;
+			this->myData     = that.myData;
+			this->myMarkPos  = that.myMarkPos;
+		}
+		Buffer& operator =(const Buffer& that) {
+			this->myBase     = that.myBase;
+			this->myPosition = that.myPosition;
+			this->myLimit    = that.myLimit;
+			this->myCapacity = that.myCapacity;
+			this->myData     = that.myData;
+			this->myMarkPos  = that.myMarkPos;
+			return *this;
+		}
 
-	// copy from data to ByteBuffer
-	void copyFrom(int len, const quint8* data);
+		// Create subrange ByteBuffer
+		Buffer newBase(int newValue) {
+			Buffer ret(*this);
+			ret.setBase(newValue);
+			return ret;
+		}
+		Buffer newBase() {
+			return newBase(myPosition);
+		}
+		void setBase(int newValue) {
+			myBase     = newValue;
+			myPosition = newValue;
+			myMarkPos  = INVALID_POS;
+		}
 
-	QString toString(int limit = 65536);
+		// copy from data to ByteBuffer
+		void copyFrom(int len, const quint8* data);
 
-	int base() const {
-		return myBase;
-	}
-	int position() const {
-		return myPosition;
-	}
-	int limit() const {
-		return myLimit;
-	}
-	int capacity() const {
-		return myCapacity;
-	}
-	quint8* data() const {
-		return myData;
-	}
+		QString toString(int limit = 65536);
 
-	int remaining() const {
-		return myLimit - myPosition;
-	}
-	bool hasRemaining() const {
-		return myPosition < myLimit;
-	}
+		int base() const {
+			return myBase;
+		}
+		int position() const {
+			return myPosition;
+		}
+		int limit() const {
+			return myLimit;
+		}
+		int capacity() const {
+			return myCapacity;
+		}
+		quint8* data() const {
+			return myData;
+		}
 
-	// prepare for read buffer from beginning
-	void rewind() {
-		myPosition = myBase;
-	}
-	// prepare for read buffer from beginning after write
-	void flip() {
-		myLimit    = myPosition;
-		myPosition = myBase;
-	}
-	// prepare for write buffer from beginning
-	void clear() {
-		myPosition = myBase;
-		myLimit    = myBase;
-	}
+		int remaining() const {
+			return myLimit - myPosition;
+		}
+		bool hasRemaining() const {
+			return myPosition < myLimit;
+		}
 
-	// set position
-	void position(int newValue);
-	// mark current position for reset
-	void mark();
-	// set position to marked position
-	void reset();
+		// prepare for read buffer from beginning
+		void rewind() {
+			myPosition = myBase;
+		}
+		// prepare for read buffer from beginning after write
+		void flip() {
+			myLimit    = myPosition;
+			myPosition = myBase;
+		}
+		// prepare for write buffer from beginning
+		void clear() {
+			myPosition = myBase;
+			myLimit    = myBase;
+		}
 
-
-	// read from ByteBuffer
-	void read8 (quint8&  value) {
-		read8(myPosition, value);
-		myPosition += 1;
-	}
-	void read16(quint16& value) {
-		read16(myPosition, value);
-		myPosition += 2;
-	}
-	void read32(quint32& value) {
-		read32(myPosition, value);
-		myPosition += 4;
-	}
-	void read48(quint64& value) {
-		read48(myPosition, value);
-		myPosition += 6;
-	}
-	void read  (const int readSize, quint8* value) {
-		read(myPosition, readSize, value);
-		myPosition += readSize;
-	}
-
-	void read8 (const int index, quint8&  value) const;
-	void read16(const int index, quint16& value) const;
-	void read32(const int index, quint32& value) const;
-	void read48(const int index, quint64& value) const;
-	void read  (const int index, const int readSize, quint8* value) const;
-
-	// write to ByteBuffer
-	void write8 (quint8  value) {
-		write8(myPosition, value);
-		myLimit = myPosition += 1;
-	}
-	void write16(quint16 value) {
-		write16(myPosition, value);
-		myLimit = myPosition += 2;
-	}
-	void write32(quint32 value) {
-		write32(myPosition, value);
-		myLimit = myPosition += 4;
-	}
-	void write48(quint64 value) {
-		write48(myPosition, value);
-		myLimit = myPosition += 6;
-	}
-	void write  (const int writeSize, const quint8* value) {
-		write(myPosition, writeSize, value);
-		myLimit = myPosition += writeSize;
-	}
-
-	void write8 (const int index, quint8  value);
-	void write16(const int index, quint16 value);
-	void write32(const int index, quint32 value);
-	void write48(const int index, quint64 value);
-	void write  (const int index, const int writeSize, const quint8* value);
-};
+		// set position
+		void position(int newValue);
+		// mark current position for reset
+		void mark();
+		// set position to marked position
+		void reset();
 
 
-class ByteBufferBase {
-public:
-	// this <= ByteBuffer
-	virtual void fromByteBuffer(ByteBuffer& bb) = 0;
+		// read from ByteBuffer
+		void read8 (quint8&  value) {
+			read8(myPosition, value);
+			myPosition += 1;
+		}
+		void read16(quint16& value) {
+			read16(myPosition, value);
+			myPosition += 2;
+		}
+		void read32(quint32& value) {
+			read32(myPosition, value);
+			myPosition += 4;
+		}
+		void read48(quint64& value) {
+			read48(myPosition, value);
+			myPosition += 6;
+		}
+		void read  (const int readSize, quint8* value) {
+			read(myPosition, readSize, value);
+			myPosition += readSize;
+		}
 
-	// ByteBuffer <= this
-	virtual void toByteBuffer(ByteBuffer& bb) const = 0;
+		void read8 (const int index, quint8&  value) const;
+		void read16(const int index, quint16& value) const;
+		void read32(const int index, quint32& value) const;
+		void read48(const int index, quint64& value) const;
+		void read  (const int index, const int readSize, quint8* value) const;
 
-	virtual ~ByteBufferBase() {}
-};
+		// write to ByteBuffer
+		void write8 (quint8  value) {
+			write8(myPosition, value);
+			myLimit = myPosition += 1;
+		}
+		void write16(quint16 value) {
+			write16(myPosition, value);
+			myLimit = myPosition += 2;
+		}
+		void write32(quint32 value) {
+			write32(myPosition, value);
+			myLimit = myPosition += 4;
+		}
+		void write48(quint64 value) {
+			write48(myPosition, value);
+			myLimit = myPosition += 6;
+		}
+		void write  (const int writeSize, const quint8* value) {
+			write(myPosition, writeSize, value);
+			myLimit = myPosition += writeSize;
+		}
+
+		void write8 (const int index, quint8  value);
+		void write16(const int index, quint16 value);
+		void write32(const int index, quint32 value);
+		void write48(const int index, quint64 value);
+		void write  (const int index, const int writeSize, const quint8* value);
+	};
+
+	class Base {
+	public:
+		// this <= ByteBuffer
+		virtual void fromByteBuffer(Buffer& bb) = 0;
+
+		// ByteBuffer <= this
+		virtual void toByteBuffer(Buffer& bb) const = 0;
+		virtual ~Base() {}
+	};
+
+	class UINT8 : public Base {
+	protected:
+		quint8 value;
+	public:
+		UINT8() : value(0) {}
+		UINT8(const UINT8& that) : value(that.value) {}
+		UINT8 operator=(const UINT8& that) {
+			this->value = that.value;
+			return *this;
+		}
+
+		UINT8(quint8 newValue) : value(newValue) {}
+		operator quint8() const {
+			return value;
+		}
+		UINT8 operator =(quint8 newValue) {
+			value = newValue;
+			return *this;
+		}
+
+		// ByteBufferBase
+		void fromByteBuffer(Buffer& bb) {
+			bb.read8(value);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write8(value);
+		}
+	};
+
+	class UINT16 : public Base {
+	protected:
+		quint16 value;
+	public:
+		UINT16() : value(0) {}
+		UINT16(const UINT16& that) : value(that.value) {}
+		UINT16 operator=(const UINT16& that) {
+			this->value = that.value;
+			return *this;
+		}
+
+		UINT16(quint16 newValue) : value(newValue) {}
+		operator quint16() const {
+			return value;
+		}
+		UINT16 operator =(quint16 newValue) {
+			value = newValue;
+			return *this;
+		}
+
+		// ByteBufferBase
+		void fromByteBuffer(Buffer& bb) {
+			bb.read16(value);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write16(value);
+		}
+	};
+
+	class UINT32 : public Base {
+	protected:
+		quint32 value;
+	public:
+		UINT32() : value(0) {}
+		UINT32(const UINT32& that) : value(that.value) {}
+		UINT32 operator=(const UINT32& that) {
+			this->value = that.value;
+			return *this;
+		}
+
+		UINT32(quint32 newValue) : value(newValue) {}
+		operator quint16() const {
+			return value;
+		}
+		UINT32 operator =(quint32 newValue) {
+			value = newValue;
+			return *this;
+		}
+
+		// ByteBufferBase
+		void fromByteBuffer(Buffer& bb) {
+			bb.read32(value);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write32(value);
+		}
+	};
+
+	class UINT48 : public Base {
+	protected:
+		quint64 value;
+	public:
+		UINT48() : value(0) {}
+		UINT48(const UINT48& that) : value(that.value) {}
+		UINT48 operator=(const UINT48& that) {
+			this->value = that.value;
+			return *this;
+		}
+
+		UINT48(quint64 newValue) : value(newValue) {}
+		operator quint64() const {
+			return value;
+		}
+		UINT48 operator =(quint64 newValue) {
+			value = newValue;
+			return *this;
+		}
+
+		// ByteBufferBase
+		void fromByteBuffer(Buffer& bb) {
+			bb.read48(value);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write48(value);
+		}
+	};
+
+}
 
 #endif

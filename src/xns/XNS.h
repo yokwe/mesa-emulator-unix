@@ -126,7 +126,7 @@ namespace XNS {
 				QMap<quint16, QString> ret;
 
 				nameMap[XNS] = "XNS";
-				nameMap[IP]  = "IPs";
+				nameMap[IP]  = "IP";
 				return ret;
 			}
 		};
@@ -135,7 +135,7 @@ namespace XNS {
 		Type type;
 
 		QString toString() const {
-			return QString("%1 %2 %3").arg(dst.toName()).arg(src.toName()).arg(type.toName());
+			return QString("%1-%2-%3").arg(dst.toName()).arg(src.toName()).arg(type.toName());
 		}
 
 		// ByteBuffer::Base

@@ -48,6 +48,8 @@ static const Logger logger = Logger::getLogger("bpf");
 
 #include "BPF.h"
 
+#define COUNT_ELEMENT(array) ((sizeof(array)) / (sizeof(array[0])))
+
 // copy output from "tcpdump -dd ip"
 static struct bpf_insn ip_insn[] = {
 	{ 0x28, 0, 0, 0x0000000c },
@@ -56,7 +58,7 @@ static struct bpf_insn ip_insn[] = {
 	{ 0x06, 0, 0, 0x00000000 },
 };
 static struct bpf_program program_ip = {
-	sizeof(ip_insn) / sizeof(ip_insn[0]),
+	(u_int)COUNT_ELEMENT(ip_insn),
 	ip_insn,
 };
 const struct bpf_program* BPF::PROGRAM_IP = &program_ip;
@@ -69,7 +71,7 @@ static struct bpf_insn xns_insn[] = {
 	{ 0x06, 0, 0, 0x00000000 },
 };
 static struct bpf_program program_xns = {
-	sizeof(xns_insn) / sizeof(xns_insn[0]),
+	(u_int)COUNT_ELEMENT(xns_insn),
 	xns_insn,
 };
 const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;

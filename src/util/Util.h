@@ -172,6 +172,9 @@ __attribute__((always_inline)) static inline quint16 bitField(quint16 word, int 
 	return bitField(word, startBit, startBit);
 }
 
+// count number of element in array
+#define COUNT_ELEMENT(array) ((sizeof(array)) / (sizeof(array[0])))
+
 
 class Util {
 public:

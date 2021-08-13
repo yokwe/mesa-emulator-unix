@@ -48,8 +48,6 @@ static const Logger logger = Logger::getLogger("bpf");
 
 #include "BPF.h"
 
-#define COUNT_ELEMENT(array) ((sizeof(array)) / (sizeof(array[0])))
-
 // copy output from "tcpdump -dd ip"
 static struct bpf_insn ip_insn[] = {
 	{ 0x28, 0, 0, 0x0000000c },

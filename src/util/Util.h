@@ -45,16 +45,16 @@
 
 #define DEBUG_TRACE() logger.debug("****  TRACE  %-20s %5d %s", __FUNCTION__, __LINE__, __FILE__)
 
-class Error {
+class ErrorError {
 public:
 	const char *func;
 	const char *file;
 	const int   line;
 
-	Error(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
+	ErrorError(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
 };
 
-#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw Error(__FUNCTION__, __FILE__, __LINE__); }
+#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw ErrorError(__FUNCTION__, __FILE__, __LINE__); }
 
 class Abort {
 public:

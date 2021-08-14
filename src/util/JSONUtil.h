@@ -85,13 +85,13 @@ namespace JSONUtil {
 
 
 	QJsonValue toJsonValue(const QString&     value);
-	QJsonValue toJsonValue(const int&         value);
+	QJsonValue toJsonValue(const qint32&      value);
 	QJsonValue toJsonValue(const bool&        value);
 	QJsonValue toJsonValue(const QJsonObject& value);
 	QJsonValue toJsonValue(const QJsonArray & value);
 
 	QString     toString(const QJsonValue& jsonValue);
-	int         toInt   (const QJsonValue& jsonValue);
+	qint32      toInt   (const QJsonValue& jsonValue);
 	bool        toBool  (const QJsonValue& jsonValue);
 	QJsonObject toObject(const QJsonValue& jsonValue);
 	QJsonArray  toArray (const QJsonValue& jsonValue);
@@ -117,7 +117,7 @@ namespace JSONUtil {
 	void inline setJsonObject(QJsonObject& jsonObject, const QString& key, const QString& value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const int      value) {
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const  qint32  value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
 	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const bool     value) {
@@ -131,7 +131,7 @@ namespace JSONUtil {
 	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QString& value) {
 		value = JSONUtil::toString(JSONUtil::toJsonValue(jsonObject, key));
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, int&     value) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, qint32&  value) {
 		value = JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, key));
 	}
 	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, bool&    value) {
@@ -149,7 +149,7 @@ namespace JSONUtil {
 			jsonArray.append(JSONUtil::toJsonValue(e));
 		}
 	}
-	inline void setJsonArray(QJsonArray& jsonArray, const QList<int>&     list) {
+	inline void setJsonArray(QJsonArray& jsonArray, const QList<qint32>&  list) {
 		for(auto e: list) {
 			jsonArray.append(JSONUtil::toJsonValue(e));
 		}
@@ -171,7 +171,7 @@ namespace JSONUtil {
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<int>&     list) {
+	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<qint32>&  list) {
 		QJsonArray jsonArray;
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
@@ -196,9 +196,9 @@ namespace JSONUtil {
 			list.append(element);
 		}
 	}
-	inline void getJsonArray(const QJsonArray& jsonArray, QList<int>&     list) {
+	inline void getJsonArray(const QJsonArray& jsonArray, QList<qint32>&  list) {
 		for(auto e: jsonArray) {
-			int element = JSONUtil::toInt(e);
+			qint32 element = JSONUtil::toInt(e);
 			list.append(element);
 		}
 	}
@@ -216,7 +216,7 @@ namespace JSONUtil {
 	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<QString>& list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<int>&     list) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<qint32>&  list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
 	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<bool>&    list) {

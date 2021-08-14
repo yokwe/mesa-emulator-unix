@@ -120,7 +120,7 @@ QJsonArray  JSONUtil::loadArray (const QString& path) {
 QJsonValue JSONUtil::toJsonValue(const QString&     value) {
 	return QJsonValue(value);
 }
-QJsonValue JSONUtil::toJsonValue(const int&         value) {
+QJsonValue JSONUtil::toJsonValue(const qint32&      value) {
 	return QJsonValue(value);
 }
 QJsonValue JSONUtil::toJsonValue(const bool&        value) {
@@ -144,7 +144,7 @@ QString     JSONUtil::toString(const QJsonValue& jsonValue) {
 		ERROR();
 	}
 }
-int         JSONUtil::toInt   (const QJsonValue& jsonValue) {
+qint32      JSONUtil::toInt   (const QJsonValue& jsonValue) {
 	if (jsonValue.isDouble()) {
 		return jsonValue.toInt();
 	} else if (jsonValue.isString()) {

@@ -286,6 +286,8 @@ QString XNS::IDP::toString() const {
 		arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
 }
 void XNS::IDP::fromByteBuffer(Buffer& bb) {
+	int pos = bb.position();
+
 	FROM_BYTE_BUFFER(bb, checksum);
 	FROM_BYTE_BUFFER(bb, length);
 	FROM_BYTE_BUFFER(bb, control);
@@ -296,6 +298,8 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, srcNet);
 	FROM_BYTE_BUFFER(bb, srcHost);
 	FROM_BYTE_BUFFER(bb, srcSocket);
+
+	bb.limit(pos + length);
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, checksum);

@@ -77,6 +77,10 @@ prepare-run-guam:
 		echo "copy setting.json"; \
 		cp data/setting.json tmp/run ; \
 	fi
+	@if [ ! -f tmp/run/xns-config.json ]; then \
+		echo "copy xns-config.json"; \
+		cp data/xns-config.json tmp/run ; \
+	fi
 	@if [ ! -f tmp/run/GVWIN.DSK ]; then \
 		echo "copy GVWIN.DSK"; \
 		cp data/GVWin/GVWIN.DSK tmp/run ; \

@@ -158,6 +158,15 @@ namespace XNS {
 			static QMap<quint16, QString> initNameMap();
 		};
 
+
+		// IMPORTANT
+		// Minimum ethernet packet length is 60 (16 bytes ethernet header + 46 bytes ehternet body)
+		// To conform this requirement, padding is added.
+		// Also number of byes in IDP must be even number by rule. If data length is odd, one byte is added to make length even.
+		// To know actual data length of XNS packet, use IDP length field.
+		// IDP length field is actual data length including IDP header(30 bytes)
+		// So actual data length of IDP packet is length - 30.
+
 		Checksum checksum;
 		UINT16   length;
 		UINT8    control;

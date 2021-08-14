@@ -41,6 +41,8 @@
 #include "../util/Network.h"
 #include "../util/ByteBuffer.h"
 
+#include "Config.h"
+
 namespace XNS {
 	using ByteBuffer::UINT48;
 	using ByteBuffer::UINT32;
@@ -48,6 +50,9 @@ namespace XNS {
 	using ByteBuffer::UINT8;
 	using ByteBuffer::Buffer;
 	using ByteBuffer::Base;
+
+
+	Config loadConfig(QString path);
 
 
 	class IDP : public Base {

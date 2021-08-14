@@ -48,6 +48,7 @@ namespace XNS {
 	using ByteBuffer::UINT32;
 	using ByteBuffer::UINT16;
 	using ByteBuffer::UINT8;
+	using ByteBuffer::BLOCK;
 	using ByteBuffer::Buffer;
 	using ByteBuffer::Base;
 
@@ -75,7 +76,7 @@ namespace XNS {
 		class Type : public UINT8 {
 		public:
 			enum Value : quint8 {
-				ROUTING = 1, ECHO = 2, ERROR = 3, PEX = 4, SPP = 5, BOOT = 9,
+				ROUTING = 1, ECHO = 2, ERROR_ = 3, PEX = 4, SPP = 5, BOOT = 9,
 			};
 
 			Type() : UINT8() {}
@@ -142,7 +143,7 @@ namespace XNS {
 		class Socket : public UINT16 {
 		public:
 			enum Value : quint16 {
-				ROUTING = 1, ECHO = 2, ERROR = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
+				ROUTING = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
 				BOOT = 10, DIAG = 19,
 				CHS = 20, AUTH = 21, MAIL = 22, NETEXEC = 23, WSINFO = 24, BINDING = 28,
 				GERM = 35,
@@ -228,10 +229,144 @@ namespace XNS {
 	};
 
 
-	// TODO implements ROUTING
-	// TODO implements ECHO
-	// TODO implements ERROE
-	// TODO implements PEX
+	class Routing : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value {
+				REQUEST = 1, RESPONSE = 2,
+			};
+
+			Type() : UINT16() {}
+
+			QString toString() const;
+		private:
+			static QMap<quint16, QString> nameMap;
+			static QMap<quint16, QString> initNameMap();
+		};
+
+		class Entry : public Base {
+		public:
+			IDP::Net net;
+			UINT16   hop;
+
+			QString toString() const;
+
+			// ByteBuffer::Base
+			void fromByteBuffer(Buffer& bb);
+			void toByteBuffer  (Buffer& bb) const;
+		};
+
+		static const quint32 BROADCAST_INTERVAL = 30; // 30 seconds
+
+		Type         type;
+		QList<Entry> entryList;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
+
+	class Echo : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value {
+				REQUEST = 1, REPLY = 2,
+			};
+
+			Type() : UINT16() {}
+
+			QString toString() const;
+		private:
+			static QMap<quint16, QString> nameMap;
+			static QMap<quint16, QString> initNameMap();
+		};
+
+		Type  type;
+		BLOCK block;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
+
+	class Error : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value {
+				UNSPEC               = 0, // An unspecified error is detected at destination
+				BAD_CHECKSUM         = 1, // The checksum is incorrect or the packet has some other serious inconsistency detected at destination
+				NO_SOCKET            = 2, // The specified socket does not exist at the specified destination host
+				RESOURCE_LIMIT       = 3, // The destination cannot accept the packet due to resource limitations
+				LISTEN_REJECT        = 4,
+				INVALID_PACKET_TYPE  = 5,
+				PROTOCOL_VIOLATION   = 6,
+
+				UNSPECIFIED_IN_ROUTE = 01000, // An unspecified error occurred before reaching destination
+				INCONSISTENT         = 01001, // The checksum is incorrect, or the packet has some other serious inconsistency before reaching destination
+				CANT_GET_THERE       = 01002, // The destination host cannot be reached from here.
+				EXCESS_HOPS          = 01003, // The packet has passed through 15 internet routes without reaching its destination.
+				TOO_BIG              = 01004, // The packet is too large to be forwarded through some intermediate network.
+			                                  // The Error Parameter field contains the length of the largest packet that can be accommodated.
+				CONGESTION_WARNING   = 01005,
+				CONGESTION_DISCARD   = 01006,
+			};
+
+			Type() : UINT16() {}
+
+			QString toString() const;
+		private:
+			static QMap<quint16, QString> nameMap;
+			static QMap<quint16, QString> initNameMap();
+		};
+
+		Type   type;
+		UINT16 param;
+		BLOCK  block;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
+
+	class PEX : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value {
+				UNSPEC = 0, TIME = 1, CHS = 2, TELEDEBUG = 8,
+			};
+
+			Type() : UINT16() {}
+
+			QString toString() const;
+		private:
+			static QMap<quint16, QString> nameMap;
+			static QMap<quint16, QString> initNameMap();
+		};
+
+		UINT32 id;
+		Type   type;
+		BLOCK  block;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
 	// TODO implements SPP
 
 

@@ -110,7 +110,7 @@ QMap<quint8, QString> XNS::IDP::Type::initNameMap() {
 	QMap<quint8, QString> ret;
 	ret[ROUTING] = "ROUTING";
 	ret[ECHO]    = "ECHO";
-	ret[ERROR]   = "ERROR";
+	ret[ERROR_]  = "ERROR";
 	ret[PEX]     = "PEX";
 	ret[SPP]     = "SPP";
 	ret[BOOT]    = "BOOT";
@@ -247,10 +247,9 @@ QString XNS::IDP::Socket::toString() const {
 }
 QMap<quint16, QString> XNS::IDP::Socket::initNameMap() {
 	QMap<quint16, QString> ret;
-
 	ret[ROUTING]  = "ROUTING";
 	ret[ECHO]      = "ECHO";
-	ret[ERROR]     = "ERROR";
+	ret[ERROR_]    = "ERROR";
 	ret[ENVOY]     = "ENVOYE";
 	ret[COURIER]   = "COURIER";
 	ret[CHS_OLD]   = "CHS_OLD";
@@ -267,7 +266,6 @@ QMap<quint16, QString> XNS::IDP::Socket::initNameMap() {
 
 	ret[GERM]      = "GERM";
 	ret[TELEDEBUG] = "TELEDEBUG";
-
 	return ret;
 }
 QMap<quint16, QString> XNS::IDP::Socket::nameMap    = initNameMap();
@@ -367,7 +365,6 @@ QString XNS::Ethernet::Type::toString() const {
 }
 QMap<quint16, QString> XNS::Ethernet::Type::initNameMap() {
 	QMap<quint16, QString> ret;
-
 	nameMap[XNS] = "XNS";
 	nameMap[IP]  = "IP";
 	return ret;
@@ -390,5 +387,193 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, dst);
 	TO_BYTE_BUFFER(bb, src);
 	TO_BYTE_BUFFER(bb, type);
+}
+
+
+//
+// XNS::Routing::Type
+//
+QString XNS::Routing::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::Routing::Type::initNameMap() {
+	QMap<quint16, QString> ret;
+	nameMap[REQUEST]  = "REQUEST";
+	nameMap[RESPONSE] = "RESPONSE";
+	return ret;
+}
+QMap<quint16, QString> XNS::Routing::Type::nameMap = initNameMap();
+
+
+//
+// XNS::Routing::Entry
+//
+QString XNS::Routing::Entry::toString() const {
+	return QString("{%1 %2}").arg(net.toString()).arg((quint16)hop);
+}
+void XNS::Routing::Entry::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, net);
+	FROM_BYTE_BUFFER(bb, hop);
+}
+void XNS::Routing::Entry::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, net);
+	TO_BYTE_BUFFER(bb, hop);
+}
+
+
+//
+// XNS::Routing
+//
+QString XNS::Routing::toString() const {
+	QStringList list;
+	for(auto e: entryList) {
+		list += e.toString();
+	}
+	return QString("%1 %2").arg(type.toString()).arg(list.join(" "));
+}
+void XNS::Routing::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, type);
+
+	for(;;) {
+		if (bb.remaining() == 0) break;;
+
+		Entry entry;
+		FROM_BYTE_BUFFER(bb, entry);
+		entryList += entry;
+	}
+}
+void XNS::Routing::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, type);
+	for(auto e: entryList) {
+		TO_BYTE_BUFFER(bb, e);
+	}
+}
+
+
+//
+// XNS::PEX::Type
+//
+QString XNS::PEX::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::PEX::Type::initNameMap() {
+	QMap<quint16, QString> ret;
+	nameMap[UNSPEC]    = "UNSPEC";
+	nameMap[TIME]      = "TIME";
+	nameMap[CHS]       = "CHS";
+	nameMap[TELEDEBUG] = "TELEDEBUG";
+	return ret;
+}
+QMap<quint16, QString> XNS::PEX::Type::nameMap = initNameMap();
+
+
+//
+// XNS::PEX
+//
+QString XNS::PEX::toString() const {
+	return QString("%1 %2 %3").arg(QString("%1").arg((quint32)id, 4, 16, QChar('0')).toUpper()).arg(type.toString()).arg(block.toString());
+}
+void XNS::PEX::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, id);
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::PEX::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, id);
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, block);
+}
+
+
+//
+// XNS::Error::Type
+//
+QString XNS::Error::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::Error::Type::initNameMap() {
+	QMap<quint16, QString> ret;
+	nameMap[UNSPEC]               = "UNSPEC";
+	nameMap[BAD_CHECKSUM]         = "BAD_CHECKSUM";
+	nameMap[NO_SOCKET]            = "NO_SOCKET";
+	nameMap[RESOURCE_LIMIT]       = "RESOURCE_LIMIT";
+	nameMap[LISTEN_REJECT]        = "LISTEN_REJECT";
+	nameMap[INVALID_PACKET_TYPE]  = "INVALID_PACKET_TYPE";
+	nameMap[PROTOCOL_VIOLATION]   = "PROTOCOL_VIOLATION";
+
+	nameMap[UNSPECIFIED_IN_ROUTE] = "UNSPECIFIED_IN_ROUTE";
+	nameMap[INCONSISTENT]         = "INCONSISTENT";
+	nameMap[CANT_GET_THERE]       = "CANT_GET_THERE";
+	nameMap[EXCESS_HOPS]          = "EXCESS_HOPS";
+	nameMap[TOO_BIG]              = "TOO_BIG";
+	nameMap[CONGESTION_WARNING]   = "CONGESTION_WARNING";
+	nameMap[CONGESTION_DISCARD]   = "CONGESTION_DISCARD";
+	return ret;
+}
+QMap<quint16, QString> XNS::Error::Type::nameMap = initNameMap();
+
+
+//
+// XNS::Error
+//
+QString XNS::Error::toString() const {
+	return QString("%1 %2 %3").arg(type.toString()).arg(QString("%1").arg((quint16)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
+}
+void XNS::Error::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, param);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::Error::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, param);
+	TO_BYTE_BUFFER(bb, block);
+}
+
+
+//
+// XNS::Echo::Type
+//
+QString XNS::Echo::Type::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%04X", value);
+	}
+}
+QMap<quint16, QString> XNS::Echo::Type::initNameMap() {
+	QMap<quint16, QString> ret;
+	nameMap[REQUEST] = "REQUEST";
+	nameMap[REPLY]   = "REPLY";
+	return ret;
+}
+QMap<quint16, QString> XNS::Echo::Type::nameMap = initNameMap();
+
+
+//
+// XNS::Echo
+//
+QString XNS::Echo::toString() const {
+	return QString("%1 %2").arg(type.toString()).arg(block.toString());
+}
+void XNS::Echo::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::Echo::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, block);
 }
 

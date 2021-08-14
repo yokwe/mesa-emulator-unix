@@ -114,12 +114,21 @@ namespace XNS {
 			static void addNameMap(quint64 value, QString name);
 			QString toString() const;
 
-			QString toOctalString() const;
-			QString toDecimalString() const;
-			QString toHexaDecimalString(QString sep) const;
-			QString toHexaDecimalString() const {
-				return toHexaDecimalString("-");
+			static QString toOctalString(quint64 value);
+			static QString toDecimalString(quint64 value);
+			static QString toHexaDecimalString(quint64 value, QString sep = "");
+			static quint64 fromString(QString string);
+
+			QString toOctalString() const {
+				return toOctalString(value);
 			}
+			QString toDecimalString() const {
+				return toDecimalString(value);
+			}
+			QString toHexaDecimalString(QString sep = "") const {
+				return toHexaDecimalString(value, sep);
+			}
+
 		private:
 			static QMap<quint64, QString> nameMap;
 			static QMap<quint64, QString> initNameMap();

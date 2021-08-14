@@ -111,10 +111,10 @@ QMap<quint32, QString> XNS::IDP::Net::nameMap       = initNameMap();
 //
 // XNS::IDP::Host
 //
-QString XNS::IDP::Host::toOctalString() const {
+QString XNS::IDP::Host::toOctalString(quint64 value) {
 	return QString::asprintf("%llob", value);
 }
-QString XNS::IDP::Host::toDecimalString() const {
+QString XNS::IDP::Host::toDecimalString(quint64 value) {
 	QStringList list;
 	auto n = value;
 	for(;;) {
@@ -128,7 +128,7 @@ QString XNS::IDP::Host::toDecimalString() const {
 
 	return list.join("-");
 }
-QString XNS::IDP::Host::toHexaDecimalString(QString sep) const {
+QString XNS::IDP::Host::toHexaDecimalString(quint64 value, QString sep) {
 	QStringList list;
 	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
 	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
@@ -137,6 +137,47 @@ QString XNS::IDP::Host::toHexaDecimalString(QString sep) const {
 	list += QString::asprintf("%02X", (int)(value >>  8) & 0xFF);
 	list += QString::asprintf("%02X", (int)(value >>  0) & 0xFF);
 	return list.join(sep);
+}
+
+
+static quint64 getValue(int base, int factor, QStringList list) {
+	quint64 ret = 0;
+	for(int i = 1; i < list.size(); i++) {
+		ret *= factor;
+		ret += list[i].toInt(0, base);
+	}
+	return ret;
+}
+
+// supposed separator used in toHexaDecimalString() format
+#define HEXSEP "[-:]?"
+
+quint64 XNS::IDP::Host::fromString(QString string) {
+	static QRegExp dec4("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
+	static QRegExp dec5("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
+	static QRegExp hex("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
+	static QRegExp oct("([0-7]+)b");
+
+	if (dec4.exactMatch(string)) {
+		QStringList list = dec4.capturedTexts();
+		return getValue(10, 1000, list);
+	}
+	if (dec5.exactMatch(string)) {
+		QStringList list = dec5.capturedTexts();
+		logger.info("list %d", list.size());
+		return getValue(10, 1000, list);
+	}
+	if (hex.exactMatch(string)) {
+		QStringList list = hex.capturedTexts();
+		return getValue(16, 256, list);
+	}
+	if (oct.exactMatch(string)) {
+		QStringList list = oct.capturedTexts();
+		return list[1].toLongLong(0, 8);
+	}
+	logger.error("Unexpected");
+	logger.error("  string = %s!", string);
+	ERROR();
 }
 
 void XNS::IDP::Host::addNameMap(quint64 value, QString name) {

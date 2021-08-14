@@ -53,9 +53,6 @@ QJsonObject XNS::Config::Net::toJsonObject() const {
 	return jsonObject;
 }
 
-//     52-242-768-273 - win98   - GVWin on Win98 (VMware ESXI virtual machine)
-// 200-639-155-12-424 - freebsd - epair0b on dev-base.lan - FreeBSD jail
-//      52-228-11-869 - ubuntu  - ens192  on ubuntu2004   - Ubuntu
 
 // XNS::Config::Host
 void XNS::Config::Host::fromJsonObject(const QJsonObject& jsonObject) {

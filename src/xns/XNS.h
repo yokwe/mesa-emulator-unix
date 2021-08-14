@@ -167,6 +167,9 @@ namespace XNS {
 		// IDP length field is actual data length including IDP header(30 bytes)
 		// So actual data length of IDP packet is length - 30.
 
+		static const int OFFSET_CHECKSUM = 0;
+		static const int OFFSET_LENGTH   = 2;
+
 		Checksum checksum;
 		UINT16   length;
 		UINT8    control;
@@ -181,6 +184,13 @@ namespace XNS {
 		Socket   srcSocket;
 
 		QString toString() const;
+
+		// Calculate checksum of IDP using length field
+		// Suppose bb.position() point to IDP packet
+		static quint16 getChecksum(const ByteBuffer::Buffer& bb);
+		static void    setChecksum(ByteBuffer::Buffer& bb, quint16 newValue);
+		static quint16 computeChecksum(const ByteBuffer::Buffer& bb);
+
 
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb);

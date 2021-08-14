@@ -314,6 +314,43 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, srcSocket);
 }
 
+quint16 XNS::IDP::getChecksum(const ByteBuffer::Buffer& bb) {
+	quint16 ret;
+	bb.read16(bb.position() + OFFSET_CHECKSUM, ret);
+	return ret;
+}
+void XNS::IDP::setChecksum(ByteBuffer::Buffer& bb, quint16 newValue) {
+	bb.write16(bb.position() + OFFSET_CHECKSUM, newValue);
+}
+quint16 XNS::IDP::computeChecksum(const ByteBuffer::Buffer& bb) {
+	quint8* data   = bb.data();
+	int     offset = bb.position();
+
+	// read length field of IDP packet
+	quint16 length;
+	bb.read16(offset + OFFSET_LENGTH, length);
+
+	// move offset to length field
+	offset += OFFSET_LENGTH; // increment offset
+	length -= OFFSET_LENGTH; // decrement length
+
+    quint32 s = 0;
+    for(int i = 0; i < length; i += 2) {
+ 		quint32 w = (data[offset + 0] << 8) | data[offset + 1];
+ 		offset += 2;
+
+		// add w to s
+		s += w;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+		// shift left
+		s <<= 1;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+    }
+    return (quint16)s;
+}
+
 
 //
 // XNS::Ethernet::Type

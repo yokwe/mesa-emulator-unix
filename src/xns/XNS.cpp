@@ -36,7 +36,40 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("xns");
 
+#include "../util/JSONUtil.h"
+
 #include "XNS.h"
+
+
+//
+// XNS
+//
+
+static XNS::Config config;
+
+XNS::Config XNS::loadConfig(QString path) {
+	QJsonObject jsonObject = JSONUtil::loadObject(path);
+	config.fromJsonObject(jsonObject);
+
+	// add name to
+	for(auto e: config.netList) {
+		XNS::IDP::Net::addNameMap(e.value, e.name);
+	}
+	for(auto e: config.hostList) {
+		XNS::IDP::Host::addNameMap(e.value, e.name);
+	}
+
+	logger.info("config localNet = %d", config.localNet);
+	for(auto e: config.netList) {
+		logger.info("config net  %4d  %s", e.value, e.name);
+	}
+	for(auto e: config.hostList) {
+		logger.info("config host %s  %llX  %s", XNS::IDP::Host::toHexaDecimalString(e.value, ":"), e.value, e.name);
+	}
+
+
+	return config;
+}
 
 
 //
@@ -187,7 +220,7 @@ QString XNS::IDP::Host::toString() const {
 	if (nameMap.contains(value)) {
 		return nameMap[value];
 	} else {
-		return toHexaDecimalString("");
+		return toHexaDecimalString(":");
 	}
 }
 QMap<quint64, QString> XNS::IDP::Host::initNameMap() {

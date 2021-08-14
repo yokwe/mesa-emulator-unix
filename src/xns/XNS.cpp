@@ -298,6 +298,8 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, srcSocket);
 
 	bb.limit(pos + length);
+	FROM_BYTE_BUFFER(bb, block);
+
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, checksum);
@@ -310,6 +312,7 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, srcNet);
 	TO_BYTE_BUFFER(bb, srcHost);
 	TO_BYTE_BUFFER(bb, srcSocket);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 quint16 XNS::IDP::getChecksum(const ByteBuffer::Buffer& bb) {
@@ -382,11 +385,13 @@ void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, dst);
 	FROM_BYTE_BUFFER(bb, src);
 	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, dst);
 	TO_BYTE_BUFFER(bb, src);
 	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -479,7 +484,7 @@ QMap<quint16, QString> XNS::PEX::Type::nameMap = initNameMap();
 // XNS::PEX
 //
 QString XNS::PEX::toString() const {
-	return QString("%1 %2 %3").arg(QString("%1").arg((quint32)id, 4, 16, QChar('0')).toUpper()).arg(type.toString()).arg(block.toString());
+	return QString("%1 %2").arg(QString("%1").arg((quint32)id, 4, 16, QChar('0')).toUpper()).arg(type.toString());
 }
 void XNS::PEX::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, id);

@@ -184,6 +184,8 @@ namespace XNS {
 		Host     srcHost;
 		Socket   srcSocket;
 
+		BLOCK    block;
+
 		QString toString() const;
 
 		// Calculate checksum of IDP using length field
@@ -220,6 +222,7 @@ namespace XNS {
 		IDP::Host dst;
 		IDP::Host src;
 		Type      type;
+		BLOCK     block;
 
 		QString toString() const;
 

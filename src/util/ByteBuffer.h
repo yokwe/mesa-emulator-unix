@@ -198,6 +198,10 @@ namespace ByteBuffer {
 		void write  (const int index, const int writeSize, const quint8* value);
 	};
 
+	// helper macro to invoke fromByteBuufer / toByteBuffer
+	#define FROM_BYTE_BUFFER(bb, name) name.fromByteBuffer(bb)
+	#define TO_BYTE_BUFFER(bb, name) name.toByteBuffer(bb)
+
 	class Base {
 	public:
 		// this <= ByteBuffer

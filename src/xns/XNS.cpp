@@ -29,6 +29,10 @@
  *******************************************************************************/
 
 
+//
+// XNS.cpp
+//
+
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("xns");
 
@@ -208,32 +212,28 @@ QString XNS::IDP::toString() const {
 		arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
 }
 void XNS::IDP::fromByteBuffer(Buffer& bb) {
-	checksum.fromByteBuffer(bb);
-	length.fromByteBuffer(bb);
-	control.fromByteBuffer(bb);
-	type.fromByteBuffer(bb);
-
-	dstNet.fromByteBuffer(bb);
-	dstHost.fromByteBuffer(bb);
-	dstSocket.fromByteBuffer(bb);
-
-	srcNet.fromByteBuffer(bb);
-	srcHost.fromByteBuffer(bb);
-	srcSocket.fromByteBuffer(bb);
+	FROM_BYTE_BUFFER(bb, checksum);
+	FROM_BYTE_BUFFER(bb, length);
+	FROM_BYTE_BUFFER(bb, control);
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, dstNet);
+	FROM_BYTE_BUFFER(bb, dstHost);
+	FROM_BYTE_BUFFER(bb, dstSocket);
+	FROM_BYTE_BUFFER(bb, srcNet);
+	FROM_BYTE_BUFFER(bb, srcHost);
+	FROM_BYTE_BUFFER(bb, srcSocket);
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
-	checksum.toByteBuffer(bb);
-	length.toByteBuffer(bb);
-	control.toByteBuffer(bb);
-	type.toByteBuffer(bb);
-
-	dstNet.toByteBuffer(bb);
-	dstHost.toByteBuffer(bb);
-	dstSocket.toByteBuffer(bb);
-
-	srcNet.toByteBuffer(bb);
-	srcHost.toByteBuffer(bb);
-	srcSocket.toByteBuffer(bb);
+	TO_BYTE_BUFFER(bb, checksum);
+	TO_BYTE_BUFFER(bb, length);
+	TO_BYTE_BUFFER(bb, control);
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, dstNet);
+	TO_BYTE_BUFFER(bb, dstHost);
+	TO_BYTE_BUFFER(bb, dstSocket);
+	TO_BYTE_BUFFER(bb, srcNet);
+	TO_BYTE_BUFFER(bb, srcHost);
+	TO_BYTE_BUFFER(bb, srcSocket);
 }
 
 
@@ -267,13 +267,13 @@ QString XNS::Ethernet::toString() const {
 	return QString("%1-%2-%3").arg(dst.toString()).arg(src.toString()).arg(type.toString());
 }
 void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
-	dst.fromByteBuffer(bb);
-	src.fromByteBuffer(bb);
-	type.fromByteBuffer(bb);
+	FROM_BYTE_BUFFER(bb, dst);
+	FROM_BYTE_BUFFER(bb, src);
+	FROM_BYTE_BUFFER(bb, type);
 }
 void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
-	dst.toByteBuffer(bb);
-	src.toByteBuffer(bb);
-	type.toByteBuffer(bb);
+	TO_BYTE_BUFFER(bb, dst);
+	TO_BYTE_BUFFER(bb, src);
+	TO_BYTE_BUFFER(bb, type);
 }
 

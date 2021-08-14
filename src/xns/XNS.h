@@ -30,7 +30,7 @@
 
 
 //
-// xns.h
+// XNS.h
 //
 
 #ifndef XNS_H__

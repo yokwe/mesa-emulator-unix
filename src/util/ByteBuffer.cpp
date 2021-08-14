@@ -61,7 +61,7 @@ void ByteBuffer::Buffer::copyFrom(int len, const quint8* data) {
 	myLimit    = len;
 }
 
-QString ByteBuffer::Buffer::toString(int limit) {
+QString ByteBuffer::Buffer::toString(int limit) const {
 	QString ret;
 	for(int i = myBase; i < myLimit; i++) {
 		ret += QString::asprintf("%02X", myData[i]);

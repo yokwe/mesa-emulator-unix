@@ -93,7 +93,7 @@ namespace ByteBuffer {
 		// copy from data to ByteBuffer
 		void copyFrom(int len, const quint8* data);
 
-		QString toString(int limit = 65536);
+		QString toString(int limit = 65536) const;
 
 		int base() const {
 			return myBase;
@@ -328,6 +328,42 @@ namespace ByteBuffer {
 		}
 		void toByteBuffer  (Buffer& bb) const {
 			bb.write48(value);
+		}
+	};
+
+	class BLOCK : public Base {
+	protected:
+		QByteArray array;
+	public:
+		BLOCK() {}
+		BLOCK(const BLOCK& that) : array(that.array) {}
+		BLOCK operator=(const BLOCK& that) {
+			array = that.array;
+		  return *this;
+		}
+
+		QString toString() const {
+			return toHexString(array.size(), (const quint8*)array.data());
+		}
+
+		ByteBuffer::Buffer toBuffer() {
+			ByteBuffer::Buffer buffer(array.size(), (quint8*)array.data());
+			return buffer;
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			quint8 data;
+			while(bb.hasRemaining()) {
+				bb.read8(data);
+				array.append(data);
+			}
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			for(int i = 0; i < array.size(); i++) {
+				quint8 data = (quint8)array.at(i);
+				bb.write8(data);
+			}
 		}
 	};
 

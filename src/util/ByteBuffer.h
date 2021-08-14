@@ -333,37 +333,31 @@ namespace ByteBuffer {
 
 	class BLOCK : public Base {
 	protected:
-		QByteArray array;
+		ByteBuffer::Buffer buffer;
 	public:
 		BLOCK() {}
-		BLOCK(const BLOCK& that) : array(that.array) {}
+		BLOCK(const BLOCK& that) : buffer(that.buffer) {}
 		BLOCK operator=(const BLOCK& that) {
-			array = that.array;
+			buffer = that.buffer;
 		  return *this;
 		}
 
 		QString toString() const {
-			return toHexString(array.size(), (const quint8*)array.data());
+			return buffer.toString();
 		}
 
 		ByteBuffer::Buffer toBuffer() {
-			ByteBuffer::Buffer buffer(array.size(), (quint8*)array.data());
 			return buffer;
 		}
 
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb) {
-			quint8 data;
-			while(bb.hasRemaining()) {
-				bb.read8(data);
-				array.append(data);
-			}
+			buffer = bb.newBase();
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			for(int i = 0; i < array.size(); i++) {
-				quint8 data = (quint8)array.at(i);
-				bb.write8(data);
-			}
+			int size = buffer.limit() - buffer.base();
+			quint8* data = buffer.data() + buffer.base();
+			bb.write(size, data);
 		}
 	};
 

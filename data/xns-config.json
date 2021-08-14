@@ -1,0 +1,11 @@
+{
+	"localNet": 1111,
+	"netList": [
+        {"name": "LOCAL", "value": 1111}
+	],
+	"hostList": [
+		{"name": "WIN98",   "value": "00:0c:29:e9:61:91"},
+		{"name": "UBUNTU",  "value": "00:0c:29:08:37:5d"},
+		{"name": "FREEBSD", "value": "b6:7a:f1:90:03:48"}
+	]
+}

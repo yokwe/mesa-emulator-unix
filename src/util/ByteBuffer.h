@@ -133,6 +133,9 @@ namespace ByteBuffer {
 			myLimit    = myBase;
 		}
 
+		// set limit
+		void limit(int newValue);
+
 		// set position
 		void position(int newValue);
 		// mark current position for reset

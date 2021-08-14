@@ -45,18 +45,19 @@ void ByteBuffer::Buffer::copyFrom(int len, const quint8* data) {
 		logger.error("  len      = %5d", len);
 		ERROR();
 	}
-	if (myCapacity < len) {
+	if (myCapacity < (myBase + len)) {
 		logger.error("Exceed capacity");
 		logger.error("  capacity = %5d", myCapacity);
+		logger.error("  base     = %5d", myBase);
 		logger.error("  len      = %5d", len);
 		ERROR();
 	}
-	// clear myData with zero
-	memset(myData, 0, (size_t)myCapacity);
-	// copy from data to myData
-	memcpy(myData, data, (size_t)len);
+	// clear myData + myBase with zero
+	memset(myData + myBase, 0, (size_t)(myCapacity - myBase));
+	// copy from data to myData + myBase
+	memcpy(myData + myBase, data, (size_t)len);
 	// reset position and limit
-	myPosition = 0;
+	myPosition = myBase;
 	myLimit    = len;
 }
 
@@ -68,12 +69,25 @@ QString ByteBuffer::Buffer::toString(int limit) {
 	return ret.left(limit);
 }
 
-void ByteBuffer::Buffer::position(int newValue	) {
-	if (0 <= newValue && newValue <= myLimit) {
+void ByteBuffer::Buffer::limit(int newValue) {
+	if (myBase <= newValue && newValue <= myCapacity) {
+		myLimit = newValue;
+	} else {
+		logger.error("Exceed limit");
+		logger.error("  newValue = %5d", newValue);
+		logger.error("  base     = %5d", myBase);
+		logger.error("  capacity = %5d", myCapacity);
+		ERROR();
+	}
+}
+
+void ByteBuffer::Buffer::position(int newValue) {
+	if (myBase <= newValue && newValue <= myLimit) {
 		myPosition = newValue;
 	} else {
 		logger.error("Exceed limit");
 		logger.error("  newValue = %5d", newValue);
+		logger.error("  base     = %5d", myBase);
 		logger.error("  limit    = %5d", myLimit);
 		ERROR();
 	}

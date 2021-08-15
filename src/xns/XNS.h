@@ -65,6 +65,13 @@ namespace XNS {
 			};
 
 			Checksum() : UINT16() {}
+			quint16 operator=(quint16 newValue) const {
+				return UINT16::operator=(newValue);
+			}
+
+			bool isNoCheck() const {
+				return value == NOCHECK;
+			}
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -80,6 +87,9 @@ namespace XNS {
 			};
 
 			Type() : UINT8() {}
+			quint8 operator=(const quint8& newValue) {
+				return UINT8::operator=(newValue);
+			}
 
 			static void addNameMap(quint8 value, QString name);
 			QString toString() const;
@@ -96,6 +106,9 @@ namespace XNS {
 			};
 
 			Net() : UINT32() {}
+			quint32 operator=(const quint32& newValue) {
+				return UINT32::operator=(newValue);
+			}
 
 			static void addNameMap(quint32 value, QString name);
 			QString toString() const;
@@ -115,6 +128,9 @@ namespace XNS {
 			Host(quint8* p) {
 				Buffer bb(SIZE, p);
 				bb.read48(value);
+			}
+			quint64 operator=(const quint64& newValue) {
+				return UINT48::operator=(newValue);
 			}
 
 			static void addNameMap(quint64 value, QString name);
@@ -151,6 +167,9 @@ namespace XNS {
 			};
 
 			Socket() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -167,6 +186,7 @@ namespace XNS {
 		// To know actual data length of XNS packet, use IDP length field.
 		// IDP length field is actual data length including IDP header(30 bytes)
 		// So actual data length of IDP packet is length - 30.
+		static const int MIN_IDP_LENGTH = 46;
 
 		static const int OFFSET_CHECKSUM = 0;
 		static const int OFFSET_LENGTH   = 2;
@@ -196,7 +216,9 @@ namespace XNS {
 
 
 		// ByteBuffer::Base
+		// fromByteBuffer will set limit of bb from length field
 		void fromByteBuffer(Buffer& bb);
+		// toByteBuffer will add padding for odd and short length, update checksum field
 		void toByteBuffer  (Buffer& bb) const;
 	};
 
@@ -210,6 +232,9 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -241,6 +266,9 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			QString toString() const;
 		private:
@@ -282,6 +310,9 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			QString toString() const;
 		private:
@@ -324,6 +355,9 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			QString toString() const;
 		private:
@@ -352,6 +386,9 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
+			quint16 operator=(const quint16& newValue) {
+				return UINT16::operator=(newValue);
+			}
 
 			QString toString() const;
 		private:
@@ -370,6 +407,7 @@ namespace XNS {
 		void toByteBuffer  (Buffer& bb) const;
 	};
 
+
 	class SPP : public Base {
 	public:
 		// SST - Sub System Type
@@ -386,6 +424,9 @@ namespace XNS {
 			};
 
 			SST() : UINT8() {}
+			quint8 operator=(const quint16& newValue) {
+				return UINT8::operator=(newValue);
+			}
 
 			QString toString() const;
 		private:
@@ -414,6 +455,9 @@ namespace XNS {
 			}
 
 			Control() : UINT8() {}
+			quint8 operator=(const quint16& newValue) {
+				return UINT8::operator=(newValue);
+			}
 
 			QString toString() const;
 		};
@@ -433,7 +477,6 @@ namespace XNS {
 		void fromByteBuffer(Buffer& bb);
 		void toByteBuffer  (Buffer& bb) const;
 	};
-
 
 }
 

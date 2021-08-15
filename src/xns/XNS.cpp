@@ -284,7 +284,7 @@ QString XNS::IDP::toString() const {
 		arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
 }
 void XNS::IDP::fromByteBuffer(Buffer& bb) {
-	int pos = bb.position();
+	int start = bb.position();
 
 	FROM_BYTE_BUFFER(bb, checksum);
 	FROM_BYTE_BUFFER(bb, length);
@@ -297,11 +297,15 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, srcHost);
 	FROM_BYTE_BUFFER(bb, srcSocket);
 
-	bb.limit(pos + length);
-	FROM_BYTE_BUFFER(bb, block);
+	// set bb limit by length
+	bb.limit(start + (quint16)length);
 
+	// read block after change limit
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
+	ByteBuffer::Buffer start(bb);
+
 	TO_BYTE_BUFFER(bb, checksum);
 	TO_BYTE_BUFFER(bb, length);
 	TO_BYTE_BUFFER(bb, control);
@@ -313,6 +317,29 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, srcHost);
 	TO_BYTE_BUFFER(bb, srcSocket);
 	TO_BYTE_BUFFER(bb, block);
+
+	// add padding
+	int padding = 0;
+	int dataLength = bb.position() - start.position();
+	// padding for odd length
+	if ((dataLength % 2) == 1) {
+		padding += 1;
+		dataLength += 1;
+	}
+	// padding for short length
+	if (dataLength < MIN_IDP_LENGTH) {
+		padding += MIN_IDP_LENGTH - dataLength;
+	}
+	// write padding and change bb limit
+	for(int i = 0; i < padding; i++) {
+		bb.write8(0);
+	}
+	// update checksum
+	{
+		quint16 newValue = computeChecksum(start);
+		checksum = newValue;
+		bb.write16(OFFSET_CHECKSUM, newValue);
+	}
 }
 
 quint16 XNS::IDP::getChecksum(const ByteBuffer::Buffer& bb) {

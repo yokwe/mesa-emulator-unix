@@ -150,7 +150,7 @@ void ProcessorThread::run() {
 				//logger.debug("Abort %-20s  %8d", e.func, abortCount);
 			}
 		}
-	} catch (Error& e) {
+	} catch (ErrorError& e) {
 		logger.fatal("Error %-20s %4d %s", e.func, e.line, e.file);
 		// Output for postmortem  examination
 		logger.fatal("GFI %4X  CB %8X  PC %d", GFI, CodeCache::CB(), PC);

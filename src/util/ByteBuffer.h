@@ -217,7 +217,7 @@ namespace ByteBuffer {
 
 	class UINT8 : public Base {
 	protected:
-		quint8 value;
+		mutable quint8 value;
 	public:
 		UINT8() : value(0) {}
 		UINT8(const UINT8& that) : value(that.value) {}
@@ -226,13 +226,17 @@ namespace ByteBuffer {
 			return *this;
 		}
 
-		UINT8(quint8 newValue) : value(newValue) {}
+		explicit UINT8(quint8 newValue) : value(newValue) {}
 		operator quint8() const {
 			return value;
 		}
-		UINT8 operator =(quint8 newValue) {
+		// IMPORTANT
+		// To avoid compile error of changing class member variable, make operator=() const and make value mutable.
+		// If type UNIT8 is declared as member variable, this pointer become const and operator=() neeed to be const.
+		// Same for UINT16, UINT32 and UINT48
+		quint8 operator =(const quint8 newValue) const {
 			value = newValue;
-			return *this;
+			return newValue;
 		}
 
 		// ByteBufferBase
@@ -246,7 +250,7 @@ namespace ByteBuffer {
 
 	class UINT16 : public Base {
 	protected:
-		quint16 value;
+		mutable quint16 value;
 	public:
 		UINT16() : value(0) {}
 		UINT16(const UINT16& that) : value(that.value) {}
@@ -255,13 +259,13 @@ namespace ByteBuffer {
 			return *this;
 		}
 
-		UINT16(quint16 newValue) : value(newValue) {}
+		explicit UINT16(const quint16 newValue) : value(newValue) {}
 		operator quint16() const {
 			return value;
 		}
-		UINT16 operator =(quint16 newValue) {
+		quint16 operator =(const quint16& newValue) const {
 			value = newValue;
-			return *this;
+			return newValue;
 		}
 
 		// ByteBufferBase
@@ -275,7 +279,7 @@ namespace ByteBuffer {
 
 	class UINT32 : public Base {
 	protected:
-		quint32 value;
+		mutable quint32 value;
 	public:
 		UINT32() : value(0) {}
 		UINT32(const UINT32& that) : value(that.value) {}
@@ -284,13 +288,13 @@ namespace ByteBuffer {
 			return *this;
 		}
 
-		UINT32(quint32 newValue) : value(newValue) {}
-		operator quint16() const {
+		explicit UINT32(quint32 newValue) : value(newValue) {}
+		operator quint32() const {
 			return value;
 		}
-		UINT32 operator =(quint32 newValue) {
+		quint32 operator =(quint32 newValue) const {
 			value = newValue;
-			return *this;
+			return newValue;
 		}
 
 		// ByteBufferBase
@@ -304,7 +308,7 @@ namespace ByteBuffer {
 
 	class UINT48 : public Base {
 	protected:
-		quint64 value;
+		mutable quint64 value;
 	public:
 		UINT48() : value(0) {}
 		UINT48(const UINT48& that) : value(that.value) {}
@@ -313,13 +317,13 @@ namespace ByteBuffer {
 			return *this;
 		}
 
-		UINT48(quint64 newValue) : value(newValue) {}
+		explicit UINT48(quint64 newValue) : value(newValue) {}
 		operator quint64() const {
 			return value;
 		}
-		UINT48 operator =(quint64 newValue) {
+		quint64 operator =(quint64 newValue) const {
 			value = newValue;
-			return *this;
+			return newValue;
 		}
 
 		// ByteBufferBase

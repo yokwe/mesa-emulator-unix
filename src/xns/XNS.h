@@ -370,7 +370,69 @@ namespace XNS {
 		void toByteBuffer  (Buffer& bb) const;
 	};
 
-	// TODO implements SPP
+	class SPP : public Base {
+	public:
+		// SST - Sub System Type
+		class SST : public UINT8 {
+		public:
+			enum Value {
+				// From Courier/Friends/CourierProtocol.mesa
+				DATA        = 0,   // Courier
+				// From Courier/Private/BulkData.mesa
+				BULK        = 1,   // Bulk Data
+				// From NS/Public/NetworkStream.mesa
+				CLOSE       = 254, // Closing connection
+				CLOSE_REPLY = 255, // Reply of CLOSE (handshake)
+			};
+
+			SST() : UINT8() {}
+
+			QString toString() const;
+		private:
+			static QMap<quint8, QString> nameMap;
+			static QMap<quint8, QString> initNameMap();
+		};
+		class Control : public UINT8 {
+		public:
+			static const quint8 BIT_SYSTEM         = 0x80; // System Packet
+			static const quint8 BIT_SEND_ACK       = 0x40; // Send Acknowledgment
+			static const quint8 BIT_ATTENTION      = 0x20; // Attention
+			static const quint8 BIT_END_OF_MESSAGE = 0x10; // End of Message
+			static const quint8 BIT_UNUSED         = 0x0F;
+
+			bool isSystem() const {
+				return value & BIT_SYSTEM;
+			}
+			bool isSendAck() const {
+				return value & BIT_SEND_ACK;
+			}
+			bool isAttention() const {
+				return value & BIT_ATTENTION;
+			}
+			bool isEndOfMessage() const {
+				return value & BIT_END_OF_MESSAGE;
+			}
+
+			Control() : UINT8() {}
+
+			QString toString() const;
+		};
+
+		Control control; // Control Bit
+		SST    sst;     // Sub System Type
+		UINT16 idSrc;   // connection id of source
+		UINT16 idDst;   // connection id of destination
+		UINT16 seq;     // sequence
+		UINT16 ack;     // acknowledgment
+		UINT16 alloc;   // allocation
+		BLOCK  block;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
 
 
 }

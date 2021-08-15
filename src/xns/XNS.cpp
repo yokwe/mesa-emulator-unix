@@ -582,3 +582,73 @@ void XNS::Echo::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, block);
 }
 
+
+//
+// XNS::SPP::SST
+//
+QString XNS::SPP::SST::toString() const {
+	if (nameMap.contains(value)) {
+		return nameMap[value];
+	} else {
+		return QString::asprintf("%02X", value);
+	}
+}
+QMap<quint8, QString> XNS::SPP::SST::initNameMap() {
+	QMap<quint8, QString> ret;
+	nameMap[DATA]        = "DATA";
+	nameMap[BULK]        = "BULK";
+	nameMap[CLOSE]       = "CLOSE";
+	nameMap[CLOSE_REPLY] = "CLOSE_REPLY";
+	return ret;
+}
+QMap<quint8, QString> XNS::SPP::SST::nameMap = initNameMap();
+
+
+//
+// XNS::SPP::Control
+//
+QString XNS::SPP::Control::toString() const {
+	QStringList list;
+	if (isSystem())         list += "SYS";
+	if (isSendAck())        list += "SEND_ACK";
+	if (isAttention())      list += "ATT";
+	if (isEndOfMessage())   list += "EOM";
+	if (value & BIT_UNUSED) list += QString::asprintf("UNUSED_%1X", value & BIT_UNUSED);
+
+	return QString("{%1}").arg(list.join(" "));
+}
+
+
+//
+// XNS::SPP
+//
+QString XNS::SPP::toString() const {
+	return QString("%1 %2  %3 %4  %5-%6-%7").
+		arg(control.toString()).arg(sst.toString()).
+		arg((quint16)idSrc, 4, QChar('0')).arg((quint16)idDst, 4, QChar('0')).
+		arg((quint16)seq).arg((quint16)ack).arg((quint16)alloc);
+}
+void XNS::SPP::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, control);
+	FROM_BYTE_BUFFER(bb, sst);
+	FROM_BYTE_BUFFER(bb, idSrc);
+	FROM_BYTE_BUFFER(bb, idDst);
+	FROM_BYTE_BUFFER(bb, seq);
+	FROM_BYTE_BUFFER(bb, ack);
+	FROM_BYTE_BUFFER(bb, alloc);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::SPP::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, control);
+	TO_BYTE_BUFFER(bb, sst);
+	TO_BYTE_BUFFER(bb, idSrc);
+	TO_BYTE_BUFFER(bb, idDst);
+	TO_BYTE_BUFFER(bb, seq);
+	TO_BYTE_BUFFER(bb, ack);
+	TO_BYTE_BUFFER(bb, alloc);
+	TO_BYTE_BUFFER(bb, block);
+}
+
+
+
+

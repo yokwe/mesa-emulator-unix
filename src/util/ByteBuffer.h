@@ -221,7 +221,7 @@ namespace ByteBuffer {
 	public:
 		UINT8() : value(0) {}
 		UINT8(const UINT8& that) : value(that.value) {}
-		UINT8 operator=(const UINT8& that) {
+		UINT8 operator =(const UINT8& that) {
 			this->value = that.value;
 			return *this;
 		}
@@ -231,13 +231,15 @@ namespace ByteBuffer {
 			return value;
 		}
 		// IMPORTANT
-		// To avoid compile error of changing class member variable, make operator=() const and make value mutable.
-		// If type UNIT8 is declared as member variable, this pointer become const and operator=() neeed to be const.
+		// To avoid compile error of changing class member variable, make operator =() const and make value mutable.
+		// If type UNIT8 is declared as member variable, this pointer become const and operator =() neeed to be const.
 		// Same for UINT16, UINT32 and UINT48
 		quint8 operator =(const quint8 newValue) const {
 			value = newValue;
 			return newValue;
 		}
+		// prohibit other assignment explicitly
+		template <typename T> T operator =(const T& newValue) const = delete;
 
 		// ByteBufferBase
 		void fromByteBuffer(Buffer& bb) {
@@ -254,7 +256,7 @@ namespace ByteBuffer {
 	public:
 		UINT16() : value(0) {}
 		UINT16(const UINT16& that) : value(that.value) {}
-		UINT16 operator=(const UINT16& that) {
+		UINT16 operator =(const UINT16& that) {
 			this->value = that.value;
 			return *this;
 		}
@@ -267,6 +269,8 @@ namespace ByteBuffer {
 			value = newValue;
 			return newValue;
 		}
+		// prohibit other assignment explicitly
+		template <typename T> T operator =(const T& newValue) const = delete;
 
 		// ByteBufferBase
 		void fromByteBuffer(Buffer& bb) {
@@ -283,7 +287,7 @@ namespace ByteBuffer {
 	public:
 		UINT32() : value(0) {}
 		UINT32(const UINT32& that) : value(that.value) {}
-		UINT32 operator=(const UINT32& that) {
+		UINT32 operator =(const UINT32& that) {
 			this->value = that.value;
 			return *this;
 		}
@@ -296,6 +300,8 @@ namespace ByteBuffer {
 			value = newValue;
 			return newValue;
 		}
+		// prohibit other assignment explicitly
+		template <typename T> T operator =(const T& newValue) const = delete;
 
 		// ByteBufferBase
 		void fromByteBuffer(Buffer& bb) {
@@ -312,7 +318,7 @@ namespace ByteBuffer {
 	public:
 		UINT48() : value(0) {}
 		UINT48(const UINT48& that) : value(that.value) {}
-		UINT48 operator=(const UINT48& that) {
+		UINT48 operator =(const UINT48& that) {
 			this->value = that.value;
 			return *this;
 		}
@@ -325,6 +331,8 @@ namespace ByteBuffer {
 			value = newValue;
 			return newValue;
 		}
+		// prohibit other assignment explicitly
+		template <typename T> T operator =(const T& newValue) const = delete;
 
 		// ByteBufferBase
 		void fromByteBuffer(Buffer& bb) {
@@ -341,7 +349,7 @@ namespace ByteBuffer {
 	public:
 		BLOCK() {}
 		BLOCK(const BLOCK& that) : buffer(that.buffer) {}
-		BLOCK operator=(const BLOCK& that) {
+		BLOCK operator =(const BLOCK& that) {
 			buffer = that.buffer;
 		  return *this;
 		}

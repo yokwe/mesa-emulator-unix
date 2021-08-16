@@ -65,9 +65,11 @@ namespace XNS {
 			};
 
 			Checksum() : UINT16() {}
-			quint16 operator=(quint16 newValue) const {
-				return UINT16::operator=(newValue);
+			quint16 operator =(quint16 newValue) const {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			bool isNoCheck() const {
 				return value == NOCHECK;
@@ -87,9 +89,11 @@ namespace XNS {
 			};
 
 			Type() : UINT8() {}
-			quint8 operator=(const quint8& newValue) {
-				return UINT8::operator=(newValue);
+			quint8 operator =(const quint8& newValue) {
+				return UINT8::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint8 value, QString name);
 			QString toString() const;
@@ -106,9 +110,11 @@ namespace XNS {
 			};
 
 			Net() : UINT32() {}
-			quint32 operator=(const quint32& newValue) {
-				return UINT32::operator=(newValue);
+			quint32 operator =(const quint32& newValue) {
+				return UINT32::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint32 value, QString name);
 			QString toString() const;
@@ -129,9 +135,11 @@ namespace XNS {
 				Buffer bb(SIZE, p);
 				bb.read48(value);
 			}
-			quint64 operator=(const quint64& newValue) {
-				return UINT48::operator=(newValue);
+			quint64 operator =(const quint64& newValue) {
+				return UINT48::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint64 value, QString name);
 			QString toString() const;
@@ -167,9 +175,11 @@ namespace XNS {
 			};
 
 			Socket() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -232,9 +242,11 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -266,9 +278,11 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -310,9 +324,11 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -355,9 +371,11 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -386,9 +404,11 @@ namespace XNS {
 			};
 
 			Type() : UINT16() {}
-			quint16 operator=(const quint16& newValue) {
-				return UINT16::operator=(newValue);
+			quint16 operator =(const quint16& newValue) {
+				return UINT16::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -424,9 +444,11 @@ namespace XNS {
 			};
 
 			SST() : UINT8() {}
-			quint8 operator=(const quint16& newValue) {
-				return UINT8::operator=(newValue);
+			quint8 operator =(const quint8& newValue) {
+				return UINT8::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -455,9 +477,11 @@ namespace XNS {
 			}
 
 			Control() : UINT8() {}
-			quint8 operator=(const quint16& newValue) {
-				return UINT8::operator=(newValue);
+			quint8 operator =(const quint8& newValue) {
+				return UINT8::operator =(newValue);
 			}
+			// prohibit other assignment explicitly
+			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		};

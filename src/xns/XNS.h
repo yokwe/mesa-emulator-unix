@@ -64,15 +64,14 @@ namespace XNS {
 				NOCHECK = 0xFFFF,
 			};
 
-			Checksum() : UINT16() {}
-			quint16 operator =(quint16 newValue) const {
-				return UINT16::operator =(newValue);
-			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
-
 			bool isNoCheck() const {
-				return value == NOCHECK;
+				return value() == NOCHECK;
+			}
+
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
 
 			static void addNameMap(quint16 value, QString name);
@@ -88,12 +87,11 @@ namespace XNS {
 				ROUTING = 1, ECHO = 2, ERROR_ = 3, PEX = 4, SPP = 5, BOOT = 9,
 			};
 
-			Type() : UINT8() {}
-			quint8 operator =(const quint8& newValue) {
-				return UINT8::operator =(newValue);
+			// define operator =
+			quint8 operator =(const quint8& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint8 value, QString name);
 			QString toString() const;
@@ -109,12 +107,11 @@ namespace XNS {
 				UNKNOWN = 0,
 			};
 
-			Net() : UINT32() {}
-			quint32 operator =(const quint32& newValue) {
-				return UINT32::operator =(newValue);
+			// define operator =
+			quint32 operator =(const quint32& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint32 value, QString name);
 			QString toString() const;
@@ -129,17 +126,11 @@ namespace XNS {
 			static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
 			static constexpr quint64 UNKNOWN   = 0;
 
-			Host() : UINT48() {}
-			Host(quint64 newValue) : UINT48(newValue) {}
-			Host(quint8* p) {
-				Buffer bb(SIZE, p);
-				bb.read48(value);
+			// define operator =
+			quint64 operator =(const quint64& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			quint64 operator =(const quint64& newValue) {
-				return UINT48::operator =(newValue);
-			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint64 value, QString name);
 			QString toString() const;
@@ -150,13 +141,13 @@ namespace XNS {
 			static quint64 fromString(QString string);
 
 			QString toOctalString() const {
-				return toOctalString(value);
+				return toOctalString(value());
 			}
 			QString toDecimalString() const {
-				return toDecimalString(value);
+				return toDecimalString(value());
 			}
 			QString toHexaDecimalString(QString sep = "") const {
-				return toHexaDecimalString(value, sep);
+				return toHexaDecimalString(value(), sep);
 			}
 
 		private:
@@ -174,12 +165,11 @@ namespace XNS {
 				TELEDEBUG = 48,
 			};
 
-			Socket() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -201,7 +191,7 @@ namespace XNS {
 		static const int OFFSET_CHECKSUM = 0;
 		static const int OFFSET_LENGTH   = 2;
 
-		Checksum checksum;
+		Checksum checksum_;
 		UINT16   length;
 		UINT8    control;
 		Type     type;
@@ -241,12 +231,11 @@ namespace XNS {
 				XNS = 0x600, IP = 0x800,
 			};
 
-			Type() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			static void addNameMap(quint16 value, QString name);
 			QString toString() const;
@@ -277,12 +266,11 @@ namespace XNS {
 				REQUEST = 1, RESPONSE = 2,
 			};
 
-			Type() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -323,12 +311,11 @@ namespace XNS {
 				REQUEST = 1, REPLY = 2,
 			};
 
-			Type() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -370,12 +357,11 @@ namespace XNS {
 				CONGESTION_DISCARD   = 01006,
 			};
 
-			Type() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -403,12 +389,11 @@ namespace XNS {
 				UNSPEC = 0, TIME = 1, CHS = 2, TELEDEBUG = 8,
 			};
 
-			Type() : UINT16() {}
-			quint16 operator =(const quint16& newValue) {
-				return UINT16::operator =(newValue);
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -443,12 +428,11 @@ namespace XNS {
 				CLOSE_REPLY = 255, // Reply of CLOSE (handshake)
 			};
 
-			SST() : UINT8() {}
-			quint8 operator =(const quint8& newValue) {
-				return UINT8::operator =(newValue);
+			// define operator =
+			quint8 operator =(const quint8& newValue) const {
+				value(newValue);
+				return newValue;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
 
 			QString toString() const;
 		private:
@@ -463,37 +447,36 @@ namespace XNS {
 			static const quint8 BIT_END_OF_MESSAGE = 0x10; // End of Message
 			static const quint8 BIT_UNUSED         = 0x0F;
 
-			bool isSystem() const {
-				return value & BIT_SYSTEM;
-			}
-			bool isSendAck() const {
-				return value & BIT_SEND_ACK;
-			}
-			bool isAttention() const {
-				return value & BIT_ATTENTION;
-			}
-			bool isEndOfMessage() const {
-				return value & BIT_END_OF_MESSAGE;
+			// define operator =
+			quint8 operator =(const quint8& newValue) const {
+				value(newValue);
+				return newValue;
 			}
 
-			Control() : UINT8() {}
-			quint8 operator =(const quint8& newValue) {
-				return UINT8::operator =(newValue);
+			bool isSystem() const {
+				return value() & BIT_SYSTEM;
 			}
-			// prohibit other assignment explicitly
-			template <typename T> T operator =(const T& newValue) const = delete;
+			bool isSendAck() const {
+				return value() & BIT_SEND_ACK;
+			}
+			bool isAttention() const {
+				return value() & BIT_ATTENTION;
+			}
+			bool isEndOfMessage() const {
+				return value() & BIT_END_OF_MESSAGE;
+			}
 
 			QString toString() const;
 		};
 
 		Control control; // Control Bit
-		SST    sst;     // Sub System Type
-		UINT16 idSrc;   // connection id of source
-		UINT16 idDst;   // connection id of destination
-		UINT16 seq;     // sequence
-		UINT16 ack;     // acknowledgment
-		UINT16 alloc;   // allocation
-		BLOCK  block;
+		SST     sst;     // Sub System Type
+		UINT16  idSrc;   // connection id of source
+		UINT16  idDst;   // connection id of destination
+		UINT16  seq;     // sequence
+		UINT16  ack;     // acknowledgment
+		UINT16  alloc;   // allocation
+		BLOCK   block;
 
 		QString toString() const;
 

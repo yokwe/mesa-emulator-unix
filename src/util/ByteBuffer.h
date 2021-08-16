@@ -39,6 +39,7 @@
 #include <cstdint>
 
 #include "Util.h"
+#include "BaseType.h"
 
 
 namespace ByteBuffer {
@@ -215,131 +216,119 @@ namespace ByteBuffer {
 		virtual ~Base() {}
 	};
 
-	class UINT8 : public Base {
-	protected:
-		mutable quint8 value;
+	class UINT8 : public Base , public BaseType<quint8> {
 	public:
-		UINT8() : value(0) {}
-		UINT8(const UINT8& that) : value(that.value) {}
-		UINT8 operator =(const UINT8& that) {
-			this->value = that.value;
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		UINT8() : BaseType() {}
+		~UINT8() {}
+		UINT8 operator =(const UINT8& newValue) const {
+			value(newValue.value());
 			return *this;
 		}
-
-		explicit UINT8(quint8 newValue) : value(newValue) {}
-		operator quint8() const {
-			return value;
-		}
-		// IMPORTANT
-		// To avoid compile error of changing class member variable, make operator =() const and make value mutable.
-		// If type UNIT8 is declared as member variable, this pointer become const and operator =() neeed to be const.
-		// Same for UINT16, UINT32 and UINT48
-		quint8 operator =(const quint8 newValue) const {
-			value = newValue;
+		quint8 operator =(const quint8& newValue) const {
+			value(newValue);
 			return newValue;
 		}
-		// prohibit other assignment explicitly
-		template <typename T> T operator =(const T& newValue) const = delete;
 
-		// ByteBufferBase
+		//
+		// Base
+		//
 		void fromByteBuffer(Buffer& bb) {
-			bb.read8(value);
+			quint8 newValue;
+			bb.read8(newValue);
+			value(newValue);
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			bb.write8(value);
+			bb.write8(value());
 		}
 	};
 
-	class UINT16 : public Base {
-	protected:
-		mutable quint16 value;
+	class UINT16 : public Base, public BaseType<quint16> {
 	public:
-		UINT16() : value(0) {}
-		UINT16(const UINT16& that) : value(that.value) {}
-		UINT16 operator =(const UINT16& that) {
-			this->value = that.value;
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		UINT16() : BaseType() {}
+		~UINT16() {}
+		UINT16 operator =(const UINT16& newValue) const {
+			value(newValue.value());
 			return *this;
-		}
-
-		explicit UINT16(const quint16 newValue) : value(newValue) {}
-		operator quint16() const {
-			return value;
 		}
 		quint16 operator =(const quint16& newValue) const {
-			value = newValue;
+			value(newValue);
 			return newValue;
 		}
-		// prohibit other assignment explicitly
-		template <typename T> T operator =(const T& newValue) const = delete;
 
-		// ByteBufferBase
+		//
+		// Base
+		//
 		void fromByteBuffer(Buffer& bb) {
-			bb.read16(value);
+			quint16 newValue;
+			bb.read16(newValue);
+			value(newValue);
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			bb.write16(value);
+			bb.write16(value());
 		}
 	};
 
-	class UINT32 : public Base {
-	protected:
-		mutable quint32 value;
+	class UINT32 : public Base, public BaseType<quint32> {
 	public:
-		UINT32() : value(0) {}
-		UINT32(const UINT32& that) : value(that.value) {}
-		UINT32 operator =(const UINT32& that) {
-			this->value = that.value;
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		UINT32() : BaseType() {}
+		~UINT32() {}
+		UINT32 operator =(const UINT32& newValue) const {
+			value(newValue.value());
 			return *this;
 		}
-
-		explicit UINT32(quint32 newValue) : value(newValue) {}
-		operator quint32() const {
-			return value;
-		}
-		quint32 operator =(quint32 newValue) const {
-			value = newValue;
+		quint32 operator =(const quint32& newValue) const {
+			value(newValue);
 			return newValue;
 		}
-		// prohibit other assignment explicitly
-		template <typename T> T operator =(const T& newValue) const = delete;
 
-		// ByteBufferBase
+		//
+		// Base
+		//
 		void fromByteBuffer(Buffer& bb) {
-			bb.read32(value);
+			quint32 newValue;
+			bb.read32(newValue);
+			value(newValue);
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			bb.write32(value);
+			bb.write32(value());
 		}
 	};
 
-	class UINT48 : public Base {
-	protected:
-		mutable quint64 value;
+	class UINT48 : public Base, public BaseType<quint64> {
 	public:
-		UINT48() : value(0) {}
-		UINT48(const UINT48& that) : value(that.value) {}
-		UINT48 operator =(const UINT48& that) {
-			this->value = that.value;
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		UINT48() : BaseType() {}
+		~UINT48() {}
+		UINT48 operator =(const UINT48& newValue) const {
+			value(newValue.value());
 			return *this;
 		}
-
-		explicit UINT48(quint64 newValue) : value(newValue) {}
-		operator quint64() const {
-			return value;
-		}
-		quint64 operator =(quint64 newValue) const {
-			value = newValue;
+		quint64 operator =(const quint64& newValue) const {
+			value(newValue);
 			return newValue;
 		}
-		// prohibit other assignment explicitly
-		template <typename T> T operator =(const T& newValue) const = delete;
 
-		// ByteBufferBase
+		//
+		// Base
+		//
 		void fromByteBuffer(Buffer& bb) {
-			bb.read48(value);
+			quint64 newValue;
+			bb.read48(newValue);
+			value(newValue);
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			bb.write48(value);
+			bb.write48(value());
 		}
 	};
 

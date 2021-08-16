@@ -33,13 +33,13 @@
 // ByteBuffer.h
 //
 
-#ifndef BYTEBUFFER_H__
-#define BYTEBUFFER_H__
+#ifndef UTIL_BYTEBUFFER_H__
+#define UTIL_BYTEBUFFER_H__
 
 #include <cstdint>
 
 #include "Util.h"
-#include "BaseType.h"
+#include "OpaqueType.h"
 
 
 namespace ByteBuffer {
@@ -216,12 +216,12 @@ namespace ByteBuffer {
 		virtual ~Base() {}
 	};
 
-	class UINT8 : public Base , public BaseType<quint8> {
+	class UINT8 : public Base , public OpaqueType<quint8> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
 		//
-		UINT8() : BaseType() {}
+		UINT8() : OpaqueType() {}
 		~UINT8() {}
 		UINT8 operator =(const UINT8& newValue) const {
 			value(newValue.value());
@@ -245,12 +245,12 @@ namespace ByteBuffer {
 		}
 	};
 
-	class UINT16 : public Base, public BaseType<quint16> {
+	class UINT16 : public Base, public OpaqueType<quint16> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
 		//
-		UINT16() : BaseType() {}
+		UINT16() : OpaqueType() {}
 		~UINT16() {}
 		UINT16 operator =(const UINT16& newValue) const {
 			value(newValue.value());
@@ -274,12 +274,12 @@ namespace ByteBuffer {
 		}
 	};
 
-	class UINT32 : public Base, public BaseType<quint32> {
+	class UINT32 : public Base, public OpaqueType<quint32> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
 		//
-		UINT32() : BaseType() {}
+		UINT32() : OpaqueType() {}
 		~UINT32() {}
 		UINT32 operator =(const UINT32& newValue) const {
 			value(newValue.value());
@@ -303,12 +303,12 @@ namespace ByteBuffer {
 		}
 	};
 
-	class UINT48 : public Base, public BaseType<quint64> {
+	class UINT48 : public Base, public OpaqueType<quint64> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
 		//
-		UINT48() : BaseType() {}
+		UINT48() : OpaqueType() {}
 		~UINT48() {}
 		UINT48 operator =(const UINT48& newValue) const {
 			value(newValue.value());

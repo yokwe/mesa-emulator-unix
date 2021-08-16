@@ -7,7 +7,7 @@ CONFIG  += staticlib
 HEADERS += Util.h   Perf.h   GuiOp.h   JSONUtil.h   Setting.h   ByteBuffer.h   Network.h
 SOURCES += Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp ByteBuffer.cpp Network.cpp
 
-HEADERS += Debug.h BaseType.h
+HEADERS += Debug.h OpaqueType.h
 
 linux  : SOURCES += Network_dummy.cpp
 macx:    SOURCES += Network_dummy.cpp

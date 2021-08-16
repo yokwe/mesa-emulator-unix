@@ -30,23 +30,23 @@
 
 
 //
-// BaseType.h
+// OpaqueType.h
 //
 
 
-#ifndef UTIL_BASETYPE_H__
-#define UTIL_BASETYPE_H__
+#ifndef UTIL_OPAQUE_H__
+#define UTIL_OPAQUE_H__
 
 #include <QtCore>
 
 
 template <typename T>
-class BaseType {
+class OpaqueType {
 	mutable T value_;
 public:
-	inline BaseType() : value_(0) {};
-	explicit inline BaseType(const T& that) : value_(that.value_) {}
-	~BaseType() {}
+	inline OpaqueType() : value_(0) {};
+	explicit inline OpaqueType(const T& that) : value_(that.value_) {}
+	~OpaqueType() {}
 
 	inline T value() const {
 		return value_;

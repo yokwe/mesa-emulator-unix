@@ -320,11 +320,12 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 
 	// add padding
 	int padding = 0;
+	// compute dataLength based on actual data length. (not length varialbe)
 	int dataLength = bb.position() - start.position();
 	// padding for odd length
 	if ((dataLength % 2) == 1) {
-		padding += 1;
-		dataLength += 1;
+		padding    += 1; // increment for padding
+		dataLength += 1; // increment for padding
 	}
 	// padding for short length
 	if (dataLength < MIN_IDP_LENGTH) {

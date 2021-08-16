@@ -79,10 +79,10 @@ void XNS::IDP::Checksum::addNameMap(quint16 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::IDP::Checksum::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%04X", value());
 	}
 }
 QMap<quint16, QString> XNS::IDP::Checksum::initNameMap() {
@@ -100,10 +100,10 @@ void XNS::IDP::Type::addNameMap(quint8 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::IDP::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%d", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint8, QString> XNS::IDP::Type::initNameMap() {
@@ -126,10 +126,10 @@ void XNS::IDP::Net::addNameMap(quint32 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::IDP::Net::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint32, QString> XNS::IDP::Net::initNameMap() {
@@ -217,10 +217,10 @@ void XNS::IDP::Host::addNameMap(quint64 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::IDP::Host::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return toHexaDecimalString(":");
+		return QString::asprintf("%llX", value());
 	}
 }
 QMap<quint64, QString> XNS::IDP::Host::initNameMap() {
@@ -239,10 +239,10 @@ void XNS::IDP::Socket::addNameMap(quint16 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::IDP::Socket::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::IDP::Socket::initNameMap() {
@@ -276,7 +276,7 @@ QMap<quint16, QString> XNS::IDP::Socket::nameMap    = initNameMap();
 //
 QString XNS::IDP::toString() const {
 	return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
-		arg(checksum.toString()).
+		arg(checksum_.toString()).
 		arg((quint16)length, 4).
 		arg((quint8)control, 2, 16, QChar('0')).
 		arg(type.toString()).
@@ -286,7 +286,7 @@ QString XNS::IDP::toString() const {
 void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	int start = bb.position();
 
-	FROM_BYTE_BUFFER(bb, checksum);
+	FROM_BYTE_BUFFER(bb, checksum_);
 	FROM_BYTE_BUFFER(bb, length);
 	FROM_BYTE_BUFFER(bb, control);
 	FROM_BYTE_BUFFER(bb, type);
@@ -306,7 +306,7 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	ByteBuffer::Buffer start(bb);
 
-	TO_BYTE_BUFFER(bb, checksum);
+	TO_BYTE_BUFFER(bb, checksum_);
 	TO_BYTE_BUFFER(bb, length);
 	TO_BYTE_BUFFER(bb, control);
 	TO_BYTE_BUFFER(bb, type);
@@ -338,7 +338,7 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	// update checksum
 	{
 		quint16 newValue = computeChecksum(start);
-		checksum = newValue;
+		checksum_ = (quint16)newValue;
 		bb.write16(OFFSET_CHECKSUM, newValue);
 	}
 }
@@ -388,10 +388,10 @@ void XNS::Ethernet::Type::addNameMap(quint16 value, QString name) {
 	nameMap[value] = name;
 }
 QString XNS::Ethernet::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::Ethernet::Type::initNameMap() {
@@ -427,10 +427,10 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 // XNS::Routing::Type
 //
 QString XNS::Routing::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::Routing::Type::initNameMap() {
@@ -491,10 +491,10 @@ void XNS::Routing::toByteBuffer  (Buffer& bb) const {
 // XNS::PEX::Type
 //
 QString XNS::PEX::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::PEX::Type::initNameMap() {
@@ -530,10 +530,10 @@ void XNS::PEX::toByteBuffer  (Buffer& bb) const {
 // XNS::Error::Type
 //
 QString XNS::Error::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::Error::Type::initNameMap() {
@@ -580,10 +580,10 @@ void XNS::Error::toByteBuffer  (Buffer& bb) const {
 // XNS::Echo::Type
 //
 QString XNS::Echo::Type::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%04X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint16, QString> XNS::Echo::Type::initNameMap() {
@@ -615,10 +615,10 @@ void XNS::Echo::toByteBuffer  (Buffer& bb) const {
 // XNS::SPP::SST
 //
 QString XNS::SPP::SST::toString() const {
-	if (nameMap.contains(value)) {
-		return nameMap[value];
+	if (nameMap.contains(value())) {
+		return nameMap[value()];
 	} else {
-		return QString::asprintf("%02X", value);
+		return QString::asprintf("%d", value());
 	}
 }
 QMap<quint8, QString> XNS::SPP::SST::initNameMap() {
@@ -641,7 +641,7 @@ QString XNS::SPP::Control::toString() const {
 	if (isSendAck())        list += "SEND_ACK";
 	if (isAttention())      list += "ATT";
 	if (isEndOfMessage())   list += "EOM";
-	if (value & BIT_UNUSED) list += QString::asprintf("UNUSED_%1X", value & BIT_UNUSED);
+	if (value() & BIT_UNUSED) list += QString::asprintf("UNUSED_%1X", value() & BIT_UNUSED);
 
 	return QString("{%1}").arg(list.join(" "));
 }

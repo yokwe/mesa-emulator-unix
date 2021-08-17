@@ -28,6 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
 //
 // Time.cpp
 //
@@ -47,22 +48,13 @@ QString XNS::Time::XNSTime::toString() const {
 	return dateTime.toString("yyyy-MM-dd hh:mm:ss");
 }
 
+
 //
 // XNS::Time::Version
 //
 QString XNS::Time::Version::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
+	return QString::asprintf("%d", value());
 }
-QMap<quint16, QString> XNS::Time::Version::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[CURRENT]  = "CURRENT";
-	return ret;
-}
-QMap<quint16, QString> XNS::Time::Version::nameMap  = initNameMap();
 
 
 //
@@ -159,14 +151,64 @@ void XNS::Time::Response::toByteBuffer  (Buffer& bb) const {
 // XNS::Time
 //
 QString XNS::Time::toString() const {
-	// FIXME
-	return "";
+	if (version.isCurrent()) {
+		if (type == Type::REQUEST) {
+			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(std::get<struct Request>(body).toString());
+		} else if (type == Type::RESPONSE) {
+			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(std::get<struct Response>(body).toString());
+		} else {
+			logger.error("Unexpected");
+			logger.error("  type %d", type.value());
+			ERROR();
+		}
+	} else {
+		logger.error("Unexpected");
+		logger.error("  version %d", version.value());
+		ERROR();
+	}
 }
 void XNS::Time::fromByteBuffer(Buffer& bb) {
-	// FIXME
-	(void)bb;
+	FROM_BYTE_BUFFER(bb, version);
+	if (version.isCurrent()) {
+		FROM_BYTE_BUFFER(bb, type);
+		if (type == Type::REQUEST) {
+			struct Request request;
+			FROM_BYTE_BUFFER(bb, request);
+			body = request;
+		} else if (type == Type::RESPONSE) {
+			struct Response response;
+			FROM_BYTE_BUFFER(bb, response);
+			body = response;
+		} else {
+			logger.error("Unexpected");
+			logger.error("  type %d", type.value());
+			ERROR();
+		}
+	} else {
+		logger.error("Unexpected");
+		logger.error("  version %d", version.value());
+		ERROR();
+	}
 }
 void XNS::Time::toByteBuffer  (Buffer& bb) const {
-	// FIXME
-	(void)bb;
+	if (version.isCurrent()) {
+		TO_BYTE_BUFFER(bb, version);
+		TO_BYTE_BUFFER(bb, type);
+
+		if (type == Type::REQUEST) {
+			struct Request request = std::get<struct Request>(body);
+			TO_BYTE_BUFFER(bb, request);
+		} else if (type == Type::RESPONSE) {
+			struct Response response = std::get<struct Response>(body);
+			TO_BYTE_BUFFER(bb, response);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  type %d", type.value());
+			ERROR();
+		}
+	} else {
+		logger.error("Unexpected");
+		logger.error("  version %d", version.value());
+		ERROR();
+	}
 }

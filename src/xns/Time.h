@@ -61,7 +61,7 @@ namespace XNS {
 			//   Difference between above 2 dates are 366 + 365 = 731 days.
 			static const quint32 EPOCH_DIFF = (quint32)EARLIEST_TIME + (quint32)(731 * 60 * 60 * 24);
 
-			// unix use qint64 as seconds since eopch
+			// unix use qint64 as seconds since epoch
 			static quint32 toXNSTime(qint64 unixTime) {
 				return (quint32)(unixTime + EPOCH_DIFF);
 			}
@@ -83,7 +83,10 @@ namespace XNS {
 			}
 			// operator quint32() get value and returns as unix time
 			operator quint32() {
-				return Util::toUnixTime(value());
+				return (quint32)toUnixTime(value());
+			}
+			operator qint64() {
+				return toUnixTime(value());
 			}
 
 			QString toString() const;
@@ -101,10 +104,11 @@ namespace XNS {
 				return newValue;
 			}
 
+			bool isCurrent() const {
+				return value() == CURRENT;
+			}
+
 			QString toString() const;
-		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
 		};
 
 		class Type : public UINT16 {
@@ -162,8 +166,16 @@ namespace XNS {
 			static QMap<quint16, QString> initNameMap();
 		};
 
-		struct Request {
-			// nothing
+		struct Request : public Base {
+			QString toString() const {
+				return "";
+			}
+			void fromByteBuffer(Buffer& bb) {
+				(void)bb;
+			}
+			void toByteBuffer  (Buffer& bb) const {
+				(void)bb;
+			}
 		};
 		struct Response : public Base {
 			XNSTime   time;             // current time between 12:00:00, 1 Jan. 1968 and 6:28:23, 6 Feb. 2104 inclusive

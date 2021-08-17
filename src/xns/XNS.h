@@ -33,8 +33,7 @@
 // XNS.h
 //
 
-#ifndef XNS_H__
-#define XNS_H__
+#pragma once
 
 #include <QtCore>
 
@@ -486,5 +485,3 @@ namespace XNS {
 	};
 
 }
-
-#endif

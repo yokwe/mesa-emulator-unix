@@ -30,7 +30,7 @@
 
 
 //
-// Config.h
+// Config.cpp
 //
 
 #include "../util/Util.h"

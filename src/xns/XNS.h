@@ -39,6 +39,7 @@
 
 #include "../util/Network.h"
 #include "../util/ByteBuffer.h"
+#include "../util/NameMap.h"
 
 #include "Config.h"
 
@@ -55,46 +56,6 @@ namespace XNS {
 	//
 	// NameMap
 	//
-
-	template <typename T>
-	class NameMap {
-	public:
-		NameMap(std::function<QString(quint16)> f, std::initializer_list<std::pair<T, QString>> list) {
-			toStringDefault = f;
-			map = list;
-		}
-
-		void add(T value, QString name) {
-			map[value] = name;
-		}
-		QString toString(T value) {
-			if (map.contains(value)) {
-				return map[value];
-			} else {
-				return toStringDefault(value);
-			}
-		}
-
-	protected:
-		std::function<QString(quint16)> toStringDefault;
-
-	private:
-		QMap<T, QString> map;
-	};
-
-	QString toString8u(quint8 value);
-	QString toString16u(quint16 value);
-	QString toString32u(quint32 value);
-	QString toString64u(quint64 value);
-
-	QString toString8X(quint8 value);
-	QString toString16X(quint16 value);
-	QString toString32X(quint32 value);
-	QString toString64X(quint64 value);
-
-	QString toString16X04(quint16 value);
-
-
 
 	Config loadConfig(QString path);
 
@@ -124,7 +85,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		class Type : public UINT8 {
@@ -146,7 +107,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint8> nameMap;
+			static NameMap::Map<quint8> nameMap;
 		};
 
 		class Net : public UINT32 {
@@ -169,7 +130,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint32> nameMap;
+			static NameMap::Map<quint32> nameMap;
 		};
 
 		class Host : public UINT48 {
@@ -206,7 +167,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint64> nameMap;
+			static NameMap::Map<quint64> nameMap;
 		};
 
 		class Socket : public UINT16 {
@@ -232,7 +193,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 
@@ -301,7 +262,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		IDP::Host dst;
@@ -338,7 +299,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		class Entry : public Base {
@@ -387,7 +348,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		Type  type;
@@ -437,7 +398,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		Type   type;
@@ -473,7 +434,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		UINT32 id;
@@ -516,7 +477,7 @@ namespace XNS {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap<quint16> nameMap;
+			static NameMap::Map<quint16> nameMap;
 		};
 		class Control : public UINT8 {
 		public:

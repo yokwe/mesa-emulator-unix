@@ -60,58 +60,28 @@ QString XNS::Time::Version::toString() const {
 //
 // XNS::Time::Type
 //
-QString XNS::Time::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Time::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[REQUEST]  = "REQUEST";
-	ret[RESPONSE] = "RESPONSE";
-	return ret;
-}
-QMap<quint16, QString> XNS::Time::Type::nameMap  = initNameMap();
+NameMap::Map<quint16> XNS::Time::Type::nameMap(NameMap::toString16u, {
+	{REQUEST,  "REQUEST"},
+	{RESPONSE, "RESPONSE"},
+});
 
 
 //
 // XNS::Time::Direction
 //
-QString XNS::Time::Direction::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Time::Direction::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[WEST] = "WEST";
-	ret[EAST] = "EAST";
-	return ret;
-}
-QMap<quint16, QString> XNS::Time::Direction::nameMap  = initNameMap();
+NameMap::Map<quint16> XNS::Time::Direction::nameMap(NameMap::toString16u, {
+	{WEST, "WEST"},
+	{EAST, "EAST"},
+});
 
 
 //
 // XNS::Time::Tolerance
 //
-QString XNS::Time::Tolerance::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Time::Tolerance::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[UNKNOWN] = "UNKNOWN";
-	ret[MILLI]   = "MILLI";
-	return ret;
-}
-QMap<quint16, QString> XNS::Time::Tolerance::nameMap  = initNameMap();
+NameMap::Map<quint16> XNS::Time::Tolerance::nameMap(NameMap::toString16u, {
+	{UNKNOWN, "UNKNOWN"},
+	{MILLI,   "MILLI"},
+});
 
 
 //

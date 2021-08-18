@@ -44,38 +44,6 @@ static const Logger logger = Logger::getLogger("xns");
 //
 // XNS
 //
-
-QString XNS::toString8u(quint8 value) {
-	return QString::asprintf("%u", value);
-}
-QString XNS::toString16u(quint16 value) {
-	return QString::asprintf("%u", value);
-}
-QString XNS::toString32u(quint32 value) {
-	return QString::asprintf("%u", value);
-}
-QString XNS::toString64u(quint64 value) {
-	return QString::asprintf("%llu", value);
-}
-
-QString XNS::toString8X(quint8 value) {
-	return QString::asprintf("%X", value);
-}
-QString XNS::toString16X(quint16 value) {
-	return QString::asprintf("%X", value);
-}
-QString XNS::toString32X(quint32 value) {
-	return QString::asprintf("%X", value);
-}
-QString XNS::toString64X(quint64 value) {
-	return QString::asprintf("%llX", value);
-}
-
-QString XNS::toString16X04(quint16 value) {
-	return QString::asprintf("%04X", value);
-}
-
-
 static XNS::Config config;
 
 XNS::Config XNS::loadConfig(QString path) {
@@ -106,13 +74,13 @@ XNS::Config XNS::loadConfig(QString path) {
 //
 // XNS::IDP::Checksum
 //
-XNS::NameMap<quint16> XNS::IDP::Checksum::nameMap(toString16X04, {{NOCHECK, "NOCHECK"}});
+NameMap::Map<quint16> XNS::IDP::Checksum::nameMap(NameMap::toString16X04, {{NOCHECK, "NOCHECK"}});
 
 
 //
 // XNS::IDP::Type
 //
-XNS::NameMap<quint8> XNS::IDP::Type::nameMap(toString8u, {
+NameMap::Map<quint8> XNS::IDP::Type::nameMap(NameMap::toString8u, {
 	{ROUTING, "ROUTING"},
 	{ECHO,    "ECHO"},
 	{ERROR_,  "ERROR"},
@@ -125,7 +93,7 @@ XNS::NameMap<quint8> XNS::IDP::Type::nameMap(toString8u, {
 //
 // XNS::IDP::Net
 //
-XNS::NameMap<quint32> XNS::IDP::Net::nameMap(toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
+NameMap::Map<quint32> XNS::IDP::Net::nameMap(NameMap::toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
@@ -200,13 +168,13 @@ quint64 XNS::IDP::Host::fromString(QString string) {
 	ERROR();
 }
 
-XNS::NameMap<quint64> XNS::IDP::Host::nameMap(toString64X, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
+NameMap::Map<quint64> XNS::IDP::Host::nameMap(NameMap::toString64X, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
 // XNS::IDP::Socket
 //
-XNS::NameMap<quint16> XNS::IDP::Socket::nameMap(toString16X04, {
+NameMap::Map<quint16> XNS::IDP::Socket::nameMap(NameMap::toString16X04, {
 	{ROUTING,   "ROUTING"},
 	{ECHO,      "ECHO"},
 	{ERROR_,    "ERROR"},
@@ -342,7 +310,7 @@ quint16 XNS::IDP::computeChecksum(const ByteBuffer::Buffer& bb) {
 //
 // XNS::Ethernet::Type
 //
-XNS::NameMap<quint16> XNS::Ethernet::Type::nameMap(toString16X04, {{XNS, "XNS"}, {IP, "IP"}});
+NameMap::Map<quint16> XNS::Ethernet::Type::nameMap(NameMap::toString16X04, {{XNS, "XNS"}, {IP, "IP"}});
 
 
 //
@@ -368,7 +336,7 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Routing::Type
 //
-XNS::NameMap<quint16> XNS::Routing::Type::nameMap(toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
+NameMap::Map<quint16> XNS::Routing::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
 
 
 //
@@ -419,7 +387,7 @@ void XNS::Routing::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::PEX::Type
 //
-XNS::NameMap<quint16> XNS::PEX::Type::nameMap(toString16u, {
+NameMap::Map<quint16> XNS::PEX::Type::nameMap(NameMap::toString16u, {
 	{UNSPEC,    "UNSPEC"},
 	{TIME,      "TIME"},
 	{CHS,       "CHS"},
@@ -448,7 +416,7 @@ void XNS::PEX::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Error::Type
 //
-XNS::NameMap<quint16> XNS::Error::Type::nameMap(toString16u, {
+NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
 	{UNSPEC,                "UNSPEC"},
 	{BAD_CHECKSUM,          "BAD_CHECKSUM"},
 	{NO_SOCKET,             "NO_SOCKET"},
@@ -488,7 +456,7 @@ void XNS::Error::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Echo::Type
 //
-XNS::NameMap<quint16> XNS::Echo::Type::nameMap(toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
+NameMap::Map<quint16> XNS::Echo::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
 
 
 //
@@ -510,7 +478,7 @@ void XNS::Echo::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::SPP::SST
 //
-XNS::NameMap<quint16> XNS::SPP::SST::nameMap(toString16u, {
+NameMap::Map<quint16> XNS::SPP::SST::nameMap(NameMap::toString16u, {
 	{DATA,         "DATA"},
 	{BULK,         "BULK"},
 	{CLOSE,        "CLOSE"},

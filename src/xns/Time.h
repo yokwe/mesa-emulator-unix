@@ -123,10 +123,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		class Direction : public UINT16 {
@@ -141,10 +145,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		class Tolerance : public UINT16 {
@@ -159,11 +167,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
-			static void addNameMap(quint16 value, QString name);
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap::Map<quint16> nameMap;
 		};
 
 		struct Request : public Base {

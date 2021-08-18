@@ -177,7 +177,8 @@ namespace XNS {
 			static NameMap::Map<quint16> nameMap;
 		};
 
-		struct Response : public Base {
+		class Response : public Base {
+		public:
 			XNSTime   time;             // current time between 12:00:00, 1 Jan. 1968 and 6:28:23, 6 Feb. 2104 inclusive
 			Direction offsetDirection;  // east or west of prime meridian
 			UINT16    offsetHours;
@@ -197,7 +198,7 @@ namespace XNS {
 		Version   version;
 		Type      type;
 
-		std::variant<std::monostate, struct Response> body;
+		std::variant<std::monostate, class Response> body;
 
 		QString toString() const;
 

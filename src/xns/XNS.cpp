@@ -45,6 +45,37 @@ static const Logger logger = Logger::getLogger("xns");
 // XNS
 //
 
+QString XNS::toString8u(quint8 value) {
+	return QString::asprintf("%u", value);
+}
+QString XNS::toString16u(quint16 value) {
+	return QString::asprintf("%u", value);
+}
+QString XNS::toString32u(quint32 value) {
+	return QString::asprintf("%u", value);
+}
+QString XNS::toString64u(quint64 value) {
+	return QString::asprintf("%llu", value);
+}
+
+QString XNS::toString8X(quint8 value) {
+	return QString::asprintf("%X", value);
+}
+QString XNS::toString16X(quint16 value) {
+	return QString::asprintf("%X", value);
+}
+QString XNS::toString32X(quint32 value) {
+	return QString::asprintf("%X", value);
+}
+QString XNS::toString64X(quint64 value) {
+	return QString::asprintf("%llX", value);
+}
+
+QString XNS::toString16X04(quint16 value) {
+	return QString::asprintf("%04X", value);
+}
+
+
 static XNS::Config config;
 
 XNS::Config XNS::loadConfig(QString path) {
@@ -75,70 +106,26 @@ XNS::Config XNS::loadConfig(QString path) {
 //
 // XNS::IDP::Checksum
 //
-void XNS::IDP::Checksum::addNameMap(quint16 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::IDP::Checksum::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%04X", value());
-	}
-}
-QMap<quint16, QString> XNS::IDP::Checksum::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[NOCHECK]  = "NOCHECK";
-	return ret;
-}
-QMap<quint16, QString> XNS::IDP::Checksum::nameMap  = initNameMap();
+XNS::NameMap<quint16> XNS::IDP::Checksum::nameMap(toString16X04, {{NOCHECK, "NOCHECK"}});
 
 
 //
 // XNS::IDP::Type
 //
-void XNS::IDP::Type::addNameMap(quint8 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::IDP::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint8, QString> XNS::IDP::Type::initNameMap() {
-	QMap<quint8, QString> ret;
-	ret[ROUTING] = "ROUTING";
-	ret[ECHO]    = "ECHO";
-	ret[ERROR_]  = "ERROR";
-	ret[PEX]     = "PEX";
-	ret[SPP]     = "SPP";
-	ret[BOOT]    = "BOOT";
-	return ret;
-}
-QMap<quint8,  QString> XNS::IDP::Type::nameMap      = initNameMap();
+XNS::NameMap<quint8> XNS::IDP::Type::nameMap(toString8u, {
+	{ROUTING, "ROUTING"},
+	{ECHO,    "ECHO"},
+	{ERROR_,  "ERROR"},
+	{PEX,     "PEX"},
+	{SPP,     "SPP"},
+	{BOOT,    "BOOT"}
+});
 
 
 //
 // XNS::IDP::Net
 //
-void XNS::IDP::Net::addNameMap(quint32 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::IDP::Net::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint32, QString> XNS::IDP::Net::initNameMap() {
-	QMap<quint32, QString> ret;
-	ret[ALL]     = "ALL";
-	ret[UNKNOWN] = "UNKNOWN";
-	return ret;
-}
-QMap<quint32, QString> XNS::IDP::Net::nameMap       = initNameMap();
+XNS::NameMap<quint32> XNS::IDP::Net::nameMap(toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
@@ -213,62 +200,33 @@ quint64 XNS::IDP::Host::fromString(QString string) {
 	ERROR();
 }
 
-void XNS::IDP::Host::addNameMap(quint64 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::IDP::Host::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%llX", value());
-	}
-}
-QMap<quint64, QString> XNS::IDP::Host::initNameMap() {
-	QMap<quint64, QString> ret;
-	ret[ALL]     = "ALL";
-	ret[UNKNOWN] = "UNKNOWN";
-	return ret;
-}
-QMap<quint64, QString> XNS::IDP::Host::nameMap      = initNameMap();
+XNS::NameMap<quint64> XNS::IDP::Host::nameMap(toString64X, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
 // XNS::IDP::Socket
 //
-void XNS::IDP::Socket::addNameMap(quint16 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::IDP::Socket::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::IDP::Socket::initNameMap() {
-	QMap<quint16, QString> ret;
-	ret[ROUTING]  = "ROUTING";
-	ret[ECHO]      = "ECHO";
-	ret[ERROR_]    = "ERROR";
-	ret[ENVOY]     = "ENVOYE";
-	ret[COURIER]   = "COURIER";
-	ret[CHS_OLD]   = "CHS_OLD";
-	ret[TIME]      = "TIME";
-	ret[BOOT]      = "BOOT";
-	ret[DIAG]      = "DIAG";
+XNS::NameMap<quint16> XNS::IDP::Socket::nameMap(toString16X04, {
+	{ROUTING,   "ROUTING"},
+	{ECHO,      "ECHO"},
+	{ERROR_,    "ERROR"},
+	{ENVOY,     "ENVOYE"},
+	{COURIER,   "COURIER"},
+	{CHS_OLD,   "CHS_OLD"},
+	{TIME,      "TIME"},
+	{BOOT,      "BOOT"},
+	{DIAG,      "DIAG"},
 
-	ret[CHS]       = "CHS";
-	ret[AUTH]      = "AUTH";
-	ret[MAIL]      = "MAIL";
-	ret[NETEXEC]   = "NETEXEC";
-	ret[WSINFO]    = "WSINFO";
-	ret[BINDING]   = "BINDING";
+	{CHS,       "CHS"},
+	{AUTH,      "AUTH"},
+	{MAIL,      "MAIL"},
+	{NETEXEC,   "NETEXEC"},
+	{WSINFO,    "WSINFO"},
+	{BINDING,   "BINDING"},
 
-	ret[GERM]      = "GERM";
-	ret[TELEDEBUG] = "TELEDEBUG";
-	return ret;
-}
-QMap<quint16, QString> XNS::IDP::Socket::nameMap    = initNameMap();
+	{GERM,      "GERM"},
+	{TELEDEBUG, "TELEDEBUG"},
+});
 
 
 //
@@ -276,7 +234,7 @@ QMap<quint16, QString> XNS::IDP::Socket::nameMap    = initNameMap();
 //
 QString XNS::IDP::toString() const {
 	return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
-		arg(checksum_.toString()).
+		arg(checksum_.toString(), 4).
 		arg((quint16)length, 4).
 		arg((quint8)control, 2, 16, QChar('0')).
 		arg(type.toString()).
@@ -384,23 +342,7 @@ quint16 XNS::IDP::computeChecksum(const ByteBuffer::Buffer& bb) {
 //
 // XNS::Ethernet::Type
 //
-void XNS::Ethernet::Type::addNameMap(quint16 value, QString name) {
-	nameMap[value] = name;
-}
-QString XNS::Ethernet::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Ethernet::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	nameMap[XNS] = "XNS";
-	nameMap[IP]  = "IP";
-	return ret;
-}
-QMap<quint16, QString> XNS::Ethernet::Type::nameMap = initNameMap();
+XNS::NameMap<quint16> XNS::Ethernet::Type::nameMap(toString16X04, {{XNS, "XNS"}, {IP, "IP"}});
 
 
 //
@@ -426,20 +368,7 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Routing::Type
 //
-QString XNS::Routing::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Routing::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	nameMap[REQUEST]  = "REQUEST";
-	nameMap[RESPONSE] = "RESPONSE";
-	return ret;
-}
-QMap<quint16, QString> XNS::Routing::Type::nameMap = initNameMap();
+XNS::NameMap<quint16> XNS::Routing::Type::nameMap(toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
 
 
 //
@@ -490,22 +419,12 @@ void XNS::Routing::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::PEX::Type
 //
-QString XNS::PEX::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::PEX::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	nameMap[UNSPEC]    = "UNSPEC";
-	nameMap[TIME]      = "TIME";
-	nameMap[CHS]       = "CHS";
-	nameMap[TELEDEBUG] = "TELEDEBUG";
-	return ret;
-}
-QMap<quint16, QString> XNS::PEX::Type::nameMap = initNameMap();
+XNS::NameMap<quint16> XNS::PEX::Type::nameMap(toString16u, {
+	{UNSPEC,    "UNSPEC"},
+	{TIME,      "TIME"},
+	{CHS,       "CHS"},
+	{TELEDEBUG, "TELEDEBUG"},
+});
 
 
 //
@@ -529,33 +448,23 @@ void XNS::PEX::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Error::Type
 //
-QString XNS::Error::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Error::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	nameMap[UNSPEC]               = "UNSPEC";
-	nameMap[BAD_CHECKSUM]         = "BAD_CHECKSUM";
-	nameMap[NO_SOCKET]            = "NO_SOCKET";
-	nameMap[RESOURCE_LIMIT]       = "RESOURCE_LIMIT";
-	nameMap[LISTEN_REJECT]        = "LISTEN_REJECT";
-	nameMap[INVALID_PACKET_TYPE]  = "INVALID_PACKET_TYPE";
-	nameMap[PROTOCOL_VIOLATION]   = "PROTOCOL_VIOLATION";
+XNS::NameMap<quint16> XNS::Error::Type::nameMap(toString16u, {
+	{UNSPEC,                "UNSPEC"},
+	{BAD_CHECKSUM,          "BAD_CHECKSUM"},
+	{NO_SOCKET,             "NO_SOCKET"},
+	{RESOURCE_LIMIT,        "RESOURCE_LIMIT"},
+	{LISTEN_REJECT,         "LISTEN_REJECT"},
+	{INVALID_PACKET_TYPE,   "INVALID_PACKET_TYPE"},
+	{PROTOCOL_VIOLATION,    "PROTOCOL_VIOLATION"},
 
-	nameMap[UNSPECIFIED_IN_ROUTE] = "UNSPECIFIED_IN_ROUTE";
-	nameMap[INCONSISTENT]         = "INCONSISTENT";
-	nameMap[CANT_GET_THERE]       = "CANT_GET_THERE";
-	nameMap[EXCESS_HOPS]          = "EXCESS_HOPS";
-	nameMap[TOO_BIG]              = "TOO_BIG";
-	nameMap[CONGESTION_WARNING]   = "CONGESTION_WARNING";
-	nameMap[CONGESTION_DISCARD]   = "CONGESTION_DISCARD";
-	return ret;
-}
-QMap<quint16, QString> XNS::Error::Type::nameMap = initNameMap();
+	{UNSPECIFIED_IN_ROUTE,  "UNSPECIFIED_IN_ROUTE"},
+	{INCONSISTENT,          "INCONSISTENT"},
+	{CANT_GET_THERE,        "CANT_GET_THERE"},
+	{EXCESS_HOPS,           "EXCESS_HOPS"},
+	{TOO_BIG,               "TOO_BIG"},
+	{CONGESTION_WARNING,    "CONGESTION_WARNING"},
+	{CONGESTION_DISCARD,    "CONGESTION_DISCARD"},
+});
 
 
 //
@@ -579,20 +488,7 @@ void XNS::Error::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Echo::Type
 //
-QString XNS::Echo::Type::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint16, QString> XNS::Echo::Type::initNameMap() {
-	QMap<quint16, QString> ret;
-	nameMap[REQUEST] = "REQUEST";
-	nameMap[REPLY]   = "REPLY";
-	return ret;
-}
-QMap<quint16, QString> XNS::Echo::Type::nameMap = initNameMap();
+XNS::NameMap<quint16> XNS::Echo::Type::nameMap(toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
 
 
 //
@@ -614,22 +510,12 @@ void XNS::Echo::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::SPP::SST
 //
-QString XNS::SPP::SST::toString() const {
-	if (nameMap.contains(value())) {
-		return nameMap[value()];
-	} else {
-		return QString::asprintf("%d", value());
-	}
-}
-QMap<quint8, QString> XNS::SPP::SST::initNameMap() {
-	QMap<quint8, QString> ret;
-	nameMap[DATA]        = "DATA";
-	nameMap[BULK]        = "BULK";
-	nameMap[CLOSE]       = "CLOSE";
-	nameMap[CLOSE_REPLY] = "CLOSE_REPLY";
-	return ret;
-}
-QMap<quint8, QString> XNS::SPP::SST::nameMap = initNameMap();
+XNS::NameMap<quint16> XNS::SPP::SST::nameMap(toString16u, {
+	{DATA,         "DATA"},
+	{BULK,         "BULK"},
+	{CLOSE,        "CLOSE"},
+	{CLOSE_REPLY,  "CLOSE_REPLY"},
+});
 
 
 //
@@ -676,7 +562,3 @@ void XNS::SPP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, alloc);
 	TO_BYTE_BUFFER(bb, block);
 }
-
-
-
-

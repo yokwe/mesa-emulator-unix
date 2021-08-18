@@ -52,6 +52,50 @@ namespace XNS {
 	using ByteBuffer::Base;
 
 
+	//
+	// NameMap
+	//
+
+	template <typename T>
+	class NameMap {
+	public:
+		NameMap(std::function<QString(quint16)> f, std::initializer_list<std::pair<T, QString>> list) {
+			toStringDefault = f;
+			map = list;
+		}
+
+		void add(T value, QString name) {
+			map[value] = name;
+		}
+		QString toString(T value) {
+			if (map.contains(value)) {
+				return map[value];
+			} else {
+				return toStringDefault(value);
+			}
+		}
+
+	protected:
+		std::function<QString(quint16)> toStringDefault;
+
+	private:
+		QMap<T, QString> map;
+	};
+
+	QString toString8u(quint8 value);
+	QString toString16u(quint16 value);
+	QString toString32u(quint32 value);
+	QString toString64u(quint64 value);
+
+	QString toString8X(quint8 value);
+	QString toString16X(quint16 value);
+	QString toString32X(quint32 value);
+	QString toString64X(quint64 value);
+
+	QString toString16X04(quint16 value);
+
+
+
 	Config loadConfig(QString path);
 
 
@@ -73,11 +117,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			static void addNameMap(quint16 value, QString name);
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		class Type : public UINT8 {
@@ -92,11 +139,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			static void addNameMap(quint8 value, QString name);
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint8 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint8, QString> nameMap;
-			static QMap<quint8, QString> initNameMap();
+			static NameMap<quint8> nameMap;
 		};
 
 		class Net : public UINT32 {
@@ -112,11 +162,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			static void addNameMap(quint32 value, QString name);
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint32 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint32, QString> nameMap;
-			static QMap<quint32, QString> initNameMap();
+			static NameMap<quint32> nameMap;
 		};
 
 		class Host : public UINT48 {
@@ -130,9 +183,6 @@ namespace XNS {
 				value(newValue);
 				return newValue;
 			}
-
-			static void addNameMap(quint64 value, QString name);
-			QString toString() const;
 
 			static QString toOctalString(quint64 value);
 			static QString toDecimalString(quint64 value);
@@ -149,9 +199,14 @@ namespace XNS {
 				return toHexaDecimalString(value(), sep);
 			}
 
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint64 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint64, QString> nameMap;
-			static QMap<quint64, QString> initNameMap();
+			static NameMap<quint64> nameMap;
 		};
 
 		class Socket : public UINT16 {
@@ -170,11 +225,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			static void addNameMap(quint16 value, QString name);
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 
@@ -236,12 +294,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			static void addNameMap(quint16 value, QString name);
-			QString toString() const;
-
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		IDP::Host dst;
@@ -271,10 +331,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		class Entry : public Base {
@@ -316,10 +380,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		Type  type;
@@ -362,10 +430,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		Type   type;
@@ -394,10 +466,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint16, QString> nameMap;
-			static QMap<quint16, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 
 		UINT32 id;
@@ -433,10 +509,14 @@ namespace XNS {
 				return newValue;
 			}
 
-			QString toString() const;
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
 		private:
-			static QMap<quint8, QString> nameMap;
-			static QMap<quint8, QString> initNameMap();
+			static NameMap<quint16> nameMap;
 		};
 		class Control : public UINT8 {
 		public:

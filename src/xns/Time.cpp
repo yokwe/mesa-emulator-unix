@@ -123,7 +123,7 @@ void XNS::Time::Response::toByteBuffer  (Buffer& bb) const {
 QString XNS::Time::toString() const {
 	if (version.isCurrent()) {
 		if (type == Type::REQUEST) {
-			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(std::get<struct Request>(body).toString());
+			return QString("%1 %2").arg(version.toString()).arg(type.toString());
 		} else if (type == Type::RESPONSE) {
 			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(std::get<struct Response>(body).toString());
 		} else {
@@ -142,9 +142,7 @@ void XNS::Time::fromByteBuffer(Buffer& bb) {
 	if (version.isCurrent()) {
 		FROM_BYTE_BUFFER(bb, type);
 		if (type == Type::REQUEST) {
-			struct Request request;
-			FROM_BYTE_BUFFER(bb, request);
-			body = request;
+			// do notheng
 		} else if (type == Type::RESPONSE) {
 			struct Response response;
 			FROM_BYTE_BUFFER(bb, response);
@@ -166,8 +164,7 @@ void XNS::Time::toByteBuffer  (Buffer& bb) const {
 		TO_BYTE_BUFFER(bb, type);
 
 		if (type == Type::REQUEST) {
-			struct Request request = std::get<struct Request>(body);
-			TO_BYTE_BUFFER(bb, request);
+			// to nothing
 		} else if (type == Type::RESPONSE) {
 			struct Response response = std::get<struct Response>(body);
 			TO_BYTE_BUFFER(bb, response);

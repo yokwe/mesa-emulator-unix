@@ -53,10 +53,7 @@ namespace XNS {
 	using ByteBuffer::Base;
 
 
-	//
-	// NameMap
-	//
-
+	// Load config file
 	Config loadConfig(QString path);
 
 

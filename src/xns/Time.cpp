@@ -120,20 +120,41 @@ void XNS::Time::Response::toByteBuffer  (Buffer& bb) const {
 //
 // XNS::Time
 //
+void XNS::Time::set(const Response& newValue) {
+	if (type == Type::RESPONSE) {
+		body = newValue;
+	} else {
+		logger.error("Unexpected");
+		logger.error("  type %s", type.toString());
+		ERROR();
+	}
+}
+void XNS::Time::get(Response& newValue) const {
+	if (type == Type::RESPONSE) {
+		newValue = std::get<Response>(body);
+	} else {
+		logger.error("Unexpected");
+		logger.error("  type %s", type.toString());
+		ERROR();
+	}
+}
+
 QString XNS::Time::toString() const {
 	if (version.isCurrent()) {
 		if (type == Type::REQUEST) {
 			return QString("%1 %2").arg(version.toString()).arg(type.toString());
 		} else if (type == Type::RESPONSE) {
-			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(std::get<class Response>(body).toString());
+			Response response;
+			get(response);
+			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(response.toString());
 		} else {
 			logger.error("Unexpected");
-			logger.error("  type %d", type.value());
+			logger.error("  type %s", type.toString());
 			ERROR();
 		}
 	} else {
 		logger.error("Unexpected");
-		logger.error("  version %d", version.value());
+		logger.error("  version %s", version.toString());
 		ERROR();
 	}
 }
@@ -144,17 +165,17 @@ void XNS::Time::fromByteBuffer(Buffer& bb) {
 		if (type == Type::REQUEST) {
 			// do notheng
 		} else if (type == Type::RESPONSE) {
-			class Response response;
+			Response response;
 			FROM_BYTE_BUFFER(bb, response);
-			body = response;
+			set(response);
 		} else {
 			logger.error("Unexpected");
-			logger.error("  type %d", type.value());
+			logger.error("  type %s", type.toString());
 			ERROR();
 		}
 	} else {
 		logger.error("Unexpected");
-		logger.error("  version %d", version.value());
+		logger.error("  version %s", version.toString());
 		ERROR();
 	}
 }
@@ -166,16 +187,17 @@ void XNS::Time::toByteBuffer  (Buffer& bb) const {
 		if (type == Type::REQUEST) {
 			// to nothing
 		} else if (type == Type::RESPONSE) {
-			class Response response = std::get<class Response>(body);
+			Response response;
+			get(response);
 			TO_BYTE_BUFFER(bb, response);
 		} else {
 			logger.error("Unexpected");
-			logger.error("  type %d", type.value());
+			logger.error("  type %s", type.toString());
 			ERROR();
 		}
 	} else {
 		logger.error("Unexpected");
-		logger.error("  version %d", version.value());
+		logger.error("  version %s", version.toString());
 		ERROR();
 	}
 }

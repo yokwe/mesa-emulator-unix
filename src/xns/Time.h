@@ -197,8 +197,10 @@ namespace XNS {
 
 		Version   version;
 		Type      type;
+		std::variant<std::monostate, Response> body;
 
-		std::variant<std::monostate, class Response> body;
+		void set(const Response& newValue);
+		void get(Response& newValue) const;
 
 		QString toString() const;
 

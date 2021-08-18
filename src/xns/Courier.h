@@ -130,6 +130,7 @@ namespace XNS {
 			void toByteBuffer  (Buffer& bb) const;
 		};
 
+		// VersionRange:  TYPE = RECORD [low, high: CARDINAL];
 		class VersionRange : public Base {
 		public:
 			UINT16 low;
@@ -142,13 +143,11 @@ namespace XNS {
 			void toByteBuffer  (Buffer& bb) const;
 		};
 
-
-//		Protocol2Body: TYPE = CHOICE MessageType OF {
-//		    call   => RECORD [transaction, program, version, procedure: CARDINAL],
-//		    reject => RECORD [transaction: CARDINAL, reject: RejectCode],
-//		    return => RECORD [transaction: CARDINAL],
-//		    abort  => RECORD [transaction: CARDINAL, abort: CARDINAL]};
-
+		// Protocol2Body: TYPE = CHOICE MessageType OF {
+		//   call   => RECORD [transaction, program, version, procedure: CARDINAL],
+		//   reject => RECORD [transaction: CARDINAL, reject: RejectCode],
+		//   return => RECORD [transaction: CARDINAL],
+		//   abort  => RECORD [transaction: CARDINAL, abort: CARDINAL]};
 		class Protocol2Body : public Base {
 		public:
 			class CallBody : public Base {
@@ -200,22 +199,15 @@ namespace XNS {
 			MessageType type;
 			std::variant<std::monostate, class CallBody, class RejectBody, class ReturnBody, class AbortBody> body;
 
-			QString toString() const;
+			void get(CallBody&   newValue) const;
+			void get(RejectBody& newValue) const;
+			void get(ReturnBody& newValue) const;
+			void get(AbortBody&  newValue) const;
 
-			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
-		};
-
-
-//		RejectBody: TYPE = CHOICE RejectCode OF {
-//		    noSuchProgramNumber, noSuchProcedureValue, invalidArguments => RECORD [],
-//		    noSuchVersionNumber => RECORD [range: VersionRange]
-//		};
-		class RejectBody : public Base {
-		public:
-			RejectCode code;
-			std::variant<std::monostate, struct VersionRange> body;
+			void set(const CallBody&   newValue);
+			void set(const RejectBody& newValue);
+			void set(const ReturnBody& newValue);
+			void set(const AbortBody&  newValue);
 
 			QString toString() const;
 
@@ -225,19 +217,17 @@ namespace XNS {
 		};
 
 
-
-//		Protocol3Body: TYPE = CHOICE type: MessageType OF {
-//		    call   => RECORD [transaction: CARDINAL,
-//		                      program:     LONG CARDINAL,
-//		                      version:     CARDINAL,
-//		                      procedure:   CARDINAL],
-//		    reject => RECORD [transaction: CARDINAL,
-//							  CHOICE code: RejectCode OF {
-//								    noSuchProgramNumber, noSuchProcedureValue, invalidArguments => RECORD [],
-//								    noSuchVersionNumber => RECORD [range: VersionRange]
-//								}],
-//		    return => RECORD [transaction: CARDINAL],
-//		    abort  => RECORD [transaction: CARDINAL, abort: CARDINAL]};
+		// Protocol3Body: TYPE = CHOICE type: MessageType OF {
+		//   call   => RECORD [transaction: CARDINAL,
+		//		               program:     LONG CARDINAL,
+		//		               version:     CARDINAL,
+		//		               procedure:   CARDINAL],
+		//   reject => RECORD [transaction: CARDINAL,
+		//                     CHOICE code: RejectCode OF {
+		//                              noSuchProgramNumber, noSuchProcedureValue, invalidArguments => RECORD [],
+		//								noSuchVersionNumber => RECORD [range: VersionRange]}],
+		//   return => RECORD [transaction: CARDINAL],
+		//   abort  => RECORD [transaction: CARDINAL, abort: CARDINAL]};
 		class Protocol3Body : public Base {
 		public:
 			class CallBody : public Base {
@@ -257,13 +247,10 @@ namespace XNS {
 			public:
 				UINT16     transaction;
 				RejectCode code;
+				std::variant<std::monostate, VersionRange> body;
 
-//				CHOICE rejectCode: RejectCode OF {
-//					noSuchProgramNumber, noSuchProcedureValue, invalidArguments => RECORD [],
-//					noSuchVersionNumber => RECORD [range: VersionRange]
-//				}
-
-				std::variant<std::monostate, struct VersionRange> body;
+				void get(VersionRange&  newValue)  const;
+				void set(const VersionRange&   newValue);
 
 				QString toString() const;
 
@@ -296,6 +283,16 @@ namespace XNS {
 			MessageType type;
 			std::variant<std::monostate, class CallBody, class RejectBody, class ReturnBody, class AbortBody> body;
 
+			void get(CallBody&   newValue) const;
+			void get(RejectBody& newValue) const;
+			void get(ReturnBody& newValue) const;
+			void get(AbortBody&  newValue) const;
+
+			void set(const CallBody&   newValue);
+			void set(const RejectBody& newValue);
+			void set(const ReturnBody& newValue);
+			void set(const AbortBody&  newValue);
+
 			QString toString() const;
 
 			// ByteBuffer::Base
@@ -313,6 +310,12 @@ namespace XNS {
 		public:
 			ProtocolType type;
 			std::variant<std::monostate, class Protocol2Body, class Protocol3Body> body;
+
+			void get(Protocol2Body& newValue) const;
+			void get(Protocol3Body& newValue) const;
+
+			void set(const Protocol2Body& newValue);
+			void set(const Protocol3Body& newValue);
 
 			QString toString() const;
 

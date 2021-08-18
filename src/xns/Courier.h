@@ -48,6 +48,29 @@ namespace XNS {
 	using ByteBuffer::Base;
 
 	namespace Courier {
+
+		class Program {
+		public:
+			static void load(QString path);
+			static QString toStrign(quint32 program, quint16 version, quint16 procedure);
+
+			class Procedure {
+			public:
+				int     procedure;
+				QString name;
+			};
+
+			int     program;
+			int     version;
+			QString programName;
+
+			QList<Procedure> ProcedureList;
+
+		private:
+			static QList<Program> programList;
+		};
+
+
 		class ProtocolType : public UINT16 {
 		public:
 			enum Value : quint16 {
@@ -216,7 +239,6 @@ namespace XNS {
 			void toByteBuffer  (Buffer& bb) const;
 		};
 
-
 		// Protocol3Body: TYPE = CHOICE type: MessageType OF {
 		//   call   => RECORD [transaction: CARDINAL,
 		//		               program:     LONG CARDINAL,
@@ -338,6 +360,7 @@ namespace XNS {
 			void fromByteBuffer(Buffer& bb);
 			void toByteBuffer  (Buffer& bb) const;
 		};
+
 	}
 
 }

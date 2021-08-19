@@ -95,14 +95,12 @@ void testNetwork() {
 
 				XNS::Ethernet ethernet;
 				FROM_BYTE_BUFFER(e, ethernet);
+				ByteBuffer::Buffer level1 = ethernet.block.toBuffer();
 
 				// Check enternet.type
 				// Even if BPF filter is set, first packet can be not XNS packet
 				if (ethernet.type == XNS::Ethernet::Type::XNS) {
-					ByteBuffer::Buffer level1 = ethernet.block.toBuffer();
-
 					XNS::IDP idp;
-
 					FROM_BYTE_BUFFER(level1, idp);
 					ByteBuffer::Buffer level2 = idp.block.toBuffer();
 
@@ -112,54 +110,48 @@ void testNetwork() {
 					if (idp.type == XNS::IDP::Type::RIP) {
 						XNS::RIP rip;
 						FROM_BYTE_BUFFER(level2, rip);
+
 						logger.info("        RIP  %s", rip.toString());
 					} else if (idp.type == XNS::IDP::Type::ERROR_) {
 						XNS::Error error;
 						FROM_BYTE_BUFFER(level2, error);
+						ByteBuffer::Buffer level3 = error.block.toBuffer();
+
 						logger.info("        ERROR  %s", error.toString());
+						logger.info("            %s", level3.toString());
 					} else if (idp.type == XNS::IDP::Type::ECHO) {
 						XNS::Echo echo;
 						FROM_BYTE_BUFFER(level2, echo);
-						logger.info("        ERROR  %s", echo.toString());
+
+						logger.info("        ECHO   %s", echo.toString());
 					} else if (idp.type == XNS::IDP::Type::PEX) {
 						XNS::PEX pex;
 						FROM_BYTE_BUFFER(level2, pex);
+						ByteBuffer::Buffer level3 = pex.block.toBuffer();
+
 						logger.info("        PEX  %s", pex.toString());
 						if (pex.type == XNS::PEX::Type::TIME) {
-							ByteBuffer::Buffer level3 = pex.block.toBuffer();
 							XNS::Time time;
 							FROM_BYTE_BUFFER(level3, time);
+
 							logger.info("            TIME  %s", time.toString());
 						} else if (pex.type == XNS::PEX::Type::CHS) {
-							// File - APilot/15.0.1/Courier/Public/ExpeditedCourier.mesa
-							// Header: TYPE = MACHINE DEPENDENT RECORD [
-							//     protRange: CourierProtocol.ProtocolRange = [protocol3, protocol3],
-							//     body: CourierProtocol.Protocol3Body];
-							// 00030003000000000000000200020000
-							// 0003 0003 0000 0000 0000 0002 0003 0000
-							// protocolType = protocol3
-							// low = 0003
-							//      high = 0003
-							//           messageType = call
-							//                transaction
-							//                     prog = CHS
-							//                               version = VERSION 3
-							//                                    proc = RetrieveAddresses
-							ByteBuffer::Buffer level3 = pex.block.toBuffer();
 							XNS::Courier::ExpeditedCourier expeditedCourier;
 							FROM_BYTE_BUFFER(level3, expeditedCourier);
+
 							logger.info("            CHS   %s", expeditedCourier.toString());
 						} else {
-							logger.info("            %s", pex.block.toString());
-
+							logger.info("            %s", level3.toString());
 						}
 					} else if (idp.type == XNS::IDP::Type::SPP) {
 						XNS::SPP spp;
 						FROM_BYTE_BUFFER(level2, spp);
+						ByteBuffer::Buffer level3 = spp.block.toBuffer();
+
 						logger.info("        SPP  %s", spp.toString());
-						logger.info("            %s", spp.block.toString());
+						logger.info("            %s", level3.toString());
 					} else {
-						logger.info("        %4d  %s", level2.remaining(), level2.toString());
+						logger.info("        ????  %s", level2.toString());
 					}
 				}
 			}

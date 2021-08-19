@@ -54,7 +54,7 @@ namespace XNS {
 
 
 	// Load config file
-	Config loadConfig(QString path);
+	Config loadConfig(const QString& path);
 
 
 	class IDP : public Base {
@@ -170,7 +170,7 @@ namespace XNS {
 		class Socket : public UINT16 {
 		public:
 			enum Value : quint16 {
-				ROUTING = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
+				RIP = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
 				BOOT = 10, DIAG = 19,
 				CHS = 20, AUTH = 21, MAIL = 22, NETEXEC = 23, WSINFO = 24, BINDING = 28,
 				GERM = 35,

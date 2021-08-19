@@ -46,11 +46,11 @@ static const Logger logger = Logger::getLogger("xns");
 //
 static XNS::Config config;
 
-XNS::Config XNS::loadConfig(QString path) {
+XNS::Config XNS::loadConfig(const QString& path) {
 	QJsonObject jsonObject = JSONUtil::loadObject(path);
 	config.fromJsonObject(jsonObject);
 
-	// add name to
+	// add name to net and host
 	for(auto e: config.netList) {
 		XNS::IDP::Net::addNameMap(e.value, e.name);
 	}
@@ -58,7 +58,8 @@ XNS::Config XNS::loadConfig(QString path) {
 		XNS::IDP::Host::addNameMap(e.value, e.name);
 	}
 
-	logger.info("config localNet = %d", config.localNet);
+	logger.info("config interface = %s", config.interface);
+	logger.info("config localNet  = %d", config.localNet);
 	for(auto e: config.netList) {
 		logger.info("config net  %4d  %s", e.value, e.name);
 	}
@@ -174,7 +175,7 @@ NameMap::Map<quint64> XNS::IDP::Host::nameMap(NameMap::toString64X, {{ALL, "ALL"
 // XNS::IDP::Socket
 //
 NameMap::Map<quint16> XNS::IDP::Socket::nameMap(NameMap::toString16X04, {
-	{ROUTING,   "ROUTING"},
+	{RIP,       "RIP"},
 	{ECHO,      "ECHO"},
 	{ERROR_,    "ERROR"},
 	{ENVOY,     "ENVOYE"},

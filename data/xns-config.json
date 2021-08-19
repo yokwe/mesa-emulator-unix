@@ -1,4 +1,5 @@
 {
+	"interface": "epair0b",
 	"localNet": 1111,
 	"netList": [
         {"name": "LOCAL", "value": 1111}

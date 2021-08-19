@@ -71,12 +71,14 @@ QJsonObject XNS::Config::Host::toJsonObject() const {
 
 // XNS::Config
 void XNS::Config::fromJsonObject(const QJsonObject& jsonObject) {
+	GET_JSON_OBJECT(interface);
 	GET_JSON_OBJECT(localNet);
 	GET_JSON_OBJECT(netList);
 	GET_JSON_OBJECT(hostList);
 }
 QJsonObject XNS::Config::toJsonObject() const {
 	QJsonObject jsonObject;
+	SET_JSON_OBJECT(interface);
 	SET_JSON_OBJECT(localNet);
 	SET_JSON_OBJECT(netList);
 	SET_JSON_OBJECT(hostList);

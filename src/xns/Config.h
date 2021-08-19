@@ -58,7 +58,8 @@ namespace XNS {
 			QJsonObject toJsonObject() const;
 		};
 
-		int         localNet;  // for simple server
+		QString     interface; // name of interface
+		int         localNet;  // for XNSServer
 
 		QList<Net>  netList;
 		QList<Host> hostList;

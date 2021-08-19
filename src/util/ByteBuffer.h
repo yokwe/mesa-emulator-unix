@@ -76,6 +76,10 @@ namespace ByteBuffer {
 			return *this;
 		}
 
+		bool isNull() {
+			return myData == nullptr;
+		}
+
 		// Create subrange ByteBuffer
 		Buffer newBase(int newValue) {
 			Buffer ret(*this);
@@ -349,6 +353,10 @@ namespace ByteBuffer {
 
 		ByteBuffer::Buffer toBuffer() {
 			return buffer;
+		}
+
+		bool isNll() {
+			return buffer.isNull();
 		}
 
 		// ByteBuffer::Base

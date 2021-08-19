@@ -29,7 +29,7 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-server");
+static const Logger logger = Logger::getLogger("main");
 
 #include "../util/Network.h"
 #include "../util/BPF.h"
@@ -48,6 +48,9 @@ static const Logger logger = Logger::getLogger("xns-server");
 
 #include "../util/JSONUtil.h"
 #include "../util/ByteBuffer.h"
+
+#include "XNSServer.h"
+
 
 void testNetwork() {
 	{
@@ -77,6 +80,7 @@ void testNetwork() {
 		bpf.setHeaderComplete(0);
 		bpf.setReadTimeout(1);
 		bpf.setReadFilter(BPF::PROGRAM_XNS);
+		bpf.flush();
 
 		logger.info("bufferSize     = %d", bpf.getBufferSize());
 		logger.info("direction      = %d", bpf.getDirection());
@@ -161,6 +165,13 @@ void testNetwork() {
 	}
 }
 
+void testXNSServer() {
+	XNS::Server server;
+
+	server.init("tmp/run/xns-config.json");
+	server.run();
+
+}
 
 int main(int, char**) {
 	logger.info("START");
@@ -171,7 +182,8 @@ int main(int, char**) {
 
 	DEBUG_TRACE();
 
-	testNetwork();
+//	testNetwork();
+	testXNSServer();
 
 	logger.info("STOP");
 	return 0;

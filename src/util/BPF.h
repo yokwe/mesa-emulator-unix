@@ -57,31 +57,27 @@ public:
 	QList<ByteBuffer::Buffer> readData;
 
 	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
-	~BPF() { delete buffer; }
+	~BPF() { close(); }
 
 	// openDevice sets fd and path
-	void openDevice();
+	void open();
+	void close();
 
-	void open() {
-		openDevice();
-		bufferSize = getBufferSize();
-		buffer     = new quint8[bufferSize];
-	}
-	void close() {
-		if (0 <= fd) {
-			int ret;
-			LOG_SYSCALL(ret, ::close(fd))
-			fd = -1;
-		}
-		delete buffer;
-		buffer = 0;
-	}
-
+	// For Packet and ByteBuffer
 	void write(const Network::Packet& value);
-	const QList<ByteBuffer::Buffer>& read();
 	// read() returns QList<ByteBuffer> readData.
-	// Backing data of ByteBuffer is field buffer.
+	// Backing store of ByteBuffer is member variable buffer.
 	// Copy ByteBuffer to Network::Packet for later use.
+	const QList<ByteBuffer::Buffer>& read();
+
+
+	// for Network::Driver
+	// no error check
+	int  select  (quint32 timeout, int& opErrno);
+	int  transmit(quint8* data, quint32 dataLen, int& opErrno);
+	int  receive (quint8* data, quint32 dataLen, int& opErrno);
+	void discard ();
+
 
 	// BIOCGBLEN
 	//   Returns the required buffer length	for reads on bpf files

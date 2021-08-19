@@ -75,6 +75,35 @@ static struct bpf_program program_xns = {
 const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;
 
 
+void BPF::open() {
+	char tempPath[sizeof("/dev/bpf00")];
+	int  tempFD;
+
+	for(int i = 0; i < 99; i++) {
+		sprintf(tempPath, "/dev/bpf%d", i);
+		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
+		if (tempFD < 0) {
+			int opErrno = errno;
+			LOG_ERRNO(opErrno);
+			continue;
+		}
+		break;
+	}
+	path       = tempPath;
+	fd         = tempFD;
+	bufferSize = getBufferSize();
+	buffer     = new quint8[bufferSize];
+}
+void BPF::close() {
+	if (0 <= fd) {
+		int ret;
+		LOG_SYSCALL(ret, ::close(fd))
+		fd = -1;
+	}
+	delete buffer;
+	buffer = 0;
+}
+
 const QList<ByteBuffer::Buffer>& BPF::read() {
 	int validBufferLen;
 	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
@@ -96,29 +125,47 @@ const QList<ByteBuffer::Buffer>& BPF::read() {
 
 	return readData;
 }
-
-
-void BPF::openDevice() {
-	char tempPath[sizeof("/dev/bpf00")];
-	int  tempFD;
-
-	for(int i = 0; i < 99; i++) {
-		sprintf(tempPath, "/dev/bpf%d", i);
-		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
-		if (tempFD < 0) {
-			int opErrno = errno;
-			LOG_ERRNO(opErrno);
-			continue;
-		}
-		break;
-	}
-	path = tempPath;
-	fd   = tempFD;
-}
-
 void BPF::write(const Network::Packet& value) {
 	int ret;
 	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
+}
+
+// for Network::Driver
+// no error check
+int  BPF::select  (quint32 timeout, int& opErrno) {
+	(void)timeout;
+	opErrno = 0;
+	if (readData.isEmpty()) {
+		return getNonBlockingReadBytes();
+	} else {
+		return readData.first().limit();
+	}
+}
+int  BPF::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+	int ret;
+	LOG_SYSCALL2(ret, opErrno, ::send(fd, data, dataLen, 0));
+	return ret;
+}
+int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno) {
+	(void)dataLen;
+	opErrno = 0;
+	// if readData is empty, fill readData
+	if (readData.isEmpty()) read();
+
+	// Take first entry
+	ByteBuffer::Buffer bb = readData.first();
+	int len = bb.limit();
+	// copy bb to data
+	bb.read(0, len, data);
+	// remove first entry
+	readData.pop_back();
+	return len;
+}
+void BPF::discard() {
+	// clear readData
+	readData.clear();
+	// clear buffer
+	flush();
 }
 
 // BIOCGBLEN

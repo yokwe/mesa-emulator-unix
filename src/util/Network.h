@@ -104,11 +104,10 @@ namespace Network {
 
 	class Driver {
 	public:
-		virtual int select  (int& opErrno, quint32 timeout = 1) = 0; // returns return value of of select().  default timeout is 1 second
-		virtual int transmit(int& opErrno, Packet& packet) = 0; // returns return value of send()
-		virtual int receive (int& opErrno, Packet& packet) = 0; // returns return value of of recv()
-
-		// discard received packet
+		// no error checking
+		virtual int  select  (quint32 timeout, int& opErrno) = 0;
+		virtual int  transmit(quint8* data, quint32 dataLen, int& opErrno) = 0;
+		virtual int  receive (quint8* data, quint32 dataLen, int& opErrno) = 0;
 		virtual void discard() = 0;
 
 		Driver(const Device& device_) : device(device_), fd(0) {}

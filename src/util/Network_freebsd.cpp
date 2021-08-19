@@ -103,6 +103,10 @@ QList<Network::Device> Network::getDeviceList() {
 
 class FreeBSDDriver : public Network::Driver {
 public:
+	int  select  (quint32 timeout, int& opErrno) = 0;
+	int  transmit(quint8* data, quint32 dataLen, int& opErrno) = 0;
+	int  receive (quint8* data, quint32 dataLen, int& opErrno) = 0;
+
 	int select  (int& opError, quint32 timeout = 1); // returns return value of of select().  default timeout is 1 second
 	int transmit(int& opError, Network::Packet& data);   // returns return value of send()
 	int receive (int& opError, Network::Packet& data);   // returns return value of of recv()
@@ -122,7 +126,7 @@ public:
 	QString bpfPath;
 };
 
-int FreeBSDDriver::select  (int& opErrno, quint32 timeout) {
+int FreeBSDDriver::select  (quint32 timeout, int& opErrno) {
 	if (!list.empty()) {
 		return 1;
 	}
@@ -139,8 +143,8 @@ int FreeBSDDriver::select  (int& opErrno, quint32 timeout) {
 	opErrno = errno;
 	return ret;
 }
-int FreeBSDDriver::transmit(int& opErrno, Network::Packet& packet) {
-	int ret = ::send(fd, packet.data(), packet.limit(), 0);
+int FreeBSDDriver::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+	int ret = ::send(fd, data, dataLen, 0);
 	opErrno = errno;
 	return ret;
 }

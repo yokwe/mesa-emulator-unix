@@ -36,8 +36,15 @@ static const Logger logger = Logger::getLogger("xns-server");
 
 #include "../xns/Config.h"
 #include "../xns/XNS.h"
-#include "../xns/Time.h"
 #include "../xns/Courier.h"
+
+#include "../xns/RIP.h"
+#include "../xns/Error.h"
+#include "../xns/Echo.h"
+#include "../xns/SPP.h"
+#include "../xns/PEX.h"
+
+#include "../xns/Time.h"
 
 #include "../util/JSONUtil.h"
 #include "../util/ByteBuffer.h"
@@ -102,10 +109,10 @@ void testNetwork() {
 					logger.info("%s", ethernet.toString());
 					logger.info("    %s", idp.toString());
 
-					if (idp.type == XNS::IDP::Type::ROUTING) {
-						XNS::Routing routing;
-						FROM_BYTE_BUFFER(level2, routing);
-						logger.info("        ROUTING  %s", routing.toString());
+					if (idp.type == XNS::IDP::Type::RIP) {
+						XNS::RIP rip;
+						FROM_BYTE_BUFFER(level2, rip);
+						logger.info("        RIP  %s", rip.toString());
 					} else if (idp.type == XNS::IDP::Type::ERROR_) {
 						XNS::Error error;
 						FROM_BYTE_BUFFER(level2, error);

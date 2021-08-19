@@ -66,7 +66,6 @@ XNS::Config XNS::loadConfig(QString path) {
 		logger.info("config host %s  %llX  %s", XNS::IDP::Host::toHexaDecimalString(e.value, ":"), e.value, e.name);
 	}
 
-
 	return config;
 }
 
@@ -81,12 +80,12 @@ NameMap::Map<quint16> XNS::IDP::Checksum::nameMap(NameMap::toString16X04, {{NOCH
 // XNS::IDP::Type
 //
 NameMap::Map<quint8> XNS::IDP::Type::nameMap(NameMap::toString8u, {
-	{ROUTING, "ROUTING"},
-	{ECHO,    "ECHO"},
-	{ERROR_,  "ERROR"},
-	{PEX,     "PEX"},
-	{SPP,     "SPP"},
-	{BOOT,    "BOOT"}
+	{RIP,    "RIP"},
+	{ECHO,   "ECHO"},
+	{ERROR_, "ERROR"},
+	{PEX,    "PEX"},
+	{SPP,    "SPP"},
+	{BOOT,   "BOOT"}
 });
 
 
@@ -332,201 +331,3 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, block);
 }
 
-
-//
-// XNS::Routing::Type
-//
-NameMap::Map<quint16> XNS::Routing::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
-
-
-//
-// XNS::Routing::Entry
-//
-QString XNS::Routing::Entry::toString() const {
-	return QString("{%1 %2}").arg(net.toString()).arg((quint16)hop);
-}
-void XNS::Routing::Entry::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, net);
-	FROM_BYTE_BUFFER(bb, hop);
-}
-void XNS::Routing::Entry::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, net);
-	TO_BYTE_BUFFER(bb, hop);
-}
-
-
-//
-// XNS::Routing
-//
-QString XNS::Routing::toString() const {
-	QStringList list;
-	for(auto e: entryList) {
-		list += e.toString();
-	}
-	return QString("%1 %2").arg(type.toString()).arg(list.join(" "));
-}
-void XNS::Routing::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, type);
-
-	for(;;) {
-		if (bb.remaining() == 0) break;;
-
-		Entry entry;
-		FROM_BYTE_BUFFER(bb, entry);
-		entryList += entry;
-	}
-}
-void XNS::Routing::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, type);
-	for(auto e: entryList) {
-		TO_BYTE_BUFFER(bb, e);
-	}
-}
-
-
-//
-// XNS::PEX::Type
-//
-NameMap::Map<quint16> XNS::PEX::Type::nameMap(NameMap::toString16u, {
-	{UNSPEC,    "UNSPEC"},
-	{TIME,      "TIME"},
-	{CHS,       "CHS"},
-	{TELEDEBUG, "TELEDEBUG"},
-});
-
-
-//
-// XNS::PEX
-//
-QString XNS::PEX::toString() const {
-	return QString("%1 %2").arg(QString("%1").arg((quint32)id, 4, 16, QChar('0')).toUpper()).arg(type.toString());
-}
-void XNS::PEX::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, id);
-	FROM_BYTE_BUFFER(bb, type);
-	FROM_BYTE_BUFFER(bb, block);
-}
-void XNS::PEX::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, id);
-	TO_BYTE_BUFFER(bb, type);
-	TO_BYTE_BUFFER(bb, block);
-}
-
-
-//
-// XNS::Error::Type
-//
-NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
-	{UNSPEC,                "UNSPEC"},
-	{BAD_CHECKSUM,          "BAD_CHECKSUM"},
-	{NO_SOCKET,             "NO_SOCKET"},
-	{RESOURCE_LIMIT,        "RESOURCE_LIMIT"},
-	{LISTEN_REJECT,         "LISTEN_REJECT"},
-	{INVALID_PACKET_TYPE,   "INVALID_PACKET_TYPE"},
-	{PROTOCOL_VIOLATION,    "PROTOCOL_VIOLATION"},
-
-	{UNSPECIFIED_IN_ROUTE,  "UNSPECIFIED_IN_ROUTE"},
-	{INCONSISTENT,          "INCONSISTENT"},
-	{CANT_GET_THERE,        "CANT_GET_THERE"},
-	{EXCESS_HOPS,           "EXCESS_HOPS"},
-	{TOO_BIG,               "TOO_BIG"},
-	{CONGESTION_WARNING,    "CONGESTION_WARNING"},
-	{CONGESTION_DISCARD,    "CONGESTION_DISCARD"},
-});
-
-
-//
-// XNS::Error
-//
-QString XNS::Error::toString() const {
-	return QString("%1 %2 %3").arg(type.toString()).arg(QString("%1").arg((quint16)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
-}
-void XNS::Error::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, type);
-	FROM_BYTE_BUFFER(bb, param);
-	FROM_BYTE_BUFFER(bb, block);
-}
-void XNS::Error::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, type);
-	TO_BYTE_BUFFER(bb, param);
-	TO_BYTE_BUFFER(bb, block);
-}
-
-
-//
-// XNS::Echo::Type
-//
-NameMap::Map<quint16> XNS::Echo::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
-
-
-//
-// XNS::Echo
-//
-QString XNS::Echo::toString() const {
-	return QString("%1 %2").arg(type.toString()).arg(block.toString());
-}
-void XNS::Echo::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, type);
-	FROM_BYTE_BUFFER(bb, block);
-}
-void XNS::Echo::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, type);
-	TO_BYTE_BUFFER(bb, block);
-}
-
-
-//
-// XNS::SPP::SST
-//
-NameMap::Map<quint16> XNS::SPP::SST::nameMap(NameMap::toString16u, {
-	{DATA,         "DATA"},
-	{BULK,         "BULK"},
-	{CLOSE,        "CLOSE"},
-	{CLOSE_REPLY,  "CLOSE_REPLY"},
-});
-
-
-//
-// XNS::SPP::Control
-//
-QString XNS::SPP::Control::toString() const {
-	QStringList list;
-	if (isSystem())         list += "SYS";
-	if (isSendAck())        list += "SEND_ACK";
-	if (isAttention())      list += "ATT";
-	if (isEndOfMessage())   list += "EOM";
-	if (value() & BIT_UNUSED) list += QString::asprintf("UNUSED_%1X", value() & BIT_UNUSED);
-
-	return QString("{%1}").arg(list.join(" "));
-}
-
-
-//
-// XNS::SPP
-//
-QString XNS::SPP::toString() const {
-	return QString("%1 %2  %3 %4  %5-%6-%7").
-		arg(control.toString()).arg(sst.toString()).
-		arg((quint16)idSrc, 4, QChar('0')).arg((quint16)idDst, 4, QChar('0')).
-		arg((quint16)seq).arg((quint16)ack).arg((quint16)alloc);
-}
-void XNS::SPP::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, control);
-	FROM_BYTE_BUFFER(bb, sst);
-	FROM_BYTE_BUFFER(bb, idSrc);
-	FROM_BYTE_BUFFER(bb, idDst);
-	FROM_BYTE_BUFFER(bb, seq);
-	FROM_BYTE_BUFFER(bb, ack);
-	FROM_BYTE_BUFFER(bb, alloc);
-	FROM_BYTE_BUFFER(bb, block);
-}
-void XNS::SPP::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, control);
-	TO_BYTE_BUFFER(bb, sst);
-	TO_BYTE_BUFFER(bb, idSrc);
-	TO_BYTE_BUFFER(bb, idDst);
-	TO_BYTE_BUFFER(bb, seq);
-	TO_BYTE_BUFFER(bb, ack);
-	TO_BYTE_BUFFER(bb, alloc);
-	TO_BYTE_BUFFER(bb, block);
-}

@@ -1,0 +1,81 @@
+/*******************************************************************************
+ * Copyright (c) 2021, Yasuhiro Hasegawa
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
+
+//
+// Error.cpp
+//
+
+#include "../util/Util.h"
+static const Logger logger = Logger::getLogger("xns-error");
+
+#include "../util/JSONUtil.h"
+
+#include "Error.h"
+
+
+//
+// XNS::Error::Type
+//
+NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
+	{UNSPEC,                "UNSPEC"},
+	{BAD_CHECKSUM,          "BAD_CHECKSUM"},
+	{NO_SOCKET,             "NO_SOCKET"},
+	{RESOURCE_LIMIT,        "RESOURCE_LIMIT"},
+	{LISTEN_REJECT,         "LISTEN_REJECT"},
+	{INVALID_PACKET_TYPE,   "INVALID_PACKET_TYPE"},
+	{PROTOCOL_VIOLATION,    "PROTOCOL_VIOLATION"},
+
+	{UNSPECIFIED_IN_ROUTE,  "UNSPECIFIED_IN_ROUTE"},
+	{INCONSISTENT,          "INCONSISTENT"},
+	{CANT_GET_THERE,        "CANT_GET_THERE"},
+	{EXCESS_HOPS,           "EXCESS_HOPS"},
+	{TOO_BIG,               "TOO_BIG"},
+	{CONGESTION_WARNING,    "CONGESTION_WARNING"},
+	{CONGESTION_DISCARD,    "CONGESTION_DISCARD"},
+});
+
+
+//
+// XNS::Error
+//
+QString XNS::Error::toString() const {
+	return QString("%1 %2 %3").arg(type.toString()).arg(QString("%1").arg((quint16)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
+}
+void XNS::Error::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, param);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::Error::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, param);
+	TO_BYTE_BUFFER(bb, block);
+}

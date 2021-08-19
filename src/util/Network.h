@@ -96,6 +96,9 @@ namespace Network {
 			return *this;
 		}
 
+		bool isNull() {
+			return address == 0;
+		}
 		QString toString() const;
 	};
 

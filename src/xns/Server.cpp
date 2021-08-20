@@ -72,25 +72,8 @@ void XNS::Server::init(const QString& path) {
 		logger.info("device.address = %s", XNS::IDP::Host::toHexaDecimalString(device.address, ":"));
 	}
 
-	bpf.open();
-	logger.info("bpf.fd         = %d", bpf.fd);
-	logger.info("bpf.path       = %s", bpf.path);
-	logger.info("bpf.bufferSize = %d", bpf.bufferSize);
+	driver = Network::getDriver(device);
 
-	bpf.setInterface(config.interface);
-	bpf.setPromiscious();
-	bpf.setImmediate(1);
-	bpf.setHeaderComplete(0);
-	bpf.setReadTimeout(0);
-	bpf.setReadFilter(BPF::PROGRAM_XNS);
-
-	logger.info("bufferSize     = %d", bpf.getBufferSize());
-	logger.info("direction      = %d", bpf.getDirection());
-	logger.info("headerComplete = %d", bpf.getHeaderComplete());
-	logger.info("interface      = %s", bpf.getInterface());
-	logger.info("nbrb           = %d", bpf.getNonBlockingReadBytes());
-	logger.info("timeout        = %d", bpf.getReadTimeout());
-	logger.info("buffer         = %p", bpf.buffer);
 }
 
 void XNS::Server::start() {
@@ -103,13 +86,17 @@ void XNS::Server::stop() {
 
 void XNS::Server::run() {
 	logger.info("run start");
-	bpf.flush();
+	driver->discard();
 
+	int ret;
 	int opErrno;
+	Network::Packet packet;
+
 	for(;;) {
+		// loop until data arrive
 		for(;;) {
 			if (requestStop) goto exitLoop;
-			int ret = bpf.select(1, opErrno);
+			ret = driver->select(1, opErrno);
 			if (ret < 0) {
 				LOG_ERRNO(opErrno);
 				ERROR();
@@ -117,39 +104,43 @@ void XNS::Server::run() {
 			if (0 < ret) break;
 		}
 		if (requestStop) goto exitLoop;
-		const QList<ByteBuffer::Buffer>& list = bpf.read();
-		logger.info("list %d", list.size());
 
-		for(ByteBuffer::Buffer e: list) {
-			if (requestStop) goto exitLoop;
-
-			Network::Packet packet(e);
-
-			XNS::Ethernet ethernet;
-			FROM_BYTE_BUFFER(e, ethernet);
-			ByteBuffer::Buffer level1 = ethernet.block.toBuffer();
-
-			if (ethernet.type != XNS::Ethernet::Type::XNS) continue;
-
-			XNS::IDP idp;
-			FROM_BYTE_BUFFER(level1, idp);
-
-			logger.info("%s", ethernet.toString());
-			logger.info("    %s", idp.toString());
-
-			quint16 socket = (quint16)idp.dstSocket;
-			if (handlerMap.contains(socket)) {
-				Handler* handler = handlerMap[socket];
-				try {
-					handler->process(ethernet, idp);
-				} catch(const XNS::Error& error) {
-					logger.info("Catch Error");
-					logger.info("  error = %s", error.toString());
-					// FIXME
-				}
-			} else {
-				logger.warn("no handler for socket %s", idp.dstSocket.toString());
+		// receive one data
+		{
+			ret = driver->receive(packet.data(), packet.limit(), opErrno);
+			if (ret < 0) {
+				logger.warn("Unexpected");
+				LOG_ERRNO(opErrno);
+				continue;
 			}
+			packet.position(0);
+			packet.limit(ret);
+		}
+
+		XNS::Ethernet ethernet;
+		FROM_BYTE_BUFFER(packet, ethernet);
+		ByteBuffer::Buffer level1 = ethernet.block.toBuffer();
+
+		if (ethernet.type != XNS::Ethernet::Type::XNS) continue;
+
+		XNS::IDP idp;
+		FROM_BYTE_BUFFER(level1, idp);
+
+		logger.info("%s", ethernet.toString());
+		logger.info("    %s", idp.toString());
+
+		quint16 socket = (quint16)idp.dstSocket;
+		if (handlerMap.contains(socket)) {
+			Handler* handler = handlerMap[socket];
+			try {
+				handler->process(ethernet, idp);
+			} catch(const XNS::Error& error) {
+				logger.info("Catch Error");
+				logger.info("  error = %s", error.toString());
+				// FIXME
+			}
+		} else {
+			logger.warn("no handler for socket %s", idp.dstSocket.toString());
 		}
 	}
 

@@ -47,7 +47,8 @@
 
 
 namespace XNS {
-	using Network::Device;
+using Network::Device;
+using Network::Driver;
 
 	class Server {
 	public:
@@ -57,7 +58,7 @@ namespace XNS {
 			virtual ~Handler() {}
 		};
 
-		Server() : requestStop(false) {}
+		Server() : driver(nullptr), requestStop(false) {}
 
 		// By socket
 		void registerHandler(IDP::Socket socket, Handler* handler);
@@ -69,10 +70,10 @@ namespace XNS {
 		void stop();
 
 	private:
-		Config config;
-		Device device;
-		BPF    bpf;
-		bool   requestStop;
+		Config  config;
+		Device  device;
+		Driver* driver;
+		bool    requestStop;
 
 		QMap<quint16, Handler*> handlerMap;
 

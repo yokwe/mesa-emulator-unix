@@ -13,10 +13,8 @@ linux  : SOURCES += Network_dummy.cpp
 macx:    SOURCES += Network_dummy.cpp
 
 freebsd {
-	SOURCES += Network_freebsd.cpp
-	
-	HEADERS += BPF.h
-	SOURCES += BPF.cpp
+	HEADERS += BPF.h   Network_freebsd.h
+	SOURCES += BPF.cpp Network_freebsd.cpp
 }
 
 

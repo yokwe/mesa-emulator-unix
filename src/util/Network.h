@@ -43,6 +43,7 @@
 #include "../util/ByteBuffer.h"
 
 namespace Network {
+
 	class Packet : public ByteBuffer::Buffer {
 	public:
 		static constexpr int SIZE = 1514;
@@ -109,7 +110,7 @@ namespace Network {
 		virtual int  receive (quint8* data, quint32 dataLen, int& opErrno) = 0;
 		virtual void discard() = 0;
 
-		Driver(const Device& device_) : device(device_), fd(0) {}
+		Driver(const Device& device_) : device(device_) {}
 		virtual ~Driver() {}
 
 		QString getName() {
@@ -121,7 +122,6 @@ namespace Network {
 
 	protected:
 		Device device;
-		int    fd;
 	};
 
 	//
@@ -129,5 +129,5 @@ namespace Network {
 	//
 
 	QList<Device> getDeviceList();
-	Driver*       getInstance(const Device& device);
+	Driver*       getDriver(const Device& device);
 }

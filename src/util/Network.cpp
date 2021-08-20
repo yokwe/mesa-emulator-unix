@@ -38,6 +38,10 @@ static const Logger logger = Logger::getLogger("net");
 
 #include "Network.h"
 
+
+//
+// Network::Packet
+//
 QString Network::Packet::toString(int limit) const {
 	ByteBuffer::Buffer bb(*this);
 	bb.rewind();
@@ -59,7 +63,9 @@ QString Network::Packet::toString(int limit) const {
 }
 
 
+//
+// Network::Device
+//
 QString Network::Device::toString() const {
 	return QString("{%1 %2}").arg(name).arg(QString("%1").arg(address, 0, 16).toUpper());
 }
-

@@ -136,7 +136,24 @@ int  BPF::select  (quint32 timeout, int& opErrno) {
 	(void)timeout;
 	opErrno = 0;
 	if (readData.isEmpty()) {
-		return getNonBlockingReadBytes();
+		int ret = getNonBlockingReadBytes();
+
+		if (ret == 0) {
+			// do actual select call
+			fd_set fds;
+			FD_ZERO(&fds);
+			FD_SET(fd, &fds);
+
+			// 1 second
+			struct timeval t;
+			t.tv_sec  = timeout;
+			t.tv_usec = 0;
+
+			ret = ::select(FD_SETSIZE, &fds, NULL, NULL, &t);
+			opErrno = errno;
+		}
+
+		return ret;
 	} else {
 		return readData.first().limit();
 	}

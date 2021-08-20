@@ -33,8 +33,7 @@
 // ByteBuffer.h
 //
 
-#ifndef UTIL_BYTEBUFFER_H__
-#define UTIL_BYTEBUFFER_H__
+#pragma once
 
 #include <cstdint>
 
@@ -227,13 +226,22 @@ namespace ByteBuffer {
 		//
 		UINT8() : OpaqueType() {}
 		~UINT8() {}
-		UINT8 operator =(const UINT8& newValue) const {
+
+		// with UINT8
+		UINT8(const UINT8& newValue) : OpaqueType(newValue) {}
+		UINT8& operator =(const UINT8& newValue) {
 			value(newValue.value());
 			return *this;
 		}
+		const UINT8& operator =(const UINT8& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with quint8
+		UINT8(const quint8& newValue) : OpaqueType(newValue) {}
 		quint8 operator =(const quint8& newValue) const {
-			value(newValue);
-			return newValue;
+			return OpaqueType::operator =(newValue);
 		}
 
 		//
@@ -256,13 +264,22 @@ namespace ByteBuffer {
 		//
 		UINT16() : OpaqueType() {}
 		~UINT16() {}
-		UINT16 operator =(const UINT16& newValue) const {
+
+		// with UINT16
+		UINT16(const UINT16& newValue) : OpaqueType(newValue) {}
+		UINT16& operator =(const UINT16& newValue) {
 			value(newValue.value());
 			return *this;
 		}
+		const UINT16& operator =(const UINT16& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with qunt16
+		UINT16(const quint16& newValue) : OpaqueType(newValue) {}
 		quint16 operator =(const quint16& newValue) const {
-			value(newValue);
-			return newValue;
+			return OpaqueType::operator =(newValue);
 		}
 
 		//
@@ -285,13 +302,21 @@ namespace ByteBuffer {
 		//
 		UINT32() : OpaqueType() {}
 		~UINT32() {}
-		UINT32 operator =(const UINT32& newValue) const {
+
+		// with UINT32
+		UINT32& operator =(const UINT32& newValue) {
 			value(newValue.value());
 			return *this;
 		}
+		const UINT32& operator =(const UINT32& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with qunt32
+		UINT32(const quint32& newValue) : OpaqueType(newValue) {}
 		quint32 operator =(const quint32& newValue) const {
-			value(newValue);
-			return newValue;
+			return OpaqueType::operator =(newValue);
 		}
 
 		//
@@ -314,13 +339,21 @@ namespace ByteBuffer {
 		//
 		UINT48() : OpaqueType() {}
 		~UINT48() {}
-		UINT48 operator =(const UINT48& newValue) const {
+
+		// with UINT48
+		UINT48& operator =(const UINT48& newValue) {
 			value(newValue.value());
 			return *this;
 		}
+		const UINT48& operator =(const UINT48& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with quint64
+		UINT48(const quint64& newValue) : OpaqueType(newValue) {}
 		quint64 operator =(const quint64& newValue) const {
-			value(newValue);
-			return newValue;
+			return OpaqueType::operator =(newValue);
 		}
 
 		//
@@ -372,4 +405,3 @@ namespace ByteBuffer {
 
 }
 
-#endif

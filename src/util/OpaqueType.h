@@ -34,36 +34,77 @@
 //
 
 
-#ifndef UTIL_OPAQUE_H__
-#define UTIL_OPAQUE_H__
+#pragma once
 
 #include <QtCore>
 
 
-template <typename T>
+template <
+	typename T,
+	typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
 class OpaqueType {
+	// IMPORTANT
+	//   To use this class as member variable of class, operator= and value(newValu) need to be "const".
+	//   To make above happen, value_ become mutable
 	mutable T value_;
 public:
-	inline OpaqueType() : value_(0) {};
-	explicit inline OpaqueType(const T& that) : value_(that.value_) {}
-	~OpaqueType() {}
+	//
+	// essential constructor, destructor and copy assignment operator
+	//
+	// default constructor
+	OpaqueType() noexcept : value_(0) {};
+	// destructor
+	~OpaqueType() noexcept {}
+	// copy constructor
+	explicit OpaqueType(const OpaqueType<T>& that) noexcept : value_(that.value_) {}
+	// move constructor
+	explicit OpaqueType(OpaqueType<T>&& that) noexcept : value_(that.value_) {}
+//	// copy assignment
+//	OpaqueType<T>& operator =(const OpaqueType<T>& that) const noexcept {
+//		value_ = that.value_;
+//		return *this;
+//	}
+//	// move assignment
+//	OpaqueType<T>& operator =(OpaqueType<T>&& that) const noexcept {
+//		value_ = that.value_;
+//		return *this;
+//	}
 
+
+	//
+	// with T
+	//
+
+	// copy constructor with T
+	OpaqueType(const T& newValue) noexcept : value_(newValue) {}
+	// move constructor with T
+	OpaqueType(T&& newValue) noexcept : value_(newValue) {}
+	// copy assignment with T
+	T operator =(const T& newValue) const noexcept {
+		value_ = newValue;
+		return newValue;
+	}
+	// move assignment with T
+	T operator =(T&& newValue) const noexcept {
+		value_ = newValue;
+		return newValue;
+	}
+	// conversion functions with T
+	operator T() const {
+		return value_;
+	}
+
+
+	// prohibit all other assignment
+	template <typename X>
+	T operator =(const X& newValue) const = delete;
+
+
+	// access to value_
 	inline T value() const {
 		return value_;
 	}
 	inline void value(T newValue) const {
 		value_ = newValue;
 	}
-
-	inline operator T() const {
-		return value_;
-	}
-	// prohibit operator = explicitly
-	template <typename X>
-	T operator =(const X& newValue) const = delete;
 };
-
-#endif
-
-
-

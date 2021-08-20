@@ -9,10 +9,6 @@ CONFIG += cmdline
 # Input
 SOURCES += main.cpp
 
-HEADERS += XNSServer.h
-SOURCES += XNSServer.cpp
-
-
 
 LIBS += ../../tmp/build/util/libutil.a
 LIBS += ../../tmp/build/xns/libxns.a

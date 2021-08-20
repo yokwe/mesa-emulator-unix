@@ -30,7 +30,7 @@
 
 
 //
-// XNSServer.h
+// Server.h
 //
 
 #pragma once
@@ -39,6 +39,8 @@
 
 #include "../util/Network.h"
 #include "../util/ByteBuffer.h"
+#include "../util/BPF.h"
+#include "../util/Network.h"
 
 #include "../xns/XNS.h"
 #include "../xns/Error.h"
@@ -79,4 +81,3 @@ namespace XNS {
 	};
 
 }
-

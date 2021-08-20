@@ -34,24 +34,22 @@ static const Logger logger = Logger::getLogger("xns-server");
 #include "../util/Network.h"
 #include "../util/BPF.h"
 
-#include "../xns/Config.h"
-#include "../xns/XNS.h"
-#include "../xns/Courier.h"
+#include "Config.h"
+#include "XNS.h"
 
-#include "../xns/RIP.h"
-#include "../xns/Error.h"
-#include "../xns/Echo.h"
-#include "../xns/SPP.h"
-#include "../xns/PEX.h"
-
-#include "../xns/Time.h"
-
-#include "../util/JSONUtil.h"
 #include "../util/ByteBuffer.h"
 
-#include "XNSServer.h"
+#include "Server.h"
 
 
+//
+// Server.cpp
+//
+
+
+//
+// XNS::Server
+//
 void XNS::Server::init(const QString& path) {
 	config = XNS::loadConfig(path);
 

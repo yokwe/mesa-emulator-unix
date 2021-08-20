@@ -13,6 +13,9 @@ SOURCES += RIP.cpp Error.cpp Echo.cpp SPP.cpp PEX.cpp
 HEADERS += Time.h
 SOURCES += Time.cpp
 
+HEADERS += Server.h
+SOURCES += Server.cpp
+
 
 ###############################################
 include(../common.pro)

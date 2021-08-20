@@ -33,8 +33,7 @@
 // JSONUtil.h
 //
 
-#ifndef JSONUTIL_H__
-#define JSONUTIL_H__
+#pragma once
 
 #include <QtCore>
 
@@ -224,5 +223,3 @@ namespace JSONUtil {
 	}
 
 };
-
-#endif

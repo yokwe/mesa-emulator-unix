@@ -32,8 +32,7 @@
 // Util.h
 //
 
-#ifndef UTIL_H__
-#define UTIL_H__
+#pragma once
 
 #include <log4cpp/Category.hh>
 
@@ -221,5 +220,3 @@ public:
 		return mesaTime - EPOCH_DIFF;
 	}
 };
-
-#endif

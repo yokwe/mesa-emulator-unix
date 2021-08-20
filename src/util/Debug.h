@@ -33,8 +33,7 @@
 // Debug.h
 //
 
-#ifndef DEBUG_H__
-#define DEBUG_H__
+#pragma once
 
 // Opcode
 static const int DEBUG_SHOW_OPCODE       = 0;
@@ -99,6 +98,3 @@ static const int DEBUG_STOP_AT_OPCODE_TRAP  = 0;
 static const int DEBUG_STOP_AT_PAGE_FAULT   = 0;
 static const int DEBUG_STOP_AT_STACK_ERROR  = 1;
 static const int DEBUG_STOP_AT_NOT_RUNNING  = 0;
-
-
-#endif

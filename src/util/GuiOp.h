@@ -33,8 +33,7 @@
 // GuiOp.h
 //
 
-#ifndef GUIOP_H__
-#define GUIOP_H__
+#pragma once
 
 #include "Util.h"
 
@@ -92,5 +91,3 @@ class NullGuiOp : public GuiOp {
 	void updateDisplayImpl   (Rect*) {}
 	void setMPImpl           (quint16) {}
 };
-
-#endif

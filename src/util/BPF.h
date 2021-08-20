@@ -33,8 +33,7 @@
 // BPF.h
 //
 
-#ifndef BPF_H__
-#define BPF_H__
+#pragma once
 
 #include <unistd.h>
 #include <sys/time.h>
@@ -224,5 +223,3 @@ public:
 	//   Gets the process or process group
 
 };
-
-#endif

@@ -33,8 +33,7 @@
 // Perf.h
 //
 
-#ifndef PERF_H__
-#define PERF_H__
+#pragma once
 
 #define PPCAT_NX(A, B) A ## B
 #define PPCAT(A, B) PPCAT_NX(A, B)
@@ -119,6 +118,3 @@ if (PERF_ENABLE) { \
 	PERF_DUMP(OpcodeTrap) \
 	PERF_DUMP(UnboundTrap) \
 }
-
-
-#endif

@@ -33,8 +33,7 @@
 // Config.h
 //
 
-#ifndef XNS_CONFIG_H__
-#define XNS_CONFIG_H__
+#pragma once
 
 #include "../util/JSONUtil.h"
 
@@ -68,6 +67,3 @@ namespace XNS {
 		QJsonObject toJsonObject() const;
 	};
 }
-
-#endif
-

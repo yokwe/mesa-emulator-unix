@@ -28,8 +28,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#ifndef PREFERENCE_H__
-#define PREFERENCE_H__
+#pragma once
 
 #include "JSONUtil.h"
 
@@ -275,5 +274,3 @@ public:
 	//           Qt::MouseButton  bitPosition
 	static void initMap(const Setting& setting);
 };
-
-#endif

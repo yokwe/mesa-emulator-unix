@@ -33,8 +33,7 @@
 // Network.h
 //
 
-#ifndef NETWORK_H__
-#define NETWORK_H__
+#pragma once
 
 #include <string.h>
 #include <stdlib.h>
@@ -132,5 +131,3 @@ namespace Network {
 	QList<Device> getDeviceList();
 	Driver*       getInstance(const Device& device);
 }
-
-#endif

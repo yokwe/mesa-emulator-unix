@@ -45,6 +45,8 @@
 #include "../xns/XNS.h"
 #include "../xns/Error.h"
 
+#include <functional>
+
 
 namespace XNS::Server {
 	using ByteBuffer::Buffer;
@@ -62,60 +64,31 @@ namespace XNS::Server {
 		Context(const QString& path); // path of config json file
 	};
 
-	class SocketListener : public QRunnable {
+
+	class Data {
 	public:
-		class Entry {
-		public:
-			quint64  time;     // creation time. seconds since unix time epoch, used to remove old queue entry
-			Context& context;
+		quint64  time;     // creation time. seconds since unix time epoch, used to remove old queue entry
+		Context& context;
 
-			Packet   packet;   // received packet
-			Ethernet ethernet;
-			IDP      idp;
+		Packet   packet;   // received packet
+		Ethernet ethernet;
+		IDP      idp;
 
-			Entry(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
-				time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
-		};
-
-		SocketListener(quint16 socket) : listenerSocket(socket), stopThread(false), threadRunning(false) {}
-		virtual ~SocketListener() {}
-
-		void add(const Entry& entry); // operation is protected by mutex. Also do list maintenance.
-
-		bool running();
-
-		virtual void run() = 0;  // for QRunnable
-		void stop(); // stop thread
-
-		quint16 socket() {
-			return listenerSocket;
-		}
-	protected:
-		quint16        listenerSocket;
-		bool           stopThread;
-		bool           threadRunning;
-		QList<Entry>   list;
-		QMutex         listMutex;
-		QWaitCondition listCV;
-
-		bool  isEmpty(); // operation is protected by mutex. Also do list maintenance.
-		Entry get();     // operation is protected by mutex. Also do list maintenance. Entry can be null
-		void  clear();   // operaiton is protected by mutex.
-
-		void maintainList(); // do list maintenance
+		Data(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+			time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
+	typedef std::function<void(Data&)> DataHandler;
 
-	// create thread for socket listener and queue received packet to socket listener queue
+
 	class ProcessThread : public QRunnable {
-		Context&                        context;
-		QMap<quint16, SocketListener*>& listenerMap;
-		QThreadPool*                    threadPool; // thread pool for socket listener
-		bool                            stopThread;
-		bool                            threadRunning;
+		Context&                    context;
+		QMap<quint16, DataHandler>& handlerMap;
+		bool                        stopThread;
+		bool                        threadRunning;
 
 	public:
-		ProcessThread(Context& context_, QMap<quint16, SocketListener*>& listenerMap_, QThreadPool* threadPool_) :
-			context(context_), listenerMap(listenerMap_), threadPool(threadPool_), stopThread(false), threadRunning(false) {}
+		ProcessThread(Context& context_, QMap<quint16, DataHandler>& handlerMap_) :
+			context(context_), handlerMap(handlerMap_), stopThread(false), threadRunning(false) {}
 
 		bool running();
 		void run();  // for QRunnable
@@ -124,18 +97,18 @@ namespace XNS::Server {
 
 
 	class Server {
-		Context                        context;
-		QMap<quint16, SocketListener*> listenerMap;
-		QThreadPool*                   processThreadPool;    // thread pool for ProcessThread
-		QThreadPool*                   listenerThreadPool;    // thread pool for ProcessThread
-		ProcessThread*                 processThread;
+		Context                    context;
+		QMap<quint16, DataHandler> handlerMap;
+
+		QThreadPool*               processThreadPool;    // thread pool for ProcessThread
+		ProcessThread*             processThread;
 
 	public:
-		Server() : processThreadPool(new QThreadPool()), listenerThreadPool(new QThreadPool()), processThread(nullptr) {}
+		Server() : processThreadPool(new QThreadPool()), processThread(nullptr) {}
 
 		void init(const QString& path);
 
-		void add(SocketListener* listener);
+		void add(quint16 socket, DataHandler handler);
 
 		bool running();
 		void start();

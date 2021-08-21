@@ -40,84 +40,31 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/Server.h"
 
 
-class RIPListener : public XNS::Server::SocketListener {
+void dump(XNS::Server::Data& data) {
+	logger.info("dat %s", data.idp.toString());
+}
+
+class Collect {
 public:
-	RIPListener() : XNS::Server::SocketListener(XNS::IDP::Socket::RIP) {}
-
-	void run() {
-		threadRunning = true;
-		logger.info("RIPListener START");
-		logger.info("RIPListener socket = %s", XNS::IDP::Socket::toString(socket()));
-		// clear list
-		clear();
-
-		{
-			QMutexLocker locker(&listMutex);
-			for(;;) {
-				// wait timeout or entry is added to list
-				for(;;) {
-					bool ret = listCV.wait(&listMutex, 1000);
-					if (ret) break; // listCV is notified
-					if (stopThread) goto exitLoop;
-				}
-				// We are protected by QMutexLocker locker(&listMutex)
-				if (list.isEmpty()) continue;
-				Entry entry = list.takeLast();
-				logger.info("RIPListener %s", entry.idp.toString());
-			}
-		}
-
-exitLoop:
-		logger.info("RIPListener STOP");
-		threadRunning = false;
+	void dump(XNS::Server::Data& data) {
+		logger.info("DAT %s", data.idp.toString());
 	}
 };
 
-class CHSListener : public XNS::Server::SocketListener {
-public:
-	CHSListener() : XNS::Server::SocketListener(XNS::IDP::Socket::CHS) {}
-
-	void run() {
-		threadRunning = true;
-		logger.info("CHSListener START");
-		logger.info("CHSListener socket = %s", XNS::IDP::Socket::toString(socket()));
-		// clear list
-		clear();
-
-		{
-			QMutexLocker locker(&listMutex);
-			for(;;) {
-				// wait timeout or entry is added to list
-				for(;;) {
-					bool ret = listCV.wait(&listMutex, 1000);
-					if (ret) break; // listCV is notified
-					if (stopThread) goto exitLoop;
-				}
-				// We are protected by QMutexLocker locker(&listMutex)
-				if (list.isEmpty()) continue;
-				Entry entry = list.takeLast();
-				logger.info("CHSListener %s", entry.idp.toString());
-			}
-		}
-
-exitLoop:
-		logger.info("CHSListener STOP");
-		threadRunning = false;
-	}
-};
 
 void testXNSServer() {
 	logger.info("START");
+
+	Collect collect;
+
 
 	XNS::Server::Server server;
 
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
 
-	XNS::Server::SocketListener* ripListener = new RIPListener();
-	XNS::Server::SocketListener* chsListener = new CHSListener();
-	server.add(ripListener);
-	server.add(chsListener);
+	server.add(XNS::IDP::Socket::RIP, dump);
+	server.add(XNS::IDP::Socket::CHS, [&collect](XNS::Server::Data& data){collect.dump(data);});
 
 	logger.info("server.start");
 	server.start();

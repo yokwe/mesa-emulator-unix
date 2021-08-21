@@ -85,17 +85,13 @@ void XNS::Server::Server::init(const QString& path) {
 	processThreadPool->setObjectName("ProcessThereadPool");
 	processThreadPool->setMaxThreadCount(1);
 
-	listenerThreadPool->setObjectName("ListenerThereadPool");
-
 	context = Context(path);
-	processThread = new ProcessThread(context, listenerMap, listenerThreadPool);
+	processThread = new ProcessThread(context, handlerMap);
 	processThread->setAutoDelete(false);
 }
-void XNS::Server::Server::add(SocketListener* listener) {
-	quint16 socket = listener->socket();
+void XNS::Server::Server::add(quint16 socket, DataHandler handler) {
 	logger.info("add socket listener %s", XNS::IDP::Socket::toString(socket));
-	listener->setAutoDelete(false); // make sure don't delete listener after done
-	listenerMap[socket] = listener;
+	handlerMap[socket] = handler;
 }
 bool XNS::Server::Server::running() {
 	return processThread->running();
@@ -123,11 +119,6 @@ void XNS::Server::Server::wait() {
 		logger.info("processThread WAIT");
 		processThreadPool->waitForDone();
 		logger.info("processThread DONE");
-
-		logger.info("listenerThreadPool WAIT");
-		listenerThreadPool->waitForDone();
-		logger.info("listenerThreadPool DONE");
-
 	} else {
 		logger.warn("processThread already done");
 	}
@@ -143,19 +134,6 @@ bool XNS::Server::ProcessThread::running() {
 void XNS::Server::ProcessThread::run() {
 	threadRunning = true;
 	stopThread    = false;
-
-	// start listener thread
-	{
-		int listenerCount = listenerMap.size();
-		logger.info("listenerCount %d", listenerCount);
-		threadPool->setMaxThreadCount(listenerCount);
-
-		for(auto e: listenerMap.keys()) {
-			int socket = e;
-			SocketListener* listener = listenerMap[socket];
-			threadPool->start(listener);
-		}
-	}
 
 	{
 		context.driver->discard();
@@ -203,10 +181,10 @@ void XNS::Server::ProcessThread::run() {
 
 			quint16 socket = (quint16)idp.dstSocket;
 
-			if (listenerMap.contains(socket)) {
-				SocketListener::Entry entry(context, packet, ethernet, idp);
-				SocketListener* socketListener = listenerMap[socket];
-				socketListener->add(entry);
+			if (handlerMap.contains(socket)) {
+				auto handler = handlerMap[socket];
+				Data data(context, packet, ethernet, idp);
+				handler(data);
 			} else {
 				logger.warn("no handler for socket %s", XNS::IDP::Socket::toString(socket));
 			}
@@ -221,103 +199,7 @@ void XNS::Server::ProcessThread::stop() {
 	if (running()) {
 		stopThread = true;
 
-		// stop listener
-		for(auto e: listenerMap.keys()) {
-			int socket = e;
-			logger.info("stop listener %s", XNS::IDP::Socket::toString(socket));
-			SocketListener* listener = listenerMap[socket];
-			if (listener->running()) {
-				listener->stop();
-			}
-		}
-
 	} else {
 		logger.warn("processThread already stop");
 	}
 }
-
-
-//
-// XNS::Server::SocketListener
-//
-void XNS::Server::SocketListener::add(const Entry& entry) {
-	QMutexLocker locker(&listMutex);
-	list.append(entry);
-	listCV.wakeOne();
-}
-XNS::Server::SocketListener::Entry XNS::Server::SocketListener::get() {
-	QMutexLocker locker(&listMutex);
-	if (list.isEmpty()) {
-		logger.error("Unexpected");
-		ERROR();
-	}
-	return list.takeLast();
-}
-bool XNS::Server::SocketListener::isEmpty() {
-	QMutexLocker locker(&listMutex);
-	maintainList();
-	return list.isEmpty();
-}
-void XNS::Server::SocketListener::maintainList() {
-	quint64 limit = QDateTime::currentSecsSinceEpoch() - XNS::IDP::MPL;
-	for(;;) {
-		if (list.isEmpty()) break;
-		Entry& last = list.last();
-		if (last.time < limit) {
-			list.removeLast();
-		} else {
-			break;
-		}
-	}
-}
-void XNS::Server::SocketListener::clear() {
-	QMutexLocker locker(&listMutex);
-	list.clear();
-}
-bool XNS::Server::SocketListener::running() {
-	return threadRunning;
-}
-void XNS::Server::SocketListener::stop() {
-	logger.info("SocketListener stop %s", XNS::IDP::Socket::toString(socket()));
-	if (running()) {
-		stopThread = true;
-	} else {
-		logger.warn("socketListener already stop");
-	}
-}
-
-
-
-//class RIPListener : public XNS::Server::SocketListener {
-//public:
-//	RIPListener() : XNS::Server::SocketListener(XNS::IDP::Socket::RIP) {}
-//
-//	void run() {
-//		threadRunning = true;
-//		logger.info("RIPListener START");
-//		logger.info("RIPListener socket = %s", XNS::IDP::Socket::toString(socket()));
-//		// clear list
-//		clear();
-//
-//		{
-//			QMutexLocker locker(&listMutex);
-//			for(;;) {
-//				// wait timeout or entry is added to list
-//				for(;;) {
-//					bool ret = listCV.wait(&listMutex, 1000);
-//					if (ret) break; // listCV is notified
-//					if (stopThread) goto exitLoop;
-//				}
-//				// We are protected by QMutexLocker locker(&listMutex)
-//				if (list.isEmpty()) continue;
-//				Entry entry = list.takeLast();
-//				logger.info("RIPListener %s", entry.idp.toString());
-//			}
-//		}
-//
-//exitLoop:
-//		logger.info("RIPListener STOP");
-//		threadRunning = false;
-//	}
-//};
-

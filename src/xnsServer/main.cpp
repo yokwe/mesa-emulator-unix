@@ -40,14 +40,16 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/Server.h"
 
 
-void dump(XNS::Server::Data& data) {
-	logger.info("dat %s", data.idp.toString());
-}
-
-class Collect {
+class Collect2: public XNS::Server::DataHandler::Base {
 public:
-	void dump(XNS::Server::Data& data) {
+	void start() {
+		logger.info("START Collect2");
+	}
+	void process(XNS::Server::Data& data) {
 		logger.info("DAT %s", data.idp.toString());
+	}
+	void stop() {
+		logger.info("STOP   Collect2");
 	}
 };
 
@@ -55,16 +57,16 @@ public:
 void testXNSServer() {
 	logger.info("START");
 
-	Collect collect;
-
+	Collect2 collect2;
+	XNS::Server::DataHandler handler(collect2);
 
 	XNS::Server::Server server;
 
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
 
-	server.add(XNS::IDP::Socket::RIP, dump);
-	server.add(XNS::IDP::Socket::CHS, [&collect](XNS::Server::Data& data){collect.dump(data);});
+	server.add(XNS::IDP::Socket::RIP, handler);
+	server.add(XNS::IDP::Socket::CHS, handler);
 
 	logger.info("server.start");
 	server.start();
@@ -72,8 +74,6 @@ void testXNSServer() {
 	QThread::sleep(10);
 	logger.info("server.stop");
 	server.stop();
-	logger.info("server.wait");
-	server.wait();
 	logger.info("STOP");
 }
 

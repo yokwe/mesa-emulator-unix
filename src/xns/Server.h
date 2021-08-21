@@ -77,7 +77,27 @@ namespace XNS::Server {
 		Data(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
 			time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
-	typedef std::function<void(Data&)> DataHandler;
+
+	class DataHandler {
+	public:
+		class Base {
+		public:
+			virtual ~Base() {}
+			virtual void start()             = 0;
+			virtual void process(Data& data) = 0;
+			virtual void stop()              = 0;
+		};
+
+		std::function<void(void)>  start;
+		std::function<void(Data&)> process;
+		std::function<void(void)>  stop;
+
+		DataHandler() : start(nullptr), process(nullptr), stop(nullptr) {}
+		DataHandler(Base& base) :
+			start  ([&base](){base.start();}),
+			process([&base](Data& data){base.process(data);}),
+			stop   ([&base](){base.stop();}) {}
+	};
 
 
 	class ProcessThread : public QRunnable {
@@ -91,6 +111,8 @@ namespace XNS::Server {
 			context(context_), handlerMap(handlerMap_), stopThread(false), threadRunning(false) {}
 
 		bool running();
+
+		void start();
 		void run();  // for QRunnable
 		void stop(); // stop thread
 	};
@@ -113,7 +135,6 @@ namespace XNS::Server {
 		bool running();
 		void start();
 		void stop();
-		void wait();
 	};
 
 }

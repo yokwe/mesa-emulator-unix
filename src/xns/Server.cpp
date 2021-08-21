@@ -101,6 +101,11 @@ void XNS::Server::Server::start() {
 		logger.error("Unexpected");
 		ERROR()
 	} else {
+		// start handler
+		for(quint16 socket: handlerMap.keys()) {
+			logger.info("handler START %s", IDP::Socket::toString(socket));
+			handlerMap[socket].start();
+		}
 		// start processThread
 		logger.info("processThread START");
 		processThreadPool->start(processThread);
@@ -110,17 +115,14 @@ void XNS::Server::Server::stop() {
 	if (processThread->running()) {
 		logger.info("processThread STOP");
 		processThread->stop();
+		this->processThreadPool->waitForDone();
+		// stop handler
+		for(quint16 socket: handlerMap.keys()) {
+			logger.info("handler STOP  %s", IDP::Socket::toString(socket));
+			handlerMap[socket].stop();
+		}
 	} else {
 		logger.warn("processThread already stop");
-	}
-}
-void XNS::Server::Server::wait() {
-	if (processThread->running()) {
-		logger.info("processThread WAIT");
-		processThreadPool->waitForDone();
-		logger.info("processThread DONE");
-	} else {
-		logger.warn("processThread already done");
 	}
 }
 
@@ -184,7 +186,7 @@ void XNS::Server::ProcessThread::run() {
 			if (handlerMap.contains(socket)) {
 				auto handler = handlerMap[socket];
 				Data data(context, packet, ethernet, idp);
-				handler(data);
+				handler.process(data);
 			} else {
 				logger.warn("no handler for socket %s", XNS::IDP::Socket::toString(socket));
 			}

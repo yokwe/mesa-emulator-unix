@@ -183,6 +183,9 @@ namespace XNS {
 				return newValue;
 			}
 
+			static QString toString(quint16 newValue) {
+				return nameMap.toString(newValue);
+			}
 			QString toString() const {
 				return nameMap.toString(value());
 			}
@@ -193,6 +196,14 @@ namespace XNS {
 			static NameMap::Map<quint16> nameMap;
 		};
 
+
+		// MPL is estimated to be 60 seconds by observing that in the worst case.
+		// If each internetwork router hop produced a store-and-forward plus transmission delay of 1 second,
+		// then the delay to traverse 15 internetwork routers would be 15 seconds.
+		// This was multiplied by 4 to account for rare delays.
+		// In the event that an internetwork has a very large number of low-speed leased lines, packets may be delayed for more than 60 seconds.
+		static const int MPL_ORIGINAL = 60; // Maximum Packet Lifetime
+		static const int MPL = MPL_ORIGINAL / 10; // Change to 1/10 of original MPL
 
 		// IMPORTANT
 		// Minimum ethernet packet length is 60 (16 bytes ethernet header + 46 bytes ehternet body)

@@ -46,39 +46,101 @@
 #include "../xns/Error.h"
 
 
-namespace XNS {
-using Network::Device;
-using Network::Driver;
+namespace XNS::Server {
+	using ByteBuffer::Buffer;
+	using Network::Device;
+	using Network::Driver;
+	using Network::Packet;
 
-	class Server {
+	class Context {
 	public:
-		class Handler {
+		Device  device;
+		quint32 localNet;
+		Driver* driver;
+
+		Context() : localNet(0), driver(nullptr) {}
+		Context(const QString& path); // path of config json file
+	};
+
+	class SocketListener : public QRunnable {
+	public:
+		class Entry {
 		public:
-			virtual void process(const Ethernet& ethernet, const IDP& idp) = 0;
-			virtual ~Handler() {}
+			quint64  time;     // creation time. seconds since unix time epoch, used to remove old queue entry
+			Context& context;
+
+			Packet   packet;   // received packet
+			Ethernet ethernet;
+			IDP      idp;
+
+			Entry(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+				time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 		};
 
-		Server() : driver(nullptr), requestStop(false) {}
+		SocketListener(quint16 socket) : listenerSocket(socket), stopThread(false), threadRunning(false) {}
+		virtual ~SocketListener() {}
 
-		// By socket
-		void registerHandler(IDP::Socket socket, Handler* handler);
+		void add(const Entry& entry); // operation is protected by mutex. Also do list maintenance.
+
+		bool running();
+
+		virtual void run() = 0;  // for QRunnable
+		void stop(); // stop thread
+
+		quint16 socket() {
+			return listenerSocket;
+		}
+	protected:
+		quint16        listenerSocket;
+		bool           stopThread;
+		bool           threadRunning;
+		QList<Entry>   list;
+		QMutex         listMutex;
+		QWaitCondition listCV;
+
+		bool  isEmpty(); // operation is protected by mutex. Also do list maintenance.
+		Entry get();     // operation is protected by mutex. Also do list maintenance. Entry can be null
+		void  clear();   // operaiton is protected by mutex.
+
+		void maintainList(); // do list maintenance
+	};
+
+	// create thread for socket listener and queue received packet to socket listener queue
+	class ProcessThread : public QRunnable {
+		Context&                        context;
+		QMap<quint16, SocketListener*>& listenerMap;
+		QThreadPool*                    threadPool; // thread pool for socket listener
+		bool                            stopThread;
+		bool                            threadRunning;
+
+	public:
+		ProcessThread(Context& context_, QMap<quint16, SocketListener*>& listenerMap_, QThreadPool* threadPool_) :
+			context(context_), listenerMap(listenerMap_), threadPool(threadPool_), stopThread(false), threadRunning(false) {}
+
+		bool running();
+		void run();  // for QRunnable
+		void stop(); // stop thread
+	};
+
+
+	class Server {
+		Context                        context;
+		QMap<quint16, SocketListener*> listenerMap;
+		QThreadPool*                   processThreadPool;    // thread pool for ProcessThread
+		QThreadPool*                   listenerThreadPool;    // thread pool for ProcessThread
+		ProcessThread*                 processThread;
+
+	public:
+		Server() : processThreadPool(new QThreadPool()), listenerThreadPool(new QThreadPool()), processThread(nullptr) {}
 
 		void init(const QString& path);
 
+		void add(SocketListener* listener);
+
+		bool running();
 		void start();
-		void run();
 		void stop();
-
-	private:
-		Config  config;
-		Device  device;
-		Driver* driver;
-		bool    requestStop;
-
-		QMap<quint16, Handler*> handlerMap;
-
-		void process(const Ethernet& src, Ethernet& dst);
-		void process(const IDP& src,      IDP& dst);
+		void wait();
 	};
 
 }

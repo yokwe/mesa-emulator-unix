@@ -40,12 +40,94 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/Server.h"
 
 
+class RIPListener : public XNS::Server::SocketListener {
+public:
+	RIPListener() : XNS::Server::SocketListener(XNS::IDP::Socket::RIP) {}
+
+	void run() {
+		threadRunning = true;
+		logger.info("RIPListener START");
+		logger.info("RIPListener socket = %s", XNS::IDP::Socket::toString(socket()));
+		// clear list
+		clear();
+
+		{
+			QMutexLocker locker(&listMutex);
+			for(;;) {
+				// wait timeout or entry is added to list
+				for(;;) {
+					bool ret = listCV.wait(&listMutex, 1000);
+					if (ret) break; // listCV is notified
+					if (stopThread) goto exitLoop;
+				}
+				// We are protected by QMutexLocker locker(&listMutex)
+				if (list.isEmpty()) continue;
+				Entry entry = list.takeLast();
+				logger.info("RIPListener %s", entry.idp.toString());
+			}
+		}
+
+exitLoop:
+		logger.info("RIPListener STOP");
+		threadRunning = false;
+	}
+};
+
+class CHSListener : public XNS::Server::SocketListener {
+public:
+	CHSListener() : XNS::Server::SocketListener(XNS::IDP::Socket::CHS) {}
+
+	void run() {
+		threadRunning = true;
+		logger.info("CHSListener START");
+		logger.info("CHSListener socket = %s", XNS::IDP::Socket::toString(socket()));
+		// clear list
+		clear();
+
+		{
+			QMutexLocker locker(&listMutex);
+			for(;;) {
+				// wait timeout or entry is added to list
+				for(;;) {
+					bool ret = listCV.wait(&listMutex, 1000);
+					if (ret) break; // listCV is notified
+					if (stopThread) goto exitLoop;
+				}
+				// We are protected by QMutexLocker locker(&listMutex)
+				if (list.isEmpty()) continue;
+				Entry entry = list.takeLast();
+				logger.info("CHSListener %s", entry.idp.toString());
+			}
+		}
+
+exitLoop:
+		logger.info("CHSListener STOP");
+		threadRunning = false;
+	}
+};
+
 void testXNSServer() {
-	XNS::Server server;
+	logger.info("START");
 
+	XNS::Server::Server server;
+
+	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
-	server.run();
 
+	XNS::Server::SocketListener* ripListener = new RIPListener();
+	XNS::Server::SocketListener* chsListener = new CHSListener();
+	server.add(ripListener);
+	server.add(chsListener);
+
+	logger.info("server.start");
+	server.start();
+	logger.info("QThread::sleep");
+	QThread::sleep(10);
+	logger.info("server.stop");
+	server.stop();
+	logger.info("server.wait");
+	server.wait();
+	logger.info("STOP");
 }
 
 int main(int, char**) {

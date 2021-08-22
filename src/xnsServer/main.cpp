@@ -43,91 +43,113 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/Courier.h"
 #include "../xns/Time.h"
 #include "../xns/Echo.h"
+#include "../xns/Courier.h"
 
 
-class RIPHandler : public XNS::Server::DataHandler::Default {
+class RIPHandler : public XNS::Server::Handlers::RIPHandler {
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::RIP;
-	}
 	const char* name() {
 		return "RIPHandler";
 	}
-	void rip(XNS::Server::Data& data, XNS::RIP& rip) {
+	void handle(XNS::Server::Data& data, XNS::RIP& rip) {
 		(void)data;
-		logger.info("    RIP %s", rip.toString());
+		logger.info("##  RIP %s", rip.toString());
+	}
+	void handle(XNS::Server::Data& data, XNS::Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
 	}
 };
 
 
-class CHSHandler : public XNS::Server::DataHandler::Default {
+class CHSHandler : public XNS::Server::Handlers::CHSHandler {
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::CHS;
-	}
 	const char* name() {
 		return "CHSHandler";
 	}
-	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
+	void handle(XNS::Server::Data& data, XNS::PEX& pex) {
 		(void)data;
 		ByteBuffer::Buffer level3 = pex.block.toBuffer();
-		if (pex.type == XNS::PEX::Type::CHS) {
-			XNS::Courier::ExpeditedCourier exp;
-			FROM_BYTE_BUFFER(level3, exp);
-
-			logger.info("    PEX %s", pex.toString());
-			logger.info("        CHS %s", exp.toString());
-		} else {
-			logger.warn("Unexpected type CHS");
-			logger.warn("    PEX %s", pex.toString());
-			logger.warn("        %s", pex.block.toString());
-		}
+		XNS::Courier::ExpeditedCourier exp;
+		FROM_BYTE_BUFFER(level3, exp);
+		logger.info("##  CHS %s", pex.toString());
+		logger.info("        %s", exp.toString());
 	}
-};
-
-
-class TimeHandler : public XNS::Server::DataHandler::Default {
-public:
-	quint16 socket() {
-		return XNS::IDP::Socket::TIME;
-	}
-	const char* name() {
-		return "TimeHandler";
-	}
-	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
+	void handle(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;
-		ByteBuffer::Buffer level3 = pex.block.toBuffer();
-		if (pex.type == XNS::PEX::Type::TIME) {
-			XNS::Time time;
-			FROM_BYTE_BUFFER(level3, time);
-
-			logger.info("    PEX %s", pex.toString());
-			logger.info("        TIME %s", time.toString());
-		} else {
-			logger.warn("Unexpected type TIME");
-			logger.warn("    PEX %s", pex.toString());
-			logger.warn("        %s", pex.block.toString());
-		}
+		logger.info("    ERROR %s", error.toString());
 	}
 };
 
 
-class EchoHandler : public XNS::Server::DataHandler::Default {
-public:
-	quint16 socket() {
-		return XNS::IDP::Socket::ECHO;
-	}
-	const char* name() {
-		return "EchoHandler";
-	}
-	void echo(XNS::Server::Data& data, XNS::Echo& echo) {
-		(void)data;
-		logger.info("    ECHO %s", echo.toString());
-	}
-	void stop() {
-//		logger.info("STOP  ECHO");
-	}
-};
+//class CHSHandler : public XNS::Server::DataHandler::Default {
+//public:
+//	quint16 socket() {
+//		return XNS::IDP::Socket::CHS;
+//	}
+//	const char* name() {
+//		return "CHSHandler";
+//	}
+//	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
+//		(void)data;
+//		ByteBuffer::Buffer level3 = pex.block.toBuffer();
+//		if (pex.type == XNS::PEX::Type::CHS) {
+//			XNS::Courier::ExpeditedCourier exp;
+//			FROM_BYTE_BUFFER(level3, exp);
+//
+//			logger.info("    PEX %s", pex.toString());
+//			logger.info("        CHS %s", exp.toString());
+//		} else {
+//			logger.warn("Unexpected type CHS");
+//			logger.warn("    PEX %s", pex.toString());
+//			logger.warn("        %s", pex.block.toString());
+//		}
+//	}
+//};
+//
+//
+//class TimeHandler : public XNS::Server::DataHandler::Default {
+//public:
+//	quint16 socket() {
+//		return XNS::IDP::Socket::TIME;
+//	}
+//	const char* name() {
+//		return "TimeHandler";
+//	}
+//	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
+//		(void)data;
+//		ByteBuffer::Buffer level3 = pex.block.toBuffer();
+//		if (pex.type == XNS::PEX::Type::TIME) {
+//			XNS::Time time;
+//			FROM_BYTE_BUFFER(level3, time);
+//
+//			logger.info("    PEX %s", pex.toString());
+//			logger.info("        TIME %s", time.toString());
+//		} else {
+//			logger.warn("Unexpected type TIME");
+//			logger.warn("    PEX %s", pex.toString());
+//			logger.warn("        %s", pex.block.toString());
+//		}
+//	}
+//};
+//
+//
+//class EchoHandler : public XNS::Server::DataHandler::Default {
+//public:
+//	quint16 socket() {
+//		return XNS::IDP::Socket::ECHO;
+//	}
+//	const char* name() {
+//		return "EchoHandler";
+//	}
+//	void echo(XNS::Server::Data& data, XNS::Echo& echo) {
+//		(void)data;
+//		logger.info("    ECHO %s", echo.toString());
+//	}
+//	void stop() {
+////		logger.info("STOP  ECHO");
+//	}
+//};
 
 
 void testXNSServer() {
@@ -135,8 +157,8 @@ void testXNSServer() {
 
 	RIPHandler  ripHandler;
 	CHSHandler  chsHandler;
-	TimeHandler timeHandler;
-	EchoHandler echoHandler;
+//	TimeHandler timeHandler;
+//	EchoHandler echoHandler;
 
 	XNS::Server::Server server;
 
@@ -145,8 +167,8 @@ void testXNSServer() {
 
 	server.add(ripHandler);
 	server.add(chsHandler);
-	server.add(timeHandler);
-	server.add(echoHandler);
+//	server.add(timeHandler);
+//	server.add(echoHandler);
 
 	logger.info("server.start");
 	server.start();

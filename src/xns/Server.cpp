@@ -79,51 +79,6 @@ XNS::Server::Context::Context(const QString& path) {
 
 
 //
-// XNS::Server::DataHandler::Default
-//
-
-void XNS::Server::DataHandler::Default::start() {}
-void XNS::Server::DataHandler::Default::stop() {}
-void XNS::Server::DataHandler::Default::rip  (Data& data, RIP&   rip) {
-	logger.error("Unexpected");
-	logger.error("  idp %s", data.idp.toString());
-	logger.error("    rip %s", rip.toString());
-	ERROR();
-}
-void XNS::Server::DataHandler::Default::echo (Data& data, Echo&  echo) {
-	logger.error("Unexpected");
-	logger.error("  idp %s", data.idp.toString());
-	logger.error("    echo %s", echo.toString());
-	ERROR();
-}
-void XNS::Server::DataHandler::Default::error(Data& data, Error& error) {
-	logger.warn("Unexpected");
-	logger.warn("  idp %s", data.idp.toString());
-	logger.warn("    error %s", error.toString());
-	ERROR();
-}
-void XNS::Server::DataHandler::Default::pex  (Data& data, PEX&   pex) {
-	logger.error("Unexpected");
-	logger.error("  idp %s", data.idp.toString());
-	logger.error("    pex %s", pex.toString());
-	ERROR();
-}
-void XNS::Server::DataHandler::Default::spp  (Data& data, SPP&   spp) {
-	logger.error("Unexpected");
-	logger.error("  idp %s", data.idp.toString());
-	logger.error("    spp %s", spp.toString());
-	ERROR();
-}
-void XNS::Server::DataHandler::Default::boot (Data& data, Boot&  boot) {
-	logger.error("Unexpected");
-	logger.error("  idp %s", data.idp.toString());
-	logger.error("    boot %s", boot.toString());
-	ERROR();
-}
-
-
-
-//
 // XNS::Server::Server
 //
 void XNS::Server::Server::init(const QString& path) {
@@ -134,7 +89,7 @@ void XNS::Server::Server::init(const QString& path) {
 	processThread = new ProcessThread(context, handlerMap);
 	processThread->setAutoDelete(false);
 }
-void XNS::Server::Server::add(DataHandler handler) {
+void XNS::Server::Server::add(Handler handler) {
 	quint16 socket = handler.socket();
 	const char* name = handler.name();
 	logger.info("add handler %-4s  %s", XNS::IDP::Socket::toString(socket), name);
@@ -150,7 +105,7 @@ void XNS::Server::Server::start() {
 	} else {
 		// start handler
 		for(quint16 socket: handlerMap.keys()) {
-			DataHandler handler = handlerMap[socket];
+			Handler handler = handlerMap[socket];
 			logger.info("handler START %-4s  %s", IDP::Socket::toString(socket), handler.name());
 			handler.start();
 		}
@@ -166,7 +121,7 @@ void XNS::Server::Server::stop() {
 		this->processThreadPool->waitForDone();
 		// stop handler
 		for(quint16 socket: handlerMap.keys()) {
-			DataHandler handler = handlerMap[socket];
+			Handler handler = handlerMap[socket];
 			logger.info("handler STOP  %-4s  %s", IDP::Socket::toString(socket), handler.name());
 			handler.stop();
 		}
@@ -226,45 +181,14 @@ void XNS::Server::ProcessThread::run() {
 
 			XNS::IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
-			ByteBuffer::Buffer level2 = idp.block.toBuffer();
 
 			logger.info("%s", ethernet.toString());
 			logger.info("    %s", idp.toString());
 
 			quint16 socket = (quint16)idp.dstSocket;
-
 			if (handlerMap.contains(socket)) {
-				auto handler = handlerMap[socket];
 				Data data(context, packet, ethernet, idp);
-				if (idp.type == IDP::Type::RIP) {
-					RIP rip;
-					FROM_BYTE_BUFFER(level2, rip);
-					handler.rip(data, rip);
-				} else if (idp.type == IDP::Type::ECHO) {
-					Echo echo;
-					FROM_BYTE_BUFFER(level2, echo);
-					handler.echo(data, echo);
-				} else if (idp.type == IDP::Type::ERROR_) {
-					Error error;
-					FROM_BYTE_BUFFER(level2, error);
-					handler.error(data, error);
-				} else if (idp.type == IDP::Type::PEX) {
-					PEX pex;
-					FROM_BYTE_BUFFER(level2, pex);
-					handler.pex(data, pex);
-				} else if (idp.type == IDP::Type::SPP) {
-					SPP spp;
-					FROM_BYTE_BUFFER(level2, spp);
-					handler.spp(data, spp);
-				} else if (idp.type == IDP::Type::BOOT) {
-					Boot boot;
-					FROM_BYTE_BUFFER(level2, boot);
-					handler.boot(data, boot);
-				} else {
-					logger.error("Unexpected");
-					logger.error("  type = %s", idp.type.toString());
-					ERROR();
-				}
+				handlerMap[socket].handle(data);
 			} else {
 				logger.warn("no handler for socket %s", XNS::IDP::Socket::toString(socket));
 			}
@@ -282,3 +206,59 @@ void XNS::Server::ProcessThread::stop() {
 		logger.warn("processThread already stop");
 	}
 }
+
+
+//
+// XNS::Server::Handlers::RIPHandler
+//
+void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
+	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::RIP) {
+		RIP rip;
+		FROM_BYTE_BUFFER(level2, rip);
+		handle(data, rip);
+	} else if (data.idp.type == IDP::Type::ERROR_) {
+		Error error;
+		FROM_BYTE_BUFFER(level2, error);
+		handle(data, error);
+	} else {
+		logger.error("Unexpected");
+		logger.error("    %s", data.idp.toString());
+		logger.error("        %s", data.idp.block.toString());
+	}
+}
+
+
+//
+// XNS::Server::Handlers::CHSHandler
+//
+void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
+	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::PEX) {
+		PEX pex;
+		FROM_BYTE_BUFFER(level2, pex);
+
+		if (pex.type == PEX::Type::CHS) {
+			handle(data, pex);
+		} else {
+			logger.error("Unexpected");
+			logger.error("    %s", data.idp.toString());
+			logger.error("        PEX %s", pex.toString());
+			logger.error("            %s", pex.block.toString());
+		}
+//	} else if (data.idp.type == IDP::Type::SPP) {
+//		SPP spp;
+//		FROM_BYTE_BUFFER(level2, spp);
+//		handle(data, spp);
+	} else if (data.idp.type == IDP::Type::ERROR_) {
+		Error error;
+		FROM_BYTE_BUFFER(level2, error);
+		handle(data, error);
+	} else {
+		logger.error("Unexpected");
+		logger.error("    %s", data.idp.toString());
+		logger.error("        %s", data.idp.block.toString());
+	}
+}
+
+

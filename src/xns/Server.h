@@ -83,77 +83,52 @@ namespace XNS::Server {
 			time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 
-	class DataHandler {
+	class Handler {
 	public:
 		class Base {
 		public:
 			virtual ~Base() {}
-			virtual quint16     socket()            = 0;
-			virtual const char* name()              = 0;
-			virtual void        start()             = 0;
-			virtual void        stop()              = 0;
+			virtual quint16     socket()           = 0;
+			virtual const char* name()             = 0;
+			virtual void        start()            = 0;
+			virtual void        stop()             = 0;
 
-			virtual void        rip  (Data& data, RIP&   rip)   = 0;
-			virtual void        echo (Data& data, Echo&  echo)  = 0;
-			virtual void        error(Data& data, Error& error) = 0;
-			virtual void        pex  (Data& data, PEX&   pex)   = 0;
-			virtual void        spp  (Data& data, SPP&   spp)   = 0;
-			virtual void        boot (Data& data, Boot&  boot)  = 0;
+			virtual void        handle(Data& data) = 0;
 		};
 
 		class Default : public Base {
 		public:
 			virtual ~Default() {}
 
-			void start();
-			void stop();
-
-			void rip  (Data& data, RIP&   rip);
-			void echo (Data& data, Echo&  echo);
-			void error(Data& data, Error& error);
-			void pex  (Data& data, PEX&   pex);
-			void spp  (Data& data, SPP&   spp);
-			void boot (Data& data, Boot&  boot);
+			void start() {}
+			void stop () {}
 		};
 
 		std::function<quint16(void)>     socket;
 		std::function<const char*(void)> name;
 		std::function<void(void)>        start;
 		std::function<void(void)>        stop;
+		std::function<void(Data&)>       handle;
 
-		std::function<void(Data&, RIP&)>   rip;
-		std::function<void(Data&, Echo&)>  echo;
-		std::function<void(Data&, Error&)> error;
-		std::function<void(Data&, PEX&)>   pex;
-		std::function<void(Data&, SPP&)>   spp;
-		std::function<void(Data&, Boot&)>  boot;
-
-		DataHandler() :
-			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr),
-			rip(nullptr), echo(nullptr), error(nullptr), pex(nullptr), spp(nullptr), boot(nullptr) {}
-		DataHandler(Base& base) :
+		Handler() :
+			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
+		Handler(Base& base) :
 			socket ([&base](){return base.socket();}),
 			name   ([&base](){return base.name();}),
 			start  ([&base](){base.start();}),
 			stop   ([&base](){base.stop();}),
-
-			rip    ([&base](Data& data, RIP& rip)    {base.rip  (data, rip);}),
-			echo   ([&base](Data& data, Echo& echo)  {base.echo (data, echo);}),
-			error  ([&base](Data& data, Error& error){base.error(data, error);}),
-			pex    ([&base](Data& data, PEX& pex)    {base.pex  (data, pex);}),
-			spp    ([&base](Data& data, SPP& spp)    {base.spp  (data, spp);}),
-			boot   ([&base](Data& data, Boot& boot)  {base.boot (data, boot);}) {}
+			handle ([&base](Data& data){base.handle(data);}) {}
 	};
 
 
 	class ProcessThread : public QRunnable {
 		Context&                    context;
-		QMap<quint16, DataHandler>& handlerMap;
-		bool                        stopThread;
-		bool                        threadRunning;
+		QMap<quint16, Handler>& handlerMap;
+		bool                    stopThread;
+		bool                    threadRunning;
 
 	public:
-		ProcessThread(Context& context_, QMap<quint16, DataHandler>& handlerMap_) :
+		ProcessThread(Context& context_, QMap<quint16, Handler>& handlerMap_) :
 			context(context_), handlerMap(handlerMap_), stopThread(false), threadRunning(false) {}
 
 		bool running();
@@ -165,22 +140,74 @@ namespace XNS::Server {
 
 
 	class Server {
-		Context                    context;
-		QMap<quint16, DataHandler> handlerMap;
+		Context                context;
+		QMap<quint16, Handler> handlerMap;
 
-		QThreadPool*               processThreadPool;    // thread pool for ProcessThread
-		ProcessThread*             processThread;
+		QThreadPool*           processThreadPool;    // thread pool for ProcessThread
+		ProcessThread*         processThread;
 
 	public:
 		Server() : processThreadPool(new QThreadPool()), processThread(nullptr) {}
 
 		void init(const QString& path);
 
-		void add(DataHandler handler);
+		void add(Handler handler);
 
 		bool running();
 		void start();
 		void stop();
 	};
+
+
+	namespace Handlers {
+		class RIPHandler : public Handler::Default {
+		public:
+			typedef std::function<void(Data&, RIP&)>   HandleRIP;
+			typedef std::function<void(Data&, Error&)> HandleError;
+
+			HandleRIP   handleRIP;
+			HandleError handleError;
+
+			RIPHandler() :
+				Handler::Default(*this),
+				handleRIP([this](Data& data, RIP& rip){this->handle(data, rip);}),
+				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+
+			quint16 socket(){
+				return XNS::IDP::Socket::RIP;
+			}
+			void handle(Data& data);
+
+			virtual void handle(Data& data, RIP&   rip)   = 0;
+			virtual void handle(Data& data, Error& error) = 0;
+		};
+
+		class CHSHandler : public Handler::Default {
+		public:
+			typedef std::function<void(Data&, PEX&)>   HandlePEX;
+//			typedef std::function<void(Data&, SPP&)>   HandleSPP;
+			typedef std::function<void(Data&, Error&)> HandleError;
+
+			HandlePEX   handlePEX;
+//			HandleSPP   handleSPP;
+			HandleError handleError;
+
+			CHSHandler() :
+				Handler::Default(*this),
+				handlePEX([this](Data& data, PEX& pex){this->handle(data, pex);}),
+//				handleSPP([this](Data& data, SPP& spp){this->handle(data, spp);}),
+				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+
+			quint16 socket(){
+				return XNS::IDP::Socket::CHS;
+			}
+			void handle(Data& data);
+
+			virtual void handle(Data& data, PEX&   rip)   = 0;
+//			virtual void handle(Data& data, SPP&   spp)   = 0;
+			virtual void handle(Data& data, Error& error) = 0;
+		};
+
+	}
 
 }

@@ -49,6 +49,7 @@
 #include "../xns/PEX.h"
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
+#include "../xns/Courier.h"
 
 #include <functional>
 
@@ -184,18 +185,15 @@ namespace XNS::Server {
 
 		class CHSHandler : public Handler::Default {
 		public:
-			typedef std::function<void(Data&, PEX&)>   HandlePEX;
-//			typedef std::function<void(Data&, SPP&)>   HandleSPP;
+			typedef std::function<void(Data&, PEX&, Courier::ExpeditedCourier& exp)>   HandlePEX;
 			typedef std::function<void(Data&, Error&)> HandleError;
 
 			HandlePEX   handlePEX;
-//			HandleSPP   handleSPP;
 			HandleError handleError;
 
 			CHSHandler() :
 				Handler::Default(*this),
-				handlePEX([this](Data& data, PEX& pex){this->handle(data, pex);}),
-//				handleSPP([this](Data& data, SPP& spp){this->handle(data, spp);}),
+				handlePEX([this](Data& data, PEX& pex, Courier::ExpeditedCourier& exp){this->handle(data, pex, exp);}),
 				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
 
 			quint16 socket(){
@@ -203,8 +201,7 @@ namespace XNS::Server {
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, PEX&   rip)   = 0;
-//			virtual void handle(Data& data, SPP&   spp)   = 0;
+			virtual void handle(Data& data, PEX&   rip, Courier::ExpeditedCourier& exp)   = 0;
 			virtual void handle(Data& data, Error& error) = 0;
 		};
 

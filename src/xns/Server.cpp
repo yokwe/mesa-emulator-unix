@@ -239,7 +239,10 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 		FROM_BYTE_BUFFER(level2, pex);
 
 		if (pex.type == PEX::Type::CHS) {
-			handle(data, pex);
+			ByteBuffer::Buffer level3 = pex.block.toBuffer();
+			XNS::Courier::ExpeditedCourier exp;
+			FROM_BYTE_BUFFER(level3, exp);
+			handle(data, pex, exp);
 		} else {
 			logger.error("Unexpected");
 			logger.error("    %s", data.idp.toString());

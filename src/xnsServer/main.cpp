@@ -67,11 +67,8 @@ public:
 	const char* name() {
 		return "CHSHandler";
 	}
-	void handle(XNS::Server::Data& data, XNS::PEX& pex) {
+	void handle(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
 		(void)data;
-		ByteBuffer::Buffer level3 = pex.block.toBuffer();
-		XNS::Courier::ExpeditedCourier exp;
-		FROM_BYTE_BUFFER(level3, exp);
 		logger.info("##  CHS %s", pex.toString());
 		logger.info("        %s", exp.toString());
 	}
@@ -82,32 +79,7 @@ public:
 };
 
 
-//class CHSHandler : public XNS::Server::DataHandler::Default {
-//public:
-//	quint16 socket() {
-//		return XNS::IDP::Socket::CHS;
-//	}
-//	const char* name() {
-//		return "CHSHandler";
-//	}
-//	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
-//		(void)data;
-//		ByteBuffer::Buffer level3 = pex.block.toBuffer();
-//		if (pex.type == XNS::PEX::Type::CHS) {
-//			XNS::Courier::ExpeditedCourier exp;
-//			FROM_BYTE_BUFFER(level3, exp);
-//
-//			logger.info("    PEX %s", pex.toString());
-//			logger.info("        CHS %s", exp.toString());
-//		} else {
-//			logger.warn("Unexpected type CHS");
-//			logger.warn("    PEX %s", pex.toString());
-//			logger.warn("        %s", pex.block.toString());
-//		}
-//	}
-//};
-//
-//
+
 //class TimeHandler : public XNS::Server::DataHandler::Default {
 //public:
 //	quint16 socket() {

@@ -168,7 +168,11 @@ quint64 XNS::IDP::Host::fromString(QString string) {
 	ERROR();
 }
 
-NameMap::Map<quint64> XNS::IDP::Host::nameMap(NameMap::toString64X, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
+NameMap::Map<quint64> XNS::IDP::Host::nameMap(NameMap::toString64X, {
+	{ALL,       "ALL"},
+	{UNKNOWN,   "UNKNOWN"},
+	{BFN_GVWIN, "BFN_GVWIN"},
+});
 
 
 //

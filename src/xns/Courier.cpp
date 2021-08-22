@@ -106,7 +106,7 @@ void XNS::Courier::VersionRange::toByteBuffer  (Buffer& bb) const {
 // XNS::Courier::Protocol2Body::CallBody
 //
 QString XNS::Courier::Protocol2Body::CallBody::toString() const {
-	return QString("%1-%2-%3-%4").arg((quint16)transaction).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
+	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
 }
 void XNS::Courier::Protocol2Body::CallBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -322,7 +322,7 @@ void XNS::Courier::Protocol2Body::toByteBuffer  (Buffer& bb) const {
 // XNS::Courier::Protocol3Body::CallBody
 //
 QString XNS::Courier::Protocol3Body::CallBody::toString() const {
-	return QString("%1-%2-%3-%4").arg((quint16)transaction).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
+	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
 }
 void XNS::Courier::Protocol3Body::CallBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);

@@ -79,6 +79,51 @@ XNS::Server::Context::Context(const QString& path) {
 
 
 //
+// XNS::Server::DataHandler::Default
+//
+
+void XNS::Server::DataHandler::Default::start() {}
+void XNS::Server::DataHandler::Default::stop() {}
+void XNS::Server::DataHandler::Default::rip  (Data& data, RIP&   rip) {
+	logger.error("Unexpected");
+	logger.error("  idp %s", data.idp.toString());
+	logger.error("    rip %s", rip.toString());
+	ERROR();
+}
+void XNS::Server::DataHandler::Default::echo (Data& data, Echo&  echo) {
+	logger.error("Unexpected");
+	logger.error("  idp %s", data.idp.toString());
+	logger.error("    echo %s", echo.toString());
+	ERROR();
+}
+void XNS::Server::DataHandler::Default::error(Data& data, Error& error) {
+	logger.warn("Unexpected");
+	logger.warn("  idp %s", data.idp.toString());
+	logger.warn("    error %s", error.toString());
+	ERROR();
+}
+void XNS::Server::DataHandler::Default::pex  (Data& data, PEX&   pex) {
+	logger.error("Unexpected");
+	logger.error("  idp %s", data.idp.toString());
+	logger.error("    pex %s", pex.toString());
+	ERROR();
+}
+void XNS::Server::DataHandler::Default::spp  (Data& data, SPP&   spp) {
+	logger.error("Unexpected");
+	logger.error("  idp %s", data.idp.toString());
+	logger.error("    spp %s", spp.toString());
+	ERROR();
+}
+void XNS::Server::DataHandler::Default::boot (Data& data, Boot&  boot) {
+	logger.error("Unexpected");
+	logger.error("  idp %s", data.idp.toString());
+	logger.error("    boot %s", boot.toString());
+	ERROR();
+}
+
+
+
+//
 // XNS::Server::Server
 //
 void XNS::Server::Server::init(const QString& path) {
@@ -181,6 +226,7 @@ void XNS::Server::ProcessThread::run() {
 
 			XNS::IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
+			ByteBuffer::Buffer level2 = idp.block.toBuffer();
 
 			logger.info("%s", ethernet.toString());
 			logger.info("    %s", idp.toString());
@@ -190,7 +236,35 @@ void XNS::Server::ProcessThread::run() {
 			if (handlerMap.contains(socket)) {
 				auto handler = handlerMap[socket];
 				Data data(context, packet, ethernet, idp);
-				handler.process(data);
+				if (idp.type == IDP::Type::RIP) {
+					RIP rip;
+					FROM_BYTE_BUFFER(level2, rip);
+					handler.rip(data, rip);
+				} else if (idp.type == IDP::Type::ECHO) {
+					Echo echo;
+					FROM_BYTE_BUFFER(level2, echo);
+					handler.echo(data, echo);
+				} else if (idp.type == IDP::Type::ERROR_) {
+					Error error;
+					FROM_BYTE_BUFFER(level2, error);
+					handler.error(data, error);
+				} else if (idp.type == IDP::Type::PEX) {
+					PEX pex;
+					FROM_BYTE_BUFFER(level2, pex);
+					handler.pex(data, pex);
+				} else if (idp.type == IDP::Type::SPP) {
+					SPP spp;
+					FROM_BYTE_BUFFER(level2, spp);
+					handler.spp(data, spp);
+				} else if (idp.type == IDP::Type::BOOT) {
+					Boot boot;
+					FROM_BYTE_BUFFER(level2, boot);
+					handler.boot(data, boot);
+				} else {
+					logger.error("Unexpected");
+					logger.error("  type = %s", idp.type.toString());
+					ERROR();
+				}
 			} else {
 				logger.warn("no handler for socket %s", XNS::IDP::Socket::toString(socket));
 			}

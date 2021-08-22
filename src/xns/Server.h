@@ -43,7 +43,12 @@
 #include "../util/Network.h"
 
 #include "../xns/XNS.h"
+#include "../xns/RIP.h"
+#include "../xns/Echo.h"
 #include "../xns/Error.h"
+#include "../xns/PEX.h"
+#include "../xns/SPP.h"
+#include "../xns/Boot.h"
 
 #include <functional>
 
@@ -86,23 +91,58 @@ namespace XNS::Server {
 			virtual quint16     socket()            = 0;
 			virtual const char* name()              = 0;
 			virtual void        start()             = 0;
-			virtual void        process(Data& data) = 0;
 			virtual void        stop()              = 0;
+
+			virtual void        rip  (Data& data, RIP&   rip)   = 0;
+			virtual void        echo (Data& data, Echo&  echo)  = 0;
+			virtual void        error(Data& data, Error& error) = 0;
+			virtual void        pex  (Data& data, PEX&   pex)   = 0;
+			virtual void        spp  (Data& data, SPP&   spp)   = 0;
+			virtual void        boot (Data& data, Boot&  boot)  = 0;
+		};
+
+		class Default : public Base {
+		public:
+			virtual ~Default() {}
+
+			void start();
+			void stop();
+
+			void rip  (Data& data, RIP&   rip);
+			void echo (Data& data, Echo&  echo);
+			void error(Data& data, Error& error);
+			void pex  (Data& data, PEX&   pex);
+			void spp  (Data& data, SPP&   spp);
+			void boot (Data& data, Boot&  boot);
 		};
 
 		std::function<quint16(void)>     socket;
 		std::function<const char*(void)> name;
 		std::function<void(void)>        start;
-		std::function<void(Data&)>       process;
 		std::function<void(void)>        stop;
 
-		DataHandler() : socket(nullptr), name(nullptr), start(nullptr), process(nullptr), stop(nullptr) {}
+		std::function<void(Data&, RIP&)>   rip;
+		std::function<void(Data&, Echo&)>  echo;
+		std::function<void(Data&, Error&)> error;
+		std::function<void(Data&, PEX&)>   pex;
+		std::function<void(Data&, SPP&)>   spp;
+		std::function<void(Data&, Boot&)>  boot;
+
+		DataHandler() :
+			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr),
+			rip(nullptr), echo(nullptr), error(nullptr), pex(nullptr), spp(nullptr), boot(nullptr) {}
 		DataHandler(Base& base) :
 			socket ([&base](){return base.socket();}),
 			name   ([&base](){return base.name();}),
 			start  ([&base](){base.start();}),
-			process([&base](Data& data){base.process(data);}),
-			stop   ([&base](){base.stop();}) {}
+			stop   ([&base](){base.stop();}),
+
+			rip    ([&base](Data& data, RIP& rip)    {base.rip  (data, rip);}),
+			echo   ([&base](Data& data, Echo& echo)  {base.echo (data, echo);}),
+			error  ([&base](Data& data, Error& error){base.error(data, error);}),
+			pex    ([&base](Data& data, PEX& pex)    {base.pex  (data, pex);}),
+			spp    ([&base](Data& data, SPP& spp)    {base.spp  (data, spp);}),
+			boot   ([&base](Data& data, Boot& boot)  {base.boot (data, boot);}) {}
 	};
 
 

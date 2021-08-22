@@ -58,15 +58,14 @@ void testXNSServer() {
 	logger.info("START");
 
 	Collect2 collect2;
-	XNS::Server::DataHandler handler(collect2);
 
 	XNS::Server::Server server;
 
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
 
-	server.add(XNS::IDP::Socket::RIP, handler);
-	server.add(XNS::IDP::Socket::CHS, handler);
+	server.add(XNS::IDP::Socket::RIP, collect2);
+	server.add(XNS::IDP::Socket::CHS, collect2);
 
 	logger.info("server.start");
 	server.start();

@@ -42,6 +42,7 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/PEX.h"
 #include "../xns/Courier.h"
 #include "../xns/Time.h"
+#include "../xns/Echo.h"
 
 
 class RIPHandler : public XNS::Server::DataHandler::Base {
@@ -50,16 +51,22 @@ public:
 		logger.info("START RIP");
 	}
 	void process(XNS::Server::Data& data) {
+		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 		if (data.idp.type == XNS::IDP::Type::RIP) {
-			ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 			XNS::RIP rip;
 			FROM_BYTE_BUFFER(level2, rip);
+			
 			logger.info("    RIP %s", rip.toString());
+		} else if (data.idp.type == XNS::IDP::Type::ERROR_) {
+			XNS::Error error_;
+			FROM_BYTE_BUFFER(level2, error_);
 
+			logger.info("    ERROR %s", error_.toString());
+			logger.info("        %s", error_.block.toString());
 		} else {
 			logger.warn("Unexpected type");
 			logger.warn("    %s", data.idp.toString());
-			logger.warn("        %s", data.idp.block.toBuffer().toString());
+			logger.warn("        %s", data.idp.block.toString());
 		}
 	}
 	void stop() {
@@ -74,27 +81,33 @@ public:
 		logger.info("START CHS");
 	}
 	void process(XNS::Server::Data& data) {
+		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 		if (data.idp.type == XNS::IDP::Type::PEX) {
-			ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 			XNS::PEX pex;
 			FROM_BYTE_BUFFER(level2, pex);
-			ByteBuffer::Buffer level3 = pex.block.toBuffer();
 
+			ByteBuffer::Buffer level3 = pex.block.toBuffer();
 			if (pex.type == XNS::PEX::Type::CHS) {
 				XNS::Courier::ExpeditedCourier exp;
 				FROM_BYTE_BUFFER(level3, exp);
+				
 				logger.info("    PEX %s", pex.toString());
 				logger.info("        CHS %s", exp.toString());
-
 			} else {
 				logger.warn("Unexpected type");
 				logger.warn("    PEX %s", pex.toString());
-				logger.warn("        %s", level3.toString());
+				logger.warn("        %s", pex.block.toString());
 			}
+		} else if (data.idp.type == XNS::IDP::Type::ERROR_) {
+			XNS::Error error_;
+			FROM_BYTE_BUFFER(level2, error_);
+
+			logger.info("    ERROR %s", error_.toString());
+			logger.info("        %s", error_.block.toString());
 		} else {
 			logger.warn("Unexpected type");
 			logger.warn("    %s", data.idp.toString());
-			logger.warn("        %s", data.idp.block.toBuffer().toString());
+			logger.warn("        %s", data.idp.block.toString());
 		}
 	}
 	void stop() {
@@ -109,31 +122,67 @@ public:
 		logger.info("START TIme");
 	}
 	void process(XNS::Server::Data& data) {
+		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 		if (data.idp.type == XNS::IDP::Type::PEX) {
-			ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
 			XNS::PEX pex;
 			FROM_BYTE_BUFFER(level2, pex);
-			ByteBuffer::Buffer level3 = pex.block.toBuffer();
 
+			ByteBuffer::Buffer level3 = pex.block.toBuffer();
 			if (pex.type == XNS::PEX::Type::TIME) {
 				XNS::Time time;
 				FROM_BYTE_BUFFER(level3, time);
+				
 				logger.info("    PEX %s", pex.toString());
 				logger.info("        TIME %s", time.toString());
-
 			} else {
 				logger.warn("Unexpected type");
 				logger.warn("    PEX %s", pex.toString());
-				logger.warn("        %s", level3.toString());
+				logger.warn("        %s", pex.block.toString());
 			}
+		} else if (data.idp.type == XNS::IDP::Type::ERROR_) {
+			XNS::Error error_;
+			FROM_BYTE_BUFFER(level2, error_);
+
+			logger.info("    ERROR %s", error_.toString());
+			logger.info("        %s", error_.block.toString());
 		} else {
 			logger.warn("Unexpected type");
 			logger.warn("    %s", data.idp.toString());
-			logger.warn("        %s", data.idp.block.toBuffer().toString());
+			logger.warn("        %s", data.idp.block.toString());
 		}
 	}
 	void stop() {
 		logger.info("STOP  TIme");
+	}
+};
+
+
+class EchoHandler : public XNS::Server::DataHandler::Base {
+public:
+	void start() {
+		logger.info("START ECHO");
+	}
+	void process(XNS::Server::Data& data) {
+		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+		if (data.idp.type == XNS::IDP::Type::ECHO) {
+			XNS::Echo echo;
+			FROM_BYTE_BUFFER(level2, echo);
+			
+			logger.info("    ECHO %s", echo.toString());
+		} else if (data.idp.type == XNS::IDP::Type::ERROR_) {
+			XNS::Error error_;
+			FROM_BYTE_BUFFER(level2, error_);
+
+			logger.info("    ERROR %s", error_.toString());
+			logger.info("        %s", error_.block.toString());
+		} else {
+			logger.warn("Unexpected type");
+			logger.warn("    %s", data.idp.toString());
+			logger.warn("        %s", data.idp.block.toString());
+		}
+	}
+	void stop() {
+		logger.info("STOP  ECHO");
 	}
 };
 
@@ -144,6 +193,7 @@ void testXNSServer() {
 	RIPHandler  ripHandler;
 	CHSHandler  chsHandler;
 	TimeHandler timeHandler;
+	EchoHandler echoHandler;
 
 	XNS::Server::Server server;
 
@@ -153,6 +203,7 @@ void testXNSServer() {
 	server.add(XNS::IDP::Socket::RIP,  ripHandler);
 	server.add(XNS::IDP::Socket::CHS,  chsHandler);
 	server.add(XNS::IDP::Socket::TIME, timeHandler);
+	server.add(XNS::IDP::Socket::ECHO, echoHandler);
 
 	logger.info("server.start");
 	server.start();

@@ -135,6 +135,7 @@ namespace XNS {
 			static constexpr int     SIZE      = 6;
 			static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
 			static constexpr quint64 UNKNOWN   = 0;
+			static constexpr quint64 BFN_GVWIN = 0x0000'aa00'0e60ULL; // Boot File Number of GVWin
 
 			// define operator =
 			quint64 operator =(const quint64& newValue) const {

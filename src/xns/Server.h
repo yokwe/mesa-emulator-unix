@@ -83,17 +83,23 @@ namespace XNS::Server {
 		class Base {
 		public:
 			virtual ~Base() {}
-			virtual void start()             = 0;
-			virtual void process(Data& data) = 0;
-			virtual void stop()              = 0;
+			virtual quint16     socket()            = 0;
+			virtual const char* name()              = 0;
+			virtual void        start()             = 0;
+			virtual void        process(Data& data) = 0;
+			virtual void        stop()              = 0;
 		};
 
-		std::function<void(void)>  start;
-		std::function<void(Data&)> process;
-		std::function<void(void)>  stop;
+		std::function<quint16(void)>     socket;
+		std::function<const char*(void)> name;
+		std::function<void(void)>        start;
+		std::function<void(Data&)>       process;
+		std::function<void(void)>        stop;
 
-		DataHandler() : start(nullptr), process(nullptr), stop(nullptr) {}
+		DataHandler() : socket(nullptr), name(nullptr), start(nullptr), process(nullptr), stop(nullptr) {}
 		DataHandler(Base& base) :
+			socket ([&base](){return base.socket();}),
+			name   ([&base](){return base.name();}),
 			start  ([&base](){base.start();}),
 			process([&base](Data& data){base.process(data);}),
 			stop   ([&base](){base.stop();}) {}
@@ -130,7 +136,7 @@ namespace XNS::Server {
 
 		void init(const QString& path);
 
-		void add(quint16 socket, DataHandler handler);
+		void add(DataHandler handler);
 
 		bool running();
 		void start();

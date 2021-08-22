@@ -47,8 +47,14 @@ static const Logger logger = Logger::getLogger("main");
 
 class RIPHandler : public XNS::Server::DataHandler::Base {
 public:
+	quint16 socket() {
+		return XNS::IDP::Socket::RIP;
+	}
+	const char* name() {
+		return "RIPHandler";
+	}
 	void start() {
-		logger.info("START RIP");
+//		logger.info("START RIP");
 	}
 	void process(XNS::Server::Data& data) {
 		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
@@ -70,15 +76,21 @@ public:
 		}
 	}
 	void stop() {
-		logger.info("STOP  RIP");
+//		logger.info("STOP  RIP");
 	}
 };
 
 
 class CHSHandler : public XNS::Server::DataHandler::Base {
 public:
+	quint16 socket() {
+		return XNS::IDP::Socket::CHS;
+	}
+	const char* name() {
+		return "CHSHandler";
+	}
 	void start() {
-		logger.info("START CHS");
+//		logger.info("START CHS");
 	}
 	void process(XNS::Server::Data& data) {
 		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
@@ -111,15 +123,21 @@ public:
 		}
 	}
 	void stop() {
-		logger.info("STOP  CHS");
+//		logger.info("STOP  CHS");
 	}
 };
 
 
 class TimeHandler : public XNS::Server::DataHandler::Base {
 public:
+	quint16 socket() {
+		return XNS::IDP::Socket::TIME;
+	}
+	const char* name() {
+		return "TimeHandler";
+	}
 	void start() {
-		logger.info("START TIme");
+//		logger.info("START TIme");
 	}
 	void process(XNS::Server::Data& data) {
 		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
@@ -152,15 +170,21 @@ public:
 		}
 	}
 	void stop() {
-		logger.info("STOP  TIme");
+//		logger.info("STOP  TIme");
 	}
 };
 
 
 class EchoHandler : public XNS::Server::DataHandler::Base {
 public:
+	quint16 socket() {
+		return XNS::IDP::Socket::ECHO;
+	}
+	const char* name() {
+		return "EchoHandler";
+	}
 	void start() {
-		logger.info("START ECHO");
+//		logger.info("START ECHO");
 	}
 	void process(XNS::Server::Data& data) {
 		ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
@@ -182,13 +206,13 @@ public:
 		}
 	}
 	void stop() {
-		logger.info("STOP  ECHO");
+//		logger.info("STOP  ECHO");
 	}
 };
 
 
 void testXNSServer() {
-	logger.info("START");
+	logger.info("START testXNSServer");
 
 	RIPHandler  ripHandler;
 	CHSHandler  chsHandler;
@@ -200,10 +224,10 @@ void testXNSServer() {
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
 
-	server.add(XNS::IDP::Socket::RIP,  ripHandler);
-	server.add(XNS::IDP::Socket::CHS,  chsHandler);
-	server.add(XNS::IDP::Socket::TIME, timeHandler);
-	server.add(XNS::IDP::Socket::ECHO, echoHandler);
+	server.add(ripHandler);
+	server.add(chsHandler);
+	server.add(timeHandler);
+	server.add(echoHandler);
 
 	logger.info("server.start");
 	server.start();
@@ -211,7 +235,7 @@ void testXNSServer() {
 	QThread::sleep(10);
 	logger.info("server.stop");
 	server.stop();
-	logger.info("STOP");
+	logger.info("STOP testXNSServer");
 }
 
 int main(int, char**) {

@@ -89,8 +89,10 @@ void XNS::Server::Server::init(const QString& path) {
 	processThread = new ProcessThread(context, handlerMap);
 	processThread->setAutoDelete(false);
 }
-void XNS::Server::Server::add(quint16 socket, DataHandler handler) {
-	logger.info("add socket listener %s", XNS::IDP::Socket::toString(socket));
+void XNS::Server::Server::add(DataHandler handler) {
+	quint16 socket = handler.socket();
+	const char* name = handler.name();
+	logger.info("add handler %-4s  %s", XNS::IDP::Socket::toString(socket), name);
 	handlerMap[socket] = handler;
 }
 bool XNS::Server::Server::running() {
@@ -103,8 +105,9 @@ void XNS::Server::Server::start() {
 	} else {
 		// start handler
 		for(quint16 socket: handlerMap.keys()) {
-			logger.info("handler START %s", IDP::Socket::toString(socket));
-			handlerMap[socket].start();
+			DataHandler handler = handlerMap[socket];
+			logger.info("handler START %-4s  %s", IDP::Socket::toString(socket), handler.name());
+			handler.start();
 		}
 		// start processThread
 		logger.info("processThread START");
@@ -118,8 +121,9 @@ void XNS::Server::Server::stop() {
 		this->processThreadPool->waitForDone();
 		// stop handler
 		for(quint16 socket: handlerMap.keys()) {
-			logger.info("handler STOP  %s", IDP::Socket::toString(socket));
-			handlerMap[socket].stop();
+			DataHandler handler = handlerMap[socket];
+			logger.info("handler STOP  %-4s  %s", IDP::Socket::toString(socket), handler.name());
+			handler.stop();
 		}
 	} else {
 		logger.warn("processThread already stop");
@@ -192,7 +196,7 @@ void XNS::Server::ProcessThread::run() {
 			}
 		}
 exitLoop:
-		logger.info("ProcessThread run stop");
+		/* empty statement for label */ ;
 	}
 
 	threadRunning = false;
@@ -200,7 +204,6 @@ exitLoop:
 void XNS::Server::ProcessThread::stop() {
 	if (running()) {
 		stopThread = true;
-
 	} else {
 		logger.warn("processThread already stop");
 	}

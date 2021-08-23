@@ -73,8 +73,8 @@ XNS::Server::Context::Context(const QString& path) {
 
 	driver = Network::getDriver(device);
 
-	logger.info("device   = %s  %s", XNS::IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
-	logger.info("device   = %s  %s", XNS::IDP::Host::toDecimalString(device.address), device.name);
+	logger.info("device   = %20s  %s", XNS::IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device   = %20s  %s", XNS::IDP::Host::toDecimalString(device.address), device.name);
 	logger.info("localNet = %d", localNet);
 }
 

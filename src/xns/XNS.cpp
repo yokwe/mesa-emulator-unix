@@ -64,7 +64,10 @@ XNS::Config XNS::loadConfig(const QString& path) {
 		logger.info("config net  %4d  %s", e.value, e.name);
 	}
 	for(auto e: config.hostList) {
-		logger.info("config host %s  %llX  %s", XNS::IDP::Host::toHexaDecimalString(e.value, ":"), e.value, e.name);
+		logger.info("config host %s  %20s  %s",
+			TO_CSTRING(XNS::IDP::Host::toHexaDecimalString(e.value, ":")),
+			TO_CSTRING(XNS::IDP::Host::toDecimalString(e.value)),
+			TO_CSTRING(e.name));
 	}
 
 	return config;
@@ -110,10 +113,9 @@ QString XNS::IDP::Host::toDecimalString(quint64 value) {
 		auto quotient  = n / 1000;
 		auto remainder = (int)(n % 1000);
 
-		list.prepend(QString::asprintf("%d", remainder));
+		list.prepend(QString::asprintf("%03d", remainder));
 		n = quotient;
 	}
-
 	return list.join("-");
 }
 QString XNS::IDP::Host::toHexaDecimalString(quint64 value, QString sep) {

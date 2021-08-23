@@ -50,6 +50,7 @@
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
 #include "../xns/Courier.h"
+#include "../xns/Time.h"
 
 #include <functional>
 
@@ -59,6 +60,9 @@ namespace XNS::Server {
 	using Network::Device;
 	using Network::Driver;
 	using Network::Packet;
+
+	// FIXME Create transmit queue and use this queue to send packet
+	// FIXME May be create receive queue?
 
 	class Context {
 	public:
@@ -83,6 +87,7 @@ namespace XNS::Server {
 		Data(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
 			time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
+
 
 	class Handler {
 	public:
@@ -171,7 +176,7 @@ namespace XNS::Server {
 
 			RIPHandler() :
 				Handler::Default(*this),
-				handleRIP([this](Data& data, RIP& rip){this->handle(data, rip);}),
+				handleRIP  ([this](Data& data, RIP& rip)    {this->handle(data, rip);}),
 				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
 
 			quint16 socket(){
@@ -183,27 +188,73 @@ namespace XNS::Server {
 			virtual void handle(Data& data, Error& error) = 0;
 		};
 
-		class CHSHandler : public Handler::Default {
+		class EchoHandler : public Handler::Default {
 		public:
-			typedef std::function<void(Data&, PEX&, Courier::ExpeditedCourier& exp)>   HandlePEX;
+			typedef std::function<void(Data&, Echo&)>  HandleEcho;
 			typedef std::function<void(Data&, Error&)> HandleError;
 
-			HandlePEX   handlePEX;
+			HandleEcho  handleEcho;
+			HandleError handleError;
+
+			EchoHandler() :
+				Handler::Default(*this),
+				handleEcho ([this](Data& data, Echo& echo)  {this->handle(data, echo);}),
+				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+
+			quint16 socket(){
+				return XNS::IDP::Socket::ECHO;
+			}
+			void handle(Data& data);
+
+			virtual void handle(Data& data, Echo&  echo)  = 0;
+			virtual void handle(Data& data, Error& error) = 0;
+		};
+
+		class CHSHandler : public Handler::Default {
+		public:
+			typedef std::function<void(Data&, PEX&, Courier::ExpeditedCourier& exp)> HandleExp;
+			typedef std::function<void(Data&, Error&)>                               HandleError;
+
+			HandleExp   handleExp;
 			HandleError handleError;
 
 			CHSHandler() :
 				Handler::Default(*this),
-				handlePEX([this](Data& data, PEX& pex, Courier::ExpeditedCourier& exp){this->handle(data, pex, exp);}),
-				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+				handleExp  ([this](Data& data, PEX& pex, Courier::ExpeditedCourier& exp){this->handle(data, pex, exp);}),
+				handleError([this](Data& data, Error& error)                            {this->handle(data, error);   }) {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::CHS;
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, PEX&   rip, Courier::ExpeditedCourier& exp)   = 0;
-			virtual void handle(Data& data, Error& error) = 0;
+			virtual void handle(Data& data, PEX&   pex, Courier::ExpeditedCourier& exp)   = 0;
+			virtual void handle(Data& data, Error& error)                                 = 0;
 		};
+
+		class TimeHandler : public Handler::Default {
+		public:
+			typedef std::function<void(Data&, PEX&, Time& time)>   HandleTime;
+			typedef std::function<void(Data&, Error&)> HandleError;
+
+			HandleTime   handleTime;
+			HandleError handleError;
+
+			TimeHandler() :
+				Handler::Default(*this),
+				handleTime ([this](Data& data, PEX& pex, Time& time){this->handle(data, pex, time);}),
+				handleError([this](Data& data, Error& error)        {this->handle(data, error);    }) {}
+
+			quint16 socket(){
+				return XNS::IDP::Socket::TIME;
+			}
+			void handle(Data& data);
+
+			virtual void handle(Data& data, PEX&   pex, Time& time)   = 0;
+			virtual void handle(Data& data, Error& error)             = 0;
+		};
+
+		// FIXME EchoHandler
 
 	}
 

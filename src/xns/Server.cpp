@@ -74,6 +74,7 @@ XNS::Server::Context::Context(const QString& path) {
 	driver = Network::getDriver(device);
 
 	logger.info("device   = %s  %s", XNS::IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device   = %s  %s", XNS::IDP::Host::toDecimalString(device.address), device.name);
 	logger.info("localNet = %d", localNet);
 }
 
@@ -225,6 +226,29 @@ void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
+		ERROR();
+	}
+}
+
+
+//
+// XNS::Server::Handlers::EchoHandler
+//
+void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
+	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::ECHO) {
+		Echo echo;
+		FROM_BYTE_BUFFER(level2, echo);
+		handle(data, echo);
+	} else if (data.idp.type == IDP::Type::ERROR_) {
+		Error error;
+		FROM_BYTE_BUFFER(level2, error);
+		handle(data, error);
+	} else {
+		logger.error("Unexpected");
+		logger.error("    %s", data.idp.toString());
+		logger.error("        %s", data.idp.block.toString());
+		ERROR();
 	}
 }
 
@@ -242,17 +266,15 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 			ByteBuffer::Buffer level3 = pex.block.toBuffer();
 			XNS::Courier::ExpeditedCourier exp;
 			FROM_BYTE_BUFFER(level3, exp);
+
 			handle(data, pex, exp);
 		} else {
 			logger.error("Unexpected");
 			logger.error("    %s", data.idp.toString());
 			logger.error("        PEX %s", pex.toString());
 			logger.error("            %s", pex.block.toString());
+			ERROR();
 		}
-//	} else if (data.idp.type == IDP::Type::SPP) {
-//		SPP spp;
-//		FROM_BYTE_BUFFER(level2, spp);
-//		handle(data, spp);
 	} else if (data.idp.type == IDP::Type::ERROR_) {
 		Error error;
 		FROM_BYTE_BUFFER(level2, error);
@@ -261,7 +283,44 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
+		ERROR();
 	}
 }
+
+
+//
+// XNS::Server::Handlers::TimeHandler
+//
+void XNS::Server::Handlers::TimeHandler::handle(Data& data) {
+	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::PEX) {
+		PEX pex;
+		FROM_BYTE_BUFFER(level2, pex);
+
+		if (pex.type == PEX::Type::TIME) {
+			ByteBuffer::Buffer level3 = pex.block.toBuffer();
+			Time time;
+			FROM_BYTE_BUFFER(level3, time);
+
+			handle(data, pex, time);
+		} else {
+			logger.error("Unexpected");
+			logger.error("    %s", data.idp.toString());
+			logger.error("        PEX %s", pex.toString());
+			logger.error("            %s", pex.block.toString());
+			ERROR();
+		}
+	} else if (data.idp.type == IDP::Type::ERROR_) {
+		Error error;
+		FROM_BYTE_BUFFER(level2, error);
+		handle(data, error);
+	} else {
+		logger.error("Unexpected");
+		logger.error("    %s", data.idp.toString());
+		logger.error("        %s", data.idp.block.toString());
+		ERROR();
+	}
+}
+
 
 

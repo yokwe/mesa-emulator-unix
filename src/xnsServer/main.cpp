@@ -79,49 +79,37 @@ public:
 };
 
 
+class TimeHandler : public XNS::Server::Handlers::TimeHandler {
+public:
+	const char* name() {
+		return "TimeHandler";
+	}
+	void handle(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
+		(void)data;
+		logger.info("##  TIME %s", pex.toString());
+		logger.info("         %s", time.toString());
+	}
+	void handle(XNS::Server::Data& data, XNS::Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+};
 
-//class TimeHandler : public XNS::Server::DataHandler::Default {
-//public:
-//	quint16 socket() {
-//		return XNS::IDP::Socket::TIME;
-//	}
-//	const char* name() {
-//		return "TimeHandler";
-//	}
-//	void pex(XNS::Server::Data& data, XNS::PEX& pex) {
-//		(void)data;
-//		ByteBuffer::Buffer level3 = pex.block.toBuffer();
-//		if (pex.type == XNS::PEX::Type::TIME) {
-//			XNS::Time time;
-//			FROM_BYTE_BUFFER(level3, time);
-//
-//			logger.info("    PEX %s", pex.toString());
-//			logger.info("        TIME %s", time.toString());
-//		} else {
-//			logger.warn("Unexpected type TIME");
-//			logger.warn("    PEX %s", pex.toString());
-//			logger.warn("        %s", pex.block.toString());
-//		}
-//	}
-//};
-//
-//
-//class EchoHandler : public XNS::Server::DataHandler::Default {
-//public:
-//	quint16 socket() {
-//		return XNS::IDP::Socket::ECHO;
-//	}
-//	const char* name() {
-//		return "EchoHandler";
-//	}
-//	void echo(XNS::Server::Data& data, XNS::Echo& echo) {
-//		(void)data;
-//		logger.info("    ECHO %s", echo.toString());
-//	}
-//	void stop() {
-////		logger.info("STOP  ECHO");
-//	}
-//};
+
+class EchoHandler : public XNS::Server::Handlers::EchoHandler {
+public:
+	const char* name() {
+		return "EchoHandler";
+	}
+	void handle(XNS::Server::Data& data, XNS::Echo& echo) {
+		(void)data;
+		logger.info("##  ECHO %s", echo.toString());
+	}
+	void handle(XNS::Server::Data& data, XNS::Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+};
 
 
 void testXNSServer() {
@@ -129,8 +117,8 @@ void testXNSServer() {
 
 	RIPHandler  ripHandler;
 	CHSHandler  chsHandler;
-//	TimeHandler timeHandler;
-//	EchoHandler echoHandler;
+	TimeHandler timeHandler;
+	EchoHandler echoHandler;
 
 	XNS::Server::Server server;
 
@@ -139,8 +127,8 @@ void testXNSServer() {
 
 	server.add(ripHandler);
 	server.add(chsHandler);
-//	server.add(timeHandler);
-//	server.add(echoHandler);
+	server.add(timeHandler);
+	server.add(echoHandler);
 
 	logger.info("server.start");
 	server.start();

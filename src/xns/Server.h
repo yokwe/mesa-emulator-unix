@@ -61,9 +61,6 @@ namespace XNS::Server {
 	using Network::Driver;
 	using Network::Packet;
 
-	// FIXME Create transmit queue and use this queue to send packet
-	// FIXME May be create receive queue?
-
 	class Context {
 	public:
 		Device  device;
@@ -162,6 +159,9 @@ namespace XNS::Server {
 
 		class Default : public Handler::Base {
 		public:
+			// initialize idp for transmit
+			static void init(const Data& data, const quint8 type, IDP& idp);
+
 			virtual ~Default() {}
 
 			void start() {}

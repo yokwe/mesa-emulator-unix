@@ -216,6 +216,63 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 	// FIXME
 	(void)data;
 	(void)idp;
+
+	Packet packet;
+	TO_BYTE_BUFFER(packet, data.ethernet.src);
+	packet.write48(data.context.device.address);
+	TO_BYTE_BUFFER(packet, data.ethernet.type);
+
+	// save packet as start for setChecksum() and computeChecksum()
+	Buffer start = packet.newBase();
+	// write idp to packet including idp.block
+	TO_BYTE_BUFFER(packet, idp);
+	// reflect packet.limit() to start
+	start.limit(packet.limit());
+
+	// calculate number of padding
+	int padding = 0;
+	{
+		// actual idp data length base on start
+		int length = start.limit() - start.base();
+		// set length in start
+		IDP::setLength(start, (quint16)length);
+		// padding for short length packet
+		if (length < IDP::IDP_MININUM_LENGTH) {
+			padding += IDP::IDP_MININUM_LENGTH - length;
+			length = IDP::IDP_MININUM_LENGTH;
+		}
+		// padding for odd length packet
+		if (length % 2) {
+			padding += 1;
+		}
+	}
+	if (padding) {
+		// needs padding
+		for(int i = 0; i < padding; i++) {
+			packet.write8(0);
+		}
+		// reflect packet.limit() for padding
+		start.limit(start.limit() + padding);
+	}
+
+	// update checksum if necessary
+	if (!idp.checksum_.isNoCheck()) {
+		quint16 newValue = IDP::computeChecksum(start);
+		IDP::setChecksum(start, (quint16)newValue);
+	}
+
+	// transmit packet
+	{
+		int opErrno;
+		int ret = data.context.driver->transmit(packet.data(), packet.limit(), opErrno);
+		if (ret < 0) {
+			logger.error("Unexpected");
+			logger.error("ret = %d", ret);
+			LOG_ERRNO(opErrno);
+			ERROR();
+		}
+	}
+
 }
 void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
 	// FIXME

@@ -213,10 +213,6 @@ void XNS::Server::ProcessThread::stop() {
 // XNS::Server::Handlers::Default
 //
 void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
-	// FIXME
-	(void)data;
-	(void)idp;
-
 	Packet packet;
 	TO_BYTE_BUFFER(packet, data.ethernet.src);
 	packet.write48(data.context.device.address);
@@ -274,10 +270,31 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 	}
 
 }
+
+void XNS::Server::Handlers::Default::init(const Data& data, const quint8 type, IDP& idp) {
+	idp.checksum_ = data.idp.checksum_;
+	idp.length    = (quint16)0;
+	idp.control   = (quint8)0;
+	idp.type      = type;
+	idp.dstNet    = data.idp.srcNet;
+	idp.dstHost   = data.idp.srcHost;
+	idp.dstSocket = data.idp.srcSocket;
+	idp.srcNet    = data.context.localNet;
+	idp.srcHost   = data.context.device.address;
+	idp.srcSocket = data.idp.dstSocket;
+	idp.block     = BLOCK();
+}
 void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
-	// FIXME
-	(void)data;
-	(void)error;
+	IDP idp;
+	init(data, IDP::Type::ERROR_, idp);
+
+	Packet level2;
+	TO_BYTE_BUFFER(level2, error);
+
+	// BLOCK
+	idp.block = error.block;
+
+	transmit(data, idp);
 }
 
 

@@ -46,10 +46,10 @@ static const Logger logger = Logger::getLogger("main");
 #include "../xns/Courier.h"
 
 
-class RIPHandler : public XNS::Server::Handlers::RIPHandler {
+class RIPService : public XNS::Server::Services::RIPService {
 public:
 	const char* name() {
-		return "RIPHandler";
+		return "RIPService";
 	}
 	void receive(XNS::Server::Data& data, XNS::RIP& rip) {
 		(void)data;
@@ -62,10 +62,10 @@ public:
 };
 
 
-class CHSHandler : public XNS::Server::Handlers::CHSHandler {
+class CHSService : public XNS::Server::Services::CHSService {
 public:
 	const char* name() {
-		return "CHSHandler";
+		return "CHSService";
 	}
 	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
 		(void)data;
@@ -79,10 +79,10 @@ public:
 };
 
 
-class TimeHandler : public XNS::Server::Handlers::TimeHandler {
+class TimeService : public XNS::Server::Services::TimeService {
 public:
 	const char* name() {
-		return "TimeHandler";
+		return "TimeService";
 	}
 	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
 		(void)data;
@@ -96,10 +96,10 @@ public:
 };
 
 
-class EchoHandler : public XNS::Server::Handlers::EchoHandler {
+class EchoService : public XNS::Server::Services::EchoService {
 public:
 	const char* name() {
-		return "EchoHandler";
+		return "EchoService";
 	}
 	void receive(XNS::Server::Data& data, XNS::Echo& echo) {
 		(void)data;
@@ -123,65 +123,26 @@ public:
 		logger.info("    ERROR %s", error.toString());
 	}
 
-//		Network::Packet bb;
-//
-//		{
-//			XNS::Ethernet ethernet;
-//			ethernet.dst = data.ethernet.src;
-//			ethernet.src = data.context.device.address;
-//			ethernet.type = XNS::Ethernet::Type::XNS;
-//
-//			TO_BYTE_BUFFER(bb, ethernet);
-//		}
-//
-//		{
-//			ByteBuffer::Buffer start = bb.newBase();
-//
-//			XNS::IDP idp;
-//			idp.checksum_ = 0;
-//			idp.length    = 0;
-//			idp.control   = 0;
-//			idp.type      = XNS::IDP::Type::ECHO;
-//			idp.dstNet    = data.idp.srcNet;
-//			idp.dstHost   = data.idp.srcHost;
-//			idp.dstSocket = data.idp.srcSocket;
-//			idp.srcNet    = data.context.localNet;
-//			idp.srcHost   = data.context.device.address;
-//			idp.srcSocket = data.idp.dstSocket;
-//
-//			TO_BYTE_BUFFER(bb, idp);
-//			ByteBuffer::Buffer bbEcho = bb.newBase();
-//
-//			XNS::Echo reply;
-//			reply.type = XNS::Echo::Type::REPLY;
-//			reply.block = echo.block;
-//
-//			TO_BYTE_BUFFER(bb, reply);
-//
-//			quint16 length = bb.limit() - start.base();
-//
-//		}
-
 };
 
 
 void testXNSServer() {
 	logger.info("START testXNSServer");
 
-	RIPHandler  ripHandler;
-	CHSHandler  chsHandler;
-	TimeHandler timeHandler;
-	EchoHandler echoHandler;
+	RIPService  ripService;
+	CHSService  chsService;
+	TimeService timeService;
+	EchoService echoService;
 
 	XNS::Server::Server server;
 
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");
 
-	server.add(ripHandler);
-	server.add(chsHandler);
-	server.add(timeHandler);
-	server.add(echoHandler);
+	server.add(ripService);
+	server.add(chsService);
+	server.add(timeService);
+	server.add(echoService);
 
 	logger.info("server.start");
 	server.start();

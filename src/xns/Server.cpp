@@ -87,14 +87,14 @@ void XNS::Server::Server::init(const QString& path) {
 	processThreadPool->setMaxThreadCount(1);
 
 	context = Context(path);
-	processThread = new ProcessThread(context, handlerMap);
+	processThread = new ProcessThread(context, serviceMap);
 	processThread->setAutoDelete(false);
 }
-void XNS::Server::Server::add(Handler handler) {
-	quint16 socket = handler.socket();
-	const char* name = handler.name();
-	logger.info("add handler %-4s  %s", XNS::IDP::Socket::toString(socket), name);
-	handlerMap[socket] = handler;
+void XNS::Server::Server::add(Service service) {
+	quint16 socket = service.socket();
+	const char* name = service.name();
+	logger.info("add service %-4s  %s", XNS::IDP::Socket::toString(socket), name);
+	serviceMap[socket] = service;
 }
 bool XNS::Server::Server::running() {
 	return processThread->running();
@@ -104,11 +104,11 @@ void XNS::Server::Server::start() {
 		logger.error("Unexpected");
 		ERROR()
 	} else {
-		// start handler
-		for(quint16 socket: handlerMap.keys()) {
-			Handler handler = handlerMap[socket];
-			logger.info("handler START %-4s  %s", IDP::Socket::toString(socket), handler.name());
-			handler.start();
+		// start service
+		for(quint16 socket: serviceMap.keys()) {
+			Service service = serviceMap[socket];
+			logger.info("service START %-4s  %s", IDP::Socket::toString(socket), service.name());
+			service.start();
 		}
 		// start processThread
 		logger.info("processThread START");
@@ -120,11 +120,11 @@ void XNS::Server::Server::stop() {
 		logger.info("processThread STOP");
 		processThread->stop();
 		this->processThreadPool->waitForDone();
-		// stop handler
-		for(quint16 socket: handlerMap.keys()) {
-			Handler handler = handlerMap[socket];
-			logger.info("handler STOP  %-4s  %s", IDP::Socket::toString(socket), handler.name());
-			handler.stop();
+		// stop service
+		for(quint16 socket: serviceMap.keys()) {
+			Service service = serviceMap[socket];
+			logger.info("service STOP  %-4s  %s", IDP::Socket::toString(socket), service.name());
+			service.stop();
 		}
 	} else {
 		logger.warn("processThread already stop");
@@ -206,11 +206,11 @@ void XNS::Server::ProcessThread::run() {
 			}
 
 			quint16 socket = (quint16)idp.dstSocket;
-			if (handlerMap.contains(socket)) {
+			if (serviceMap.contains(socket)) {
 				Data data(context, packet, ethernet, idp);
-				handlerMap[socket].handle(data);
+				serviceMap[socket].handle(data);
 			} else {
-				logger.warn("no handler for socket %s", IDP::Socket::toString(socket));
+				logger.warn("no service for socket %s", IDP::Socket::toString(socket));
 			}
 		}
 exitLoop:
@@ -229,9 +229,9 @@ void XNS::Server::ProcessThread::stop() {
 
 
 //
-// XNS::Server::Handlers::Default
+// XNS::Server::Services::Default
 //
-void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
+void XNS::Server::Services::Default::transmit(Data& data, IDP& idp) {
 	Packet packet;
 	TO_BYTE_BUFFER(packet, data.ethernet.src);
 	packet.write48(data.context.device.address);
@@ -294,7 +294,7 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 
 }
 
-void XNS::Server::Handlers::Default::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
+void XNS::Server::Services::Default::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
 	idp.control   = (quint8)0;
@@ -307,7 +307,7 @@ void XNS::Server::Handlers::Default::init(const Data& data, quint8 type, BLOCK& 
 	idp.srcSocket = data.idp.dstSocket;
 	idp.block     = block;
 }
-void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
+void XNS::Server::Services::Default::transmit(Data& data, Error& error) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, error);
 	BLOCK block(level2);
@@ -321,9 +321,9 @@ void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
 
 
 //
-// XNS::Server::Handlers::RIPHandler
+// XNS::Server::Services::RIPService
 //
-void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
+void XNS::Server::Services::RIPService::handle(Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::RIP) {
 		RIP rip;
@@ -340,7 +340,7 @@ void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Handlers::RIPHandler::transmit(Data& data, RIP& rip) {
+void XNS::Server::Services::RIPService::transmit(Data& data, RIP& rip) {
 	// FIXME
 	(void)data;
 	(void)rip;
@@ -348,9 +348,9 @@ void XNS::Server::Handlers::RIPHandler::transmit(Data& data, RIP& rip) {
 
 
 //
-// XNS::Server::Handlers::EchoHandler
+// XNS::Server::Services::EchoService
 //
-void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
+void XNS::Server::Services::EchoService::handle(Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
 		Echo echo;
@@ -367,7 +367,7 @@ void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Handlers::EchoHandler::transmit(Data& data, Echo& echo) {
+void XNS::Server::Services::EchoService::transmit(Data& data, Echo& echo) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, echo);
 	BLOCK block(level2);
@@ -380,9 +380,9 @@ void XNS::Server::Handlers::EchoHandler::transmit(Data& data, Echo& echo) {
 
 
 //
-// XNS::Server::Handlers::CHSHandler
+// XNS::Server::Services::CHSService
 //
-void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
+void XNS::Server::Services::CHSService::handle(Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;
@@ -412,7 +412,7 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Handlers::CHSHandler::transmit(Data& data, PEX& pex, ExpeditedCourier& exp) {
+void XNS::Server::Services::CHSService::transmit(Data& data, PEX& pex, ExpeditedCourier& exp) {
 	// FIXME
 	(void)data;
 	(void)pex;
@@ -421,9 +421,9 @@ void XNS::Server::Handlers::CHSHandler::transmit(Data& data, PEX& pex, Expedited
 
 
 //
-// XNS::Server::Handlers::TimeHandler
+// XNS::Server::Services::TimeService
 //
-void XNS::Server::Handlers::TimeHandler::handle(Data& data) {
+void XNS::Server::Services::TimeService::handle(Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;
@@ -453,7 +453,7 @@ void XNS::Server::Handlers::TimeHandler::handle(Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Handlers::TimeHandler::transmit(Data& data, PEX& pex, Time& time) {
+void XNS::Server::Services::TimeService::transmit(Data& data, PEX& pex, Time& time) {
 	// FIXME
 	(void)data;
 	(void)pex;

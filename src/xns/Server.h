@@ -86,7 +86,7 @@ namespace XNS::Server {
 	};
 
 
-	class Handler {
+	class Service {
 	public:
 		class Base {
 		public:
@@ -105,9 +105,9 @@ namespace XNS::Server {
 		std::function<void(void)>        stop;
 		std::function<void(Data&)>       handle;
 
-		Handler() :
+		Service() :
 			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
-		Handler(Base& base) :
+		Service(Base& base) :
 			socket ([&base](){return base.socket();}),
 			name   ([&base](){return base.name();}),
 			start  ([&base](){base.start();}),
@@ -117,14 +117,14 @@ namespace XNS::Server {
 
 
 	class ProcessThread : public QRunnable {
-		Context&                    context;
-		QMap<quint16, Handler>& handlerMap;
+		Context&                context;
+		QMap<quint16, Service>& serviceMap;
 		bool                    stopThread;
 		bool                    threadRunning;
 
 	public:
-		ProcessThread(Context& context_, QMap<quint16, Handler>& handlerMap_) :
-			context(context_), handlerMap(handlerMap_), stopThread(false), threadRunning(false) {}
+		ProcessThread(Context& context_, QMap<quint16, Service>& serviceMap_) :
+			context(context_), serviceMap(serviceMap_), stopThread(false), threadRunning(false) {}
 
 		bool running();
 
@@ -136,7 +136,7 @@ namespace XNS::Server {
 
 	class Server {
 		Context                context;
-		QMap<quint16, Handler> handlerMap;
+		QMap<quint16, Service> serviceMap;
 
 		QThreadPool*           processThreadPool;    // thread pool for ProcessThread
 		ProcessThread*         processThread;
@@ -146,7 +146,7 @@ namespace XNS::Server {
 
 		void init(const QString& path);
 
-		void add(Handler handler);
+		void add(Service handler);
 
 		bool running();
 		void start();
@@ -154,10 +154,10 @@ namespace XNS::Server {
 	};
 
 
-	namespace Handlers {
+	namespace Services {
 		using Courier::ExpeditedCourier;
 
-		class Default : public Handler::Base {
+		class Default : public Service::Base {
 		public:
 			// initialize idp for transmit
 			static void init(const Data& data, quint8 type, BLOCK& block, IDP& idp);
@@ -176,7 +176,7 @@ namespace XNS::Server {
 		};
 
 
-		class RIPHandler : public Default {
+		class RIPService : public Default {
 			typedef std::function<void(Data&, RIP&)>   ReceiveRIP;
 			typedef std::function<void(Data&, Error&)> ReceiveError;
 
@@ -184,10 +184,10 @@ namespace XNS::Server {
 			ReceiveError receiveError;
 
 		public:
-			RIPHandler() :
+			RIPService() :
 				receiveRIP  ([this](Data& data, RIP& rip)    {this->receive(data, rip);}),
 				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
-			virtual ~RIPHandler() {}
+			virtual ~RIPService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::RIP;
@@ -203,7 +203,7 @@ namespace XNS::Server {
 			void transmit(Data& data, RIP& rip);
 		};
 
-		class EchoHandler : public Default {
+		class EchoService : public Default {
 			typedef std::function<void(Data&, Echo&)>  ReceiveEcho;
 			typedef std::function<void(Data&, Error&)> ReceiveError;
 
@@ -211,10 +211,10 @@ namespace XNS::Server {
 			ReceiveError receiveError;
 
 		public:
-			EchoHandler() :
+			EchoService() :
 				receiveEcho ([this](Data& data, Echo& echo)  {this->receive(data, echo);}),
 				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
-			virtual ~EchoHandler() {}
+			virtual ~EchoService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::ECHO;
@@ -230,7 +230,7 @@ namespace XNS::Server {
 			void transmit(Data& data, Echo& echo);
 		};
 
-		class CHSHandler : public Default {
+		class CHSService : public Default {
 			typedef std::function<void(Data&, PEX&, ExpeditedCourier& exp)> ReceiveExp;
 			typedef std::function<void(Data&, Error&)>                      ReceiveError;
 
@@ -238,10 +238,10 @@ namespace XNS::Server {
 			ReceiveError receiveError;
 
 		public:
-			CHSHandler() :
+			CHSService() :
 				receiveExp  ([this](Data& data, PEX& pex, ExpeditedCourier& exp){this->receive(data, pex, exp);}),
 				receiveError([this](Data& data, Error& error)                   {this->receive(data, error);   }) {}
-			virtual ~CHSHandler() {}
+			virtual ~CHSService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::CHS;
@@ -257,7 +257,7 @@ namespace XNS::Server {
 			void transmit(Data& data, PEX& pex, ExpeditedCourier& exp);
 		};
 
-		class TimeHandler : public Default {
+		class TimeService : public Default {
 			typedef std::function<void(Data&, PEX&, Time& time)> ReceiveTime;
 			typedef std::function<void(Data&, Error&)>           ReceiveError;
 
@@ -265,10 +265,10 @@ namespace XNS::Server {
 			ReceiveError receiveError;
 
 		public:
-			TimeHandler() :
+			TimeService() :
 				receiveTime ([this](Data& data, PEX& pex, Time& time){this->receive(data, pex, time);}),
 				receiveError([this](Data& data, Error& error)        {this->receive(data, error);    }) {}
-			virtual ~TimeHandler() {}
+			virtual ~TimeService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::TIME;

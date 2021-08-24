@@ -239,7 +239,7 @@ namespace ByteBuffer {
 		}
 
 		// with quint8
-		UINT8(const quint8& newValue) : OpaqueType(newValue) {}
+		explicit UINT8(const quint8& newValue) : OpaqueType(newValue) {}
 		quint8 operator =(const quint8& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
@@ -277,7 +277,7 @@ namespace ByteBuffer {
 		}
 
 		// with qunt16
-		UINT16(const quint16& newValue) : OpaqueType(newValue) {}
+		explicit UINT16(const quint16& newValue) : OpaqueType(newValue) {}
 		quint16 operator =(const quint16& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
@@ -314,7 +314,7 @@ namespace ByteBuffer {
 		}
 
 		// with qunt32
-		UINT32(const quint32& newValue) : OpaqueType(newValue) {}
+		explicit UINT32(const quint32& newValue) : OpaqueType(newValue) {}
 		quint32 operator =(const quint32& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
@@ -351,7 +351,7 @@ namespace ByteBuffer {
 		}
 
 		// with quint64
-		UINT48(const quint64& newValue) : OpaqueType(newValue) {}
+		explicit UINT48(const quint64& newValue) : OpaqueType(newValue) {}
 		quint64 operator =(const quint64& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
@@ -373,12 +373,15 @@ namespace ByteBuffer {
 	protected:
 		ByteBuffer::Buffer buffer;
 	public:
-		BLOCK() {}
+		BLOCK() : buffer() {}
 		BLOCK(const BLOCK& that) : buffer(that.buffer) {}
 		BLOCK operator =(const BLOCK& that) {
 			buffer = that.buffer;
 		  return *this;
 		}
+
+		// with ByteBuffer
+		explicit BLOCK(const ByteBuffer::Buffer& newValue) : buffer(newValue) {}
 
 		QString toString() const {
 			return buffer.toString();

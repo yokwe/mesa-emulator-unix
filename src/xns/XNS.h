@@ -58,6 +58,9 @@ namespace XNS {
 
 
 	class IDP : public Base {
+		static const int OFFSET_CHECKSUM = 0;
+		static const int OFFSET_LENGTH   = 2;
+
 	public:
 		class Checksum : public UINT16 {
 		public:
@@ -213,10 +216,9 @@ namespace XNS {
 		// To know actual data length of XNS packet, use IDP length field.
 		// IDP length field is actual data length including IDP header(30 bytes)
 		// So actual data length of IDP packet is length - 30.
-		static const int MIN_IDP_LENGTH = 46;
-
-		static const int OFFSET_CHECKSUM = 0;
-		static const int OFFSET_LENGTH   = 2;
+		static const int ETHERNET_MINIMUM_LENGTH = 60;
+		static const int ETHERNT_HEADER_LENGTH   = 16;
+		static const int IDP_MININUM_LENGTH      = ETHERNET_MINIMUM_LENGTH - ETHERNT_HEADER_LENGTH; // 60 - 16 = 46
 
 		Checksum checksum_;
 		UINT16   length;
@@ -235,11 +237,19 @@ namespace XNS {
 
 		QString toString() const;
 
-		// Calculate checksum of IDP using length field
-		// Suppose bb.position() point to IDP packet
-		static quint16 getChecksum(const ByteBuffer::Buffer& bb);
-		static void    setChecksum(ByteBuffer::Buffer& bb, quint16 newValue);
-		static quint16 computeChecksum(const ByteBuffer::Buffer& bb);
+		// Set length field of IDP in ByteBuffer
+		// bb.base() must point to head of IDP packet
+		static quint16 getLength(const Buffer& bb);
+		static void    setLength(Buffer& bb, quint16 newValue);
+
+		// Set length field of IDP in ByteBuffer
+		// bb.base() must point to head of IDP packet
+		static quint16 getChecksum(const Buffer& bb);
+		static void    setChecksum(Buffer& bb, quint16 newValue);
+
+		// Compute checksum of IDP using length field
+		// bb.base() must point to head of IDP packet
+		static quint16 computeChecksum(const Buffer& bb);
 
 
 		// ByteBuffer::Base

@@ -236,7 +236,7 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
-	ByteBuffer::Buffer start(bb);
+	Buffer start(bb);
 
 	TO_BYTE_BUFFER(bb, checksum_);
 	TO_BYTE_BUFFER(bb, length);
@@ -249,43 +249,29 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, srcHost);
 	TO_BYTE_BUFFER(bb, srcSocket);
 	TO_BYTE_BUFFER(bb, block);
-
-	// add padding
-	int padding = 0;
-	// compute dataLength based on actual data length. (not length varialbe)
-	int dataLength = bb.position() - start.position();
-	// padding for odd length
-	if ((dataLength % 2) == 1) {
-		padding    += 1; // increment for padding
-		dataLength += 1; // increment for padding
-	}
-	// padding for short length
-	if (dataLength < MIN_IDP_LENGTH) {
-		padding += MIN_IDP_LENGTH - dataLength;
-	}
-	// write padding and change bb limit
-	for(int i = 0; i < padding; i++) {
-		bb.write8(0);
-	}
-	// update checksum
-	{
-		quint16 newValue = computeChecksum(start);
-		checksum_ = (quint16)newValue;
-		bb.write16(OFFSET_CHECKSUM, newValue);
-	}
 }
 
-quint16 XNS::IDP::getChecksum(const ByteBuffer::Buffer& bb) {
-	quint16 ret;
-	bb.read16(bb.position() + OFFSET_CHECKSUM, ret);
-	return ret;
+quint16 XNS::IDP::getLength(const Buffer& bb) {
+	quint16 newValue;
+	bb.read16(bb.base() + OFFSET_LENGTH, newValue);
+	return newValue;
 }
-void XNS::IDP::setChecksum(ByteBuffer::Buffer& bb, quint16 newValue) {
-	bb.write16(bb.position() + OFFSET_CHECKSUM, newValue);
+void XNS::IDP::setLength(Buffer& bb, quint16 newValue) {
+	bb.write16(bb.base() + OFFSET_LENGTH, newValue);
 }
-quint16 XNS::IDP::computeChecksum(const ByteBuffer::Buffer& bb) {
+
+quint16 XNS::IDP::getChecksum(const Buffer& bb) {
+	quint16 newValue;
+	bb.read16(bb.base() + OFFSET_CHECKSUM, newValue);
+	return newValue;
+}
+void XNS::IDP::setChecksum(Buffer& bb, quint16 newValue) {
+	bb.write16(bb.base() + OFFSET_CHECKSUM, newValue);
+}
+
+quint16 XNS::IDP::computeChecksum(const Buffer& bb) {
 	quint8* data   = bb.data();
-	int     offset = bb.position();
+	int     offset = bb.base();
 
 	// read length field of IDP packet
 	quint16 length;

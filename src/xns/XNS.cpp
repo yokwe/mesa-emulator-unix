@@ -52,10 +52,10 @@ XNS::Config XNS::loadConfig(const QString& path) {
 
 	// add name to net and host
 	for(auto e: config.netList) {
-		XNS::IDP::Net::addNameMap(e.value, e.name);
+		IDP::Net::addNameMap(e.value, e.name);
 	}
 	for(auto e: config.hostList) {
-		XNS::IDP::Host::addNameMap(e.value, e.name);
+		Host::addNameMap(e.value, e.name);
 	}
 
 	logger.info("config interface = %s", config.interface);
@@ -65,8 +65,8 @@ XNS::Config XNS::loadConfig(const QString& path) {
 	}
 	for(auto e: config.hostList) {
 		logger.info("config host %s  %20s  %s",
-			TO_CSTRING(XNS::IDP::Host::toHexaDecimalString(e.value, ":")),
-			TO_CSTRING(XNS::IDP::Host::toDecimalString(e.value)),
+			TO_CSTRING(Host::toHexaDecimalString(e.value, ":")),
+			TO_CSTRING(Host::toDecimalString(e.value)),
 			TO_CSTRING(e.name));
 	}
 
@@ -75,37 +75,12 @@ XNS::Config XNS::loadConfig(const QString& path) {
 
 
 //
-// XNS::IDP::Checksum
+// XNS::Host
 //
-NameMap::Map<quint16> XNS::IDP::Checksum::nameMap(NameMap::toString16X04, {{NOCHECK, "NOCHECK"}});
-
-
-//
-// XNS::IDP::Type
-//
-NameMap::Map<quint8> XNS::IDP::Type::nameMap(NameMap::toString8u, {
-	{RIP,    "RIP"},
-	{ECHO,   "ECHO"},
-	{ERROR_, "ERROR"},
-	{PEX,    "PEX"},
-	{SPP,    "SPP"},
-	{BOOT,   "BOOT"}
-});
-
-
-//
-// XNS::IDP::Net
-//
-NameMap::Map<quint32> XNS::IDP::Net::nameMap(NameMap::toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
-
-
-//
-// XNS::IDP::Host
-//
-QString XNS::IDP::Host::toOctalString(quint64 value) {
+QString XNS::Host::toOctalString(quint64 value) {
 	return QString::asprintf("%llob", value);
 }
-QString XNS::IDP::Host::toDecimalString(quint64 value) {
+QString XNS::Host::toDecimalString(quint64 value) {
 	QStringList list;
 	auto n = value;
 	for(;;) {
@@ -118,7 +93,7 @@ QString XNS::IDP::Host::toDecimalString(quint64 value) {
 	}
 	return list.join("-");
 }
-QString XNS::IDP::Host::toHexaDecimalString(quint64 value, QString sep) {
+QString XNS::Host::toHexaDecimalString(quint64 value, QString sep) {
 	QStringList list;
 	list += QString::asprintf("%02X", (int)(value >> 40) & 0xFF);
 	list += QString::asprintf("%02X", (int)(value >> 32) & 0xFF);
@@ -142,7 +117,7 @@ static quint64 getValue(int base, int factor, QStringList list) {
 // supposed separator used in toHexaDecimalString() format
 #define HEXSEP "[-:]?"
 
-quint64 XNS::IDP::Host::fromString(QString string) {
+quint64 XNS::Host::fromString(QString string) {
 	static QRegExp dec4("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
 	static QRegExp dec5("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
 	static QRegExp hex("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
@@ -170,11 +145,62 @@ quint64 XNS::IDP::Host::fromString(QString string) {
 	ERROR();
 }
 
-NameMap::Map<quint64> XNS::IDP::Host::nameMap(NameMap::toString64X, {
+NameMap::Map<quint64> XNS::Host::nameMap(NameMap::toString64X, {
 	{ALL,       "ALL"},
 	{UNKNOWN,   "UNKNOWN"},
 	{BFN_GVWIN, "BFN_GVWIN"},
 });
+
+
+//
+// XNS::Ethernet::Type
+//
+NameMap::Map<quint16> XNS::Ethernet::Type::nameMap(NameMap::toString16X04, {{XNS, "XNS"}, {IP, "IP"}});
+
+
+//
+// XNS::Ethernet
+//
+QString XNS::Ethernet::toString() const {
+	return QString("%1-%2-%3").arg(dst.toString()).arg(src.toString()).arg(type.toString());
+}
+void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
+	FROM_BYTE_BUFFER(bb, dst);
+	FROM_BYTE_BUFFER(bb, src);
+	FROM_BYTE_BUFFER(bb, type);
+	FROM_BYTE_BUFFER(bb, block);
+}
+void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
+	TO_BYTE_BUFFER(bb, dst);
+	TO_BYTE_BUFFER(bb, src);
+	TO_BYTE_BUFFER(bb, type);
+	TO_BYTE_BUFFER(bb, block);
+}
+
+
+//
+// XNS::IDP::Checksum
+//
+NameMap::Map<quint16> XNS::IDP::Checksum::nameMap(NameMap::toString16X04, {{NOCHECK, "NOCHECK"}});
+
+
+//
+// XNS::IDP::Type
+//
+NameMap::Map<quint8> XNS::IDP::Type::nameMap(NameMap::toString8u, {
+	{RIP,    "RIP"},
+	{ECHO,   "ECHO"},
+	{ERROR_, "ERROR"},
+	{PEX,    "PEX"},
+	{SPP,    "SPP"},
+	{BOOT,   "BOOT"}
+});
+
+
+//
+// XNS::IDP::Net
+//
+NameMap::Map<quint32> XNS::IDP::Net::nameMap(NameMap::toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
@@ -297,30 +323,3 @@ quint16 XNS::IDP::computeChecksum(const Buffer& bb) {
     }
     return (quint16)s;
 }
-
-
-//
-// XNS::Ethernet::Type
-//
-NameMap::Map<quint16> XNS::Ethernet::Type::nameMap(NameMap::toString16X04, {{XNS, "XNS"}, {IP, "IP"}});
-
-
-//
-// XNS::Ethernet
-//
-QString XNS::Ethernet::toString() const {
-	return QString("%1-%2-%3").arg(dst.toString()).arg(src.toString()).arg(type.toString());
-}
-void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
-	FROM_BYTE_BUFFER(bb, dst);
-	FROM_BYTE_BUFFER(bb, src);
-	FROM_BYTE_BUFFER(bb, type);
-	FROM_BYTE_BUFFER(bb, block);
-}
-void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
-	TO_BYTE_BUFFER(bb, dst);
-	TO_BYTE_BUFFER(bb, src);
-	TO_BYTE_BUFFER(bb, type);
-	TO_BYTE_BUFFER(bb, block);
-}
-

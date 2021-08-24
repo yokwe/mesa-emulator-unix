@@ -73,8 +73,8 @@ XNS::Server::Context::Context(const QString& path) {
 
 	driver = Network::getDriver(device);
 
-	logger.info("device   = %20s  %s", IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
-	logger.info("device   = %20s  %s", IDP::Host::toDecimalString(device.address), device.name);
+	logger.info("device   = %20s  %s", Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device   = %20s  %s", Host::toDecimalString(device.address), device.name);
 	logger.info("localNet = %d", localNet);
 }
 
@@ -237,9 +237,9 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 		// set length in start
 		IDP::setLength(start, (quint16)length);
 		// padding for short length packet
-		if (length < IDP::IDP_MININUM_LENGTH) {
-			padding += IDP::IDP_MININUM_LENGTH - length;
-			length = IDP::IDP_MININUM_LENGTH;
+		if (length < IDP::MININUM_PACKET_LENGTH) {
+			padding += IDP::MININUM_PACKET_LENGTH - length;
+			length = IDP::MININUM_PACKET_LENGTH;
 		}
 		// padding for odd length packet
 		if (length % 2) {

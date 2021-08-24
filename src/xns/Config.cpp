@@ -59,10 +59,10 @@ void XNS::Config::Host::fromJsonObject(const QJsonObject& jsonObject) {
 	QString valueString;
 	GET_JSON_OBJECT(name);
 	GET_JSON_OBJECT2(value, valueString);
-	value = XNS::IDP::Host::fromString(valueString);
+	value = XNS::Host::fromString(valueString);
 }
 QJsonObject XNS::Config::Host::toJsonObject() const {
-	QString valueString = XNS::IDP::Host::toHexaDecimalString(value, ":");
+	QString valueString = XNS::Host::toHexaDecimalString(value, ":");
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(name);
 	SET_JSON_OBJECT2(value, valueString);

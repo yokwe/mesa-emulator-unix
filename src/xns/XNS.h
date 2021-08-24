@@ -57,6 +57,85 @@ namespace XNS {
 	Config loadConfig(const QString& path);
 
 
+	class Host : public UINT48 {
+	public:
+		static constexpr int     SIZE      = 6;
+		static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
+		static constexpr quint64 UNKNOWN   = 0;
+		static constexpr quint64 BFN_GVWIN = 0x0000'aa00'0e60ULL; // Boot File Number of GVWin
+
+		// define operator =
+		quint64 operator =(const quint64& newValue) const {
+			value(newValue);
+			return newValue;
+		}
+
+		static QString toOctalString(quint64 value);
+		static QString toDecimalString(quint64 value);
+		static QString toHexaDecimalString(quint64 value, QString sep = "");
+		static quint64 fromString(QString string);
+
+		QString toOctalString() const {
+			return toOctalString(value());
+		}
+		QString toDecimalString() const {
+			return toDecimalString(value());
+		}
+		QString toHexaDecimalString(QString sep = "") const {
+			return toHexaDecimalString(value(), sep);
+		}
+
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+		static void addNameMap(quint64 value, QString name) {
+			nameMap.add(value, name);
+		}
+	private:
+		static NameMap::Map<quint64> nameMap;
+	};
+
+
+	class Ethernet : public Base {
+	public:
+		class Type : public UINT16 {
+		public:
+			enum Value : quint16 {
+				XNS = 0x600, IP = 0x800,
+			};
+
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
+			}
+
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+			static void addNameMap(quint16 value, QString name) {
+				nameMap.add(value, name);
+			}
+		private:
+			static NameMap::Map<quint16> nameMap;
+		};
+
+		static const int MINIMUM_PACKET_LENGTH = 60;
+		static const int HEADER_LENGTH         = 16;
+
+		Host  dst;
+		Host  src;
+		Type  type;
+		BLOCK block;
+
+		QString toString() const;
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
+
 	class IDP : public Base {
 		static const int OFFSET_CHECKSUM = 0;
 		static const int OFFSET_LENGTH   = 2;
@@ -133,44 +212,6 @@ namespace XNS {
 			static NameMap::Map<quint32> nameMap;
 		};
 
-		class Host : public UINT48 {
-		public:
-			static constexpr int     SIZE      = 6;
-			static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
-			static constexpr quint64 UNKNOWN   = 0;
-			static constexpr quint64 BFN_GVWIN = 0x0000'aa00'0e60ULL; // Boot File Number of GVWin
-
-			// define operator =
-			quint64 operator =(const quint64& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			static QString toOctalString(quint64 value);
-			static QString toDecimalString(quint64 value);
-			static QString toHexaDecimalString(quint64 value, QString sep = "");
-			static quint64 fromString(QString string);
-
-			QString toOctalString() const {
-				return toOctalString(value());
-			}
-			QString toDecimalString() const {
-				return toDecimalString(value());
-			}
-			QString toHexaDecimalString(QString sep = "") const {
-				return toHexaDecimalString(value(), sep);
-			}
-
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-			static void addNameMap(quint64 value, QString name) {
-				nameMap.add(value, name);
-			}
-		private:
-			static NameMap::Map<quint64> nameMap;
-		};
-
 		class Socket : public UINT16 {
 		public:
 			enum Value : quint16 {
@@ -216,9 +257,8 @@ namespace XNS {
 		// To know actual data length of XNS packet, use IDP length field.
 		// IDP length field is actual data length including IDP header(30 bytes)
 		// So actual data length of IDP packet is length - 30.
-		static const int ETHERNET_MINIMUM_LENGTH = 60;
-		static const int ETHERNT_HEADER_LENGTH   = 16;
-		static const int IDP_MININUM_LENGTH      = ETHERNET_MINIMUM_LENGTH - ETHERNT_HEADER_LENGTH; // 60 - 16 = 46
+		static const int MININUM_PACKET_LENGTH = Ethernet::MINIMUM_PACKET_LENGTH - Ethernet::HEADER_LENGTH; // 60 - 16 = 46
+		static const int HEADER_LENGTH         = 30;
 
 		Checksum checksum_;
 		UINT16   length;
@@ -256,43 +296,6 @@ namespace XNS {
 		// fromByteBuffer will set limit of bb from length field
 		void fromByteBuffer(Buffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field
-		void toByteBuffer  (Buffer& bb) const;
-	};
-
-
-	class Ethernet : public Base {
-	public:
-		class Type : public UINT16 {
-		public:
-			enum Value : quint16 {
-				XNS = 0x600, IP = 0x800,
-			};
-
-			// define operator =
-			quint16 operator =(const quint16& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-			static void addNameMap(quint16 value, QString name) {
-				nameMap.add(value, name);
-			}
-		private:
-			static NameMap::Map<quint16> nameMap;
-		};
-
-		IDP::Host dst;
-		IDP::Host src;
-		Type      type;
-		BLOCK     block;
-
-		QString toString() const;
-
-		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
 		void toByteBuffer  (Buffer& bb) const;
 	};
 

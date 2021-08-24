@@ -80,7 +80,7 @@ namespace XNS {
 
 		class SimpleRequest : public Base {
 		public:
-			IDP::Host bootFileNumber; // XNS::IDG::HOST::BFN_GVWIN
+			Host bootFileNumber; // XNS::HOST::BFN_GVWIN
 
 			QString toString() const;
 
@@ -90,9 +90,9 @@ namespace XNS {
 		};
 		class SimpleData : public Base {
 		public:
-			IDP::Host bootFileNumber; // XNS::IDG::HOST::BFN_GVWIN
-			UINT16    packetNumber;   // start with 1
-			BLOCK     block;          // one page of data normally or no data means end of file
+			Host   bootFileNumber; // XNS::HOST::BFN_GVWIN
+			UINT16 packetNumber;   // start with 1
+			BLOCK  block;          // one page of data normally or no data means end of file
 
 			QString toString() const;
 
@@ -102,8 +102,8 @@ namespace XNS {
 		};
 		class SPPRequest : public Base {
 		public:
-			IDP::Host bootFileNumber; // XNS::IDG::HOST::BFN_GVWIN
-			UINT16    connectionID;
+			Host   bootFileNumber; // XNS::HOST::BFN_GVWIN
+			UINT16 connectionID;
 
 			QString toString() const;
 

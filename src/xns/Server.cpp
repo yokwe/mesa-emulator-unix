@@ -178,13 +178,32 @@ void XNS::Server::ProcessThread::run() {
 			FROM_BYTE_BUFFER(packet, ethernet);
 			Buffer level1 = ethernet.block.toBuffer();
 
+			// check ethernet type
 			if (ethernet.type != Ethernet::Type::XNS) continue;
+			// check ethernet dst
+			// accepth broadcast or my host
+			if (ethernet.dst != Host::ALL && ethernet.dst != context.device.address) continue;
+
+			Buffer start = level1.newBase(); // use start for checksum
 
 			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
 
 			logger.info("%s", ethernet.toString());
 			logger.info("    %s", idp.toString());
+
+			// check idp checksum
+			{
+				quint16 checksum = XNS::IDP::getChecksum(start);
+				if (checksum != XNS::IDP::Checksum::NOCHECK) {
+					quint16 newValue = XNS::IDP::computeChecksum(start);
+					if (checksum != newValue) {
+						// checksum error
+						logger.warn("Checksum error");
+						continue;
+					}
+				}
+			}
 
 			quint16 socket = (quint16)idp.dstSocket;
 			if (handlerMap.contains(socket)) {
@@ -232,6 +251,8 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 		int length = start.limit() - start.base();
 		// set length in start
 		IDP::setLength(start, (quint16)length);
+		// update length for later use
+		idp.length = (quint16)length;
 		// padding for short length packet
 		if (length < IDP::MININUM_PACKET_LENGTH) {
 			padding += IDP::MININUM_PACKET_LENGTH - length;
@@ -254,7 +275,9 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 	// update checksum if necessary
 	if (!idp.checksum_.isNoCheck()) {
 		quint16 newValue = IDP::computeChecksum(start);
-		IDP::setChecksum(start, (quint16)newValue);
+		IDP::setChecksum(start, newValue);
+		// update checksum for later use
+		idp.checksum_ = newValue;
 	}
 
 	// transmit packet
@@ -271,7 +294,7 @@ void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
 
 }
 
-void XNS::Server::Handlers::Default::init(const Data& data, const quint8 type, IDP& idp) {
+void XNS::Server::Handlers::Default::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
 	idp.control   = (quint8)0;
@@ -282,17 +305,15 @@ void XNS::Server::Handlers::Default::init(const Data& data, const quint8 type, I
 	idp.srcNet    = data.context.localNet;
 	idp.srcHost   = data.context.device.address;
 	idp.srcSocket = data.idp.dstSocket;
-	idp.block     = BLOCK();
+	idp.block     = block;
 }
 void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
-	IDP idp;
-	init(data, IDP::Type::ERROR_, idp);
-
 	Packet level2;
 	TO_BYTE_BUFFER(level2, error);
+	BLOCK block(level2);
 
-	// BLOCK
-	idp.block = error.block;
+	IDP idp;
+	init(data, IDP::Type::ERROR_, block, idp);
 
 	transmit(data, idp);
 }
@@ -347,9 +368,14 @@ void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
 	}
 }
 void XNS::Server::Handlers::EchoHandler::transmit(Data& data, Echo& echo) {
-	// FIXME
-	(void)data;
-	(void)echo;
+	Packet level2;
+	TO_BYTE_BUFFER(level2, echo);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::ECHO, block, idp);
+
+	Default::transmit(data, idp);
 }
 
 

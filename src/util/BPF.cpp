@@ -160,7 +160,7 @@ int  BPF::select  (quint32 timeout, int& opErrno) {
 }
 int  BPF::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	int ret;
-	LOG_SYSCALL2(ret, opErrno, ::send(fd, data, dataLen, 0));
+	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
 int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno) {

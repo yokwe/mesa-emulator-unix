@@ -96,7 +96,7 @@ public:
 
 	// BIOCPROMISC
 	//   Forces the interface into promiscuous mode
-	void setPromiscious();
+	void setPromiscuous();
 
 	// BIOCFLUSH
 	//   Flushes the buffer	of incoming packets, and resets	the statistics

@@ -196,7 +196,7 @@ quint32 BPF::getBufferSize() {
 
 // BIOCPROMISC
 //   Forces the interface into promiscuous mode
-void BPF::setPromiscious() {
+void BPF::setPromiscuous() {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCPROMISC, NULL))
 }

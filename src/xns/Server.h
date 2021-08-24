@@ -160,7 +160,7 @@ namespace XNS::Server {
 		class Default : public Handler::Base {
 		public:
 			// initialize idp for transmit
-			static void init(const Data& data, const quint8 type, IDP& idp);
+			static void init(const Data& data, quint8 type, BLOCK& block, IDP& idp);
 
 			virtual ~Default() {}
 

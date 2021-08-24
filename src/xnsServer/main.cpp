@@ -104,6 +104,19 @@ public:
 	void receive(XNS::Server::Data& data, XNS::Echo& echo) {
 		(void)data;
 		logger.info("##  ECHO %s", echo.toString());
+
+		if (echo.type == XNS::Echo::Type::REQUEST) {
+			XNS::Echo reply;
+
+			reply.type = XNS::Echo::Type::REPLY;
+			reply.block = echo.block;
+
+			transmit(data, reply);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  echo %s", echo.toString());
+			ERROR();
+		}
 	}
 	void receive(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;

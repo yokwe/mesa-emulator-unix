@@ -120,8 +120,8 @@ Network::FreeBSD::Driver::Driver(const Network::Device& device_) : Network::Driv
 	logger.info("bpf.bufferSize = %d", bpf.bufferSize);
 
 	bpf.setInterface(device.name);
-	bpf.setPromiscious();
-	bpf.setImmediate(0);
+//	bpf.setPromiscuous();
+	bpf.setImmediate(1);
 	bpf.setHeaderComplete(0);
 	bpf.setReadTimeout(1);
 	bpf.setReadFilter(BPF::PROGRAM_XNS);

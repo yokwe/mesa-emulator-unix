@@ -121,7 +121,7 @@ namespace XNS {
 		};
 
 		static const int MINIMUM_PACKET_LENGTH = 60;
-		static const int HEADER_LENGTH         = 16;
+		static const int HEADER_LENGTH         = 14;
 
 		Host  dst;
 		Host  src;
@@ -251,7 +251,7 @@ namespace XNS {
 		static const int MPL = MPL_ORIGINAL / 10; // Change to 1/10 of original MPL
 
 		// IMPORTANT
-		// Minimum ethernet packet length is 60 (16 bytes ethernet header + 46 bytes ehternet body)
+		// Minimum ethernet packet length is 60 (14 bytes ethernet header + 46 bytes ehternet body)
 		// To conform this requirement, padding is added.
 		// Also number of byes in IDP must be even number by rule. If data length is odd, one byte is added to make length even.
 		// To know actual data length of XNS packet, use IDP length field.

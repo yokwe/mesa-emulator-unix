@@ -50,7 +50,7 @@ static const Logger logger = Logger::getLogger("xns-server");
 // XNS::Server::Context
 //
 XNS::Server::Context::Context(const QString& path) {
-	XNS::Config config = XNS::loadConfig(path);
+	Config config = XNS::loadConfig(path);
 
 	device.name    = config.interface;
 	device.address = 0;
@@ -73,8 +73,8 @@ XNS::Server::Context::Context(const QString& path) {
 
 	driver = Network::getDriver(device);
 
-	logger.info("device   = %20s  %s", XNS::IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
-	logger.info("device   = %20s  %s", XNS::IDP::Host::toDecimalString(device.address), device.name);
+	logger.info("device   = %20s  %s", IDP::Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device   = %20s  %s", IDP::Host::toDecimalString(device.address), device.name);
 	logger.info("localNet = %d", localNet);
 }
 
@@ -174,13 +174,13 @@ void XNS::Server::ProcessThread::run() {
 				packet.limit(ret);
 			}
 
-			XNS::Ethernet ethernet;
+			Ethernet ethernet;
 			FROM_BYTE_BUFFER(packet, ethernet);
-			ByteBuffer::Buffer level1 = ethernet.block.toBuffer();
+			Buffer level1 = ethernet.block.toBuffer();
 
-			if (ethernet.type != XNS::Ethernet::Type::XNS) continue;
+			if (ethernet.type != Ethernet::Type::XNS) continue;
 
-			XNS::IDP idp;
+			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
 
 			logger.info("%s", ethernet.toString());
@@ -191,7 +191,7 @@ void XNS::Server::ProcessThread::run() {
 				Data data(context, packet, ethernet, idp);
 				handlerMap[socket].handle(data);
 			} else {
-				logger.warn("no handler for socket %s", XNS::IDP::Socket::toString(socket));
+				logger.warn("no handler for socket %s", IDP::Socket::toString(socket));
 			}
 		}
 exitLoop:
@@ -210,24 +210,45 @@ void XNS::Server::ProcessThread::stop() {
 
 
 //
+// XNS::Server::Handlers::Default
+//
+void XNS::Server::Handlers::Default::transmit(Data& data, IDP& idp) {
+	// FIXME
+	(void)data;
+	(void)idp;
+}
+void XNS::Server::Handlers::Default::transmit(Data& data, Error& error) {
+	// FIXME
+	(void)data;
+	(void)error;
+}
+
+
+
+//
 // XNS::Server::Handlers::RIPHandler
 //
 void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
-	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::RIP) {
 		RIP rip;
 		FROM_BYTE_BUFFER(level2, rip);
-		handle(data, rip);
+		receive(data, rip);
 	} else if (data.idp.type == IDP::Type::ERROR_) {
 		Error error;
 		FROM_BYTE_BUFFER(level2, error);
-		handle(data, error);
+		receive(data, error);
 	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
+}
+void XNS::Server::Handlers::RIPHandler::transmit(Data& data, RIP& rip) {
+	// FIXME
+	(void)data;
+	(void)rip;
 }
 
 
@@ -235,21 +256,26 @@ void XNS::Server::Handlers::RIPHandler::handle(Data& data) {
 // XNS::Server::Handlers::EchoHandler
 //
 void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
-	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
 		Echo echo;
 		FROM_BYTE_BUFFER(level2, echo);
-		handle(data, echo);
+		receive(data, echo);
 	} else if (data.idp.type == IDP::Type::ERROR_) {
 		Error error;
 		FROM_BYTE_BUFFER(level2, error);
-		handle(data, error);
+		receive(data, error);
 	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
+}
+void XNS::Server::Handlers::EchoHandler::transmit(Data& data, Echo& echo) {
+	// FIXME
+	(void)data;
+	(void)echo;
 }
 
 
@@ -257,17 +283,17 @@ void XNS::Server::Handlers::EchoHandler::handle(Data& data) {
 // XNS::Server::Handlers::CHSHandler
 //
 void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
-	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;
 		FROM_BYTE_BUFFER(level2, pex);
 
 		if (pex.type == PEX::Type::CHS) {
-			ByteBuffer::Buffer level3 = pex.block.toBuffer();
-			XNS::Courier::ExpeditedCourier exp;
+			Buffer level3 = pex.block.toBuffer();
+			ExpeditedCourier exp;
 			FROM_BYTE_BUFFER(level3, exp);
 
-			handle(data, pex, exp);
+			receive(data, pex, exp);
 		} else {
 			logger.error("Unexpected");
 			logger.error("    %s", data.idp.toString());
@@ -278,7 +304,7 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 	} else if (data.idp.type == IDP::Type::ERROR_) {
 		Error error;
 		FROM_BYTE_BUFFER(level2, error);
-		handle(data, error);
+		receive(data, error);
 	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
@@ -286,23 +312,29 @@ void XNS::Server::Handlers::CHSHandler::handle(Data& data) {
 		ERROR();
 	}
 }
+void XNS::Server::Handlers::CHSHandler::transmit(Data& data, PEX& pex, ExpeditedCourier& exp) {
+	// FIXME
+	(void)data;
+	(void)pex;
+	(void)exp;
+}
 
 
 //
 // XNS::Server::Handlers::TimeHandler
 //
 void XNS::Server::Handlers::TimeHandler::handle(Data& data) {
-	ByteBuffer::Buffer level2 = data.idp.block.toBuffer();
+	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;
 		FROM_BYTE_BUFFER(level2, pex);
 
 		if (pex.type == PEX::Type::TIME) {
-			ByteBuffer::Buffer level3 = pex.block.toBuffer();
+			Buffer level3 = pex.block.toBuffer();
 			Time time;
 			FROM_BYTE_BUFFER(level3, time);
 
-			handle(data, pex, time);
+			receive(data, pex, time);
 		} else {
 			logger.error("Unexpected");
 			logger.error("    %s", data.idp.toString());
@@ -313,13 +345,19 @@ void XNS::Server::Handlers::TimeHandler::handle(Data& data) {
 	} else if (data.idp.type == IDP::Type::ERROR_) {
 		Error error;
 		FROM_BYTE_BUFFER(level2, error);
-		handle(data, error);
+		receive(data, error);
 	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
+}
+void XNS::Server::Handlers::TimeHandler::transmit(Data& data, PEX& pex, Time& time) {
+	// FIXME
+	(void)data;
+	(void)pex;
+	(void)time;
 }
 
 

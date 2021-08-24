@@ -102,14 +102,6 @@ namespace XNS::Server {
 			virtual void        handle(Data& data) = 0;
 		};
 
-		class Default : public Base {
-		public:
-			virtual ~Default() {}
-
-			void start() {}
-			void stop () {}
-		};
-
 		std::function<quint16(void)>     socket;
 		std::function<const char*(void)> name;
 		std::function<void(void)>        start;
@@ -166,96 +158,130 @@ namespace XNS::Server {
 
 
 	namespace Handlers {
-		class RIPHandler : public Handler::Default {
+		using Courier::ExpeditedCourier;
+
+		class Default : public Handler::Base {
 		public:
-			typedef std::function<void(Data&, RIP&)>   HandleRIP;
-			typedef std::function<void(Data&, Error&)> HandleError;
+			virtual ~Default() {}
 
-			HandleRIP   handleRIP;
-			HandleError handleError;
+			void start() {}
+			void stop () {}
 
+		protected:
+			// transmit idp packet
+			void transmit(Data& data, IDP& idp);
+
+			// transmit error packet
+			void transmit(Data& data, Error& error);
+		};
+
+
+		class RIPHandler : public Default {
+			typedef std::function<void(Data&, RIP&)>   ReceiveRIP;
+			typedef std::function<void(Data&, Error&)> ReceiveError;
+
+			ReceiveRIP   receiveRIP;
+			ReceiveError receiveError;
+
+		public:
 			RIPHandler() :
-				Handler::Default(*this),
-				handleRIP  ([this](Data& data, RIP& rip)    {this->handle(data, rip);}),
-				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+				receiveRIP  ([this](Data& data, RIP& rip)    {this->receive(data, rip);}),
+				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
+			virtual ~RIPHandler() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::RIP;
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, RIP&   rip)   = 0;
-			virtual void handle(Data& data, Error& error) = 0;
+		protected:
+			// receive packet
+			virtual void receive(Data& data, RIP&   rip)   = 0;
+			virtual void receive(Data& data, Error& error) = 0;
+
+			// transmit packet
+			void transmit(Data& data, RIP& rip);
 		};
 
-		class EchoHandler : public Handler::Default {
+		class EchoHandler : public Default {
+			typedef std::function<void(Data&, Echo&)>  ReceiveEcho;
+			typedef std::function<void(Data&, Error&)> ReceiveError;
+
+			ReceiveEcho  receiveEcho;
+			ReceiveError receiveError;
+
 		public:
-			typedef std::function<void(Data&, Echo&)>  HandleEcho;
-			typedef std::function<void(Data&, Error&)> HandleError;
-
-			HandleEcho  handleEcho;
-			HandleError handleError;
-
 			EchoHandler() :
-				Handler::Default(*this),
-				handleEcho ([this](Data& data, Echo& echo)  {this->handle(data, echo);}),
-				handleError([this](Data& data, Error& error){this->handle(data, error);}) {}
+				receiveEcho ([this](Data& data, Echo& echo)  {this->receive(data, echo);}),
+				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
+			virtual ~EchoHandler() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::ECHO;
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, Echo&  echo)  = 0;
-			virtual void handle(Data& data, Error& error) = 0;
+		protected:
+			// receive packet
+			virtual void receive(Data& data, Echo&  echo)  = 0;
+			virtual void receive(Data& data, Error& error) = 0;
+
+			// transmit packet
+			void transmit(Data& data, Echo& echo);
 		};
 
-		class CHSHandler : public Handler::Default {
+		class CHSHandler : public Default {
+			typedef std::function<void(Data&, PEX&, ExpeditedCourier& exp)> ReceiveExp;
+			typedef std::function<void(Data&, Error&)>                      ReceiveError;
+
+			ReceiveExp   receiveExp;
+			ReceiveError receiveError;
+
 		public:
-			typedef std::function<void(Data&, PEX&, Courier::ExpeditedCourier& exp)> HandleExp;
-			typedef std::function<void(Data&, Error&)>                               HandleError;
-
-			HandleExp   handleExp;
-			HandleError handleError;
-
 			CHSHandler() :
-				Handler::Default(*this),
-				handleExp  ([this](Data& data, PEX& pex, Courier::ExpeditedCourier& exp){this->handle(data, pex, exp);}),
-				handleError([this](Data& data, Error& error)                            {this->handle(data, error);   }) {}
+				receiveExp  ([this](Data& data, PEX& pex, ExpeditedCourier& exp){this->receive(data, pex, exp);}),
+				receiveError([this](Data& data, Error& error)                   {this->receive(data, error);   }) {}
+			virtual ~CHSHandler() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::CHS;
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, PEX&   pex, Courier::ExpeditedCourier& exp)   = 0;
-			virtual void handle(Data& data, Error& error)                                 = 0;
+		protected:
+			// receive packet
+			virtual void receive(Data& data, PEX&   pex, ExpeditedCourier& exp)   = 0;
+			virtual void receive(Data& data, Error& error)                        = 0;
+
+			// transmit packet
+			void transmit(Data& data, PEX& pex, ExpeditedCourier& exp);
 		};
 
-		class TimeHandler : public Handler::Default {
+		class TimeHandler : public Default {
+			typedef std::function<void(Data&, PEX&, Time& time)> ReceiveTime;
+			typedef std::function<void(Data&, Error&)>           ReceiveError;
+
+			ReceiveTime  receiveTime;
+			ReceiveError receiveError;
+
 		public:
-			typedef std::function<void(Data&, PEX&, Time& time)>   HandleTime;
-			typedef std::function<void(Data&, Error&)> HandleError;
-
-			HandleTime   handleTime;
-			HandleError handleError;
-
 			TimeHandler() :
-				Handler::Default(*this),
-				handleTime ([this](Data& data, PEX& pex, Time& time){this->handle(data, pex, time);}),
-				handleError([this](Data& data, Error& error)        {this->handle(data, error);    }) {}
+				receiveTime ([this](Data& data, PEX& pex, Time& time){this->receive(data, pex, time);}),
+				receiveError([this](Data& data, Error& error)        {this->receive(data, error);    }) {}
+			virtual ~TimeHandler() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::TIME;
 			}
 			void handle(Data& data);
 
-			virtual void handle(Data& data, PEX&   pex, Time& time)   = 0;
-			virtual void handle(Data& data, Error& error)             = 0;
+		protected:
+			// receive packet
+			virtual void receive(Data& data, PEX&   pex, Time& time)   = 0;
+			virtual void receive(Data& data, Error& error)             = 0;
+
+			// transmit packet
+			void transmit(Data& data, PEX& pex, Time& time);
 		};
-
-		// FIXME EchoHandler
-
 	}
-
 }

@@ -51,11 +51,11 @@ public:
 	const char* name() {
 		return "RIPHandler";
 	}
-	void handle(XNS::Server::Data& data, XNS::RIP& rip) {
+	void receive(XNS::Server::Data& data, XNS::RIP& rip) {
 		(void)data;
 		logger.info("##  RIP %s", rip.toString());
 	}
-	void handle(XNS::Server::Data& data, XNS::Error& error) {
+	void receive(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;
 		logger.info("    ERROR %s", error.toString());
 	}
@@ -67,12 +67,12 @@ public:
 	const char* name() {
 		return "CHSHandler";
 	}
-	void handle(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
+	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
 		(void)data;
 		logger.info("##  CHS %s", pex.toString());
 		logger.info("        %s", exp.toString());
 	}
-	void handle(XNS::Server::Data& data, XNS::Error& error) {
+	void receive(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;
 		logger.info("    ERROR %s", error.toString());
 	}
@@ -84,12 +84,12 @@ public:
 	const char* name() {
 		return "TimeHandler";
 	}
-	void handle(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
+	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
 		(void)data;
 		logger.info("##  TIME %s", pex.toString());
 		logger.info("         %s", time.toString());
 	}
-	void handle(XNS::Server::Data& data, XNS::Error& error) {
+	void receive(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;
 		logger.info("    ERROR %s", error.toString());
 	}
@@ -101,14 +101,54 @@ public:
 	const char* name() {
 		return "EchoHandler";
 	}
-	void handle(XNS::Server::Data& data, XNS::Echo& echo) {
+	void receive(XNS::Server::Data& data, XNS::Echo& echo) {
 		(void)data;
 		logger.info("##  ECHO %s", echo.toString());
 	}
-	void handle(XNS::Server::Data& data, XNS::Error& error) {
+	void receive(XNS::Server::Data& data, XNS::Error& error) {
 		(void)data;
 		logger.info("    ERROR %s", error.toString());
 	}
+
+//		Network::Packet bb;
+//
+//		{
+//			XNS::Ethernet ethernet;
+//			ethernet.dst = data.ethernet.src;
+//			ethernet.src = data.context.device.address;
+//			ethernet.type = XNS::Ethernet::Type::XNS;
+//
+//			TO_BYTE_BUFFER(bb, ethernet);
+//		}
+//
+//		{
+//			ByteBuffer::Buffer start = bb.newBase();
+//
+//			XNS::IDP idp;
+//			idp.checksum_ = 0;
+//			idp.length    = 0;
+//			idp.control   = 0;
+//			idp.type      = XNS::IDP::Type::ECHO;
+//			idp.dstNet    = data.idp.srcNet;
+//			idp.dstHost   = data.idp.srcHost;
+//			idp.dstSocket = data.idp.srcSocket;
+//			idp.srcNet    = data.context.localNet;
+//			idp.srcHost   = data.context.device.address;
+//			idp.srcSocket = data.idp.dstSocket;
+//
+//			TO_BYTE_BUFFER(bb, idp);
+//			ByteBuffer::Buffer bbEcho = bb.newBase();
+//
+//			XNS::Echo reply;
+//			reply.type = XNS::Echo::Type::REPLY;
+//			reply.block = echo.block;
+//
+//			TO_BYTE_BUFFER(bb, reply);
+//
+//			quint16 length = bb.limit() - start.base();
+//
+//		}
+
 };
 
 

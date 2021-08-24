@@ -45,8 +45,8 @@ static const Logger logger = Logger::getLogger("bpf");
 #include <string.h>
 #include <unistd.h>
 
-#include "../util/ByteBuffer.h"
-#include "../util/Network.h"
+#include "ByteBuffer.h"
+#include "Network.h"
 
 
 #include "BPF.h"

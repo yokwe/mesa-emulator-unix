@@ -58,7 +58,6 @@ QJsonObject XNS::Config::Network::Entry::toJsonObject() const {
 // XNS::Config::Network
 void XNS::Config::Network::fromJsonObject(const QJsonObject& jsonObject) {
 	GET_JSON_OBJECT(interface);
-	GET_JSON_OBJECT(local);
 	GET_JSON_OBJECT(list);
 }
 QJsonObject XNS::Config::Network::toJsonObject() const {

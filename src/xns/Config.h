@@ -53,7 +53,6 @@ namespace XNS {
 			};
 
 			QString      interface;
-			int          local;
 			QList<Entry> list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);

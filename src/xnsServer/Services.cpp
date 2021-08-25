@@ -30,56 +30,65 @@
 
 
 //
-// main.c
+// Services.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const Logger logger = Logger::getLogger("services");
 
-#include "../xns/Server.h"
 
 #include "Services.h"
 
-void testXNSServer() {
-	logger.info("START testXNSServer");
 
-	RIPService  ripService;
-	CHSService  chsService;
-	TimeService timeService;
-	EchoService echoService;
-
-	XNS::Server::Server server;
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	server.add(ripService);
-	server.add(chsService);
-	server.add(timeService);
-	server.add(echoService);
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(10);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
+void RIPService::receive(XNS::Server::Data& data, XNS::RIP& rip) {
+	(void)data;
+	logger.info("##  RIP %s", rip.toString());
 }
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	testXNSServer();
-
-	logger.info("STOP");
-	return 0;
+void RIPService::receive(XNS::Server::Data& data, XNS::Error& error) {
+	(void)data;
+	logger.info("    ERROR %s", error.toString());
 }
 
 
+void CHSService::receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
+	(void)data;
+	logger.info("##  CHS %s", pex.toString());
+	logger.info("        %s", exp.toString());
+}
+void CHSService::receive(XNS::Server::Data& data, XNS::Error& error) {
+	(void)data;
+	logger.info("    ERROR %s", error.toString());
+}
+
+
+void TimeService::receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
+	(void)data;
+	logger.info("##  TIME %s", pex.toString());
+	logger.info("         %s", time.toString());
+}
+void TimeService::receive(XNS::Server::Data& data, XNS::Error& error) {
+	(void)data;
+	logger.info("    ERROR %s", error.toString());
+}
+
+
+void EchoService::receive(XNS::Server::Data& data, XNS::Echo& echo) {
+	logger.info("##  ECHO %s", echo.toString());
+
+	if (echo.type == XNS::Echo::Type::REQUEST) {
+		XNS::Echo reply;
+
+		reply.type = XNS::Echo::Type::REPLY;
+		reply.block = echo.block;
+
+		transmit(data, reply);
+	} else {
+		logger.error("Unexpected");
+		logger.error("  echo %s", echo.toString());
+		ERROR();
+	}
+}
+void EchoService::receive(XNS::Server::Data& data, XNS::Error& error) {
+	(void)data;
+	logger.info("    ERROR %s", error.toString());
+}

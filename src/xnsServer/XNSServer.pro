@@ -9,6 +9,9 @@ CONFIG += cmdline
 # Input
 SOURCES += main.cpp
 
+HEADERS += Services.h
+SOURCES += Services.cpp
+
 
 LIBS += ../../tmp/build/util/libutil.a
 LIBS += ../../tmp/build/xns/libxns.a

@@ -76,14 +76,15 @@ namespace XNS::Server {
 	class Data {
 	public:
 		quint64  time;     // creation time. seconds since unix time epoch, used to remove old queue entry
+		Config&  config;
 		Context& context;
 
 		Packet   packet;   // received packet
 		Ethernet ethernet;
 		IDP      idp;
 
-		Data(Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
-			time(QDateTime::currentSecsSinceEpoch()), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
+		Data(Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+			time(QDateTime::currentSecsSinceEpoch()), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 
 
@@ -118,14 +119,15 @@ namespace XNS::Server {
 
 
 	class ProcessThread : public QRunnable {
+		Config&                 config;
 		Context&                context;
 		QMap<quint16, Service>& serviceMap;
 		bool                    stopThread;
 		bool                    threadRunning;
 
 	public:
-		ProcessThread(Context& context_, QMap<quint16, Service>& serviceMap_) :
-			context(context_), serviceMap(serviceMap_), stopThread(false), threadRunning(false) {}
+		ProcessThread(Config& config_, Context& context_, QMap<quint16, Service>& serviceMap_) :
+			config(config_), context(context_), serviceMap(serviceMap_), stopThread(false), threadRunning(false) {}
 
 		bool running();
 

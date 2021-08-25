@@ -98,7 +98,7 @@ void XNS::Server::Server::init(const QString& path) {
 
 	config = XNS::loadConfig(path);
 	context = Context(config);
-	processThread = new ProcessThread(context, serviceMap);
+	processThread = new ProcessThread(config, context, serviceMap);
 	processThread->setAutoDelete(false);
 }
 void XNS::Server::Server::add(Service service) {
@@ -218,7 +218,7 @@ void XNS::Server::ProcessThread::run() {
 
 			quint16 socket = (quint16)idp.dstSocket;
 			if (serviceMap.contains(socket)) {
-				Data data(context, packet, ethernet, idp);
+				Data data(config, context, packet, ethernet, idp);
 				serviceMap[socket].handle(data);
 			} else {
 				logger.warn("no service for socket %s", IDP::Socket::toString(socket));

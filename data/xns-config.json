@@ -1,12 +1,28 @@
 {
-	"interface": "epair0b",
-	"localNet": 1111,
-	"netList": [
-        {"name": "LOCAL", "value": 1111}
-	],
-	"hostList": [
-		{"name": "WIN98",   "value": "00:0c:29:e9:61:91"},
-		{"name": "UBUNTU",  "value": "00:0c:29:08:37:5d"},
-		{"name": "FREEBSD", "value": "b6:7a:f1:90:03:48"}
-	]
+	"network": {
+		"interface": "epair0b",
+		"local"    : 1111,
+		"list": [
+	        {"name": "AAAA", "net": 1111, "hop": 0},
+	        {"name": "BBBB", "net": 2222, "hop": 1},
+	        {"name": "CCCC", "net": 3333, "hop": 2}
+		]
+	},
+	
+	"host": {
+		"list": [
+			{"name": "WIN98",   "value": "00:0c:29:e9:61:91"},
+			{"name": "UBUNTU",  "value": "00:0c:29:08:37:5d"},
+			{"name": "FREEBSD", "value": "b6:7a:f1:90:03:48"}
+	
+		]
+	},
+	
+	"time" : {
+		"offsetDirection" : 1,
+		"offsetHours"     : 9,
+		"offsetMinutes"   : 0,
+		"dstStart"        : 0,
+		"dstEnd"          : 0
+	}
 }

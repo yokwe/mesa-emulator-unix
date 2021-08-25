@@ -41,46 +41,85 @@ static const Logger logger = Logger::getLogger("xns-config");
 #include "Config.h"
 
 
-// XNS::Config::Net
-void XNS::Config::Net::fromJsonObject(const QJsonObject& jsonObject) {
+// XNS::Config::Network::Entry
+void XNS::Config::Network::Entry::fromJsonObject(const QJsonObject& jsonObject) {
 	GET_JSON_OBJECT(name);
-	GET_JSON_OBJECT(value);
+	GET_JSON_OBJECT(net);
+	GET_JSON_OBJECT(hop);
 }
-QJsonObject XNS::Config::Net::toJsonObject() const {
+QJsonObject XNS::Config::Network::Entry::toJsonObject() const {
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(name);
-	SET_JSON_OBJECT(value);
+	SET_JSON_OBJECT(net);
+	SET_JSON_OBJECT(hop);
 	return jsonObject;
 }
 
+// XNS::Config::Network
+void XNS::Config::Network::fromJsonObject(const QJsonObject& jsonObject) {
+	GET_JSON_OBJECT(interface);
+	GET_JSON_OBJECT(local);
+	GET_JSON_OBJECT(list);
+}
+QJsonObject XNS::Config::Network::toJsonObject() const {
+	QJsonObject jsonObject;
+	SET_JSON_OBJECT(interface);
+	SET_JSON_OBJECT(list);
+	return jsonObject;
+}
 
-// XNS::Config::Host
-void XNS::Config::Host::fromJsonObject(const QJsonObject& jsonObject) {
+// XNS::Config::Host::Entry
+void XNS::Config::Host::Entry::fromJsonObject(const QJsonObject& jsonObject) {
 	QString valueString;
 	GET_JSON_OBJECT(name);
 	GET_JSON_OBJECT2(value, valueString);
 	value = XNS::Host::fromString(valueString);
 }
-QJsonObject XNS::Config::Host::toJsonObject() const {
+QJsonObject XNS::Config::Host::Entry::toJsonObject() const {
 	QString valueString = XNS::Host::toHexaDecimalString(value, ":");
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(name);
 	SET_JSON_OBJECT2(value, valueString);
 	return jsonObject;
 }
+// XNS::Config::Host
+void XNS::Config::Host::fromJsonObject(const QJsonObject& jsonObject) {
+	GET_JSON_OBJECT(list);
+}
+QJsonObject XNS::Config::Host::toJsonObject() const {
+	QJsonObject jsonObject;
+	SET_JSON_OBJECT(list);
+	return jsonObject;
+}
+
+// XNS::Config::Time
+void XNS::Config::Time::fromJsonObject(const QJsonObject& jsonObject) {
+	GET_JSON_OBJECT(offsetDirection);
+	GET_JSON_OBJECT(offsetHours);
+	GET_JSON_OBJECT(offsetMinutes);
+	GET_JSON_OBJECT(dstStart);
+	GET_JSON_OBJECT(dstEnd);
+}
+QJsonObject XNS::Config::Time::toJsonObject() const {
+	QJsonObject jsonObject;
+	SET_JSON_OBJECT(offsetDirection);
+	SET_JSON_OBJECT(offsetHours);
+	SET_JSON_OBJECT(offsetMinutes);
+	SET_JSON_OBJECT(dstStart);
+	SET_JSON_OBJECT(dstEnd);
+	return jsonObject;
+}
 
 // XNS::Config
 void XNS::Config::fromJsonObject(const QJsonObject& jsonObject) {
-	GET_JSON_OBJECT(interface);
-	GET_JSON_OBJECT(localNet);
-	GET_JSON_OBJECT(netList);
-	GET_JSON_OBJECT(hostList);
+	GET_JSON_OBJECT(network);
+	GET_JSON_OBJECT(host);
+	GET_JSON_OBJECT(time);
 }
 QJsonObject XNS::Config::toJsonObject() const {
 	QJsonObject jsonObject;
-	SET_JSON_OBJECT(interface);
-	SET_JSON_OBJECT(localNet);
-	SET_JSON_OBJECT(netList);
-	SET_JSON_OBJECT(hostList);
+	SET_JSON_OBJECT(network);
+	SET_JSON_OBJECT(host);
+	SET_JSON_OBJECT(time);
 	return jsonObject;
 }

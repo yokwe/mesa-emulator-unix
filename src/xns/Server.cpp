@@ -52,9 +52,9 @@ static const Logger logger = Logger::getLogger("xns-server");
 XNS::Server::Context::Context(const QString& path) {
 	Config config = XNS::loadConfig(path);
 
-	device.name    = config.interface;
+	device.name    = config.network.interface;
 	device.address = 0;
-	localNet       = config.localNet;
+	localNet       = config.network.local;
 
 	QList<Network::Device> list = Network::getDeviceList();
 	for(auto e: list) {

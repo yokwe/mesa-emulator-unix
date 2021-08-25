@@ -40,28 +40,58 @@
 namespace XNS {
 	class Config : public JSONBase {
 	public:
-		class Net : public JSONBase {
+		class Network : public JSONBase {
 		public:
-			QString name;
-			int     value;
+			class Entry : public JSONBase {
+			public:
+				QString name;
+				int     net;
+				int     hop;
+
+				void fromJsonObject(const QJsonObject& jsonObject);
+				QJsonObject toJsonObject() const;
+			};
+
+			QString      interface;
+			int          local;
+			QList<Entry> list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);
 			QJsonObject toJsonObject() const;
 		};
+
 		class Host : public JSONBase {
 		public:
-			QString name;
-			quint64 value;
+			class Entry : public JSONBase {
+			public:
+				QString name;
+				quint64 value;
+
+				void fromJsonObject(const QJsonObject& jsonObject);
+				QJsonObject toJsonObject() const;
+			};
+
+			QList<Entry>  list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);
 			QJsonObject toJsonObject() const;
 		};
 
-		QString     interface; // name of interface
-		int         localNet;  // for XNSServer
+		class Time : public JSONBase {
+		public:
+			int  offsetDirection;  // east or west of prime meridian
+			int  offsetHours;
+			int  offsetMinutes;
+			int  dstStart;         // 0 for no DST
+			int  dstEnd;           // 0 for no DST
 
-		QList<Net>  netList;
-		QList<Host> hostList;
+			void fromJsonObject(const QJsonObject& jsonObject);
+			QJsonObject toJsonObject() const;
+		};
+
+		Network network;
+		Host    host;
+		Time    time;
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;

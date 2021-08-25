@@ -38,6 +38,8 @@ static const Logger logger = Logger::getLogger("xns");
 
 #include "../util/JSONUtil.h"
 
+#include "Time.h"
+
 #include "XNS.h"
 
 
@@ -51,23 +53,38 @@ XNS::Config XNS::loadConfig(const QString& path) {
 	config.fromJsonObject(jsonObject);
 
 	// add name to net and host
-	for(auto e: config.netList) {
-		IDP::Net::addNameMap(e.value, e.name);
+	for(auto e: config.network.list) {
+		IDP::Net::addNameMap((quint32)e.net, e.name);
 	}
-	for(auto e: config.hostList) {
+	for(auto e: config.host.list) {
 		Host::addNameMap(e.value, e.name);
 	}
 
-	logger.info("config interface = %s", config.interface);
-	logger.info("config localNet  = %d", config.localNet);
-	for(auto e: config.netList) {
-		logger.info("config net  %4d  %s", e.value, e.name);
+	// config.network
+	logger.info("config network interface    %s", config.network.interface);
+	logger.info("config network local        %d", config.network.local);
+	for(auto e: config.network.list) {
+		logger.info("config network list         %s  %d  %d", e.name, e.net, e.hop);
 	}
-	for(auto e: config.hostList) {
-		logger.info("config host %s  %20s  %s",
+
+	// config.host
+	for(auto e: config.host.list) {
+		logger.info("config host list            %-10s  %s  %20s",
+			TO_CSTRING(e.name),
 			TO_CSTRING(Host::toHexaDecimalString(e.value, ":")),
-			TO_CSTRING(Host::toDecimalString(e.value)),
-			TO_CSTRING(e.name));
+			TO_CSTRING(Host::toDecimalString(e.value)));
+	}
+
+	// config time
+	{
+		XNS::Time::Direction direction;
+		direction = (quint16)config.time.offsetDirection;
+
+		logger.info("config time offsetDirection %s", direction.toString());
+		logger.info("config time offsetHours     %d", config.time.offsetHours);
+		logger.info("config time offsetMinutes   %d", config.time.offsetMinutes);
+		logger.info("config time dstStart        %d", config.time.dstStart);
+		logger.info("config time dstEnd          %d", config.time.dstEnd);
 	}
 
 	return config;

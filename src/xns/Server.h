@@ -60,6 +60,7 @@ namespace XNS::Server {
 	using Network::Device;
 	using Network::Driver;
 	using Network::Packet;
+	using Courier::ExpeditedCourier;
 
 	class Context {
 	public:
@@ -159,8 +160,6 @@ namespace XNS::Server {
 
 
 	namespace Services {
-		using Courier::ExpeditedCourier;
-
 		class Default : public Service::Base {
 		public:
 			// initialize idp for transmit

@@ -40,39 +40,39 @@ static const Logger logger = Logger::getLogger("services");
 #include "Services.h"
 
 
-void RIPService::receive(XNS::Server::Data& data, XNS::RIP& rip) {
+void RIPService::receive(const XNS::Server::Data& data, const XNS::RIP& rip) {
 	(void)data;
 	logger.info("##  RIP %s", rip.toString());
 }
-void RIPService::receive(XNS::Server::Data& data, XNS::Error& error) {
+void RIPService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
 	(void)data;
 	logger.info("    ERROR %s", error.toString());
 }
 
 
-void CHSService::receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp) {
+void CHSService::receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Courier::ExpeditedCourier& exp) {
 	(void)data;
 	logger.info("##  CHS %s", pex.toString());
 	logger.info("        %s", exp.toString());
 }
-void CHSService::receive(XNS::Server::Data& data, XNS::Error& error) {
+void CHSService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
 	(void)data;
 	logger.info("    ERROR %s", error.toString());
 }
 
 
-void TimeService::receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time) {
+void TimeService::receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Time& time) {
 	(void)data;
 	logger.info("##  TIME %s", pex.toString());
 	logger.info("         %s", time.toString());
 }
-void TimeService::receive(XNS::Server::Data& data, XNS::Error& error) {
+void TimeService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
 	(void)data;
 	logger.info("    ERROR %s", error.toString());
 }
 
 
-void EchoService::receive(XNS::Server::Data& data, XNS::Echo& echo) {
+void EchoService::receive(const XNS::Server::Data& data, const XNS::Echo& echo) {
 	logger.info("##  ECHO %s", echo.toString());
 
 	if (echo.type == XNS::Echo::Type::REQUEST) {
@@ -88,7 +88,7 @@ void EchoService::receive(XNS::Server::Data& data, XNS::Echo& echo) {
 		ERROR();
 	}
 }
-void EchoService::receive(XNS::Server::Data& data, XNS::Error& error) {
+void EchoService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
 	(void)data;
 	logger.info("    ERROR %s", error.toString());
 }

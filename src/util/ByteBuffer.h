@@ -387,7 +387,7 @@ namespace ByteBuffer {
 			return buffer.toString();
 		}
 
-		ByteBuffer::Buffer toBuffer() {
+		ByteBuffer::Buffer toBuffer() const {
 			return buffer;
 		}
 

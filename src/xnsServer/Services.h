@@ -43,8 +43,8 @@ public:
 	const char* name() {
 		return "RIPService";
 	}
-	void receive(XNS::Server::Data& data, XNS::RIP& rip);
-	void receive(XNS::Server::Data& data, XNS::Error& error);
+	void receive(const XNS::Server::Data& data, const XNS::RIP& rip);
+	void receive(const XNS::Server::Data& data, const XNS::Error& error);
 };
 
 
@@ -53,8 +53,8 @@ public:
 	const char* name() {
 		return "CHSService";
 	}
-	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Courier::ExpeditedCourier& exp);
-	void receive(XNS::Server::Data& data, XNS::Error& error);
+	void receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Courier::ExpeditedCourier& exp);
+	void receive(const XNS::Server::Data& data, const XNS::Error& error);
 };
 
 
@@ -63,8 +63,8 @@ public:
 	const char* name() {
 		return "TimeService";
 	}
-	void receive(XNS::Server::Data& data, XNS::PEX& pex, XNS::Time& time);
-	void receive(XNS::Server::Data& data, XNS::Error& error);
+	void receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Time& time);
+	void receive(const XNS::Server::Data& data, const XNS::Error& error);
 };
 
 
@@ -73,7 +73,7 @@ public:
 	const char* name() {
 		return "EchoService";
 	}
-	void receive(XNS::Server::Data& data, XNS::Echo& echo);
-	void receive(XNS::Server::Data& data, XNS::Error& error);
+	void receive(const XNS::Server::Data& data, const XNS::Echo& echo);
+	void receive(const XNS::Server::Data& data, const XNS::Error& error);
 };
 

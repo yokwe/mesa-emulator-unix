@@ -98,14 +98,14 @@ namespace XNS::Server {
 			virtual void        start()            = 0;
 			virtual void        stop()             = 0;
 
-			virtual void        handle(Data& data) = 0;
+			virtual void        handle(const Data& data) = 0;
 		};
 
 		std::function<quint16(void)>     socket;
 		std::function<const char*(void)> name;
 		std::function<void(void)>        start;
 		std::function<void(void)>        stop;
-		std::function<void(Data&)>       handle;
+		std::function<void(const Data&)> handle;
 
 		Service() :
 			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
@@ -114,7 +114,7 @@ namespace XNS::Server {
 			name   ([&base](){return base.name();}),
 			start  ([&base](){base.start();}),
 			stop   ([&base](){base.stop();}),
-			handle ([&base](Data& data){base.handle(data);}) {}
+			handle ([&base](const Data& data){base.handle(data);}) {}
 	};
 
 
@@ -173,119 +173,119 @@ namespace XNS::Server {
 
 		protected:
 			// transmit idp packet
-			void transmit(Data& data, IDP& idp);
+			void transmit(const Data& data, const IDP& idp);
 
 			// transmit error packet
-			void transmit(Data& data, Error& error);
+			void transmit(const Data& data, const Error& error);
 		};
 
 
 		class RIPService : public Default {
-			typedef std::function<void(Data&, RIP&)>   ReceiveRIP;
-			typedef std::function<void(Data&, Error&)> ReceiveError;
+			typedef std::function<void(const Data&, const RIP&)>   ReceiveRIP;
+			typedef std::function<void(const Data&, const Error&)> ReceiveError;
 
 			ReceiveRIP   receiveRIP;
 			ReceiveError receiveError;
 
 		public:
 			RIPService() :
-				receiveRIP  ([this](Data& data, RIP& rip)    {this->receive(data, rip);}),
-				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
+				receiveRIP  ([this](const Data& data, const RIP& rip)    {this->receive(data, rip);}),
+				receiveError([this](const Data& data, const Error& error){this->receive(data, error);}) {}
 			virtual ~RIPService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::RIP;
 			}
-			void handle(Data& data);
+			void handle(const Data& data);
 
 		protected:
 			// receive packet
-			virtual void receive(Data& data, RIP&   rip)   = 0;
-			virtual void receive(Data& data, Error& error) = 0;
+			virtual void receive(const Data& data, const RIP&   rip)   = 0;
+			virtual void receive(const Data& data, const Error& error) = 0;
 
 			// transmit packet
-			void transmit(Data& data, RIP& rip);
+			void transmit(const Data& data, const RIP& rip);
 		};
 
 		class EchoService : public Default {
-			typedef std::function<void(Data&, Echo&)>  ReceiveEcho;
-			typedef std::function<void(Data&, Error&)> ReceiveError;
+			typedef std::function<void(const Data&, const Echo&)>  ReceiveEcho;
+			typedef std::function<void(const Data&, const Error&)> ReceiveError;
 
 			ReceiveEcho  receiveEcho;
 			ReceiveError receiveError;
 
 		public:
 			EchoService() :
-				receiveEcho ([this](Data& data, Echo& echo)  {this->receive(data, echo);}),
-				receiveError([this](Data& data, Error& error){this->receive(data, error);}) {}
+				receiveEcho ([this](const Data& data, const Echo& echo)  {this->receive(data, echo);}),
+				receiveError([this](const Data& data, const Error& error){this->receive(data, error);}) {}
 			virtual ~EchoService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::ECHO;
 			}
-			void handle(Data& data);
+			void handle(const Data& data);
 
 		protected:
 			// receive packet
-			virtual void receive(Data& data, Echo&  echo)  = 0;
-			virtual void receive(Data& data, Error& error) = 0;
+			virtual void receive(const Data& data, const Echo&  echo)  = 0;
+			virtual void receive(const Data& data, const Error& error) = 0;
 
 			// transmit packet
-			void transmit(Data& data, Echo& echo);
+			void transmit(const Data& data, const Echo& echo);
 		};
 
 		class CHSService : public Default {
-			typedef std::function<void(Data&, PEX&, ExpeditedCourier& exp)> ReceiveExp;
-			typedef std::function<void(Data&, Error&)>                      ReceiveError;
+			typedef std::function<void(const Data&, const PEX&, const ExpeditedCourier& exp)> ReceiveExp;
+			typedef std::function<void(const Data&, const Error&)>                      ReceiveError;
 
 			ReceiveExp   receiveExp;
 			ReceiveError receiveError;
 
 		public:
 			CHSService() :
-				receiveExp  ([this](Data& data, PEX& pex, ExpeditedCourier& exp){this->receive(data, pex, exp);}),
-				receiveError([this](Data& data, Error& error)                   {this->receive(data, error);   }) {}
+				receiveExp  ([this](const Data& data, const PEX& pex, const ExpeditedCourier& exp){this->receive(data, pex, exp);}),
+				receiveError([this](const Data& data, const Error& error)                   {this->receive(data, error);   }) {}
 			virtual ~CHSService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::CHS;
 			}
-			void handle(Data& data);
+			void handle(const Data& data);
 
 		protected:
 			// receive packet
-			virtual void receive(Data& data, PEX&   pex, ExpeditedCourier& exp)   = 0;
-			virtual void receive(Data& data, Error& error)                        = 0;
+			virtual void receive(const Data& data, const PEX&   pex, const ExpeditedCourier& exp)   = 0;
+			virtual void receive(const Data& data, const Error& error)                        = 0;
 
 			// transmit packet
-			void transmit(Data& data, PEX& pex, ExpeditedCourier& exp);
+			void transmit(const Data& data, const PEX& pex, const ExpeditedCourier& exp);
 		};
 
 		class TimeService : public Default {
-			typedef std::function<void(Data&, PEX&, Time& time)> ReceiveTime;
-			typedef std::function<void(Data&, Error&)>           ReceiveError;
+			typedef std::function<void(const Data&, const PEX&, const Time& time)> ReceiveTime;
+			typedef std::function<void(const Data&, const Error&)>           ReceiveError;
 
 			ReceiveTime  receiveTime;
 			ReceiveError receiveError;
 
 		public:
 			TimeService() :
-				receiveTime ([this](Data& data, PEX& pex, Time& time){this->receive(data, pex, time);}),
-				receiveError([this](Data& data, Error& error)        {this->receive(data, error);    }) {}
+				receiveTime ([this](const Data& data, const PEX& pex, const Time& time){this->receive(data, pex, time);}),
+				receiveError([this](const Data& data, const Error& error)              {this->receive(data, error);    }) {}
 			virtual ~TimeService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::TIME;
 			}
-			void handle(Data& data);
+			void handle(const Data& data);
 
 		protected:
 			// receive packet
-			virtual void receive(Data& data, PEX&   pex, Time& time)   = 0;
-			virtual void receive(Data& data, Error& error)             = 0;
+			virtual void receive(const Data& data, const PEX&   pex, const Time& time)   = 0;
+			virtual void receive(const Data& data, const Error& error)             = 0;
 
 			// transmit packet
-			void transmit(Data& data, PEX& pex, Time& time);
+			void transmit(const Data& data, const PEX& pex, const Time& time);
 		};
 	}
 }

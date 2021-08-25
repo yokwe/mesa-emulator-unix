@@ -62,7 +62,6 @@ XNS::Config XNS::loadConfig(const QString& path) {
 
 	// config.network
 	logger.info("config network interface    %s", config.network.interface);
-	logger.info("config network local        %d", config.network.local);
 	for(auto e: config.network.list) {
 		logger.info("config network list         %s  %d  %d", e.name, e.net, e.hop);
 	}

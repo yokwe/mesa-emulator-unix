@@ -46,19 +46,22 @@ static const Logger logger = Logger::getLogger("xns");
 //
 // XNS
 //
-static XNS::Config config;
-
 XNS::Config XNS::loadConfig(const QString& path) {
+	XNS::Config config;
+
 	QJsonObject jsonObject = JSONUtil::loadObject(path);
 	config.fromJsonObject(jsonObject);
 
-	// add name to net and host
+	// add known name to net
 	for(auto e: config.network.list) {
 		IDP::Net::addNameMap((quint32)e.net, e.name);
 	}
+	// add known name to host
 	for(auto e: config.host.list) {
 		Host::addNameMap(e.value, e.name);
 	}
+
+	// dump config values
 
 	// config.network
 	logger.info("config network interface    %s", config.network.interface);

@@ -63,12 +63,13 @@ namespace XNS::Server {
 
 	class Context {
 	public:
-		Device  device;
 		quint32 localNet;
+		quint64 localAddress;
+
 		Driver* driver;
 
-		Context() : localNet(0), driver(nullptr) {}
-		Context(const QString& path); // path of config json file
+		Context() : localNet(0), localAddress(0), driver(nullptr) {}
+		Context(const Config& config);
 	};
 
 
@@ -135,6 +136,7 @@ namespace XNS::Server {
 
 
 	class Server {
+		Config                 config;
 		Context                context;
 		QMap<quint16, Service> serviceMap;
 

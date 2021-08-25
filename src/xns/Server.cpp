@@ -49,17 +49,26 @@ static const Logger logger = Logger::getLogger("xns-server");
 //
 // XNS::Server::Context
 //
-XNS::Server::Context::Context(const QString& path) {
-	Config config = XNS::loadConfig(path);
+XNS::Server::Context::Context(const Config& config) {
+	localNet = 0;
+	for(auto e: config.network.list) {
+		if (e.hop == 0) {
+			localNet = e.net;
+		}
+	}
+	if (localNet == 0) {
+		logger.error("Unexpected");
+		for(auto e: config.network.list) {
+			logger.error("  available network %d %d %s", e.hop, e.net, e.name);
+		}
+		ERROR()
+	}
 
-	device.name    = config.network.interface;
-	device.address = 0;
-	localNet       = config.network.local;
-
+	Network::Device device;
 	QList<Network::Device> list = Network::getDeviceList();
 	for(auto e: list) {
-		if (e.name == device.name) {
-			device.address   = e.address;
+		if (e.name == config.network.interface) {
+			device = e;
 		}
 	}
 	if (device.address == 0) {
@@ -71,6 +80,7 @@ XNS::Server::Context::Context(const QString& path) {
 		ERROR()
 	}
 
+	localAddress = device.address;
 	driver = Network::getDriver(device);
 
 	logger.info("device   = %20s  %s", Host::toHexaDecimalString(device.address, ":"), device.name);
@@ -86,7 +96,8 @@ void XNS::Server::Server::init(const QString& path) {
 	processThreadPool->setObjectName("ProcessThereadPool");
 	processThreadPool->setMaxThreadCount(1);
 
-	context = Context(path);
+	config = XNS::loadConfig(path);
+	context = Context(config);
 	processThread = new ProcessThread(context, serviceMap);
 	processThread->setAutoDelete(false);
 }
@@ -182,7 +193,7 @@ void XNS::Server::ProcessThread::run() {
 			if (ethernet.type != Ethernet::Type::XNS) continue;
 			// check ethernet dst
 			// accepth broadcast or my host
-			if (ethernet.dst != Host::ALL && ethernet.dst != context.device.address) continue;
+			if (ethernet.dst != Host::ALL && ethernet.dst != context.localAddress) continue;
 
 			Buffer start = level1.newBase(); // use start for checksum
 
@@ -234,7 +245,7 @@ void XNS::Server::ProcessThread::stop() {
 void XNS::Server::Services::Default::transmit(Data& data, IDP& idp) {
 	Packet packet;
 	TO_BYTE_BUFFER(packet, data.ethernet.src);
-	packet.write48(data.context.device.address);
+	packet.write48(data.context.localAddress);
 	TO_BYTE_BUFFER(packet, data.ethernet.type);
 
 	// save packet as start for setChecksum() and computeChecksum()
@@ -303,7 +314,7 @@ void XNS::Server::Services::Default::init(const Data& data, quint8 type, BLOCK& 
 	idp.dstHost   = data.idp.srcHost;
 	idp.dstSocket = data.idp.srcSocket;
 	idp.srcNet    = data.context.localNet;
-	idp.srcHost   = data.context.device.address;
+	idp.srcHost   = data.context.localAddress;
 	idp.srcSocket = data.idp.dstSocket;
 	idp.block     = block;
 }

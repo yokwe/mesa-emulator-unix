@@ -195,7 +195,6 @@ void XNS::Server::ProcessThread::run() {
 			// accepth broadcast or my host
 			if (ethernet.dst != Host::ALL && ethernet.dst != context.localAddress) continue;
 
-			Buffer start = level1.newBase(); // use start for checksum
 
 			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
@@ -205,6 +204,7 @@ void XNS::Server::ProcessThread::run() {
 
 			// check idp checksum
 			{
+				Buffer start = ethernet.block.toBuffer();
 				quint16 checksum = XNS::IDP::getChecksum(start);
 				if (checksum != XNS::IDP::Checksum::NOCHECK) {
 					quint16 newValue = XNS::IDP::computeChecksum(start);

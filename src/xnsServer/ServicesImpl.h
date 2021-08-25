@@ -30,7 +30,7 @@
 
 
 //
-// Services.h
+// ServicesImpl.h
 //
 
 #pragma once
@@ -38,42 +38,54 @@
 #include "../xns/XNS.h"
 #include "../xns/Server.h"
 
-class RIPService : public XNS::Server::Services::RIPService {
-public:
-	const char* name() {
-		return "RIPService";
-	}
-	void receive(const XNS::Server::Data& data, const XNS::RIP& rip);
-	void receive(const XNS::Server::Data& data, const XNS::Error& error);
-};
+namespace XNS::ServicesImpl {
+	using ByteBuffer::Buffer;
+	using XNS::Echo;
+	using XNS::Error;
+	using XNS::PEX;
+	using XNS::RIP;
+	using XNS::Time;
+	using XNS::Server::Data;
+	using XNS::Courier::ExpeditedCourier;
+
+	class RIPService : public XNS::Server::Services::RIPService {
+	public:
+		const char* name() {
+			return "RIPService";
+		}
+		void receive(const Data& data, const RIP& rip);
+		void receive(const Data& data, const Error& error);
+	};
 
 
-class CHSService : public XNS::Server::Services::CHSService {
-public:
-	const char* name() {
-		return "CHSService";
-	}
-	void receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Courier::ExpeditedCourier& exp);
-	void receive(const XNS::Server::Data& data, const XNS::Error& error);
-};
+	class CHSService : public XNS::Server::Services::CHSService {
+	public:
+		const char* name() {
+			return "CHSService";
+		}
+		void receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp);
+		void receive(const Data& data, const Error& error);
+	};
 
 
-class TimeService : public XNS::Server::Services::TimeService {
-public:
-	const char* name() {
-		return "TimeService";
-	}
-	void receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Time& time);
-	void receive(const XNS::Server::Data& data, const XNS::Error& error);
-};
+	class TimeService : public XNS::Server::Services::TimeService {
+	public:
+		const char* name() {
+			return "TimeService";
+		}
+		void receive(const Data& data, const PEX& pex, const Time& time);
+		void receive(const Data& data, const Error& error);
+	};
 
 
-class EchoService : public XNS::Server::Services::EchoService {
-public:
-	const char* name() {
-		return "EchoService";
-	}
-	void receive(const XNS::Server::Data& data, const XNS::Echo& echo);
-	void receive(const XNS::Server::Data& data, const XNS::Error& error);
-};
+	class EchoService : public XNS::Server::Services::EchoService {
+	public:
+		const char* name() {
+			return "EchoService";
+		}
+		void receive(const Data& data, const XNS::Echo& echo);
+		void receive(const Data& data, const Error& error);
+	};
+
+}
 

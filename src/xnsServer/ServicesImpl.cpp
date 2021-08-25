@@ -30,65 +30,67 @@
 
 
 //
-// Services.cpp
+// ServicesImpl.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("services");
+static const Logger logger = Logger::getLogger("servicesImpl");
 
 
-#include "Services.h"
+#include "ServicesImpl.h"
 
-
-void RIPService::receive(const XNS::Server::Data& data, const XNS::RIP& rip) {
-	(void)data;
-	logger.info("##  RIP %s", rip.toString());
-}
-void RIPService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
-	(void)data;
-	logger.info("    ERROR %s", error.toString());
-}
-
-
-void CHSService::receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Courier::ExpeditedCourier& exp) {
-	(void)data;
-	logger.info("##  CHS %s", pex.toString());
-	logger.info("        %s", exp.toString());
-}
-void CHSService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
-	(void)data;
-	logger.info("    ERROR %s", error.toString());
-}
-
-
-void TimeService::receive(const XNS::Server::Data& data, const XNS::PEX& pex, const XNS::Time& time) {
-	(void)data;
-	logger.info("##  TIME %s", pex.toString());
-	logger.info("         %s", time.toString());
-}
-void TimeService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
-	(void)data;
-	logger.info("    ERROR %s", error.toString());
-}
-
-
-void EchoService::receive(const XNS::Server::Data& data, const XNS::Echo& echo) {
-	logger.info("##  ECHO %s", echo.toString());
-
-	if (echo.type == XNS::Echo::Type::REQUEST) {
-		XNS::Echo reply;
-
-		reply.type = XNS::Echo::Type::REPLY;
-		reply.block = echo.block;
-
-		transmit(data, reply);
-	} else {
-		logger.error("Unexpected");
-		logger.error("  echo %s", echo.toString());
-		ERROR();
+namespace XNS::ServicesImpl {
+	void RIPService::receive(const Data& data, const RIP& rip) {
+		(void)data;
+		logger.info("##  RIP %s", rip.toString());
 	}
-}
-void EchoService::receive(const XNS::Server::Data& data, const XNS::Error& error) {
-	(void)data;
-	logger.info("    ERROR %s", error.toString());
+	void RIPService::receive(const Data& data, const Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+
+
+	void CHSService::receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
+		(void)data;
+		logger.info("##  CHS %s", pex.toString());
+		logger.info("        %s", exp.toString());
+	}
+	void CHSService::receive(const Data& data, const Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+
+
+	void TimeService::receive(const Data& data, const PEX& pex, const Time& time) {
+		(void)data;
+		logger.info("##  TIME %s", pex.toString());
+		logger.info("         %s", time.toString());
+	}
+	void TimeService::receive(const Data& data, const Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+
+
+	void EchoService::receive(const Data& data, const Echo& echo) {
+		logger.info("##  ECHO %s", echo.toString());
+
+		if (echo.type == XNS::Echo::Type::REQUEST) {
+			XNS::Echo reply;
+
+			reply.type = XNS::Echo::Type::REPLY;
+			reply.block = echo.block;
+
+			transmit(data, reply);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  echo %s", echo.toString());
+			ERROR();
+		}
+	}
+	void EchoService::receive(const Data& data, const Error& error) {
+		(void)data;
+		logger.info("    ERROR %s", error.toString());
+	}
+
 }

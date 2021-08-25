@@ -38,15 +38,15 @@ static const Logger logger = Logger::getLogger("main");
 
 #include "../xns/Server.h"
 
-#include "Services.h"
+#include "ServicesImpl.h"
 
 void testXNSServer() {
 	logger.info("START testXNSServer");
 
-	RIPService  ripService;
-	CHSService  chsService;
-	TimeService timeService;
-	EchoService echoService;
+	XNS::ServicesImpl::RIPService  ripService;
+	XNS::ServicesImpl::CHSService  chsService;
+	XNS::ServicesImpl::TimeService timeService;
+	XNS::ServicesImpl::EchoService echoService;
 
 	XNS::Server::Server server;
 

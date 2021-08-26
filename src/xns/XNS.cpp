@@ -252,13 +252,16 @@ NameMap::Map<quint16> XNS::IDP::Socket::nameMap(NameMap::toString16X04, {
 // XNS::IDP
 //
 QString XNS::IDP::toString() const {
-	return QString("%1 %2 %3 %4  %5-%6-%7  %8-%9-%10").
-		arg(checksum_.toString(), 4).
+	QString dst = QString("%1-%2-%3").arg(dstNet.toString()).arg(dstHost.toString()).arg(dstSocket.toString());
+	QString src = QString("%1-%2-%3").arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
+
+	return QString("%1 %2 %3 %4 %5 %6").
+		arg(checksum_.toString(), -7).
 		arg((quint16)length, 4).
 		arg((quint8)control, 2, 16, QChar('0')).
-		arg(type.toString()).
-		arg(dstNet.toString()).arg(dstHost.toString()).arg(dstSocket.toString()).
-		arg(srcNet.toString()).arg(srcHost.toString()).arg(srcSocket.toString());
+		arg(type.toString(), 4).
+		arg(dst, -20).
+		arg(src, -20);
 }
 void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	int start = bb.position();

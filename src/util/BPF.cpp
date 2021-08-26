@@ -167,8 +167,7 @@ int  BPF::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
-int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno) {
-	(void)dataLen;
+int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch) {
 	opErrno = 0;
 	// if readData is empty, fill readData
 	if (readData.isEmpty()) read();
@@ -176,8 +175,20 @@ int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno) {
 	// Take first entry
 	ByteBuffer::Buffer bb = readData.first();
 	int len = bb.limit() - bb.base();
+	if (dataLen < (quint32)len) {
+		logger.error("Unexpected");
+		logger.error("  dataLen %u", dataLen);
+		logger.error("  len     %d", len);
+		ERROR();
+	}
 	// copy bb to data
 	bb.read(bb.base(), len, data);
+
+	// set dateTime
+	if (msecSinceEpoch != nullptr) {
+		struct timeval* p = (struct timeval*)bb.data();
+		*msecSinceEpoch = (p->tv_sec * 1000) + (p->tv_usec / 1000);
+	}
 	// remove first entry
 	readData.pop_back();
 	return len;

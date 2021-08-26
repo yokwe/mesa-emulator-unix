@@ -64,9 +64,18 @@ public:
 
 	// For Packet and ByteBuffer
 	void write(const Network::Packet& value);
+
 	// read() returns QList<ByteBuffer> readData.
 	// Backing store of ByteBuffer is member variable buffer.
-	// Copy ByteBuffer to Network::Packet for later use.
+	//
+	// IMPORTANT
+	//
+	// This ByteBuffer contains whole data that includes struct bpf_hdr.
+	// Buffer.data() returns address of struct bpf_hdr.
+	// Buffer.base() returns index of captured data
+	// Buffer.limit() returns bh_hdrlen + bh_caplen
+	// So actual received data is stored between base() and limit()
+	// You can get address of struct timeval from data()
 	const QList<ByteBuffer::Buffer>& read();
 
 

@@ -118,9 +118,10 @@ const QList<ByteBuffer::Buffer>& BPF::read() {
 		struct bpf_hdr* p = (struct bpf_hdr*)(buffer + i);
 		int     caplen = (int)(p->bh_caplen);
 		int     hdrlen = (int)(p->bh_hdrlen);
-		quint8* data   = buffer + i + hdrlen;
+		quint8* data   = buffer + i;
 
-		ByteBuffer::Buffer element(caplen, data);
+		ByteBuffer::Buffer element(hdrlen + caplen, data);
+		element.setBase(hdrlen);
 		readData.append(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);
@@ -174,9 +175,9 @@ int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno) {
 
 	// Take first entry
 	ByteBuffer::Buffer bb = readData.first();
-	int len = bb.limit();
+	int len = bb.limit() - bb.base();
 	// copy bb to data
-	bb.read(0, len, data);
+	bb.read(bb.base(), len, data);
 	// remove first entry
 	readData.pop_back();
 	return len;

@@ -76,16 +76,18 @@ namespace XNS::Server {
 
 	class Data {
 	public:
-		quint64  time;     // creation time. seconds since unix time epoch, used to remove old queue entry
+		// creation time in milliseconds since unix time epoch, used to remove old entry
+		quint64  timeStamp;
 		Config&  config;
 		Context& context;
 
-		Packet   packet;   // received packet
+		// received data
+		Packet   packet;
 		Ethernet ethernet;
 		IDP      idp;
 
-		Data(Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
-			time(QDateTime::currentSecsSinceEpoch()), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
+		Data(quint64 timeStamp_, Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 
 

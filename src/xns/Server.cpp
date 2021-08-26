@@ -185,8 +185,10 @@ void XNS::Server::ProcessThread::run() {
 			if (stopThread) goto exitLoop;
 
 			// receive one data
+			// milliseconds since epoch
+			quint64 timeStamp;
 			{
-				ret = context.driver->receive(packet.data(), packet.limit(), opErrno);
+				ret = context.driver->receive(packet.data(), packet.capacity(), opErrno, &timeStamp);
 				if (ret < 0) {
 					logger.warn("Unexpected");
 					LOG_ERRNO(opErrno);
@@ -232,7 +234,7 @@ void XNS::Server::ProcessThread::run() {
 
 			quint16 socket = (quint16)idp.dstSocket;
 			if (serviceMap.contains(socket)) {
-				Data data(config, context, packet, ethernet, idp);
+				Data data(timeStamp, config, context, packet, ethernet, idp);
 				serviceMap[socket].handle(data);
 			} else {
 				logger.warn("no service for socket %s", IDP::Socket::toString(socket));

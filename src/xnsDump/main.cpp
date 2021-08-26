@@ -161,13 +161,13 @@ void xnsDump() {
 				if (pex.type == PEX::Type::TIME) {
 					Time time;
 					FROM_BYTE_BUFFER(level3, time);
-					logger.info("%-18s  %s  PEX   %s  TIME %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
+					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
 				} else if (pex.type == PEX::Type::CHS) {
 					ExpeditedCourier exp;
 					FROM_BYTE_BUFFER(level3, exp);
-					logger.info("%-18s  %s  PEX   %s  CHS  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
+					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
 				} else {
-					logger.info("%-18s  %s  PEX   %s  ???  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
+					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
 				}
 			} else if (idp.type == IDP::Type::SPP) {
 				SPP spp;

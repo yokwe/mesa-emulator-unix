@@ -50,13 +50,13 @@ void testXNSServer() {
 
 	XNS::Server::Server server;
 
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
 	server.add(ripService);
 	server.add(chsService);
 	server.add(timeService);
 	server.add(echoService);
+
+	logger.info("server.init");
+	server.init("tmp/run/xns-config.json");
 
 	logger.info("server.start");
 	server.start();

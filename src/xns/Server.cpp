@@ -186,9 +186,9 @@ void XNS::Server::ProcessThread::run() {
 
 			// receive one data
 			// milliseconds since epoch
-			quint64 timeStamp;
+			quint64 msecsSinceEpoch;
 			{
-				ret = context.driver->receive(packet.data(), packet.capacity(), opErrno, &timeStamp);
+				ret = context.driver->receive(packet.data(), packet.capacity(), opErrno, &msecsSinceEpoch);
 				if (ret < 0) {
 					logger.warn("Unexpected");
 					LOG_ERRNO(opErrno);
@@ -197,6 +197,8 @@ void XNS::Server::ProcessThread::run() {
 				packet.position(0);
 				packet.limit(ret);
 			}
+
+			QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
 
 			Ethernet ethernet;
 			FROM_BYTE_BUFFER(packet, ethernet);
@@ -215,8 +217,7 @@ void XNS::Server::ProcessThread::run() {
 			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
 
-			logger.info("%s", ethernet.toString());
-			logger.info("    %s", idp.toString());
+			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 			// check idp checksum
 			{
@@ -226,7 +227,7 @@ void XNS::Server::ProcessThread::run() {
 					quint16 newValue = XNS::IDP::computeChecksum(start);
 					if (checksum != newValue) {
 						// checksum error
-						logger.warn("Checksum error");
+						logger.warn("%s  BAD CHECKSUM", header);
 						continue;
 					}
 				}
@@ -234,10 +235,10 @@ void XNS::Server::ProcessThread::run() {
 
 			quint16 socket = (quint16)idp.dstSocket;
 			if (serviceMap.contains(socket)) {
-				Data data(timeStamp, config, context, packet, ethernet, idp);
+				Data data(msecsSinceEpoch, config, context, packet, ethernet, idp);
 				serviceMap[socket].handle(data);
 			} else {
-				logger.warn("no service for socket %s", IDP::Socket::toString(socket));
+				logger.info("%s  NO SERVICE", TO_CSTRING(header));
 			}
 		}
 exitLoop:

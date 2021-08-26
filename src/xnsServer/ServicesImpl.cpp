@@ -107,8 +107,9 @@ namespace XNS::ServicesImpl {
 	}
 
 	void RIPService::receive(const Data& data, const RIP& rip) {
-		(void)data;
-		logger.info("##  RIP %s", rip.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  RIP   %s", TO_CSTRING(header), TO_CSTRING(rip.toString()));
 
 		if (rip.type == XNS::RIP::Type::REQUEST) {
 			XNS::RIP reply;
@@ -146,35 +147,45 @@ namespace XNS::ServicesImpl {
 
 	}
 	void RIPService::receive(const Data& data, const Error& error) {
-		(void)data;
-		logger.info("    ERROR %s", error.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+		// FIXME
 	}
 
 
 	void CHSService::receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
-		(void)data;
-		logger.info("##  CHS %s", pex.toString());
-		logger.info("        %s", exp.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
+		// FIXME
 	}
 	void CHSService::receive(const Data& data, const Error& error) {
-		(void)data;
-		logger.info("    ERROR %s", error.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+		// FIXME
 	}
 
 
 	void TimeService::receive(const Data& data, const PEX& pex, const Time& time) {
-		(void)data;
-		logger.info("##  TIME %s", pex.toString());
-		logger.info("         %s", time.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
+		// FIXME
 	}
 	void TimeService::receive(const Data& data, const Error& error) {
-		(void)data;
-		logger.info("    ERROR %s", error.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+		// FIXME
 	}
 
 
 	void EchoService::receive(const Data& data, const Echo& echo) {
-		logger.info("##  ECHO %s", echo.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
 
 		if (echo.type == XNS::Echo::Type::REQUEST) {
 			XNS::Echo reply;
@@ -190,8 +201,10 @@ namespace XNS::ServicesImpl {
 		}
 	}
 	void EchoService::receive(const Data& data, const Error& error) {
-		(void)data;
-		logger.info("    ERROR %s", error.toString());
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+		// FIXME
 	}
 
 }

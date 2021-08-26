@@ -141,10 +141,6 @@ void xnsDump() {
 
 				QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
-
-	//			logger.info("%s", ethernet.toString());
-	//			logger.info("    %s", idp.toString());
-
 				// check idp checksum
 				{
 					Buffer start = ethernet.block.toBuffer();

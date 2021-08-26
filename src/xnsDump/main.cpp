@@ -114,6 +114,10 @@ void xnsDump() {
 				levle0.limit(ret);
 			}
 
+			QDateTime dateTime = QDateTime::currentDateTime();
+			QString timeStamp = dateTime.toString("yyyy-MM-dd hh:mm:ss.zzz");
+
+
 			Ethernet ethernet;
 			FROM_BYTE_BUFFER(levle0, ethernet);
 			Buffer level1 = ethernet.block.toBuffer();
@@ -125,8 +129,7 @@ void xnsDump() {
 			FROM_BYTE_BUFFER(level1, idp);
 			Buffer level2 = idp.block.toBuffer();
 
-//			logger.info("%s", ethernet.toString());
-//			logger.info("    %s", idp.toString());
+			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 			// check idp checksum
 			{
@@ -136,7 +139,7 @@ void xnsDump() {
 					quint16 newValue = XNS::IDP::computeChecksum(start);
 					if (checksum != newValue) {
 						// checksum error
-						logger.warn("%-18s  %s  BAD CHECKSUM", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
+						logger.warn("%s  BAD CHECKSUM", header);
 						continue;
 					}
 				}
@@ -145,15 +148,15 @@ void xnsDump() {
 			if (idp.type == IDP::Type::RIP) {
 				RIP rip;
 				FROM_BYTE_BUFFER(level2, rip);
-				logger.info("%-18s  %s  RIP   %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(rip.toString()));
+				logger.info("%s  RIP   %s", TO_CSTRING(header), TO_CSTRING(rip.toString()));
 			} else if (idp.type == IDP::Type::ECHO) {
 				Echo echo;
 				FROM_BYTE_BUFFER(level2, echo);
-				logger.info("%-18s  %s  ECHO  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(echo.toString()));
+				logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
 			} else if (idp.type == IDP::Type::ERROR_) {
 				Error error;
 				FROM_BYTE_BUFFER(level2, error);
-				logger.info("%-18s  %s  ERROR %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(error.toString()));
+				logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
 			} else if (idp.type == IDP::Type::PEX) {
 				PEX pex;
 				FROM_BYTE_BUFFER(level2, pex);
@@ -161,24 +164,24 @@ void xnsDump() {
 				if (pex.type == PEX::Type::TIME) {
 					Time time;
 					FROM_BYTE_BUFFER(level3, time);
-					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
+					logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
 				} else if (pex.type == PEX::Type::CHS) {
 					ExpeditedCourier exp;
 					FROM_BYTE_BUFFER(level3, exp);
-					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
+					logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
 				} else {
-					logger.info("%-18s  %s  PEX   %s  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
+					logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
 				}
 			} else if (idp.type == IDP::Type::SPP) {
 				SPP spp;
 				FROM_BYTE_BUFFER(level2, spp);
-				logger.info("%-18s  %s  SPP   %s  ???  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
+				logger.info("%s  SPP   %s  ???  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
 			} else if (idp.type == IDP::Type::BOOT) {
 				Boot boot;
 				FROM_BYTE_BUFFER(level2, boot);
-				logger.info("%-18s  %s  BOOT  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(boot.toString()));
+				logger.info("%s  BOOT  %s", TO_CSTRING(header), TO_CSTRING(boot.toString()));
 			} else {
-				logger.info("%-18s  %s  ???   %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(idp.block.toString()));
+				logger.info("%s  ???   %s", TO_CSTRING(header), TO_CSTRING(idp.block.toString()));
 			}
 		}
 	}

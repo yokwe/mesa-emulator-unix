@@ -93,6 +93,7 @@ namespace XNS::ServicesImpl {
 				idp.srcSocket = IDP::Socket::RIP;
 				idp.block     = block;
 
+				logger.info("RIPService periodic broadcast");
 				Default::transmit(*context, XNS::Host::ALL, idp);
 			}
 		}
@@ -134,7 +135,6 @@ namespace XNS::ServicesImpl {
 					reply.entryList.append(find(e.net));
 				}
 			}
-			// How to ransmit reply?
 			transmit(data, reply);
 		} else {
 			logger.error("Unexpected");

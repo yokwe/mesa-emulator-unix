@@ -92,6 +92,14 @@ XNS::Server::Context::Context(const Config& config) {
 //
 // XNS::Server::Server
 //
+void XNS::Server::Server::add(Service service) {
+	if (processThread) ERROR();
+
+	quint16 socket = service.socket();
+	const char* name = service.name();
+	logger.info("add service %-4s  %s", XNS::IDP::Socket::toString(socket), name);
+	serviceMap[socket] = service;
+}
 void XNS::Server::Server::init(const QString& path) {
 	processThreadPool->setObjectName("ProcessThereadPool");
 	processThreadPool->setMaxThreadCount(1);
@@ -100,12 +108,13 @@ void XNS::Server::Server::init(const QString& path) {
 	context = Context(config);
 	processThread = new ProcessThread(config, context, serviceMap);
 	processThread->setAutoDelete(false);
-}
-void XNS::Server::Server::add(Service service) {
-	quint16 socket = service.socket();
-	const char* name = service.name();
-	logger.info("add service %-4s  %s", XNS::IDP::Socket::toString(socket), name);
-	serviceMap[socket] = service;
+
+	for(auto i = serviceMap.begin(); i != serviceMap.end(); i++) {
+		const quint16& socket(i.key());
+		Service& service(i.value());
+		logger.info("service init  %-4s  %s", IDP::Socket::toString(socket), service.name());
+		service.init(&config, &context);
+	}
 }
 bool XNS::Server::Server::running() {
 	return processThread->running();
@@ -116,9 +125,10 @@ void XNS::Server::Server::start() {
 		ERROR()
 	} else {
 		// start service
-		for(quint16 socket: serviceMap.keys()) {
-			Service service = serviceMap[socket];
-			logger.info("service START %-4s  %s", IDP::Socket::toString(socket), service.name());
+		for(auto i = serviceMap.begin(); i != serviceMap.end(); i++) {
+			const quint16& socket(i.key());
+			Service& service(i.value());
+			logger.info("service start %-4s  %s", IDP::Socket::toString(socket), service.name());
 			service.start();
 		}
 		// start processThread
@@ -132,9 +142,10 @@ void XNS::Server::Server::stop() {
 		processThread->stop();
 		this->processThreadPool->waitForDone();
 		// stop service
-		for(quint16 socket: serviceMap.keys()) {
-			Service service = serviceMap[socket];
-			logger.info("service STOP  %-4s  %s", IDP::Socket::toString(socket), service.name());
+		for(auto i = serviceMap.begin(); i != serviceMap.end(); i++) {
+			const quint16& socket(i.key());
+			Service& service(i.value());
+			logger.info("service stop  %-4s  %s", IDP::Socket::toString(socket), service.name());
 			service.stop();
 		}
 	} else {
@@ -191,6 +202,9 @@ void XNS::Server::ProcessThread::run() {
 
 			// check ethernet type
 			if (ethernet.type != Ethernet::Type::XNS) continue;
+			// check ethernet src
+			// ignroe my own transmission
+			if (ethernet.src == context.localAddress) continue;
 			// check ethernet dst
 			// accepth broadcast or my host
 			if (ethernet.dst != Host::ALL && ethernet.dst != context.localAddress) continue;
@@ -242,11 +256,11 @@ void XNS::Server::ProcessThread::stop() {
 //
 // XNS::Server::Services::Default
 //
-void XNS::Server::Services::Default::transmit(const Data& data, const IDP& idp) {
+void XNS::Server::Services::Default::transmit(const Context& context, quint64 dst, const IDP& idp) {
 	Packet packet;
-	TO_BYTE_BUFFER(packet, data.ethernet.src);
-	packet.write48(data.context.localAddress);
-	TO_BYTE_BUFFER(packet, data.ethernet.type);
+	packet.write48(dst);
+	packet.write48(context.localAddress);
+	packet.write16(XNS::Ethernet::Type::XNS);
 
 	// save packet as start for setChecksum() and computeChecksum()
 	Buffer start = packet.newBase();
@@ -294,7 +308,7 @@ void XNS::Server::Services::Default::transmit(const Data& data, const IDP& idp) 
 	// transmit packet
 	{
 		int opErrno;
-		int ret = data.context.driver->transmit(packet.data(), packet.limit(), opErrno);
+		int ret = context.driver->transmit(packet.data(), packet.limit(), opErrno);
 		if (ret < 0) {
 			logger.error("Unexpected");
 			logger.error("ret = %d", ret);
@@ -302,7 +316,10 @@ void XNS::Server::Services::Default::transmit(const Data& data, const IDP& idp) 
 			ERROR();
 		}
 	}
+}
 
+void XNS::Server::Services::Default::transmit(const Data& data, const IDP& idp) {
+	transmit(data.context, data.ethernet.src, idp);
 }
 
 void XNS::Server::Services::Default::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
@@ -352,9 +369,14 @@ void XNS::Server::Services::RIPService::handle(const Data& data) {
 	}
 }
 void XNS::Server::Services::RIPService::transmit(const Data& data, const RIP& rip) {
-	// FIXME
-	(void)data;
-	(void)rip;
+	Packet level2;
+	TO_BYTE_BUFFER(level2, rip);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::RIP, block, idp);
+
+	Default::transmit(data, idp);
 }
 
 
@@ -428,6 +450,7 @@ void XNS::Server::Services::CHSService::transmit(const Data& data, const PEX& pe
 	(void)data;
 	(void)pex;
 	(void)exp;
+	logger.warn("XNS::Server::Services::CHSService::transmit");
 }
 
 
@@ -469,6 +492,7 @@ void XNS::Server::Services::TimeService::transmit(const Data& data, const PEX& p
 	(void)data;
 	(void)pex;
 	(void)time;
+	logger.warn("XNS::Server::Services::TimeService::transmit");
 }
 
 

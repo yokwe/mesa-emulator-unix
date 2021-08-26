@@ -94,28 +94,31 @@ namespace XNS::Server {
 		class Base {
 		public:
 			virtual ~Base() {}
-			virtual quint16     socket()           = 0;
-			virtual const char* name()             = 0;
-			virtual void        start()            = 0;
-			virtual void        stop()             = 0;
+			virtual quint16     socket()                  = 0;
+			virtual const char* name  ()                  = 0;
+			virtual void        init  (Config*, Context*) = 0;
+			virtual void        start ()                  = 0;
+			virtual void        stop  ()                  = 0;
 
 			virtual void        handle(const Data& data) = 0;
 		};
 
-		std::function<quint16(void)>     socket;
-		std::function<const char*(void)> name;
-		std::function<void(void)>        start;
-		std::function<void(void)>        stop;
-		std::function<void(const Data&)> handle;
+		std::function<quint16    (void)>              socket;
+		std::function<const char*(void)>              name;
+		std::function<void       (Config*, Context*)> init;
+		std::function<void       (void)>              start;
+		std::function<void       (void)>              stop;
+		std::function<void       (const Data&)>       handle;
 
 		Service() :
-			socket(nullptr), name(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
+			socket(nullptr), name(nullptr), init(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
 		Service(Base& base) :
-			socket ([&base](){return base.socket();}),
-			name   ([&base](){return base.name();}),
-			start  ([&base](){base.start();}),
-			stop   ([&base](){base.stop();}),
-			handle ([&base](const Data& data){base.handle(data);}) {}
+			socket ([&base]()                                {return base.socket();}),
+			name   ([&base]()                                {return base.name();}),
+			init   ([&base](Config* config, Context* context){base.init(config, context);}),
+			start  ([&base]()                                {base.start();}),
+			stop   ([&base]()                                {base.stop();}),
+			handle ([&base](const Data& data)                {base.handle(data);}) {}
 	};
 
 
@@ -132,9 +135,12 @@ namespace XNS::Server {
 
 		bool running();
 
+		// initialize and start thread
 		void start();
-		void run();  // for QRunnable
-		void stop(); // stop thread
+		// thread main
+		void run();
+		// stop thread and finalize
+		void stop();
 	};
 
 
@@ -149,9 +155,11 @@ namespace XNS::Server {
 	public:
 		Server() : processThreadPool(new QThreadPool()), processThread(nullptr) {}
 
-		void init(const QString& path);
+		// add service
+		void add(Service service);
 
-		void add(Service handler);
+		// after adding service finished, initialize server
+		void init(const QString& path);
 
 		bool running();
 		void start();
@@ -165,17 +173,30 @@ namespace XNS::Server {
 			// initialize idp for transmit
 			static void init(const Data& data, quint8 type, BLOCK& block, IDP& idp);
 
+			Default() : config(nullptr), context(nullptr) {}
 			virtual ~Default() {}
+
+			void init(Config* config_, Context* context_) {
+				config  = config_;
+				context = context_;
+			}
 
 			void start() {}
 			void stop () {}
 
 		protected:
+			Config*  config;
+			Context* context;
+
+			// for RIP broadcast
+			void transmit(const Context& context, quint64 dst, const IDP& idp);
+
 			// transmit idp packet
 			void transmit(const Data& data, const IDP& idp);
 
 			// transmit error packet
 			void transmit(const Data& data, const Error& error);
+
 		};
 
 

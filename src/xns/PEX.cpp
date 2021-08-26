@@ -56,7 +56,7 @@ NameMap::Map<quint16> XNS::PEX::Type::nameMap(NameMap::toString16u, {
 // XNS::PEX
 //
 QString XNS::PEX::toString() const {
-	return QString("%1 %2").arg(QString("%1").arg((quint32)id, 4, 16, QChar('0')).toUpper()).arg(type.toString());
+	return QString("%1 %2").arg(QString("%1").arg((quint32)id, 8, 16, QChar('0')).toUpper()).arg(type.toString(), -4);
 }
 void XNS::PEX::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, id);

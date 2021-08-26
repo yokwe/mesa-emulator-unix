@@ -602,11 +602,18 @@ void XNS::Courier::Protocol3Body::toByteBuffer  (Buffer& bb) const {
 // XNS::Courier::ExpeditedCourier
 //
 QString XNS::Courier::ExpeditedCourier::toString() const {
-	return QString("%1 %2").arg(range.toString()).arg(body.toString());
+//	return QString("%1 %2").arg(range.toString()).arg(body.toString());
+	return QString("%1").arg(body.toString());
 }
 void XNS::Courier::ExpeditedCourier::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, range);
-	FROM_BYTE_BUFFER(bb, body);
+	if (range.low == Courier::ProtocolType::PROTOCOL3 && range.high == Courier::ProtocolType::PROTOCOL3) {
+		FROM_BYTE_BUFFER(bb, body);
+	} else {
+		logger.error("Unexpected");
+		logger.error("  range %s", range.toString());
+		ERROR();
+	}
 }
 void XNS::Courier::ExpeditedCourier::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, range);

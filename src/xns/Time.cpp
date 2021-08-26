@@ -142,11 +142,13 @@ void XNS::Time::get(Response& newValue) const {
 QString XNS::Time::toString() const {
 	if (version.isCurrent()) {
 		if (type == Type::REQUEST) {
-			return QString("%1 %2").arg(version.toString()).arg(type.toString());
+//			return QString("%1 %2").arg(version.toString()).arg(type.toString());
+			return QString("%1").arg(type.toString());
 		} else if (type == Type::RESPONSE) {
 			Response response;
 			get(response);
-			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(response.toString());
+//			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(response.toString());
+			return QString("%1 %2").arg(type.toString()).arg(response.toString());
 		} else {
 			logger.error("Unexpected");
 			logger.error("  type %s", type.toString());

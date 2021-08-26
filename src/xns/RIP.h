@@ -82,6 +82,12 @@ namespace XNS {
 			IDP::Net net;
 			UINT16   hop;
 
+			Entry() {}
+			Entry(quint32 net_, quint16 hop_) {
+				net = net_;
+				hop = hop_;
+			}
+
 			QString toString() const;
 
 			// ByteBuffer::Base
@@ -89,7 +95,8 @@ namespace XNS {
 			void toByteBuffer  (Buffer& bb) const;
 		};
 
-		static const quint32 BROADCAST_INTERVAL = 30; // 30 seconds
+		static const int     BROADCAST_INTERVAL = 30; // 30 seconds
+		static const quint16 HOP_INFINITY       = 16;
 
 		Type         type;
 		QList<Entry> entryList;

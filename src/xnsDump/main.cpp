@@ -89,7 +89,7 @@ void xnsDump() {
 
 		int ret;
 		int opErrno;
-		Packet packet;
+		Packet levle0;
 
 		for(;;) {
 			// loop until data arrive
@@ -104,41 +104,39 @@ void xnsDump() {
 
 			// receive one data
 			{
-				ret = context.driver->receive(packet.data(), packet.limit(), opErrno);
+				ret = context.driver->receive(levle0.data(), levle0.limit(), opErrno);
 				if (ret < 0) {
 					logger.warn("Unexpected");
 					LOG_ERRNO(opErrno);
 					continue;
 				}
-				packet.position(0);
-				packet.limit(ret);
+				levle0.position(0);
+				levle0.limit(ret);
 			}
 
 			Ethernet ethernet;
-			FROM_BYTE_BUFFER(packet, ethernet);
+			FROM_BYTE_BUFFER(levle0, ethernet);
 			Buffer level1 = ethernet.block.toBuffer();
 
 			// check ethernet type
 			if (ethernet.type != Ethernet::Type::XNS) continue;
 
-			// set start for checksum
-			Buffer start = level1.newBase();
-
 			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
 			Buffer level2 = idp.block.toBuffer();
 
-			logger.info("%s", ethernet.toString());
-			logger.info("    %s", idp.toString());
+//			logger.info("%s", ethernet.toString());
+//			logger.info("    %s", idp.toString());
 
 			// check idp checksum
 			{
+				Buffer start = ethernet.block.toBuffer();
 				quint16 checksum = XNS::IDP::getChecksum(start);
 				if (checksum != XNS::IDP::Checksum::NOCHECK) {
 					quint16 newValue = XNS::IDP::computeChecksum(start);
 					if (checksum != newValue) {
 						// checksum error
-						logger.warn("Checksum error");
+						logger.warn("%-18s  %s  BAD CHECKSUM", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 						continue;
 					}
 				}
@@ -146,16 +144,16 @@ void xnsDump() {
 
 			if (idp.type == IDP::Type::RIP) {
 				RIP rip;
-				FROM_BYTE_BUFFER(level2, idp);
-				// FIXME
+				FROM_BYTE_BUFFER(level2, rip);
+				logger.info("%-18s  %s  RIP   %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(rip.toString()));
 			} else if (idp.type == IDP::Type::ECHO) {
 				Echo echo;
 				FROM_BYTE_BUFFER(level2, echo);
-				// FIXME
+				logger.info("%-18s  %s  ECHO  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(echo.toString()));
 			} else if (idp.type == IDP::Type::ERROR_) {
 				Error error;
 				FROM_BYTE_BUFFER(level2, error);
-				// FIXME
+				logger.info("%-18s  %s  ERROR %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(error.toString()));
 			} else if (idp.type == IDP::Type::PEX) {
 				PEX pex;
 				FROM_BYTE_BUFFER(level2, pex);
@@ -163,32 +161,26 @@ void xnsDump() {
 				if (pex.type == PEX::Type::TIME) {
 					Time time;
 					FROM_BYTE_BUFFER(level3, time);
-					// FIXME
+					logger.info("%-18s  %s  PEX   %s  TIME %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
 				} else if (pex.type == PEX::Type::CHS) {
 					ExpeditedCourier exp;
 					FROM_BYTE_BUFFER(level3, exp);
-					// FIXME
+					logger.info("%-18s  %s  PEX   %s  CHS  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
 				} else {
-					// FIXME
+					logger.info("%-18s  %s  PEX   %s  ???  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
 				}
-				// FIXME
 			} else if (idp.type == IDP::Type::SPP) {
 				SPP spp;
 				FROM_BYTE_BUFFER(level2, spp);
-				Buffer level3 = spp.block.toBuffer();
-				// FIXME
+				logger.info("%-18s  %s  SPP   %s  ???  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
 			} else if (idp.type == IDP::Type::BOOT) {
 				Boot boot;
 				FROM_BYTE_BUFFER(level2, boot);
-				// FIXME
+				logger.info("%-18s  %s  BOOT  %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(boot.toString()));
 			} else {
-				//
+				logger.info("%-18s  %s  ???   %s", TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()), TO_CSTRING(idp.block.toString()));
 			}
-
 		}
-exitLoop:
-		/* empty statement for label */ ;
-
 	}
 
 }

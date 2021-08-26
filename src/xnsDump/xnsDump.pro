@@ -7,9 +7,7 @@ CONFIG += cmdline
 
 
 # Input
-linux  : SOURCES += main.cpp
-macx:    SOURCES += main_bpf.cpp
-freebsd: SOURCES += main_bpf.cpp
+SOURCES += main.cpp
 
 LIBS += ../../tmp/build/util/libutil.a
 LIBS += ../../tmp/build/xns/libxns.a

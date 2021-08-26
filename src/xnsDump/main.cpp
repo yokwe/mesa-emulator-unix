@@ -89,7 +89,7 @@ void xnsDump() {
 
 		int ret;
 		int opErrno;
-		Packet levle0;
+		Packet level0;
 
 		for(;;) {
 			// loop until data arrive
@@ -103,23 +103,23 @@ void xnsDump() {
 			}
 
 			// receive one data
+			quint64 msecsSinceEpoch;
 			{
-				ret = context.driver->receive(levle0.data(), levle0.limit(), opErrno);
+				ret = context.driver->receive(level0.data(), level0.capacity(), opErrno, &msecsSinceEpoch);
 				if (ret < 0) {
 					logger.warn("Unexpected");
 					LOG_ERRNO(opErrno);
 					continue;
 				}
-				levle0.position(0);
-				levle0.limit(ret);
+				level0.position(0);
+				level0.limit(ret);
 			}
 
-			QDateTime dateTime = QDateTime::currentDateTime();
-			QString timeStamp = dateTime.toString("yyyy-MM-dd hh:mm:ss.zzz");
+			QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
 
 
 			Ethernet ethernet;
-			FROM_BYTE_BUFFER(levle0, ethernet);
+			FROM_BYTE_BUFFER(level0, ethernet);
 			Buffer level1 = ethernet.block.toBuffer();
 
 			// check ethernet type

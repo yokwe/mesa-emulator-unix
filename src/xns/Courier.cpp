@@ -113,12 +113,14 @@ void XNS::Courier::Protocol2Body::CallBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, program);
 	FROM_BYTE_BUFFER(bb, version);
 	FROM_BYTE_BUFFER(bb, procedure);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol2Body::CallBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, program);
 	TO_BYTE_BUFFER(bb, version);
 	TO_BYTE_BUFFER(bb, procedure);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -146,9 +148,11 @@ QString XNS::Courier::Protocol2Body::ReturnBody::toString() const {
 }
 void XNS::Courier::Protocol2Body::ReturnBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol2Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -161,10 +165,12 @@ QString XNS::Courier::Protocol2Body::AbortBody::toString() const {
 void XNS::Courier::Protocol2Body::AbortBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, abort);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol2Body::AbortBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, abort);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -329,12 +335,14 @@ void XNS::Courier::Protocol3Body::CallBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, program);
 	FROM_BYTE_BUFFER(bb, version);
 	FROM_BYTE_BUFFER(bb, procedure);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol3Body::CallBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, program);
 	TO_BYTE_BUFFER(bb, version);
 	TO_BYTE_BUFFER(bb, procedure);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -426,9 +434,11 @@ QString XNS::Courier::Protocol3Body::ReturnBody::toString() const {
 }
 void XNS::Courier::Protocol3Body::ReturnBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol3Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 
@@ -441,10 +451,12 @@ QString XNS::Courier::Protocol3Body::AbortBody::toString() const {
 void XNS::Courier::Protocol3Body::AbortBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, abort);
+	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::Courier::Protocol3Body::AbortBody::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, abort);
+	TO_BYTE_BUFFER(bb, block);
 }
 
 

@@ -175,10 +175,11 @@ namespace XNS {
 		public:
 			class CallBody : public Base {
 			public:
-				UINT16 transaction;
-				UINT16 program;
-				UINT16 version;
-				UINT16 procedure;
+				UINT16     transaction;
+				UINT16     program;
+				UINT16     version;
+				UINT16     procedure;
+				BLOCK      block;
 
 				QString toString() const;
 
@@ -200,6 +201,7 @@ namespace XNS {
 			class ReturnBody : public Base {
 			public:
 				UINT16     transaction;
+				BLOCK      block;
 
 				QString toString() const;
 
@@ -211,6 +213,7 @@ namespace XNS {
 			public:
 				UINT16     transaction;
 				UINT16     abort;
+				BLOCK      block;
 
 				QString toString() const;
 
@@ -254,10 +257,11 @@ namespace XNS {
 		public:
 			class CallBody : public Base {
 			public:
-				UINT16 transaction;
-				UINT32 program;
-				UINT16 version;
-				UINT16 procedure;
+				UINT16     transaction;
+				UINT32     program;
+				UINT16     version;
+				UINT16     procedure;
+				BLOCK      block;
 
 				QString toString() const;
 
@@ -283,6 +287,7 @@ namespace XNS {
 			class ReturnBody : public Base {
 			public:
 				UINT16     transaction;
+				BLOCK      block;
 
 				QString toString() const;
 
@@ -294,6 +299,7 @@ namespace XNS {
 			public:
 				UINT16     transaction;
 				UINT16     abort;
+				BLOCK      block;
 
 				QString toString() const;
 

@@ -44,7 +44,8 @@ static const Logger logger = Logger::getLogger("xns-time");
 //
 QString XNS::Time::XNSTime::toString() const {
 	qint64 unixTime = toUnixTime(value());
-	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(unixTime, Qt::UTC);
+//	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(unixTime, Qt::UTC);
+	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(unixTime);
 	return dateTime.toString("yyyy-MM-dd hh:mm:ss");
 }
 
@@ -89,7 +90,7 @@ NameMap::Map<quint16> XNS::Time::Tolerance::nameMap(NameMap::toString16u, {
 //
 QString XNS::Time::Response::toString() const {
 	return QString("%1  %2-%3-%4  %5-%6 %7-%8").
-		arg(time.value()).
+		arg(time.toString()).
 		arg(offsetDirection.toString()).arg(offsetHours.value()).arg(offsetMinutes.value()).
 		arg(dstStart.value()).arg(dstEnd.value()).
 		arg(tolerance.toString()).arg(toleranceValue.value());

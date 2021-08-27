@@ -30,7 +30,7 @@
 
 
 //
-// ServicesImpl.h
+// CHServiceImpl.h
 //
 
 #pragma once
@@ -39,70 +39,17 @@
 #include "../xns/Server.h"
 
 namespace XNS::ServicesImpl {
-	using ByteBuffer::Buffer;
-	using Network::Packet;
-	using XNS::Config;
-	using XNS::Echo;
 	using XNS::Error;
 	using XNS::PEX;
-	using XNS::RIP;
-	using XNS::Time;
-	using XNS::Server::Context;
 	using XNS::Server::Data;
 	using XNS::Courier::ExpeditedCourier;
 
-	class RIPService : public XNS::Server::Services::RIPService, public QRunnable {
-		QList<RIP::Entry> list;
-
-		QThreadPool* threadPool;
-		bool         stopThread;
-
-		RIP::Entry find(quint32 net);
-	public:
-		RIPService() : threadPool(new QThreadPool()), stopThread(false) {}
-		~RIPService() {
-			delete threadPool;
-		}
-
-		const char* name() {
-			return "RIPService";
-		}
-		void init(Config* config, Context* contex);
-		void start();
-		void stop();
-		void run();
-
-		void receive(const Data& data, const RIP& rip);
-		void receive(const Data& data, const Error& error);
-	};
-
-
-	class CHSService : public XNS::Server::Services::CHSService {
+	class CHServiceImpl : public XNS::Server::Services::CHService {
 	public:
 		const char* name() {
-			return "CHSService";
+			return "CHService";
 		}
 		void receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp);
-		void receive(const Data& data, const Error& error);
-	};
-
-
-	class TimeService : public XNS::Server::Services::TimeService {
-	public:
-		const char* name() {
-			return "TimeService";
-		}
-		void receive(const Data& data, const PEX& pex, const Time& time);
-		void receive(const Data& data, const Error& error);
-	};
-
-
-	class EchoService : public XNS::Server::Services::EchoService {
-	public:
-		const char* name() {
-			return "EchoService";
-		}
-		void receive(const Data& data, const XNS::Echo& echo);
 		void receive(const Data& data, const Error& error);
 	};
 

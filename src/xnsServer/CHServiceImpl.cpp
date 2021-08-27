@@ -30,59 +30,25 @@
 
 
 //
-// main.c
+// CHServiceImpl.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const Logger logger = Logger::getLogger("chs-impl");
 
-#include "../xns/Server.h"
 
-#include "RIPServiceImpl.h"
 #include "CHServiceImpl.h"
-#include "TimeServiceImpl.h"
-#include "EchoServiceImpl.h"
 
-void testXNSServer() {
-	logger.info("START testXNSServer");
-
-	XNS::ServicesImpl::RIPServiceImpl  ripServiceImpl;
-	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-	XNS::ServicesImpl::TimeServiceImpl timeServiceImpl;
-	XNS::ServicesImpl::EchoServiceImpl echoServiceImpl;
-
-	XNS::Server::Server server;
-
-	server.add(ripServiceImpl);
-	server.add(chServiceImpl);
-	server.add(timeServiceImpl);
-	server.add(echoServiceImpl);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
+namespace XNS::ServicesImpl {
+	void CHServiceImpl::receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
+		// FIXME
+	}
+	void CHServiceImpl::receive(const Data& data, const Error& error) {
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+	}
 }
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	testXNSServer();
-
-	logger.info("STOP");
-	return 0;
-}
-
-

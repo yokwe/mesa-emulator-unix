@@ -30,59 +30,38 @@
 
 
 //
-// main.c
+// EcoServiceImpl.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const Logger logger = Logger::getLogger("echo-impl");
 
-#include "../xns/Server.h"
 
-#include "RIPServiceImpl.h"
-#include "CHServiceImpl.h"
-#include "TimeServiceImpl.h"
 #include "EchoServiceImpl.h"
 
-void testXNSServer() {
-	logger.info("START testXNSServer");
+namespace XNS::ServicesImpl {
+	void EchoServiceImpl::receive(const Data& data, const Echo& echo) {
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
 
-	XNS::ServicesImpl::RIPServiceImpl  ripServiceImpl;
-	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-	XNS::ServicesImpl::TimeServiceImpl timeServiceImpl;
-	XNS::ServicesImpl::EchoServiceImpl echoServiceImpl;
+		if (echo.type == Echo::Type::REQUEST) {
+			Echo reply;
 
-	XNS::Server::Server server;
+			reply.type = Echo::Type::REPLY;
+			reply.block = echo.block;
 
-	server.add(ripServiceImpl);
-	server.add(chServiceImpl);
-	server.add(timeServiceImpl);
-	server.add(echoServiceImpl);
+			transmit(data, reply);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  echo %s", echo.toString());
+			ERROR();
+		}
+	}
+	void EchoServiceImpl::receive(const Data& data, const Error& error) {
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
+	}
 
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
 }
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	testXNSServer();
-
-	logger.info("STOP");
-	return 0;
-}
-
-

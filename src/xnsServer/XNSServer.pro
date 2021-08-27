@@ -9,8 +9,8 @@ CONFIG += cmdline
 # Input
 SOURCES += main.cpp
 
-HEADERS += ServicesImpl.h
-SOURCES += ServicesImpl.cpp
+HEADERS += CHServiceImpl.h   EchoServiceImpl.h   RIPServiceImpl.h   TimeServiceImpl.h
+SOURCES += CHServiceImpl.cpp EchoServiceImpl.cpp RIPServiceImpl.cpp TimeServiceImpl.cpp
 
 
 LIBS += ../../tmp/build/util/libutil.a

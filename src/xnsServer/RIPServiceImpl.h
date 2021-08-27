@@ -30,59 +30,44 @@
 
 
 //
-// main.c
+// RIPServiceImpl.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+#pragma once
 
+#include "../xns/XNS.h"
 #include "../xns/Server.h"
 
-#include "RIPServiceImpl.h"
-#include "CHServiceImpl.h"
-#include "TimeServiceImpl.h"
-#include "EchoServiceImpl.h"
+namespace XNS::ServicesImpl {
+	using XNS::Config;
+	using XNS::Error;
+	using XNS::RIP;
+	using XNS::Server::Context;
+	using XNS::Server::Data;
 
-void testXNSServer() {
-	logger.info("START testXNSServer");
+	class RIPServiceImpl : public XNS::Server::Services::RIPService, public QRunnable {
+		QList<RIP::Entry> list;
 
-	XNS::ServicesImpl::RIPServiceImpl  ripServiceImpl;
-	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-	XNS::ServicesImpl::TimeServiceImpl timeServiceImpl;
-	XNS::ServicesImpl::EchoServiceImpl echoServiceImpl;
+		QThreadPool* threadPool;
+		bool         stopThread;
 
-	XNS::Server::Server server;
+		RIP::Entry find(quint32 net);
+	public:
+		RIPServiceImpl() : threadPool(new QThreadPool()), stopThread(false) {}
+		~RIPServiceImpl() {
+			delete threadPool;
+		}
 
-	server.add(ripServiceImpl);
-	server.add(chServiceImpl);
-	server.add(timeServiceImpl);
-	server.add(echoServiceImpl);
+		const char* name() {
+			return "RIPService";
+		}
+		void init(Config* config, Context* contex);
+		void start();
+		void stop();
+		void run();
 
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
+		void receive(const Data& data, const RIP& rip);
+		void receive(const Data& data, const Error& error);
+	};
 
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
 }
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	testXNSServer();
-
-	logger.info("STOP");
-	return 0;
-}
-
-

@@ -30,17 +30,19 @@
 
 
 //
-// ServicesImpl.cpp
+// RIPServiceImpl.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("servicesImpl");
+static const Logger logger = Logger::getLogger("rip-impl");
 
 
-#include "ServicesImpl.h"
+#include "RIPServiceImpl.h"
 
 namespace XNS::ServicesImpl {
-	void RIPService::init(Config* config_, Context* context_) {
+	using Network::Packet;
+
+	void RIPServiceImpl::init(Config* config_, Context* context_) {
 		Default::init(config_, context_);
 		list.clear();
 		for(auto e: config->network.list) {
@@ -52,15 +54,15 @@ namespace XNS::ServicesImpl {
 		// Need to set autoDelete false
 		setAutoDelete(false);
 	}
-	void RIPService::start() {
+	void RIPServiceImpl::start() {
 		stopThread = false;
 		threadPool->start(this);
 	}
-	void RIPService::stop() {
+	void RIPServiceImpl::stop() {
 		stopThread = true;
 		threadPool->waitForDone();
 	}
-	void RIPService::run() {
+	void RIPServiceImpl::run() {
 		int count = RIP::BROADCAST_INTERVAL - 1;
 		for(;;) {
 			if (stopThread) break;
@@ -99,14 +101,14 @@ namespace XNS::ServicesImpl {
 		}
 	}
 
-	RIP::Entry RIPService::find(quint32 net) {
+	RIP::Entry RIPServiceImpl::find(quint32 net) {
 		for(auto e: list) {
 			if (e.net == net) return e;
 		}
 		return XNS::RIP::Entry(net, XNS::RIP::HOP_INFINITY);
 	}
 
-	void RIPService::receive(const Data& data, const RIP& rip) {
+	void RIPServiceImpl::receive(const Data& data, const RIP& rip) {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  RIP   %s", TO_CSTRING(header), TO_CSTRING(rip.toString()));
@@ -146,88 +148,7 @@ namespace XNS::ServicesImpl {
 		}
 
 	}
-	void RIPService::receive(const Data& data, const Error& error) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-	}
-
-
-	void CHSService::receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
-		// FIXME
-	}
-	void CHSService::receive(const Data& data, const Error& error) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-	}
-
-
-	void TimeService::receive(const Data& data, const PEX& pex, const Time& time) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
-
-		if (time.type == Time::Type::REQUEST) {
-			Time::Response response;
-			response.time            = QDateTime::currentSecsSinceEpoch();
-			response.offsetDirection = data.config.time.offsetDirection;
-			response.offsetHours     = data.config.time.offsetHours;
-			response.offsetMinutes   = data.config.time.offsetMinutes;
-			response.tolerance       = Time::Tolerance::MILLI;
-			response.toleranceValue  = 10;
-
-			Time replyTime;
-			replyTime.version = Time::Version::CURRENT;
-			replyTime.type    = Time::Type::RESPONSE;
-			replyTime.set(response);
-
-			Packet level3;
-			TO_BYTE_BUFFER(level3, replyTime);
-			BLOCK block3(level3);
-
-			// set block3 to replyPEX.block
-			PEX replyPEX;
-			replyPEX.id    = pex.id;
-			replyPEX.type  = PEX::Type::TIME;
-			replyPEX.block = block3;
-
-			Default::transmit(data, replyPEX);
-		} else {
-			logger.error("Unexpected");
-			logger.error("  time %s", time.toString());
-			ERROR();
-		}
-	}
-	void TimeService::receive(const Data& data, const Error& error) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-	}
-
-
-	void EchoService::receive(const Data& data, const Echo& echo) {
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
-
-		if (echo.type == XNS::Echo::Type::REQUEST) {
-			Echo reply;
-
-			reply.type = XNS::Echo::Type::REPLY;
-			reply.block = echo.block;
-
-			transmit(data, reply);
-		} else {
-			logger.error("Unexpected");
-			logger.error("  echo %s", echo.toString());
-			ERROR();
-		}
-	}
-	void EchoService::receive(const Data& data, const Error& error) {
+	void RIPServiceImpl::receive(const Data& data, const Error& error) {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));

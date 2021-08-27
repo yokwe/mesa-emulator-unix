@@ -35,7 +35,7 @@
 
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const Logger logger = Logger::getLogger("xnsDump");
 
 #include "../xns/XNS.h"
 #include "../xns/Config.h"

@@ -255,7 +255,7 @@ namespace XNS::Server {
 			virtual void receive(const Data& data, const Error& error) = 0;
 		};
 
-		class CHSService : public Default {
+		class CHService : public Default {
 			typedef std::function<void(const Data&, const PEX&, const ExpeditedCourier& exp)> ReceiveExp;
 			typedef std::function<void(const Data&, const Error&)>                            ReceiveError;
 
@@ -263,10 +263,10 @@ namespace XNS::Server {
 			ReceiveError receiveError;
 
 		public:
-			CHSService() :
+			CHService() :
 				receiveExp  ([this](const Data& data, const PEX& pex, const ExpeditedCourier& exp){this->receive(data, pex, exp);}),
 				receiveError([this](const Data& data, const Error& error)                         {this->receive(data, error);   }) {}
-			virtual ~CHSService() {}
+			virtual ~CHService() {}
 
 			quint16 socket(){
 				return XNS::IDP::Socket::CHS;

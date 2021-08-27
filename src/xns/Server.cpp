@@ -444,7 +444,7 @@ void XNS::Server::Services::EchoService::handle(const Data& data) {
 //
 // XNS::Server::Services::CHSService
 //
-void XNS::Server::Services::CHSService::handle(const Data& data) {
+void XNS::Server::Services::CHService::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;

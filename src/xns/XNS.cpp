@@ -284,8 +284,6 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, block);
 }
 void XNS::IDP::toByteBuffer  (Buffer& bb) const {
-	Buffer start(bb);
-
 	TO_BYTE_BUFFER(bb, checksum_);
 	TO_BYTE_BUFFER(bb, length);
 	TO_BYTE_BUFFER(bb, control);

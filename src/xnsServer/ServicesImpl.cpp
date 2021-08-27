@@ -173,6 +173,37 @@ namespace XNS::ServicesImpl {
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
 		// FIXME
+
+		if (time.type == Time::Type::REQUEST) {
+			Time::Response response;
+			response.time            = QDateTime::currentSecsSinceEpoch();
+			response.offsetDirection = data.config.time.offsetDirection;
+			response.offsetHours     = data.config.time.offsetHours;
+			response.offsetMinutes   = data.config.time.offsetMinutes;
+			response.tolerance       = Time::Tolerance::MILLI;
+			response.toleranceValue  = 10;
+
+			Time replyTime;
+			replyTime.version = Time::Version::CURRENT;
+			replyTime.type    = Time::Type::RESPONSE;
+			replyTime.set(response);
+
+			Packet level3;
+			TO_BYTE_BUFFER(level3, replyTime);
+			BLOCK block3(level3);
+
+			// set block3 to replyPEX.block
+			PEX replyPEX;
+			replyPEX.id    = pex.id;
+			replyPEX.type  = PEX::Type::TIME;
+			replyPEX.block = block3;
+
+			Default::transmit(data, replyPEX);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  time %s", time.toString());
+			ERROR();
+		}
 	}
 	void TimeService::receive(const Data& data, const Error& error) {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
@@ -188,7 +219,7 @@ namespace XNS::ServicesImpl {
 		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
 
 		if (echo.type == XNS::Echo::Type::REQUEST) {
-			XNS::Echo reply;
+			Echo reply;
 
 			reply.type = XNS::Echo::Type::REPLY;
 			reply.block = echo.block;

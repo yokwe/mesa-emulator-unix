@@ -321,10 +321,6 @@ void XNS::Server::Services::Default::transmit(const Context& context, quint64 ds
 	}
 }
 
-void XNS::Server::Services::Default::transmit(const Data& data, const IDP& idp) {
-	transmit(data.context, data.ethernet.src, idp);
-}
-
 void XNS::Server::Services::Default::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
@@ -338,6 +334,27 @@ void XNS::Server::Services::Default::init(const Data& data, quint8 type, BLOCK& 
 	idp.srcSocket = data.idp.dstSocket;
 	idp.block     = block;
 }
+
+void XNS::Server::Services::Default::transmit(const Data& data, const RIP&   rip) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, rip);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::RIP, block, idp);
+
+	transmit(data, idp);
+}
+void XNS::Server::Services::Default::transmit(const Data& data, const Echo&  echo) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, echo);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::ECHO, block, idp);
+
+	transmit(data, idp);
+}
 void XNS::Server::Services::Default::transmit(const Data& data, const Error& error) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, error);
@@ -348,7 +365,36 @@ void XNS::Server::Services::Default::transmit(const Data& data, const Error& err
 
 	transmit(data, idp);
 }
+void XNS::Server::Services::Default::transmit(const Data& data, const PEX&   pex) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, pex);
+	BLOCK block(level2);
 
+	IDP idp;
+	init(data, IDP::Type::PEX, block, idp);
+
+	transmit(data, idp);
+}
+void XNS::Server::Services::Default::transmit(const Data& data, const SPP&   spp) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, spp);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::SPP, block, idp);
+
+	transmit(data, idp);
+}
+void XNS::Server::Services::Default::transmit(const Data& data, const Boot&  boot) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, boot);
+	BLOCK block(level2);
+
+	IDP idp;
+	init(data, IDP::Type::BOOT, block, idp);
+
+	transmit(data, idp);
+}
 
 
 //
@@ -371,16 +417,6 @@ void XNS::Server::Services::RIPService::handle(const Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Services::RIPService::transmit(const Data& data, const RIP& rip) {
-	Packet level2;
-	TO_BYTE_BUFFER(level2, rip);
-	BLOCK block(level2);
-
-	IDP idp;
-	init(data, IDP::Type::RIP, block, idp);
-
-	Default::transmit(data, idp);
-}
 
 
 //
@@ -402,16 +438,6 @@ void XNS::Server::Services::EchoService::handle(const Data& data) {
 		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
-}
-void XNS::Server::Services::EchoService::transmit(const Data& data, const Echo& echo) {
-	Packet level2;
-	TO_BYTE_BUFFER(level2, echo);
-	BLOCK block(level2);
-
-	IDP idp;
-	init(data, IDP::Type::ECHO, block, idp);
-
-	Default::transmit(data, idp);
 }
 
 
@@ -448,13 +474,6 @@ void XNS::Server::Services::CHSService::handle(const Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Services::CHSService::transmit(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
-	// FIXME
-	(void)data;
-	(void)pex;
-	(void)exp;
-	logger.warn("XNS::Server::Services::CHSService::transmit");
-}
 
 
 //
@@ -490,13 +509,4 @@ void XNS::Server::Services::TimeService::handle(const Data& data) {
 		ERROR();
 	}
 }
-void XNS::Server::Services::TimeService::transmit(const Data& data, const PEX& pex, const Time& time) {
-	// FIXME
-	(void)data;
-	(void)pex;
-	(void)time;
-	logger.warn("XNS::Server::Services::TimeService::transmit");
-}
-
-
 

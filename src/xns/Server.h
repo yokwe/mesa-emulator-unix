@@ -194,11 +194,16 @@ namespace XNS::Server {
 			void transmit(const Context& context, quint64 dst, const IDP& idp);
 
 			// transmit idp packet
-			void transmit(const Data& data, const IDP& idp);
+			void transmit(const Data& data, const IDP& idp) {
+				transmit(data.context, data.ethernet.src, idp);
+			}
 
-			// transmit error packet
+			void transmit(const Data& data, const RIP&   rip);
+			void transmit(const Data& data, const Echo&  echo);
 			void transmit(const Data& data, const Error& error);
-
+			void transmit(const Data& data, const PEX&   pex);
+			void transmit(const Data& data, const SPP&   spp);
+			void transmit(const Data& data, const Boot&  boot);
 		};
 
 
@@ -224,9 +229,6 @@ namespace XNS::Server {
 			// receive packet
 			virtual void receive(const Data& data, const RIP&   rip)   = 0;
 			virtual void receive(const Data& data, const Error& error) = 0;
-
-			// transmit packet
-			void transmit(const Data& data, const RIP& rip);
 		};
 
 		class EchoService : public Default {
@@ -251,14 +253,11 @@ namespace XNS::Server {
 			// receive packet
 			virtual void receive(const Data& data, const Echo&  echo)  = 0;
 			virtual void receive(const Data& data, const Error& error) = 0;
-
-			// transmit packet
-			void transmit(const Data& data, const Echo& echo);
 		};
 
 		class CHSService : public Default {
 			typedef std::function<void(const Data&, const PEX&, const ExpeditedCourier& exp)> ReceiveExp;
-			typedef std::function<void(const Data&, const Error&)>                      ReceiveError;
+			typedef std::function<void(const Data&, const Error&)>                            ReceiveError;
 
 			ReceiveExp   receiveExp;
 			ReceiveError receiveError;
@@ -266,7 +265,7 @@ namespace XNS::Server {
 		public:
 			CHSService() :
 				receiveExp  ([this](const Data& data, const PEX& pex, const ExpeditedCourier& exp){this->receive(data, pex, exp);}),
-				receiveError([this](const Data& data, const Error& error)                   {this->receive(data, error);   }) {}
+				receiveError([this](const Data& data, const Error& error)                         {this->receive(data, error);   }) {}
 			virtual ~CHSService() {}
 
 			quint16 socket(){
@@ -276,16 +275,13 @@ namespace XNS::Server {
 
 		protected:
 			// receive packet
-			virtual void receive(const Data& data, const PEX&   pex, const ExpeditedCourier& exp)   = 0;
-			virtual void receive(const Data& data, const Error& error)                        = 0;
-
-			// transmit packet
-			void transmit(const Data& data, const PEX& pex, const ExpeditedCourier& exp);
+			virtual void receive(const Data& data, const PEX&   pex, const ExpeditedCourier& exp) = 0;
+			virtual void receive(const Data& data, const Error& error)                            = 0;
 		};
 
 		class TimeService : public Default {
 			typedef std::function<void(const Data&, const PEX&, const Time& time)> ReceiveTime;
-			typedef std::function<void(const Data&, const Error&)>           ReceiveError;
+			typedef std::function<void(const Data&, const Error&)>                 ReceiveError;
 
 			ReceiveTime  receiveTime;
 			ReceiveError receiveError;
@@ -303,11 +299,8 @@ namespace XNS::Server {
 
 		protected:
 			// receive packet
-			virtual void receive(const Data& data, const PEX&   pex, const Time& time)   = 0;
-			virtual void receive(const Data& data, const Error& error)             = 0;
-
-			// transmit packet
-			void transmit(const Data& data, const PEX& pex, const Time& time);
+			virtual void receive(const Data& data, const PEX&   pex, const Time& time) = 0;
+			virtual void receive(const Data& data, const Error& error)                 = 0;
 		};
 	}
 }

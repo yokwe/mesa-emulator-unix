@@ -150,7 +150,6 @@ namespace XNS::ServicesImpl {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-		// FIXME
 	}
 
 
@@ -164,7 +163,6 @@ namespace XNS::ServicesImpl {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-		// FIXME
 	}
 
 
@@ -172,7 +170,6 @@ namespace XNS::ServicesImpl {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
-		// FIXME
 
 		if (time.type == Time::Type::REQUEST) {
 			Time::Response response;
@@ -209,7 +206,6 @@ namespace XNS::ServicesImpl {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-		// FIXME
 	}
 
 
@@ -235,7 +231,6 @@ namespace XNS::ServicesImpl {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  ERROR %s", TO_CSTRING(header), TO_CSTRING(error.toString()));
-		// FIXME
 	}
 
 }

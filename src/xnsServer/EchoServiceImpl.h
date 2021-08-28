@@ -38,10 +38,6 @@
 #include "Server.h"
 
 namespace XNS::ServicesImpl {
-	using XNS::Echo;
-	using XNS::Error;
-	using XNS::Server::Data;
-
 	class EchoServiceImpl : public XNS::Server::Services::EchoService {
 	public:
 		const char* name() {

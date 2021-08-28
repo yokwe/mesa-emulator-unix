@@ -38,9 +38,6 @@
 #include "Server.h"
 
 namespace XNS::ServicesImpl {
-	using XNS::Error;
-	using XNS::PEX;
-	using XNS::Server::Data;
 	using XNS::Courier::Protocol3Body;
 
 	class CHServiceImpl : public XNS::Server::Services::CHService {

@@ -45,6 +45,7 @@
 
 namespace XNS {
 	using Network::Driver;
+	using Network::Packet;
 	using ByteBuffer::UINT48;
 	using ByteBuffer::UINT32;
 	using ByteBuffer::UINT16;
@@ -52,22 +53,6 @@ namespace XNS {
 	using ByteBuffer::BLOCK;
 	using ByteBuffer::Buffer;
 	using ByteBuffer::Base;
-
-
-	// Load config file
-	Config loadConfig(const QString& path);
-
-	class Context {
-	public:
-		quint32 localNet;
-		quint64 localAddress;
-
-		Driver* driver;
-
-		Context() : localNet(0), localAddress(0), driver(nullptr) {}
-		Context(const Config& config);
-	};
-
 
 
 	class Host : public UINT48 {
@@ -310,6 +295,38 @@ namespace XNS {
 		void fromByteBuffer(Buffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field
 		void toByteBuffer  (Buffer& bb) const;
+	};
+
+
+	// Load config file
+	Config loadConfig(const QString& path);
+
+	class Context {
+	public:
+		quint32 localNet;
+		quint64 localAddress;
+
+		Driver* driver;
+
+		Context() : localNet(0), localAddress(0), driver(nullptr) {}
+		Context(const Config& config);
+	};
+
+
+	class Data {
+	public:
+		// creation time in milliseconds since unix time epoch, used to remove old entry
+		quint64  timeStamp;
+		Config&  config;
+		Context& context;
+
+		// received data
+		Packet   packet;
+		Ethernet ethernet;
+		IDP      idp;
+
+		Data(quint64 timeStamp_, Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 
 }

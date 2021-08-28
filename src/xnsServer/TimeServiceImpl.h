@@ -38,10 +38,6 @@
 #include "Server.h"
 
 namespace XNS::ServicesImpl {
-	using XNS::Error;
-	using XNS::PEX;
-	using XNS::Server::Data;
-
 	class TimeServiceImpl : public XNS::Server::Services::TimeService {
 	public:
 		const char* name() {

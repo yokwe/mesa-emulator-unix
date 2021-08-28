@@ -38,12 +38,6 @@
 #include "Server.h"
 
 namespace XNS::ServicesImpl {
-	using XNS::Config;
-	using XNS::Context;
-	using XNS::Error;
-	using XNS::RIP;
-	using XNS::Server::Data;
-
 	class RIPServiceImpl : public XNS::Server::Services::RIPService, public QRunnable {
 		QList<RIP::Entry> list;
 

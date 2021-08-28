@@ -63,23 +63,6 @@ namespace XNS::Server {
 	using Courier::Protocol3Body;
 
 
-	class Data {
-	public:
-		// creation time in milliseconds since unix time epoch, used to remove old entry
-		quint64  timeStamp;
-		Config&  config;
-		Context& context;
-
-		// received data
-		Packet   packet;
-		Ethernet ethernet;
-		IDP      idp;
-
-		Data(quint64 timeStamp_, Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
-			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
-	};
-
-
 	class Service {
 	public:
 		class Base {

@@ -76,12 +76,12 @@ void xnsDump() {
 	using XNS::SPP;
 	using XNS::Boot;
 	using XNS::Time;
-	using XNS::Server::Context;
+	using XNS::Context;
 	using XNS::Courier::ExpeditedCourier;
 
 
-	Config config = XNS::loadConfig("tmp/run/xns-config.json");
-	Context context = XNS::Server::Context(config);
+	Config  config  = XNS::loadConfig("tmp/run/xns-config.json");
+	Context context = Context(config);
 
 	{
 

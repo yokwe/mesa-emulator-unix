@@ -44,6 +44,7 @@
 #include "Config.h"
 
 namespace XNS {
+	using Network::Driver;
 	using ByteBuffer::UINT48;
 	using ByteBuffer::UINT32;
 	using ByteBuffer::UINT16;
@@ -55,6 +56,18 @@ namespace XNS {
 
 	// Load config file
 	Config loadConfig(const QString& path);
+
+	class Context {
+	public:
+		quint32 localNet;
+		quint64 localAddress;
+
+		Driver* driver;
+
+		Context() : localNet(0), localAddress(0), driver(nullptr) {}
+		Context(const Config& config);
+	};
+
 
 
 	class Host : public UINT48 {

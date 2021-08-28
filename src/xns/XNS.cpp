@@ -94,6 +94,49 @@ XNS::Config XNS::loadConfig(const QString& path) {
 
 
 //
+// XNS::Context
+//
+XNS::Context::Context(const Config& config) {
+	localNet = 0;
+	for(auto e: config.network.list) {
+		if (e.hop == 0) {
+			localNet = e.net;
+		}
+	}
+	if (localNet == 0) {
+		logger.error("Unexpected");
+		for(auto e: config.network.list) {
+			logger.error("  available network %d %d %s", e.hop, e.net, e.name);
+		}
+		ERROR()
+	}
+
+	Network::Device device;
+	QList<Network::Device> list = Network::getDeviceList();
+	for(auto e: list) {
+		if (e.name == config.network.interface) {
+			device = e;
+		}
+	}
+	if (device.address == 0) {
+		logger.error("Unexpected");
+		logger.error("  name = %s", device.name);
+		for(auto e: list) {
+			logger.error("  available interface = %s", e.name);
+		}
+		ERROR()
+	}
+
+	localAddress = device.address;
+	driver = Network::getDriver(device);
+
+	logger.info("device   = %20s  %s", Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device   = %20s  %s", Host::toDecimalString(device.address), device.name);
+	logger.info("localNet = %d", localNet);
+}
+
+
+//
 // XNS::Host
 //
 QString XNS::Host::toOctalString(quint64 value) {

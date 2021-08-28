@@ -62,17 +62,6 @@ namespace XNS::Server {
 	using Network::Packet;
 	using Courier::Protocol3Body;
 
-	class Context {
-	public:
-		quint32 localNet;
-		quint64 localAddress;
-
-		Driver* driver;
-
-		Context() : localNet(0), localAddress(0), driver(nullptr) {}
-		Context(const Config& config);
-	};
-
 
 	class Data {
 	public:

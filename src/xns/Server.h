@@ -60,7 +60,7 @@ namespace XNS::Server {
 	using Network::Device;
 	using Network::Driver;
 	using Network::Packet;
-	using Courier::ExpeditedCourier;
+	using Courier::Protocol3Body;
 
 	class Context {
 	public:
@@ -256,7 +256,7 @@ namespace XNS::Server {
 		};
 
 		class CHService : public Default {
-			typedef std::function<void(const Data&, const PEX&, const ExpeditedCourier& exp)> ReceiveExp;
+			typedef std::function<void(const Data&, const PEX&, const Protocol3Body& body)> ReceiveExp;
 			typedef std::function<void(const Data&, const Error&)>                            ReceiveError;
 
 			ReceiveExp   receiveExp;
@@ -264,7 +264,7 @@ namespace XNS::Server {
 
 		public:
 			CHService() :
-				receiveExp  ([this](const Data& data, const PEX& pex, const ExpeditedCourier& exp){this->receive(data, pex, exp);}),
+				receiveExp  ([this](const Data& data, const PEX& pex, const Protocol3Body& body){this->receive(data, pex, body);}),
 				receiveError([this](const Data& data, const Error& error)                         {this->receive(data, error);   }) {}
 			virtual ~CHService() {}
 
@@ -275,8 +275,8 @@ namespace XNS::Server {
 
 		protected:
 			// receive packet
-			virtual void receive(const Data& data, const PEX&   pex, const ExpeditedCourier& exp) = 0;
-			virtual void receive(const Data& data, const Error& error)                            = 0;
+			virtual void receive(const Data& data, const PEX&   pex, const Protocol3Body& body) = 0;
+			virtual void receive(const Data& data, const Error& error)                          = 0;
 		};
 
 		class TimeService : public Default {

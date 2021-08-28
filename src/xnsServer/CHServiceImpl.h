@@ -42,14 +42,14 @@ namespace XNS::ServicesImpl {
 	using XNS::Error;
 	using XNS::PEX;
 	using XNS::Server::Data;
-	using XNS::Courier::ExpeditedCourier;
+	using XNS::Courier::Protocol3Body;
 
 	class CHServiceImpl : public XNS::Server::Services::CHService {
 	public:
 		const char* name() {
 			return "CHService";
 		}
-		void receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp);
+		void receive(const Data& data, const PEX& pex, const Protocol3Body& body);
 		void receive(const Data& data, const Error& error);
 	};
 

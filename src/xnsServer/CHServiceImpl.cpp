@@ -40,10 +40,10 @@ static const Logger logger = Logger::getLogger("chs-impl");
 #include "CHServiceImpl.h"
 
 namespace XNS::ServicesImpl {
-	void CHServiceImpl::receive(const Data& data, const PEX& pex, const ExpeditedCourier& exp) {
+	void CHServiceImpl::receive(const Data& data, const PEX& pex, const Protocol3Body& body) {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
+		logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(body.toString()));
 		// FIXME
 	}
 	void CHServiceImpl::receive(const Data& data, const Error& error) {

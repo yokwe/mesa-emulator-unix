@@ -452,10 +452,10 @@ void XNS::Server::Services::CHService::handle(const Data& data) {
 
 		if (pex.type == PEX::Type::CHS) {
 			Buffer level3 = pex.block.toBuffer();
-			ExpeditedCourier exp;
+			XNS::Courier::ExpeditedCourier exp;
 			FROM_BYTE_BUFFER(level3, exp);
 
-			receive(data, pex, exp);
+			receive(data, pex, exp.body);
 		} else {
 			logger.error("Unexpected");
 			logger.error("    %s", data.idp.toString());

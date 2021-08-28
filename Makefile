@@ -3,7 +3,7 @@
 #
 
 MODULE := main test guam-headless \
-          util mesa agent opcode trace symbols xns xnsServer xnsDump
+          util mesa agent opcode trace symbols xns courier xnsServer xnsDump
 
 .PHONY: all clean distclean gamke fix-permission
 .PHONY:     main     test     xnsServer     xnsDump
@@ -60,7 +60,8 @@ symbols: util mesa
 	( cd src/symbols; make all )
 
 xns: util
-	( cd src/xns; make all )
+	( cd src/xns;     make all )
+	( cd src/courier; make all )
 	
 xnsServer: xns
 	( cd src/xnsServer; make all )

@@ -295,6 +295,44 @@ namespace ByteBuffer {
 		}
 	};
 
+	class INT16 : public Base, public OpaqueType<qint16> {
+	public:
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		INT16() : OpaqueType() {}
+		~INT16() {}
+
+		// with UINT16
+		INT16(const INT16& newValue) : OpaqueType(newValue) {}
+		INT16& operator =(const INT16& newValue) {
+			value(newValue.value());
+			return *this;
+		}
+		const INT16& operator =(const INT16& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with qint16
+		explicit INT16(const qint16& newValue) : OpaqueType(newValue) {}
+		qint16 operator =(const qint16& newValue) const {
+			return OpaqueType::operator =(newValue);
+		}
+
+		//
+		// Base
+		//
+		void fromByteBuffer(Buffer& bb) {
+			quint16 newValue;
+			bb.read16(newValue);
+			value((qint16)newValue);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write16(value());
+		}
+	};
+
 	class UINT32 : public Base, public OpaqueType<quint32> {
 	public:
 		//
@@ -326,6 +364,43 @@ namespace ByteBuffer {
 			quint32 newValue;
 			bb.read32(newValue);
 			value(newValue);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			bb.write32(value());
+		}
+	};
+
+	class INT32 : public Base, public OpaqueType<qint32> {
+	public:
+		//
+		// essential constructor, destructor and copy assignment operator
+		//
+		INT32() : OpaqueType() {}
+		~INT32() {}
+
+		// with UINT32
+		INT32& operator =(const INT32& newValue) {
+			value(newValue.value());
+			return *this;
+		}
+		const INT32& operator =(const INT32& newValue) const {
+			value(newValue.value());
+			return *this;
+		}
+
+		// with qunt32
+		explicit INT32(const qint32& newValue) : OpaqueType(newValue) {}
+		qint32 operator =(const qint32& newValue) const {
+			return OpaqueType::operator =(newValue);
+		}
+
+		//
+		// Base
+		//
+		void fromByteBuffer(Buffer& bb) {
+			quint32 newValue;
+			bb.read32(newValue);
+			value((qint32)newValue);
 		}
 		void toByteBuffer  (Buffer& bb) const {
 			bb.write32(value());

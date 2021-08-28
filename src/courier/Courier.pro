@@ -4,8 +4,8 @@ TEMPLATE = lib
 CONFIG  += staticlib
 
 # Input
-HEADERS += Courier.h   Type.h
-SOURCES += Courier.cpp Type.cpp
+HEADERS += Courier.h   Type.h   Service.h   CHS.h
+SOURCES += Courier.cpp Type.cpp Service.cpp CHS.cpp
 
 
 ###############################################

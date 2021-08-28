@@ -35,8 +35,7 @@
 
 #pragma once
 
-#include "../xns/XNS.h"
-#include "../xns/Server.h"
+#include "Server.h"
 
 namespace XNS::ServicesImpl {
 	using XNS::Echo;

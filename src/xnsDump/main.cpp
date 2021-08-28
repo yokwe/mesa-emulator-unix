@@ -39,7 +39,6 @@ static const Logger logger = Logger::getLogger("xnsDump");
 
 #include "../xns/XNS.h"
 #include "../xns/Config.h"
-#include "../xns/Server.h"
 #include "../xns/RIP.h"
 #include "../xns/Echo.h"
 #include "../xns/Error.h"

@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("xnsServer");
 
-#include "../xns/Server.h"
+#include "Server.h"
 
 #include "RIPServiceImpl.h"
 #include "CHServiceImpl.h"

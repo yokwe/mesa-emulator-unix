@@ -35,8 +35,8 @@ static const Logger logger = Logger::getLogger("xns-server");
 #include "../util/Network.h"
 #include "../util/BPF.h"
 
-#include "Config.h"
-#include "XNS.h"
+#include "../xns/Config.h"
+#include "../xns/XNS.h"
 
 #include "Server.h"
 

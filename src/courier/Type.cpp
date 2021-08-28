@@ -30,24 +30,63 @@
 
 
 //
-// CHServiceImpl.h
+// Courier.cpp
 //
 
-#pragma once
+#include "../util/Util.h"
+static const Logger logger = Logger::getLogger("courier");
 
-#include "Server.h"
+#include "Type.h"
 
-namespace XNS::ServicesImpl {
-	using Courier::Protocol3Body;
 
-	class CHServiceImpl : public XNS::Server::Services::CHService {
-	public:
-		const char* name() {
-			return "CHService";
-		}
-		void receive(const Data& data, const PEX& pex, const Protocol3Body& body);
-		void receive(const Data& data, const Error& error);
-	};
+//
+// Courier::BOOLEAN
+//
+void Courier::BOOLEAN::fromByteBuffer(Buffer& bb) {
+	quint16 newValue;
+	bb.read16(newValue);
+	value(newValue);
+}
+void Courier::BOOLEAN::toByteBuffer  (Buffer& bb) const {
+	bb.write16(value());
+}
 
+
+//
+// Courier::STRING
+//
+void Courier::STRING::fromByteBuffer(Buffer& bb) {
+	quint16 length;
+	bb.read16(length);
+	byteArray.clear();
+
+	for(quint16 i = 0; i < length; i++) {
+		quint8 newValue;
+		bb.read8(newValue);
+		byteArray.append((char)newValue);
+	}
+	// read padding
+	if (length % 2) {
+		quint8 newValue;
+		bb.read8(newValue);
+		(void)newValue;
+	}
+}
+void Courier::STRING::toByteBuffer  (Buffer& bb) const {
+	int length = byteArray.length();
+	if (MAX_LENGTH < length) {
+		logger.error("Unexpected");
+		logger.error("  MAX_LENGTH = %d", MAX_LENGTH);
+		logger.error("  length     = %d", length);
+		ERROR();
+	}
+	bb.write16((quint16)length);
+	for(int i = 0; i < length; i++) {
+		bb.write8((quint8)byteArray[i]);
+	}
+	// write padding
+	if (length % 2) {
+		bb.write8(0);
+	}
 }
 

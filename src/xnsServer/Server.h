@@ -49,8 +49,9 @@
 #include "../xns/PEX.h"
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
-#include "../xns/Courier.h"
 #include "../xns/Time.h"
+
+#include "../courier/Courier.h"
 
 #include <functional>
 

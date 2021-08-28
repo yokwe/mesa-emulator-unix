@@ -409,7 +409,7 @@ void XNS::Server::Services::CHService::handle(const Data& data) {
 
 		if (pex.type == PEX::Type::CHS) {
 			Buffer level3 = pex.block.toBuffer();
-			XNS::Courier::ExpeditedCourier exp;
+			Courier::ExpeditedCourier exp;
 			FROM_BYTE_BUFFER(level3, exp);
 
 			receive(data, pex, exp.body);

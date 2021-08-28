@@ -46,7 +46,8 @@ static const Logger logger = Logger::getLogger("xnsDump");
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
 #include "../xns/Time.h"
-#include "../xns/Courier.h"
+
+#include "../courier/Courier.h"
 
 void xnsDump();
 
@@ -76,7 +77,7 @@ void xnsDump() {
 	using XNS::Boot;
 	using XNS::Time;
 	using XNS::Context;
-	using XNS::Courier::ExpeditedCourier;
+	using Courier::ExpeditedCourier;
 
 
 	Config  config  = XNS::loadConfig("tmp/run/xns-config.json");

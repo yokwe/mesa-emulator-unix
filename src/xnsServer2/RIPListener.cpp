@@ -36,38 +36,37 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("srv-rip");
 
-#include "../util/ByteBuffer.h"
-#include "../courier/Service.h"
-
 #include "RIPListener.h"
-
 
 using ByteBuffer::Buffer;
 using ByteBuffer::BLOCK;
 using Network::Packet;
+using XNS::Config;
+using XNS::Context;
 using XNS::Data;
+using XNS::Host;
 using XNS::IDP;
 using XNS::RIP;
 using XNS::Host;
+using XNS::Server2::DefaultListener;
 using Courier::Services;
 
-using XNS::Server2::DefaultListener;
 
 RIP::Entry RIPListener::find(quint32 net) {
 	for(auto e: list) {
 		if (e.net == net) return e;
 	}
-	return XNS::RIP::Entry(net, XNS::RIP::HOP_INFINITY);
+	return RIP::Entry(net, RIP::HOP_INFINITY);
 }
 
-void RIPListener::init(XNS::Config* config_, XNS::Context* context_, Services* services_) {
+void RIPListener::init(Config* config_, Context* context_, Services* services_) {
 	logger.info("RIPListener::init");
 	DefaultListener::init(config_, context_, services_);
 
 	list.clear();
 
 	for(auto e: config->network.list) {
-		XNS::RIP::Entry entry(e.net, e.hop);
+		RIP::Entry entry(e.net, e.hop);
 		list.append(entry);
 	}
 }
@@ -88,10 +87,10 @@ void RIPListener::run() {
 		if (count == RIP::BROADCAST_INTERVAL) {
 			count = 0;
 			// transmit broadcast
-			XNS::RIP rip;
-			rip.type = XNS::RIP::Type::RESPONSE;
+			RIP rip;
+			rip.type = RIP::Type::RESPONSE;
 			for(auto e: list) {
-				XNS::RIP::Entry entry(e.net, e.hop);
+				RIP::Entry entry(e.net, e.hop);
 				rip.entryList.append(entry);
 			}
 
@@ -113,12 +112,12 @@ void RIPListener::run() {
 			idp.block     = block;
 
 			logger.info("RIPListener periodic broadcast");
-			DefaultListener::transmit(*context, XNS::Host::ALL, idp);
+			DefaultListener::transmit(*context, Host::ALL, idp);
 		}
 	}
 }
 
-void RIPListener::handle(const XNS::Data& data) {
+void RIPListener::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::RIP) {
 		RIP rip;
@@ -129,21 +128,21 @@ void RIPListener::handle(const XNS::Data& data) {
 		logger.info("%s  RIP   %s", TO_CSTRING(header), TO_CSTRING(rip.toString()));
 
 		if (rip.type == RIP::Type::REQUEST) {
-			XNS::RIP reply;
+			RIP reply;
 
-			reply.type = XNS::RIP::Type::RESPONSE;
+			reply.type = RIP::Type::RESPONSE;
 
 			bool returnAll = false;
 			if (rip.entryList.size() == 1) {
-				XNS::RIP::Entry entry = rip.entryList[0];
-				if (entry.net == XNS::IDP::Net::ALL && entry.hop == XNS::RIP::HOP_INFINITY) {
+				RIP::Entry entry = rip.entryList[0];
+				if (entry.net == IDP::Net::ALL && entry.hop == RIP::HOP_INFINITY) {
 					returnAll = true;
 				}
 			}
 
 			if (returnAll) {
 				for(auto e: data.config.network.list) {
-					XNS::RIP::Entry entry;
+					RIP::Entry entry;
 					entry.net = e.net;
 					entry.hop = e.hop;
 					reply.entryList.append(entry);

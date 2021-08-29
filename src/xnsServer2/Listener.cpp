@@ -36,16 +36,15 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listener");
 
-#include "../courier/Service.h"
-
 #include "Listener.h"
 
-using Courier::Services;
+using XNS::Server2::Listener;
+using XNS::Server2::Listeners;
 
 //
 // XNS::Server2::Listeners
 //
-void XNS::Server2::Listeners::add(Listener listener) {
+void Listeners::add(Listener listener) {
 	quint16 key = listener.socket();
 	if (map.contains(key)) {
 		logger.error("Unexpected");
@@ -55,7 +54,7 @@ void XNS::Server2::Listeners::add(Listener listener) {
 		map[key] = listener;
 	}
 }
-XNS::Server2::Listener XNS::Server2::Listeners::getListener(quint16 socket) {
+Listener Listeners::getListener(quint16 socket) {
 	if (map.contains(socket)) {
 		return map[socket];
 	} else {
@@ -64,7 +63,7 @@ XNS::Server2::Listener XNS::Server2::Listeners::getListener(quint16 socket) {
 }
 
 // life cycle management
-void XNS::Server2::Listeners::init(Config* config, Context* context, Services* services) {
+void Listeners::init(Config* config, Context* context, Services* services) {
 	// call init of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
@@ -72,7 +71,7 @@ void XNS::Server2::Listeners::init(Config* config, Context* context, Services* s
 		listener.init(config, context, services);
 	}
 }
-void XNS::Server2::Listeners::start() {
+void Listeners::start() {
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
@@ -80,7 +79,7 @@ void XNS::Server2::Listeners::start() {
 		listener.start();
 	}
 }
-void XNS::Server2::Listeners::stop() {
+void Listeners::stop() {
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();

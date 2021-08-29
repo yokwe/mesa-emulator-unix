@@ -36,26 +36,23 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("srv-echo");
 
-#include "../util/ByteBuffer.h"
-
-#include "../xns/XNS.h"
-#include "../xns/Echo.h"
-#include "../courier/Service.h"
-
 #include "EchoListener.h"
 
 using ByteBuffer::Buffer;
 using XNS::Data;
+using XNS::Config;
+using XNS::Context;
 using XNS::IDP;
 using XNS::Echo;
+using Courier::Services;
 
-void EchoListener::init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_) {
+void EchoListener::init(Config* config_, Context* context_, Services* services_) {
 	(void)config_;
 	(void)context_;
 	(void)services_;
 	logger.info("EchoListener::init");
 }
-void EchoListener::handle(const XNS::Data& data) {
+void EchoListener::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
 		Echo echo;

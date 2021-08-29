@@ -50,7 +50,6 @@
 
 #include "Listener.h"
 
-#include <QtCore>
 #include <QtConcurrent/QtConcurrent>
 
 namespace XNS::Server2 {

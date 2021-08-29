@@ -37,8 +37,6 @@
 
 #include "Listener.h"
 
-#include "../xns/XNS.h"
-
 class EchoListener : public XNS::Server2::DefaultListener {
 public:
 	quint16 socket() {

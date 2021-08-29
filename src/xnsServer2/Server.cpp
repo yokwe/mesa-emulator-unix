@@ -50,6 +50,7 @@ void XNS::Server2::Server::init(const QString& path) {
 	services.init();
 }
 void XNS::Server2::Server::start() {
+	stopFuture = false;
 	listeners.start();
 	services.start();
 
@@ -60,61 +61,56 @@ void XNS::Server2::Server::stop() {
 	future.waitForFinished();
 	listeners.stop();
 	services.stop();
-	stopFuture = false;
 }
 void XNS::Server2::Server::run() {
 	context.driver->discard();
 
 	int ret;
 	int opErrno;
-	Network::Packet packet;
+	Packet level0;
 
 	for(;;) {
 		// loop until data arrive
 		for(;;) {
-			if (stopFuture) goto exitLoop;
 			ret = context.driver->select(1, opErrno);
 			if (ret < 0) {
 				LOG_ERRNO(opErrno);
 				ERROR();
 			}
+			if (stopFuture) goto exitLoop;
 			if (0 < ret) break;
 		}
-		if (stopFuture) goto exitLoop;
 
 		// receive one data
-		// milliseconds since epoch
 		quint64 msecsSinceEpoch;
 		{
-			ret = context.driver->receive(packet.data(), packet.capacity(), opErrno, &msecsSinceEpoch);
+			ret = context.driver->receive(level0.data(), level0.capacity(), opErrno, &msecsSinceEpoch);
 			if (ret < 0) {
 				logger.warn("Unexpected");
 				LOG_ERRNO(opErrno);
 				continue;
 			}
-			packet.position(0);
-			packet.limit(ret);
+			level0.position(0);
+			level0.limit(ret);
 		}
 
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
-
 		Ethernet ethernet;
-		FROM_BYTE_BUFFER(packet, ethernet);
+		FROM_BYTE_BUFFER(level0, ethernet);
 		Buffer level1 = ethernet.block.toBuffer();
 
 		// check ethernet type
 		if (ethernet.type != Ethernet::Type::XNS) continue;
 		// check ethernet src
-		// ignroe my own transmission
+		// ignore my own transmission
 		if (ethernet.src == context.localAddress) continue;
-		// check ethernet dst
-		// accepth broadcast or my host
+		// accept broadcast or to my host
 		if (ethernet.dst != Host::ALL && ethernet.dst != context.localAddress) continue;
-
 
 		IDP idp;
 		FROM_BYTE_BUFFER(level1, idp);
 
+		// build header
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 		// check idp checksum
@@ -133,8 +129,12 @@ void XNS::Server2::Server::run() {
 
 		quint16 socket = (quint16)idp.dstSocket;
 		Listener listener = listeners.getListener(socket);
-		Data data(msecsSinceEpoch, config, context, packet, ethernet, idp);
-		listener.handle(data);
+		if (listener.isNull()) {
+			logger.warn("%s  NO HANDLER", header);
+		} else {
+			Data data(msecsSinceEpoch, config, context, level0, ethernet, idp);
+			listener.handle(data);
+		}
 	}
 exitLoop:
 	/* empty statement for label */ ;

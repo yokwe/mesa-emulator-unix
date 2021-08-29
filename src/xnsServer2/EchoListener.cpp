@@ -54,8 +54,6 @@ void EchoListener::init(XNS::Config* config, XNS::Context* context) {
 	logger.info("EchoListener::init");
 }
 void EchoListener::handle(const XNS::Data& data) {
-	logger.debug("XXX");
-
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
 		Echo echo;

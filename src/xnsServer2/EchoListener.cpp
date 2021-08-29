@@ -30,57 +30,59 @@
 
 
 //
-// main.c
+// EchoListener.c
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer2");
+static const Logger logger = Logger::getLogger("srv-echo");
 
-#include "Server.h"
+#include "../util/ByteBuffer.h"
 
-//#include "RIPServiceImpl.h"
-//#include "CHServiceImpl.h"
-//#include "TimeServiceImpl.h"
+#include "../xns/XNS.h"
+#include "../xns/Echo.h"
+
 #include "EchoListener.h"
 
-void testXNSServer() {}
+using ByteBuffer::Buffer;
+using XNS::Data;
+using XNS::IDP;
+using XNS::Echo;
 
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	logger.info("START testXNSServer");
-
-//	XNS::ServicesImpl::RIPServiceImpl  ripServiceImpl;
-//	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-//	XNS::ServicesImpl::TimeServiceImpl timeServiceImpl;
-	EchoListener echoListener;
-
-	XNS::Server2::Server server;
-
-//	server.add(ripServiceImpl);
-//	server.add(chServiceImpl);
-//	server.add(timeServiceImpl);
-	server.add(echoListener);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
+void EchoListener::init(XNS::Config* config, XNS::Context* context) {
+	(void)config;
+	(void)context;
+	logger.info("EchoListener::init");
 }
+void EchoListener::handle(const XNS::Data& data) {
+	logger.debug("XXX");
 
+	Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::ECHO) {
+		Echo echo;
+		FROM_BYTE_BUFFER(level2, echo);
+
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
+
+		if (echo.type == Echo::Type::REQUEST) {
+			Echo reply;
+
+			reply.type = Echo::Type::REPLY;
+			reply.block = echo.block;
+
+			DefaultListener::transmit(data, reply);
+		} else {
+			logger.error("Unexpected");
+			logger.error("  echo %s", echo.toString());
+			ERROR();
+		}
+
+	} else if (data.idp.type == IDP::Type::ERROR_) {
+		logger.error("Unexpected");
+		logger.error("    %s", data.idp.toString());
+		logger.error("        %s", data.idp.block.toString());
+		ERROR();
+	}
+}
 

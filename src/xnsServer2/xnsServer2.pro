@@ -12,6 +12,9 @@ SOURCES += main.cpp
 HEADERS += Server.h   Listener.h
 SOURCES += Server.cpp Listener.cpp
 
+HEADERS += EchoListener.h
+SOURCES += EchoListener.cpp
+
 
 LIBS += ../../tmp/build/util/libutil.a
 LIBS += ../../tmp/build/xns/libxns.a

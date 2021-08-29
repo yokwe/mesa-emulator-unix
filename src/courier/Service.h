@@ -51,86 +51,126 @@ namespace Courier {
 	using ByteBuffer::Buffer;
 	using XNS::PEX;
 	using XNS::Data;
-	using Courier::ExpeditedCourier;
 	using Courier::Protocol3Body;
 
 	class Procedure {
 	public:
-		virtual ~Procedure() {}
+		class Base {
+		public:
+			virtual ~Base() {}
+			virtual const char* name()      = 0;
+			virtual quint16     procedure() = 0;
+			virtual void        call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) = 0;
+		};
+		std::function<const char*(void)> name;
+		std::function<quint16(void)>     procedure;
+		std::function<void(const Data&, const PEX&, const Protocol3Body::CallBody&)> call;
 
-		virtual const char* name()      = 0;
-		virtual quint16     procedure() = 0;;
-
-		virtual void call(const Data& data, const PEX& pex, const Protocol3Body& body) = 0;
+		Procedure() : name(nullptr), procedure(nullptr), call(nullptr) {}
+		Procedure(Base& base) :
+			name      ([&base]() {return base.name();}),
+			procedure ([&base]() {return base.procedure();}),
+			call ([&base](const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) {base.call(data, pex, body);}) {}
 	};
 
 	class Service {
 	public:
-		virtual ~Service() {}
+		class Base {
+		public:
+			virtual ~Base() {}
+			virtual const char* name()    = 0;
+			virtual quint16     program() = 0;
+			virtual quint16     version() = 0;
+			virtual void        init()    = 0;
+			virtual void        start()   = 0;
+			virtual void        stop()    = 0;
+		};
 
-		Service() {}
-		Service(const Service& that) : map(that.map) {}
+		Service() : name(nullptr), program(nullptr), version(nullptr), init(nullptr), start(nullptr), stop(nullptr) {}
+		Service(const Service& that) : name(that.name), program(that.program), version(that.version), init(that.init), start(that.start), stop(that.stop), map(that.map) {}
 		Service& operator = (const Service& that) {
-			this->map = that.map;
+			this->program = that.program;
+			this->version = that.version;
+			this->init    = that.init;
+			this->start   = that.start;
+			this->stop    = that.stop;
+			this->map     = that.map;
 			return *this;
 		}
 
-		virtual const char* name()    = 0;
-		virtual quint32     program() = 0;
-		virtual quint16     version() = 0;
+		std::function<const char*(void)> name;
+		std::function<quint32(void)>     program;
+		std::function<quint16(void)>     version;
 
-		// initialize this service. called once before call
-		virtual void init() = 0;
+		// life cycle management
+		std::function<void(void)>        init;
+		std::function<void(void)>        start;
+		std::function<void(void)>        stop;
 
-		void add(Procedure* procedure);
-		Procedure* getProcedure(quint16 procedure);
+		Service(Base& base) :
+			name    ([&base]() {return base.name();}),
+			program ([&base]() {return base.program();}),
+			version ([&base]() {return base.version();}),
+			init    ([&base]() {return base.init();}),
+			start   ([&base]() {return base.start();}),
+			stop    ([&base]() {return base.stop();}) {}
 
-		void call(const Data& data, const PEX& pex, const Protocol3Body& body);
+		void add(Procedure procedure);
+
+		Procedure getProcedure(quint16 procedure);
+		void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body);
 
 	protected:
-		QMap<quint16, Procedure*> map;
+		QMap<quint16, Procedure> map;
 		//   procedure
+	};
+
+	class ProgramVersion {
+	public:
+		quint32 program;
+		quint16 version;
+
+		ProgramVersion(Service service) : program(service.program()), version(service.version()) {}
+		ProgramVersion(quint32 program_, quint16 version_) : program(program_), version(version_) {}
+
+		ProgramVersion() : program(0), version(0) {}
+		ProgramVersion(const ProgramVersion& that) : program(that.program), version(that.version) {}
+		ProgramVersion& operator = (const ProgramVersion& that) {
+			this->program = that.program;
+			this->version = that.version;
+			return *this;
+		}
+
+		QString toString() {
+			return QString("%1-%2").arg(program).arg(version);
+		}
+
+		bool operator == (const ProgramVersion& that) const {
+			return this->program == that.program && this->version == that.version;
+		}
+		bool operator < (const ProgramVersion& that) const {
+			if (this->program == that.program) {
+				return this->version < that.version;
+			} else {
+				return this->program < that.program;
+			}
+		}
 	};
 
 	class Services {
 	public:
-		class ProgramVersion {
-		public:
-			quint32 program;
-			quint16 version;
+		// life cycle management
+		void init();
+		void start();
+		void stop();
 
-			ProgramVersion(quint32 program_, quint16 version_) : program(program_), version(version_) {}
-
-			ProgramVersion() : program(0), version(0) {}
-			ProgramVersion(const ProgramVersion& that) : program(that.program), version(that.version) {}
-			ProgramVersion& operator = (const ProgramVersion& that) {
-				this->program = that.program;
-				this->version = that.version;
-				return *this;
-			}
-
-			QString toString() {
-				return QString("%1-%2").arg(program).arg(version);
-			}
-
-			bool operator == (const ProgramVersion& that) const {
-				return this->program == that.program && this->version == that.version;
-			}
-			bool operator < (const ProgramVersion& that) const {
-				if (this->program == that.program) {
-					return this->version < that.version;
-				} else {
-					return this->program < that.program;
-				}
-			}
-		};
-
-		void add(Service* service);
-		Service* getService(quint32 program, quint16 version);
+		// add and get service
+		void add(Service service);
+		Service getService(quint32 program, quint16 version);
 
 		void call(const Data& data, const PEX& pex, const Protocol3Body& body);
 	protected:
-		QMap<ProgramVersion, Service*> map;
+		QMap<ProgramVersion, Service> map;
 	};
 }
 

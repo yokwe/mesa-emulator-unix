@@ -41,42 +41,69 @@ static const Logger logger = Logger::getLogger("service");
 //
 // Courier::Service
 //
-void Courier::Service::add(Procedure* procedure) {
-	if (map.contains(procedure->procedure())) {
+void Courier::Service::add(Procedure procedure) {
+	quint16 key = procedure.procedure();
+	if (map.contains(key)) {
 		logger.error("Unexpected");
-		logger.error("  service   %d-%d %s", program(), version(), name());
-		logger.error("  procedure %d %s", procedure->procedure(), procedure->name());
+		logger.error("  service   %u-%u %s", program(), version(), name());
+		logger.error("  procedure %u %s", procedure.procedure(), procedure.name());
 		ERROR();
 	} else {
-		map[procedure->procedure()] = procedure;
+		map[key] = procedure;
 	}
 }
-Courier::Procedure* Courier::Service::getProcedure(quint16 procedure) {
+Courier::Procedure Courier::Service::getProcedure(quint16 procedure) {
 	if (map.contains(procedure)) {
 		return map[procedure];
 	} else {
 		logger.error("Unexpected");
-		logger.error("  service   %d-%d %s", program(), version(), name());
-		logger.error("  procedure %d", procedure);
+		logger.error("  service   %u-%u %s", program(), version(), name());
+		logger.error("  procedure %u", procedure);
 		ERROR();
 	}
 }
+void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody) {
+	Procedure procedure = getProcedure(callBody.procedure);
+	procedure.call(data, pex, callBody);
+}
+
 
 //
 // Courier::Services
 //
-void Courier::Services::add(Service* service) {
-	ProgramVersion programVersion(service->program(), service->version());
+void Courier::Services::init() {
+	// call init of service in map
+	for(auto i = map.begin(); i != map.end(); i++) {
+		Service& service = i.value();
+		service.init();
+	}
+}
+void Courier::Services::start() {
+	// call init of service in map
+	for(auto i = map.begin(); i != map.end(); i++) {
+		Service& service = i.value();
+		service.start();
+	}
+}
+void Courier::Services::stop() {
+	// call init of service in map
+	for(auto i = map.begin(); i != map.end(); i++) {
+		Service& service = i.value();
+		service.stop();
+	}
+}
+void Courier::Services::add(Service service) {
+	ProgramVersion programVersion(service);
 
 	if (map.contains(programVersion)) {
 		logger.error("Unexpected");
-		logger.error("  service  %d-%d %s", service->program(), service->version(), service->name());
+		logger.error("  service  %d-%d %s", service.program(), service.version(), service.name());
 		ERROR();
 	} else {
 		map[programVersion] = service;
 	}
 }
-Courier::Service* Courier::Services::getService(quint32 program, quint16 version) {
+Courier::Service Courier::Services::getService(quint32 program, quint16 version) {
 	ProgramVersion programVersion(program, version);
 
 	if (map.contains(programVersion)) {
@@ -92,7 +119,7 @@ void Courier::Services::call(const Data& data, const PEX& pex, const Protocol3Bo
 	Protocol3Body::CallBody callBody;
 	body.get(callBody);
 
-	Service* service = getService(callBody.program, callBody.version);
-	Procedure* procedure = service->getProcedure(callBody.procedure);
-	procedure->call(data, pex, body);
+	Service service = getService(callBody.program, callBody.version);
+	Procedure procedure = service.getProcedure(callBody.procedure);
+	procedure.call(data, pex, callBody);
 }

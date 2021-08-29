@@ -84,6 +84,10 @@ namespace XNS::Server2 {
 			start  ([&base]()                                {base.start();}),
 			stop   ([&base]()                                {base.stop();}),
 			handle ([&base](const Data& data)                {base.handle(data);}) {}
+
+		bool isNull() {
+			return socket == nullptr;
+		}
 	};
 
 

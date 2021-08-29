@@ -40,6 +40,7 @@ static const Logger logger = Logger::getLogger("listener");
 
 using XNS::Server2::Listener;
 using XNS::Server2::Listeners;
+using XNS::Server2::DefaultListener;
 
 //
 // XNS::Server2::Listeners
@@ -93,7 +94,7 @@ void Listeners::stop() {
 // XNS::Server2::Services::Default
 //
 
-void XNS::Server2::DefaultListener::transmit(const Context& context, quint64 dst, const IDP& idp) {
+void DefaultListener::transmit(const Context& context, quint64 dst, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
 	packet.write48(context.localAddress);
@@ -154,7 +155,7 @@ void XNS::Server2::DefaultListener::transmit(const Context& context, quint64 dst
 		}
 	}
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const RIP&   rip) {
+void DefaultListener::transmit(const Data& data, const RIP&   rip) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, rip);
 	BLOCK block(level2);
@@ -164,7 +165,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const RIP&   rip)
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const Echo&  echo) {
+void DefaultListener::transmit(const Data& data, const Echo&  echo) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, echo);
 	BLOCK block(level2);
@@ -174,7 +175,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const Echo&  echo
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const Error& error) {
+void DefaultListener::transmit(const Data& data, const Error& error) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, error);
 	BLOCK block(level2);
@@ -184,7 +185,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const Error& erro
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const PEX&   pex) {
+void DefaultListener::transmit(const Data& data, const PEX&   pex) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, pex);
 	BLOCK block(level2);
@@ -194,7 +195,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const PEX&   pex)
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const SPP&   spp) {
+void DefaultListener::transmit(const Data& data, const SPP&   spp) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, spp);
 	BLOCK block(level2);
@@ -204,7 +205,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const SPP&   spp)
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::transmit(const Data& data, const Boot&  boot) {
+void DefaultListener::transmit(const Data& data, const Boot&  boot) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, boot);
 	BLOCK block(level2);
@@ -214,7 +215,7 @@ void XNS::Server2::DefaultListener::transmit(const Data& data, const Boot&  boot
 
 	transmit(data, idp);
 }
-void XNS::Server2::DefaultListener::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
+void DefaultListener::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
 	idp.control   = (quint8)0;

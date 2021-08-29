@@ -38,31 +38,32 @@ static const Logger logger = Logger::getLogger("server");
 
 #include "Server.h"
 
+using XNS::Server2::Server;
 
 //
 // XNS::Server2::Server
 //
-void XNS::Server2::Server::init(const QString& path) {
+void Server::init(const QString& path) {
 	config = XNS::loadConfig(path);
 	context = Context(config);
 
 	listeners.init(&config, &context, &services);
 	services.init();
 }
-void XNS::Server2::Server::start() {
+void Server::start() {
 	stopFuture = false;
 	listeners.start();
 	services.start();
 
 	future = QtConcurrent::run([this](){this->run();});
 }
-void XNS::Server2::Server::stop() {
+void Server::stop() {
 	stopFuture = true;
 	future.waitForFinished();
 	listeners.stop();
 	services.stop();
 }
-void XNS::Server2::Server::run() {
+void Server::run() {
 	context.driver->discard();
 
 	int ret;
@@ -139,5 +140,3 @@ void XNS::Server2::Server::run() {
 exitLoop:
 	/* empty statement for label */ ;
 }
-
-

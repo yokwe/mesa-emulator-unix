@@ -55,9 +55,7 @@ XNS::Server2::Listener XNS::Server2::Listeners::getListener(quint16 socket) {
 	if (map.contains(socket)) {
 		return map[socket];
 	} else {
-		logger.error("Unexpected");
-		logger.error("  listener   %5u", socket);
-		ERROR();
+		return Listener();
 	}
 }
 
@@ -66,21 +64,24 @@ void XNS::Server2::Listeners::init(Config* config, Context* context) {
 	// call init of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
+		logger.info("Listeners::init  %5d %s", listener.socket(), listener.name());
 		listener.init(config, context);
 	}
 }
 void XNS::Server2::Listeners::start() {
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener& listner = i.value();
-		listner.start();
+		Listener& listener = i.value();
+		logger.info("Listeners::start %5d %s", listener.socket(), listener.name());
+		listener.start();
 	}
 }
 void XNS::Server2::Listeners::stop() {
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener& listner = i.value();
-		listner.stop();
+		Listener& listener = i.value();
+		logger.info("Listeners::stop  %5d %s", listener.socket(), listener.name());
+		listener.stop();
 	}
 }
 

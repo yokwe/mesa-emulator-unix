@@ -52,6 +52,7 @@ namespace XNS::Server2 {
 	using XNS::PEX;
 	using XNS::SPP;
 	using XNS::Boot;
+	using Courier::Services;
 
 
 	class Listener {
@@ -59,31 +60,31 @@ namespace XNS::Server2 {
 		class Base {
 		public:
 			virtual ~Base() {}
-			virtual quint16     socket()                  = 0;
-			virtual const char* name  ()                  = 0;
-			virtual void        init  (Config*, Context*) = 0;
-			virtual void        start ()                  = 0;
-			virtual void        stop  ()                  = 0;
+			virtual quint16     socket()                             = 0;
+			virtual const char* name  ()                             = 0;
+			virtual void        init  (Config*, Context*, Services*) = 0;
+			virtual void        start ()                             = 0;
+			virtual void        stop  ()                             = 0;
 
 			virtual void        handle(const Data& data) = 0;
 		};
 
-		std::function<quint16    (void)>              socket;
-		std::function<const char*(void)>              name;
-		std::function<void       (Config*, Context*)> init;
-		std::function<void       (void)>              start;
-		std::function<void       (void)>              stop;
-		std::function<void       (const Data&)>       handle;
+		std::function<quint16    (void)>                         socket;
+		std::function<const char*(void)>                         name;
+		std::function<void       (Config*, Context*, Services*)> init;
+		std::function<void       (void)>                         start;
+		std::function<void       (void)>                         stop;
+		std::function<void       (const Data&)>                  handle;
 
 		Listener() :
 			socket(nullptr), name(nullptr), init(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
 		Listener(Base& base) :
-			socket ([&base]()                                {return base.socket();}),
-			name   ([&base]()                                {return base.name();}),
-			init   ([&base](Config* config, Context* context){base.init(config, context);}),
-			start  ([&base]()                                {base.start();}),
-			stop   ([&base]()                                {base.stop();}),
-			handle ([&base](const Data& data)                {base.handle(data);}) {}
+			socket ([&base]()                                                    {return base.socket();}),
+			name   ([&base]()                                                    {return base.name();}),
+			init   ([&base](Config* config, Context* context, Services* services){base.init(config, context, services);}),
+			start  ([&base]()                                                    {base.start();}),
+			stop   ([&base]()                                                    {base.stop();}),
+			handle ([&base](const Data& data)                                    {base.handle(data);}) {}
 
 		bool isNull() {
 			return socket == nullptr;
@@ -97,7 +98,7 @@ namespace XNS::Server2 {
 		Listener getListener(quint16 socket);
 
 		// life cycle management
-		void init(Config* config, Context* context);
+		void init(Config* config, Context* context, Services* services_);
 		void start();
 		void stop();
 
@@ -109,20 +110,22 @@ namespace XNS::Server2 {
 
 	class DefaultListener : public Listener::Base {
 	public:
-		DefaultListener() : config(nullptr), context(nullptr) {}
+		DefaultListener() : config(nullptr), context(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
 
-		void init(Config* config_, Context* context_) {
-			config  = config_;
-			context = context_;
+		void init(Config* config_, Context* context_, Services* services_) {
+			config   = config_;
+			context  = context_;
+			services = services_;
 		}
 
 		void start() {}
 		void stop () {}
 
 	protected:
-		Config*  config;
-		Context* context;
+		Config*   config;
+		Context*  context;
+		Services* services;
 
 		// for RIP broadcast
 		static void transmit(const Context& context, quint64 dst, const IDP& idp);

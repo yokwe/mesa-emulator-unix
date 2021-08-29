@@ -55,7 +55,7 @@ public:
 		return "RIPListener";
 	}
 
-	void init(XNS::Config* config, XNS::Context* context);
+	void init(XNS::Config* config_, XNS::Context* context_, XNS::Server2::Services* services_);
 	void start();
 	void stop();
 	void run();

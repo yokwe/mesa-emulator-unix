@@ -37,6 +37,7 @@
 static const Logger logger = Logger::getLogger("srv-rip");
 
 #include "../util/ByteBuffer.h"
+#include "../courier/Service.h"
 
 #include "RIPListener.h"
 
@@ -48,6 +49,7 @@ using XNS::Data;
 using XNS::IDP;
 using XNS::RIP;
 using XNS::Host;
+using Courier::Services;
 
 using XNS::Server2::DefaultListener;
 
@@ -58,9 +60,9 @@ RIP::Entry RIPListener::find(quint32 net) {
 	return XNS::RIP::Entry(net, XNS::RIP::HOP_INFINITY);
 }
 
-void RIPListener::init(XNS::Config* config, XNS::Context* context) {
+void RIPListener::init(XNS::Config* config_, XNS::Context* context_, Services* services_) {
 	logger.info("RIPListener::init");
-	DefaultListener::init(config, context);
+	DefaultListener::init(config_, context_, services_);
 
 	list.clear();
 

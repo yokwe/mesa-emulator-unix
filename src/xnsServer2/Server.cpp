@@ -46,7 +46,7 @@ void XNS::Server2::Server::init(const QString& path) {
 	config = XNS::loadConfig(path);
 	context = Context(config);
 
-	listeners.init(&config, &context);
+	listeners.init(&config, &context, &services);
 	services.init();
 }
 void XNS::Server2::Server::start() {

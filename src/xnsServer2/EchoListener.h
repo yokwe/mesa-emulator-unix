@@ -46,7 +46,7 @@ public:
 		return "EchoListener";
 	}
 
-	void init(XNS::Config* config, XNS::Context* context);
+	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 
 	void handle(const XNS::Data& data);
 };

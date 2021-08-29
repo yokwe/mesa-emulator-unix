@@ -40,6 +40,7 @@ static const Logger logger = Logger::getLogger("srv-echo");
 
 #include "../xns/XNS.h"
 #include "../xns/Echo.h"
+#include "../courier/Service.h"
 
 #include "EchoListener.h"
 
@@ -48,9 +49,10 @@ using XNS::Data;
 using XNS::IDP;
 using XNS::Echo;
 
-void EchoListener::init(XNS::Config* config, XNS::Context* context) {
-	(void)config;
-	(void)context;
+void EchoListener::init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_) {
+	(void)config_;
+	(void)context_;
+	(void)services_;
 	logger.info("EchoListener::init");
 }
 void EchoListener::handle(const XNS::Data& data) {

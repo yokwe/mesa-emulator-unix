@@ -36,7 +36,11 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listener");
 
+#include "../courier/Service.h"
+
 #include "Listener.h"
+
+using Courier::Services;
 
 //
 // XNS::Server2::Listeners
@@ -60,12 +64,12 @@ XNS::Server2::Listener XNS::Server2::Listeners::getListener(quint16 socket) {
 }
 
 // life cycle management
-void XNS::Server2::Listeners::init(Config* config, Context* context) {
+void XNS::Server2::Listeners::init(Config* config, Context* context, Services* services) {
 	// call init of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
 		logger.info("Listeners::init  %5d %s", listener.socket(), listener.name());
-		listener.init(config, context);
+		listener.init(config, context, services);
 	}
 }
 void XNS::Server2::Listeners::start() {

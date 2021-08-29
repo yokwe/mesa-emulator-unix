@@ -30,58 +30,23 @@
 
 
 //
-// main.c
+// TimeListeners.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer2");
+#pragma once
 
-#include "Server.h"
+#include "Listener.h"
 
-//#include "CHSListener.h"
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
+class TimeListener : public XNS::Server2::DefaultListener {
+public:
+	quint16 socket() {
+		return XNS::IDP::Socket::TIME;
+	}
+	const char* name() {
+		return "TimeListener";
+	}
 
-void testXNSServer() {}
+	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	logger.info("START testXNSServer");
-
-//	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-	EchoListener echoListener;
-	RIPListener  ripListener;
-	TimeListener timeListener;
-
-	XNS::Server2::Server server;
-
-//	server.add(chServiceImpl);
-//	server.add(timeServiceImpl);
-	server.add(echoListener);
-	server.add(ripListener);
-	server.add(timeListener);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
-}
-
-
+	void handle(const XNS::Data& data);
+};

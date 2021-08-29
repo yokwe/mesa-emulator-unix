@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("srv-rip");
+static const Logger logger = Logger::getLogger("listen-rip");
 
 #include "RIPListener.h"
 

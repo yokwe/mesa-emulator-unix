@@ -30,57 +30,35 @@
 
 
 //
-// main.c
+// RIPListeners.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer2");
+#pragma once
 
-#include "Server.h"
+#include <QtConcurrent/QtConcurrent>
 
-//#include "CHServiceImpl.h"
-//#include "TimeServiceImpl.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-
-void testXNSServer() {}
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	logger.info("START testXNSServer");
-
-//	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
-//	XNS::ServicesImpl::TimeServiceImpl timeServiceImpl;
-	EchoListener echoListener;
-	RIPListener  ripListener;
-
-	XNS::Server2::Server server;
-
-//	server.add(chServiceImpl);
-//	server.add(timeServiceImpl);
-	server.add(echoListener);
-	server.add(ripListener);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(30);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
-}
+#include "Listener.h"
 
 
+class RIPListener : public XNS::Server2::DefaultListener {
+	QList<XNS::RIP::Entry> list;
+
+	bool              stopFuture;
+	QFuture<void>     future;
+
+	XNS::RIP::Entry find(quint32 net);
+public:
+	quint16 socket() {
+		return XNS::IDP::Socket::RIP;
+	}
+	const char* name() {
+		return "RIPListener";
+	}
+
+	void init(XNS::Config* config, XNS::Context* context);
+	void start();
+	void stop();
+	void run();
+
+	void handle(const XNS::Data& data);
+};

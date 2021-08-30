@@ -12,8 +12,11 @@ SOURCES += main.cpp
 HEADERS += Server.h   Listener.h
 SOURCES += Server.cpp Listener.cpp
 
-HEADERS += EchoListener.h   RIPListener.h   TimeListener.h
-SOURCES += EchoListener.cpp RIPListener.cpp TimeListener.cpp
+HEADERS += EchoListener.h   RIPListener.h   TimeListener.h   CHSListener.h
+SOURCES += EchoListener.cpp RIPListener.cpp TimeListener.cpp CHSListener.cpp
+
+HEADERS += CHService.h
+SOURCES += CHService.cpp
 
 
 LIBS += ../../tmp/build/util/libutil.a

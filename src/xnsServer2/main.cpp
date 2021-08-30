@@ -38,10 +38,11 @@ static const Logger logger = Logger::getLogger("xnsServer2");
 
 #include "Server.h"
 
-//#include "CHSListener.h"
 #include "TimeListener.h"
 #include "EchoListener.h"
 #include "RIPListener.h"
+#include "CHSListener.h"
+#include "CHService.h"
 
 void testXNSServer() {}
 
@@ -56,18 +57,25 @@ int main(int, char**) {
 
 	logger.info("START testXNSServer");
 
-//	XNS::ServicesImpl::CHServiceImpl   chServiceImpl;
 	EchoListener echoListener;
 	RIPListener  ripListener;
 	TimeListener timeListener;
+	CHSListener  chsListener;
+
+	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
+	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
 
 	XNS::Server2::Server server;
 
-//	server.add(chServiceImpl);
-//	server.add(timeServiceImpl);
+	// add listener
 	server.add(echoListener);
 	server.add(ripListener);
 	server.add(timeListener);
+	server.add(chsListener);
+
+	// add service
+	server.add(&chService2);
+	server.add(&chService3);
 
 	logger.info("server.init");
 	server.init("tmp/run/xns-config.json");

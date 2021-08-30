@@ -40,6 +40,31 @@ static const Logger logger = Logger::getLogger("svc-chs");
 
 #include "CHService.h"
 
-void CHService::init() {
+using XNS::Data;
+using XNS::PEX;
+using Courier::Procedure;
+using Courier::Protocol3Body;
+
+
+class RetrieveAddresses : public Procedure {
+	static constexpr const char*   NAME      = "RetrieveAddresses";
+	static constexpr quint16       PROCEDURE = 0;
+public:
+	RetrieveAddresses() : Procedure(NAME, PROCEDURE) {}
+
+	void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) {
+		(void)data;
+		(void)pex;
+		(void)body;
+		logger.info("RetrieveAddresses called");
+	}
+};
+RetrieveAddresses retrieveAddress;
+
+void CHService::init(XNS::Config* config_, XNS::Context* context_) {
+	DefaultService::init(config_, context_);
+
 	logger.info("init %s", name());
+	// add procedure
+	add(&retrieveAddress);
 }

@@ -38,12 +38,10 @@
 #include "../courier/Service.h"
 #include "../courier/CHS.h"
 
-class CHService : public Courier::Service {
+class CHService : public Courier::DefaultService {
 public:
-	CHService(const char* name_, quint32 program_, quint16 version_) : Courier::Service(name_, program_, version_) {}
-	void        init ();
-	void        start() {}
-	void        stop () {}
+	CHService(const char* name_, quint32 program_, quint16 version_) : Courier::DefaultService(name_, program_, version_) {}
+	void init (XNS::Config* config_, XNS::Context* context_);
 };
 
 

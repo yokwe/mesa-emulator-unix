@@ -130,7 +130,7 @@ namespace Courier::CHS {
 		quint16 procedure() {
 			return PROCEDURE;
 		}
-		void call(const Data& data, const PEX& pex, const Protocol3Body& body);
+		void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody);
 
 		class Parameter : Base {
 		public:
@@ -148,24 +148,9 @@ namespace Courier::CHS {
 		};
 	};
 
-
-	class Service2 : public Courier::Service {
-		const char*   NAME     = "CHS-2";
-		const quint32 PROAGRAM = 2;
-		const quint16 VERSION  = 2;
-	public:
-		const char* name() {
-			return NAME;
-		}
-		quint32 program() {
-			return PROAGRAM;
-		}
-		quint16 version() {
-			return VERSION;
-		}
-
-		void init();
-	};
+	const quint32 PROGRAM  = 2;
+	const quint16 VERSION2 = 2;
+	const quint16 VERSION3 = 3;
 
 
 

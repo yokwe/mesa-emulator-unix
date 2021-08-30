@@ -36,34 +36,14 @@
 #pragma once
 
 #include "../courier/Service.h"
+#include "../courier/CHS.h"
 
 class CHService : public Courier::Service {
 public:
-	class Base : public Courier::Service::Base {
-		static const quint16 PROGRAM = 2;
-		static const quint16 VERSION = 3;
-	public:
-		const char* name() {
-			return "CHService";
-		}
-		quint16     program() {
-			return PROGRAM;
-		}
-		quint16     version() {
-			return VERSION;
-		}
-		void        init()  {}
-		void        start() {}
-		void        stop()  {}
-	};
-
-	CHService(Base& base) : Courier::Service(base) {}
-	static CHService getInstance() {
-		Base base;
-		return CHService(base);
-	}
-
-	void init();
+	CHService(const char* name_, quint32 program_, quint16 version_) : Courier::Service(name_, program_, version_) {}
+	void        init ();
+	void        start() {}
+	void        stop () {}
 };
 
 

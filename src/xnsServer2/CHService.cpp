@@ -41,5 +41,5 @@ static const Logger logger = Logger::getLogger("svc-chs");
 #include "CHService.h"
 
 void CHService::init() {
-	logger.info("init");
+	logger.info("init %s", name());
 }

@@ -81,13 +81,13 @@ void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Bod
 //
 // Courier::Services
 //
-void Courier::Services::init() {
+void Courier::Services::init(Config* config_, Context* context_) {
 	// call init of service in map
 	logger.debug("Services::init");
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Service* service = i.value();
 		logger.info("Services::init  %s", service->toString());
-		service->init();
+		service->init(config_, context_);
 	}
 }
 void Courier::Services::start() {

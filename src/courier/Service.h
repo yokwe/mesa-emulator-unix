@@ -49,6 +49,8 @@
 namespace Courier {
 	using ByteBuffer::Base;
 	using ByteBuffer::Buffer;
+	using XNS::Config;
+	using XNS::Context;
 	using XNS::PEX;
 	using XNS::Data;
 	using Courier::Protocol3Body;
@@ -73,6 +75,8 @@ namespace Courier {
 			return *this;
 		}
 
+		Procedure(const char* name_, quint16 procedure_) : myName(name_), myProcedure(procedure_) {}
+
 		QString toString() const;
 
 	protected:
@@ -94,9 +98,9 @@ namespace Courier {
 			return myVersion;
 		}
 
-		virtual void        init()    = 0;
-		virtual void        start()   = 0;
-		virtual void        stop()    = 0;
+		virtual void init(Config* config, Context* context) = 0;
+		virtual void start()                                = 0;
+		virtual void stop()                                 = 0;
 
 		Service() : myName(nullptr), myProgram(0), myVersion(0) {}
 		Service(const Service& that) : myName(that.myName), myProgram(that.myProgram), myVersion(that.myVersion), map(that.map) {}
@@ -123,6 +127,33 @@ namespace Courier {
 		quint16     myVersion;
 
 		QMap<quint16, Procedure*> map;
+	};
+
+	class DefaultService : public Service {
+	public:
+		virtual ~DefaultService() {}
+
+		DefaultService() : Service(), config(nullptr), context(nullptr) {}
+		DefaultService(const DefaultService& that) : Service(that), config(nullptr), context(nullptr) {}
+		DefaultService& operator = (const DefaultService& that) {
+			Service::operator =(that);
+			this->config  = that.config;
+			this->context = that.context;
+			return *this;
+		}
+
+		DefaultService(const char* name_, quint32 program_, quint16 version_) : Service(name_, program_, version_), config(nullptr), context(nullptr) {}
+
+		void init(Config* config_, Context* context_) {
+			config  = config_;
+			context = context_;
+		}
+		void start() {}
+		void stop () {}
+
+	protected:
+		Config*  config;
+		Context* context;
 	};
 
 
@@ -161,7 +192,7 @@ namespace Courier {
 	class Services {
 	public:
 		// life cycle management
-		void init();
+		void init(Config* config, Context* context);
 		void start();
 		void stop();
 

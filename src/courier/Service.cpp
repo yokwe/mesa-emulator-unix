@@ -52,17 +52,14 @@ void Courier::Service::add(Procedure procedure) {
 		map[key] = procedure;
 	}
 }
-Courier::Procedure Courier::Service::getProcedure(quint16 procedure) {
+Courier::Procedure Courier::Service::getProcedure(quint16 procedure) const {
 	if (map.contains(procedure)) {
 		return map[procedure];
 	} else {
-		logger.error("Unexpected");
-		logger.error("  service   %u-%u %s", program(), version(), name());
-		logger.error("  procedure %u", procedure);
-		ERROR();
+		return Procedure();
 	}
 }
-void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody) {
+void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody) const {
 	Procedure procedure = getProcedure(callBody.procedure);
 	procedure.call(data, pex, callBody);
 }
@@ -105,14 +102,10 @@ void Courier::Services::add(Service service) {
 }
 Courier::Service Courier::Services::getService(quint32 program, quint16 version) {
 	ProgramVersion programVersion(program, version);
-
 	if (map.contains(programVersion)) {
 		return map[programVersion];
 	} else {
-		logger.error("Unexpected");
-		logger.error("  program %u", program);
-		logger.error("  version %u", version);
-		ERROR();
+		return Service();
 	}
 }
 void Courier::Services::call(const Data& data, const PEX& pex, const Protocol3Body& body) {

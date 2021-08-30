@@ -60,11 +60,10 @@ RIP::Entry RIPListener::find(quint32 net) {
 }
 
 void RIPListener::init(Config* config_, Context* context_, Services* services_) {
-	logger.info("RIPListener::init");
 	DefaultListener::init(config_, context_, services_);
+	logger.info("RIPListener::init");
 
 	list.clear();
-
 	for(auto e: config->network.list) {
 		RIP::Entry entry(e.net, e.hop);
 		list.append(entry);

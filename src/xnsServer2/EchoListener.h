@@ -39,12 +39,7 @@
 
 class EchoListener : public XNS::Server2::DefaultListener {
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::ECHO;
-	}
-	const char* name() {
-		return "EchoListener";
-	}
+	EchoListener() : XNS::Server2::DefaultListener("EchoListener", XNS::IDP::Socket::ECHO) {}
 
 	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 

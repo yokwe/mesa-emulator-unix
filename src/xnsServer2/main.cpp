@@ -68,10 +68,10 @@ int main(int, char**) {
 	XNS::Server2::Server server;
 
 	// add listener
-	server.add(echoListener);
-	server.add(ripListener);
-	server.add(timeListener);
-	server.add(chsListener);
+	server.add(&echoListener);
+	server.add(&ripListener);
+	server.add(&timeListener);
+	server.add(&chsListener);
 
 	// add service
 	server.add(&chService2);

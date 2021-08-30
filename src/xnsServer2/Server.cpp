@@ -129,12 +129,12 @@ void Server::run() {
 		}
 
 		quint16 socket = (quint16)idp.dstSocket;
-		Listener listener = listeners.getListener(socket);
-		if (listener.isNull()) {
+		Listener* listener = listeners.getListener(socket);
+		if (listener == nullptr) {
 			logger.warn("%s  NO HANDLER", header);
 		} else {
 			Data data(msecsSinceEpoch, config, context, level0, ethernet, idp);
-			listener.handle(data);
+			listener->handle(data);
 		}
 	}
 exitLoop:

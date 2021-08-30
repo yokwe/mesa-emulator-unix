@@ -47,9 +47,7 @@ using XNS::Echo;
 using Courier::Services;
 
 void EchoListener::init(Config* config_, Context* context_, Services* services_) {
-	(void)config_;
-	(void)context_;
-	(void)services_;
+	DefaultListener::init(config_, context_, services_);
 	logger.info("EchoListener::init");
 }
 void EchoListener::handle(const Data& data) {

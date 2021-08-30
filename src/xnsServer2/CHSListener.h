@@ -39,12 +39,7 @@
 
 class CHSListener : public XNS::Server2::DefaultListener {
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::CHS;
-	}
-	const char* name() {
-		return "CHSListener";
-	}
+	CHSListener() : XNS::Server2::DefaultListener("CHSListener", XNS::IDP::Socket::CHS) {}
 
 	void handle(const XNS::Data& data);
 };

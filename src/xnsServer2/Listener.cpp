@@ -45,21 +45,21 @@ using XNS::Server2::DefaultListener;
 //
 // XNS::Server2::Listeners
 //
-void Listeners::add(Listener listener) {
-	quint16 key = listener.socket();
+void Listeners::add(Listener* listener) {
+	quint16 key = listener->socket();
 	if (map.contains(key)) {
 		logger.error("Unexpected");
-		logger.error("  listener   %5u %s", listener.socket(), listener.name());
+		logger.error("  listener   %5u %s", listener->socket(), listener->name());
 		ERROR();
 	} else {
 		map[key] = listener;
 	}
 }
-Listener Listeners::getListener(quint16 socket) {
+Listener* Listeners::getListener(quint16 socket) {
 	if (map.contains(socket)) {
 		return map[socket];
 	} else {
-		return Listener();
+		return nullptr;
 	}
 }
 
@@ -67,25 +67,25 @@ Listener Listeners::getListener(quint16 socket) {
 void Listeners::init(Config* config, Context* context, Services* services) {
 	// call init of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener& listener = i.value();
-		logger.info("Listeners::init  %s", listener.toString());
-		listener.init(config, context, services);
+		Listener* listener = i.value();
+		logger.info("Listeners::init  %s", listener->toString());
+		listener->init(config, context, services);
 	}
 }
 void Listeners::start() {
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener& listener = i.value();
-		logger.info("Listeners::start %s", listener.toString());
-		listener.start();
+		Listener* listener = i.value();
+		logger.info("Listeners::start %s", listener->toString());
+		listener->start();
 	}
 }
 void Listeners::stop() {
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener& listener = i.value();
-		logger.info("Listeners::stop  %s", listener.toString());
-		listener.stop();
+		Listener* listener = i.value();
+		logger.info("Listeners::stop  %s", listener->toString());
+		listener->stop();
 	}
 }
 

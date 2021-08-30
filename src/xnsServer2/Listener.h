@@ -58,62 +58,38 @@ namespace XNS::Server2 {
 
 	class Listener {
 	public:
-		class Base {
-		public:
-			virtual ~Base() {}
-			virtual quint16     socket()                             = 0;
-			virtual const char* name  ()                             = 0;
-			virtual void        init  (Config*, Context*, Services*) = 0;
-			virtual void        start ()                             = 0;
-			virtual void        stop  ()                             = 0;
+		virtual ~Listener() {}
 
-			virtual void        handle(const Data& data) = 0;
-		};
+		const char* name  () {
+			return myName;
+		}
+		quint16     socket() {
+			return mySocket;
+		}
 
-		std::function<quint16    (void)>                         socket;
-		std::function<const char*(void)>                         name;
-		std::function<void       (Config*, Context*, Services*)> init;
-		std::function<void       (void)>                         start;
-		std::function<void       (void)>                         stop;
-		std::function<void       (const Data&)>                  handle;
+		virtual void init  (Config*, Context*, Services*) = 0;
+		virtual void start ()                             = 0;
+		virtual void stop  ()                             = 0;
 
-		Listener() :
-			socket(nullptr), name(nullptr), init(nullptr), start(nullptr), stop(nullptr), handle(nullptr) {}
-		Listener(Base& base) :
-			socket ([&base]()                                                    {return base.socket();}),
-			name   ([&base]()                                                    {return base.name();}),
-			init   ([&base](Config* config, Context* context, Services* services){base.init(config, context, services);}),
-			start  ([&base]()                                                    {base.start();}),
-			stop   ([&base]()                                                    {base.stop();}),
-			handle ([&base](const Data& data)                                    {base.handle(data);}) {}
+		virtual void handle(const Data& data)             = 0;
+
+		Listener() : myName(nullptr), mySocket(0) {}
+
+		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_) {}
 
 		QString toString();
-		bool isNull() {
-			return socket == nullptr;
-		}
-	};
-
-
-	class Listeners {
-	public:
-		void add(Listener listener);
-		Listener getListener(quint16 socket);
-
-		// life cycle management
-		void init(Config* config, Context* context, Services* services_);
-		void start();
-		void stop();
 
 	protected:
-		QMap<quint16, Listener> map;
-		//   socket
+		const char* myName;
+		quint16     mySocket;
 	};
 
-
-	class DefaultListener : public Listener::Base {
+	class DefaultListener : public Listener {
 	public:
 		DefaultListener() : config(nullptr), context(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
+
+		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), config(nullptr), context(nullptr), services(nullptr) {}
 
 		void init(Config* config_, Context* context_, Services* services_) {
 			config   = config_;
@@ -148,6 +124,22 @@ namespace XNS::Server2 {
 		// initialize idp for transmit
 		static void init(const Data& data, quint8 type, BLOCK& block, IDP& idp);
 
+	};
+
+
+	class Listeners {
+	public:
+		void add(Listener* listener);
+		Listener* getListener(quint16 socket);
+
+		// life cycle management
+		void init(Config* config, Context* context, Services* services_);
+		void start();
+		void stop();
+
+	protected:
+		QMap<quint16, Listener*> map;
+		//   socket
 	};
 
 }

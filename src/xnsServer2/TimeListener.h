@@ -39,12 +39,7 @@
 
 class TimeListener : public XNS::Server2::DefaultListener {
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::TIME;
-	}
-	const char* name() {
-		return "TimeListener";
-	}
+	TimeListener() : XNS::Server2::DefaultListener("TimeListener", XNS::IDP::Socket::TIME) {}
 
 	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 

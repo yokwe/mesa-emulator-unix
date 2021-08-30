@@ -48,12 +48,7 @@ class RIPListener : public XNS::Server2::DefaultListener {
 
 	XNS::RIP::Entry find(quint32 net);
 public:
-	quint16 socket() {
-		return XNS::IDP::Socket::RIP;
-	}
-	const char* name() {
-		return "RIPListener";
-	}
+	RIPListener() : XNS::Server2::DefaultListener("RIPListener", XNS::IDP::Socket::RIP), stopFuture(false) {}
 
 	void init(XNS::Config* config_, XNS::Context* context_, XNS::Server2::Services* services_);
 	void start();

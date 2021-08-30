@@ -70,7 +70,7 @@ namespace XNS::Server2 {
 		QFuture<void> future;
 
 	public:
-		void add(Listener listener) {
+		void add(Listener* listener) {
 			listeners.add(listener);
 		}
 		void add(Service* service) {

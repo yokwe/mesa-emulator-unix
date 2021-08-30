@@ -30,7 +30,7 @@
 
 
 //
-// RIPListener.c
+// RIPListener.cpp
 //
 
 #include "../util/Util.h"

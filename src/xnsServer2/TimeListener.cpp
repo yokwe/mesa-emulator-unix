@@ -30,7 +30,7 @@
 
 
 //
-// TimeListener.c
+// TimeListener.cpp
 //
 
 #include "../util/Util.h"

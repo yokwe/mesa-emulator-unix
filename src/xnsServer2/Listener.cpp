@@ -68,7 +68,7 @@ void Listeners::init(Config* config, Context* context, Services* services) {
 	// call init of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
-		logger.info("Listeners::init  %5d %s", listener.socket(), listener.name());
+		logger.info("Listeners::init  %s", listener.toString());
 		listener.init(config, context, services);
 	}
 }
@@ -76,7 +76,7 @@ void Listeners::start() {
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
-		logger.info("Listeners::start %5d %s", listener.socket(), listener.name());
+		logger.info("Listeners::start %s", listener.toString());
 		listener.start();
 	}
 }
@@ -84,14 +84,22 @@ void Listeners::stop() {
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Listener& listener = i.value();
-		logger.info("Listeners::stop  %5d %s", listener.socket(), listener.name());
+		logger.info("Listeners::stop  %s", listener.toString());
 		listener.stop();
 	}
 }
 
 
 //
-// XNS::Server2::Services::Default
+// XNS::Server::Listener
+//
+QString XNS::Server2::Listener::toString() {
+	return QString::asprintf("%2d-%s", socket(), name());
+}
+
+
+//
+// XNS::Server2::DefaultListener
 //
 
 void DefaultListener::transmit(const Context& context, quint64 dst, const IDP& idp) {

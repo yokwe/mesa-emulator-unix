@@ -87,6 +87,7 @@ namespace XNS::Server2 {
 			stop   ([&base]()                                                    {base.stop();}),
 			handle ([&base](const Data& data)                                    {base.handle(data);}) {}
 
+		QString toString();
 		bool isNull() {
 			return socket == nullptr;
 		}

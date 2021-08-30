@@ -54,6 +54,7 @@ using Courier::Procedure;
 using Courier::ExpeditedCourier;
 using Courier::Protocol3Body;
 using Courier::MessageType;
+using Courier::ProgramVersion;
 
 void CHSListener::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
@@ -74,16 +75,18 @@ void CHSListener::handle(const Data& data) {
 				Protocol3Body::CallBody callBody;
 				exp.body.get(callBody);
 
-				Service service = services->getService(callBody.program, callBody.version);
-				if (service.isNull()) {
-					logger.warn("NO SERVICE  %u-%u", (quint32)callBody.program, (quint16)callBody.version);
+				ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
+
+				Service* service = services->getService(programVersion);
+				if (service == nullptr) {
+					logger.warn("NO SERVICE  %s", programVersion.toString());
 				} else {
-					Procedure procedure = service.getProcedure(callBody.procedure);
-					if (procedure.isNull()) {
-						logger.warn("NO PROCEDURE  %s  %u", service.name(), (quint16)callBody.procedure);
+					Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+					if (procedure == nullptr) {
+						logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
 					} else {
-						logger.info("Courier %s %s !%s!", service.name(), procedure.name(), callBody.block.toString());
-						procedure.call(data, pex, callBody);
+						logger.info("Courier %s %s !%s!", service->name(), procedure->name(), callBody.block.toString());
+						procedure->call(data, pex, callBody);
 					}
 				}
 

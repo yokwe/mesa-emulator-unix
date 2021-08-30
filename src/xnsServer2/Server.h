@@ -73,7 +73,7 @@ namespace XNS::Server2 {
 		void add(Listener listener) {
 			listeners.add(listener);
 		}
-		void add(Service service) {
+		void add(Service* service) {
 			services.add(service);
 		}
 

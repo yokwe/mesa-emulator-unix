@@ -38,30 +38,43 @@ static const Logger logger = Logger::getLogger("service");
 
 #include "Service.h"
 
+
+using XNS::Data;
+using XNS::PEX;
+
 //
 // Courier::Service
 //
-void Courier::Service::add(Procedure procedure) {
-	quint16 key = procedure.procedure();
+void Courier::Service::add(Procedure* procedure) {
+	quint16 key = procedure->procedure();
 	if (map.contains(key)) {
 		logger.error("Unexpected");
 		logger.error("  service   %u-%u %s", program(), version(), name());
-		logger.error("  procedure %u %s", procedure.procedure(), procedure.name());
+		logger.error("  procedure %u %s", procedure->procedure(), procedure->name());
 		ERROR();
 	} else {
 		map[key] = procedure;
 	}
 }
-Courier::Procedure Courier::Service::getProcedure(quint16 procedure) const {
+QString Courier::Service::toString() const {
+	return QString::asprintf("%d-%d %s", myProgram, myVersion, myName);
+}
+
+Courier::Procedure* Courier::Service::getProcedure(const quint16 procedure) const {
 	if (map.contains(procedure)) {
 		return map[procedure];
 	} else {
-		return Procedure();
+		return nullptr;
 	}
 }
 void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody) const {
-	Procedure procedure = getProcedure(callBody.procedure);
-	procedure.call(data, pex, callBody);
+	Procedure* procedure = getProcedure(callBody.procedure);
+	if (procedure == nullptr) {
+		logger.error("callBody %s", callBody.toString());
+		ERROR();
+	} else {
+		procedure->call(data, pex, callBody);
+	}
 }
 
 
@@ -70,49 +83,75 @@ void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Bod
 //
 void Courier::Services::init() {
 	// call init of service in map
+	logger.debug("Services::init");
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Service& service = i.value();
-		service.init();
+		Service* service = i.value();
+		logger.info("Services::init  %s", service->toString());
+		service->init();
 	}
 }
 void Courier::Services::start() {
 	// call init of service in map
+	logger.debug("Services::start");
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Service& service = i.value();
-		service.start();
+		Service* service = i.value();
+		logger.info("Services::start %s", service->toString());
+		service->start();
 	}
 }
 void Courier::Services::stop() {
 	// call init of service in map
+	logger.debug("Services::stop");
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Service& service = i.value();
-		service.stop();
+		Service* service = i.value();
+		logger.info("Services::stop  %s", service->toString());
+		service->stop();
 	}
 }
-void Courier::Services::add(Service service) {
-	ProgramVersion programVersion(service);
+void Courier::Services::add(Service* service) {
+	ProgramVersion programVersion(service->program(), service->version());
 
 	if (map.contains(programVersion)) {
 		logger.error("Unexpected");
-		logger.error("  service  %d-%d %s", service.program(), service.version(), service.name());
+		logger.error("  service  %d-%d %s", service->program(), service->version(), service->name());
 		ERROR();
 	} else {
 		map[programVersion] = service;
 	}
 }
-Courier::Service Courier::Services::getService(quint32 program, quint16 version) {
-	ProgramVersion programVersion(program, version);
+Courier::Service* Courier::Services::getService(const ProgramVersion& programVersion) const {
 	if (map.contains(programVersion)) {
 		return map[programVersion];
 	} else {
-		return Service();
+		return nullptr;
 	}
 }
-void Courier::Services::call(const Data& data, const PEX& pex, const Protocol3Body& body) {
+void Courier::Services::call(const Data& data, const PEX& pex, const Protocol3Body& body) const {
 	Protocol3Body::CallBody callBody;
 	body.get(callBody);
 
-	Service service = getService(callBody.program, callBody.version);
-	Procedure procedure = service.getProcedure(callBody.procedure);
-	procedure.call(data, pex, callBody);
+	ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
+	Service* service = getService(programVersion);
+	if (service == nullptr) {
+		logger.error("Unexpected");
+		logger.error("  callBody %s", callBody.toString());
+		ERROR();
+	} else {
+		Procedure* procedure = service->getProcedure(callBody.procedure);
+		if (procedure == nullptr) {
+			logger.error("Unexpected");
+			logger.error("  callBody %s", callBody.toString());
+			ERROR();
+		} else {
+			procedure->call(data, pex, callBody);
+		}
+	}
+}
+
+
+//
+// Courier::Procedure
+//
+QString Courier::Procedure::toString() const {
+	return QString::asprintf("%d %s", myProcedure, myName);
 }

@@ -48,7 +48,7 @@ void Server::init(const QString& path) {
 	context = Context(config);
 
 	listeners.init(&config, &context, &services);
-	services.init();
+	services.init(&config, &context);
 }
 void Server::start() {
 	stopFuture = false;

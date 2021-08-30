@@ -71,6 +71,10 @@ namespace Courier {
 			name      ([&base]() {return base.name();}),
 			procedure ([&base]() {return base.procedure();}),
 			call ([&base](const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) {base.call(data, pex, body);}) {}
+
+		bool isNull() {
+			return name == nullptr;
+		}
 	};
 
 	class Service {
@@ -115,10 +119,17 @@ namespace Courier {
 			start   ([&base]() {return base.start();}),
 			stop    ([&base]() {return base.stop();}) {}
 
+		bool isNull() const {
+			return name == nullptr;
+		}
+		QString toString() const {
+			return QString::asprintf("%d-%d %s", program(), version(), name());
+		}
+
 		void add(Procedure procedure);
 
-		Procedure getProcedure(quint16 procedure);
-		void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body);
+		Procedure getProcedure(quint16 procedure) const;
+		void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) const;
 
 	protected:
 		QMap<quint16, Procedure> map;
@@ -141,7 +152,7 @@ namespace Courier {
 			return *this;
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString("%1-%2").arg(program).arg(version);
 		}
 

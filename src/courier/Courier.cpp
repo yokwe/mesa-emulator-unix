@@ -614,8 +614,7 @@ void Courier::Protocol3Body::toByteBuffer  (Buffer& bb) const {
 // Courier::ExpeditedCourier
 //
 QString Courier::ExpeditedCourier::toString() const {
-//	return QString("%1 %2").arg(range.toString()).arg(body.toString());
-	return QString("%1").arg(body.toString());
+	return QString("%1 %2").arg(range.toString()).arg(body.toString());
 }
 void Courier::ExpeditedCourier::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, range);

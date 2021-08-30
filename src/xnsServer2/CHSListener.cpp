@@ -85,7 +85,7 @@ void CHSListener::handle(const Data& data) {
 					if (procedure == nullptr) {
 						logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
 					} else {
-						logger.info("Courier %s %s !%s!", service->name(), procedure->name(), callBody.block.toString());
+						logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
 						procedure->call(data, pex, callBody);
 					}
 				}

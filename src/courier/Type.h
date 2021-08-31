@@ -110,15 +110,24 @@ namespace Courier {
 	template <typename T, unsigned short int N>
 	class SEQUENCE : public Base {
 		quint16 maxLength = N;
-		quint16 length;
 
 		QList<T> list;
 	public:
+		void append(T& newValue) {
+			list.append(newValue);
+		}
+		QString toString() {
+			QStringList myList;
+			for(auto e: list) {
+				myList.append(e.toString());
+			}
+			return QString("{%1}").arg(myList.join(", "));
+		}
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb) {
+			quint16 length;
 			bb.read16(length);
 			if (maxLength < length) {
-				extern Logger logger;
 				logger.error("Unexpected");
 				logger.error("  maxLength = %u", maxLength);
 				logger.error("  length    = %u", length);
@@ -132,7 +141,7 @@ namespace Courier {
 			}
 		}
 		void toByteBuffer  (Buffer& bb) const {
-			bb.write16(length);
+			bb.write16((quint16)list.length());
 			for(auto e: list) {
 				e.toByteBuffer(bb);
 			}

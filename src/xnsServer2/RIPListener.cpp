@@ -158,7 +158,7 @@ void RIPListener::handle(const Data& data) {
 			ERROR();
 		}
 
-	} else if (data.idp.type == IDP::Type::ERROR_) {
+	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());

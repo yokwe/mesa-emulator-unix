@@ -77,7 +77,7 @@ void XNS::RIP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 
 	for(;;) {
-		if (bb.remaining() == 0) break;;
+		if (bb.remaining() == 0) break;
 
 		Entry entry;
 		FROM_BYTE_BUFFER(bb, entry);

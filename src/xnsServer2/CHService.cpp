@@ -103,7 +103,7 @@ public:
 		NetworkAddress networkAddress;
 		networkAddress.network = data.context.localNet;
 		networkAddress.host    = data.context.localAddress;
-		networkAddress.socket  = data.idp.dstSocket;
+		networkAddress.socket  = IDP::Socket::COURIER;
 
 		Courier::SEQUENCE<NetworkAddress, 40> reply;
 		reply.append(networkAddress);

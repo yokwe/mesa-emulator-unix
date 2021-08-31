@@ -102,10 +102,10 @@ QString XNS::Server2::Listener::toString() {
 // XNS::Server2::DefaultListener
 //
 
-void DefaultListener::transmit(const Context& context, quint64 dst, const IDP& idp) {
+void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
-	packet.write48(context.localAddress);
+	packet.write48(context->localAddress);
 	packet.write16(XNS::Ethernet::Type::XNS);
 
 	// save packet as start for setChecksum() and computeChecksum()
@@ -154,7 +154,7 @@ void DefaultListener::transmit(const Context& context, quint64 dst, const IDP& i
 	// transmit packet
 	{
 		int opErrno;
-		int ret = context.driver->transmit(packet.data(), packet.limit(), opErrno);
+		int ret = context->driver->transmit(packet.data(), packet.limit(), opErrno);
 		if (ret < 0) {
 			logger.error("Unexpected");
 			logger.error("ret = %d", ret);
@@ -231,8 +231,8 @@ void DefaultListener::init(const Data& data, quint8 type, BLOCK& block, IDP& idp
 	idp.dstNet    = data.idp.srcNet;
 	idp.dstHost   = data.idp.srcHost;
 	idp.dstSocket = data.idp.srcSocket;
-	idp.srcNet    = data.context.localNet;
-	idp.srcHost   = data.context.localAddress;
+	idp.srcNet    = data.context->localNet;
+	idp.srcHost   = data.context->localAddress;
 	idp.srcSocket = data.idp.dstSocket;
 	idp.block     = block;
 }

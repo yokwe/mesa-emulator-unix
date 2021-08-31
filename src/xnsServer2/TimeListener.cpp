@@ -63,9 +63,9 @@ void TimeListener::handle(const Data& data, const PEX& pex) {
 	if (time.type == Time::Type::REQUEST) {
 		Time::Response response;
 		response.time            = QDateTime::currentSecsSinceEpoch();
-		response.offsetDirection = data.config.time.offsetDirection;
-		response.offsetHours     = data.config.time.offsetHours;
-		response.offsetMinutes   = data.config.time.offsetMinutes;
+		response.offsetDirection = data.config->time.offsetDirection;
+		response.offsetHours     = data.config->time.offsetHours;
+		response.offsetMinutes   = data.config->time.offsetMinutes;
 		response.tolerance       = Time::Tolerance::MILLI;
 		response.toleranceValue  = 10;
 

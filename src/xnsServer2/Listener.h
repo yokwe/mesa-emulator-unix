@@ -113,7 +113,7 @@ namespace XNS::Server2 {
 		Services* services;
 
 		// for RIP broadcast
-		static void transmit(const Context& context, quint64 dst, const IDP& idp);
+		static void transmit(const Context* context, quint64 dst, const IDP& idp);
 
 		// transmit idp packet
 		static void transmit(const Data& data, const IDP& idp) {

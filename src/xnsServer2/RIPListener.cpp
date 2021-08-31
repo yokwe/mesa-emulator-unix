@@ -111,7 +111,7 @@ void RIPListener::run() {
 			idp.block     = block;
 
 			logger.info("RIPListener periodic broadcast");
-			DefaultListener::transmit(*context, Host::ALL, idp);
+			DefaultListener::transmit(context, Host::ALL, idp);
 		}
 	}
 }
@@ -140,7 +140,7 @@ void RIPListener::handle(const Data& data) {
 			}
 
 			if (returnAll) {
-				for(auto e: data.config.network.list) {
+				for(auto e: data.config->network.list) {
 					RIP::Entry entry;
 					entry.net = e.net;
 					entry.hop = e.hop;

@@ -133,7 +133,7 @@ void Server::run() {
 		if (listener == nullptr) {
 			logger.warn("%s  NO HANDLER", header);
 		} else {
-			Data data(msecsSinceEpoch, config, context, level0, ethernet, idp);
+			Data data(msecsSinceEpoch, &config, &context, level0, ethernet, idp);
 			listener->handle(data);
 		}
 	}

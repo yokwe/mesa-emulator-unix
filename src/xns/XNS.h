@@ -317,15 +317,34 @@ namespace XNS {
 	public:
 		// creation time in milliseconds since unix time epoch, used to remove old entry
 		quint64  timeStamp;
-		Config&  config;
-		Context& context;
+		Config*  config;
+		Context* context;
 
 		// received data
 		Packet   packet;
 		Ethernet ethernet;
 		IDP      idp;
 
-		Data(quint64 timeStamp_, Config& config_, Context& context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+		Data() : timeStamp(0), config(nullptr), context(nullptr) {}
+		Data(const Data& that) {
+			this->timeStamp = that.timeStamp;
+			this->config    = that.config;
+			this->context   = that.context;
+			this->packet    = that.packet;
+			this->ethernet  = that.ethernet;
+			this->idp       = that.idp;
+		}
+		Data& operator = (const Data& that) {
+			this->timeStamp = that.timeStamp;
+			this->config    = that.config;
+			this->context   = that.context;
+			this->packet    = that.packet;
+			this->ethernet  = that.ethernet;
+			this->idp       = that.idp;
+			return *this;
+		}
+
+		Data(quint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
 			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 

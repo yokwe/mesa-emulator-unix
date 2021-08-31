@@ -30,30 +30,53 @@
 
 
 //
-// CourierListener.cpp
+// SPPListener.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-cour");
+#pragma once
 
-#include "../xns/SPP.h"
+#include <functional>
 
-#include "CourierListener.h"
+#include <QtConcurrent/QtConcurrent>
 
-void CourierListener::run(FunctionTable functionTable) {
-	logger.info("CourierListener::run START");
+#include "Listener.h"
 
-	for(;;) {
-		if (functionTable.stopRun()) break;
-		MyData myData;
-		bool dataReceived = functionTable.get(&myData);
-		if (dataReceived) {
-			QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
-			logger.info("%s  SPP   %s  COURIER", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
-		}
-	}
+class SPPListener : public XNS::Server2::DefaultListener {
+public:
+	SPPListener(const char* name, quint16 socket);
+	virtual ~SPPListener() {}
 
-	logger.info("CourierListener::run STOP");
-}
+	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
+	void start();
+	void stop();
 
+	void handle(const XNS::Data& data);
+
+protected:
+	class MyData {
+	public:
+		XNS::Data data;
+		XNS::SPP  spp;
+	};
+	class FunctionTable {
+	public:
+		std::function<bool(MyData*)> get;
+		std::function<bool(void)>    stopRun;
+	};
+	FunctionTable functionTable;
+
+	virtual void run(FunctionTable functionTable) = 0;
+
+	bool           stopFuture;
+	QFuture<void>  future;
+
+	QList<MyData>  dataList;
+	QMutex         dataListMutex;
+	QWaitCondition dataListCV;
+
+	// if get returns true, myData is assigned
+	// if get returns false, myData is not assigned
+	bool get(MyData* myData);
+	bool stopRun();
+
+};

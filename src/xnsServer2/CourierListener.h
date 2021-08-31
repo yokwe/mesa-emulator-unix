@@ -38,33 +38,11 @@
 #include <QtConcurrent/QtConcurrent>
 
 #include "Listener.h"
+#include "SPPListener.h"
 
-class CourierListener : public XNS::Server2::DefaultListener {
+class CourierListener : public SPPListener {
 public:
-	CourierListener() : XNS::Server2::DefaultListener("CourierListener", XNS::IDP::Socket::COURIER), stopFuture(false) {}
+	CourierListener() : SPPListener("CourierListener", XNS::IDP::Socket::COURIER) {}
 
-	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
-	void start();
-	void stop();
-	void run();
-
-	void handle(const XNS::Data& data);
-
-protected:
-	class MyData {
-	public:
-		XNS::Data data;
-		XNS::SPP  spp;
-
-		MyData(XNS::Data data_, XNS::SPP spp_) : data(data_), spp(spp_) {}
-
-	};
-
-	bool           stopFuture;
-	QFuture<void>  future;
-
-	QList<MyData>  dataList;
-	QMutex         dataListMutex;
-	QWaitCondition dataListCV;
-
+	void run(FunctionTable functionTable);
 };

@@ -12,8 +12,8 @@ SOURCES += main.cpp
 HEADERS += Server.h   Listener.h
 SOURCES += Server.cpp Listener.cpp
 
-HEADERS += EchoListener.h   RIPListener.h   TimeListener.h   CHSListener.h
-SOURCES += EchoListener.cpp RIPListener.cpp TimeListener.cpp CHSListener.cpp
+HEADERS += EchoListener.h   RIPListener.h   TimeListener.h   CHSListener.h   CourierListener.h
+SOURCES += EchoListener.cpp RIPListener.cpp TimeListener.cpp CHSListener.cpp CourierListener.cpp
 
 HEADERS += CHService.h
 SOURCES += CHService.cpp

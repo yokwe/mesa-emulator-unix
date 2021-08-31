@@ -30,69 +30,41 @@
 
 
 //
-// main.c
+// CourierListener.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer2");
+#pragma once
 
-#include "Server.h"
+#include <QtConcurrent/QtConcurrent>
 
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-#include "CHSListener.h"
-#include "CHService.h"
-#include "CourierListener.h"
+#include "Listener.h"
 
-void testXNSServer() {}
+class CourierListener : public XNS::Server2::DefaultListener {
+public:
+	CourierListener() : XNS::Server2::DefaultListener("CourierListener", XNS::IDP::Socket::COURIER), stopFuture(false) {}
 
-int main(int, char**) {
-	logger.info("START");
+	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
+	void start();
+	void stop();
+	void run();
 
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
+	void handle(const XNS::Data& data);
 
-	DEBUG_TRACE();
+protected:
+	class MyData {
+	public:
+		XNS::Data data;
+		XNS::SPP  spp;
 
-	logger.info("START testXNSServer");
+		MyData(XNS::Data data_, XNS::SPP spp_) : data(data_), spp(spp_) {}
 
-	EchoListener    echoListener;
-	RIPListener     ripListener;
-	TimeListener    timeListener;
-	CHSListener     chsListener;
-	CourierListener courierListener;
+	};
 
-	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
-	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
+	bool           stopFuture;
+	QFuture<void>  future;
 
-	XNS::Server2::Server server;
+	QList<MyData>  dataList;
+	QMutex         dataListMutex;
+	QWaitCondition dataListCV;
 
-	// add listener
-	server.add(&echoListener);
-	server.add(&ripListener);
-	server.add(&timeListener);
-	server.add(&chsListener);
-	server.add(&courierListener);
-
-	// add service
-	server.add(&chService2);
-	server.add(&chService3);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(60);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
-}
-
-
+};

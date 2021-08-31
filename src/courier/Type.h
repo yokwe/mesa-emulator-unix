@@ -119,9 +119,9 @@ namespace Courier {
 		QString toString() {
 			QStringList myList;
 			for(auto e: list) {
-				myList.append(e.toString());
+				myList.append(QString("{%1}").arg(e.toString()));
 			}
-			return QString("{%1}").arg(myList.join(", "));
+			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
 		}
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb) {

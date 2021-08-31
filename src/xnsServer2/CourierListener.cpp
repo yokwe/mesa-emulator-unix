@@ -37,21 +37,141 @@
 static const Logger logger = Logger::getLogger("listen-cour");
 
 #include "../xns/SPP.h"
+#include "../xns/Time.h"
 
 #include "CourierListener.h"
+
+using ByteBuffer::UINT16;
+using XNS::Data;
+using XNS::Host;
+using XNS::IDP;
+using XNS::SPP;
+
+class Key {
+public:
+	XNS::Host host;
+	UINT16    id;
+
+	Key() {}
+	Key(const Key& that) {
+		this->host = that.host;
+		this->id   = that.id;
+	}
+	Key& operator = (const Key& that) {
+		this->host = that.host;
+		this->id   = that.id;
+		return *this;
+	}
+
+	Key(XNS::Host host_, UINT16 id_) : host (host_), id(id_) {}
+
+	bool operator == (const Key& that) const {
+		return this->host == that.host && this->id == that.id;
+	}
+	bool operator < (const Key& that) const {
+		if (this->host == that.host) {
+			return this->id < that.id;
+		} else {
+			return this->host < that.host;
+		}
+	}
+};
+
+class State {
+public:
+	quint64  time;
+
+	Host     hostRemote;
+	quint16  idRemote;
+	quint16  idLocal;
+
+	SPP::SST sst;     // Sub System Type
+
+	quint16  seq;     // sequence
+	quint16  ack;     // acknowledgment
+	quint16  alloc;   // allocation
+
+	State() : time(0), idRemote(0), idLocal(0), seq(0), ack(0), alloc(4) {}
+	State(const State& that) {
+		this->time       = that.time;
+		this->hostRemote = that.hostRemote;
+		this->idRemote   = that.idRemote;
+		this->idLocal    = that.idLocal;
+		this->sst        = that.sst;
+		this->seq        = that.seq;
+		this->ack        = that.ack;
+		this->alloc      = that.alloc;
+	}
+	State& operator = (const State& that) {
+		this->time       = that.time;
+		this->hostRemote = that.hostRemote;
+		this->idRemote   = that.idRemote;
+		this->idLocal    = that.idLocal;
+		this->sst        = that.sst;
+		this->seq        = that.seq;
+		this->ack        = that.ack;
+		this->alloc      = that.alloc;
+		return *this;
+	}
+};
+QMap<Key, State> stateMap;
 
 void CourierListener::run(FunctionTable functionTable) {
 	logger.info("CourierListener::run START");
 
+	MyData myData;
+	Data&  data(myData.data);
+	SPP&   spp(myData.spp);
+
 	for(;;) {
 		if (functionTable.stopRun()) break;
-		MyData myData;
-		bool dataReceived = functionTable.get(&myData);
-		if (dataReceived) {
-			QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
-			logger.info("%s  SPP   %s  COURIER", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
+		bool dataReady = functionTable.get(&myData);
+		if (!dataReady) continue;
+
+		{
+			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			logger.info("%s  SPP   %s  COURIER", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 		}
+
+		Key key(myData.data.idp.srcHost, myData.spp.idSrc);
+		State state;
+		if (stateMap.contains(key)) {
+			state = stateMap[key];
+		} else {
+			state.time       = data.timeStamp;
+			state.hostRemote = data.idp.srcHost;
+			state.idRemote   = spp.idSrc;
+			state.idLocal    = (quint16)(data.timeStamp / 32);
+			state.sst        = SPP::SST::DATA;
+			state.seq        = 0;
+			state.ack        = 0;
+			state.alloc      = 4;
+			// save for later use
+			stateMap[key] = state;
+		}
+
+		if (spp.control.isSystem()) {
+			// system packet
+			if (spp.control.isSendAck()) {
+				SPP reply;
+				reply.control = SPP::Control::BIT_SYSTEM;
+				reply.sst = SPP::SST::DATA;
+				reply.idSrc = state.idLocal;
+				reply.idDst = spp.idSrc;
+				reply.seq   = state.seq;
+				reply.ack   = state.ack;
+				reply.alloc = state.alloc;
+
+				DefaultListener::transmit(myData.data, reply);
+				return;
+			}
+
+		} else {
+			// data packet
+			// collect data and send data to client
+		}
+
 	}
 
 	logger.info("CourierListener::run STOP");

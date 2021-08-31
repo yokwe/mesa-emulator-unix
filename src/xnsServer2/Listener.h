@@ -100,6 +100,13 @@ namespace XNS::Server2 {
 		void start() {}
 		void stop () {}
 
+		static void transmit(const Data& data, const RIP&   rip);
+		static void transmit(const Data& data, const Echo&  echo);
+		static void transmit(const Data& data, const Error& error);
+		static void transmit(const Data& data, const PEX&   pex);
+		static void transmit(const Data& data, const SPP&   spp);
+		static void transmit(const Data& data, const Boot&  boot);
+
 	protected:
 		Config*   config;
 		Context*  context;
@@ -112,13 +119,6 @@ namespace XNS::Server2 {
 		static void transmit(const Data& data, const IDP& idp) {
 			transmit(data.context, data.ethernet.src, idp);
 		}
-
-		static void transmit(const Data& data, const RIP&   rip);
-		static void transmit(const Data& data, const Echo&  echo);
-		static void transmit(const Data& data, const Error& error);
-		static void transmit(const Data& data, const PEX&   pex);
-		static void transmit(const Data& data, const SPP&   spp);
-		static void transmit(const Data& data, const Boot&  boot);
 
 	private:
 		// initialize idp for transmit

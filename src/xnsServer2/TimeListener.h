@@ -36,12 +36,11 @@
 #pragma once
 
 #include "Listener.h"
+#include "PEXListener.h"
 
-class TimeListener : public XNS::Server2::DefaultListener {
+class TimeListener : public PEXListener {
 public:
-	TimeListener() : XNS::Server2::DefaultListener("TimeListener", XNS::IDP::Socket::TIME) {}
+	TimeListener() : PEXListener("TimeListener", XNS::IDP::Socket::TIME, XNS::PEX::Type::TIME) {}
 
-	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
-
-	void handle(const XNS::Data& data);
+	void handle(const XNS::Data& data, const XNS::PEX& pex);
 };

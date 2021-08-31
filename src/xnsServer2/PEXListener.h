@@ -30,17 +30,22 @@
 
 
 //
-// CHSListener.h
+// PEXListener.h
 //
 
 #pragma once
 
 #include "Listener.h"
-#include "PEXListener.h"
 
-class CHSListener : public PEXListener {
+class PEXListener : public XNS::Server2::DefaultListener {
+	// pex type
+	quint16 myType;
 public:
-	CHSListener() : PEXListener("CHSListener", XNS::IDP::Socket::CHS, XNS::PEX::Type::CHS) {}
+	PEXListener(const char* name, quint16 socket, quint16 type) : XNS::Server2::DefaultListener(name, socket), myType(type) {}
+	~PEXListener() {}
 
-	void handle(const XNS::Data& data, const XNS::PEX& pex);
+	void handle(const XNS::Data& data);
+
+protected:
+	virtual void handle(const XNS::Data& data, const XNS::PEX& pex) = 0;
 };

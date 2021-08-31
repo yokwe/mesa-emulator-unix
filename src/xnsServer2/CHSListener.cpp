@@ -42,7 +42,7 @@ static const Logger logger = Logger::getLogger("listen-chs");
 
 using ByteBuffer::Buffer;
 using ByteBuffer::BLOCK;
-using Network::Packet;;
+using Network::Packet;
 using XNS::Data;
 using XNS::Config;
 using XNS::Context;
@@ -56,56 +56,35 @@ using Courier::Protocol3Body;
 using Courier::MessageType;
 using Courier::ProgramVersion;
 
-void CHSListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
-	if (data.idp.type == IDP::Type::PEX) {
-		PEX pex;
-		FROM_BYTE_BUFFER(level2, pex);
+void CHSListener::handle(const Data& data, const PEX& pex) {
+	Buffer level3 = pex.block.toBuffer();
+	ExpeditedCourier exp;
+	FROM_BYTE_BUFFER(level3, exp);
 
-		if (pex.type == PEX::Type::CHS) {
-			Buffer level3 = pex.block.toBuffer();
-			ExpeditedCourier exp;
-			FROM_BYTE_BUFFER(level3, exp);
+	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
 
-			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-			logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
+	if (exp.body.type == MessageType::CALL) {
+		Protocol3Body::CallBody callBody;
+		exp.body.get(callBody);
 
-			if (exp.body.type == MessageType::CALL) {
-				Protocol3Body::CallBody callBody;
-				exp.body.get(callBody);
+		ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
 
-				ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
-
-				Service* service = services->getService(programVersion);
-				if (service == nullptr) {
-					logger.warn("NO SERVICE  %s", programVersion.toString());
-				} else {
-					Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
-					if (procedure == nullptr) {
-						logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
-					} else {
-						logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
-						procedure->call(data, pex, callBody);
-					}
-				}
-
-			} else {
-				logger.error("Unexpected");
-				ERROR();
-			}
-
+		Service* service = services->getService(programVersion);
+		if (service == nullptr) {
+			logger.warn("NO SERVICE  %s", programVersion.toString());
 		} else {
-			logger.error("Unexpected");
-			logger.error("    %s", data.idp.toString());
-			logger.error("        %s", data.idp.block.toString());
-			ERROR();
+			Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+			if (procedure == nullptr) {
+				logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
+			} else {
+				logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
+				procedure->call(data, pex, callBody);
+			}
 		}
-
-	} else if (data.idp.type == IDP::Type::ERROR_) {
+	} else {
 		logger.error("Unexpected");
-		logger.error("    %s", data.idp.toString());
-		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
 }

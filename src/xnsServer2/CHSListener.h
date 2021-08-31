@@ -40,7 +40,7 @@
 
 class CHSListener : public PEXListener {
 public:
-	CHSListener() : PEXListener("CHSListener", XNS::IDP::Socket::CHS, XNS::PEX::Type::CHS) {}
+	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS) {}
 
 	void handle(const XNS::Data& data, const XNS::PEX& pex);
 };

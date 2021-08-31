@@ -46,7 +46,9 @@ using XNS::Context;
 using XNS::Data;
 using XNS::Host;
 using XNS::IDP;
+using XNS::Net;
 using XNS::RIP;
+using XNS::Socket;
 using XNS::Host;
 using XNS::Server::DefaultListener;
 using Courier::Services;
@@ -104,10 +106,10 @@ void RIPListener::run() {
 			idp.type      = IDP::Type::RIP;
 			idp.dstNet    = context->localNet;
 			idp.dstHost   = Host::ALL;
-			idp.dstSocket = IDP::Socket::RIP;
+			idp.dstSocket = Socket::RIP;
 			idp.srcNet    = context->localNet;
 			idp.srcHost   = context->localAddress;
-			idp.srcSocket = IDP::Socket::RIP;
+			idp.srcSocket = Socket::RIP;
 			idp.block     = block;
 
 			logger.info("RIPListener periodic broadcast");
@@ -134,7 +136,7 @@ void RIPListener::handle(const Data& data) {
 			bool returnAll = false;
 			if (rip.entryList.size() == 1) {
 				RIP::Entry entry = rip.entryList[0];
-				if (entry.net == IDP::Net::ALL && entry.hop == RIP::HOP_INFINITY) {
+				if (entry.net == Net::ALL && entry.hop == RIP::HOP_INFINITY) {
 					returnAll = true;
 				}
 			}

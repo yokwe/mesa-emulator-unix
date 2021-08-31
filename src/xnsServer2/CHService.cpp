@@ -51,7 +51,8 @@ using ByteBuffer::BLOCK;
 using Network::Packet;
 using XNS::Data;
 using XNS::Host;
-using XNS::IDP;
+using XNS::Socket;
+using XNS::Net;
 using XNS::PEX;
 using XNS::Server::DefaultListener;
 using Courier::Procedure;
@@ -64,9 +65,9 @@ using Courier::Protocol3Body;
 //	socket: UNSPECIFIED ];
 class NetworkAddress : public Base {
 public:
-	IDP::Net    network;
-	Host        host;
-	IDP::Socket socket;
+	Net    network;
+	Host   host;
+	Socket socket;
 
 	QString toString();
 
@@ -103,7 +104,7 @@ public:
 		NetworkAddress networkAddress;
 		networkAddress.network = data.context->localNet;
 		networkAddress.host    = data.context->localAddress;
-		networkAddress.socket  = IDP::Socket::COURIER;
+		networkAddress.socket  = Socket::COURIER;
 
 		Courier::SEQUENCE<NetworkAddress, 40> reply;
 		reply.append(networkAddress);

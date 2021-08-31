@@ -79,8 +79,8 @@ namespace XNS {
 
 		class Entry : public Base {
 		public:
-			IDP::Net net;
-			UINT16   hop;
+			Net    net;
+			UINT16 hop;
 
 			Entry() {}
 			Entry(quint32 net_, quint16 hop_) {

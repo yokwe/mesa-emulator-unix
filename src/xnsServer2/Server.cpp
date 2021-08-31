@@ -118,7 +118,7 @@ void Server::run() {
 		{
 			Buffer start = ethernet.block.toBuffer();
 			quint16 checksum = XNS::IDP::getChecksum(start);
-			if (checksum != XNS::IDP::Checksum::NOCHECK) {
+			if (checksum != XNS::Checksum::NOCHECK) {
 				quint16 newValue = XNS::IDP::computeChecksum(start);
 				if (checksum != newValue) {
 					// checksum error

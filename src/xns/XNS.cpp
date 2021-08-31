@@ -54,7 +54,7 @@ XNS::Config XNS::loadConfig(const QString& path) {
 
 	// add known name to net
 	for(auto e: config.network.list) {
-		IDP::Net::addNameMap((quint32)e.net, e.name);
+		Net::addNameMap((quint32)e.net, e.name);
 	}
 	// add known name to host
 	for(auto e: config.host.list) {
@@ -241,9 +241,9 @@ void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
 
 
 //
-// XNS::IDP::Checksum
+// XNS::Checksum
 //
-NameMap::Map<quint16> XNS::IDP::Checksum::nameMap(NameMap::toString16X04, {{NOCHECK, "NOCHECK"}});
+NameMap::Map<quint16> XNS::Checksum::nameMap(NameMap::toString16X04, {{NOCHECK, "NOCHECK"}});
 
 
 //
@@ -260,15 +260,15 @@ NameMap::Map<quint8> XNS::IDP::Type::nameMap(NameMap::toString8u, {
 
 
 //
-// XNS::IDP::Net
+// XNS::Net
 //
-NameMap::Map<quint32> XNS::IDP::Net::nameMap(NameMap::toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
+NameMap::Map<quint32> XNS::Net::nameMap(NameMap::toString32u, {{ALL, "ALL"}, {UNKNOWN, "UNKNOWN"}});
 
 
 //
-// XNS::IDP::Socket
+// XNS::Socket
 //
-NameMap::Map<quint16> XNS::IDP::Socket::nameMap(NameMap::toString16X04, {
+NameMap::Map<quint16> XNS::Socket::nameMap(NameMap::toString16X04, {
 	{RIP,       "RIP"},
 	{ECHO,      "ECHO"},
 	{ERROR_,    "ERROR"},

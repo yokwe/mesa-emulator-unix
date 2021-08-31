@@ -45,7 +45,8 @@ namespace Courier::CHS {
 	using ByteBuffer::Base;
 	using ByteBuffer::UINT16;
 	using XNS::Host;
-	using XNS::IDP;
+	using XNS::Net;
+	using XNS::Socket;
 
 	//NetworkAddress: TYPE = RECORD [
 	//	network: UNSPECIFIED2,
@@ -53,9 +54,9 @@ namespace Courier::CHS {
 	//	socket: UNSPECIFIED ];
 	class NetworkAddress : public Base {
 	public:
-		IDP::Net    network;
-		Host        host;
-		IDP::Socket socket;
+		Net    network;
+		Host   host;
+		Socket socket;
 
 		QString toString();
 

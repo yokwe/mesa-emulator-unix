@@ -40,7 +40,7 @@
 
 class TimeListener : public PEXListener {
 public:
-	TimeListener() : PEXListener("TimeListener", XNS::IDP::Socket::TIME, XNS::PEX::Type::TIME) {}
+	TimeListener() : PEXListener("TimeListener", XNS::Socket::TIME, XNS::PEX::Type::TIME) {}
 
 	void handle(const XNS::Data& data, const XNS::PEX& pex);
 };

@@ -42,7 +42,7 @@
 
 class CourierListener : public SPPListener {
 public:
-	CourierListener() : SPPListener("CourierListener", XNS::IDP::Socket::COURIER) {}
+	CourierListener() : SPPListener("CourierListener", XNS::Socket::COURIER) {}
 
 	void run(FunctionTable functionTable);
 };

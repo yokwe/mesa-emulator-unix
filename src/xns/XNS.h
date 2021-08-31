@@ -134,37 +134,92 @@ namespace XNS {
 	};
 
 
+	class Checksum : public UINT16 {
+	public:
+		enum Value : quint16 {
+			NOCHECK = 0xFFFF,
+		};
+
+		bool isNoCheck() const {
+			return value() == NOCHECK;
+		}
+
+		// define operator =
+		quint16 operator =(const quint16& newValue) const {
+			value(newValue);
+			return newValue;
+		}
+
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+		static void addNameMap(quint16 value, QString name) {
+			nameMap.add(value, name);
+		}
+	private:
+		static NameMap::Map<quint16> nameMap;
+	};
+
+
+	class Net : public UINT32 {
+	public:
+		enum Value : quint32 {
+			ALL     = 0xFFFFFFFF,
+			UNKNOWN = 0,
+		};
+
+		// define operator =
+		quint32 operator =(const quint32& newValue) const {
+			value(newValue);
+			return newValue;
+		}
+
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+		static void addNameMap(quint32 value, QString name) {
+			nameMap.add(value, name);
+		}
+	private:
+		static NameMap::Map<quint32> nameMap;
+	};
+
+
+	class Socket : public UINT16 {
+	public:
+		enum Value : quint16 {
+			RIP = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
+			BOOT = 10, DIAG = 19,
+			CHS = 20, AUTH = 21, MAIL = 22, NETEXEC = 23, WSINFO = 24, BINDING = 28,
+			GERM = 35,
+			TELEDEBUG = 48,
+		};
+
+		// define operator =
+		quint16 operator =(const quint16& newValue) const {
+			value(newValue);
+			return newValue;
+		}
+
+		static QString toString(quint16 newValue) {
+			return nameMap.toString(newValue);
+		}
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+		static void addNameMap(quint16 value, QString name) {
+			nameMap.add(value, name);
+		}
+	private:
+		static NameMap::Map<quint16> nameMap;
+	};
+
+
 	class IDP : public Base {
 		static const int OFFSET_CHECKSUM = 0;
 		static const int OFFSET_LENGTH   = 2;
 
 	public:
-		class Checksum : public UINT16 {
-		public:
-			enum Value : quint16 {
-				NOCHECK = 0xFFFF,
-			};
-
-			bool isNoCheck() const {
-				return value() == NOCHECK;
-			}
-
-			// define operator =
-			quint16 operator =(const quint16& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-			static void addNameMap(quint16 value, QString name) {
-				nameMap.add(value, name);
-			}
-		private:
-			static NameMap::Map<quint16> nameMap;
-		};
-
 		class Type : public UINT8 {
 		public:
 			enum Value : quint8 {
@@ -186,59 +241,6 @@ namespace XNS {
 		private:
 			static NameMap::Map<quint8> nameMap;
 		};
-
-		class Net : public UINT32 {
-		public:
-			enum Value : quint32 {
-				ALL     = 0xFFFFFFFF,
-				UNKNOWN = 0,
-			};
-
-			// define operator =
-			quint32 operator =(const quint32& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-			static void addNameMap(quint32 value, QString name) {
-				nameMap.add(value, name);
-			}
-		private:
-			static NameMap::Map<quint32> nameMap;
-		};
-
-		class Socket : public UINT16 {
-		public:
-			enum Value : quint16 {
-				RIP = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
-				BOOT = 10, DIAG = 19,
-				CHS = 20, AUTH = 21, MAIL = 22, NETEXEC = 23, WSINFO = 24, BINDING = 28,
-				GERM = 35,
-				TELEDEBUG = 48,
-			};
-
-			// define operator =
-			quint16 operator =(const quint16& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			static QString toString(quint16 newValue) {
-				return nameMap.toString(newValue);
-			}
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-			static void addNameMap(quint16 value, QString name) {
-				nameMap.add(value, name);
-			}
-		private:
-			static NameMap::Map<quint16> nameMap;
-		};
-
 
 		// MPL is estimated to be 60 seconds by observing that in the worst case.
 		// If each internetwork router hop produced a store-and-forward plus transmission delay of 1 second,

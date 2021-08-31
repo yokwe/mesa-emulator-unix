@@ -38,10 +38,10 @@ static const Logger logger = Logger::getLogger("server");
 
 #include "Server.h"
 
-using XNS::Server2::Server;
+using XNS::Server::Server;
 
 //
-// XNS::Server2::Server
+// XNS::Server::Server
 //
 void Server::init(const QString& path) {
 	config = XNS::loadConfig(path);

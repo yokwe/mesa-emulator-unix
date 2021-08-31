@@ -52,7 +52,7 @@
 
 #include <QtConcurrent/QtConcurrent>
 
-namespace XNS::Server2 {
+namespace XNS::Server {
 	using Network::Driver;
 	using Network::Packet;
 	using Courier::Service;

@@ -46,7 +46,7 @@
 
 #include "../courier/Service.h"
 
-namespace XNS::Server2 {
+namespace XNS::Server {
 	using XNS::IDP;
 	using XNS::RIP;
 	using XNS::Echo;

@@ -48,7 +48,7 @@ using XNS::Host;
 using XNS::IDP;
 using XNS::RIP;
 using XNS::Host;
-using XNS::Server2::DefaultListener;
+using XNS::Server::DefaultListener;
 using Courier::Services;
 
 

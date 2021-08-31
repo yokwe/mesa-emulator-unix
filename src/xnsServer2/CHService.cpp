@@ -53,7 +53,7 @@ using XNS::Data;
 using XNS::Host;
 using XNS::IDP;
 using XNS::PEX;
-using XNS::Server2::DefaultListener;
+using XNS::Server::DefaultListener;
 using Courier::Procedure;
 using Courier::Protocol3Body;
 

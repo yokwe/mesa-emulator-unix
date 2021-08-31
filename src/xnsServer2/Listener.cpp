@@ -38,12 +38,12 @@ static const Logger logger = Logger::getLogger("listener");
 
 #include "Listener.h"
 
-using XNS::Server2::Listener;
-using XNS::Server2::Listeners;
-using XNS::Server2::DefaultListener;
+using XNS::Server::Listener;
+using XNS::Server::Listeners;
+using XNS::Server::DefaultListener;
 
 //
-// XNS::Server2::Listeners
+// XNS::Server::Listeners
 //
 void Listeners::add(Listener* listener) {
 	quint16 key = listener->socket();
@@ -93,13 +93,13 @@ void Listeners::stop() {
 //
 // XNS::Server::Listener
 //
-QString XNS::Server2::Listener::toString() {
+QString XNS::Server::Listener::toString() {
 	return QString::asprintf("%2d-%s", socket(), name());
 }
 
 
 //
-// XNS::Server2::DefaultListener
+// XNS::Server::DefaultListener
 //
 
 void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {

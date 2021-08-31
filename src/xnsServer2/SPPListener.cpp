@@ -49,7 +49,7 @@ using XNS::IDP;
 using XNS::SPP;
 using Courier::Services;
 
-SPPListener::SPPListener(const char* name, quint16 socket) : XNS::Server2::DefaultListener(name, socket) {
+SPPListener::SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {
 	stopFuture = false;
 	functionTable.get     = [this](MyData* myData){return get(myData);};
 	functionTable.stopRun = [this](){return stopFuture;};

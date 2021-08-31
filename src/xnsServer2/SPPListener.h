@@ -41,7 +41,7 @@
 
 #include "Listener.h"
 
-class SPPListener : public XNS::Server2::DefaultListener {
+class SPPListener : public XNS::Server::DefaultListener {
 public:
 	SPPListener(const char* name, quint16 socket);
 	virtual ~SPPListener() {}

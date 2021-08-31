@@ -37,9 +37,9 @@
 
 #include "Listener.h"
 
-class EchoListener : public XNS::Server2::DefaultListener {
+class EchoListener : public XNS::Server::DefaultListener {
 public:
-	EchoListener() : XNS::Server2::DefaultListener("EchoListener", XNS::IDP::Socket::ECHO) {}
+	EchoListener() : XNS::Server::DefaultListener("EchoListener", XNS::IDP::Socket::ECHO) {}
 
 	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 

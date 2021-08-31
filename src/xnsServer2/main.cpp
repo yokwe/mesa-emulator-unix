@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer2");
+static const Logger logger = Logger::getLogger("xnsServer");
 
 #include "Server.h"
 
@@ -67,7 +67,7 @@ int main(int, char**) {
 	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
 	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
 
-	XNS::Server2::Server server;
+	XNS::Server::Server server;
 
 	// add listener
 	server.add(&echoListener);

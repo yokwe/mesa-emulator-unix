@@ -30,22 +30,69 @@
 
 
 //
-// PEXListener.h
+// main.c
 //
 
-#pragma once
+#include "../util/Util.h"
+static const Logger logger = Logger::getLogger("xnsServer");
 
-#include "Listener.h"
+#include "../xnsServer/Server.h"
 
-class PEXListener : public XNS::Server::DefaultListener {
-	// pex type
-	quint16 myType;
-public:
-	PEXListener(const char* name, quint16 socket, quint16 type) : XNS::Server::DefaultListener(name, socket), myType(type) {}
-	~PEXListener() {}
+#include "../xnsServer/TimeListener.h"
+#include "../xnsServer/EchoListener.h"
+#include "../xnsServer/RIPListener.h"
+#include "../xnsServer/CHSListener.h"
+#include "../xnsServer/CHService.h"
+#include "../xnsServer/CourierListener.h"
 
-	void handle(const XNS::Data& data);
+void testXNSServer() {}
 
-protected:
-	virtual void handle(const XNS::Data& data, const XNS::PEX& pex) = 0;
-};
+int main(int, char**) {
+	logger.info("START");
+
+	setSignalHandler(SIGSEGV);
+	setSignalHandler(SIGILL);
+	setSignalHandler(SIGABRT);
+
+	DEBUG_TRACE();
+
+	logger.info("START testXNSServer");
+
+	EchoListener    echoListener;
+	RIPListener     ripListener;
+	TimeListener    timeListener;
+	CHSListener     chsListener;
+	CourierListener courierListener;
+
+	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
+	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
+
+	XNS::Server::Server server;
+
+	// add listener
+	server.add(&echoListener);
+	server.add(&ripListener);
+	server.add(&timeListener);
+	server.add(&chsListener);
+	server.add(&courierListener);
+
+	// add service
+	server.add(&chService2);
+	server.add(&chService3);
+
+	logger.info("server.init");
+	server.init("tmp/run/xns-config.json");
+
+	logger.info("server.start");
+	server.start();
+	logger.info("QThread::sleep");
+	QThread::sleep(60);
+	logger.info("server.stop");
+	server.stop();
+	logger.info("STOP testXNSServer");
+
+	logger.info("STOP");
+	return 0;
+}
+
+

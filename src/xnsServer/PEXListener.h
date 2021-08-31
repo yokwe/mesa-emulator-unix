@@ -30,64 +30,22 @@
 
 
 //
-// Server.h
+// PEXListener.h
 //
 
 #pragma once
 
-#include "../util/Network.h"
+#include "../xnsServer/Listener.h"
 
-#include "../xns/XNS.h"
-#include "../xns/Config.h"
-#include "../xns/RIP.h"
-#include "../xns/Echo.h"
-#include "../xns/Error.h"
-#include "../xns/PEX.h"
-#include "../xns/SPP.h"
-#include "../xns/Boot.h"
+class PEXListener : public XNS::Server::DefaultListener {
+	// pex type
+	quint16 myType;
+public:
+	PEXListener(const char* name, quint16 socket, quint16 type) : XNS::Server::DefaultListener(name, socket), myType(type) {}
+	~PEXListener() {}
 
-#include "../courier/Service.h"
+	void handle(const XNS::Data& data);
 
-#include "Listener.h"
-
-#include <QtConcurrent/QtConcurrent>
-
-namespace XNS::Server {
-	using Network::Driver;
-	using Network::Packet;
-	using Courier::Service;
-	using Courier::Services;
-	using Courier::ProgramVersion;
-
-	class Server {
-		Config        config;
-		Context       context;
-
-		Listeners     listeners;
-		Services      services;
-
-		bool          stopFuture;
-		QFuture<void> future;
-
-	public:
-		void add(Listener* listener) {
-			listeners.add(listener);
-		}
-		void add(Service* service) {
-			services.add(service);
-		}
-
-		// life cycle management
-		void init(const QString& path);
-		void start();
-		void stop();
-
-		bool isRnning() {
-			return future.isRunning();
-		}
-
-		// for future
-		void run();
-	};
-
-}
+protected:
+	virtual void handle(const XNS::Data& data, const XNS::PEX& pex) = 0;
+};

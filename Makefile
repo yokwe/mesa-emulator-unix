@@ -3,11 +3,11 @@
 #
 
 MODULE := main test guam-headless \
-          util mesa agent opcode trace symbols xns courier xnsServer xnsDump xnsServer2
+          util mesa agent opcode trace symbols xns courier xnsDump xnsServer
 
 .PHONY: all clean distclean gamke fix-permission
-.PHONY:     main     test     xnsServer     xnsDump     xnsServer2
-.PHONY: run-main run-test run-xnsServer run-xnsDump run-xnsServer2
+.PHONY:     main     test     xnsDump     xnsServer
+.PHONY: run-main run-test run-xnsDump run-xnsServer
 .PHONY:     guam-headless prepare-run-guam
 .PONEY: run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
 .PHONY: util mesa symbols xns
@@ -66,9 +66,6 @@ xns: util
 xnsServer: xns
 	( cd src/xnsServer; make all )
 
-xnsServer2: xns
-	( cd src/xnsServer2; make all )
-
 xnsDump: xns
 	( cd src/xnsDump; make all )
 
@@ -116,10 +113,6 @@ run-main: main prepare-run-guam
 run-xnsServer: xnsServer
 	echo -n >tmp/run/debug.log
 	tmp/build/xnsServer/xnsServer
-
-run-xnsServer2: xnsServer2
-	echo -n >tmp/run/debug.log
-	tmp/build/xnsServer2/xnsServer2
 
 run-xnsDump: xnsDump
 	echo -n >tmp/run/debug.log

@@ -30,40 +30,88 @@
 
 
 //
-// PEXListener.cpp
+// SPPListener.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-pex");
+static const Logger logger = Logger::getLogger("listen-cr");
 
-#include "../xns/Time.h"
+#include "../xns/SPP.h"
 
-#include "PEXListener.h"
+#include "../xnsServer/SPPListener.h"
 
 using ByteBuffer::Buffer;
+using Network::Packet;
 using XNS::Data;
+using XNS::Config;
+using XNS::Context;
 using XNS::IDP;
-using XNS::PEX;
+using XNS::SPP;
+using Courier::Services;
 
-void PEXListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
-	if (data.idp.type == IDP::Type::PEX) {
-		PEX pex;
-		FROM_BYTE_BUFFER(level2, pex);
+SPPListener::SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {
+	stopFuture = false;
+	functionTable.get     = [this](MyData* myData){return get(myData);};
+	functionTable.stopRun = [this](){return stopFuture;};
+}
 
-		if (pex.type == myType) {
-			handle(data, pex);
-		} else {
-			logger.error("Unexpected");
-			logger.error("    %s", data.idp.toString());
-			logger.error("        %s", pex.toString());
-			ERROR();
-		}
+void SPPListener::init(Config* config_, Context* context_, Services* services_) {
+	DefaultListener::init(config_, context_, services_);
+	logger.info("SPPListener::init");
+}
+
+void SPPListener::start() {
+	stopFuture = false;
+
+	future = QtConcurrent::run([this](){this->run(functionTable);});
+}
+void SPPListener::stop() {
+	stopFuture = true;
+	future.waitForFinished();
+}
+
+bool SPPListener::get(MyData* myData) {
+	quint32 WAIT_TIME = 1;
+
+	QMutexLocker mutexLocker(&dataListMutex);
+	if (dataList.isEmpty()) {
+		// wait until notified
+		(void)dataListCV.wait(&dataListMutex, WAIT_TIME);
+	}
+	if (dataList.isEmpty()) {
+		return false;
 	} else {
+		*myData = dataList.takeLast();
+		return true;
+	}
+}
+void SPPListener::handle(const Data& data) {
+	Buffer level2 = data.idp.block.toBuffer();
+	if (data.idp.type == IDP::Type::SPP) {
+		SPP spp;
+		FROM_BYTE_BUFFER(level2, spp);
+
+		dataListMutex.lock();
+		MyData myData;
+		myData.data = data;
+		myData.spp  = spp;
+
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
+		logger.info("%s  SPP   %s  HANDLE", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
+
+		dataList.append(myData);
+		dataListMutex.unlock();
+		dataListCV.wakeOne();
+
+	} else if (data.idp.type == IDP::Type::ERROR_) {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
+}
+bool SPPListener::stopRun() {
+	return stopFuture;
 }
 

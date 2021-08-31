@@ -1,4 +1,4 @@
-TARGET   = xnsServer2
+TARGET   = xnsServer
 
 TEMPLATE = app
 

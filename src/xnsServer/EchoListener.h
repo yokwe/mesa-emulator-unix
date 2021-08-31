@@ -30,19 +30,18 @@
 
 
 //
-// CourierListener.h
+// EchoListener.h
 //
 
 #pragma once
 
-#include <QtConcurrent/QtConcurrent>
+#include "../xnsServer/Listener.h"
 
-#include "Listener.h"
-#include "SPPListener.h"
-
-class CourierListener : public SPPListener {
+class EchoListener : public XNS::Server::DefaultListener {
 public:
-	CourierListener() : SPPListener("CourierListener", XNS::Socket::COURIER) {}
+	EchoListener() : XNS::Server::DefaultListener("EchoListener", XNS::Socket::ECHO) {}
 
-	void run(FunctionTable functionTable);
+	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
+
+	void handle(const XNS::Data& data);
 };

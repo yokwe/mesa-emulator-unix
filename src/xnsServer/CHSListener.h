@@ -30,53 +30,17 @@
 
 
 //
-// SPPListener.h
+// CHSListener.h
 //
 
 #pragma once
 
-#include <functional>
+#include "../xnsServer/Listener.h"
+#include "../xnsServer/PEXListener.h"
 
-#include <QtConcurrent/QtConcurrent>
-
-#include "Listener.h"
-
-class SPPListener : public XNS::Server::DefaultListener {
+class CHSListener : public PEXListener {
 public:
-	SPPListener(const char* name, quint16 socket);
-	virtual ~SPPListener() {}
+	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS) {}
 
-	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
-	void start();
-	void stop();
-
-	void handle(const XNS::Data& data);
-
-protected:
-	class MyData {
-	public:
-		XNS::Data data;
-		XNS::SPP  spp;
-	};
-	class FunctionTable {
-	public:
-		std::function<bool(MyData*)> get;
-		std::function<bool(void)>    stopRun;
-	};
-	FunctionTable functionTable;
-
-	virtual void run(FunctionTable functionTable) = 0;
-
-	bool           stopFuture;
-	QFuture<void>  future;
-
-	QList<MyData>  dataList;
-	QMutex         dataListMutex;
-	QWaitCondition dataListCV;
-
-	// if get returns true, myData is assigned
-	// if get returns false, myData is not assigned
-	bool get(MyData* myData);
-	bool stopRun();
-
+	void handle(const XNS::Data& data, const XNS::PEX& pex);
 };

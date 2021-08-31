@@ -30,53 +30,61 @@
 
 
 //
-// EchoListener.cpp
+// CHSListener.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-echo");
+static const Logger logger = Logger::getLogger("listen-chs");
 
-#include "EchoListener.h"
+#include "../courier/Courier.h"
+
+#include "../xnsServer/CHSListener.h"
 
 using ByteBuffer::Buffer;
+using ByteBuffer::BLOCK;
+using Network::Packet;
 using XNS::Data;
 using XNS::Config;
 using XNS::Context;
 using XNS::IDP;
-using XNS::Echo;
+using XNS::PEX;
 using Courier::Services;
+using Courier::Service;
+using Courier::Procedure;
+using Courier::ExpeditedCourier;
+using Courier::Protocol3Body;
+using Courier::MessageType;
+using Courier::ProgramVersion;
 
-void EchoListener::init(Config* config_, Context* context_, Services* services_) {
-	DefaultListener::init(config_, context_, services_);
-	logger.info("EchoListener::init");
-}
-void EchoListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
-	if (data.idp.type == IDP::Type::ECHO) {
-		Echo echo;
-		FROM_BYTE_BUFFER(level2, echo);
+void CHSListener::handle(const Data& data, const PEX& pex) {
+	Buffer level3 = pex.block.toBuffer();
+	ExpeditedCourier exp;
+	FROM_BYTE_BUFFER(level3, exp);
 
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
+	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
 
-		if (echo.type == Echo::Type::REQUEST) {
-			Echo reply;
+	if (exp.body.type == MessageType::CALL) {
+		Protocol3Body::CallBody callBody;
+		exp.body.get(callBody);
 
-			reply.type = Echo::Type::REPLY;
-			reply.block = echo.block;
+		ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
 
-			DefaultListener::transmit(data, reply);
+		Service* service = services->getService(programVersion);
+		if (service == nullptr) {
+			logger.warn("NO SERVICE  %s", programVersion.toString());
 		} else {
-			logger.error("Unexpected");
-			logger.error("  echo %s", echo.toString());
-			ERROR();
+			Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+			if (procedure == nullptr) {
+				logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
+			} else {
+				logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
+				procedure->call(data, pex, callBody);
+			}
 		}
-
 	} else {
 		logger.error("Unexpected");
-		logger.error("    %s", data.idp.toString());
-		logger.error("        %s", data.idp.block.toString());
 		ERROR();
 	}
 }

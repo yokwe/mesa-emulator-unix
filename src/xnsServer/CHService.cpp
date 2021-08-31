@@ -41,9 +41,9 @@ static const Logger logger = Logger::getLogger("svc-chs");
 #include "../courier/Courier.h"
 #include "../courier/Type.h"
 
-#include "../xnsServer2/Listener.h"
+#include "../xnsServer/Listener.h"
 
-#include "CHService.h"
+#include "../xnsServer/CHService.h"
 
 using ByteBuffer::Base;
 using ByteBuffer::Buffer;

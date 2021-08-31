@@ -30,69 +30,65 @@
 
 
 //
-// main.c
+// TimeListener.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const Logger logger = Logger::getLogger("listen-time");
 
-#include "Server.h"
+#include "../xns/Time.h"
 
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-#include "CHSListener.h"
-#include "CHService.h"
-#include "CourierListener.h"
+#include "../xnsServer/TimeListener.h"
 
-void testXNSServer() {}
+using ByteBuffer::Buffer;
+using ByteBuffer::BLOCK;
+using Network::Packet;;
+using XNS::Data;
+using XNS::Config;
+using XNS::Context;
+using XNS::IDP;
+using XNS::PEX;
+using XNS::Time;
+using Courier::Services;
 
-int main(int, char**) {
-	logger.info("START");
+void TimeListener::handle(const Data& data, const PEX& pex) {
+	Buffer level3 = pex.block.toBuffer();
+	Time time;
+	FROM_BYTE_BUFFER(level3, time);
 
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
+	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
 
-	DEBUG_TRACE();
+	if (time.type == Time::Type::REQUEST) {
+		Time::Response response;
+		response.time            = QDateTime::currentSecsSinceEpoch();
+		response.offsetDirection = data.config->time.offsetDirection;
+		response.offsetHours     = data.config->time.offsetHours;
+		response.offsetMinutes   = data.config->time.offsetMinutes;
+		response.tolerance       = Time::Tolerance::MILLI;
+		response.toleranceValue  = 10;
 
-	logger.info("START testXNSServer");
+		Time replyTime;
+		replyTime.version = Time::Version::CURRENT;
+		replyTime.type    = Time::Type::RESPONSE;
+		replyTime.set(response);
 
-	EchoListener    echoListener;
-	RIPListener     ripListener;
-	TimeListener    timeListener;
-	CHSListener     chsListener;
-	CourierListener courierListener;
+		Packet level3;
+		TO_BYTE_BUFFER(level3, replyTime);
+		BLOCK block3(level3);
 
-	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
-	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
+		// set block3 to replyPEX.block
+		PEX replyPEX;
+		replyPEX.id    = pex.id;
+		replyPEX.type  = PEX::Type::TIME;
+		replyPEX.block = block3;
 
-	XNS::Server::Server server;
-
-	// add listener
-	server.add(&echoListener);
-	server.add(&ripListener);
-	server.add(&timeListener);
-	server.add(&chsListener);
-	server.add(&courierListener);
-
-	// add service
-	server.add(&chService2);
-	server.add(&chService3);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(60);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
+		DefaultListener::transmit(data, replyPEX);
+	} else {
+		logger.error("Unexpected");
+		logger.error("  time %s", time.toString());
+		ERROR();
+	}
 }
-
 

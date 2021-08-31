@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listener");
 
-#include "Listener.h"
+#include "../xnsServer/Listener.h"
 
 using XNS::Server::Listener;
 using XNS::Server::Listeners;

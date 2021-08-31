@@ -39,7 +39,7 @@ static const Logger logger = Logger::getLogger("listen-cour");
 #include "../xns/SPP.h"
 #include "../xns/Time.h"
 
-#include "CourierListener.h"
+#include "../xnsServer/CourierListener.h"
 
 using ByteBuffer::UINT16;
 using XNS::Data;

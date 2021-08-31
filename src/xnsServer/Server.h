@@ -30,30 +30,63 @@
 
 
 //
-// RIPListener.h
+// Server.h
 //
 
 #pragma once
 
+#include "../util/Network.h"
+
+#include "../xns/XNS.h"
+#include "../xns/Config.h"
+#include "../xns/RIP.h"
+#include "../xns/Echo.h"
+#include "../xns/Error.h"
+#include "../xns/PEX.h"
+#include "../xns/SPP.h"
+#include "../xns/Boot.h"
+
+#include "../courier/Service.h"
+
 #include <QtConcurrent/QtConcurrent>
+#include "../xnsServer/Listener.h"
 
-#include "Listener.h"
+namespace XNS::Server {
+	using Network::Driver;
+	using Network::Packet;
+	using Courier::Service;
+	using Courier::Services;
+	using Courier::ProgramVersion;
 
+	class Server {
+		Config        config;
+		Context       context;
 
-class RIPListener : public XNS::Server::DefaultListener {
-	QList<XNS::RIP::Entry> list;
+		Listeners     listeners;
+		Services      services;
 
-	bool              stopFuture;
-	QFuture<void>     future;
+		bool          stopFuture;
+		QFuture<void> future;
 
-	XNS::RIP::Entry find(quint32 net);
-public:
-	RIPListener() : XNS::Server::DefaultListener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
+	public:
+		void add(Listener* listener) {
+			listeners.add(listener);
+		}
+		void add(Service* service) {
+			services.add(service);
+		}
 
-	void init(XNS::Config* config_, XNS::Context* context_, XNS::Server::Services* services_);
-	void start();
-	void stop();
-	void run();
+		// life cycle management
+		void init(const QString& path);
+		void start();
+		void stop();
 
-	void handle(const XNS::Data& data);
-};
+		bool isRnning() {
+			return future.isRunning();
+		}
+
+		// for future
+		void run();
+	};
+
+}

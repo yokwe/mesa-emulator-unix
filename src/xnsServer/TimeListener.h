@@ -35,8 +35,8 @@
 
 #pragma once
 
-#include "Listener.h"
-#include "PEXListener.h"
+#include "../xnsServer/Listener.h"
+#include "../xnsServer/PEXListener.h"
 
 class TimeListener : public PEXListener {
 public:

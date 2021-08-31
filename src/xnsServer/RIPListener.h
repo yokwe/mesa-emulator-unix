@@ -30,17 +30,30 @@
 
 
 //
-// CHSListener.h
+// RIPListener.h
 //
 
 #pragma once
 
-#include "Listener.h"
-#include "PEXListener.h"
+#include <QtConcurrent/QtConcurrent>
 
-class CHSListener : public PEXListener {
+#include "../xnsServer/Listener.h"
+
+
+class RIPListener : public XNS::Server::DefaultListener {
+	QList<XNS::RIP::Entry> list;
+
+	bool              stopFuture;
+	QFuture<void>     future;
+
+	XNS::RIP::Entry find(quint32 net);
 public:
-	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS) {}
+	RIPListener() : XNS::Server::DefaultListener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
 
-	void handle(const XNS::Data& data, const XNS::PEX& pex);
+	void init(XNS::Config* config_, XNS::Context* context_, XNS::Server::Services* services_);
+	void start();
+	void stop();
+	void run();
+
+	void handle(const XNS::Data& data);
 };

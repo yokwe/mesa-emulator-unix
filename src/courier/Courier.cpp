@@ -430,7 +430,7 @@ void Courier::Protocol3Body::RejectBody::toByteBuffer  (Buffer& bb) const {
 // Courier::Protocol3Body::ReturnBody
 //
 QString Courier::Protocol3Body::ReturnBody::toString() const {
-	return QString("%1").arg((quint16)transaction);
+	return QString("%1 (%2)").arg(QString("%1").arg((quint16)transaction, 4, 16, QChar('0').toUpper())).arg(block.toString());
 }
 void Courier::Protocol3Body::ReturnBody::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);

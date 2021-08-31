@@ -72,8 +72,10 @@ QString XNS::SPP::Control::toString() const {
 //
 QString XNS::SPP::toString() const {
 	return QString("%1 %2  %3 %4  %5-%6-%7").
-		arg(control.toString()).arg(sst.toString()).
-		arg((quint16)idSrc, 4, QChar('0')).arg((quint16)idDst, 4, QChar('0')).
+		arg(control.toString()).
+		arg(sst.toString()).
+		arg(QString("%1").arg((quint16)idSrc, 4, 16, QChar('0').toUpper())).
+		arg(QString("%1").arg((quint16)idDst, 4, 16, QChar('0').toUpper())).
 		arg((quint16)seq).arg((quint16)ack).arg((quint16)alloc);
 }
 void XNS::SPP::fromByteBuffer(Buffer& bb) {

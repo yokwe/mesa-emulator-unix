@@ -69,6 +69,8 @@ namespace XNS::Server {
 		bool          stopFuture;
 		QFuture<void> future;
 
+		QMap<quint16, const char*> socketMap;
+
 	public:
 		void add(DefaultListener* listener) {
 			listeners.add(listener);
@@ -85,6 +87,18 @@ namespace XNS::Server {
 		bool isRnning() {
 			return future.isRunning();
 		}
+
+		// Well-known socket numbers range from 1 to 3000 decimal
+		quint16 getUnusedSocket() const;
+		void openSocket (const char* name, quint16 newValue);
+		void closeSocket(const char* name, quint16 newValue);
+		void openSocket(const Listener* listener) {
+			openSocket(listener->name(), listener->socket());
+		}
+		void closeSocket(const Listener* listener) {
+			closeSocket(listener->name(), listener->socket());
+		}
+
 
 		// access method for Listener and Service
 		Config*    getConfig() {

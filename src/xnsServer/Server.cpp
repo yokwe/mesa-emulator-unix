@@ -49,6 +49,8 @@ void Server::init(const QString& path) {
 
 	listeners.init(this);
 	services.init(this);
+
+	socketMap.clear();
 }
 void Server::start() {
 	stopFuture = false;
@@ -139,4 +141,43 @@ void Server::run() {
 	}
 exitLoop:
 	/* empty statement for label */ ;
+}
+
+
+quint16 Server::getUnusedSocket() const {
+	quint16 socket;
+	for(;;) {
+		socket = (quint16)QDateTime::currentMSecsSinceEpoch();
+		if (socket <= Socket::MAX_WELLKNOWN_SOCKET) continue;
+		if (socketMap.contains(socket)) continue;
+		break;
+	}
+	return socket;
+}
+void Server::openSocket(const char* name, quint16 socket) {
+	if (socket == 0) {
+		logger.error("Unexpected");
+		logger.error(" name   %s", name);
+		logger.error(" socket %u", socket);
+		ERROR();
+	}
+	if (socketMap.contains(socket)) {
+		logger.error("Unexpected");
+		logger.error(" name   %s", name);
+		logger.error(" socket %u", socket);
+		logger.error(" old    %s", socketMap[socket]);
+		ERROR();
+	} else {
+		socketMap[socket] = name;
+	}
+}
+void Server::closeSocket(const char* name, quint16 socket) {
+	if (socketMap.contains(socket)) {
+		socketMap.remove(socket);
+	} else {
+		logger.error("Unexpected");
+		logger.error(" name   %s", name);
+		logger.error(" socket %u", socket);
+		ERROR();
+	}
 }

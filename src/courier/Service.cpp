@@ -36,6 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("service");
 
+#include "../xnsServer/Server.h"
+
 #include "Service.h"
 
 
@@ -79,44 +81,56 @@ void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Bod
 
 
 //
+//
+//
+void Courier::DefaultService::initDefaultService(XNS::Server::Server* server_) {
+	server  = server_;
+	config  = server->getConfig();
+	context = server->getContext();
+}
+
+//
 // Courier::Services
 //
-void Courier::Services::init(Config* config_, Context* context_) {
-	// call init of service in map
-	logger.debug("Services::init");
-	for(auto i = map.begin(); i != map.end(); i++) {
-		Service* service = i.value();
-		logger.info("Services::init  %s", service->toString());
-		service->init(config_, context_);
-	}
-}
 void Courier::Services::start() {
-	// call init of service in map
+	// call start of service in map
 	logger.debug("Services::start");
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Service* service = i.value();
 		logger.info("Services::start %s", service->toString());
 		service->start();
 	}
+	started = true;
 }
 void Courier::Services::stop() {
-	// call init of service in map
+	// call stop of service in map
 	logger.debug("Services::stop");
 	for(auto i = map.begin(); i != map.end(); i++) {
 		Service* service = i.value();
 		logger.info("Services::stop  %s", service->toString());
 		service->stop();
 	}
+	started = false;
 }
-void Courier::Services::add(Service* service) {
-	ProgramVersion programVersion(service->program(), service->version());
+void Courier::Services::add(DefaultService* service) {
+	// sanity check
+	if (server == nullptr) {
+		ERROR();
+	}
 
+	ProgramVersion programVersion(service->program(), service->version());
 	if (map.contains(programVersion)) {
 		logger.error("Unexpected");
 		logger.error("  service  %d-%d %s", service->program(), service->version(), service->name());
 		ERROR();
 	} else {
 		map[programVersion] = service;
+
+		// call init
+		service->initDefaultService(server);
+		service->init();
+		// call start if listener started
+		if (started) service->start();
 	}
 }
 Courier::Service* Courier::Services::getService(const ProgramVersion& programVersion) const {

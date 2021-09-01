@@ -140,9 +140,7 @@ public:
 };
 RetrieveAddresses retrieveAddress;
 
-void CHService::init(XNS::Config* config_, XNS::Context* context_) {
-	DefaultService::init(config_, context_);
-
+void CHService::init() {
 	logger.info("init %s", name());
 	// add procedure
 	add(&retrieveAddress);

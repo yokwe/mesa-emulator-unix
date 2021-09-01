@@ -41,7 +41,8 @@
 class CHService : public Courier::DefaultService {
 public:
 	CHService(const char* name_, quint32 program_, quint16 version_) : Courier::DefaultService(name_, program_, version_) {}
-	void init (XNS::Config* config_, XNS::Context* context_);
+
+	void init ();
 };
 
 

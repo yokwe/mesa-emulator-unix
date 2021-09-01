@@ -45,6 +45,10 @@
 
 #include "Courier.h"
 
+// forward declaration of XNS::Server::Server
+namespace XNS::Server {
+	class Server;
+}
 
 namespace Courier {
 	using ByteBuffer::Base;
@@ -53,6 +57,7 @@ namespace Courier {
 	using XNS::Context;
 	using XNS::PEX;
 	using XNS::Data;
+	using XNS::Server::Server;
 	using Courier::Protocol3Body;
 
 	class Procedure {
@@ -98,9 +103,9 @@ namespace Courier {
 			return myVersion;
 		}
 
-		virtual void init(Config* config, Context* context) = 0;
-		virtual void start()                                = 0;
-		virtual void stop()                                 = 0;
+		virtual void init () = 0;
+		virtual void start() = 0;
+		virtual void stop () = 0;
 
 		Service() : myName(nullptr), myProgram(0), myVersion(0) {}
 		Service(const Service& that) : myName(that.myName), myProgram(that.myProgram), myVersion(that.myVersion), map(that.map) {}
@@ -129,31 +134,30 @@ namespace Courier {
 		QMap<quint16, Procedure*> map;
 	};
 
+
 	class DefaultService : public Service {
 	public:
 		virtual ~DefaultService() {}
 
-		DefaultService() : Service(), config(nullptr), context(nullptr) {}
-		DefaultService(const DefaultService& that) : Service(that), config(nullptr), context(nullptr) {}
+		DefaultService() : Service(), server(nullptr) {}
+		DefaultService(const DefaultService& that) : Service(that), server(that.server) {}
 		DefaultService& operator = (const DefaultService& that) {
 			Service::operator =(that);
-			this->config  = that.config;
-			this->context = that.context;
+			this->server = that.server;
 			return *this;
 		}
 
-		DefaultService(const char* name_, quint32 program_, quint16 version_) : Service(name_, program_, version_), config(nullptr), context(nullptr) {}
+		DefaultService(const char* name_, quint32 program_, quint16 version_) : Service(name_, program_, version_), server(nullptr) {}
 
-		void init(Config* config_, Context* context_) {
-			config  = config_;
-			context = context_;
-		}
+		void initDefaultService(Server* server_);
+
 		void start() {}
 		void stop () {}
 
 	protected:
-		Config*  config;
-		Context* context;
+		Server*    server;
+		Config*    config;
+		Context*   context;
 	};
 
 
@@ -162,7 +166,7 @@ namespace Courier {
 		quint32 program;
 		quint16 version;
 
-		ProgramVersion(Service service) : program(service.program()), version(service.version()) {}
+		ProgramVersion(Service& service) : program(service.program()), version(service.version()) {}
 		ProgramVersion(quint32 program_, quint16 version_) : program(program_), version(version_) {}
 
 		ProgramVersion() : program(0), version(0) {}
@@ -191,17 +195,25 @@ namespace Courier {
 
 	class Services {
 	public:
+		Services() : server(nullptr), started(false) {}
+
 		// life cycle management
-		void init(Config* config, Context* context);
+		void init(Server* server_) {
+			server = server_;
+		}
+
 		void start();
 		void stop();
 
 		// add and get service
-		void add(Service* service);
+		void add(DefaultService* service);
 		Service* getService(const ProgramVersion& programVersion) const;
 
 		void call(const Data& data, const PEX& pex, const Protocol3Body& body) const;
 	protected:
+		Server* server;
+		bool    started;
+
 		QMap<ProgramVersion, Service*> map;
 	};
 }

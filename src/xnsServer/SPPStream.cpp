@@ -78,7 +78,7 @@ void SPPStream::handle(const XNS::Data& data, const XNS::SPP& spp) {
 		state.remoteSocket = (quint16)data.idp.srcSocket;
 		state.remoteID     = spp.idSrc;
 
-		state.localSocket  = server->getUnusedSocket();
+		state.localSocket  = listeners->getUnusedSocket();
 		state.localID      = data.timeStamp / 100;
 
 		state.sst   = XNS::SPP::SST::DATA;
@@ -89,7 +89,8 @@ void SPPStream::handle(const XNS::Data& data, const XNS::SPP& spp) {
 		stateMap[key] = state;
 
 		SPPStream* client = new SPPStream("SPPStream-client", state.localSocket);
-		server->add(client);
+		client->setAutoDelete();
+		listeners->add(client);
 	}
 
 	if (spp.control.isSystem()) {

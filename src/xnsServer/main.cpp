@@ -69,19 +69,20 @@ int main(int, char**) {
 
 	XNS::Server::Server server;
 
+	// init server
+	logger.info("server.init");
+	server.init("tmp/run/xns-config.json");
+
+	// add service
+	server.add(&chService2);
+	server.add(&chService3);
+
 	// add listener
 	server.add(&echoListener);
 	server.add(&ripListener);
 	server.add(&timeListener);
 	server.add(&chsListener);
 	server.add(&courierListener);
-
-	// add service
-	server.add(&chService2);
-	server.add(&chService3);
-
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
 
 	logger.info("server.start");
 	server.start();

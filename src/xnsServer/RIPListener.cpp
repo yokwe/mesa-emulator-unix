@@ -36,6 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listen-rip");
 
+#include "Server.h"
 #include "../xnsServer/RIPListener.h"
 
 using ByteBuffer::Buffer;
@@ -61,8 +62,7 @@ RIP::Entry RIPListener::find(quint32 net) {
 	return RIP::Entry(net, RIP::HOP_INFINITY);
 }
 
-void RIPListener::init(Config* config_, Context* context_, Services* services_) {
-	DefaultListener::init(config_, context_, services_);
+void RIPListener::init() {
 	logger.info("RIPListener::init");
 
 	list.clear();

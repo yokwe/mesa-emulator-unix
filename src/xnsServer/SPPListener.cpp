@@ -55,11 +55,6 @@ SPPListener::SPPListener(const char* name, quint16 socket) : XNS::Server::Defaul
 	functionTable.stopRun = [this](){return stopFuture;};
 }
 
-void SPPListener::init(Config* config_, Context* context_, Services* services_) {
-	DefaultListener::init(config_, context_, services_);
-	logger.info("SPPListener::init");
-}
-
 void SPPListener::start() {
 	stopFuture = false;
 

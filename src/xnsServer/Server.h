@@ -55,6 +55,7 @@ namespace XNS::Server {
 	using Network::Driver;
 	using Network::Packet;
 	using Courier::Service;
+	using Courier::DefaultService;
 	using Courier::Services;
 	using Courier::ProgramVersion;
 
@@ -69,10 +70,10 @@ namespace XNS::Server {
 		QFuture<void> future;
 
 	public:
-		void add(Listener* listener) {
+		void add(DefaultListener* listener) {
 			listeners.add(listener);
 		}
-		void add(Service* service) {
+		void add(DefaultService* service) {
 			services.add(service);
 		}
 
@@ -83,6 +84,20 @@ namespace XNS::Server {
 
 		bool isRnning() {
 			return future.isRunning();
+		}
+
+		// access method for Listener and Service
+		Config*    getConfig() {
+			return &config;
+		}
+		Context*   getContext() {
+			return &context;
+		}
+		Listeners* getListeners() {
+			return &listeners;
+		}
+		Services*  getServices() {
+			return &services;
 		}
 
 		// for future

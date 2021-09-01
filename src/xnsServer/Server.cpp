@@ -47,8 +47,8 @@ void Server::init(const QString& path) {
 	config = XNS::loadConfig(path);
 	context = Context(config);
 
-	listeners.init(&config, &context, &services);
-	services.init(&config, &context);
+	listeners.init(this);
+	services.init(this);
 }
 void Server::start() {
 	stopFuture = false;

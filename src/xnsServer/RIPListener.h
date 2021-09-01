@@ -50,7 +50,7 @@ class RIPListener : public XNS::Server::DefaultListener {
 public:
 	RIPListener() : XNS::Server::DefaultListener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
 
-	void init(XNS::Config* config_, XNS::Context* context_, XNS::Server::Services* services_);
+	void init();
 	void start();
 	void stop();
 	void run();

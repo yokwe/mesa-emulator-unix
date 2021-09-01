@@ -46,7 +46,6 @@ public:
 	SPPListener(const char* name, quint16 socket);
 	virtual ~SPPListener() {}
 
-	void init(XNS::Config* config_, XNS::Context* context_, Courier::Services* services_);
 	void start();
 	void stop();
 

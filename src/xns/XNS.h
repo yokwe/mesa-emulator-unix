@@ -187,6 +187,9 @@ namespace XNS {
 
 	class Socket : public UINT16 {
 	public:
+		// Well-known socket numbers range from 1 to 3000 decimal
+		static const quint16 MAX_WELLKNOWN_SOCKET = 3000;
+
 		enum Value : quint16 {
 			RIP = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
 			BOOT = 10, DIAG = 19,

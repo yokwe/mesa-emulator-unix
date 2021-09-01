@@ -72,10 +72,12 @@ void RIPListener::init() {
 	}
 }
 void RIPListener::start() {
+	DefaultListener::start();
 	stopFuture = false;
 	future = QtConcurrent::run([this](){this->run();});
 }
 void RIPListener::stop() {
+	DefaultListener::stop();
 	stopFuture = true;
 	future.waitForFinished();
 }

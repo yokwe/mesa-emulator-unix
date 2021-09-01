@@ -39,7 +39,7 @@
 
 #include <QtConcurrent/QtConcurrent>
 
-#include "../xnsServer/Listener.h"
+#include "Listener.h"
 
 class SPPListener : public XNS::Server::DefaultListener {
 public:
@@ -57,10 +57,22 @@ protected:
 		XNS::Data data;
 		XNS::SPP  spp;
 	};
+
+	// if getData returns true, data and spp are assigned
+	// if getDAta returns false, data and spp are NOT assigned
+	bool                    getData(XNS::Data* data, XNS::SPP* spp);
+	bool                    stopRun();
+	XNS::Config*            getConfig();
+	XNS::Context*           getContext();
+	XNS::Server::Listeners* getListeners();
+
 	class FunctionTable {
 	public:
-		std::function<bool(MyData*)> get;
-		std::function<bool(void)>    stopRun;
+		std::function<bool(XNS::Data*, XNS::SPP*)>   getData;
+		std::function<bool(void)>                    stopRun;
+		std::function<XNS::Config*(void)>            getConfig;
+		std::function<XNS::Context*(void)>           getContext;
+		std::function<XNS::Server::Listeners*(void)> getListeners;
 	};
 	FunctionTable functionTable;
 
@@ -72,10 +84,5 @@ protected:
 	QList<MyData>  dataList;
 	QMutex         dataListMutex;
 	QWaitCondition dataListCV;
-
-	// if get returns true, myData is assigned
-	// if get returns false, myData is not assigned
-	bool get(MyData* myData);
-	bool stopRun();
 
 };

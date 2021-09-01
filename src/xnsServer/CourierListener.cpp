@@ -46,6 +46,7 @@ using XNS::Data;
 using XNS::Host;
 using XNS::IDP;
 using XNS::SPP;
+using XNS::Socket;
 
 class Key {
 public:
@@ -119,26 +120,30 @@ QMap<Key, State> stateMap;
 void CourierListener::run(FunctionTable functionTable) {
 	logger.info("CourierListener::run START");
 
-	MyData myData;
-	Data&  data(myData.data);
-	SPP&   spp(myData.spp);
+	Data data;
+	SPP  spp;
 
 	for(;;) {
 		if (functionTable.stopRun()) break;
-		bool dataReady = functionTable.get(&myData);
+		bool dataReady = functionTable.getData(&data, &spp);
 		if (!dataReady) continue;
 
 		{
 			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 			logger.info("%s  SPP   %s  COURIER", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 		}
 
-		Key key(myData.data.idp.srcHost, myData.spp.idSrc);
+		Key key(data.idp.srcHost, spp.idSrc);
 		State state;
 		if (stateMap.contains(key)) {
 			state = stateMap[key];
 		} else {
+			// new connection
+			// FIXME
+			// assign new local id
+			// assign new local socket and create listener for new local socket and use it
+
 			state.time       = data.timeStamp;
 			state.hostRemote = data.idp.srcHost;
 			state.idRemote   = spp.idSrc;
@@ -163,7 +168,7 @@ void CourierListener::run(FunctionTable functionTable) {
 				reply.ack   = state.ack;
 				reply.alloc = state.alloc;
 
-				DefaultListener::transmit(myData.data, reply);
+				DefaultListener::transmit(data, reply);
 				return;
 			}
 

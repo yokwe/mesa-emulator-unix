@@ -49,10 +49,20 @@ using XNS::IDP;
 using XNS::SPP;
 using Courier::Services;
 
+
+std::function<bool(XNS::Data*, XNS::SPP*)>   getData;
+std::function<bool(void)>                    stopRun;
+std::function<XNS::Config*(void)>            getConfig;
+std::function<XNS::Context*(void)>           getContext;
+std::function<XNS::Server::Listeners*(void)> getListeners;
+
 SPPListener::SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {
 	stopFuture = false;
-	functionTable.get     = [this](MyData* myData){return get(myData);};
-	functionTable.stopRun = [this](){return stopFuture;};
+	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
+	functionTable.stopRun      = [this](){return stopFuture;};
+	functionTable.getConfig    = [this](){return config;};
+	functionTable.getContext   = [this](){return context;};
+	functionTable.getListeners = [this](){return listeners;};
 }
 
 void SPPListener::start() {
@@ -65,21 +75,6 @@ void SPPListener::stop() {
 	future.waitForFinished();
 }
 
-bool SPPListener::get(MyData* myData) {
-	quint32 WAIT_TIME = 1;
-
-	QMutexLocker mutexLocker(&dataListMutex);
-	if (dataList.isEmpty()) {
-		// wait until notified
-		(void)dataListCV.wait(&dataListMutex, WAIT_TIME);
-	}
-	if (dataList.isEmpty()) {
-		return false;
-	} else {
-		*myData = dataList.takeLast();
-		return true;
-	}
-}
 void SPPListener::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::SPP) {
@@ -106,7 +101,34 @@ void SPPListener::handle(const Data& data) {
 		ERROR();
 	}
 }
+
+
+bool SPPListener::getData(Data* data, SPP* spp) {
+	quint32 WAIT_TIME = 1;
+
+	QMutexLocker mutexLocker(&dataListMutex);
+	if (dataList.isEmpty()) {
+		// wait until notified
+		(void)dataListCV.wait(&dataListMutex, WAIT_TIME);
+	}
+	if (dataList.isEmpty()) {
+		return false;
+	} else {
+		auto myData = dataList.takeLast();
+		*data = myData.data;
+		*spp  = myData.spp;
+		return true;
+	}
+}
 bool SPPListener::stopRun() {
 	return stopFuture;
 }
-
+XNS::Config*            SPPListener::getConfig() {
+	return config;
+}
+XNS::Context*           SPPListener::getContext() {
+	return context;
+}
+XNS::Server::Listeners* SPPListener::getListeners() {
+	return listeners;
+}

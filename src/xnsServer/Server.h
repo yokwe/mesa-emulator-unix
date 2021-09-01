@@ -88,18 +88,6 @@ namespace XNS::Server {
 			return future.isRunning();
 		}
 
-		// Well-known socket numbers range from 1 to 3000 decimal
-		quint16 getUnusedSocket() const;
-		void openSocket (const char* name, quint16 newValue);
-		void closeSocket(const char* name, quint16 newValue);
-		void openSocket(const Listener* listener) {
-			openSocket(listener->name(), listener->socket());
-		}
-		void closeSocket(const Listener* listener) {
-			closeSocket(listener->name(), listener->socket());
-		}
-
-
 		// access method for Listener and Service
 		Config*    getConfig() {
 			return &config;

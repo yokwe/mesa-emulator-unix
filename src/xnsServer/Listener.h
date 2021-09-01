@@ -55,6 +55,10 @@ namespace XNS::Server {
 	using XNS::Boot;
 	using Courier::Services;
 
+	// forward declaration
+	class Server;
+	class Listeners;
+
 
 	class Listener {
 	public:
@@ -67,11 +71,11 @@ namespace XNS::Server {
 			return mySocket;
 		}
 
-		virtual void init  (Config*, Context*, Services*) = 0;
-		virtual void start ()                             = 0;
-		virtual void stop  ()                             = 0;
+		virtual void init  ()                 = 0;
+		virtual void start ()                 = 0;
+		virtual void stop  ()                 = 0;
 
-		virtual void handle(const Data& data)             = 0;
+		virtual void handle(const Data& data) = 0;
 
 		Listener() : myName(nullptr), mySocket(0) {}
 
@@ -86,17 +90,14 @@ namespace XNS::Server {
 
 	class DefaultListener : public Listener {
 	public:
-		DefaultListener() : config(nullptr), context(nullptr), services(nullptr) {}
+		DefaultListener() : server(nullptr), config(nullptr), listeners(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
 
-		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), config(nullptr), context(nullptr), services(nullptr) {}
+		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), server(nullptr), config(nullptr), listeners(nullptr), services(nullptr) {}
 
-		void init(Config* config_, Context* context_, Services* services_) {
-			config   = config_;
-			context  = context_;
-			services = services_;
-		}
+		void initDefaultListener(Server* server_);
 
+		void init () {}
 		void start() {}
 		void stop () {}
 
@@ -108,9 +109,11 @@ namespace XNS::Server {
 		static void transmit(const Data& data, const Boot&  boot);
 
 	protected:
-		Config*   config;
-		Context*  context;
-		Services* services;
+		Server*    server;
+		Config*    config;
+		Context*   context;
+		Listeners* listeners;
+		Services*  services;
 
 		// for RIP broadcast
 		static void transmit(const Context* context, quint64 dst, const IDP& idp);
@@ -122,22 +125,33 @@ namespace XNS::Server {
 
 	private:
 		// initialize idp for transmit
-		static void init(const Data& data, quint8 type, BLOCK& block, IDP& idp);
+		static void setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp);
 
 	};
 
 
 	class Listeners {
 	public:
-		void add(Listener* listener);
-		Listener* getListener(quint16 socket);
+		Listeners() : server(nullptr), started(false) {}
 
 		// life cycle management
-		void init(Config* config, Context* context, Services* services_);
+		void init(Server* server_) {
+			server = server_;
+		}
+
 		void start();
 		void stop();
 
+		void add(quint16 socket, DefaultListener* listener);
+		void add(DefaultListener* listener) {
+			add(listener->socket(), listener);
+		}
+		Listener* getListener(quint16 socket);
+
 	protected:
+		Server* server;
+		bool    started;
+
 		QMap<quint16, Listener*> map;
 		//   socket
 	};

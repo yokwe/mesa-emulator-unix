@@ -36,7 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listener");
 
-#include "../xnsServer/Listener.h"
+#include "Server.h"
+#include "Listener.h"
 
 using XNS::Server::Listener;
 using XNS::Server::Listeners;
@@ -45,14 +46,24 @@ using XNS::Server::DefaultListener;
 //
 // XNS::Server::Listeners
 //
-void Listeners::add(Listener* listener) {
-	quint16 key = listener->socket();
-	if (map.contains(key)) {
+void Listeners::add(quint16 socket, DefaultListener* listener) {
+	// sanity check
+	if (server == nullptr) {
+		ERROR();
+	}
+
+	if (map.contains(socket)) {
 		logger.error("Unexpected");
 		logger.error("  listener   %5u %s", listener->socket(), listener->name());
 		ERROR();
 	} else {
-		map[key] = listener;
+		map[socket] = listener;
+
+		// call init
+		listener->initDefaultListener(server);
+		listener->init();
+		// call start if listener started
+		if (started) listener->start();
 	}
 }
 Listener* Listeners::getListener(quint16 socket) {
@@ -64,29 +75,23 @@ Listener* Listeners::getListener(quint16 socket) {
 }
 
 // life cycle management
-void Listeners::init(Config* config, Context* context, Services* services) {
-	// call init of listener in map
-	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener* listener = i.value();
-		logger.info("Listeners::init  %s", listener->toString());
-		listener->init(config, context, services);
-	}
-}
 void Listeners::start() {
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener* listener = i.value();
+		auto listener = i.value();
 		logger.info("Listeners::start %s", listener->toString());
 		listener->start();
 	}
+	started = true;
 }
 void Listeners::stop() {
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
-		Listener* listener = i.value();
+		auto listener = i.value();
 		logger.info("Listeners::stop  %s", listener->toString());
 		listener->stop();
 	}
+	started = false;
 }
 
 
@@ -101,6 +106,13 @@ QString XNS::Server::Listener::toString() {
 //
 // XNS::Server::DefaultListener
 //
+void XNS::Server::DefaultListener::initDefaultListener(Server* server_) {
+	server    = server_;
+	config    = server->getConfig();
+	context   = server->getContext();
+	listeners = server->getListeners();
+	services  = server->getServices();
+}
 
 void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;
@@ -169,7 +181,7 @@ void DefaultListener::transmit(const Data& data, const RIP&   rip) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::RIP, block, idp);
+	setIDP(data, IDP::Type::RIP, block, idp);
 
 	transmit(data, idp);
 }
@@ -179,7 +191,7 @@ void DefaultListener::transmit(const Data& data, const Echo&  echo) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::ECHO, block, idp);
+	setIDP(data, IDP::Type::ECHO, block, idp);
 
 	transmit(data, idp);
 }
@@ -189,7 +201,7 @@ void DefaultListener::transmit(const Data& data, const Error& error) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::ERROR_, block, idp);
+	setIDP(data, IDP::Type::ERROR_, block, idp);
 
 	transmit(data, idp);
 }
@@ -199,7 +211,7 @@ void DefaultListener::transmit(const Data& data, const PEX&   pex) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::PEX, block, idp);
+	setIDP(data, IDP::Type::PEX, block, idp);
 
 	transmit(data, idp);
 }
@@ -209,7 +221,7 @@ void DefaultListener::transmit(const Data& data, const SPP&   spp) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::SPP, block, idp);
+	setIDP(data, IDP::Type::SPP, block, idp);
 
 	transmit(data, idp);
 }
@@ -219,11 +231,11 @@ void DefaultListener::transmit(const Data& data, const Boot&  boot) {
 	BLOCK block(level2);
 
 	IDP idp;
-	init(data, IDP::Type::BOOT, block, idp);
+	setIDP(data, IDP::Type::BOOT, block, idp);
 
 	transmit(data, idp);
 }
-void DefaultListener::init(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
+void DefaultListener::setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
 	idp.control   = (quint8)0;

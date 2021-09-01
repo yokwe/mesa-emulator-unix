@@ -64,10 +64,10 @@ namespace XNS::Server {
 	public:
 		virtual ~Listener() {}
 
-		const char* name  () {
+		const char* name  () const {
 			return myName;
 		}
-		quint16     socket() {
+		quint16     socket() const {
 			return mySocket;
 		}
 
@@ -90,16 +90,16 @@ namespace XNS::Server {
 
 	class DefaultListener : public Listener {
 	public:
-		DefaultListener() : server(nullptr), config(nullptr), listeners(nullptr), services(nullptr) {}
+		DefaultListener() : server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
 
-		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), server(nullptr), config(nullptr), listeners(nullptr), services(nullptr) {}
+		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
 
 		void initDefaultListener(Server* server_);
 
 		void init () {}
-		void start() {}
-		void stop () {}
+		void start();
+		void stop ();
 
 		static void transmit(const Data& data, const RIP&   rip);
 		static void transmit(const Data& data, const Echo&  echo);
@@ -123,7 +123,6 @@ namespace XNS::Server {
 			transmit(data.context, data.ethernet.src, idp);
 		}
 
-	private:
 		// initialize idp for transmit
 		static void setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp);
 

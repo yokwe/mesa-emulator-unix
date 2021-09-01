@@ -113,6 +113,12 @@ void XNS::Server::DefaultListener::initDefaultListener(Server* server_) {
 	listeners = server->getListeners();
 	services  = server->getServices();
 }
+void XNS::Server::DefaultListener::start() {
+	server->openSocket(this);
+}
+void XNS::Server::DefaultListener::stop() {
+	server->closeSocket(this);
+}
 
 void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;

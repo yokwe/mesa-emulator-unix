@@ -66,11 +66,13 @@ SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket)
 }
 
 void SPPQueue::start() {
+	DefaultListener::start();
 	stopFuture = false;
 
 	future = QtConcurrent::run([this](){this->run(functionTable);});
 }
 void SPPQueue::stop() {
+	DefaultListener::stop();
 	stopFuture = true;
 	future.waitForFinished();
 }

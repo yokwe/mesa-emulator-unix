@@ -70,6 +70,12 @@ namespace XNS::Server {
 		quint16     socket() const {
 			return mySocket;
 		}
+		bool        autoDelete() const {
+			return myAutoDelete;
+		}
+		void setAutoDelete() {
+			myAutoDelete = true;
+		}
 
 		virtual void init  ()                 = 0;
 		virtual void start ()                 = 0;
@@ -77,15 +83,16 @@ namespace XNS::Server {
 
 		virtual void handle(const Data& data) = 0;
 
-		Listener() : myName(nullptr), mySocket(0) {}
+		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false) {}
 
-		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_) {}
+		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false) {}
 
 		QString toString();
 
 	protected:
 		const char* myName;
 		quint16     mySocket;
+		bool        myAutoDelete;
 	};
 
 	class DefaultListener : public Listener {
@@ -93,13 +100,15 @@ namespace XNS::Server {
 		DefaultListener() : server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
 
-		DefaultListener(const char* name_, quint16 socket_) : Listener(name_, socket_), server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
+		DefaultListener(const char* name_, quint16 socket_) :
+			Listener(name_, socket_),
+			server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
 
 		void initDefaultListener(Server* server_);
 
 		void init () {}
-		void start();
-		void stop ();
+		void start() {}
+		void stop () {}
 
 		static void transmit(const Data& data, const RIP&   rip);
 		static void transmit(const Data& data, const Echo&  echo);
@@ -141,16 +150,27 @@ namespace XNS::Server {
 		void start();
 		void stop();
 
+		// Add listener to map
+		// call listener.init()
+		// If listeners is running, call listener.start()
 		void add(quint16 socket, DefaultListener* listener);
 		void add(DefaultListener* listener) {
 			add(listener->socket(), listener);
 		}
+		// Remove listener from map
+		// If listeners is running, call listener.stop().
+		// If listener is autoDelete, delete listener.
+		void remove(quint16 socket);
 		Listener* getListener(quint16 socket);
+
+		// Well-known socket numbers range from 1 to 3000 decimal
+		quint16 getUnusedSocket() const;
 
 	protected:
 		Server* server;
 		bool    started;
 
+		// FIXME delete inactive socket
 		QMap<quint16, Listener*> map;
 		//   socket
 	};

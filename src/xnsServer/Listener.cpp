@@ -66,6 +66,17 @@ void Listeners::add(quint16 socket, DefaultListener* listener) {
 		if (started) listener->start();
 	}
 }
+void Listeners::remove(quint16 socket) {
+	if (map.contains(socket)) {
+		Listener *listener = map.take(socket);
+		if (started) listener->stop();
+		delete listener;
+	} else {
+		logger.error("Unexpected");
+		logger.error("  socket %s", XNS::Socket::toString(socket));
+		ERROR();
+	}
+}
 Listener* Listeners::getListener(quint16 socket) {
 	if (map.contains(socket)) {
 		return map[socket];
@@ -73,6 +84,18 @@ Listener* Listeners::getListener(quint16 socket) {
 		return nullptr;
 	}
 }
+
+quint16 Listeners::getUnusedSocket() const {
+	quint16 socket;
+	for(;;) {
+		socket = (quint16)QDateTime::currentMSecsSinceEpoch();
+		if (socket <= Socket::MAX_WELLKNOWN_SOCKET) continue;
+		if (map.contains(socket)) continue;
+		break;
+	}
+	return socket;
+}
+
 
 // life cycle management
 void Listeners::start() {
@@ -113,13 +136,6 @@ void XNS::Server::DefaultListener::initDefaultListener(Server* server_) {
 	listeners = server->getListeners();
 	services  = server->getServices();
 }
-void XNS::Server::DefaultListener::start() {
-	server->openSocket(this);
-}
-void XNS::Server::DefaultListener::stop() {
-	server->closeSocket(this);
-}
-
 void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);

@@ -75,7 +75,8 @@ void SPPQueue::stop() {
 	future.waitForFinished();
 }
 
-void SPPQueue::handle(const Data& data, const SPP& spp) {		dataListMutex.lock();
+void SPPQueue::handle(const Data& data, const SPP& spp) {
+	dataListMutex.lock();
 	MyData myData;
 	myData.data = data;
 	myData.spp  = spp;

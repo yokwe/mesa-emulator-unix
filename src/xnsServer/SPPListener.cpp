@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-cr");
+static const Logger logger = Logger::getLogger("listen-spp");
 
 #include "../xns/SPP.h"
 

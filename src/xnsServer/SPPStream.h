@@ -136,9 +136,8 @@ protected:
 		}
 	};
 
+	// FIXME Is this OK to use static variable here?
 	static QMap<Key, State> stateMap;
-	static QList<SPPStream> clientList;
-
 
 };
 

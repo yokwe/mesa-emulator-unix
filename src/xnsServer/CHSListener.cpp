@@ -38,7 +38,9 @@ static const Logger logger = Logger::getLogger("listen-chs");
 
 #include "../courier/Courier.h"
 
-#include "../xnsServer/CHSListener.h"
+#include "Server.h"
+
+#include "CHSListener.h"
 
 using ByteBuffer::Buffer;
 using ByteBuffer::BLOCK;

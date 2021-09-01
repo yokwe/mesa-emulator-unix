@@ -35,54 +35,15 @@
 
 #pragma once
 
-#include <functional>
-
-#include <QtConcurrent/QtConcurrent>
-
 #include "Listener.h"
 
 class SPPListener : public XNS::Server::DefaultListener {
 public:
-	SPPListener(const char* name, quint16 socket);
+	SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {}
 	virtual ~SPPListener() {}
-
-	void start();
-	void stop();
 
 	void handle(const XNS::Data& data);
 
 protected:
-	class MyData {
-	public:
-		XNS::Data data;
-		XNS::SPP  spp;
-	};
-
-	// if getData returns true, data and spp are assigned
-	// if getDAta returns false, data and spp are NOT assigned
-	bool                    getData(XNS::Data* data, XNS::SPP* spp);
-	bool                    stopRun();
-	XNS::Config*            getConfig();
-	XNS::Context*           getContext();
-	XNS::Server::Listeners* getListeners();
-
-	class FunctionTable {
-	public:
-		std::function<bool(XNS::Data*, XNS::SPP*)>   getData;
-		std::function<bool(void)>                    stopRun;
-		std::function<XNS::Config*(void)>            getConfig;
-		std::function<XNS::Context*(void)>           getContext;
-		std::function<XNS::Server::Listeners*(void)> getListeners;
-	};
-	FunctionTable functionTable;
-
-	virtual void run(FunctionTable functionTable) = 0;
-
-	bool           stopFuture;
-	QFuture<void>  future;
-
-	QList<MyData>  dataList;
-	QMutex         dataListMutex;
-	QWaitCondition dataListCV;
-
+	virtual void handle(const XNS::Data& data, const XNS::SPP& spp) = 0;
 };

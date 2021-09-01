@@ -46,10 +46,6 @@ using XNS::IDP;
 using XNS::Echo;
 using Courier::Services;
 
-void EchoListener::init(Config* config_, Context* context_, Services* services_) {
-	DefaultListener::init(config_, context_, services_);
-	logger.info("EchoListener::init");
-}
 void EchoListener::handle(const Data& data) {
 	Buffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {

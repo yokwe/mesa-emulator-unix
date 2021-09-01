@@ -36,14 +36,15 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("xnsServer");
 
-#include "../xnsServer/Server.h"
+#include "Server.h"
 
-#include "../xnsServer/TimeListener.h"
-#include "../xnsServer/EchoListener.h"
-#include "../xnsServer/RIPListener.h"
-#include "../xnsServer/CHSListener.h"
-#include "../xnsServer/CHService.h"
-#include "../xnsServer/CourierListener.h"
+#include "TimeListener.h"
+#include "EchoListener.h"
+#include "RIPListener.h"
+#include "CHSListener.h"
+#include "CHService.h"
+#include "CourierListener.h"
+#include "SPPStream.h"
 
 void testXNSServer() {}
 
@@ -63,6 +64,7 @@ int main(int, char**) {
 	TimeListener    timeListener;
 	CHSListener     chsListener;
 	CourierListener courierListener;
+	SPPStream       sppStream("SSPStream", courierListener.socket());
 
 	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
 	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
@@ -82,7 +84,8 @@ int main(int, char**) {
 	server.add(&ripListener);
 	server.add(&timeListener);
 	server.add(&chsListener);
-	server.add(&courierListener);
+//	server.add(&courierListener);
+	server.add(&sppStream);
 
 	logger.info("server.start");
 	server.start();

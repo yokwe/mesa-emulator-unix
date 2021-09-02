@@ -122,7 +122,7 @@ void Listeners::stop() {
 // XNS::Server::Listener
 //
 QString XNS::Server::Listener::toString() {
-	return QString::asprintf("%2d-%s", socket(), name());
+	return QString::asprintf("%s-%s", TO_CSTRING(Socket::toString(socket())), name());
 }
 
 

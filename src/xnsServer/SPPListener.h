@@ -42,6 +42,13 @@ public:
 	SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {}
 	virtual ~SPPListener() {}
 
+	SPPListener() {}
+	SPPListener(const SPPListener& that) : DefaultListener(that) {}
+	SPPListener& operator = (const SPPListener& that) {
+		DefaultListener::operator =(that);
+		return *this;
+	}
+
 	void handle(const XNS::Data& data);
 
 protected:

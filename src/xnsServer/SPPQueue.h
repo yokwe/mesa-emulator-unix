@@ -52,12 +52,6 @@ public:
 	void handle(const XNS::Data& data, const XNS::SPP& spp);
 
 protected:
-	class MyData {
-	public:
-		XNS::Data data;
-		XNS::SPP  spp;
-	};
-
 	// if getData returns true, data and spp are assigned
 	// if getDAta returns false, data and spp are NOT assigned
 	bool                    getData(XNS::Data* data, XNS::SPP* spp);
@@ -77,6 +71,13 @@ protected:
 	FunctionTable functionTable;
 
 	virtual void run(FunctionTable functionTable) = 0;
+
+private:
+	class MyData {
+	public:
+		XNS::Data data;
+		XNS::SPP  spp;
+	};
 
 	bool           stopFuture;
 	QFuture<void>  future;

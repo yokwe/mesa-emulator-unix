@@ -89,7 +89,7 @@ void SPPStream::handle(const XNS::Data& data, const XNS::SPP& spp) {
 		stateMap[key] = state;
 
 		SPPStream* client = new SPPStream("SPPStream-client", state.localSocket);
-		client->setAutoDelete();
+		client->autoDelete();
 		listeners->add(client);
 	}
 

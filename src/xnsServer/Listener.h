@@ -62,7 +62,30 @@ namespace XNS::Server {
 
 	class Listener {
 	public:
+		virtual void init  ()                 = 0;
+		virtual void start ()                 = 0;
+		virtual void stop  ()                 = 0;
+
+		virtual void handle(const Data& data) = 0;
+
 		virtual ~Listener() {}
+		Listener(const Listener& that) {
+			this->myName       = that.myName;
+			this->mySocket     = that.mySocket;
+			this->myAutoDelete = that.myAutoDelete;
+		}
+		Listener& operator = (const Listener& that) {
+			this->myName       = that.myName;
+			this->mySocket     = that.mySocket;
+			this->myAutoDelete = that.myAutoDelete;
+			return *this;
+		}
+
+		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false) {}
+
+		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false) {}
+
+		QString toString();
 
 		const char* name  () const {
 			return myName;
@@ -73,21 +96,15 @@ namespace XNS::Server {
 		bool        autoDelete() const {
 			return myAutoDelete;
 		}
-		void setAutoDelete() {
-			myAutoDelete = true;
+		void name(const char* newValue) {
+			myName = newValue;
 		}
-
-		virtual void init  ()                 = 0;
-		virtual void start ()                 = 0;
-		virtual void stop  ()                 = 0;
-
-		virtual void handle(const Data& data) = 0;
-
-		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false) {}
-
-		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false) {}
-
-		QString toString();
+		void socket(quint16 newValue) {
+			mySocket = newValue;
+		}
+		void autoDelete(bool newValue = true) {
+			myAutoDelete = newValue;
+		}
 
 	protected:
 		const char* myName;
@@ -99,6 +116,24 @@ namespace XNS::Server {
 	public:
 		DefaultListener() : server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
 		virtual ~DefaultListener() {}
+
+		DefaultListener(const DefaultListener& that) : Listener(that) {
+			this->server    = that.server;
+			this->config    = that.config;
+			this->context   = that.context;
+			this->listeners = that.listeners;
+			this->services  = that.services;
+		}
+		DefaultListener& operator = (const DefaultListener& that) {
+			Listener::operator =(that);
+
+			this->server    = that.server;
+			this->config    = that.config;
+			this->context   = that.context;
+			this->listeners = that.listeners;
+			this->services  = that.services;
+			return *this;
+		}
 
 		DefaultListener(const char* name_, quint16 socket_) :
 			Listener(name_, socket_),

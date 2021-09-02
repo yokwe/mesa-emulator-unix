@@ -40,6 +40,8 @@ static const Logger logger = Logger::getLogger("spp-server");
 
 #include <QtCore>
 
+#include "../courier/Courier.h"
+
 #include "SPPServer.h"
 
 
@@ -74,7 +76,38 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 			// FIXEME
 		}
 	} else {
+		// 0003 0003 0000 0000 0000 0002 0002 0001 0001 0000 0000 0000
+		// protocol3
+		//      protocol3
+		//           call
+		//                transaction
+		//                     program = 2
+		//                               version = 2
+		//                                    procedure = ListDomainServed
+		//                                         Sink = Descriptor::immediate
+		//                                              Credentials type = simple
+		//                                                    Credentials value sequence 0
+		//                                                        Verifier sequence 0
+		// return is in bulk data of following type
+		//		StreamOfDomainName: TYPE = CHOICE OF {
+		//			nextSegment (0) => RECORD [
+		//				segment: SEQUENCE OF DomainName,
+		//				restOfStream: StreamOfDomainName],
+		//			lastSegment (1) => SEQUENCE OF DomainName};
+		// Clearinghouse2 use Auth1
+		// Clearinghouse3 use Auth3
+
+
 		// FIXME
+		if (spp.control.isEndOfMessage()) {
+			Courier::ExpeditedCourier exp;
+			ByteBuffer::Buffer bb = spp.block.toBuffer();
+			FROM_BYTE_BUFFER(bb, exp);
+			logger.info("message %s", exp.toString());
+
+		} else {
+			// FIXME
+		}
 	}
 
 }

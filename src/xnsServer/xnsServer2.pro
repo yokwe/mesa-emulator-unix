@@ -15,8 +15,8 @@ SOURCES += Server.cpp Listener.cpp
 HEADERS += EchoListener.h   RIPListener.h   PEXListener.h   TimeListener.h   CHSListener.h   SPPListener.h   CourierListener.h
 SOURCES += EchoListener.cpp RIPListener.cpp PEXListener.cpp TimeListener.cpp CHSListener.cpp SPPListener.cpp CourierListener.cpp
 
-HEADERS += SPPQueue.h   SPPStream.h
-SOURCES += SPPQueue.cpp SPPStream.cpp
+HEADERS += SPPQueue.h   SPPStream.h   SPPServer.h   SPPCourier.h
+SOURCES += SPPQueue.cpp SPPStream.cpp SPPServer.cpp SPPCourier.cpp
 
 HEADERS += CHService.h
 SOURCES += CHService.cpp

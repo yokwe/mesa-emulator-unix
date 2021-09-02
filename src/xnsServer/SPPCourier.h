@@ -30,83 +30,33 @@
 
 
 //
-// main.c
+// SPPCourier.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+#pragma once
 
-#include "Server.h"
+#include <functional>
 
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-#include "CHSListener.h"
-#include "CHService.h"
-#include "CourierListener.h"
-#include "SPPStream.h"
-#include "SPPCourier.h"
+#include <QtConcurrent/QtConcurrent>
+
 #include "SPPServer.h"
 
-using XNS::Server::Server;
-using XNS::Server::SPPCourier;
-using XNS::Server::SPPServer;
 
-int main(int, char**) {
-	logger.info("START");
+namespace XNS::Server {
 
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
+	class SPPCourier : public SPPServerImpl {
+	public:
+		SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
+		SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
+		SPPCourier& operator = (const SPPCourier& that) {
+			SPPServerImpl::operator =(that);
+			return *this;
+		}
 
-	DEBUG_TRACE();
+		void run(FunctionTable functionTable);
 
-	logger.info("START testXNSServer");
+		// clone method for SPPServer
+		SPPCourier* clone();
+	};
 
-	EchoListener    echoListener;
-	RIPListener     ripListener;
-	TimeListener    timeListener;
-	CHSListener     chsListener;
-	CourierListener courierListener;
-	SPPStream       sppStream("SSPStream", courierListener.socket());
-
-	SPPCourier sppCourier;
-	logger.info("sppCourier %s", sppCourier.toString());
-	SPPServer sppServerCourie(&sppCourier);
-
-
-	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
-	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
-
-	Server server;
-
-	// init server
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	// add service
-	server.add(&chService2);
-	server.add(&chService3);
-
-	// add listener
-	server.add(&echoListener);
-	server.add(&ripListener);
-	server.add(&timeListener);
-	server.add(&chsListener);
-//	server.add(&courierListener);
-//	server.add(&sppStream);
-	server.add(&sppServerCourie);
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(60);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
 }
-
-

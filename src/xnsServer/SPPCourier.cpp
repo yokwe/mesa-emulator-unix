@@ -30,83 +30,26 @@
 
 
 //
-// main.c
+// SPPStream.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const Logger logger = Logger::getLogger("spp-cour");
 
+#include "../xns/SPP.h"
 #include "Server.h"
 
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-#include "CHSListener.h"
-#include "CHService.h"
-#include "CourierListener.h"
-#include "SPPStream.h"
 #include "SPPCourier.h"
-#include "SPPServer.h"
-
-using XNS::Server::Server;
-using XNS::Server::SPPCourier;
-using XNS::Server::SPPServer;
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	logger.info("START testXNSServer");
-
-	EchoListener    echoListener;
-	RIPListener     ripListener;
-	TimeListener    timeListener;
-	CHSListener     chsListener;
-	CourierListener courierListener;
-	SPPStream       sppStream("SSPStream", courierListener.socket());
-
-	SPPCourier sppCourier;
-	logger.info("sppCourier %s", sppCourier.toString());
-	SPPServer sppServerCourie(&sppCourier);
 
 
-	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
-	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
-
-	Server server;
-
-	// init server
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	// add service
-	server.add(&chService2);
-	server.add(&chService3);
-
-	// add listener
-	server.add(&echoListener);
-	server.add(&ripListener);
-	server.add(&timeListener);
-	server.add(&chsListener);
-//	server.add(&courierListener);
-//	server.add(&sppStream);
-	server.add(&sppServerCourie);
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(60);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
+void XNS::Server::SPPCourier::run(FunctionTable functionTable) {
+	logger.info("run");
+	functionTable.stopRun();
 }
 
+// clone method for SPPServer
+XNS::Server::SPPCourier* XNS::Server::SPPCourier::clone() {
+	SPPCourier* ret = new SPPCourier(*this);
+	return ret;
+}
 

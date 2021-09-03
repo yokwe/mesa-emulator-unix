@@ -244,6 +244,10 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
+		QString toString() {
+			return QString::asprintf("%u", value());
+		}
+
 		//
 		// Base
 		//
@@ -280,6 +284,10 @@ namespace ByteBuffer {
 		explicit UINT16(const quint16& newValue) : OpaqueType(newValue) {}
 		quint16 operator =(const quint16& newValue) const {
 			return OpaqueType::operator =(newValue);
+		}
+
+		QString toString() {
+			return QString::asprintf("%u", value());
 		}
 
 		//
@@ -320,6 +328,10 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
+		QString toString() {
+			return QString::asprintf("%d", value());
+		}
+
 		//
 		// Base
 		//
@@ -355,6 +367,10 @@ namespace ByteBuffer {
 		explicit UINT32(const quint32& newValue) : OpaqueType(newValue) {}
 		quint32 operator =(const quint32& newValue) const {
 			return OpaqueType::operator =(newValue);
+		}
+
+		QString toString() {
+			return QString::asprintf("%u", value());
 		}
 
 		//
@@ -394,6 +410,10 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
+		QString toString() {
+			return QString::asprintf("%d", value());
+		}
+
 		//
 		// Base
 		//
@@ -429,6 +449,10 @@ namespace ByteBuffer {
 		explicit UINT48(const quint64& newValue) : OpaqueType(newValue) {}
 		quint64 operator =(const quint64& newValue) const {
 			return OpaqueType::operator =(newValue);
+		}
+
+		QString toString() {
+			return QString::asprintf("%llu", value());
 		}
 
 		//

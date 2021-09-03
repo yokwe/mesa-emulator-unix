@@ -62,6 +62,10 @@ namespace Courier {
 			return value();
 		}
 
+		QString toString() {
+			return value() ? "true" : "false";
+		}
+
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb);
 		void toByteBuffer  (Buffer& bb) const;
@@ -81,6 +85,10 @@ namespace Courier {
 			return byteArray.constData();
 		}
 
+		QString toString() {
+			return byteArray.constData();
+		}
+
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb);
 		void toByteBuffer  (Buffer& bb) const;
@@ -89,8 +97,39 @@ namespace Courier {
 	template <typename T, unsigned short int N>
 	class ARRAY : public Base {
 		int length = N;
-		QList<T> list;
 	public:
+		QList<T> list;
+
+		ARRAY() {}
+
+		ARRAY(const QList<T>& that) {
+			if (length != that.length()) {
+				logger.error("Unexpected");
+				logger.error("  length %d", length);
+				logger.error("  that   %d", that.length());
+				ERROR();
+			}
+			list = that;
+		};
+		ARRAY& operator = (const QList<T>& that) {
+			if (length != that.length()) {
+				logger.error("Unexpected");
+				logger.error("  length %d", length);
+				logger.error("  that   %d", that.length());
+				ERROR();
+			}
+			list = that;
+			return *this;
+		}
+
+		QString toString() const {
+			QStringList myList;
+			for(auto e: list) {
+				myList.append(QString("{%1}").arg(e.toString()));
+			}
+			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
+		}
+
 		// ByteBuffer::Base
 		void fromByteBuffer(Buffer& bb) {
 			list.clear();
@@ -107,16 +146,49 @@ namespace Courier {
 		}
 	};
 
-	template <typename T, unsigned short int N>
+	template <typename T, unsigned short int N = 65535>
 	class SEQUENCE : public Base {
-		quint16 maxLength = N;
-
-		QList<T> list;
+		quint16  maxLength = N;
 	public:
+		QList<T> list;
+
+		SEQUENCE() {}
+
+		SEQUENCE(const QList<T>& that) {
+			if (maxLength < that.length()) {
+				logger.error("Unexpected");
+				logger.error("  maxLength %d", maxLength);
+				logger.error("  that      %d", that.length());
+				ERROR();
+			}
+			list = that;
+		};
+		SEQUENCE& operator = (const QList<T>& that) {
+			if (maxLength < that.length()) {
+				logger.error("Unexpected");
+				logger.error("  maxLength %d", maxLength);
+				logger.error("  that      %d", that.length());
+				ERROR();
+			}
+			list = that;
+			return *this;
+		}
+
+		int size() const {
+			return list.size();
+		}
+		void clear() {
+			list.clear();
+		}
 		void append(T& newValue) {
 			list.append(newValue);
 		}
-		QString toString() {
+		void append(QList<T> newValue) {
+			for(auto e: newValue) {
+				list.append(e);
+			}
+		}
+		QString toString() const {
 			QStringList myList;
 			for(auto e: list) {
 				myList.append(QString("{%1}").arg(e.toString()));

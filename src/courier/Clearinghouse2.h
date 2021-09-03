@@ -40,12 +40,20 @@
 #include "Service.h"
 #include "Type.h"
 
+#include <QtCore>
+
 #include "Authentication1.h"
+#include "BulkData.h"
 
 
 namespace Courier::Clearinghouse2 {
 	const quint32 PROGRAM = 2;
 	const quint16 VERSION = 2;
+
+	using XNS::Net;
+	using XNS::Host;
+	using XNS::Socket;
+
 
 	//  Clearinghouse: PROGRAM 2 VERSION 2
 	//	DEPENDS UPON
@@ -57,93 +65,214 @@ namespace Courier::Clearinghouse2 {
 	//	-- TYPES AND CONSTANTS DESCRIBING NAMES --
 	//
 	//	Organization: TYPE = STRING;
+	typedef STRING Organization;
+
 	//	Domain: TYPE = STRING;
+	typedef STRING Domain;
+
 	//	Object: TYPE = STRING;
-	//
+	typedef STRING Object;
+
 	//	maxOrganizationsLength: CARDINAL = 20; -- in bytes --
+	static const int MAX_ORGANIZATION_LENGTH = 20;
+
 	//	maxDomainLength: CARDINAL = 20; -- in bytes --
+	static const int MAX_DOMAIN_LENGTH = 20;
+
 	//	maxObjectLength: CARDINAL = 40; -- in bytes --
-	//
+	static const int MAX_OBJECT_LENGTH = 40;
+
 	//	-- There can be no wildcard characters in any of the following types. --
 	//	OrganizationName: TYPE = Organization;
-	//
+	typedef Organization OrganizationName;
+
 	//	TwoPartName: TYPE = RECORD [
 	//		organization: Organization,
 	//		domain: Domain];
-	//
+	class TwoPartName : public Base {
+	public:
+		Organization organization;
+		Domain       domain;
+
+		QString toString();
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
 	//	DomainName: TYPE = TwoPartName;
-	//
+	typedef TwoPartName DomainName;
+
 	//	ThreePartName: TYPE = RECORD [
 	//		organization: Organization,
 	//		domain: Domain,
 	//		object: Object];
-	//
+	class ThreePartName : Base {
+	public:
+		Organization organization;
+		Domain       domain;
+		Object       object;
+
+		QString toString() {
+			return QString("%1-%2-%3").arg(organization.toString()).arg(domain.toString()).arg(object.toString());
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			FROM_BYTE_BUFFER(bb, organization);
+			FROM_BYTE_BUFFER(bb, domain);
+			FROM_BYTE_BUFFER(bb, object);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			TO_BYTE_BUFFER(bb, organization);
+			TO_BYTE_BUFFER(bb, domain);
+			TO_BYTE_BUFFER(bb, object);
+		}
+	};
+
 	//	ObjectName: TYPE = ThreePartName;
-	//
+	typedef ThreePartName ObjectName;
+
 	//	Name: TYPE = ThreePartName;
-	//
-	//	-- Wildcard characters are permittedin OrganizationNamePatterns. --
+	typedef ThreePartName Name;
+
+	//	-- Wildcard characters are permitted in OrganizationNamePatterns. --
 	//	OrganizationNamePattern: TYPE = Organization;
-	//
+	typedef Organization OrganizationNamePattern;
+
 	//	-- Wildcard characters are permitted in the domain component of this type,
 	//	-- but not in the organization component.
 	//	DomainNamePattern: TYPE = TwoPartName;
-	//
+	typedef TwoPartName DomainNamePattern;
+
 	//	-- Wildcard characters are permitted in the object component of this type,
 	//	-- but not in the organization and domain components.
 	//	ObjectNamePattern: TYPE = ThreePartName;
-	//
+	typedef ThreePartName ObjectNamePattern;
+
 	//	-- TYPES AND CONSTANTS DESCRIBING BULK PARAMETERS --
-	//
+	template <class T>
+	class StreamOf : public Base {
+	public:
+		class Choice : public UINT16 {
+		public:
+			enum Value : quint16 {
+				NEXT_SEGMENT = 0,
+				LAST_SEGMENT = 1,
+			};
+
+			// define operator =
+			quint16 operator =(const quint16& newValue) const {
+				value(newValue);
+				return newValue;
+			}
+
+			QString toString() const {
+				return nameMap.toString(value());
+			}
+		private:
+			static NameMap::Map<quint16> nameMap;
+		};
+
+		QList<T> list;
+
+		StreamOf& operator = (const QList<T>& that) {
+			list.clear();
+			list.append(that);
+			return *this;
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			Choice      choice;
+			SEQUENCE<T> sequence;
+
+			list.clear();
+			for(;;) {
+				FROM_BYTE_BUFFER(bb, choice);
+				FROM_BYTE_BUFFER(bb, sequence);
+
+				if ((quint16)choice == Choice::LAST_SEGMENT) break;
+				if ((quint16)choice == Choice::NEXT_SEGMENT) continue;
+
+				logger.error("choice %d", (quint16)choice);
+				ERROR();
+			}
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			Choice      choice;
+			SEQUENCE<T> sequence;
+
+			choice   = Choice::LAST_SEGMENT;
+			sequence = list;
+
+			TO_BYTE_BUFFER(bb, choice);
+			TO_BYTE_BUFFER(bb, sequence);
+		}
+	};
+
 	//	StreamOfDomain: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF Domain,
 	//			restOfStream: StreamOfDomain],
 	//		lastSegment (1) => SEQUENCE OF Domain};
-	//
+	typedef StreamOf<Domain> StreamOfDomain;
+
 	//	StreamOfDomainName: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF DomainName,
 	//			restOfStream: StreamOfDomainName],
 	//		lastSegment (1) => SEQUENCE OF DomainName};
-	//
+	typedef StreamOf<DomainName> StreamOfDomainName;
+
 	//	StreamOfObject: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF Object,
 	//			restOfStream: StreamOfObject],
 	//		lastSegment (1) => SEQUENCE OF Object};
-	//
+	typedef StreamOf<Object> StreamOfObject;
+
 	//	StreamOfObjectName: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF ObjectName,
 	//			restOfStream: StreamOfObjectName],
 	//		lastSegment (1) => SEQUENCE OF ObjectName};
-	//
+	typedef StreamOf<ObjectName> StreamOfObjectName;
+
 	//	StreamOfOrganization: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF Organization,
 	//			restOfStream: StreamOfOrganization],
 	//		lastSegment (1) => SEQUENCE OF Organization};
-	//
+	typedef StreamOf<Organization> StreamOfOrganization;
+
 	//	StreamOfThreePartName: TYPE = CHOICE OF {
 	//		nextSegment (0) => RECORD [
 	//			segment: SEQUENCE OF ThreePartName,
 	//			restOfStream: StreamOfThreePartName],
 	//		lastSegment (1) => SEQUENCE OF ThreePartName};
-	//
+	typedef StreamOf<ThreePartName> StreamOfThreePartName;
+
 	//	-- TYPES AND CONSTANTS DESCRIBING PROPERTIES --
 	//
 	//	Property: TYPE = LONG CARDINAL;
-	//
+	typedef UINT32 Property;
+
 	//	-- A Name can have up to 250 Properties associated with it. --
 	//	Properties: TYPE = SEQUENCE 250 OF Property;
-	//
+	typedef SEQUENCE<Property, 250> Properties;
+
 	//	all: Property = 0;
+	const quint32 ALL = 0;
+
 	//	nullProperty: Property = 37777777777B;
-	//
+	const quint32 NULL_PROPERTY = ~0;
+
 	//	-- The value associated with an item property. --
 	//	Item: TYPE = SEQUENCE 500 OF UNSPECIFIED;
-	//
+	typedef SEQUENCE<UINT16, 500> Item;
+
 	//	-- TYPES AND CONSTANTS DESCRIBING NETWORK ADDRESSES --
 	//
 	//	-- Clearinghouse addresses aer stored in this form. --
@@ -152,8 +281,33 @@ namespace Courier::Clearinghouse2 {
 	//		network: ARRAY 2 OF UNSPECIFIED,
 	//		host: ARRAY 3 OF UNSPECIFIED,
 	//		socket: UNSPECIFIED ];
+	class NetworkAddress : public Base {
+	public:
+		Net    net;
+		Host   host;
+		Socket socket;
+
+		QString toString() {
+			return QString("{%1-%2-%3}").arg(net.toString()).arg(host.toString()).arg(socket.toString());
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			FROM_BYTE_BUFFER(bb, net);
+			FROM_BYTE_BUFFER(bb, host);
+			FROM_BYTE_BUFFER(bb, socket);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			TO_BYTE_BUFFER(bb, net);
+			TO_BYTE_BUFFER(bb, host);
+			TO_BYTE_BUFFER(bb, socket);
+		}
+	};
+
 	//
 	//	NetworkAddressList: TYPE = SEQUENCE 40 OF NetworkAddress;
+	typedef SEQUENCE<NetworkAddress, 40> NetworkAddressList;
+
 	//
 	//	-- OTHER TYPES AND CONSTANTS --
 	//
@@ -161,9 +315,29 @@ namespace Courier::Clearinghouse2 {
 	//	Authenticator: TYPE = RECORD [
 	//		credentials: Authentication.Credentials,
 	//		verifier: Authentication.Verifier];
-	//
+	class Authenticator : public Base {
+	public:
+		Auth::Credentials credentials;
+		Auth::Verifier    verifier;
+
+		QString toString() {
+			return QString("%1-%2").arg(credentials.toString()).arg(verifier.toString());
+		}
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb) {
+			FROM_BYTE_BUFFER(bb, credentials);
+			FROM_BYTE_BUFFER(bb, verifier);
+		}
+		void toByteBuffer  (Buffer& bb) const {
+			TO_BYTE_BUFFER(bb, credentials);
+			TO_BYTE_BUFFER(bb, verifier);
+		}
+	};
+
 	//	wildcard: STRING = "*"; -- the wildcard character (asterisk) --
-	//
+	const char* WILDCARD = "*";
+
 	//	-- ERRORS --
 	//
 	//	WhichArgument: TYPE = {
@@ -341,8 +515,60 @@ namespace Courier::Clearinghouse2 {
 	//	RetrieveAddresses: PROCEDURE
 	//	RETURNS [address: NetworkAddressList]
 	//	REPORTS [CallError] = 0;
-	//
+	class RetrieveAddress {
+	public:
+		const bool    USE_BULK = false;
+
+		class Return : Base {
+			NetworkAddressList address;
+			// ByteBuffer::Base
+			void fromByteBuffer(Buffer& bb) {
+				FROM_BYTE_BUFFER(bb, address);
+			}
+			void toByteBuffer  (Buffer& bb) const {
+				TO_BYTE_BUFFER(bb, address);
+			}
+		};
+	};
+
+
 	//	ListDomainServed: PROCEDURE [domains: BulkData.Sink, agent: Authenticator]
 	//	REPORTS [AuthenticationError, CallError] = 1;
+	class ListDomainServed {
+	public:
+		class Call : public Base {
+		public:
+			BulkData::Sink domains;
+			Authenticator  agent;
+			// ByteBuffer::Base
+			void fromByteBuffer(Buffer& bb) {
+				FROM_BYTE_BUFFER(bb, domains);
+				FROM_BYTE_BUFFER(bb, agent);
+			}
+			void toByteBuffer  (Buffer& bb) const {
+				TO_BYTE_BUFFER(bb, domains);
+				TO_BYTE_BUFFER(bb, agent);
+			}
+		};
+		// return data with SST == BULK
+		// return data type is StreamOfDomainName
+		class Return : public Base {
+			QList<DomainName> list;
+
+			// ByteBuffer::Base
+			void fromByteBuffer(Buffer& bb) {
+				StreamOf<DomainName> streamOf;
+				FROM_BYTE_BUFFER(bb, streamOf);
+				list.clear();
+				list.append(streamOf.list);
+			}
+			void toByteBuffer  (Buffer& bb) const {
+				StreamOf<DomainName> streamOf;
+				streamOf = list;
+				TO_BYTE_BUFFER(bb, streamOf);
+			}
+		};
+	};
+
 
 }

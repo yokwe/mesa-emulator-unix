@@ -44,21 +44,58 @@ namespace Courier::Authentication1 {
 	const quint32 PROGRAM = 14;
 	const quint16 VERSION = 1;
 
+	using ByteBuffer::UINT48;
+	using ByteBuffer::UINT32;
+	using ByteBuffer::UINT16;
+	using ByteBuffer::UINT8;
+	using ByteBuffer::BLOCK;
+	using ByteBuffer::Buffer;
+	using ByteBuffer::Base;
+
+
 	//  Authentication: PROGRAM 14 VERSION 1
 	//  DEPENDS UPON Clearinghouse(2) VERSION 2
 
 	//	CredentialsType: TYPE = CARDINAL;
-	//
+	//	Copy from Authenticaton3
+	//    CredentialsType: TYPE = {simple(0), strong(1)};
+	class CredentialsType : public UINT16 {
+	public:
+		enum Value : quint16 {
+			SIMPLE = 0,
+			STRONG = 1,
+		};
+
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+	private:
+		static NameMap::Map<quint16> nameMap;
+	};
+
 	//	Credentials: TYPE = RECORD[
 	//		type: CredentialsType,
 	//		value: SEQUENCE OF UNSPECIFIED];
+	class Credentials : public Base {
+	public:
+		CredentialsType  type;
+		SEQUENCE<UINT16> value;
+
+		QString toString();
+
+		// ByteBuffer::Base
+		void fromByteBuffer(Buffer& bb);
+		void toByteBuffer  (Buffer& bb) const;
+	};
+
 	//
 	//	simpleCredentials: CredentialsType = 0;
 	//
 	//	SimpleCredentials: TYPE = Clearinghouse.Name;
 	//
 	//	Verifier: TYPE = SEQUENCE 12 OF UNSPECIFIED;
-	//
+	typedef SEQUENCE<UINT16, 12> Verifier;
+
 	//	HashedPassword: TYPE = CARDINAL;
 	//
 	//	SimpleVerifier: TYPE = HashedPassword;

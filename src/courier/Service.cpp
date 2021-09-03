@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("service");
+static const Logger logger = Logger::getLogger("cr-service");
 
 #include "../xnsServer/Server.h"
 

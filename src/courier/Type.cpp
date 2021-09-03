@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("courier");
+static const Logger logger = Logger::getLogger("cr-type");
 
 #include "Type.h"
 

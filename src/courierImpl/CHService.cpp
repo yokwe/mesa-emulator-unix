@@ -43,7 +43,7 @@ static const Logger logger = Logger::getLogger("svc-chs");
 
 #include "../xnsServer/Listener.h"
 
-#include "../xnsServer/CHService.h"
+#include "CHService.h"
 
 using ByteBuffer::Base;
 using ByteBuffer::Buffer;

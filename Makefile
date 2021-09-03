@@ -3,14 +3,14 @@
 #
 
 MODULE := main test guam-headless \
-          util mesa agent opcode trace symbols xns courier xnsDump xnsServer
+          util mesa agent opcode trace symbols xns courier courierImpl xnsDump xnsServer xnsServerImpl
 
 .PHONY: all clean distclean gamke fix-permission
 .PHONY:     main     test     xnsDump     xnsServer
 .PHONY: run-main run-test run-xnsDump run-xnsServer
 .PHONY:     guam-headless prepare-run-guam
 .PONEY: run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
-.PHONY: util mesa symbols xns
+.PHONY: util mesa symbols xns courier
 
 all:
 	echo "all"
@@ -41,29 +41,31 @@ fix-permission:
 	find . -type f -exec chmod 0644 {} \;
 
 util:
-	( cd src/util;   make all )
+	( cd src/util; make all )
 
 main: util
-	( cd src/main;   make all )
+	( cd src/main; make all )
 
 
 mesa: util
-	( cd src/agent;  make all )
+	( cd src/agent; make all )
 	( cd src/opcode; make all )
-	( cd src/mesa;   make all )
-	( cd src/trace;  make all )
+	( cd src/mesa; make all )
+	( cd src/trace; make all )
 
 test: util mesa
-	( cd src/test;   make all )
+	( cd src/test; make all )
 
 symbols: util mesa
 	( cd src/symbols; make all )
 
 xns: util
-	( cd src/xns;     make all )
+	( cd src/xns; make all )
 	( cd src/courier; make all )
-	
+
 xnsServer: xns
+	( cd src/xnsServerImpl; make all )
+	( cd src/courierImpl; make all )
 	( cd src/xnsServer; make all )
 
 xnsDump: xns

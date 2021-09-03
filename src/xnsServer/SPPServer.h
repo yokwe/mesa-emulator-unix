@@ -39,8 +39,8 @@
 
 #include <QtConcurrent/QtConcurrent>
 
+#include "../xnsServerImpl/PilotStream.h"
 #include "SPPQueue.h"
-#include "PilotStream.h"
 
 namespace XNS::Server {
 

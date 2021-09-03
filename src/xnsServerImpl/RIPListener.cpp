@@ -36,8 +36,9 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listen-rip");
 
-#include "Server.h"
-#include "../xnsServer/RIPListener.h"
+#include "../xnsServer/Server.h"
+
+#include "RIPListener.h"
 
 using ByteBuffer::Buffer;
 using ByteBuffer::BLOCK;

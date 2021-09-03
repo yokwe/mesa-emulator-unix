@@ -30,64 +30,63 @@
 
 
 //
-// TimeListener.cpp
+// CHSListener.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-time");
+static const Logger logger = Logger::getLogger("listen-chs");
 
-#include "../xns/Time.h"
+#include "../courier/Courier.h"
 
-#include "../xnsServer/TimeListener.h"
+#include "../xnsServer/Server.h"
+
+#include "CHSListener.h"
 
 using ByteBuffer::Buffer;
 using ByteBuffer::BLOCK;
-using Network::Packet;;
+using Network::Packet;
 using XNS::Data;
 using XNS::Config;
 using XNS::Context;
 using XNS::IDP;
 using XNS::PEX;
-using XNS::Time;
 using Courier::Services;
+using Courier::Service;
+using Courier::Procedure;
+using Courier::ExpeditedCourier;
+using Courier::Protocol3Body;
+using Courier::MessageType;
+using Courier::ProgramVersion;
 
-void TimeListener::handle(const Data& data, const PEX& pex) {
+void CHSListener::handle(const Data& data, const PEX& pex) {
 	Buffer level3 = pex.block.toBuffer();
-	Time time;
-	FROM_BYTE_BUFFER(level3, time);
+	ExpeditedCourier exp;
+	FROM_BYTE_BUFFER(level3, exp);
 
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
+	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
 
-	if (time.type == Time::Type::REQUEST) {
-		Time::Response response;
-		response.time            = QDateTime::currentSecsSinceEpoch();
-		response.offsetDirection = data.config->time.offsetDirection;
-		response.offsetHours     = data.config->time.offsetHours;
-		response.offsetMinutes   = data.config->time.offsetMinutes;
-		response.tolerance       = Time::Tolerance::MILLI;
-		response.toleranceValue  = 10;
+	if (exp.body.type == MessageType::CALL) {
+		Protocol3Body::CallBody callBody;
+		exp.body.get(callBody);
 
-		Time replyTime;
-		replyTime.version = Time::Version::CURRENT;
-		replyTime.type    = Time::Type::RESPONSE;
-		replyTime.set(response);
+		ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
 
-		Packet level3;
-		TO_BYTE_BUFFER(level3, replyTime);
-		BLOCK block3(level3);
-
-		// set block3 to replyPEX.block
-		PEX replyPEX;
-		replyPEX.id    = pex.id;
-		replyPEX.type  = PEX::Type::TIME;
-		replyPEX.block = block3;
-
-		DefaultListener::transmit(data, replyPEX);
+		Service* service = services->getService(programVersion);
+		if (service == nullptr) {
+			logger.warn("NO SERVICE  %s", programVersion.toString());
+		} else {
+			Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+			if (procedure == nullptr) {
+				logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
+			} else {
+				logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
+				procedure->call(data, pex, callBody);
+			}
+		}
 	} else {
 		logger.error("Unexpected");
-		logger.error("  time %s", time.toString());
 		ERROR();
 	}
 }

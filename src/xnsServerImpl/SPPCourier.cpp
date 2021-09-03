@@ -30,33 +30,27 @@
 
 
 //
-// SPPCourier.h
+// SPPStream.cpp
 //
 
-#pragma once
+#include "../util/Util.h"
+static const Logger logger = Logger::getLogger("spp-cour");
 
-#include <functional>
+#include "../xns/SPP.h"
 
-#include <QtConcurrent/QtConcurrent>
+#include "../xnsServer/Server.h"
 
-#include "SPPServer.h"
+#include "SPPCourier.h"
 
 
-namespace XNS::Server {
-
-	class SPPCourier : public SPPServerImpl {
-	public:
-		SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
-		SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
-		SPPCourier& operator = (const SPPCourier& that) {
-			SPPServerImpl::operator =(that);
-			return *this;
-		}
-
-		void run(FunctionTable functionTable);
-
-		// clone method for SPPServer
-		SPPCourier* clone();
-	};
-
+void XNS::Server::SPPCourier::run(FunctionTable functionTable) {
+	logger.info("run");
+	functionTable.stopRun();
 }
+
+// clone method for SPPServer
+XNS::Server::SPPCourier* XNS::Server::SPPCourier::clone() {
+	SPPCourier* ret = new SPPCourier(*this);
+	return ret;
+}
+

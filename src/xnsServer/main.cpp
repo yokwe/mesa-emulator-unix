@@ -37,16 +37,16 @@
 static const Logger logger = Logger::getLogger("xnsServer");
 
 #include "Server.h"
-
-#include "TimeListener.h"
-#include "EchoListener.h"
-#include "RIPListener.h"
-#include "CHSListener.h"
-#include "CHService.h"
-#include "CourierListener.h"
-#include "SPPStream.h"
-#include "SPPCourier.h"
 #include "SPPServer.h"
+
+#include "../xnsServerImpl/TimeListener.h"
+#include "../xnsServerImpl/EchoListener.h"
+#include "../xnsServerImpl/RIPListener.h"
+#include "../xnsServerImpl/CHSListener.h"
+#include "../xnsServerImpl/SPPCourier.h"
+
+#include "../courierImpl/CHService.h"
+
 
 using XNS::Server::Server;
 using XNS::Server::SPPCourier;
@@ -67,13 +67,9 @@ int main(int, char**) {
 	RIPListener     ripListener;
 	TimeListener    timeListener;
 	CHSListener     chsListener;
-	CourierListener courierListener;
-	SPPStream       sppStream("SSPStream", courierListener.socket());
 
-	SPPCourier sppCourier;
-	logger.info("sppCourier %s", sppCourier.toString());
-	SPPServer sppServerCourie(&sppCourier);
-
+	SPPCourier      sppCourier;
+	SPPServer       sppServerCourie(&sppCourier);
 
 	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
 	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
@@ -93,8 +89,6 @@ int main(int, char**) {
 	server.add(&ripListener);
 	server.add(&timeListener);
 	server.add(&chsListener);
-//	server.add(&courierListener);
-//	server.add(&sppStream);
 	server.add(&sppServerCourie);
 
 	logger.info("server.start");

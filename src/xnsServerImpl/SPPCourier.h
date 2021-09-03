@@ -30,50 +30,33 @@
 
 
 //
-// EchoListener.cpp
+// SPPCourier.h
 //
 
-#include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-echo");
+#pragma once
 
-#include "../xnsServer/EchoListener.h"
+#include <functional>
 
-using ByteBuffer::Buffer;
-using XNS::Data;
-using XNS::Config;
-using XNS::Context;
-using XNS::IDP;
-using XNS::Echo;
-using Courier::Services;
+#include <QtConcurrent/QtConcurrent>
 
-void EchoListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
-	if (data.idp.type == IDP::Type::ECHO) {
-		Echo echo;
-		FROM_BYTE_BUFFER(level2, echo);
+#include "../xnsServer/SPPServer.h"
 
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  ECHO  %s", TO_CSTRING(header), TO_CSTRING(echo.toString()));
 
-		if (echo.type == Echo::Type::REQUEST) {
-			Echo reply;
+namespace XNS::Server {
 
-			reply.type = Echo::Type::REPLY;
-			reply.block = echo.block;
-
-			DefaultListener::transmit(data, reply);
-		} else {
-			logger.error("Unexpected");
-			logger.error("  echo %s", echo.toString());
-			ERROR();
+	class SPPCourier : public SPPServerImpl {
+	public:
+		SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
+		SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
+		SPPCourier& operator = (const SPPCourier& that) {
+			SPPServerImpl::operator =(that);
+			return *this;
 		}
 
-	} else {
-		logger.error("Unexpected");
-		logger.error("    %s", data.idp.toString());
-		logger.error("        %s", data.idp.block.toString());
-		ERROR();
-	}
-}
+		void run(FunctionTable functionTable);
 
+		// clone method for SPPServer
+		SPPCourier* clone();
+	};
+
+}

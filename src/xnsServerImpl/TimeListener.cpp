@@ -30,26 +30,65 @@
 
 
 //
-// SPPStream.cpp
+// TimeListener.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("spp-cour");
+static const Logger logger = Logger::getLogger("listen-time");
 
-#include "../xns/SPP.h"
-#include "Server.h"
+#include "../xns/Time.h"
 
-#include "SPPCourier.h"
+#include "TimeListener.h"
 
+using ByteBuffer::Buffer;
+using ByteBuffer::BLOCK;
+using Network::Packet;;
+using XNS::Data;
+using XNS::Config;
+using XNS::Context;
+using XNS::IDP;
+using XNS::PEX;
+using XNS::Time;
+using Courier::Services;
 
-void XNS::Server::SPPCourier::run(FunctionTable functionTable) {
-	logger.info("run");
-	functionTable.stopRun();
-}
+void TimeListener::handle(const Data& data, const PEX& pex) {
+	Buffer level3 = pex.block.toBuffer();
+	Time time;
+	FROM_BYTE_BUFFER(level3, time);
 
-// clone method for SPPServer
-XNS::Server::SPPCourier* XNS::Server::SPPCourier::clone() {
-	SPPCourier* ret = new SPPCourier(*this);
-	return ret;
+	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(time.toString()));
+
+	if (time.type == Time::Type::REQUEST) {
+		Time::Response response;
+		response.time            = QDateTime::currentSecsSinceEpoch();
+		response.offsetDirection = data.config->time.offsetDirection;
+		response.offsetHours     = data.config->time.offsetHours;
+		response.offsetMinutes   = data.config->time.offsetMinutes;
+		response.tolerance       = Time::Tolerance::MILLI;
+		response.toleranceValue  = 10;
+
+		Time replyTime;
+		replyTime.version = Time::Version::CURRENT;
+		replyTime.type    = Time::Type::RESPONSE;
+		replyTime.set(response);
+
+		Packet level3;
+		TO_BYTE_BUFFER(level3, replyTime);
+		BLOCK block3(level3);
+
+		// set block3 to replyPEX.block
+		PEX replyPEX;
+		replyPEX.id    = pex.id;
+		replyPEX.type  = PEX::Type::TIME;
+		replyPEX.block = block3;
+
+		DefaultListener::transmit(data, replyPEX);
+	} else {
+		logger.error("Unexpected");
+		logger.error("  time %s", time.toString());
+		ERROR();
+	}
 }
 

@@ -80,12 +80,12 @@ namespace ByteBuffer {
 		}
 
 		// Create subrange ByteBuffer
-		Buffer newBase(int newValue) {
+		Buffer newBase(int newValue) const {
 			Buffer ret(*this);
 			ret.setBase(newValue);
 			return ret;
 		}
-		Buffer newBase() {
+		Buffer newBase() const {
 			return newBase(myPosition);
 		}
 		void setBase(int newValue) {
@@ -244,7 +244,7 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString::asprintf("%u", value());
 		}
 
@@ -286,7 +286,7 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString::asprintf("%u", value());
 		}
 
@@ -328,7 +328,7 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString::asprintf("%d", value());
 		}
 
@@ -410,7 +410,7 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString::asprintf("%d", value());
 		}
 
@@ -451,7 +451,7 @@ namespace ByteBuffer {
 			return OpaqueType::operator =(newValue);
 		}
 
-		QString toString() {
+		QString toString() const {
 			return QString::asprintf("%llu", value());
 		}
 
@@ -505,5 +505,134 @@ namespace ByteBuffer {
 		}
 	};
 
+}
+
+
+//
+// Define operator >> for generic class T that decived from ByteBuffer::Base
+//
+template <typename T>
+ByteBuffer::Buffer& operator << (ByteBuffer::Buffer &bb, const T &value) {
+	static_assert(std::is_base_of<ByteBuffer::Base, T>::value, "T is not derived from ByteBuffer::Base");
+	value.toByteBuffer(bb);
+	return bb;
+}
+template <typename T>
+ByteBuffer::Buffer& operator >> (ByteBuffer::Buffer &bb, T &value) {
+	static_assert(std::is_base_of<ByteBuffer::Base, T>::value, "T is not derived from ByteBuffer::Base");
+	value.fromByteBuffer(bb);
+	return bb;
+}
+
+//
+// Define specialized operator << for unsigned primitive type
+//
+template <>
+inline ByteBuffer::Buffer& operator << (ByteBuffer::Buffer &bb, const quint8 &value) {
+	bb.write8(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const quint16 &value) {
+	bb.write16(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const quint32 &value) {
+	bb.write32(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const quint64 &value) {
+	bb.write48(value);
+	return bb;
+}
+
+//
+// Define specialized operator << for signed primitive type
+//
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const qint8 &value) {
+	bb.write8((quint8)value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const qint16 &value) {
+	bb.write16((quint16)value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const qint32 &value) {
+	bb.write32((quint32)value);
+	return bb;
+}
+
+//
+// Define specialized operator << for for Buffer
+//
+template <>
+inline ByteBuffer::Buffer& operator <<(ByteBuffer::Buffer &bb, const ByteBuffer::Buffer &value) {
+	int size = value.limit() - value.base();
+	quint8* data = value.data() + value.base();
+	bb.write(size, data);
+	return bb;
+}
+
+//
+// Define specialized operator >> for unsigned primitive type
+//
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, quint8 &value) {
+	bb.read8(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, quint16 &value) {
+	bb.read16(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, quint32 &value) {
+	bb.read32(value);
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, quint64 &value) {
+	bb.read48(value);
+	return bb;
+}
+
+//
+// Define specialized operator >> for signed primitive type
+//
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, qint8 &value) {
+	quint8 newValue;
+	bb.read8(newValue);
+	value = (qint8)newValue;
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, qint16 &value) {
+	quint16 newValue;
+	bb.read16(newValue);
+	value = (qint16)newValue;
+	return bb;
+}
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, qint32 &value) {
+	quint32 newValue;
+	bb.read32(newValue);
+	value = (qint32)newValue;
+	return bb;
+}
+
+//
+// Define specialized operator >> for Buffer
+//
+template <>
+inline ByteBuffer::Buffer& operator >>(ByteBuffer::Buffer &bb, ByteBuffer::Buffer &value) {
+	value = bb.newBase();
+	return bb;
 }
 

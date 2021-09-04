@@ -55,6 +55,8 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
+	Logger::installQtMessageHandler();
+
 	DEBUG_TRACE();
 
 	{

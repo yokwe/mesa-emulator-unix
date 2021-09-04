@@ -113,6 +113,12 @@ public:
 	static void pushPriority(log4cpp::Priority::Value newValue);
 	static void popPriority();
 
+	// To redirect qDebug() qInfo() and qWarning() to log4cpp, call installQtMessageHandler
+	static QtMessageHandler getQtMessageHandler();
+	static void installQtMessageHandler() {
+		qInstallMessageHandler(getQtMessageHandler());
+	}
+
     template<typename... Args> void debug(const char* format, Args&& ... args) const {
     	category->debug(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
     }

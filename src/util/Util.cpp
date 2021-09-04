@@ -67,6 +67,53 @@ void setSignalHandler(int signum) {
 
 
 // Logger
+static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& string) {
+	if (context.line == 0) {
+		switch(type) {
+		case QtDebugMsg:
+			logger.debug("%s", string);
+			break;
+		case QtInfoMsg:
+			logger.info("%s", string);
+			break;
+		case QtWarningMsg:
+			logger.warn("%s", string);
+			break;
+		case QtCriticalMsg:
+			logger.error("%s", string);
+			break;
+		case QtFatalMsg:
+			logger.fatal("%s", string);
+			break;
+		default:
+			ERROR();
+		}
+	} else {
+		switch(type) {
+		case QtDebugMsg:
+			logger.debug("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			break;
+		case QtInfoMsg:
+			logger.info("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			break;
+		case QtWarningMsg:
+			logger.warn("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			break;
+		case QtCriticalMsg:
+			logger.error("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			break;
+		case QtFatalMsg:
+			logger.fatal("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			break;
+		default:
+			ERROR();
+		}
+	}
+}
+QtMessageHandler Logger::getQtMessageHandler() {
+	return qtMessageHandler;
+}
+
 Logger Logger::getLogger(const char *name) {
 	static char *fileName = getenv("LOG4CPP_CONFIG");
 

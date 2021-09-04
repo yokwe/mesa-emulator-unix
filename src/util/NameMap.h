@@ -53,7 +53,7 @@ namespace NameMap {
 			if (map.contains(value)) {
 				return map[value];
 			} else {
-				return toStringDefault(value);
+				return toStringDefault((quint16)value);
 			}
 		}
 

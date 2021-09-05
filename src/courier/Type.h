@@ -30,7 +30,7 @@
 
 
 //
-// Courier.h
+// Type.h
 //
 
 #pragma once
@@ -40,6 +40,9 @@
 #include "../util/OpaqueType.h"
 #include "../util/ByteBuffer.h"
 
+#include "DataStream.h"
+#include "TextStream.h"
+
 namespace Courier {
 	using ByteBuffer::Base;
 	using ByteBuffer::Buffer;
@@ -47,29 +50,38 @@ namespace Courier {
 	//
 	// Predefined Type
 	//
-	class BOOLEAN : public Base, public OpaqueType<quint16> {
-	public:
-		BOOLEAN() : OpaqueType() {}
-
-		// define operator =
-		bool operator =(const bool& newValue) const {
-			value(newValue ? 1 : 0);
-			return newValue;
-		}
-
-		// cast to bool
-		operator bool() {
-			return value();
-		}
-
-		QString toString() {
-			return value() ? "true" : "false";
-		}
-
-		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+	enum class BOOLEAN : quint16 {
+		FALSE_ = 0, TRUE_ = 1,
 	};
+
+	DataStream& operator << (DataStream& that, const BOOLEAN& value);
+	DataStream& operator >> (DataStream& that,       BOOLEAN& value);
+	TextStream& operator << (TextStream& that, const BOOLEAN& value);
+
+
+//	class BOOLEAN : public Base, public OpaqueType<quint16> {
+//	public:
+//		BOOLEAN() : OpaqueType() {}
+//
+//		// define operator =
+//		bool operator =(const bool& newValue) const {
+//			value(newValue ? 1 : 0);
+//			return newValue;
+//		}
+//
+//		// cast to bool
+//		operator bool() {
+//			return value();
+//		}
+//
+//		QString toString() {
+//			return value() ? "true" : "false";
+//		}
+//
+//		// ByteBuffer::Base
+//		void fromByteBuffer(Buffer& bb);
+//		void toByteBuffer  (Buffer& bb) const;
+//	};
 
 	// Use UINT16 UINT32 INT16 INT32 from ByteBuffer
 
@@ -221,4 +233,3 @@ namespace Courier {
 	};
 
 }
-

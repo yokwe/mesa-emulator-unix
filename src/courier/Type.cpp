@@ -42,13 +42,21 @@ static const Logger logger = Logger::getLogger("cr-type");
 //
 // Courier::BOOLEAN
 //
-void Courier::BOOLEAN::fromByteBuffer(Buffer& bb) {
-	quint16 newValue;
-	bb.read16(newValue);
-	value(newValue);
+Courier::DataStream& operator << (Courier::DataStream& that, const Courier::BOOLEAN& value) {
+	quint16 newValue = value == Courier::BOOLEAN::FALSE_ ? 0 : 1;
+	that << newValue;
+	return that;
 }
-void Courier::BOOLEAN::toByteBuffer  (Buffer& bb) const {
-	bb.write16(value());
+Courier::DataStream& operator >> (Courier::DataStream& that,       Courier::BOOLEAN& value) {
+	quint16 newValue;
+	that >> newValue;
+	value = newValue ? Courier::BOOLEAN::TRUE_ : Courier::BOOLEAN::FALSE_;
+	return that;
+}
+Courier::TextStream& operator << (Courier::TextStream& that, const Courier::BOOLEAN& value) {
+	const char* newValue = (value == Courier::BOOLEAN::FALSE_) ? "false" : "true";
+	that << newValue;
+	return that;
 }
 
 

@@ -58,7 +58,7 @@ void ByteBuffer::Buffer::copyFrom(int len, const quint8* data) {
 	memcpy(myData + myBase, data, (size_t)len);
 	// reset position and limit
 	myPosition = myBase;
-	myLimit    = len;
+	myLimit    = myBase + len;
 }
 
 QString ByteBuffer::Buffer::toString(int limit) const {

@@ -69,7 +69,8 @@ void CHSListener::handle(const Data& data, const PEX& pex) {
 	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
 
 	Packet result;
-	services->call(exp.body, result);
+	bool useBulk;
+	services->call(exp.body, result, useBulk);
 
 	if (result.limit() == 0) return;
 	BLOCK block(result);

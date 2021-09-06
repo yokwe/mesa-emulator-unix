@@ -42,12 +42,6 @@
 #include "Type.h"
 
 namespace Courier {
-	using Courier::Base;
-	using Courier::UINT32;
-	using Courier::UINT16;
-	using Courier::BLOCK;
-
-
 	class ProtocolType : public UINT16 {
 	public:
 		enum Value : quint16 {

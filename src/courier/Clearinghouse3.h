@@ -37,7 +37,6 @@
 
 #include "../xns/XNS.h"
 
-#include "Service.h"
 #include "Type.h"
 
 #include "Authentication3.h"

@@ -99,16 +99,20 @@ namespace XNS::Server {
 		virtual ~SPPServerImpl() {}
 
 		SPPServerImpl(const SPPServerImpl& that) : SPPListener(that) {
-			this->state = that.state;
+			this->myState = that.myState;
 		}
 		SPPServerImpl& operator = (const SPPServerImpl& that) {
 			SPPListener::operator =(that);
-			this->state = that.state;
+			this->myState = that.myState;
 			return *this;
 		}
 
+		void state(const State& state_) {
+			myState = state_;
+		}
+
 		SPPServerImpl(const char* name, quint16 socket) : SPPListener(name, socket) {}
-		SPPServerImpl(const State& state_) : SPPListener(state_.name, state_.localSocket), state(state_) {}
+		SPPServerImpl(const State& state_) : SPPListener(state_.name, state_.localSocket), myState(state_) {}
 
 		void handle(const XNS::Data& data, const XNS::SPP& spp);
 
@@ -126,7 +130,7 @@ namespace XNS::Server {
 		// return new SPPServerImpl(*this);
 
 	protected:
-		State state;
+		State myState;
 	};
 
 	// SPPServer waiting for new connection at server socket

@@ -51,6 +51,14 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPServerImpl", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 
+	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
+		// something goes wrong
+		logger.error("Unexpected");
+		logger.error("  expect  %04X  %s-%s", myState.remoteID,     TO_CSTRING(XNS::Host::toString(myState.remoteHost)), TO_CSTRING(XNS::Socket::toString(myState.remoteSocket)));
+		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),           TO_CSTRING(data.idp.srcSocket.toString()));
+		ERROR();
+	}
+
 	if (spp.control.isSystem()) {
 		if (spp.control.isSendAck()) {
 			// Send reply packet
@@ -58,11 +66,11 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 				SPP reply;
 				reply.control = SPP::Control::BIT_SYSTEM;
 				reply.sst = SPP::SST::DATA;
-				reply.idSrc = state.localID;
-				reply.idDst = state.remoteID;
-				reply.seq   = state.seq;
-				reply.ack   = state.ack;
-				reply.alloc = state.alloc;
+				reply.idSrc = myState.localID;
+				reply.idDst = myState.remoteID;
+				reply.seq   = myState.seq;
+				reply.ack   = myState.ack;
+				reply.alloc = myState.alloc;
 
 				Network::Packet level2;
 				TO_BYTE_BUFFER(level2, reply);
@@ -154,6 +162,7 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 			newImpl->socket(state.localSocket);
 			newImpl->name(state.name);
 			newImpl->autoDelete(true);
+			newImpl->state(state);
 
 			// start listening
 			listeners->add(newImpl);

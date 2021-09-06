@@ -36,13 +36,19 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("cr-service");
 
+#include "../util/Network.h"
+
 #include "../xnsServer/Server.h"
+
+#include "../courier/Protocol.h"
 
 #include "Service.h"
 
 
+using Network::Packet;
 using XNS::Data;
 using XNS::PEX;
+using Courier::Protocol3Body;
 
 //
 // Courier::Service
@@ -55,6 +61,7 @@ void Courier::Service::add(Procedure* procedure) {
 		logger.error("  procedure %u %s", procedure->procedure(), procedure->name());
 		ERROR();
 	} else {
+		logger.info("add  %3d  %s %s", procedure->procedure(), name(), procedure->name());
 		map[key] = procedure;
 	}
 }
@@ -69,25 +76,7 @@ Courier::Procedure* Courier::Service::getProcedure(const quint16 procedure) cons
 		return nullptr;
 	}
 }
-void Courier::Service::call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& callBody) const {
-	Procedure* procedure = getProcedure(callBody.procedure);
-	if (procedure == nullptr) {
-		logger.error("callBody %s", callBody.toString());
-		ERROR();
-	} else {
-		procedure->call(data, pex, callBody);
-	}
-}
 
-
-//
-//
-//
-void Courier::DefaultService::initDefaultService(XNS::Server::Server* server_) {
-	server  = server_;
-	config  = server->getConfig();
-	context = server->getContext();
-}
 
 //
 // Courier::Services
@@ -112,7 +101,7 @@ void Courier::Services::stop() {
 	}
 	started = false;
 }
-void Courier::Services::add(DefaultService* service) {
+void Courier::Services::add(Service* service) {
 	// sanity check
 	if (server == nullptr) {
 		ERROR();
@@ -127,7 +116,6 @@ void Courier::Services::add(DefaultService* service) {
 		map[programVersion] = service;
 
 		// call init
-		service->initDefaultService(server);
 		service->init();
 	}
 }
@@ -138,26 +126,35 @@ Courier::Service* Courier::Services::getService(const ProgramVersion& programVer
 		return nullptr;
 	}
 }
-void Courier::Services::call(const Data& data, const PEX& pex, const Protocol3Body& body) const {
+
+void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result) const {
+	if (body.type != MessageType::CALL) {
+		logger.error("Unexpected");
+		logger.error("  body %s", body.toString());
+		ERROR();
+	}
+
+	result.clear();
+
 	Protocol3Body::CallBody callBody;
 	body.get(callBody);
 
 	ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
-	Service* service = getService(programVersion);
+	Service* service = server->getServices()->getService(programVersion);
 	if (service == nullptr) {
-		logger.error("Unexpected");
-		logger.error("  callBody %s", callBody.toString());
-		ERROR();
-	} else {
-		Procedure* procedure = service->getProcedure(callBody.procedure);
-		if (procedure == nullptr) {
-			logger.error("Unexpected");
-			logger.error("  callBody %s", callBody.toString());
-			ERROR();
-		} else {
-			procedure->call(data, pex, callBody);
-		}
+		logger.warn("NO SERVICE  %s", programVersion.toString());
+		return;
 	}
+
+	Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+	if (procedure == nullptr) {
+		logger.warn("NO PROCEDURE  %s  %u", service->toString(), (quint16)callBody.procedure);
+		return;
+	}
+
+	logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
+	procedure->call(*(server->getConfig()), callBody, result);
+	logger.info("result  %s", result.toString());
 }
 
 

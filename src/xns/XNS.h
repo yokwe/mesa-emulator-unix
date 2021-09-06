@@ -85,7 +85,10 @@ namespace XNS {
 		}
 
 		QString toString() const {
-			return nameMap.toString(value());
+			return toString(value());
+		}
+		static QString toString(quint64 value) {
+			return nameMap.toString(value);
 		}
 		static void addNameMap(quint64 value, QString name) {
 			nameMap.add(value, name);
@@ -176,7 +179,10 @@ namespace XNS {
 		}
 
 		QString toString() const {
-			return nameMap.toString(value());
+			return toString(value());
+		}
+		static QString toString(quint32 value) {
+			return nameMap.toString(value);
 		}
 		static void addNameMap(quint32 value, QString name) {
 			nameMap.add(value, name);
@@ -205,11 +211,11 @@ namespace XNS {
 			return newValue;
 		}
 
+		QString toString() const {
+			return toString(value());
+		}
 		static QString toString(quint16 newValue) {
 			return nameMap.toString(newValue);
-		}
-		QString toString() const {
-			return nameMap.toString(value());
 		}
 		static void addNameMap(quint16 value, QString name) {
 			nameMap.add(value, name);

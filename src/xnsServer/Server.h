@@ -56,7 +56,6 @@ namespace XNS::Server {
 	using Network::Driver;
 	using Network::Packet;
 	using Courier::Service;
-	using Courier::DefaultService;
 	using Courier::Services;
 	using Courier::ProgramVersion;
 
@@ -76,7 +75,7 @@ namespace XNS::Server {
 		void add(DefaultListener* listener) {
 			listeners.add(listener);
 		}
-		void add(DefaultService* service) {
+		void add(Service* service) {
 			services.add(service);
 		}
 

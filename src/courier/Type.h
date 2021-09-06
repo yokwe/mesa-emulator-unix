@@ -438,11 +438,15 @@ namespace Courier {
 		// Base
 		//
 		QString toString() const {
-			QStringList myList;
-			for(auto e: list) {
-				myList.append(QString("{%1}").arg(e.toString()));
+			if (list.isEmpty()) {
+				return "{}";
+			} else {
+				QStringList myList;
+				for(auto e: list) {
+					myList.append(QString("{%1}").arg(e.toString()));
+				}
+				return QString("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
 			}
-			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
 			list.clear();
@@ -509,11 +513,15 @@ namespace Courier {
 		// Base
 		//
 		QString toString() const {
-			QStringList myList;
-			for(auto e: list) {
-				myList.append(QString("{%1}").arg(e.toString()));
+			if (list.isEmpty()) {
+				return "{}";
+			} else {
+				QStringList myList;
+				for(auto e: list) {
+					myList.append(QString("{%1}").arg(e.toString()));
+				}
+				return QString("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
 			}
-			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
 			quint16 length;

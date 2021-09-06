@@ -66,23 +66,27 @@ using Courier::Clearinghouse2::NetworkAddress;
 class RetrieveAddresses : public Procedure {
 	static constexpr const char*   NAME      = "RetrieveAddresses";
 	static constexpr quint16       PROCEDURE = 0;
+	static constexpr bool          USE_BULK  = false;
 public:
-	RetrieveAddresses() : Procedure(NAME, PROCEDURE) {}
+	RetrieveAddresses() : Procedure(NAME, PROCEDURE, USE_BULK) {}
 
 	void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
-		logger.info("RetrieveAddresses called");
+		logger.info("%s called", NAME);
 
-		NetworkAddress networkAddress;
-		// send myself
-		networkAddress.net    = config.local.net;
-		networkAddress.host   = config.local.host;
-		networkAddress.socket = Socket::COURIER;
+		Courier::Clearinghouse2::RetrieveAddress::Return returnValue;
 
-		Courier::SEQUENCE<NetworkAddress, 40> reply;
-		reply.append(networkAddress);
+		{
+			NetworkAddress networkAddress;
+			// send myself
+			networkAddress.net    = config.local.net;
+			networkAddress.host   = config.local.host;
+			networkAddress.socket = Socket::COURIER;
+
+			returnValue.address.list.append(networkAddress);
+		}
 
 		Packet level4;
-		TO_BYTE_BUFFER(level4, reply);
+		TO_BYTE_BUFFER(level4, returnValue);
 		BLOCK block4(level4);
 
 		Protocol3Body::ReturnBody returnBody;
@@ -100,8 +104,33 @@ public:
 };
 RetrieveAddresses retrieveAddress;
 
+
+class ListDomainServed : public Procedure {
+	static constexpr const char*   NAME      = "ListDomainServed";
+	static constexpr quint16       PROCEDURE = 1;
+	static constexpr bool          USE_BULK  = true;
+public:
+	ListDomainServed() : Procedure(NAME, PROCEDURE, USE_BULK) {}
+
+	void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
+		(void)config;
+		(void)result;
+		logger.info("%s called", NAME);
+
+		ByteBuffer bb = callBody.block.toBuffer();
+		Courier::Clearinghouse2::ListDomainServed::Call callValue;
+		FROM_BYTE_BUFFER(bb, callValue);
+
+		logger.info("callValue %s", callValue.toString());
+
+	}
+};
+ListDomainServed listDomainServed;
+
+
 void CHService::init() {
 	logger.info("init %s", name());
 	// add procedure
 	add(&retrieveAddress);
+	add(&listDomainServed);
 }

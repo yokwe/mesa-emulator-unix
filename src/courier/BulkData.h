@@ -151,9 +151,9 @@ namespace Courier::BulkData {
 		void get(      NetworkIdentifier&  newValue)  const;
 		void set(const NetworkIdentifier&  newValue);
 
-		QString toString() const;
 
 		// Courier::Base
+		QString toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

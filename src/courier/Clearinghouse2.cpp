@@ -58,10 +58,9 @@ void Courier::Clearinghouse2::TwoPartName::toByteBuffer  (ByteBuffer& bb) const 
 
 
 //
-// Courier::Clearinghouse2::StreamOf::Choice
+// Courier::Clearinghouse2::StreamOfChoice
 //
-template <class T>
-NameMap::Map<quint16> Courier::Clearinghouse2::StreamOf<T>::Choice::nameMap(NameMap::toString16u, {
+NameMap::Map<quint16> Courier::Clearinghouse2::StreamOfChoice::nameMap(NameMap::toString16u, {
 	{NEXT_SEGMENT, "NEXT_SEGMENT"},
 	{LAST_SEGMENT, "LAST_SEGMENT"},
 });

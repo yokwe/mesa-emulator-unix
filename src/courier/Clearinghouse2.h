@@ -35,11 +35,11 @@
 
 #pragma once
 
+#include "../util/NameMap.h"
+
 #include "../xns/XNS.h"
 
 #include "Type.h"
-
-#include <QtCore>
 
 #include "Authentication1.h"
 #include "BulkData.h"
@@ -151,28 +151,29 @@ namespace Courier::Clearinghouse2 {
 	typedef ThreePartName ObjectNamePattern;
 
 	//	-- TYPES AND CONSTANTS DESCRIBING BULK PARAMETERS --
+	class StreamOfChoice : public UINT16 {
+	public:
+		enum Value : quint16 {
+			NEXT_SEGMENT = 0,
+			LAST_SEGMENT = 1,
+		};
+
+		// define operator =
+		quint16 operator =(const quint16& newValue) const {
+			value(newValue);
+			return newValue;
+		}
+
+		QString toString() const {
+			return nameMap.toString(value());
+		}
+	private:
+		static NameMap::Map<quint16> nameMap;
+	};
+
 	template <class T>
 	class StreamOf : public Base {
 	public:
-		class Choice : public UINT16 {
-		public:
-			enum Value : quint16 {
-				NEXT_SEGMENT = 0,
-				LAST_SEGMENT = 1,
-			};
-
-			// define operator =
-			quint16 operator =(const quint16& newValue) const {
-				value(newValue);
-				return newValue;
-			}
-
-			QString toString() const {
-				return nameMap.toString(value());
-			}
-		private:
-			static NameMap::Map<quint16> nameMap;
-		};
 
 		QList<T> list;
 
@@ -192,26 +193,26 @@ namespace Courier::Clearinghouse2 {
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb) {
-			Choice      choice;
-			SEQUENCE<T> sequence;
+			StreamOfChoice choice;
+			SEQUENCE<T>    sequence;
 
 			list.clear();
 			for(;;) {
 				FROM_BYTE_BUFFER(bb, choice);
 				FROM_BYTE_BUFFER(bb, sequence);
 
-				if ((quint16)choice == Choice::LAST_SEGMENT) break;
-				if ((quint16)choice == Choice::NEXT_SEGMENT) continue;
+				if ((quint16)choice == StreamOfChoice::LAST_SEGMENT) break;
+				if ((quint16)choice == StreamOfChoice::NEXT_SEGMENT) continue;
 
 				logger.error("choice %d", (quint16)choice);
 				ERROR();
 			}
 		}
 		void toByteBuffer  (ByteBuffer& bb) const {
-			Choice      choice;
-			SEQUENCE<T> sequence;
+			StreamOfChoice choice;
+			SEQUENCE<T>    sequence;
 
-			choice   = Choice::LAST_SEGMENT;
+			choice   = StreamOfChoice::LAST_SEGMENT;
 			sequence = list;
 
 			TO_BYTE_BUFFER(bb, choice);
@@ -343,7 +344,7 @@ namespace Courier::Clearinghouse2 {
 	};
 
 	//	wildcard: STRING = "*"; -- the wildcard character (asterisk) --
-	const char* WILDCARD = "*";
+	constexpr const char* WILDCARD = "*";
 
 	//	-- ERRORS --
 	//
@@ -527,6 +528,7 @@ namespace Courier::Clearinghouse2 {
 		const bool    USE_BULK = false;
 
 		class Return : Base {
+		public:
 			NetworkAddressList address;
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) {

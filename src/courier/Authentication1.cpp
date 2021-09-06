@@ -42,14 +42,17 @@ static const Logger logger = Logger::getLogger("cr-auth1");
 //
 // Courier::Authentication1::CredentialsType
 //
-NameMap::Map<quint16> Courier::Authentication1::CredentialsType::nameMap(NameMap::toString16X04, {{SIMPLE, "SIMPLE"}, {STRONG, "STRONG"}});
+NameMap::Map<quint16> Courier::Authentication1::CredentialsType::nameMap(NameMap::toString16X04, {
+	{SIMPLE, "SIMPLE"},
+	{STRONG, "STRONG"}
+});
 
 
 //
 // Courier::Authentication1::Credentials
 //
 QString Courier::Authentication1::Credentials::toString() const {
-	return QString("%1-%2").arg(type.toString()).arg(value.toString());
+	return QString("%1-(%2)").arg(type.toString()).arg(value.toString());
 }
 
 // Courier::Base

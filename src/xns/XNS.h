@@ -315,13 +315,13 @@ namespace XNS {
 
 	class Context {
 	public:
-		quint32 localNet;
-		quint64 localAddress;
+		quint64 address;
 
 		Driver* driver;
 
-		Context() : localNet(0), localAddress(0), driver(nullptr) {}
-		Context(const Config& config);
+		Context() : address(0), driver(nullptr) {}
+		// set value to config.local
+		Context(Config& config);
 	};
 
 

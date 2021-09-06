@@ -96,8 +96,8 @@ XNS::Config XNS::loadConfig(const QString& path) {
 //
 // XNS::Context
 //
-XNS::Context::Context(const Config& config) {
-	localNet = 0;
+XNS::Context::Context(Config& config) {
+	int localNet = 0;
 	for(auto e: config.network.list) {
 		if (e.hop == 0) {
 			localNet = e.net;
@@ -127,12 +127,17 @@ XNS::Context::Context(const Config& config) {
 		ERROR()
 	}
 
-	localAddress = device.address;
+	address = device.address;
 	driver = Network::getDriver(device);
 
-	logger.info("device   = %20s  %s", Host::toHexaDecimalString(device.address, ":"), device.name);
-	logger.info("device   = %20s  %s", Host::toDecimalString(device.address), device.name);
-	logger.info("localNet = %d", localNet);
+	// set value in config.local
+	config.local.host = address;
+	config.local.net  = (quint32)localNet;
+
+	logger.info("device     = %20s  %s", Host::toHexaDecimalString(device.address, ":"), device.name);
+	logger.info("device     = %20s  %s", Host::toDecimalString(device.address), device.name);
+	logger.info("local.net  = %s", Net::toString(config.local.net));
+	logger.info("local.host = %s", Host::toString(config.local.host));
 }
 
 

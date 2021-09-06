@@ -105,9 +105,9 @@ void Server::run() {
 		if (ethernet.type != Ethernet::Type::XNS) continue;
 		// check ethernet src
 		// ignore my own transmission
-		if (ethernet.src == context.localAddress) continue;
+		if (ethernet.src == config.local.host) continue;
 		// accept broadcast or to my host
-		if (ethernet.dst != Host::ALL && ethernet.dst != context.localAddress) continue;
+		if (ethernet.dst != Host::ALL && ethernet.dst != config.local.host) continue;
 
 		IDP idp;
 		FROM_BYTE_BUFFER(level1, idp);

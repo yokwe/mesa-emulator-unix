@@ -139,7 +139,7 @@ void XNS::Server::DefaultListener::initDefaultListener(Server* server_) {
 void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
-	packet.write48(context->localAddress);
+	packet.write48(context->address);
 	packet.write16(XNS::Ethernet::Type::XNS);
 
 	// save packet as start for setChecksum() and computeChecksum()
@@ -265,8 +265,8 @@ void DefaultListener::setIDP(const Data& data, quint8 type, BLOCK& block, IDP& i
 	idp.dstNet    = data.idp.srcNet;
 	idp.dstHost   = data.idp.srcHost;
 	idp.dstSocket = data.idp.srcSocket;
-	idp.srcNet    = data.context->localNet;
-	idp.srcHost   = data.context->localAddress;
+	idp.srcNet    = data.config->local.net;
+	idp.srcHost   = data.config->local.host;
 	idp.srcSocket = data.idp.dstSocket;
 	idp.block     = block;
 }

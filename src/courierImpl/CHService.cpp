@@ -101,8 +101,8 @@ public:
 		logger.info("RetrieveAddresses called");
 
 		NetworkAddress networkAddress;
-		networkAddress.network = data.context->localNet;
-		networkAddress.host    = data.context->localAddress;
+		networkAddress.network = data.config->local.net;
+		networkAddress.host    = data.config->local.host;
 		networkAddress.socket  = Socket::COURIER;
 
 		Courier::SEQUENCE<NetworkAddress, 40> reply;

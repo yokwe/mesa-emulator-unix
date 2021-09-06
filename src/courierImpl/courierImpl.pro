@@ -4,8 +4,8 @@ TEMPLATE = lib
 CONFIG  += staticlib
 
 # Input
-HEADERS += Service.h   CHS.h   CHService.h
-SOURCES += Service.cpp CHS.cpp CHService.cpp
+HEADERS += Service.h   CHService.h
+SOURCES += Service.cpp CHService.cpp
 
 
 ###############################################

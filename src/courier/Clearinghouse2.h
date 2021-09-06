@@ -329,7 +329,7 @@ namespace Courier::Clearinghouse2 {
 		Auth::Verifier    verifier;
 
 		QString toString() const {
-			return QString("%1-%2").arg(credentials.toString()).arg(verifier.toString());
+			return QString("(%1)-(%2)").arg(credentials.toString()).arg(verifier.toString());
 		}
 
 		// Courier::Base
@@ -530,7 +530,11 @@ namespace Courier::Clearinghouse2 {
 		class Return : Base {
 		public:
 			NetworkAddressList address;
+
 			// Courier::Base
+			QString toString() const {
+				return address.toString();
+			}
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, address);
 			}
@@ -549,7 +553,11 @@ namespace Courier::Clearinghouse2 {
 		public:
 			BulkData::Sink domains;
 			Authenticator  agent;
+
 			// Courier::Base
+			QString toString() const {
+				return QString("(%1)-(%2)").arg(domains.toString()).arg(agent.toString());
+			}
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, domains);
 				FROM_BYTE_BUFFER(bb, agent);
@@ -562,22 +570,19 @@ namespace Courier::Clearinghouse2 {
 		// return data with SST == BULK
 		// return data type is StreamOfDomainName
 		class Return : public Base {
-			QList<DomainName> list;
+			StreamOfDomainName value;
 
 			// Courier::Base
+			QString toString() const {
+				return value.toString();
+			}
 			void fromByteBuffer(ByteBuffer& bb) {
-				StreamOf<DomainName> streamOf;
-				FROM_BYTE_BUFFER(bb, streamOf);
-				list.clear();
-				list.append(streamOf.list);
+				FROM_BYTE_BUFFER(bb, value);
 			}
 			void toByteBuffer  (ByteBuffer& bb) const {
-				StreamOf<DomainName> streamOf;
-				streamOf = list;
-				TO_BYTE_BUFFER(bb, streamOf);
+				TO_BYTE_BUFFER(bb, value);
 			}
 		};
 	};
-
 
 }

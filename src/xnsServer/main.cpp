@@ -45,6 +45,8 @@ static const Logger logger = Logger::getLogger("xnsServer");
 #include "../xnsServerImpl/CHSListener.h"
 #include "../xnsServerImpl/SPPCourier.h"
 
+#include "../courier/Clearinghouse2.h"
+
 #include "../courierImpl/CHService.h"
 
 
@@ -71,8 +73,8 @@ int main(int, char**) {
 	SPPCourier      sppCourier;
 	SPPServer       sppServerCourie(&sppCourier);
 
-	CHService chService2("CHService2", Courier::CHS::PROGRAM, Courier::CHS::VERSION2);
-	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
+	CHService chService2("CHService2", Courier::Clearinghouse2::PROGRAM, Courier::Clearinghouse2::VERSION);
+//	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
 
 	Server server;
 
@@ -82,7 +84,7 @@ int main(int, char**) {
 
 	// add service
 	server.add(&chService2);
-	server.add(&chService3);
+//	server.add(&chService3);
 
 	// add listener
 	server.add(&echoListener);

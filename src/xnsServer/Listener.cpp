@@ -70,7 +70,8 @@ void Listeners::remove(quint16 socket) {
 	if (map.contains(socket)) {
 		Listener *listener = map.take(socket);
 		if (started) listener->stop();
-		delete listener;
+		// delete if autoDelete() it true
+		if (listener->autoDelete()) delete listener;
 	} else {
 		logger.error("Unexpected");
 		logger.error("  socket %s", XNS::Socket::toString(socket));

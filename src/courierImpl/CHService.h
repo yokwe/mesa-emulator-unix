@@ -35,8 +35,8 @@
 
 #pragma once
 
-#include "../courier/Service.h"
-#include "../courier/CHS.h"
+#include "Service.h"
+#include "CHS.h"
 
 class CHService : public Courier::DefaultService {
 public:

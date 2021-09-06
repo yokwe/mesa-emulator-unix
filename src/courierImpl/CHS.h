@@ -37,8 +37,8 @@
 
 #include "../xns/XNS.h"
 
+#include "../courier/Type.h"
 #include "Service.h"
-#include "Type.h"
 
 namespace Courier::CHS {
 	using XNS::Host;

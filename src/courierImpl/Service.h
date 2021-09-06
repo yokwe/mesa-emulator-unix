@@ -43,7 +43,7 @@
 #include "../xns/XNS.h"
 #include "../xns/PEX.h"
 
-#include "Protocol.h"
+#include "../courier/Protocol.h"
 
 // forward declaration of XNS::Server::Server
 namespace XNS::Server {

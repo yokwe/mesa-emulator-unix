@@ -46,10 +46,11 @@
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
 
-#include "../courier/Service.h"
+#include "../courierImpl/Service.h"
+
+#include "../xnsServer/Listener.h"
 
 #include <QtConcurrent/QtConcurrent>
-#include "../xnsServer/Listener.h"
 
 namespace XNS::Server {
 	using Network::Driver;

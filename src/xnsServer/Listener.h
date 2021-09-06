@@ -44,7 +44,7 @@
 #include "../xns/SPP.h"
 #include "../xns/Boot.h"
 
-#include "../courier/Service.h"
+#include "../courierImpl/Service.h"
 
 namespace XNS::Server {
 	using XNS::IDP;

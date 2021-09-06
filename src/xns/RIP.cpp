@@ -53,11 +53,11 @@ NameMap::Map<quint16> XNS::RIP::Type::nameMap(NameMap::toString16u, {{REQUEST, "
 QString XNS::RIP::Entry::toString() const {
 	return QString("{%1 %2}").arg(net.toString()).arg((quint16)hop);
 }
-void XNS::RIP::Entry::fromByteBuffer(Buffer& bb) {
+void XNS::RIP::Entry::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, net);
 	FROM_BYTE_BUFFER(bb, hop);
 }
-void XNS::RIP::Entry::toByteBuffer  (Buffer& bb) const {
+void XNS::RIP::Entry::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, net);
 	TO_BYTE_BUFFER(bb, hop);
 }
@@ -73,7 +73,7 @@ QString XNS::RIP::toString() const {
 	}
 	return QString("%1 %2").arg(type.toString()).arg(list.join(" "));
 }
-void XNS::RIP::fromByteBuffer(Buffer& bb) {
+void XNS::RIP::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 
 	for(;;) {
@@ -84,7 +84,7 @@ void XNS::RIP::fromByteBuffer(Buffer& bb) {
 		entryList += entry;
 	}
 }
-void XNS::RIP::toByteBuffer  (Buffer& bb) const {
+void XNS::RIP::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	for(auto e: entryList) {
 		TO_BYTE_BUFFER(bb, e);

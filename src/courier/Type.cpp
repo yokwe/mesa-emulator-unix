@@ -40,30 +40,9 @@ static const Logger logger = Logger::getLogger("cr-type");
 
 
 //
-// Courier::BOOLEAN
-//
-Courier::DataStream& operator << (Courier::DataStream& that, const Courier::BOOLEAN& value) {
-	quint16 newValue = value == Courier::BOOLEAN::FALSE_ ? 0 : 1;
-	that << newValue;
-	return that;
-}
-Courier::DataStream& operator >> (Courier::DataStream& that,       Courier::BOOLEAN& value) {
-	quint16 newValue;
-	that >> newValue;
-	value = newValue ? Courier::BOOLEAN::TRUE_ : Courier::BOOLEAN::FALSE_;
-	return that;
-}
-Courier::TextStream& operator << (Courier::TextStream& that, const Courier::BOOLEAN& value) {
-	const char* newValue = (value == Courier::BOOLEAN::FALSE_) ? "false" : "true";
-	that << newValue;
-	return that;
-}
-
-
-//
 // Courier::STRING
 //
-void Courier::STRING::fromByteBuffer(Buffer& bb) {
+void Courier::STRING::fromByteBuffer(ByteBuffer& bb) {
 	quint16 length;
 	bb.read16(length);
 	byteArray.clear();
@@ -80,7 +59,7 @@ void Courier::STRING::fromByteBuffer(Buffer& bb) {
 		(void)newValue;
 	}
 }
-void Courier::STRING::toByteBuffer  (Buffer& bb) const {
+void Courier::STRING::toByteBuffer  (ByteBuffer& bb) const {
 	int length = byteArray.length();
 	if (MAX_LENGTH < length) {
 		logger.error("Unexpected");

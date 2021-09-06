@@ -40,7 +40,6 @@ static const Logger logger = Logger::getLogger("spp-queue");
 
 #include "SPPQueue.h"
 
-using ByteBuffer::Buffer;
 using Network::Packet;
 using XNS::Data;
 using XNS::Config;

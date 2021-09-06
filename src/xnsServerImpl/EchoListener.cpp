@@ -38,7 +38,6 @@ static const Logger logger = Logger::getLogger("listen-echo");
 
 #include "EchoListener.h"
 
-using ByteBuffer::Buffer;
 using XNS::Data;
 using XNS::Config;
 using XNS::Context;
@@ -47,7 +46,7 @@ using XNS::Echo;
 using Courier::Services;
 
 void EchoListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
+	ByteBuffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
 		Echo echo;
 		FROM_BYTE_BUFFER(level2, echo);

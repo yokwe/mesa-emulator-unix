@@ -54,6 +54,7 @@ namespace XNS::Server {
 	using XNS::SPP;
 	using XNS::Boot;
 	using Courier::Services;
+	using Courier::BLOCK;
 
 	// forward declaration
 	class Server;

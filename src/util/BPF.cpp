@@ -107,7 +107,7 @@ void BPF::close() {
 	buffer = 0;
 }
 
-const QList<ByteBuffer::Buffer>& BPF::read() {
+const QList<ByteBuffer>& BPF::read() {
 	int validBufferLen;
 	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 
@@ -120,7 +120,7 @@ const QList<ByteBuffer::Buffer>& BPF::read() {
 		int     hdrlen = (int)(p->bh_hdrlen);
 		quint8* data   = buffer + i;
 
-		ByteBuffer::Buffer element(hdrlen + caplen, data);
+		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
 		readData.append(element);
 
@@ -173,7 +173,7 @@ int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSin
 	if (readData.isEmpty()) read();
 
 	// Take first entry
-	ByteBuffer::Buffer bb = readData.first();
+	ByteBuffer bb = readData.first();
 	int len = bb.limit() - bb.base();
 	if (dataLen < (quint32)len) {
 		logger.error("Unexpected");

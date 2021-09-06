@@ -43,7 +43,7 @@ static const Logger logger = Logger::getLogger("net");
 // Network::Packet
 //
 QString Network::Packet::toString(int limit) const {
-	ByteBuffer::Buffer bb(*this);
+	ByteBuffer bb(*this);
 	bb.rewind();
 
 	QString ret = QString::asprintf("(%4d) ", bb.limit());

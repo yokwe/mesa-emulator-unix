@@ -78,11 +78,11 @@ namespace Courier::BulkData {
 			return *this;
 		}
 
-		QString toString();
+		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 
@@ -129,17 +129,17 @@ namespace Courier::BulkData {
 				return *this;
 			}
 
-			QString toString() {
+			QString toString() const {
 				return QString("%1-%2-%3").arg(net.toString()).arg(host.toString()).arg(identifier.toString());
 			}
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb) {
+			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, net);
 				FROM_BYTE_BUFFER(bb, host);
 				FROM_BYTE_BUFFER(bb, identifier);
 			}
-			void toByteBuffer  (Buffer& bb) const {
+			void toByteBuffer  (ByteBuffer& bb) const {
 				TO_BYTE_BUFFER(bb, net);
 				TO_BYTE_BUFFER(bb, host);
 				TO_BYTE_BUFFER(bb, identifier);
@@ -155,8 +155,8 @@ namespace Courier::BulkData {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	//	-- sinks (for external use) --

@@ -46,10 +46,9 @@
 #include <variant>
 
 namespace XNS {
-	using ByteBuffer::UINT16;
-	using ByteBuffer::BLOCK;
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
+	using Courier::UINT16;
+	using Courier::BLOCK;
+	using Courier::Base;
 
 	//
 	// See APilot/15.0.1/Pilot/Friends/BootServerTypes.mesa
@@ -85,8 +84,8 @@ namespace XNS {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class SimpleData : public Base {
 		public:
@@ -97,8 +96,8 @@ namespace XNS {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class SPPRequest : public Base {
 		public:
@@ -108,8 +107,8 @@ namespace XNS {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 
 		Type type;
@@ -126,8 +125,8 @@ namespace XNS {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 }

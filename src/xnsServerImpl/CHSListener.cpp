@@ -36,20 +36,19 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listen-chs");
 
-#include "../courier/Courier.h"
+#include "../courier/Protocol.h"
 
 #include "../xnsServer/Server.h"
 
 #include "CHSListener.h"
 
-using ByteBuffer::Buffer;
-using ByteBuffer::BLOCK;
 using Network::Packet;
 using XNS::Data;
 using XNS::Config;
 using XNS::Context;
 using XNS::IDP;
 using XNS::PEX;
+using Courier::BLOCK;
 using Courier::Services;
 using Courier::Service;
 using Courier::Procedure;
@@ -59,7 +58,7 @@ using Courier::MessageType;
 using Courier::ProgramVersion;
 
 void CHSListener::handle(const Data& data, const PEX& pex) {
-	Buffer level3 = pex.block.toBuffer();
+	ByteBuffer level3 = pex.block.toBuffer();
 	ExpeditedCourier exp;
 	FROM_BYTE_BUFFER(level3, exp);
 

@@ -48,16 +48,16 @@ NameMap::Map<quint16> Courier::Authentication1::CredentialsType::nameMap(NameMap
 //
 // Courier::Authentication1::Credentials
 //
-QString Courier::Authentication1::Credentials::toString() {
+QString Courier::Authentication1::Credentials::toString() const {
 	return QString("%1-%2").arg(type.toString()).arg(value.toString());
 }
 
 // ByteBuffer::Base
-void Courier::Authentication1::Credentials::fromByteBuffer(Buffer& bb) {
+void Courier::Authentication1::Credentials::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	FROM_BYTE_BUFFER(bb, value);
 }
-void Courier::Authentication1::Credentials::toByteBuffer  (Buffer& bb) const {
+void Courier::Authentication1::Credentials::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	TO_BYTE_BUFFER(bb, value);
 }

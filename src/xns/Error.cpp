@@ -69,12 +69,12 @@ NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
 QString XNS::Error::toString() const {
 	return QString("%1 %2 %3").arg(type.toString()).arg(QString("%1").arg((quint16)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
 }
-void XNS::Error::fromByteBuffer(Buffer& bb) {
+void XNS::Error::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	FROM_BYTE_BUFFER(bb, param);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::Error::toByteBuffer  (Buffer& bb) const {
+void XNS::Error::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	TO_BYTE_BUFFER(bb, param);
 	TO_BYTE_BUFFER(bb, block);

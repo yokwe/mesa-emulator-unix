@@ -226,13 +226,13 @@ NameMap::Map<quint16> XNS::Ethernet::Type::nameMap(NameMap::toString16X04, {{XNS
 QString XNS::Ethernet::toString() const {
 	return QString("%1-%2-%3").arg(dst.toString()).arg(src.toString()).arg(type.toString());
 }
-void XNS::Ethernet::fromByteBuffer(Buffer& bb) {
+void XNS::Ethernet::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, dst);
 	FROM_BYTE_BUFFER(bb, src);
 	FROM_BYTE_BUFFER(bb, type);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::Ethernet::toByteBuffer  (Buffer& bb) const {
+void XNS::Ethernet::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, dst);
 	TO_BYTE_BUFFER(bb, src);
 	TO_BYTE_BUFFER(bb, type);
@@ -306,7 +306,7 @@ QString XNS::IDP::toString() const {
 		arg(dst, -20).
 		arg(src, -20);
 }
-void XNS::IDP::fromByteBuffer(Buffer& bb) {
+void XNS::IDP::fromByteBuffer(ByteBuffer& bb) {
 	int start = bb.position();
 
 	FROM_BYTE_BUFFER(bb, checksum_);
@@ -326,7 +326,7 @@ void XNS::IDP::fromByteBuffer(Buffer& bb) {
 	// read block after change limit
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::IDP::toByteBuffer  (Buffer& bb) const {
+void XNS::IDP::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, checksum_);
 	TO_BYTE_BUFFER(bb, length);
 	TO_BYTE_BUFFER(bb, control);
@@ -340,25 +340,25 @@ void XNS::IDP::toByteBuffer  (Buffer& bb) const {
 	TO_BYTE_BUFFER(bb, block);
 }
 
-quint16 XNS::IDP::getLength(const Buffer& bb) {
+quint16 XNS::IDP::getLength(const ByteBuffer& bb) {
 	quint16 newValue;
 	bb.read16(bb.base() + OFFSET_LENGTH, newValue);
 	return newValue;
 }
-void XNS::IDP::setLength(Buffer& bb, quint16 newValue) {
+void XNS::IDP::setLength(ByteBuffer& bb, quint16 newValue) {
 	bb.write16(bb.base() + OFFSET_LENGTH, newValue);
 }
 
-quint16 XNS::IDP::getChecksum(const Buffer& bb) {
+quint16 XNS::IDP::getChecksum(const ByteBuffer& bb) {
 	quint16 newValue;
 	bb.read16(bb.base() + OFFSET_CHECKSUM, newValue);
 	return newValue;
 }
-void XNS::IDP::setChecksum(Buffer& bb, quint16 newValue) {
+void XNS::IDP::setChecksum(ByteBuffer& bb, quint16 newValue) {
 	bb.write16(bb.base() + OFFSET_CHECKSUM, newValue);
 }
 
-quint16 XNS::IDP::computeChecksum(const Buffer& bb) {
+quint16 XNS::IDP::computeChecksum(const ByteBuffer& bb) {
 	quint8* data   = bb.data();
 	int     offset = bb.base();
 

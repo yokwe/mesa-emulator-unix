@@ -40,10 +40,11 @@ static const Logger logger = Logger::getLogger("spp-server");
 
 #include <QtCore>
 
-#include "../courier/Courier.h"
+#include "../courier/Protocol.h"
 
 #include "SPPServer.h"
 
+using Courier::BLOCK;
 
 void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
@@ -65,7 +66,7 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 
 				Network::Packet level2;
 				TO_BYTE_BUFFER(level2, reply);
-				ByteBuffer::BLOCK block(level2);
+				BLOCK block(level2);
 
 				IDP idp;
 				setIDP(data, IDP::Type::SPP, block, idp);
@@ -101,7 +102,7 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 		// FIXME
 		if (spp.control.isEndOfMessage()) {
 			Courier::ExpeditedCourier exp;
-			ByteBuffer::Buffer bb = spp.block.toBuffer();
+			ByteBuffer bb = spp.block.toBuffer();
 			FROM_BYTE_BUFFER(bb, exp);
 			logger.info("message %s", exp.toString());
 
@@ -172,7 +173,7 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 
 			Network::Packet level2;
 			TO_BYTE_BUFFER(level2, reply);
-			ByteBuffer::BLOCK block(level2);
+			BLOCK block(level2);
 
 			IDP idp;
 			setIDP(data, IDP::Type::SPP, block, idp);

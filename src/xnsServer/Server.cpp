@@ -99,7 +99,7 @@ void Server::run() {
 
 		Ethernet ethernet;
 		FROM_BYTE_BUFFER(level0, ethernet);
-		Buffer level1 = ethernet.block.toBuffer();
+		ByteBuffer level1 = ethernet.block.toBuffer();
 
 		// check ethernet type
 		if (ethernet.type != Ethernet::Type::XNS) continue;
@@ -118,7 +118,7 @@ void Server::run() {
 
 		// check idp checksum
 		{
-			Buffer start = ethernet.block.toBuffer();
+			ByteBuffer start = ethernet.block.toBuffer();
 			quint16 checksum = XNS::IDP::getChecksum(start);
 			if (checksum != XNS::Checksum::NOCHECK) {
 				quint16 newValue = XNS::IDP::computeChecksum(start);

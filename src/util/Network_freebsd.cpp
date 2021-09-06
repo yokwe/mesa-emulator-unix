@@ -96,7 +96,7 @@ QList<Network::Device> Network::FreeBSD::getDeviceList() {
 					device.name.append(data[i]);
 				}
 				// copy address
-				ByteBuffer::Buffer bb(sdl->sdl_alen, data + sdl->sdl_nlen);
+				ByteBuffer bb(sdl->sdl_alen, data + sdl->sdl_nlen);
 				bb.read48(device.address);
 
 				list += device;

@@ -44,16 +44,16 @@
 
 namespace Network {
 
-	class Packet : public ByteBuffer::Buffer {
+	class Packet : public ByteBuffer {
 	public:
 		static constexpr int SIZE = 1514;
 
-		Packet() : ByteBuffer::Buffer(SIZE, packetData) {}
+		Packet() : ByteBuffer(SIZE, packetData) {}
 
-		Packet(const ByteBuffer::Buffer& that) : ByteBuffer::Buffer() {
+		Packet(const ByteBuffer& that) : ByteBuffer() {
 			deepCopy(that);
 		}
-		Packet& operator =(const ByteBuffer::Buffer& that) {
+		Packet& operator =(const ByteBuffer& that) {
 			deepCopy(that);
 			return *this;
 		}
@@ -68,7 +68,7 @@ namespace Network {
 		quint8  packetData[SIZE];
 
 	protected:
-		void deepCopy(const ByteBuffer::Buffer& that) {
+		void deepCopy(const ByteBuffer& that) {
 			// copy values from that
 			myBase     = that.base();
 			myPosition = that.position();

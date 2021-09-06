@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("cr-courier");
 
-#include "Courier.h"
+#include "Protocol.h"
 
 
 //
@@ -76,11 +76,11 @@ NameMap::Map<quint16> Courier::RejectCode::nameMap(NameMap::toString16u, {
 QString Courier::ProtocolRange::toString() const {
 	return QString("%1-%2").arg(low.toString()).arg(high.toString());
 }
-void Courier::ProtocolRange::fromByteBuffer(Buffer& bb) {
+void Courier::ProtocolRange::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, low);
 	FROM_BYTE_BUFFER(bb, high);
 }
-void Courier::ProtocolRange::toByteBuffer  (Buffer& bb) const {
+void Courier::ProtocolRange::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, low);
 	TO_BYTE_BUFFER(bb, high);
 }
@@ -92,11 +92,11 @@ void Courier::ProtocolRange::toByteBuffer  (Buffer& bb) const {
 QString Courier::VersionRange::toString() const {
 	return QString("%1-%2").arg((quint16)low).arg((quint16)high);
 }
-void Courier::VersionRange::fromByteBuffer(Buffer& bb) {
+void Courier::VersionRange::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, low);
 	FROM_BYTE_BUFFER(bb, high);
 }
-void Courier::VersionRange::toByteBuffer  (Buffer& bb) const {
+void Courier::VersionRange::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, low);
 	TO_BYTE_BUFFER(bb, high);
 }
@@ -108,14 +108,14 @@ void Courier::VersionRange::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol2Body::CallBody::toString() const {
 	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
 }
-void Courier::Protocol2Body::CallBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol2Body::CallBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, program);
 	FROM_BYTE_BUFFER(bb, version);
 	FROM_BYTE_BUFFER(bb, procedure);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol2Body::CallBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol2Body::CallBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, program);
 	TO_BYTE_BUFFER(bb, version);
@@ -130,11 +130,11 @@ void Courier::Protocol2Body::CallBody::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol2Body::RejectBody::toString() const {
 	return QString("%1-%2").arg((quint16)transaction).arg(reject.toString());
 }
-void Courier::Protocol2Body::RejectBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol2Body::RejectBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, reject);
 }
-void Courier::Protocol2Body::RejectBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol2Body::RejectBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, reject);
 }
@@ -146,11 +146,11 @@ void Courier::Protocol2Body::RejectBody::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol2Body::ReturnBody::toString() const {
 	return QString("%1").arg((quint16)transaction);
 }
-void Courier::Protocol2Body::ReturnBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol2Body::ReturnBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol2Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol2Body::ReturnBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, block);
 }
@@ -162,12 +162,12 @@ void Courier::Protocol2Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol2Body::AbortBody::toString() const {
 	return QString("%1-%2").arg((quint16)transaction).arg((quint16)abort);
 }
-void Courier::Protocol2Body::AbortBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol2Body::AbortBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, abort);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol2Body::AbortBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol2Body::AbortBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, abort);
 	TO_BYTE_BUFFER(bb, block);
@@ -274,7 +274,7 @@ QString Courier::Protocol2Body::toString() const {
 		ERROR();
 	}
 }
-void Courier::Protocol2Body::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol2Body::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	if (type == MessageType::CALL) {
 		CallBody newValue;
@@ -298,7 +298,7 @@ void Courier::Protocol2Body::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void Courier::Protocol2Body::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol2Body::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	if (type == MessageType::CALL) {
 		CallBody newValue;
@@ -330,14 +330,14 @@ void Courier::Protocol2Body::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol3Body::CallBody::toString() const {
 	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
 }
-void Courier::Protocol3Body::CallBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol3Body::CallBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, program);
 	FROM_BYTE_BUFFER(bb, version);
 	FROM_BYTE_BUFFER(bb, procedure);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol3Body::CallBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol3Body::CallBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, program);
 	TO_BYTE_BUFFER(bb, version);
@@ -384,7 +384,7 @@ QString Courier::Protocol3Body::RejectBody::toString() const {
 		ERROR();
 	}
 }
-void Courier::Protocol3Body::RejectBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol3Body::RejectBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, code);
 
@@ -404,7 +404,7 @@ void Courier::Protocol3Body::RejectBody::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void Courier::Protocol3Body::RejectBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol3Body::RejectBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, code);
 
@@ -432,11 +432,11 @@ void Courier::Protocol3Body::RejectBody::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol3Body::ReturnBody::toString() const {
 	return QString("%1").arg((quint16)transaction, 4, 16, QChar('0').toUpper());
 }
-void Courier::Protocol3Body::ReturnBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol3Body::ReturnBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol3Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol3Body::ReturnBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, block);
 }
@@ -448,12 +448,12 @@ void Courier::Protocol3Body::ReturnBody::toByteBuffer  (Buffer& bb) const {
 QString Courier::Protocol3Body::AbortBody::toString() const {
 	return QString("%1-%2").arg((quint16)transaction).arg((quint16)abort);
 }
-void Courier::Protocol3Body::AbortBody::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol3Body::AbortBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
 	FROM_BYTE_BUFFER(bb, abort);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void Courier::Protocol3Body::AbortBody::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol3Body::AbortBody::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, transaction);
 	TO_BYTE_BUFFER(bb, abort);
 	TO_BYTE_BUFFER(bb, block);
@@ -560,7 +560,7 @@ QString Courier::Protocol3Body::toString() const {
 		ERROR();
 	}
 }
-void Courier::Protocol3Body::fromByteBuffer(Buffer& bb) {
+void Courier::Protocol3Body::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	if (type == MessageType::CALL) {
 		CallBody newValue;
@@ -584,7 +584,7 @@ void Courier::Protocol3Body::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void Courier::Protocol3Body::toByteBuffer  (Buffer& bb) const {
+void Courier::Protocol3Body::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	if (type == MessageType::CALL) {
 		CallBody newValue;
@@ -616,7 +616,7 @@ void Courier::Protocol3Body::toByteBuffer  (Buffer& bb) const {
 QString Courier::ExpeditedCourier::toString() const {
 	return QString("%1 %2").arg(range.toString()).arg(body.toString());
 }
-void Courier::ExpeditedCourier::fromByteBuffer(Buffer& bb) {
+void Courier::ExpeditedCourier::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, range);
 	if (range.low == Courier::ProtocolType::PROTOCOL3 && range.high == Courier::ProtocolType::PROTOCOL3) {
 		FROM_BYTE_BUFFER(bb, body);
@@ -626,7 +626,7 @@ void Courier::ExpeditedCourier::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void Courier::ExpeditedCourier::toByteBuffer  (Buffer& bb) const {
+void Courier::ExpeditedCourier::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, range);
 	TO_BYTE_BUFFER(bb, body);
 }

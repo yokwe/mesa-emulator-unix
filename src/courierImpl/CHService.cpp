@@ -38,16 +38,13 @@ static const Logger logger = Logger::getLogger("svc-chs");
 
 #include "../util/ByteBuffer.h"
 
-#include "../courier/Courier.h"
+#include "../courier/Protocol.h"
 #include "../courier/Type.h"
 
 #include "../xnsServer/Listener.h"
 
 #include "CHService.h"
 
-using ByteBuffer::Base;
-using ByteBuffer::Buffer;
-using ByteBuffer::BLOCK;
 using Network::Packet;
 using XNS::Data;
 using XNS::Host;
@@ -55,6 +52,8 @@ using XNS::Socket;
 using XNS::Net;
 using XNS::PEX;
 using XNS::Server::DefaultListener;
+using Courier::Base;
+using Courier::BLOCK;
 using Courier::Procedure;
 using Courier::Protocol3Body;
 
@@ -69,23 +68,23 @@ public:
 	Host   host;
 	Socket socket;
 
-	QString toString();
+	QString toString() const;
 
 	// ByteBuffer::Base
-	void fromByteBuffer(Buffer& bb);
-	void toByteBuffer  (Buffer& bb) const;
+	void fromByteBuffer(ByteBuffer& bb);
+	void toByteBuffer  (ByteBuffer& bb) const;
 };
 
-QString NetworkAddress::toString() {
+QString NetworkAddress::toString() const {
 	return QString("%1-%2-%3").arg(network.toString()).arg(host.toString()).arg(socket.toString());
 }
 
-void NetworkAddress::fromByteBuffer(Buffer& bb) {
+void NetworkAddress::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, network);
 	FROM_BYTE_BUFFER(bb, host);
 	FROM_BYTE_BUFFER(bb, socket);
 }
-void NetworkAddress::toByteBuffer(Buffer& bb) const {
+void NetworkAddress::toByteBuffer(ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, network);
 	TO_BYTE_BUFFER(bb, host);
 	TO_BYTE_BUFFER(bb, socket);

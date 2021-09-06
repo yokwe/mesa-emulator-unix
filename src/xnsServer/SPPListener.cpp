@@ -40,13 +40,12 @@ static const Logger logger = Logger::getLogger("listen-spp");
 
 #include "../xnsServer/SPPListener.h"
 
-using ByteBuffer::Buffer;
 using XNS::Data;
 using XNS::IDP;
 using XNS::SPP;
 
 void SPPListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
+	ByteBuffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::SPP) {
 		SPP spp;
 		FROM_BYTE_BUFFER(level2, spp);

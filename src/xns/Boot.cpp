@@ -55,10 +55,10 @@ NameMap::Map<quint16> XNS::Boot::Type::nameMap(NameMap::toString16u, {
 QString XNS::Boot::SimpleRequest::toString() const {
 	return bootFileNumber.toHexaDecimalString();
 }
-void XNS::Boot::SimpleRequest::fromByteBuffer(Buffer& bb) {
+void XNS::Boot::SimpleRequest::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, bootFileNumber);
 }
-void XNS::Boot::SimpleRequest::toByteBuffer  (Buffer& bb) const {
+void XNS::Boot::SimpleRequest::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, bootFileNumber);
 }
 
@@ -69,12 +69,12 @@ void XNS::Boot::SimpleRequest::toByteBuffer  (Buffer& bb) const {
 QString XNS::Boot::SimpleData::toString() const {
 	return QString("%1 %2 %3").arg(bootFileNumber.toHexaDecimalString()).arg(packetNumber).arg(block.toString());
 }
-void XNS::Boot::SimpleData::fromByteBuffer(Buffer& bb) {
+void XNS::Boot::SimpleData::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, bootFileNumber);
 	FROM_BYTE_BUFFER(bb, packetNumber);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::Boot::SimpleData::toByteBuffer  (Buffer& bb) const {
+void XNS::Boot::SimpleData::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, bootFileNumber);
 	TO_BYTE_BUFFER(bb, packetNumber);
 	TO_BYTE_BUFFER(bb, block);
@@ -87,11 +87,11 @@ void XNS::Boot::SimpleData::toByteBuffer  (Buffer& bb) const {
 QString XNS::Boot::SPPRequest::toString() const {
 	return QString("%1 %2").arg(bootFileNumber.toHexaDecimalString()).arg(connectionID, 4, 16, QChar('0'));
 }
-void XNS::Boot::SPPRequest::fromByteBuffer(Buffer& bb) {
+void XNS::Boot::SPPRequest::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, bootFileNumber);
 	FROM_BYTE_BUFFER(bb, connectionID);
 }
-void XNS::Boot::SPPRequest::toByteBuffer  (Buffer& bb) const {
+void XNS::Boot::SPPRequest::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, bootFileNumber);
 	TO_BYTE_BUFFER(bb, connectionID);
 }
@@ -170,7 +170,7 @@ QString XNS::Boot::toString() const {
 		ERROR();
 	}
 }
-void XNS::Boot::fromByteBuffer(Buffer& bb) {
+void XNS::Boot::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 
 	if (type == Type::SIMPLE_REQUEST) {
@@ -191,7 +191,7 @@ void XNS::Boot::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void XNS::Boot::toByteBuffer(Buffer& bb) const {
+void XNS::Boot::toByteBuffer(ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 
 	if (type == Type::SIMPLE_REQUEST) {

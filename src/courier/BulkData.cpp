@@ -42,16 +42,16 @@ static const Logger logger = Logger::getLogger("cr-bulk");
 //
 // Courier::BulkData::Identifier
 //
-QString Courier::BulkData::Identifier::toString() {
+QString Courier::BulkData::Identifier::toString() const {
 	return QString("%1-%2").arg(host.toString()).arg(QString("%1").arg(hostRelativeIdentifier, 8, 16, QChar('0').toUpper()));
 }
 
 // ByteBuffer::Base
-void Courier::BulkData::Identifier::fromByteBuffer(Buffer& bb) {
+void Courier::BulkData::Identifier::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, host);
 	FROM_BYTE_BUFFER(bb, hostRelativeIdentifier);
 }
-void Courier::BulkData::Identifier::toByteBuffer  (Buffer& bb) const {
+void Courier::BulkData::Identifier::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, host);
 	TO_BYTE_BUFFER(bb, hostRelativeIdentifier);
 }

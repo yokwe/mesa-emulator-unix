@@ -53,7 +53,7 @@ public:
 	int     bufferSize;
 	quint8* buffer;
 
-	QList<ByteBuffer::Buffer> readData;
+	QList<ByteBuffer> readData;
 
 	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
 	~BPF() { close(); }
@@ -76,7 +76,7 @@ public:
 	// Buffer.limit() returns bh_hdrlen + bh_caplen
 	// So actual received data is stored between base() and limit()
 	// You can get address of struct timeval from data()
-	const QList<ByteBuffer::Buffer>& read();
+	const QList<ByteBuffer>& read();
 
 
 	// for Network::Driver

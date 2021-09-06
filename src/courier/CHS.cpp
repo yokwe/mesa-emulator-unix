@@ -42,15 +42,15 @@ static const Logger logger = Logger::getLogger("cr-chs");
 //
 // Courier::CHS::NetworkAddress
 //
-QString Courier::CHS::NetworkAddress::toString() {
+QString Courier::CHS::NetworkAddress::toString() const {
 	return QString("%1-%2-%3").arg(network.toString()).arg(host.toString()).arg(socket.toString());
 }
-void Courier::CHS::NetworkAddress::fromByteBuffer(Buffer& bb) {
+void Courier::CHS::NetworkAddress::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, network);
 	FROM_BYTE_BUFFER(bb, host);
 	FROM_BYTE_BUFFER(bb, socket);
 }
-void Courier::CHS::NetworkAddress::toByteBuffer  (Buffer& bb) const {
+void Courier::CHS::NetworkAddress::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, network);
 	TO_BYTE_BUFFER(bb, host);
 	TO_BYTE_BUFFER(bb, socket);

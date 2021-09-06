@@ -44,15 +44,6 @@ namespace Courier::Authentication1 {
 	const quint32 PROGRAM = 14;
 	const quint16 VERSION = 1;
 
-	using ByteBuffer::UINT48;
-	using ByteBuffer::UINT32;
-	using ByteBuffer::UINT16;
-	using ByteBuffer::UINT8;
-	using ByteBuffer::BLOCK;
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
-
-
 	//  Authentication: PROGRAM 14 VERSION 1
 	//  DEPENDS UPON Clearinghouse(2) VERSION 2
 
@@ -81,11 +72,11 @@ namespace Courier::Authentication1 {
 		CredentialsType  type;
 		SEQUENCE<UINT16> value;
 
-		QString toString();
+		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	//

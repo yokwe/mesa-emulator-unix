@@ -40,8 +40,6 @@ static const Logger logger = Logger::getLogger("listen-rip");
 
 #include "RIPListener.h"
 
-using ByteBuffer::Buffer;
-using ByteBuffer::BLOCK;
 using Network::Packet;
 using XNS::Config;
 using XNS::Context;
@@ -54,7 +52,7 @@ using XNS::Socket;
 using XNS::Host;
 using XNS::Server::DefaultListener;
 using Courier::Services;
-
+using Courier::BLOCK;
 
 RIP::Entry RIPListener::find(quint32 net) {
 	for(auto e: list) {
@@ -122,7 +120,7 @@ void RIPListener::run() {
 }
 
 void RIPListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
+	ByteBuffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::RIP) {
 		RIP rip;
 		FROM_BYTE_BUFFER(level2, rip);

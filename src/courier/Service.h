@@ -43,7 +43,7 @@
 #include "../xns/XNS.h"
 #include "../xns/PEX.h"
 
-#include "Courier.h"
+#include "Protocol.h"
 
 // forward declaration of XNS::Server::Server
 namespace XNS::Server {
@@ -51,14 +51,11 @@ namespace XNS::Server {
 }
 
 namespace Courier {
-	using ByteBuffer::Base;
-	using ByteBuffer::Buffer;
 	using XNS::Config;
 	using XNS::Context;
 	using XNS::PEX;
 	using XNS::Data;
 	using XNS::Server::Server;
-	using Courier::Protocol3Body;
 
 	class Procedure {
 	public:

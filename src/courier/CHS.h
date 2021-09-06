@@ -41,9 +41,6 @@
 #include "Type.h"
 
 namespace Courier::CHS {
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
-	using ByteBuffer::UINT16;
 	using XNS::Host;
 	using XNS::Net;
 	using XNS::Socket;
@@ -58,11 +55,11 @@ namespace Courier::CHS {
 		Host   host;
 		Socket socket;
 
-		QString toString();
+		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 	// NetworkAddressList: TYPE = SEQUENCE 40 OF NetworkAddress;
 
@@ -107,7 +104,7 @@ namespace Courier::CHS {
 	public:
 		CallProblem problem;
 
-		void toByteBuffer(Buffer& bb) const {
+		void toByteBuffer(ByteBuffer& bb) const {
 			bb.write16(ABORT);
 			TO_BYTE_BUFFER(bb, problem);
 		}
@@ -136,14 +133,14 @@ namespace Courier::CHS {
 		class Parameter : Base {
 		public:
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb) { (void)bb; }
+			void fromByteBuffer(ByteBuffer& bb) { (void)bb; }
 		};
 		class Returns : Base {
 		public:
 			SEQUENCE<NetworkAddress, 40> value;
 
 			// ByteBuffer::Base
-			void toByteBuffer  (Buffer& bb) const {
+			void toByteBuffer  (ByteBuffer& bb) const {
 				TO_BYTE_BUFFER(bb, value);
 			}
 		};

@@ -53,11 +53,11 @@ NameMap::Map<quint16> XNS::Echo::Type::nameMap(NameMap::toString16u, {{REQUEST, 
 QString XNS::Echo::toString() const {
 	return QString("%1 %2").arg(type.toString()).arg(block.toString());
 }
-void XNS::Echo::fromByteBuffer(Buffer& bb) {
+void XNS::Echo::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::Echo::toByteBuffer  (Buffer& bb) const {
+void XNS::Echo::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, type);
 	TO_BYTE_BUFFER(bb, block);
 }

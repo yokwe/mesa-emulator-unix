@@ -37,6 +37,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("xnsDump");
 
+#include "../util/Network.h"
+
 #include "../xns/XNS.h"
 #include "../xns/Config.h"
 #include "../xns/RIP.h"
@@ -47,7 +49,7 @@ static const Logger logger = Logger::getLogger("xnsDump");
 #include "../xns/Boot.h"
 #include "../xns/Time.h"
 
-#include "../courier/Courier.h"
+#include "../courier/Protocol.h"
 
 void xnsDump();
 
@@ -64,7 +66,6 @@ int main(int, char**) {
 }
 
 void xnsDump() {
-	using ByteBuffer::Buffer;
 	using Network::Packet;
 	using XNS::Config;
 	using XNS::Ethernet;
@@ -120,20 +121,20 @@ void xnsDump() {
 
 			Ethernet ethernet;
 			FROM_BYTE_BUFFER(level0, ethernet);
-			Buffer level1 = ethernet.block.toBuffer();
+			ByteBuffer level1 = ethernet.block.toBuffer();
 
 			// check ethernet type
 			if (ethernet.type != Ethernet::Type::XNS) continue;
 
 			IDP idp;
 			FROM_BYTE_BUFFER(level1, idp);
-			Buffer level2 = idp.block.toBuffer();
+			ByteBuffer level2 = idp.block.toBuffer();
 
 			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 			// check idp checksum
 			{
-				Buffer start = ethernet.block.toBuffer();
+				ByteBuffer start = ethernet.block.toBuffer();
 				quint16 checksum = XNS::IDP::getChecksum(start);
 				if (checksum != XNS::Checksum::NOCHECK) {
 					quint16 newValue = XNS::IDP::computeChecksum(start);
@@ -160,7 +161,7 @@ void xnsDump() {
 			} else if (idp.type == IDP::Type::PEX) {
 				PEX pex;
 				FROM_BYTE_BUFFER(level2, pex);
-				Buffer level3 = pex.block.toBuffer();
+				ByteBuffer level3 = pex.block.toBuffer();
 				if (pex.type == PEX::Type::TIME) {
 					Time time;
 					FROM_BYTE_BUFFER(level3, time);

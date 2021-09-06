@@ -40,13 +40,12 @@ static const Logger logger = Logger::getLogger("listen-pex");
 
 #include "../xnsServer/PEXListener.h"
 
-using ByteBuffer::Buffer;
 using XNS::Data;
 using XNS::IDP;
 using XNS::PEX;
 
 void PEXListener::handle(const Data& data) {
-	Buffer level2 = data.idp.block.toBuffer();
+	ByteBuffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::PEX) {
 		PEX pex;
 		FROM_BYTE_BUFFER(level2, pex);

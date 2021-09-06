@@ -40,8 +40,6 @@ static const Logger logger = Logger::getLogger("listen-time");
 
 #include "TimeListener.h"
 
-using ByteBuffer::Buffer;
-using ByteBuffer::BLOCK;
 using Network::Packet;;
 using XNS::Data;
 using XNS::Config;
@@ -50,9 +48,10 @@ using XNS::IDP;
 using XNS::PEX;
 using XNS::Time;
 using Courier::Services;
+using Courier::BLOCK;
 
 void TimeListener::handle(const Data& data, const PEX& pex) {
-	Buffer level3 = pex.block.toBuffer();
+	ByteBuffer level3 = pex.block.toBuffer();
 	Time time;
 	FROM_BYTE_BUFFER(level3, time);
 

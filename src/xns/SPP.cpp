@@ -78,7 +78,7 @@ QString XNS::SPP::toString() const {
 		arg(QString("%1").arg((quint16)idDst, 4, 16, QChar('0')).toUpper()).
 		arg((quint16)seq).arg((quint16)ack).arg((quint16)alloc);
 }
-void XNS::SPP::fromByteBuffer(Buffer& bb) {
+void XNS::SPP::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, control);
 	FROM_BYTE_BUFFER(bb, sst);
 	FROM_BYTE_BUFFER(bb, idSrc);
@@ -88,7 +88,7 @@ void XNS::SPP::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, alloc);
 	FROM_BYTE_BUFFER(bb, block);
 }
-void XNS::SPP::toByteBuffer  (Buffer& bb) const {
+void XNS::SPP::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, control);
 	TO_BYTE_BUFFER(bb, sst);
 	TO_BYTE_BUFFER(bb, idSrc);

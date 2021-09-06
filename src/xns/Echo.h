@@ -44,13 +44,12 @@
 #include "XNS.h"
 
 namespace XNS {
-	using ByteBuffer::UINT48;
-	using ByteBuffer::UINT32;
-	using ByteBuffer::UINT16;
-	using ByteBuffer::UINT8;
-	using ByteBuffer::BLOCK;
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
+	using Courier::UINT48;
+	using Courier::UINT32;
+	using Courier::UINT16;
+	using Courier::UINT8;
+	using Courier::BLOCK;
+	using Courier::Base;
 
 
 	class Echo : public Base {
@@ -83,8 +82,8 @@ namespace XNS {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 }

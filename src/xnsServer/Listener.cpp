@@ -143,7 +143,7 @@ void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& i
 	packet.write16(XNS::Ethernet::Type::XNS);
 
 	// save packet as start for setChecksum() and computeChecksum()
-	Buffer start = packet.newBase();
+	ByteBuffer start = packet.newBase();
 	// write idp to packet including idp.block
 	TO_BYTE_BUFFER(packet, idp);
 	// reflect packet.limit() to start

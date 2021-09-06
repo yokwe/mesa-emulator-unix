@@ -35,18 +35,17 @@
 
 #pragma once
 
-#include "../util/ByteBuffer.h"
 #include "../util/NameMap.h"
 
 #include <variant>
 
+#include "Type.h"
 
 namespace Courier {
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
-	using ByteBuffer::UINT32;
-	using ByteBuffer::UINT16;
-	using ByteBuffer::BLOCK;
+	using Courier::Base;
+	using Courier::UINT32;
+	using Courier::UINT16;
+	using Courier::BLOCK;
 
 
 	class ProtocolType : public UINT16 {
@@ -127,8 +126,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	// VersionRange:  TYPE = RECORD [low, high: CARDINAL];
@@ -140,8 +139,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	// Protocol2Body: TYPE = CHOICE MessageType OF {
@@ -162,8 +161,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class RejectBody : public Base {
 		public:
@@ -173,8 +172,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class ReturnBody : public Base {
 		public:
@@ -184,8 +183,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class AbortBody : public Base {
 		public:
@@ -196,8 +195,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 
 		MessageType type;
@@ -216,8 +215,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	// Protocol3Body: TYPE = CHOICE type: MessageType OF {
@@ -244,8 +243,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class RejectBody : public Base {
 		public:
@@ -259,8 +258,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class ReturnBody : public Base {
 		public:
@@ -270,8 +269,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 		class AbortBody : public Base {
 		public:
@@ -282,8 +281,8 @@ namespace Courier {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 
 		MessageType type;
@@ -302,8 +301,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 //		MessageObject: TYPE = CHOICE ProtocolType OF {
@@ -326,8 +325,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 //		Header: TYPE = MACHINE DEPENDENT RECORD [
@@ -341,8 +340,8 @@ namespace Courier {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 }

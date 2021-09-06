@@ -41,10 +41,9 @@
 #include <variant>
 
 namespace XNS {
-	using ByteBuffer::UINT32;
-	using ByteBuffer::UINT16;
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
+	using Courier::UINT32;
+	using Courier::UINT16;
+	using Courier::Base;
 
 	class Time : public Base {
 	public:
@@ -191,8 +190,8 @@ namespace XNS {
 			QString toString() const;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb);
-			void toByteBuffer  (Buffer& bb) const;
+			void fromByteBuffer(ByteBuffer& bb);
+			void toByteBuffer  (ByteBuffer& bb) const;
 		};
 
 		Version   version;
@@ -205,8 +204,8 @@ namespace XNS {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 }

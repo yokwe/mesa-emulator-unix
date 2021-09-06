@@ -96,7 +96,7 @@ QString XNS::Time::Response::toString() const {
 		arg(tolerance.toString()).arg(toleranceValue.value());
 }
 
-void XNS::Time::Response::fromByteBuffer(Buffer& bb) {
+void XNS::Time::Response::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, time);
 	FROM_BYTE_BUFFER(bb, offsetDirection);
 	FROM_BYTE_BUFFER(bb, offsetHours);
@@ -106,7 +106,7 @@ void XNS::Time::Response::fromByteBuffer(Buffer& bb) {
 	FROM_BYTE_BUFFER(bb, tolerance);
 	FROM_BYTE_BUFFER(bb, toleranceValue);
 }
-void XNS::Time::Response::toByteBuffer  (Buffer& bb) const {
+void XNS::Time::Response::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, time);
 	TO_BYTE_BUFFER(bb, offsetDirection);
 	TO_BYTE_BUFFER(bb, offsetHours);
@@ -161,7 +161,7 @@ QString XNS::Time::toString() const {
 		ERROR();
 	}
 }
-void XNS::Time::fromByteBuffer(Buffer& bb) {
+void XNS::Time::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, version);
 	if (version.isCurrent()) {
 		FROM_BYTE_BUFFER(bb, type);
@@ -182,7 +182,7 @@ void XNS::Time::fromByteBuffer(Buffer& bb) {
 		ERROR();
 	}
 }
-void XNS::Time::toByteBuffer  (Buffer& bb) const {
+void XNS::Time::toByteBuffer  (ByteBuffer& bb) const {
 	if (version.isCurrent()) {
 		TO_BYTE_BUFFER(bb, version);
 		TO_BYTE_BUFFER(bb, type);

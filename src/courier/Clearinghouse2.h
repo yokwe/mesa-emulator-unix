@@ -94,11 +94,11 @@ namespace Courier::Clearinghouse2 {
 		Organization organization;
 		Domain       domain;
 
-		QString toString();
+		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 	//	DomainName: TYPE = TwoPartName;
@@ -114,17 +114,17 @@ namespace Courier::Clearinghouse2 {
 		Domain       domain;
 		Object       object;
 
-		QString toString() {
+		QString toString() const {
 			return QString("%1-%2-%3").arg(organization.toString()).arg(domain.toString()).arg(object.toString());
 		}
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb) {
+		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, organization);
 			FROM_BYTE_BUFFER(bb, domain);
 			FROM_BYTE_BUFFER(bb, object);
 		}
-		void toByteBuffer  (Buffer& bb) const {
+		void toByteBuffer  (ByteBuffer& bb) const {
 			TO_BYTE_BUFFER(bb, organization);
 			TO_BYTE_BUFFER(bb, domain);
 			TO_BYTE_BUFFER(bb, object);
@@ -183,8 +183,16 @@ namespace Courier::Clearinghouse2 {
 			return *this;
 		}
 
+		QString toString() const {
+			QStringList myList;
+			for(auto e: list) {
+				myList.append(QString("{%1}").arg(e.toString()));
+			}
+			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
+		}
+
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb) {
+		void fromByteBuffer(ByteBuffer& bb) {
 			Choice      choice;
 			SEQUENCE<T> sequence;
 
@@ -200,7 +208,7 @@ namespace Courier::Clearinghouse2 {
 				ERROR();
 			}
 		}
-		void toByteBuffer  (Buffer& bb) const {
+		void toByteBuffer  (ByteBuffer& bb) const {
 			Choice      choice;
 			SEQUENCE<T> sequence;
 
@@ -287,17 +295,17 @@ namespace Courier::Clearinghouse2 {
 		Host   host;
 		Socket socket;
 
-		QString toString() {
+		QString toString() const {
 			return QString("{%1-%2-%3}").arg(net.toString()).arg(host.toString()).arg(socket.toString());
 		}
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb) {
+		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, net);
 			FROM_BYTE_BUFFER(bb, host);
 			FROM_BYTE_BUFFER(bb, socket);
 		}
-		void toByteBuffer  (Buffer& bb) const {
+		void toByteBuffer  (ByteBuffer& bb) const {
 			TO_BYTE_BUFFER(bb, net);
 			TO_BYTE_BUFFER(bb, host);
 			TO_BYTE_BUFFER(bb, socket);
@@ -320,16 +328,16 @@ namespace Courier::Clearinghouse2 {
 		Auth::Credentials credentials;
 		Auth::Verifier    verifier;
 
-		QString toString() {
+		QString toString() const {
 			return QString("%1-%2").arg(credentials.toString()).arg(verifier.toString());
 		}
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb) {
+		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, credentials);
 			FROM_BYTE_BUFFER(bb, verifier);
 		}
-		void toByteBuffer  (Buffer& bb) const {
+		void toByteBuffer  (ByteBuffer& bb) const {
 			TO_BYTE_BUFFER(bb, credentials);
 			TO_BYTE_BUFFER(bb, verifier);
 		}
@@ -522,10 +530,10 @@ namespace Courier::Clearinghouse2 {
 		class Return : Base {
 			NetworkAddressList address;
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb) {
+			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, address);
 			}
-			void toByteBuffer  (Buffer& bb) const {
+			void toByteBuffer  (ByteBuffer& bb) const {
 				TO_BYTE_BUFFER(bb, address);
 			}
 		};
@@ -541,11 +549,11 @@ namespace Courier::Clearinghouse2 {
 			BulkData::Sink domains;
 			Authenticator  agent;
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb) {
+			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, domains);
 				FROM_BYTE_BUFFER(bb, agent);
 			}
-			void toByteBuffer  (Buffer& bb) const {
+			void toByteBuffer  (ByteBuffer& bb) const {
 				TO_BYTE_BUFFER(bb, domains);
 				TO_BYTE_BUFFER(bb, agent);
 			}
@@ -556,13 +564,13 @@ namespace Courier::Clearinghouse2 {
 			QList<DomainName> list;
 
 			// ByteBuffer::Base
-			void fromByteBuffer(Buffer& bb) {
+			void fromByteBuffer(ByteBuffer& bb) {
 				StreamOf<DomainName> streamOf;
 				FROM_BYTE_BUFFER(bb, streamOf);
 				list.clear();
 				list.append(streamOf.list);
 			}
-			void toByteBuffer  (Buffer& bb) const {
+			void toByteBuffer  (ByteBuffer& bb) const {
 				StreamOf<DomainName> streamOf;
 				streamOf = list;
 				TO_BYTE_BUFFER(bb, streamOf);

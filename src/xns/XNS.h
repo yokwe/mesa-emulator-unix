@@ -41,18 +41,19 @@
 #include "../util/ByteBuffer.h"
 #include "../util/NameMap.h"
 
+#include "../courier/Type.h"
+
 #include "Config.h"
 
 namespace XNS {
 	using Network::Driver;
 	using Network::Packet;
-	using ByteBuffer::UINT48;
-	using ByteBuffer::UINT32;
-	using ByteBuffer::UINT16;
-	using ByteBuffer::UINT8;
-	using ByteBuffer::BLOCK;
-	using ByteBuffer::Buffer;
-	using ByteBuffer::Base;
+	using Courier::UINT48;
+	using Courier::UINT32;
+	using Courier::UINT16;
+	using Courier::UINT8;
+	using Courier::BLOCK;
+	using Courier::Base;
 
 
 	class Host : public UINT48 {
@@ -129,8 +130,8 @@ namespace XNS {
 		QString toString() const;
 
 		// ByteBuffer::Base
-		void fromByteBuffer(Buffer& bb);
-		void toByteBuffer  (Buffer& bb) const;
+		void fromByteBuffer(ByteBuffer& bb);
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 
@@ -282,24 +283,24 @@ namespace XNS {
 
 		// Set length field of IDP in ByteBuffer
 		// bb.base() must point to head of IDP packet
-		static quint16 getLength(const Buffer& bb);
-		static void    setLength(Buffer& bb, quint16 newValue);
+		static quint16 getLength(const ByteBuffer& bb);
+		static void    setLength(ByteBuffer& bb, quint16 newValue);
 
 		// Set length field of IDP in ByteBuffer
 		// bb.base() must point to head of IDP packet
-		static quint16 getChecksum(const Buffer& bb);
-		static void    setChecksum(Buffer& bb, quint16 newValue);
+		static quint16 getChecksum(const ByteBuffer& bb);
+		static void    setChecksum(ByteBuffer& bb, quint16 newValue);
 
 		// Compute checksum of IDP using length field
 		// bb.base() must point to head of IDP packet
-		static quint16 computeChecksum(const Buffer& bb);
+		static quint16 computeChecksum(const ByteBuffer& bb);
 
 
 		// ByteBuffer::Base
 		// fromByteBuffer will set limit of bb from length field
-		void fromByteBuffer(Buffer& bb);
+		void fromByteBuffer(ByteBuffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field
-		void toByteBuffer  (Buffer& bb) const;
+		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
 

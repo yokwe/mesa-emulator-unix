@@ -42,19 +42,30 @@ static const Logger logger = Logger::getLogger("cr-ch2");
 //
 // Courier::Clearinghouse2::TwoPartName
 //
-QString Courier::Clearinghouse2::TwoPartName::toString() {
+QString Courier::Clearinghouse2::TwoPartName::toString() const {
 	return QString("%1-%2").arg(organization.toString()).arg(domain.toString());
 }
 
 // ByteBuffer::Base
-void Courier::Clearinghouse2::TwoPartName::fromByteBuffer(Buffer& bb) {
+void Courier::Clearinghouse2::TwoPartName::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, organization);
 	FROM_BYTE_BUFFER(bb, domain);
 }
-void Courier::Clearinghouse2::TwoPartName::toByteBuffer  (Buffer& bb) const {
+void Courier::Clearinghouse2::TwoPartName::toByteBuffer  (ByteBuffer& bb) const {
 	TO_BYTE_BUFFER(bb, organization);
 	TO_BYTE_BUFFER(bb, domain);
 }
+
+
+//
+// Courier::Clearinghouse2::StreamOf::Choice
+//
+template <class T>
+NameMap::Map<quint16> Courier::Clearinghouse2::StreamOf<T>::Choice::nameMap(NameMap::toString16u, {
+	{NEXT_SEGMENT, "NEXT_SEGMENT"},
+	{LAST_SEGMENT, "LAST_SEGMENT"},
+});
+
 
 
 

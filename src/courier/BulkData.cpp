@@ -69,7 +69,7 @@ NameMap::Map<quint16> Courier::BulkData::Descriptor::Choice::nameMap(NameMap::to
 
 
 //
-//
+// Courier::BulkData::Descriptor
 //
 void Courier::BulkData::Descriptor::get(      NetworkIdentifier&  newValue)  const {
 	if (choice == Choice::PASSIVE || choice == Choice::ACTIVE) {
@@ -88,6 +88,34 @@ void Courier::BulkData::Descriptor::set(const NetworkIdentifier&  newValue) {
 		logger.error("  type %s", choice.toString());
 		ERROR();
 	}
+}
+QString Courier::BulkData::Descriptor::toString() const {
+	if (choice == Choice::PASSIVE || choice == Choice::ACTIVE) {
+		NetworkIdentifier networkIdentifier = std::get<NetworkIdentifier>(body);
 
+		return QString("%1-%2").arg(choice.toString()).arg(networkIdentifier.toString());
+	} else {
+		return choice.toString();
+	}
+}
+void Courier::BulkData::Descriptor::fromByteBuffer(ByteBuffer& bb) {
+	FROM_BYTE_BUFFER(bb, choice);
+	if (choice == Choice::PASSIVE || choice == Choice::ACTIVE) {
+		NetworkIdentifier networkIdentifier;
+		FROM_BYTE_BUFFER(bb, networkIdentifier);
+		set(networkIdentifier);
+	} else {
+		//
+	}
+}
+void Courier::BulkData::Descriptor::toByteBuffer  (ByteBuffer& bb) const {
+	TO_BYTE_BUFFER(bb, choice);
+	if (choice == Choice::PASSIVE || choice == Choice::ACTIVE) {
+		NetworkIdentifier networkIdentifier;
+		get(networkIdentifier);
+		TO_BYTE_BUFFER(bb, networkIdentifier);
+	} else {
+		//
+	}
 }
 

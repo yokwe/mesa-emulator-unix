@@ -37,15 +37,19 @@
 static const Logger logger = Logger::getLogger("svc-chs");
 
 #include "../util/ByteBuffer.h"
+#include "../util/Network.h"
+
+#include "../xnsServer/Listener.h"
 
 #include "../courier/Protocol.h"
 #include "../courier/Type.h"
 
-#include "../xnsServer/Listener.h"
+#include "../courier/Clearinghouse2.h"
 
 #include "CHService.h"
 
 using Network::Packet;
+using XNS::Config;
 using XNS::Data;
 using XNS::Host;
 using XNS::Socket;
@@ -57,39 +61,7 @@ using Courier::BLOCK;
 using Courier::Procedure;
 using Courier::Protocol3Body;
 
-
-//NetworkAddress: TYPE = RECORD [
-//	network: UNSPECIFIED2,
-//	host: UNSPECIFIED3,
-//	socket: UNSPECIFIED ];
-class NetworkAddress : public Base {
-public:
-	Net    network;
-	Host   host;
-	Socket socket;
-
-	QString toString() const;
-
-	// Courier::Base
-	void fromByteBuffer(ByteBuffer& bb);
-	void toByteBuffer  (ByteBuffer& bb) const;
-};
-
-QString NetworkAddress::toString() const {
-	return QString("%1-%2-%3").arg(network.toString()).arg(host.toString()).arg(socket.toString());
-}
-
-void NetworkAddress::fromByteBuffer(ByteBuffer& bb) {
-	FROM_BYTE_BUFFER(bb, network);
-	FROM_BYTE_BUFFER(bb, host);
-	FROM_BYTE_BUFFER(bb, socket);
-}
-void NetworkAddress::toByteBuffer(ByteBuffer& bb) const {
-	TO_BYTE_BUFFER(bb, network);
-	TO_BYTE_BUFFER(bb, host);
-	TO_BYTE_BUFFER(bb, socket);
-}
-
+using Courier::Clearinghouse2::NetworkAddress;
 
 class RetrieveAddresses : public Procedure {
 	static constexpr const char*   NAME      = "RetrieveAddresses";
@@ -97,13 +69,14 @@ class RetrieveAddresses : public Procedure {
 public:
 	RetrieveAddresses() : Procedure(NAME, PROCEDURE) {}
 
-	void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) {
+	void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
 		logger.info("RetrieveAddresses called");
 
 		NetworkAddress networkAddress;
-		networkAddress.network = data.config->local.net;
-		networkAddress.host    = data.config->local.host;
-		networkAddress.socket  = Socket::COURIER;
+		// send myself
+		networkAddress.net    = config.local.net;
+		networkAddress.host   = config.local.host;
+		networkAddress.socket = Socket::COURIER;
 
 		Courier::SEQUENCE<NetworkAddress, 40> reply;
 		reply.append(networkAddress);
@@ -113,28 +86,16 @@ public:
 		BLOCK block4(level4);
 
 		Protocol3Body::ReturnBody returnBody;
-		returnBody.transaction = body.transaction;
+		returnBody.transaction = callBody.transaction;
 		returnBody.block = block4;
 
-		Courier::ExpeditedCourier exp;
-		exp.range.low  = Courier::ProtocolType::PROTOCOL3;
-		exp.range.high = Courier::ProtocolType::PROTOCOL3;
-		exp.body.type = Courier::MessageType::RETURN;
-		exp.body.set(returnBody);
+		Courier::ExpeditedCourier replyExp;
+		replyExp.range.low  = Courier::ProtocolType::PROTOCOL3;
+		replyExp.range.high = Courier::ProtocolType::PROTOCOL3;
+		replyExp.body.type  = Courier::MessageType::RETURN;
+		replyExp.body.set(returnBody);
 
-		Packet level3;
-		TO_BYTE_BUFFER(level3, exp);
-		BLOCK block3(level3);
-
-		// set block3 to replyPEX.block
-		PEX replyPEX;
-		replyPEX.id    = pex.id;
-		replyPEX.type  = PEX::Type::CHS;
-		replyPEX.block = block3;
-
-		logger.info("replyPEX %s %s %s", replyPEX.toString(), exp.body.toString(), reply.toString());
-
-		DefaultListener::transmit(data, replyPEX);
+		TO_BYTE_BUFFER(result, replyExp);
 	}
 };
 RetrieveAddresses retrieveAddress;

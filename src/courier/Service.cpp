@@ -129,8 +129,6 @@ void Courier::Services::add(DefaultService* service) {
 		// call init
 		service->initDefaultService(server);
 		service->init();
-		// call start if listener started
-		if (started) service->start();
 	}
 }
 Courier::Service* Courier::Services::getService(const ProgramVersion& programVersion) const {

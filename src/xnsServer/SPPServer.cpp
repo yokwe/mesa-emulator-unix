@@ -164,8 +164,10 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 			newImpl->autoDelete(true);
 			newImpl->state(state);
 
-			// start listening
+			// start listening object
 			listeners->add(newImpl);
+			// start new listener object
+			newImpl->start();
 		}
 
 

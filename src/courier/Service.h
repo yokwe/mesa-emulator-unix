@@ -202,11 +202,17 @@ namespace Courier {
 		void start();
 		void stop();
 
-		// add and get service
+		// add service
 		void add(DefaultService* service);
+		// get service
+		//   if there is no service for programVersion, returns nullptr
 		Service* getService(const ProgramVersion& programVersion) const;
 
 		void call(const Data& data, const PEX& pex, const Protocol3Body& body) const;
+
+		// call service specified in body and set outcome in result
+		// FIXME
+		void call(const Protocol3Body& body, ByteBuffer& result) const;
 	protected:
 		Server* server;
 		bool    started;

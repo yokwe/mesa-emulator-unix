@@ -36,6 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("listen-chs");
 
+#include "../util/Network.h"
+
 #include "../courier/Protocol.h"
 
 #include "../xnsServer/Server.h"
@@ -66,27 +68,17 @@ void CHSListener::handle(const Data& data, const PEX& pex) {
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.body.toString()));
 
-	if (exp.body.type == MessageType::CALL) {
-		Protocol3Body::CallBody callBody;
-		exp.body.get(callBody);
+	Packet result;
+	services->call(exp.body, result);
 
-		ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
+	if (result.limit() == 0) return;
+	BLOCK block(result);
 
-		Service* service = services->getService(programVersion);
-		if (service == nullptr) {
-			logger.warn("NO SERVICE  %s", programVersion.toString());
-		} else {
-			Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
-			if (procedure == nullptr) {
-				logger.warn("NO PROCEDURE  %s  %u", service->name(), (quint16)callBody.procedure);
-			} else {
-				logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
-				procedure->call(data, pex, callBody);
-			}
-		}
-	} else {
-		logger.error("Unexpected");
-		ERROR();
-	}
+	PEX replyPEX;
+	replyPEX.id    = pex.id;
+	replyPEX.type  = PEX::Type::CHS;
+	replyPEX.block = block;
+
+	DefaultListener::transmit(data, replyPEX);
 }
 

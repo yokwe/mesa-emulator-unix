@@ -88,9 +88,16 @@ namespace XNS {
 			QJsonObject toJsonObject() const;
 		};
 
+		class Local {
+		public:
+			quint32 net;
+			quint64 host;
+		};
+
 		Network network;
 		Host    host;
 		Time    time;
+		Local	local;
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;

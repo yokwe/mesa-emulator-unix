@@ -46,7 +46,7 @@ QString Courier::Clearinghouse2::TwoPartName::toString() const {
 	return QString("%1-%2").arg(organization.toString()).arg(domain.toString());
 }
 
-// ByteBuffer::Base
+// Courier::Base
 void Courier::Clearinghouse2::TwoPartName::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, organization);
 	FROM_BYTE_BUFFER(bb, domain);

@@ -46,7 +46,7 @@ QString Courier::BulkData::Identifier::toString() const {
 	return QString("%1-%2").arg(host.toString()).arg(QString("%1").arg(hostRelativeIdentifier, 8, 16, QChar('0').toUpper()));
 }
 
-// ByteBuffer::Base
+// Courier::Base
 void Courier::BulkData::Identifier::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, host);
 	FROM_BYTE_BUFFER(bb, hostRelativeIdentifier);

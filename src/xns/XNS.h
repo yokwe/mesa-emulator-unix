@@ -129,7 +129,7 @@ namespace XNS {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -296,7 +296,7 @@ namespace XNS {
 		static quint16 computeChecksum(const ByteBuffer& bb);
 
 
-		// ByteBuffer::Base
+		// Courier::Base
 		// fromByteBuffer will set limit of bb from length field
 		void fromByteBuffer(ByteBuffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field

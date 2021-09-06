@@ -96,7 +96,7 @@ namespace Courier::Clearinghouse2 {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -118,7 +118,7 @@ namespace Courier::Clearinghouse2 {
 			return QString("%1-%2-%3").arg(organization.toString()).arg(domain.toString()).arg(object.toString());
 		}
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, organization);
 			FROM_BYTE_BUFFER(bb, domain);
@@ -191,7 +191,7 @@ namespace Courier::Clearinghouse2 {
 			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
 		}
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb) {
 			Choice      choice;
 			SEQUENCE<T> sequence;
@@ -299,7 +299,7 @@ namespace Courier::Clearinghouse2 {
 			return QString("{%1-%2-%3}").arg(net.toString()).arg(host.toString()).arg(socket.toString());
 		}
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, net);
 			FROM_BYTE_BUFFER(bb, host);
@@ -332,7 +332,7 @@ namespace Courier::Clearinghouse2 {
 			return QString("%1-%2").arg(credentials.toString()).arg(verifier.toString());
 		}
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb) {
 			FROM_BYTE_BUFFER(bb, credentials);
 			FROM_BYTE_BUFFER(bb, verifier);
@@ -529,7 +529,7 @@ namespace Courier::Clearinghouse2 {
 
 		class Return : Base {
 			NetworkAddressList address;
-			// ByteBuffer::Base
+			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, address);
 			}
@@ -548,7 +548,7 @@ namespace Courier::Clearinghouse2 {
 		public:
 			BulkData::Sink domains;
 			Authenticator  agent;
-			// ByteBuffer::Base
+			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, domains);
 				FROM_BYTE_BUFFER(bb, agent);
@@ -563,7 +563,7 @@ namespace Courier::Clearinghouse2 {
 		class Return : public Base {
 			QList<DomainName> list;
 
-			// ByteBuffer::Base
+			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) {
 				StreamOf<DomainName> streamOf;
 				FROM_BYTE_BUFFER(bb, streamOf);

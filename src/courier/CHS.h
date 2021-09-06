@@ -57,7 +57,7 @@ namespace Courier::CHS {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -132,14 +132,14 @@ namespace Courier::CHS {
 
 		class Parameter : Base {
 		public:
-			// ByteBuffer::Base
+			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) { (void)bb; }
 		};
 		class Returns : Base {
 		public:
 			SEQUENCE<NetworkAddress, 40> value;
 
-			// ByteBuffer::Base
+			// Courier::Base
 			void toByteBuffer  (ByteBuffer& bb) const {
 				TO_BYTE_BUFFER(bb, value);
 			}

@@ -52,7 +52,7 @@ QString Courier::Authentication1::Credentials::toString() const {
 	return QString("%1-%2").arg(type.toString()).arg(value.toString());
 }
 
-// ByteBuffer::Base
+// Courier::Base
 void Courier::Authentication1::Credentials::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);
 	FROM_BYTE_BUFFER(bb, value);

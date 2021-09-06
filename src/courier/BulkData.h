@@ -80,7 +80,7 @@ namespace Courier::BulkData {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -133,7 +133,7 @@ namespace Courier::BulkData {
 				return QString("%1-%2-%3").arg(net.toString()).arg(host.toString()).arg(identifier.toString());
 			}
 
-			// ByteBuffer::Base
+			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, net);
 				FROM_BYTE_BUFFER(bb, host);
@@ -154,7 +154,7 @@ namespace Courier::BulkData {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

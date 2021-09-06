@@ -82,7 +82,7 @@ namespace XNS {
 
 		QString toString() const;
 
-		// ByteBuffer::Base
+		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

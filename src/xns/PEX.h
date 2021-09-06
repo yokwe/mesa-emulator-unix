@@ -41,6 +41,8 @@
 #include "../util/ByteBuffer.h"
 #include "../util/NameMap.h"
 
+#include "../courier/Type.h"
+
 #include "XNS.h"
 
 namespace XNS {

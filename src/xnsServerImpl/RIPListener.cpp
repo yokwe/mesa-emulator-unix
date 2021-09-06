@@ -105,11 +105,11 @@ void RIPListener::run() {
 			idp.length    = (quint16)0;
 			idp.control   = (quint8)0;
 			idp.type      = IDP::Type::RIP;
-			idp.dstNet    = context->localNet;
+			idp.dstNet    = config->local.net;
 			idp.dstHost   = Host::ALL;
 			idp.dstSocket = Socket::RIP;
-			idp.srcNet    = context->localNet;
-			idp.srcHost   = context->localAddress;
+			idp.srcNet    = config->local.net;
+			idp.srcHost   = config->local.host;
 			idp.srcSocket = Socket::RIP;
 			idp.block     = block;
 

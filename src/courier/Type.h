@@ -103,6 +103,7 @@ namespace Courier {
 		}
 	};
 
+
 	class UINT16 : public Base, public OpaqueType<quint16> {
 	public:
 		//
@@ -144,6 +145,7 @@ namespace Courier {
 			bb.write16(value());
 		}
 	};
+
 
 	class INT16 : public Base, public OpaqueType<qint16> {
 	public:
@@ -187,6 +189,7 @@ namespace Courier {
 		}
 	};
 
+
 	class UINT32 : public Base, public OpaqueType<quint32> {
 	public:
 		//
@@ -227,6 +230,7 @@ namespace Courier {
 			bb.write32(value());
 		}
 	};
+
 
 	class INT32 : public Base, public OpaqueType<qint32> {
 	public:
@@ -269,6 +273,7 @@ namespace Courier {
 		}
 	};
 
+
 	class UINT48 : public Base, public OpaqueType<quint64> {
 	public:
 		//
@@ -298,7 +303,7 @@ namespace Courier {
 		// Base
 		//
 		QString toString() const {
-			return QString::asprintf("%llu", value());
+			return QString::asprintf("%llX", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
 			quint64 newValue;
@@ -309,6 +314,7 @@ namespace Courier {
 			bb.write48(value());
 		}
 	};
+
 
 	class BLOCK : public Base {
 	protected:
@@ -374,7 +380,6 @@ namespace Courier {
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
-	// Use UINT16 UINT32 INT16 INT32 from ByteBuffer
 
 	class STRING : public Base {
 		const int MAX_LENGTH = 65535;
@@ -388,7 +393,6 @@ namespace Courier {
 			return byteArray.constData();
 		}
 
-
 		//
 		// Base
 		//
@@ -399,8 +403,10 @@ namespace Courier {
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
 
+
 	template <typename T, unsigned short int N>
 	class ARRAY : public Base {
+		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		int length = N;
 	public:
 		QList<T> list;
@@ -453,8 +459,10 @@ namespace Courier {
 		}
 	};
 
+
 	template <typename T, unsigned short int N = 65535>
 	class SEQUENCE : public Base {
+		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		quint16  maxLength = N;
 	public:
 		QList<T> list;

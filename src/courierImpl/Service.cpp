@@ -127,7 +127,7 @@ Courier::Service* Courier::Services::getService(const ProgramVersion& programVer
 	}
 }
 
-void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result) const {
+void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result, bool& useBulk) const {
 	if (body.type != MessageType::CALL) {
 		logger.error("Unexpected");
 		logger.error("  body %s", body.toString());
@@ -155,6 +155,7 @@ void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result) cons
 	logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
 	procedure->call(*(server->getConfig()), callBody, result);
 	logger.info("result  %s", result.toString());
+	useBulk = procedure->useBulk();
 }
 
 

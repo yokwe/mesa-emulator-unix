@@ -66,16 +66,24 @@ namespace Courier {
 		quint16     procedure() const {
 			return myProcedure;
 		}
+		bool        useBulk() const {
+			return myUseBulk;
+		}
 
-		Procedure() : myName(nullptr), myProcedure(0) {}
-		Procedure(const Procedure& that) : myName(that.myName), myProcedure(that.myProcedure) {}
+		Procedure() : myName(nullptr), myProcedure(0), myUseBulk(false) {}
+		Procedure(const Procedure& that) {
+			this->myName      = that.myName;
+			this->myProcedure = that.myProcedure;
+			this->myUseBulk   = that.myUseBulk;
+		}
 		Procedure& operator = (const Procedure& that) {
 			this->myName      = that.myName;
 			this->myProcedure = that.myProcedure;
+			this->myUseBulk   = that.myUseBulk;
 			return *this;
 		}
 
-		Procedure(const char* name_, quint16 procedure_) : myName(name_), myProcedure(procedure_) {}
+		Procedure(const char* name_, quint16 procedure_, bool useBulk_) : myName(name_), myProcedure(procedure_), myUseBulk(useBulk_) {}
 
 		QString toString() const;
 
@@ -84,6 +92,7 @@ namespace Courier {
 	protected:
 		const char* myName;
 		quint16     myProcedure;
+		bool        myUseBulk;
 	};
 
 
@@ -188,7 +197,7 @@ namespace Courier {
 
 		// call service specified in body and set outcome in result
 		//   if result is empty, don't send return packet
-		void call(const Protocol3Body& body, ByteBuffer& result) const;
+		void call(const Protocol3Body& body, ByteBuffer& result, bool& useBulk) const;
 	protected:
 		Server* server;
 		bool    started;

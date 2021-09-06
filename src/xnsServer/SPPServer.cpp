@@ -36,15 +36,18 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("spp-server");
 
-#include "../xns/SPP.h"
-
 #include <QtCore>
+
+#include "../xns/SPP.h"
 
 #include "../courier/Protocol.h"
 
 #include "SPPServer.h"
 
+
 using Courier::BLOCK;
+using Courier::ExpeditedCourier;
+
 
 void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
@@ -109,11 +112,28 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 
 		// FIXME
 		if (spp.control.isEndOfMessage()) {
-			Courier::ExpeditedCourier exp;
-			ByteBuffer bb = spp.block.toBuffer();
-			FROM_BYTE_BUFFER(bb, exp);
-			logger.info("message %s", exp.toString());
+			ByteBuffer level3 = spp.block.toBuffer();
+			ExpeditedCourier exp;
+			FROM_BYTE_BUFFER(level3, exp);
 
+			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			logger.info("%s  SPP   %s  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(exp.body.toString()));
+
+			Packet result;
+			bool useBulk;
+			services->call(exp.body, result, useBulk);
+
+			if (result.limit() == 0) return;
+			BLOCK block(result);
+
+			// FIXME How to send reply with SPP?
+//			PEX replyPEX;
+//			replyPEX.id    = pex.id;
+//			replyPEX.type  = PEX::Type::CHS;
+//			replyPEX.block = block;
+//
+//			DefaultListener::transmit(data, replyPEX);
 		} else {
 			// FIXME
 		}

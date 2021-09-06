@@ -60,14 +60,12 @@ namespace Courier {
 	class Procedure {
 	public:
 		virtual ~Procedure() {}
-		const char* name() {
+		const char* name() const {
 			return myName;
 		}
-		quint16     procedure() {
+		quint16     procedure() const {
 			return myProcedure;
 		}
-
-		virtual void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) = 0;
 
 		Procedure() : myName(nullptr), myProcedure(0) {}
 		Procedure(const Procedure& that) : myName(that.myName), myProcedure(that.myProcedure) {}
@@ -81,6 +79,8 @@ namespace Courier {
 
 		QString toString() const;
 
+		virtual void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) = 0;
+
 	protected:
 		const char* myName;
 		quint16     myProcedure;
@@ -90,13 +90,13 @@ namespace Courier {
 	class Service {
 	public:
 		virtual ~Service() {}
-		const char* name() {
+		const char* name() const {
 			return myName;
 		}
-		quint32     program() {
+		quint32     program() const {
 			return myProgram;
 		}
-		quint16     version() {
+		quint16     version() const {
 			return myVersion;
 		}
 
@@ -105,7 +105,12 @@ namespace Courier {
 		virtual void stop () = 0;
 
 		Service() : myName(nullptr), myProgram(0), myVersion(0) {}
-		Service(const Service& that) : myName(that.myName), myProgram(that.myProgram), myVersion(that.myVersion), map(that.map) {}
+		Service(const Service& that) {
+			this->myName    = that.myName;
+			this->myProgram = that.myProgram;
+			this->myVersion = that.myVersion;
+			this->map       = that.map;
+		}
 		Service& operator = (const Service& that) {
 			this->myName    = that.myName;
 			this->myProgram = that.myProgram;
@@ -121,7 +126,6 @@ namespace Courier {
 		void add(Procedure* procedure);
 
 		Procedure* getProcedure(const quint16 procedure) const;
-		void call(const Data& data, const PEX& pex, const Protocol3Body::CallBody& body) const;
 
 	protected:
 		const char* myName;
@@ -129,32 +133,6 @@ namespace Courier {
 		quint16     myVersion;
 
 		QMap<quint16, Procedure*> map;
-	};
-
-
-	class DefaultService : public Service {
-	public:
-		virtual ~DefaultService() {}
-
-		DefaultService() : Service(), server(nullptr) {}
-		DefaultService(const DefaultService& that) : Service(that), server(that.server) {}
-		DefaultService& operator = (const DefaultService& that) {
-			Service::operator =(that);
-			this->server = that.server;
-			return *this;
-		}
-
-		DefaultService(const char* name_, quint32 program_, quint16 version_) : Service(name_, program_, version_), server(nullptr) {}
-
-		void initDefaultService(Server* server_);
-
-		void start() {}
-		void stop () {}
-
-	protected:
-		Server*    server;
-		Config*    config;
-		Context*   context;
 	};
 
 
@@ -203,15 +181,13 @@ namespace Courier {
 		void stop();
 
 		// add service
-		void add(DefaultService* service);
+		void add(Service* service);
 		// get service
 		//   if there is no service for programVersion, returns nullptr
 		Service* getService(const ProgramVersion& programVersion) const;
 
-		void call(const Data& data, const PEX& pex, const Protocol3Body& body) const;
-
 		// call service specified in body and set outcome in result
-		// FIXME
+		//   if result is empty, don't send return packet
 		void call(const Protocol3Body& body, ByteBuffer& result) const;
 	protected:
 		Server* server;

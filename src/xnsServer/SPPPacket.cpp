@@ -30,86 +30,45 @@
 
 
 //
-// main.c
+// SPPPacket.cpp
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const Logger logger = Logger::getLogger("spp-packet");
 
-#include "../xnsServerImpl/TimeListener.h"
-#include "../xnsServerImpl/EchoListener.h"
-#include "../xnsServerImpl/RIPListener.h"
-#include "../xnsServerImpl/CHSListener.h"
-#include "../xnsServerImpl/SPPCourier.h"
-
-#include "../courier/Clearinghouse2.h"
-
-#include "../courierImpl/CHService.h"
-
-#include "Server.h"
-#include "SPPServer.h"
-#include "SPPQueue.h"
 #include "SPPPacket.h"
 
 
-using XNS::Server::Server;
-using XNS::Server::SPPCourier;
-using XNS::Server::SPPServer;
-
-int main(int, char**) {
-	logger.info("START");
-
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
-
-	DEBUG_TRACE();
-
-	logger.info("START testXNSServer");
-
-	EchoListener    echoListener;
-	RIPListener     ripListener;
-	TimeListener    timeListener;
-	CHSListener     chsListener;
-
-//	SPPCourier      sppCourier;
-//	SPPServer       sppServerCourie(&sppCourier);
-
-	SPPPacket       sppPacket;
-	SPPQueueServer  sppQueueServer(&sppPacket);
-
-
-	CHService chService2("CHService2", Courier::Clearinghouse2::PROGRAM, Courier::Clearinghouse2::VERSION);
-//	CHService chService3("CHService3", Courier::CHS::PROGRAM, Courier::CHS::VERSION3);
-
-	Server server;
-
-	// init server
-	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
-
-	// add service
-	server.add(&chService2);
-//	server.add(&chService3);
-
-	// add listener
-	server.add(&echoListener);
-	server.add(&ripListener);
-	server.add(&timeListener);
-	server.add(&chsListener);
-//	server.add(&sppServerCourie);
-	server.add(&sppQueueServer);
-
-	logger.info("server.start");
-	server.start();
-	logger.info("QThread::sleep");
-	QThread::sleep(60);
-	logger.info("server.stop");
-	server.stop();
-	logger.info("STOP testXNSServer");
-
-	logger.info("STOP");
-	return 0;
+void SPPPacket::init() {
+	SPPQueue::init();
+}
+void SPPPacket::start() {
+	SPPQueue::start();
+}
+void SPPPacket::stop() {
+	SPPQueue::stop();
 }
 
+
+SPPPacket* SPPPacket::clone() {
+	SPPPacket* ret = new SPPPacket(*this);
+	return ret;
+}
+
+void SPPPacket::run(FunctionTable functionTable) {
+	logger.info("run START");
+
+	XNS::Data data;
+	XNS::SPP  spp;
+	for(;;) {
+		if (functionTable.stopRun()) break;
+		bool getData = functionTable.getData(&data, &spp);
+		if (!getData) continue;
+
+		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		logger.info("%s  SPP   %s  SPPPacket", TO_CSTRING(header), TO_CSTRING(spp.toString()));
+	}
+	logger.info("run STOP");
+}
 

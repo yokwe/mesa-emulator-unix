@@ -36,6 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("spp-queue");
 
+#include "../courier/Type.h"
+
 #include "../xns/SPP.h"
 
 #include "SPPQueue.h"
@@ -46,6 +48,7 @@ using XNS::Config;
 using XNS::Context;
 using XNS::IDP;
 using XNS::SPP;
+using Courier::BLOCK;
 using Courier::Services;
 
 
@@ -63,14 +66,28 @@ SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket)
 	functionTable.getContext   = [this](){return context;};
 	functionTable.getListeners = [this](){return listeners;};
 }
+SPPQueue::SPPQueue(const SPPQueue& that) : SPPListener(that) {
+	stopFuture = false;
+	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
+	functionTable.stopRun      = [this](){return stopFuture;};
+	functionTable.getConfig    = [this](){return config;};
+	functionTable.getContext   = [this](){return context;};
+	functionTable.getListeners = [this](){return listeners;};
+}
 
+
+void SPPQueue::init() {
+	logger.info("init");
+}
 void SPPQueue::start() {
+	DEBUG_TRACE();
 	DefaultListener::start();
 	stopFuture = false;
 
 	future = QtConcurrent::run([this](){this->run(functionTable);});
 }
 void SPPQueue::stop() {
+	DEBUG_TRACE();
 	DefaultListener::stop();
 	stopFuture = true;
 	future.waitForFinished();
@@ -121,3 +138,82 @@ XNS::Context*           SPPQueue::getContext() {
 XNS::Server::Listeners* SPPQueue::getListeners() {
 	return listeners;
 }
+
+
+//
+// SPPQueueServer
+//
+void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
+	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	logger.info("%s  SPP   %s  SPPQueueServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
+
+	if (spp.control.isSystem() && spp.control.isSendAck()) {
+		// OK
+		SPPQueue::State state;
+
+		// build state
+		{
+			QString newName = QString("%1-client").arg(name());
+
+			state.name = strdup(newName.toUtf8().constData());
+
+			state.time = data.timeStamp;
+
+			state.remoteHost   = data.idp.srcHost;
+			state.remoteSocket = (quint16)data.idp.srcSocket;
+			state.remoteID     = spp.idSrc;
+
+			state.localSocket  = listeners->getUnusedSocket();
+			state.localID      = data.timeStamp / 100;
+
+			state.sst   = XNS::SPP::SST::DATA;
+
+			// first reply packet is system, so sequence number is still 0
+			state.seq   = 0;
+			state.ack   = 0;
+			state.alloc = 0;
+		}
+
+		// create listener object and add to listeners
+		{
+			SPPQueue* newImpl = myImpl->clone();
+			newImpl->socket(state.localSocket);
+			newImpl->name(state.name);
+			newImpl->autoDelete(true);
+			newImpl->state(state);
+			// start listening object
+			// newImpl.start() is called during listeners->add()
+			listeners->add(newImpl);
+		}
+
+
+		// Send reply packet
+		{
+			SPP reply;
+			reply.control = SPP::Control::BIT_SYSTEM;
+			reply.sst = SPP::SST::DATA;
+			reply.idSrc = state.localID;
+			reply.idDst = state.remoteID;
+			reply.seq   = state.seq;
+			reply.ack   = state.ack;
+			reply.alloc = state.alloc;
+
+			Network::Packet level2;
+			TO_BYTE_BUFFER(level2, reply);
+			BLOCK block(level2);
+
+			IDP idp;
+			setIDP(data, IDP::Type::SPP, block, idp);
+			// change receiving socket to match newImpl
+			idp.srcSocket = state.localSocket;
+
+			transmit(data, idp);
+		}
+	} else {
+		logger.error("Unexpected");
+		ERROR();
+	}
+}
+
+

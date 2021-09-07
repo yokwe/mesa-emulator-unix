@@ -12,6 +12,9 @@ SOURCES += main.cpp
 HEADERS += Listener.h   PEXListener.h   Server.h   SPPListener.h   SPPQueue.h   SPPServer.h
 SOURCES += Listener.cpp PEXListener.cpp Server.cpp SPPListener.cpp SPPQueue.cpp SPPServer.cpp
 
+HEADERS += SPPPacket.h
+SOURCES += SPPPacket.cpp
+
 
 LIBS += ../../tmp/build/util/libutil.a
 LIBS += ../../tmp/build/xns/libxns.a

@@ -63,7 +63,6 @@ namespace XNS::PilotStream {
 	public:
 		CompletionCode why;
 		SST            sst;
-		quint16        seq;
 	};
 
 	class Stream {

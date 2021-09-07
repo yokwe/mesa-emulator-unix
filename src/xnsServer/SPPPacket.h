@@ -46,9 +46,15 @@ public:
 	SPPPacket(const SPPPacket& that) : SPPQueue(that.name(), that.socket()) {}
 
 	// life cycle method
-	void init ();
-	void start();
-	void stop ();
+	void init(XNS::Server::Server* server) {
+		SPPQueue::init(server);
+	}
+	void start() {
+		SPPQueue::start();
+	}
+	void stop() {
+		SPPQueue::stop();
+	}
 
 	SPPPacket* clone();
 

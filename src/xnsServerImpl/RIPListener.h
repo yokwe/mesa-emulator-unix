@@ -40,19 +40,21 @@
 #include "../xnsServer/Listener.h"
 
 
-class RIPListener : public XNS::Server::DefaultListener {
+class RIPListener : public XNS::Server::Listener {
 	QList<XNS::RIP::Entry> list;
 
-	bool              stopFuture;
-	QFuture<void>     future;
+	bool                   stopFuture;
+	QFuture<void>          future;
+	XNS::Server::Server*   myServer;
 
 	XNS::RIP::Entry find(quint32 net);
 public:
-	RIPListener() : XNS::Server::DefaultListener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
+	RIPListener() : XNS::Server::Listener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
 
-	void init();
+	void init (XNS::Server::Server* server);
 	void start();
-	void stop();
+	void stop ();
+
 	void run();
 
 	void handle(const XNS::Data& data);

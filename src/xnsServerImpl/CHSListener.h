@@ -42,5 +42,14 @@ class CHSListener : public PEXListener {
 public:
 	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS) {}
 
+	void init (XNS::Server::Server* server) {
+		myServer = server;
+	}
+	void start() {}
+	void stop () {}
+
 	void handle(const XNS::Data& data, const XNS::PEX& pex);
+
+private:
+	XNS::Server::Server* myServer;
 };

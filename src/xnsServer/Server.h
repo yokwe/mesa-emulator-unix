@@ -72,7 +72,7 @@ namespace XNS::Server {
 		QMap<quint16, const char*> socketMap;
 
 	public:
-		void add(DefaultListener* listener) {
+		void add(Listener* listener) {
 			listeners.add(listener);
 		}
 		void add(Service* service) {

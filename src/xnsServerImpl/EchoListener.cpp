@@ -45,6 +45,13 @@ using XNS::IDP;
 using XNS::Echo;
 using Courier::Services;
 
+
+void EchoListener::init (XNS::Server::Server* server) {
+	(void)server;
+}
+void EchoListener::start() {}
+void EchoListener::stop () {}
+
 void EchoListener::handle(const Data& data) {
 	ByteBuffer level2 = data.idp.block.toBuffer();
 	if (data.idp.type == IDP::Type::ECHO) {
@@ -61,7 +68,7 @@ void EchoListener::handle(const Data& data) {
 			reply.type = Echo::Type::REPLY;
 			reply.block = echo.block;
 
-			DefaultListener::transmit(data, reply);
+			Listener::transmit(data, reply);
 		} else {
 			logger.error("Unexpected");
 			logger.error("  echo %s", echo.toString());

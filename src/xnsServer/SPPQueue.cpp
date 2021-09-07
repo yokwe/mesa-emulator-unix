@@ -40,6 +40,8 @@ static const Logger logger = Logger::getLogger("spp-queue");
 
 #include "../xns/SPP.h"
 
+#include "Server.h"
+
 #include "SPPQueue.h"
 
 using Network::Packet;
@@ -52,43 +54,34 @@ using Courier::BLOCK;
 using Courier::Services;
 
 
-std::function<bool(XNS::Data*, XNS::SPP*)>   getData;
-std::function<bool(void)>                    stopRun;
-std::function<XNS::Config*(void)>            getConfig;
-std::function<XNS::Context*(void)>           getContext;
-std::function<XNS::Server::Listeners*(void)> getListeners;
-
 SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket) {
 	stopFuture = false;
 	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
-	functionTable.stopRun      = [this](){return stopFuture;};
-	functionTable.getConfig    = [this](){return config;};
-	functionTable.getContext   = [this](){return context;};
-	functionTable.getListeners = [this](){return listeners;};
+	functionTable.stopRun      = [this](){return stopRun();};
+	functionTable.getConfig    = [this](){return getConfig();};
+	functionTable.getContext   = [this](){return getContext();};
+	functionTable.getListeners = [this](){return getListeners();};
 }
 SPPQueue::SPPQueue(const SPPQueue& that) : SPPListener(that) {
 	stopFuture = false;
 	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
-	functionTable.stopRun      = [this](){return stopFuture;};
-	functionTable.getConfig    = [this](){return config;};
-	functionTable.getContext   = [this](){return context;};
-	functionTable.getListeners = [this](){return listeners;};
+	functionTable.stopRun      = [this](){return stopRun();};
+	functionTable.getConfig    = [this](){return getConfig();};
+	functionTable.getContext   = [this](){return getContext();};
+	functionTable.getListeners = [this](){return getListeners();};
 }
 
 
-void SPPQueue::init() {
-	logger.info("init");
+void SPPQueue::init(XNS::Server::Server* server) {
+	myServer = server;
 }
 void SPPQueue::start() {
-	DEBUG_TRACE();
-	DefaultListener::start();
-	stopFuture = false;
+	if (myServer == nullptr) ERROR();
 
-	future = QtConcurrent::run([this](){this->run(functionTable);});
+	stopFuture = false;
+	future     = QtConcurrent::run([this](){this->run(functionTable);});
 }
 void SPPQueue::stop() {
-	DEBUG_TRACE();
-	DefaultListener::stop();
 	stopFuture = true;
 	future.waitForFinished();
 }
@@ -130,19 +123,22 @@ bool SPPQueue::stopRun() {
 	return stopFuture;
 }
 XNS::Config*            SPPQueue::getConfig() {
-	return config;
+	return myServer->getConfig();
 }
 XNS::Context*           SPPQueue::getContext() {
-	return context;
+	return myServer->getContext();
 }
 XNS::Server::Listeners* SPPQueue::getListeners() {
-	return listeners;
+	return myServer->getListeners();
 }
 
 
 //
 // SPPQueueServer
 //
+void SPPQueueServer::start() {
+	if (myServer == nullptr) ERROR();
+}
 void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
@@ -151,6 +147,7 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 	if (spp.control.isSystem() && spp.control.isSendAck()) {
 		// OK
 		SPPQueue::State state;
+		XNS::Server::Listeners* listeners = myServer->getListeners();
 
 		// build state
 		{
@@ -186,7 +183,6 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 			// newImpl.start() is called during listeners->add()
 			listeners->add(newImpl);
 		}
-
 
 		// Send reply packet
 		{

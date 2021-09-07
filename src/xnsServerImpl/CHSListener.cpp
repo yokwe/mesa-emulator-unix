@@ -59,6 +59,7 @@ using Courier::Protocol3Body;
 using Courier::MessageType;
 using Courier::ProgramVersion;
 
+
 void CHSListener::handle(const Data& data, const PEX& pex) {
 	ByteBuffer level3 = pex.block.toBuffer();
 	ExpeditedCourier exp;
@@ -70,7 +71,7 @@ void CHSListener::handle(const Data& data, const PEX& pex) {
 
 	Packet result;
 	bool useBulk;
-	services->call(exp.body, result, useBulk);
+	myServer->getServices()->call(exp.body, result, useBulk);
 
 	if (result.limit() == 0) return;
 	BLOCK block(result);
@@ -92,6 +93,6 @@ void CHSListener::handle(const Data& data, const PEX& pex) {
 	replyPEX.type  = PEX::Type::CHS;
 	replyPEX.block = block2;
 
-	DefaultListener::transmit(data, replyPEX);
+	Listener::transmit(data, replyPEX);
 }
 

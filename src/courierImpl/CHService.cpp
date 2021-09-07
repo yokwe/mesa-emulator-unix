@@ -55,7 +55,7 @@ using XNS::Host;
 using XNS::Socket;
 using XNS::Net;
 using XNS::PEX;
-using XNS::Server::DefaultListener;
+using XNS::Server::Listener;
 using Courier::Base;
 using Courier::BLOCK;
 using Courier::Procedure;

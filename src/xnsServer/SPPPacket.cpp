@@ -36,18 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("spp-packet");
 
+#include "Server.h"
 #include "SPPPacket.h"
-
-
-void SPPPacket::init() {
-	SPPQueue::init();
-}
-void SPPPacket::start() {
-	SPPQueue::start();
-}
-void SPPPacket::stop() {
-	SPPQueue::stop();
-}
 
 
 SPPPacket* SPPPacket::clone() {

@@ -50,6 +50,7 @@ using XNS::Time;
 using Courier::Services;
 using Courier::BLOCK;
 
+
 void TimeListener::handle(const Data& data, const PEX& pex) {
 	ByteBuffer level3 = pex.block.toBuffer();
 	Time time;
@@ -83,7 +84,7 @@ void TimeListener::handle(const Data& data, const PEX& pex) {
 		replyPEX.type  = PEX::Type::TIME;
 		replyPEX.block = block3;
 
-		DefaultListener::transmit(data, replyPEX);
+		Listener::transmit(data, replyPEX);
 	} else {
 		logger.error("Unexpected");
 		logger.error("  time %s", time.toString());

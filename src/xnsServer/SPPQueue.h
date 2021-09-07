@@ -41,6 +41,12 @@
 
 #include "SPPListener.h"
 
+
+// forward declaration
+namespace XNS::Server {
+	class Server;
+}
+
 class SPPQueue : public SPPListener {
 public:
 	class State {
@@ -106,7 +112,7 @@ public:
 
 	SPPQueue(const SPPQueue& that);
 
-	void init();
+	void init(XNS::Server::Server* server);
 	void start();
 	void stop();
 
@@ -143,6 +149,7 @@ protected:
 	virtual void run(FunctionTable functionTable) = 0;
 
 	State myState;
+	XNS::Server::Server* myServer;
 
 private:
 	class MyData {
@@ -162,10 +169,17 @@ private:
 
 class SPPQueueServer : public SPPListener {
 public:
-	SPPQueueServer(SPPQueue* impl) : SPPListener(impl->name(), impl->socket()), myImpl(impl) {}
+	SPPQueueServer(SPPQueue* impl) : SPPListener(impl->name(), impl->socket()), myImpl(impl), myServer(nullptr) {}
+
+	void init (XNS::Server::Server* server) {
+		myServer = server;
+	}
+	void start();
+	void stop () {}
 
 	void handle(const XNS::Data& data, const XNS::SPP& spp);
 
 private:
-	SPPQueue* myImpl;
+	SPPQueue*            myImpl;
+	XNS::Server::Server* myServer;
 };

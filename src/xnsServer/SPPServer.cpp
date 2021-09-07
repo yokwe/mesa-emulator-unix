@@ -42,6 +42,7 @@ static const Logger logger = Logger::getLogger("spp-server");
 
 #include "../courier/Protocol.h"
 
+#include "Server.h"
 #include "SPPServer.h"
 
 
@@ -122,18 +123,12 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 
 			Packet result;
 			bool useBulk;
-			services->call(exp.body, result, useBulk);
+			myServer->getServices()->call(exp.body, result, useBulk);
 
 			if (result.limit() == 0) return;
 			BLOCK block(result);
 
 			// FIXME How to send reply with SPP?
-//			PEX replyPEX;
-//			replyPEX.id    = pex.id;
-//			replyPEX.type  = PEX::Type::CHS;
-//			replyPEX.block = block;
-//
-//			DefaultListener::transmit(data, replyPEX);
 		} else {
 			// FIXME
 		}
@@ -141,9 +136,6 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 
 }
 
-void XNS::Server::SPPServer::init() {
-	logger.info("SPPServer::init  %s", toString());
-}
 
 void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
@@ -153,6 +145,7 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 	if (spp.control.isSystem() && spp.control.isSendAck()) {
 		// OK
 		SPPServerImpl::State state;
+		Listeners* listeners = myServer->getListeners();
 
 		// build state
 		{

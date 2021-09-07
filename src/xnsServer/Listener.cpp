@@ -41,12 +41,11 @@ static const Logger logger = Logger::getLogger("listener");
 
 using XNS::Server::Listener;
 using XNS::Server::Listeners;
-using XNS::Server::DefaultListener;
 
 //
 // XNS::Server::Listeners
 //
-void Listeners::add(quint16 socket, DefaultListener* listener) {
+void Listeners::add(quint16 socket, Listener* listener) {
 	// sanity check
 	if (server == nullptr) {
 		ERROR();
@@ -60,8 +59,7 @@ void Listeners::add(quint16 socket, DefaultListener* listener) {
 		map[socket] = listener;
 
 		// call init
-		listener->initDefaultListener(server);
-		listener->init();
+		listener->init(server);
 		// call start if listener started
 		if (started) listener->start();
 	}
@@ -122,22 +120,10 @@ void Listeners::stop() {
 //
 // XNS::Server::Listener
 //
-QString XNS::Server::Listener::toString() {
+QString Listener::toString() {
 	return QString::asprintf("%s-%s", TO_CSTRING(Socket::toString(socket())), name());
 }
-
-
-//
-// XNS::Server::DefaultListener
-//
-void XNS::Server::DefaultListener::initDefaultListener(Server* server_) {
-	server    = server_;
-	config    = server->getConfig();
-	context   = server->getContext();
-	listeners = server->getListeners();
-	services  = server->getServices();
-}
-void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& idp) {
+void Listener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
 	packet.write48(context->address);
@@ -198,7 +184,7 @@ void DefaultListener::transmit(const Context* context, quint64 dst, const IDP& i
 		}
 	}
 }
-void DefaultListener::transmit(const Data& data, const RIP&   rip) {
+void Listener::transmit(const Data& data, const RIP&   rip) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, rip);
 	BLOCK block(level2);
@@ -208,7 +194,7 @@ void DefaultListener::transmit(const Data& data, const RIP&   rip) {
 
 	transmit(data, idp);
 }
-void DefaultListener::transmit(const Data& data, const Echo&  echo) {
+void Listener::transmit(const Data& data, const Echo&  echo) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, echo);
 	BLOCK block(level2);
@@ -218,7 +204,7 @@ void DefaultListener::transmit(const Data& data, const Echo&  echo) {
 
 	transmit(data, idp);
 }
-void DefaultListener::transmit(const Data& data, const Error& error) {
+void Listener::transmit(const Data& data, const Error& error) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, error);
 	BLOCK block(level2);
@@ -228,7 +214,7 @@ void DefaultListener::transmit(const Data& data, const Error& error) {
 
 	transmit(data, idp);
 }
-void DefaultListener::transmit(const Data& data, const PEX&   pex) {
+void Listener::transmit(const Data& data, const PEX&   pex) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, pex);
 	BLOCK block(level2);
@@ -238,7 +224,7 @@ void DefaultListener::transmit(const Data& data, const PEX&   pex) {
 
 	transmit(data, idp);
 }
-void DefaultListener::transmit(const Data& data, const SPP&   spp) {
+void Listener::transmit(const Data& data, const SPP&   spp) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, spp);
 	BLOCK block(level2);
@@ -248,7 +234,7 @@ void DefaultListener::transmit(const Data& data, const SPP&   spp) {
 
 	transmit(data, idp);
 }
-void DefaultListener::transmit(const Data& data, const Boot&  boot) {
+void Listener::transmit(const Data& data, const Boot&  boot) {
 	Packet level2;
 	TO_BYTE_BUFFER(level2, boot);
 	BLOCK block(level2);
@@ -258,7 +244,7 @@ void DefaultListener::transmit(const Data& data, const Boot&  boot) {
 
 	transmit(data, idp);
 }
-void DefaultListener::setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
+void Listener::setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
 	idp.length    = (quint16)0;
 	idp.control   = (quint8)0;

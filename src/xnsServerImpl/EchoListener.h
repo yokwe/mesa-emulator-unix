@@ -37,9 +37,13 @@
 
 #include "../xnsServer/Listener.h"
 
-class EchoListener : public XNS::Server::DefaultListener {
+class EchoListener : public XNS::Server::Listener {
 public:
-	EchoListener() : XNS::Server::DefaultListener("EchoListener", XNS::Socket::ECHO) {}
+	EchoListener() : XNS::Server::Listener("EchoListener", XNS::Socket::ECHO) {}
+
+	void init(XNS::Server::Server* server);
+	void start();
+	void stop();
 
 	void handle(const XNS::Data& data);
 };

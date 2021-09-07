@@ -42,5 +42,11 @@ class TimeListener : public PEXListener {
 public:
 	TimeListener() : PEXListener("TimeListener", XNS::Socket::TIME, XNS::PEX::Type::TIME) {}
 
+	void init (XNS::Server::Server* server) {
+		(void)server;
+	}
+	void start() {}
+	void stop () {}
+
 	void handle(const XNS::Data& data, const XNS::PEX& pex);
 };

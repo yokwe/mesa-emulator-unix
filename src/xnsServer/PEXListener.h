@@ -37,11 +37,11 @@
 
 #include "../xnsServer/Listener.h"
 
-class PEXListener : public XNS::Server::DefaultListener {
+class PEXListener : public XNS::Server::Listener {
 	// pex type
 	quint16 myType;
 public:
-	PEXListener(const char* name, quint16 socket, quint16 type) : XNS::Server::DefaultListener(name, socket), myType(type) {}
+	PEXListener(const char* name, quint16 socket, quint16 type) : XNS::Server::Listener(name, socket), myType(type) {}
 	~PEXListener() {}
 
 	void handle(const XNS::Data& data);

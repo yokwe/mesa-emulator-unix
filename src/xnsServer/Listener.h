@@ -58,12 +58,10 @@ namespace XNS::Server {
 
 	// forward declaration
 	class Server;
-	class Listeners;
-
 
 	class Listener {
 	public:
-		virtual void init  ()                 = 0;
+		virtual void init  (Server* server)   = 0;
 		virtual void start ()                 = 0;
 		virtual void stop  ()                 = 0;
 
@@ -107,45 +105,6 @@ namespace XNS::Server {
 			myAutoDelete = newValue;
 		}
 
-	protected:
-		const char* myName;
-		quint16     mySocket;
-		bool        myAutoDelete;
-	};
-
-	class DefaultListener : public Listener {
-	public:
-		DefaultListener() : server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
-		virtual ~DefaultListener() {}
-
-		DefaultListener(const DefaultListener& that) : Listener(that) {
-			this->server    = that.server;
-			this->config    = that.config;
-			this->context   = that.context;
-			this->listeners = that.listeners;
-			this->services  = that.services;
-		}
-		DefaultListener& operator = (const DefaultListener& that) {
-			Listener::operator =(that);
-
-			this->server    = that.server;
-			this->config    = that.config;
-			this->context   = that.context;
-			this->listeners = that.listeners;
-			this->services  = that.services;
-			return *this;
-		}
-
-		DefaultListener(const char* name_, quint16 socket_) :
-			Listener(name_, socket_),
-			server(nullptr), config(nullptr), context(nullptr), listeners(nullptr), services(nullptr) {}
-
-		void initDefaultListener(Server* server_);
-
-		void init () {}
-		void start() {}
-		void stop () {}
-
 		static void transmit(const Data& data, const RIP&   rip);
 		static void transmit(const Data& data, const Echo&  echo);
 		static void transmit(const Data& data, const Error& error);
@@ -153,12 +112,11 @@ namespace XNS::Server {
 		static void transmit(const Data& data, const SPP&   spp);
 		static void transmit(const Data& data, const Boot&  boot);
 
+
 	protected:
-		Server*    server;
-		Config*    config;
-		Context*   context;
-		Listeners* listeners;
-		Services*  services;
+		const char* myName;
+		quint16     mySocket;
+		bool        myAutoDelete;
 
 		// for RIP broadcast
 		static void transmit(const Context* context, quint64 dst, const IDP& idp);
@@ -170,7 +128,6 @@ namespace XNS::Server {
 
 		// initialize idp for transmit
 		static void setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp);
-
 	};
 
 
@@ -189,8 +146,8 @@ namespace XNS::Server {
 		// Add listener to map
 		// call listener.init()
 		// If listeners is running, call listener.start()
-		void add(quint16 socket, DefaultListener* listener);
-		void add(DefaultListener* listener) {
+		void add(quint16 socket, Listener* listener);
+		void add(Listener* listener) {
 			add(listener->socket(), listener);
 		}
 		// Remove listener from map

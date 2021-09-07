@@ -50,7 +50,7 @@ using XNS::Net;
 using XNS::RIP;
 using XNS::Socket;
 using XNS::Host;
-using XNS::Server::DefaultListener;
+using XNS::Server::Listener;
 using Courier::Services;
 using Courier::BLOCK;
 
@@ -61,26 +61,28 @@ RIP::Entry RIPListener::find(quint32 net) {
 	return RIP::Entry(net, RIP::HOP_INFINITY);
 }
 
-void RIPListener::init() {
+void RIPListener::init(XNS::Server::Server* server) {
 	logger.info("RIPListener::init");
 
+	myServer = server;
 	list.clear();
-	for(auto e: config->network.list) {
+	for(auto e: myServer->getConfig()->network.list) {
 		RIP::Entry entry(e.net, e.hop);
 		list.append(entry);
 	}
 }
 void RIPListener::start() {
-	DefaultListener::start();
 	stopFuture = false;
 	future = QtConcurrent::run([this](){this->run();});
 }
 void RIPListener::stop() {
-	DefaultListener::stop();
 	stopFuture = true;
 	future.waitForFinished();
 }
 void RIPListener::run() {
+	Config*  config  = myServer->getConfig();
+	Context* context = myServer->getContext();
+
 	int count = RIP::BROADCAST_INTERVAL - 1;
 	for(;;) {
 		if (stopFuture) break;
@@ -114,7 +116,7 @@ void RIPListener::run() {
 			idp.block     = block;
 
 			logger.info("RIPListener periodic broadcast");
-			DefaultListener::transmit(context, Host::ALL, idp);
+			Listener::transmit(context, Host::ALL, idp);
 		}
 	}
 }

@@ -37,15 +37,15 @@
 
 #include "Listener.h"
 
-class SPPListener : public XNS::Server::DefaultListener {
+class SPPListener : public XNS::Server::Listener {
 public:
-	SPPListener(const char* name, quint16 socket) : XNS::Server::DefaultListener(name, socket) {}
+	SPPListener(const char* name, quint16 socket) : XNS::Server::Listener(name, socket) {}
 	virtual ~SPPListener() {}
 
 	SPPListener() {}
-	SPPListener(const SPPListener& that) : DefaultListener(that) {}
+	SPPListener(const SPPListener& that) : Listener(that) {}
 	SPPListener& operator = (const SPPListener& that) {
-		DefaultListener::operator =(that);
+		Listener::operator =(that);
 		return *this;
 	}
 

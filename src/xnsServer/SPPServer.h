@@ -139,6 +139,12 @@ namespace XNS::Server {
 			std::function<PilotStream::Stream*()> getPilotStream;
 		};
 
+		void init (Server* server) {
+			myServer = server;
+		}
+		void start() {}
+		void stop () {}
+
 		virtual void           run(FunctionTable functionTable) = 0;
 
 		// clone method for SPPServer
@@ -147,7 +153,8 @@ namespace XNS::Server {
 		// return new SPPServerImpl(*this);
 
 	protected:
-		State myState;
+		State   myState;
+		Server* myServer;
 	};
 
 	// SPPServer waiting for new connection at server socket
@@ -157,12 +164,15 @@ namespace XNS::Server {
 		SPPServer(SPPServerImpl* impl_) : SPPListener(impl_->name(), impl_->socket()), impl(impl_) {}
 		virtual ~SPPServer() {}
 
-		void init();
+		void init (Server* server);
+		void start();
+		void stop ();
+
 		void handle(const XNS::Data& data, const XNS::SPP& spp);
 
 	protected:
 		SPPServerImpl* impl;
+		Server*        myServer;
 	};
-
 
 }

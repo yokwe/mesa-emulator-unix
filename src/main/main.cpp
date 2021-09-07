@@ -31,25 +31,21 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-#include "../courier/TextStream.h"
+//#include "../mesa/Type.h"
+//#include "../trace/Trace.h"
+//
+//// Define PageFault and WriteProtectFault for Memory.h
+//void PageFault(CARD32 ptr) {
+//	logger.fatal("%s %X", __FUNCTION__, ptr);
+//	ERROR();
+//}
+//void WriteProtectFault(CARD32 ptr) {
+//	logger.fatal("%s %X", __FUNCTION__, ptr);
+//	ERROR();
+//}
 
-
-using Courier::TextStream;
-using Courier::Printf;
-
-enum class ABC : quint16 {A, B, C};
-
-
-
-TextStream& operator << (TextStream& that, ABC& value) {
-	that <<  QString("(%1)").arg((quint16)value);
-	return that;
-}
-
-TextStream& operator << (TextStream& that, quint16& value) {
-	that <<  QString("(%1)").arg(value);
-	return that;
-}
+// To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
+//	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
 
 
 int main(int, char**) {
@@ -64,15 +60,6 @@ int main(int, char**) {
 	DEBUG_TRACE();
 
 	{
-		ABC a = ABC::A;
-		ABC b = ABC::B;
-		quint16 c = 0x123;
-
-		TextStream ss;
-
-		ss << a << " " << b << " " << Printf("!%d %04X!", 3, 0x2345) << c << "!";
-		logger.info("string = %s", ss.toString());
-
 		// write code here
 	}
 

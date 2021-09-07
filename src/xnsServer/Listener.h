@@ -103,7 +103,7 @@ namespace XNS::Server {
 		void socket(quint16 newValue) {
 			mySocket = newValue;
 		}
-		void autoDelete(bool newValue = true) {
+		void autoDelete(bool newValue) {
 			myAutoDelete = newValue;
 		}
 

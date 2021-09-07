@@ -171,9 +171,10 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 
 			state.sst   = XNS::SPP::SST::DATA;
 
+			// first reply packet is system, so sequence number is still 0
 			state.seq   = 0;
 			state.ack   = 0;
-			state.alloc = 4;
+			state.alloc = 0;
 		}
 
 		// create listener object and add to listeners

@@ -61,9 +61,26 @@ namespace XNS::Server {
 
 			quint16 sst;
 
-			quint16 seq;     // sequence
-			quint16 ack;     // acknowledgment
-			quint16 alloc;   // allocation
+			// Packets with the Attention bit set must have only one byte of data.
+
+			// FIXME
+			//   how to retransmit data?
+			//   how to remove duplicate of received data?
+			//   how to increase my seq number?
+			//
+
+			// If ack of receiving packet, means expecing sequence number
+
+			// The Sequence Number counts packets sent on the connection.
+			// The first packet is assigned number zero, and the count proceeds from there.
+			// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
+			quint16 seq;
+			// The Acknowledge Number field specifies the sequence number of the first packet which has not yet been seen traveling in the reverse direction.
+			// Acknowledge Number indicates the sequence number of the next expected packet.
+			quint16 ack;
+			// The Allocation Number specifies the sequence number up to and including which packets will be accepted from the other end.
+			// One plus the difference between the Allocation Number and the Acknowledge Number indicates the number of packets that may be outstanding in the reverse direction
+			quint16 alloc;
 
 			State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sst(0), seq(0), ack(0), alloc(0) {}
 			State(const State& that) {

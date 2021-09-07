@@ -50,32 +50,63 @@ using XNS::Data;
 using XNS::PEX;
 using Courier::Protocol3Body;
 
+
 //
 // Courier::Service
 //
-void Courier::Service::add(Procedure* procedure) {
+QString Courier::Service::toString() const {
+	return QString::asprintf("%d-%d %s", myProgram, myVersion, myName);
+}
+
+void Courier::Service::addProcedure(Procedure* procedure) {
 	quint16 key = procedure->procedure();
-	if (map.contains(key)) {
+	if (procedureMap.contains(key)) {
 		logger.error("Unexpected");
 		logger.error("  service   %u-%u %s", program(), version(), name());
 		logger.error("  procedure %u %s", procedure->procedure(), procedure->name());
 		ERROR();
 	} else {
 		logger.info("add  %3d  %s %s", procedure->procedure(), name(), procedure->name());
-		map[key] = procedure;
+		procedureMap[key] = procedure;
 	}
 }
-QString Courier::Service::toString() const {
-	return QString::asprintf("%d-%d %s", myProgram, myVersion, myName);
-}
-
 Courier::Procedure* Courier::Service::getProcedure(const quint16 procedure) const {
-	if (map.contains(procedure)) {
-		return map[procedure];
+	if (procedureMap.contains(procedure)) {
+		return procedureMap[procedure];
 	} else {
 		return nullptr;
 	}
 }
+void Courier::Service::addSesion(Session* session) {
+	quint16 key = session->transaction();
+	if (sessionMap.contains(key)) {
+		logger.error("Unexpected");
+		logger.error("  new %s", session->toString());
+		logger.error("  old %s", sessionMap[key]->toString());
+		ERROR();
+	} else {
+		sessionMap[key] = session;
+	}
+}
+void Courier::Service::removeSession(quint16 transaction) {
+	if (sessionMap.contains(transaction)) {
+		Session* session = sessionMap[transaction];
+		delete session;
+	} else {
+		logger.error("Unexpected");
+		logger.error("  transaction %04X", transaction);
+		ERROR();
+	}
+}
+// If three is no session for transaction, returns nullptr
+Courier::Session* Courier::Service::getSession(quint16 transaction) {
+	if (sessionMap.contains(transaction)) {
+		return sessionMap[transaction];
+	} else {
+		return nullptr;
+	}
+}
+
 
 
 //
@@ -153,7 +184,8 @@ void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result, bool
 	}
 
 	logger.info("Courier %s %s (%s)", service->name(), procedure->name(), callBody.block.toString());
-	procedure->call(*(server->getConfig()), callBody, result);
+	Config* config = server->getConfig();
+	procedure->call(*config, *service, callBody, result);
 	logger.info("result  %s", result.toString());
 	useBulk = procedure->useBulk();
 }
@@ -164,4 +196,13 @@ void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result, bool
 //
 QString Courier::Procedure::toString() const {
 	return QString::asprintf("%d %s", myProcedure, myName);
+}
+
+
+//
+// Courier::Session
+//
+QString Courier::Session::toString() {
+	QString timeStampString = QDateTime::fromSecsSinceEpoch(myTimestamp).toString("yyyy-MM-dd hh:mm:ss");
+	return QString("%1-%2").arg(timeStampString).arg(myTransaction, 4, 16, QChar('0')).toUpper();
 }

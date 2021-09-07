@@ -75,10 +75,22 @@ void CHSListener::handle(const Data& data, const PEX& pex) {
 	if (result.limit() == 0) return;
 	BLOCK block(result);
 
+	// result is serialized Protocol3Body
+
+	// emulate ExpeditedCourier
+	Courier::ProtocolRange range;
+	range.low  = Courier::ProtocolType::PROTOCOL3;
+	range.high = Courier::ProtocolType::PROTOCOL3;
+
+	Packet result2;
+	TO_BYTE_BUFFER(result2, range);
+	TO_BYTE_BUFFER(result2, block);
+	BLOCK block2(result2);
+
 	PEX replyPEX;
 	replyPEX.id    = pex.id;
 	replyPEX.type  = PEX::Type::CHS;
-	replyPEX.block = block;
+	replyPEX.block = block2;
 
 	DefaultListener::transmit(data, replyPEX);
 }

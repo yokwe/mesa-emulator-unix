@@ -60,6 +60,7 @@ using Courier::Base;
 using Courier::BLOCK;
 using Courier::Procedure;
 using Courier::Protocol3Body;
+using Courier::Service;
 
 using Courier::Clearinghouse2::NetworkAddress;
 
@@ -70,7 +71,8 @@ class RetrieveAddresses : public Procedure {
 public:
 	RetrieveAddresses() : Procedure(NAME, PROCEDURE, USE_BULK) {}
 
-	void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
+	void call(const Config& config, Service& service, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
+		(void)service;
 		logger.info("%s called", NAME);
 
 		Courier::Clearinghouse2::RetrieveAddress::Return returnValue;
@@ -93,13 +95,11 @@ public:
 		returnBody.transaction = callBody.transaction;
 		returnBody.block = block4;
 
-		Courier::ExpeditedCourier replyExp;
-		replyExp.range.low  = Courier::ProtocolType::PROTOCOL3;
-		replyExp.range.high = Courier::ProtocolType::PROTOCOL3;
-		replyExp.body.type  = Courier::MessageType::RETURN;
-		replyExp.body.set(returnBody);
+		Protocol3Body body;
+		body.type = Courier::MessageType::RETURN;
+		body.set(returnBody);
 
-		TO_BYTE_BUFFER(result, replyExp);
+		TO_BYTE_BUFFER(result, body);
 	}
 };
 RetrieveAddresses retrieveAddress;
@@ -112,8 +112,9 @@ class ListDomainServed : public Procedure {
 public:
 	ListDomainServed() : Procedure(NAME, PROCEDURE, USE_BULK) {}
 
-	void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
+	void call(const Config& config, Service& service, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
 		(void)config;
+		(void)service;
 		(void)result;
 		logger.info("%s called", NAME);
 
@@ -131,6 +132,11 @@ ListDomainServed listDomainServed;
 void CHService::init() {
 	logger.info("init %s", name());
 	// add procedure
-	add(&retrieveAddress);
-	add(&listDomainServed);
+	addProcedure(&retrieveAddress);
+	addProcedure(&listDomainServed);
+}
+void CHService::start() {
+	Service::defaultStart();
+}
+void CHService::stop() {
 }

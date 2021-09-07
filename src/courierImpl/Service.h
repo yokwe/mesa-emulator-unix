@@ -57,6 +57,9 @@ namespace Courier {
 	using XNS::Data;
 	using XNS::Server::Server;
 
+	// forward declaration
+	class Service;
+
 	class Procedure {
 	public:
 		virtual ~Procedure() {}
@@ -87,12 +90,52 @@ namespace Courier {
 
 		QString toString() const;
 
-		virtual void call(const Config& config, const Protocol3Body::CallBody& callBody, ByteBuffer& result) = 0;
+		// service is to access session
+		// result contains serialized Protocol3Body
+		// result can be empty for error during process of call
+		virtual void call(const Config& config, Service& service, const Protocol3Body::CallBody& callBody, ByteBuffer& result) = 0;
 
 	protected:
 		const char* myName;
 		quint16     myProcedure;
 		bool        myUseBulk;
+	};
+
+
+	class Session {
+		static const quint64 VALID_SESSION_PERIOD = 10 * 60; // 10 minutes
+
+	public:
+		Session(quint16 transaction_) {
+			myTimestamp = QDateTime::currentSecsSinceEpoch();
+			myTransaction = transaction_;
+		}
+		Session() : myTimestamp(0), myTransaction(0) {}
+		Session(const Session& that) {
+			this->myTimestamp   = that.myTimestamp;
+			this->myTransaction = that.myTransaction;
+		}
+		Session& operator = (const Session& that) {
+			this->myTimestamp   = that.myTimestamp;
+			this->myTransaction = that.myTransaction;
+			return *this;
+		}
+		QString toString();
+
+		quint16 transaction() {
+			return myTransaction;
+		}
+		void update() {
+			myTimestamp = QDateTime::currentSecsSinceEpoch();
+		}
+		bool isTimeout() {
+			quint64 now = QDateTime::currentSecsSinceEpoch();
+			return (myTimestamp + VALID_SESSION_PERIOD) < now;
+		}
+
+	protected:
+		quint64 myTimestamp;   // myTimestamp is for session timeout management
+		quint16 myTransaction;
 	};
 
 
@@ -109,22 +152,29 @@ namespace Courier {
 			return myVersion;
 		}
 
-		virtual void init () = 0;
-		virtual void start() = 0;
-		virtual void stop () = 0;
+		// life cycle management
+		virtual void init  () = 0;
+		virtual void start () = 0;
+		virtual void stop  () = 0;
+
+		void defaultStart() {
+			sessionMap.clear();
+		}
 
 		Service() : myName(nullptr), myProgram(0), myVersion(0) {}
 		Service(const Service& that) {
-			this->myName    = that.myName;
-			this->myProgram = that.myProgram;
-			this->myVersion = that.myVersion;
-			this->map       = that.map;
+			this->myName       = that.myName;
+			this->myProgram    = that.myProgram;
+			this->myVersion    = that.myVersion;
+			this->procedureMap = that.procedureMap;
+			this->sessionMap   = that.sessionMap;
 		}
 		Service& operator = (const Service& that) {
-			this->myName    = that.myName;
-			this->myProgram = that.myProgram;
-			this->myVersion = that.myVersion;
-			this->map       = that.map;
+			this->myName       = that.myName;
+			this->myProgram    = that.myProgram;
+			this->myVersion    = that.myVersion;
+			this->procedureMap = that.procedureMap;
+			this->sessionMap   = that.sessionMap;
 			return *this;
 		}
 
@@ -132,16 +182,25 @@ namespace Courier {
 
 		QString toString() const;
 
-		void add(Procedure* procedure);
-
+		// procedure
+		void addProcedure(Procedure* procedure);
 		Procedure* getProcedure(const quint16 procedure) const;
+
+		// session
+		void addSesion(Session* session);
+		void removeSession(quint16 transaction);
+		// If three is no session for transaction, returns nullptr
+		Session* getSession(quint16 transaction);
 
 	protected:
 		const char* myName;
 		quint32     myProgram;
 		quint16     myVersion;
 
-		QMap<quint16, Procedure*> map;
+		QMap<quint16, Procedure*> procedureMap;
+		//   procedure
+		QMap<quint16, Session*>   sessionMap;
+		//   transaction
 	};
 
 
@@ -177,6 +236,7 @@ namespace Courier {
 		}
 	};
 
+
 	class Services {
 	public:
 		Services() : server(nullptr), started(false) {}
@@ -185,7 +245,6 @@ namespace Courier {
 		void init(Server* server_) {
 			server = server_;
 		}
-
 		void start();
 		void stop();
 
@@ -196,7 +255,8 @@ namespace Courier {
 		Service* getService(const ProgramVersion& programVersion) const;
 
 		// call service specified in body and set outcome in result
-		//   if result is empty, don't send return packet
+		// result contains serialized Protocol3Body
+		// result can be empty for error during process of call
 		void call(const Protocol3Body& body, ByteBuffer& result, bool& useBulk) const;
 	protected:
 		Server* server;

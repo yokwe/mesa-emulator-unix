@@ -50,59 +50,62 @@ namespace XNS::Server {
 class SPPQueue : public SPPListener {
 public:
 	class State {
+		void copyFrom(const State& that) {
+			this->name         = that.name;
+			this->time         = that.time;
+			this->remoteHost   = that.remoteHost;
+			this->remoteSocket = that.remoteSocket;
+			this->remoteID     = that.remoteID;
+			this->localSocket  = that.localSocket;
+			this->localID      = that.localID;
+
+			this->recvSST      = that.recvSST;
+			this->recvSeq      = that.recvSeq;
+			this->sendSeq      = that.sendSeq;
+		}
 	public:
 		const char* name;
+		quint64     time;
+		quint64     remoteHost;
+		quint16     remoteSocket;
+		quint16     remoteID;
+		quint16     localSocket;
+		quint16     localID;
 
-		quint64 time;
+		quint16     recvSST;
+		quint16     recvSeq;
+		quint16     sendSeq;
 
-		quint64 remoteHost;
-		quint16 remoteSocket;
-		quint16 remoteID;
+		// When sending data to remote,
+		// sendSeq is used as seq
+		// recvSeq is used as ack and alloc (window size is one)
 
-		quint16 localSocket;
-		quint16 localID;
+		// When receiving data from remote,
+		// if seq equals to recvSeq, use receive this data and increment recvSeq.
+		// if ack equals to sendSeq plus one, increment sendSeq.
+		// if there is a data in sendQeueu, send data with updated recvSeq and sendSeq.
+		// if there is no data in sendQeueu, send system ack packet
 
-		quint16 sst;
-
-		// Packets with the Attention bit set must have only one byte of data.
 
 		// The Sequence Number counts packets sent on the connection.
 		// The first packet is assigned number zero, and the count proceeds from there.
 		// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
-		quint16 seq;
+
 		// The Acknowledge Number field specifies the sequence number of the first packet which has not yet been seen traveling in the reverse direction.
 		// Acknowledge Number indicates the sequence number of the next expected packet.
-		quint16 ack;
+
 		// The Allocation Number specifies the sequence number up to and including which packets will be accepted from the other end.
 		// One plus the difference between the Allocation Number and the Acknowledge Number indicates the number of packets that may be outstanding in the reverse direction
-		quint16 alloc;
 
-		State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sst(0), seq(0), ack(0), alloc(0) {}
+		// Packets with the Attention bit set must have only one byte of data.
+
+
+		State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), recvSST(0), recvSeq(0), sendSeq(0) {}
 		State(const State& that) {
-			this->name         = that.name;
-			this->time         = that.time;
-			this->remoteHost   = that.remoteHost;
-			this->remoteSocket = that.remoteSocket;
-			this->remoteID     = that.remoteID;
-			this->localSocket  = that.localSocket;
-			this->localID      = that.localID;
-			this->sst          = that.sst;
-			this->seq          = that.seq;
-			this->ack          = that.ack;
-			this->alloc        = that.alloc;
+			copyFrom(that);
 		}
 		State& operator = (const State& that) {
-			this->name         = that.name;
-			this->time         = that.time;
-			this->remoteHost   = that.remoteHost;
-			this->remoteSocket = that.remoteSocket;
-			this->remoteID     = that.remoteID;
-			this->localSocket  = that.localSocket;
-			this->localID      = that.localID;
-			this->sst          = that.sst;
-			this->seq          = that.seq;
-			this->ack          = that.ack;
-			this->alloc        = that.alloc;
+			copyFrom(that);
 			return *this;
 		}
 	};
@@ -128,9 +131,10 @@ public:
 	}
 
 protected:
-	// if getData returns true, data and spp are assigned
-	// if getDAta returns false, data and spp are NOT assigned
-	bool                    getData(XNS::Data* data, XNS::SPP* spp);
+	// if recv returns true, data and spp are assigned
+	// if recv returns false, data and spp are NOT assigned
+	bool                    recv(XNS::Data* data, XNS::SPP* spp);
+	void                    send(XNS::Data* data, XNS::SPP* spp);
 	bool                    stopRun();
 	XNS::Config*            getConfig();
 	XNS::Context*           getContext();
@@ -138,7 +142,8 @@ protected:
 
 	class FunctionTable {
 	public:
-		std::function<bool(XNS::Data*, XNS::SPP*)>   getData;
+		std::function<bool(XNS::Data*, XNS::SPP*)>   recv;
+		std::function<void(XNS::Data*, XNS::SPP*)>   send;
 		std::function<bool(void)>                    stopRun;
 		std::function<XNS::Config*(void)>            getConfig;
 		std::function<XNS::Context*(void)>           getContext;

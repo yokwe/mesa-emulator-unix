@@ -52,7 +52,7 @@ void SPPPacket::run(FunctionTable functionTable) {
 	XNS::SPP  spp;
 	for(;;) {
 		if (functionTable.stopRun()) break;
-		bool getData = functionTable.getData(&data, &spp);
+		bool getData = functionTable.recv(&data, &spp);
 		if (!getData) continue;
 
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");

@@ -54,26 +54,19 @@ using Courier::BLOCK;
 using Courier::Services;
 
 
-SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket) {
-	stopFuture = false;
-	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
-	functionTable.stopRun      = [this](){return stopRun();};
-	functionTable.getConfig    = [this](){return getConfig();};
-	functionTable.getContext   = [this](){return getContext();};
-	functionTable.getListeners = [this](){return getListeners();};
-}
-SPPQueue::SPPQueue(const SPPQueue& that) : SPPListener(that) {
-	stopFuture = false;
-	functionTable.getData      = [this](XNS::Data* data, XNS::SPP* spp){return getData(data, spp);};
-	functionTable.stopRun      = [this](){return stopRun();};
-	functionTable.getConfig    = [this](){return getConfig();};
-	functionTable.getContext   = [this](){return getContext();};
-	functionTable.getListeners = [this](){return getListeners();};
-}
+SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), stopFuture(false) {}
+SPPQueue::SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), stopFuture(false) {}
 
 
 void SPPQueue::init(XNS::Server::Server* server) {
 	myServer = server;
+
+	functionTable.recv         = [this](XNS::Data* data, XNS::SPP* spp){return recv(data, spp);};
+	functionTable.send         = [this](XNS::Data* data, XNS::SPP* spp){return send(data, spp);};
+	functionTable.stopRun      = [this](){return stopRun();};
+	functionTable.getConfig    = [this](){return getConfig();};
+	functionTable.getContext   = [this](){return getContext();};
+	functionTable.getListeners = [this](){return getListeners();};
 }
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
@@ -87,7 +80,6 @@ void SPPQueue::stop() {
 }
 
 void SPPQueue::handle(const Data& data, const SPP& spp) {
-	dataListMutex.lock();
 	MyData myData;
 	myData.data = data;
 	myData.spp  = spp;
@@ -96,13 +88,15 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
 	logger.info("%s  SPP   %s  HANDLE", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
 
+	dataListMutex.lock();
 	dataList.append(myData);
 	dataListMutex.unlock();
+
 	dataListCV.wakeOne();
 }
 
 
-bool SPPQueue::getData(Data* data, SPP* spp) {
+bool SPPQueue::recv(Data* data, SPP* spp) {
 	quint32 WAIT_TIME = 1;
 
 	QMutexLocker mutexLocker(&dataListMutex);
@@ -118,6 +112,11 @@ bool SPPQueue::getData(Data* data, SPP* spp) {
 		*spp  = myData.spp;
 		return true;
 	}
+}
+void SPPQueue::send(Data* data, SPP* spp) {
+	(void)data;
+	(void)spp;
+	// FIXME
 }
 bool SPPQueue::stopRun() {
 	return stopFuture;
@@ -164,12 +163,11 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 			state.localSocket  = listeners->getUnusedSocket();
 			state.localID      = data.timeStamp / 100;
 
-			state.sst   = XNS::SPP::SST::DATA;
+			state.recvSST      = XNS::SPP::SST::DATA;
 
 			// first reply packet is system, so sequence number is still 0
-			state.seq   = 0;
-			state.ack   = 0;
-			state.alloc = 0;
+			state.recvSeq      = 0;
+			state.sendSeq      = 0;
 		}
 
 		// create listener object and add to listeners
@@ -191,9 +189,9 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 			reply.sst = SPP::SST::DATA;
 			reply.idSrc = state.localID;
 			reply.idDst = state.remoteID;
-			reply.seq   = state.seq;
-			reply.ack   = state.ack;
-			reply.alloc = state.alloc;
+			reply.seq   = state.sendSeq;
+			reply.ack   = state.recvSeq;
+			reply.alloc = state.recvSeq;
 
 			Network::Packet level2;
 			TO_BYTE_BUFFER(level2, reply);

@@ -63,6 +63,7 @@ void SPPQueue::init(XNS::Server::Server* server) {
 
 	functionTable.recv         = [this](XNS::Data* data, XNS::SPP* spp){return recv(data, spp);};
 	functionTable.send         = [this](XNS::Data* data, XNS::SPP* spp){return send(data, spp);};
+	functionTable.close        = [this](){return close();};
 	functionTable.stopRun      = [this](){return stopRun();};
 	functionTable.getConfig    = [this](){return getConfig();};
 	functionTable.getContext   = [this](){return getContext();};
@@ -116,6 +117,9 @@ bool SPPQueue::recv(Data* data, SPP* spp) {
 void SPPQueue::send(Data* data, SPP* spp) {
 	(void)data;
 	(void)spp;
+	// FIXME
+}
+void SPPQueue::close() {
 	// FIXME
 }
 bool SPPQueue::stopRun() {

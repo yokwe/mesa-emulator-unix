@@ -86,7 +86,6 @@ public:
 		// if there is a data in sendQeueu, send data with updated recvSeq and sendSeq.
 		// if there is no data in sendQeueu, send system ack packet
 
-
 		// The Sequence Number counts packets sent on the connection.
 		// The first packet is assigned number zero, and the count proceeds from there.
 		// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
@@ -100,7 +99,8 @@ public:
 		// Packets with the Attention bit set must have only one byte of data.
 
 
-		State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), recvSST(0), recvSeq(0), sendSeq(0) {}
+		State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0),
+			recvSST(0), recvSeq(0), sendSeq(0) {}
 		State(const State& that) {
 			copyFrom(that);
 		}
@@ -135,6 +135,7 @@ protected:
 	// if recv returns false, data and spp are NOT assigned
 	bool                    recv(XNS::Data* data, XNS::SPP* spp);
 	void                    send(XNS::Data* data, XNS::SPP* spp);
+	void                    close();
 	bool                    stopRun();
 	XNS::Config*            getConfig();
 	XNS::Context*           getContext();
@@ -144,6 +145,7 @@ protected:
 	public:
 		std::function<bool(XNS::Data*, XNS::SPP*)>   recv;
 		std::function<void(XNS::Data*, XNS::SPP*)>   send;
+		std::function<void(void)>                    close;
 		std::function<bool(void)>                    stopRun;
 		std::function<XNS::Config*(void)>            getConfig;
 		std::function<XNS::Context*(void)>           getContext;

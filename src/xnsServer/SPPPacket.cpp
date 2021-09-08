@@ -36,10 +36,13 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("spp-packet");
 
+#include "../courier/Protocol.h"
+
 #include "Server.h"
 #include "SPPPacket.h"
 
 
+using Courier::ExpeditedCourier;
 using XNS::Server::SPPPacket;
 
 SPPPacket* SPPPacket::clone() {
@@ -57,9 +60,17 @@ void SPPPacket::run(FunctionTable functionTable) {
 		bool getData = functionTable.recv(&data, &spp);
 		if (!getData) continue;
 
+		ByteBuffer level3 = spp.block.toBuffer();
+		ExpeditedCourier exp;
+		FROM_BYTE_BUFFER(level3, exp);
+
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
-		logger.info("%s  SPP   %s  SPPPacket", TO_CSTRING(header), TO_CSTRING(spp.toString()));
+		logger.info("%s  SPP   %s  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(exp.body.toString()));
+
+		Packet result;
+		bool useBulk;
+		myServer->getServices()->call(exp.body, result, useBulk);
 
 		//
 		// FIXME

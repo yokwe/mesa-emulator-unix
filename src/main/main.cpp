@@ -47,27 +47,6 @@ static const Logger logger = Logger::getLogger("main");
 // To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
 //	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
 
-class ABC {
-public:
-	virtual ~ABC() {}
-
-	virtual void hello() = 0;
-};
-
-class A100 : public ABC {
-public:
-	void hello() override {
-		logger.info("A100");
-	}
-};
-
-class A200 : public A100 {
-public:
-	void hello() override {
-		logger.info("A200");
-		A100::hello();
-	}
-};
 
 int main(int, char**) {
 	logger.info("START");
@@ -81,13 +60,7 @@ int main(int, char**) {
 	DEBUG_TRACE();
 
 	{
-		A200 a200;
-
-		a200.hello();
-
-		ABC& abc(a200);
-		abc.hello();
-
+		// write code here
 	}
 
 	logger.info("STOP");

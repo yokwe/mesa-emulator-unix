@@ -42,6 +42,11 @@ static const Logger logger = Logger::getLogger("cr-type");
 //
 // Courier::STRING
 //
+QString Courier::STRING::operator =(const QString& newValue) const {
+	byteArray = newValue.toUtf8().constData();
+	return newValue;
+}
+
 void Courier::STRING::fromByteBuffer(ByteBuffer& bb) {
 	quint16 length;
 	bb.read16(length);

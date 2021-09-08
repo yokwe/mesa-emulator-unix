@@ -48,10 +48,10 @@ SPPPacket* SPPPacket::clone() {
 }
 
 void SPPPacket::run(FunctionTable functionTable) {
-	logger.info("run START");
-
+	logger.info("SPPPacket::run START");
 	Data data;
 	SPP  spp;
+
 	for(;;) {
 		if (functionTable.stopRun()) break;
 		bool getData = functionTable.recv(&data, &spp);
@@ -60,7 +60,11 @@ void SPPPacket::run(FunctionTable functionTable) {
 		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  SPP   %s  SPPPacket", TO_CSTRING(header), TO_CSTRING(spp.toString()));
+
+		//
+		// FIXME
+		//
 	}
-	logger.info("run STOP");
+	logger.info("SPPPacket::run STOP");
 }
 

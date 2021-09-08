@@ -49,7 +49,7 @@ void SPPListener::handle(const Data& data) {
 		FROM_BYTE_BUFFER(level2, spp);
 
 		handle(data, spp);
-	} else if (data.idp.type == IDP::Type::ERROR_) {
+	} else {
 		logger.error("Unexpected");
 		logger.error("    %s", data.idp.toString());
 		logger.error("        %s", data.idp.block.toString());

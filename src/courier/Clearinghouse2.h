@@ -173,15 +173,23 @@ namespace Courier::Clearinghouse2 {
 
 	template <class T>
 	class StreamOf : public Base {
-	public:
-
 		QList<T> list;
-
+	public:
 		StreamOf& operator = (const QList<T>& that) {
 			list.clear();
 			list.append(that);
 			return *this;
 		}
+		void clear() {
+			list.clear();
+		}
+		int size() const {
+			return list.size();
+		}
+		void append(const T& newValue) {
+			list.append(newValue);
+		}
+
 
 		QString toString() const {
 			QStringList myList;
@@ -212,8 +220,8 @@ namespace Courier::Clearinghouse2 {
 			StreamOfChoice choice;
 			SEQUENCE<T>    sequence;
 
-			choice   = StreamOfChoice::LAST_SEGMENT;
-			sequence = list;
+			choice = StreamOfChoice::LAST_SEGMENT;
+			sequence.append(list);
 
 			TO_BYTE_BUFFER(bb, choice);
 			TO_BYTE_BUFFER(bb, sequence);
@@ -570,6 +578,7 @@ namespace Courier::Clearinghouse2 {
 		// return data with SST == BULK
 		// return data type is StreamOfDomainName
 		class Return : public Base {
+		public:
 			StreamOfDomainName value;
 
 			// Courier::Base

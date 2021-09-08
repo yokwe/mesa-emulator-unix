@@ -63,6 +63,7 @@ using Courier::Protocol3Body;
 using Courier::Service;
 
 using Courier::Clearinghouse2::NetworkAddress;
+using Courier::Clearinghouse2::DomainName;
 
 class RetrieveAddresses : public Procedure {
 	static constexpr const char*   NAME      = "RetrieveAddresses";
@@ -84,7 +85,7 @@ public:
 			networkAddress.host   = config.local.host;
 			networkAddress.socket = Socket::COURIER;
 
-			returnValue.address.list.append(networkAddress);
+			returnValue.address.append(networkAddress);
 		}
 
 		Packet level4;
@@ -115,7 +116,6 @@ public:
 	void call(const Config& config, Service& service, const Protocol3Body::CallBody& callBody, ByteBuffer& result) {
 		(void)config;
 		(void)service;
-		(void)result;
 		logger.info("%s called", NAME);
 
 		ByteBuffer bb = callBody.block.toBuffer();
@@ -124,6 +124,29 @@ public:
 
 		logger.info("callValue %s", callValue.toString());
 
+		Courier::Clearinghouse2::ListDomainServed::Return returnValue;
+
+		{
+			DomainName domainName;
+			domainName.domain = "Fuji Xerox";
+			domainName.organization = "FXIS";
+
+			returnValue.value.append(domainName);
+		}
+
+		Packet level4;
+		TO_BYTE_BUFFER(level4, returnValue);
+		BLOCK block4(level4);
+
+		Protocol3Body::ReturnBody returnBody;
+		returnBody.transaction = callBody.transaction;
+		returnBody.block = block4;
+
+		Protocol3Body body;
+		body.type = Courier::MessageType::RETURN;
+		body.set(returnBody);
+
+		TO_BYTE_BUFFER(result, body);
 	}
 };
 ListDomainServed listDomainServed;

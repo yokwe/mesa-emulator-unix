@@ -383,7 +383,8 @@ namespace Courier {
 
 	class STRING : public Base {
 		const int MAX_LENGTH = 65535;
-		QByteArray byteArray;
+		mutable QByteArray byteArray;
+
 	public:
 		// define operator =
 		QString operator =(const QString& newValue) const;
@@ -408,9 +409,9 @@ namespace Courier {
 	class ARRAY : public Base {
 		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		int length = N;
-	public:
-		QList<T> list;
+		mutable QList<T> list;
 
+	public:
 		ARRAY() {}
 
 		ARRAY(const QList<T>& that) {
@@ -422,7 +423,7 @@ namespace Courier {
 			}
 			list = that;
 		};
-		ARRAY& operator = (const QList<T>& that) {
+		ARRAY& operator = (const QList<T>& that) const {
 			if (length != that.length()) {
 				logger.error("Unexpected");
 				logger.error("  length %d", length);
@@ -431,6 +432,21 @@ namespace Courier {
 			}
 			list = that;
 			return *this;
+		}
+
+		int size() const {
+			return list.size();
+		}
+		void clear() {
+			list.clear();
+		}
+		void append(T& newValue) {
+			list.append(newValue);
+		}
+		void append(QList<T> newValue) {
+			for(auto e: newValue) {
+				list.append(e);
+			}
 		}
 
 
@@ -468,9 +484,9 @@ namespace Courier {
 	class SEQUENCE : public Base {
 		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		quint16  maxLength = N;
-	public:
-		QList<T> list;
+		mutable QList<T> list;
 
+	public:
 		SEQUENCE() {}
 
 		SEQUENCE(const QList<T>& that) {
@@ -482,7 +498,7 @@ namespace Courier {
 			}
 			list = that;
 		};
-		SEQUENCE& operator = (const QList<T>& that) {
+		SEQUENCE& operator = (const QList<T>& that) const {
 			if (maxLength < that.length()) {
 				logger.error("Unexpected");
 				logger.error("  maxLength %d", maxLength);

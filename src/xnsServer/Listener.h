@@ -55,9 +55,14 @@ namespace XNS::Server {
 
 	class Listener {
 	public:
-		virtual void init  (Server* server)   = 0;
-		virtual void start ()                 = 0;
-		virtual void stop  ()                 = 0;
+		enum class State {
+			NEW, INITIALIZED, STARTED, STOPPED,
+		};
+		static const char* toString(State value);
+
+		void initListener  (Server* server);
+		void startListener ();
+		void stopListener  ();
 
 		virtual void handle(const Data& data) = 0;
 
@@ -66,17 +71,19 @@ namespace XNS::Server {
 			this->myName       = that.myName;
 			this->mySocket     = that.mySocket;
 			this->myAutoDelete = that.myAutoDelete;
+			this->myState      = that.myState;
 		}
 		Listener& operator = (const Listener& that) {
 			this->myName       = that.myName;
 			this->mySocket     = that.mySocket;
 			this->myAutoDelete = that.myAutoDelete;
+			this->myState      = that.myState;
 			return *this;
 		}
 
-		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false) {}
+		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false), myState(State::NEW) {}
 
-		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false) {}
+		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false), myState(State::NEW) {}
 
 		QString toString();
 
@@ -88,6 +95,9 @@ namespace XNS::Server {
 		}
 		bool        autoDelete() const {
 			return myAutoDelete;
+		}
+		State       state() const {
+			return myState;
 		}
 		void name(const char* newValue) {
 			myName = newValue;
@@ -106,11 +116,15 @@ namespace XNS::Server {
 		static void transmit(const Data& data, const SPP&   spp);
 		static void transmit(const Data& data, const Boot&  boot);
 
-
 	protected:
 		const char* myName;
 		quint16     mySocket;
 		bool        myAutoDelete;
+		State       myState;
+
+		virtual void init  (Server* server)   = 0;
+		virtual void start ()                 = 0;
+		virtual void stop  ()                 = 0;
 
 		// for RIP broadcast
 		static void transmit(const Context* context, quint64 dst, const IDP& idp);

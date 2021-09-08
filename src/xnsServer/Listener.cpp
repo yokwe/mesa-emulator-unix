@@ -60,7 +60,7 @@ void Listeners::add(quint16 socket, Listener* listener) {
 		map[socket] = listener;
 
 		// call init
-		listener->init(server);
+		listener->initListener(server);
 	}
 }
 void Listeners::remove(quint16 socket) {
@@ -94,30 +94,29 @@ quint16 Listeners::getUnusedSocket() const {
 	return socket;
 }
 
-
 // life cycle management
 void Listeners::start() {
 	QMutexLocker mutexLocker(&mapMutex);
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		auto listener = i.value();
-		logger.info("Listeners::start  %s", listener->toString());
-		listener->start();
+		listener->startListener();
 	}
 	started = true;
 }
 void Listeners::stop() {
 	QMutexLocker mutexLocker(&mapMutex);
 	// call stop of listener in map
-	for(auto i = map.begin(); i != map.end(); i++) {
+	for(auto i = map.begin(); i != map.end();) {
 		auto listener = i.value();
-		logger.info("Listeners::stop   %s", listener->toString());
-		listener->stop();
+		listener->stopListener();
 
 		if (listener->autoDelete()) {
-			map.erase(i);
 			logger.info("Listeners::delete %s", listener->toString());
 			delete listener;
+			i = map.erase(i);
+		} else {
+			i++;
 		}
 	}
 	started = false;
@@ -127,8 +126,61 @@ void Listeners::stop() {
 //
 // XNS::Server::Listener
 //
+const char* Listener::toString(State value) {
+	switch(value) {
+	case State::NEW:
+		return "NEW";
+	case State::INITIALIZED:
+		return "INITIALIZED";
+	case State::STARTED:
+		return "STARTED";
+	case State::STOPPED:
+		return "STOPPED";
+	default:
+		logger.error("Unexpected");
+		logger.error("  state %d", (int)value);
+		ERROR();
+	}
+}
+
+void Listener::initListener  (Server* server) {
+	if (myState == State::NEW) {
+		logger.info("Listeners::init   %s", toString());
+		init(server);
+		myState = State::INITIALIZED;
+		logger.info("Listeners::init   %s", toString());
+	} else {
+		logger.error("Unexpected");
+		logger.error("  listener %s", toString());
+		ERROR();
+	}
+}
+void Listener::startListener () {
+	if (myState == State::INITIALIZED || myState == State::STOPPED) {
+		logger.info("Listeners::start  %s", toString());
+		start();
+		myState = State::STARTED;
+		logger.info("Listeners::start  %s", toString());
+	} else {
+		logger.error("Unexpected");
+		logger.error("  listener %s", toString());
+		ERROR();
+	}
+}
+void Listener::stopListener  () {
+	if (myState == State::STARTED) {
+		logger.info("Listeners::stop   %s", toString());
+		stop();
+		myState = State::STOPPED;
+		logger.info("Listeners::stop   %s", toString());
+	} else {
+		logger.error("Unexpected");
+		logger.error("  listener %s", toString());
+		ERROR();
+	}
+}
 QString Listener::toString() {
-	return QString::asprintf("%s-%s", TO_CSTRING(Socket::toString(socket())), name());
+	return QString::asprintf("%s-%s-%s", TO_CSTRING(Socket::toString(socket())), name(), toString(myState));
 }
 void Listener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	Packet packet;

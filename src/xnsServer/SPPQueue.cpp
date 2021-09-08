@@ -50,9 +50,6 @@ using Courier::Services;
 using XNS::Server::SPPQueue;
 using XNS::Server::SPPQueueServer;
 
-SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), stopFuture(false) {}
-SPPQueue::SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), stopFuture(false) {}
-
 
 void SPPQueue::init(XNS::Server::Server* server) {
 	myServer = server;
@@ -68,12 +65,70 @@ void SPPQueue::init(XNS::Server::Server* server) {
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
 
-	stopFuture = false;
-	future     = QtConcurrent::run([this](){this->run(functionTable);});
+	stopFuture    = false;
+	stopIsCalled  = false;
+	closeIsCalled = false;
+	futureSend = QtConcurrent::run([this](){this->sendThread();});
+	futureRun  = QtConcurrent::run([this](){this->runThread();});
 }
 void SPPQueue::stop() {
+	stopIsCalled = true;
+	stopFuture   = true;
+
+	futureRun.waitForFinished();
+	futureSend.waitForFinished();
+
+	// delete this at last statement
+	if (closeIsCalled) {
+		logger.info("delete this in stop");
+		delete this;
+	}
+}
+
+void SPPQueue::runThread() {
+	run(functionTable);
+
+	if (stopIsCalled) {
+		// just return
+		return;
+	} else {
+		if (closeIsCalled) {
+			goto delete_this;
+		} else {
+			// run voluntary returns
+			// just return;
+			logger.debug("Unexpected");
+			logger.debug("  stopFuture %s", stopFuture ? "true" : "false");
+			return;
+		}
+	}
+
+delete_this:
+	// wait sendThread and delete this
 	stopFuture = true;
-	future.waitForFinished();
+	futureSend.waitForFinished();
+	logger.info("delete this in runThread");
+	delete this;
+}
+void SPPQueue::sendThread() {
+	quint32 WAIT_TIME = 1;
+
+	QMutexLocker mutexLocker(&sendListMutex);
+	for(;;) {
+		if (stopFuture) break;
+		if (sendList.isEmpty()) {
+			// wait until notified
+			(void)sendListCV.wait(&sendListMutex, WAIT_TIME);
+		}
+		if (sendList.isEmpty()) {
+			continue;
+		} else {
+			auto myData = sendList.takeLast();
+			mutexLocker.unlock();
+			Listener::transmit(myData.data, myData.spp);
+			mutexLocker.relock();
+		}
+	}
 }
 
 void SPPQueue::handle(const Data& data, const SPP& spp) {
@@ -85,38 +140,45 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
 	logger.info("%s  SPP   %s  HANDLE", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
 
-	dataListMutex.lock();
-	dataList.append(myData);
-	dataListMutex.unlock();
-
-	dataListCV.wakeOne();
+	recvListMutex.lock();
+	recvList.prepend(myData);
+	recvListMutex.unlock();
+	recvListCV.wakeOne();
 }
 
 
 bool SPPQueue::recv(Data* data, SPP* spp) {
 	quint32 WAIT_TIME = 1;
 
-	QMutexLocker mutexLocker(&dataListMutex);
-	if (dataList.isEmpty()) {
+	QMutexLocker mutexLocker(&recvListMutex);
+	if (recvList.isEmpty()) {
 		// wait until notified
-		(void)dataListCV.wait(&dataListMutex, WAIT_TIME);
+		(void)recvListCV.wait(&recvListMutex, WAIT_TIME);
 	}
-	if (dataList.isEmpty()) {
+	if (recvList.isEmpty()) {
 		return false;
 	} else {
-		auto myData = dataList.takeLast();
+		auto myData = recvList.takeLast();
 		*data = myData.data;
 		*spp  = myData.spp;
 		return true;
 	}
 }
 void SPPQueue::send(Data* data, SPP* spp) {
-	(void)data;
-	(void)spp;
-	// FIXME
+	MyData myData;
+	myData.data = *data;
+	myData.spp  = *spp;
+
+	sendListMutex.lock();
+	sendList.prepend(myData);
+	sendListMutex.unlock();
+	sendListCV.wakeOne();
 }
 void SPPQueue::close() {
-	// FIXME
+	Listeners* listeners = myServer->getListeners();
+	listeners->remove(socket());
+	closeIsCalled = true;
+	stopFuture    = true;
 }
 bool SPPQueue::stopRun() {
 	return stopFuture;
@@ -180,6 +242,7 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 			// start listening object
 			// newImpl.start() is called during listeners->add()
 			listeners->add(newImpl);
+			newImpl->start();
 		}
 
 		// Send reply packet

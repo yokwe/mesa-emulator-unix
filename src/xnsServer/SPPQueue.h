@@ -109,10 +109,10 @@ namespace XNS::Server {
 			}
 		};
 
-		SPPQueue(const char* name, quint16 socket);
-		virtual ~SPPQueue() {}
+		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), stopFuture(false), stopIsCalled(false), closeIsCalled(false) {}
+		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), stopFuture(false), stopIsCalled(false), closeIsCalled(false) {}
 
-		SPPQueue(const SPPQueue& that);
+		virtual ~SPPQueue() {}
 
 		void init(Server* server);
 		void start();
@@ -132,13 +132,13 @@ namespace XNS::Server {
 	protected:
 		// if recv returns true, data and spp are assigned
 		// if recv returns false, data and spp are NOT assigned
-		bool                    recv(Data* data, SPP* spp);
-		void                    send(Data* data, SPP* spp);
-		void                    close();
-		bool                    stopRun();
-		XNS::Config*            getConfig();
-		XNS::Context*           getContext();
-		XNS::Server::Listeners* getListeners();
+		bool       recv(Data* data, SPP* spp);
+		void       send(Data* data, SPP* spp);
+		void       close();
+		bool       stopRun();
+		Config*    getConfig();
+		Context*   getContext();
+		Listeners* getListeners();
 
 		class FunctionTable {
 		public:
@@ -164,12 +164,22 @@ namespace XNS::Server {
 			SPP  spp;
 		};
 
-		bool           stopFuture;
-		QFuture<void>  future;
+		void runThread();
+		void sendThread();
 
-		QList<MyData>  dataList;
-		QMutex         dataListMutex;
-		QWaitCondition dataListCV;
+		bool           stopFuture;
+		bool           stopIsCalled;
+		bool           closeIsCalled;
+		QFuture<void>  futureRun;
+		QFuture<void>  futureSend;
+
+		QList<MyData>  recvList;
+		QMutex         recvListMutex;
+		QWaitCondition recvListCV;
+
+		QList<MyData>  sendList;
+		QMutex         sendListMutex;
+		QWaitCondition sendListCV;
 	};
 
 

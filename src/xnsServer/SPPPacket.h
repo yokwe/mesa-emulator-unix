@@ -45,7 +45,7 @@ namespace XNS::Server {
 		SPPPacket() : SPPQueue("SPPPacket", (quint16)Socket::COURIER) {}
 
 		SPPPacket(const char* name, quint16 socket) : SPPQueue(name, socket) {}
-		SPPPacket(const SPPPacket& that) : SPPQueue(that.name(), that.socket()) {}
+		SPPPacket(const SPPPacket& that)            : SPPQueue(that) {}
 
 		// life cycle method
 		void init(Server* server) {

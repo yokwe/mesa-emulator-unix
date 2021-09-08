@@ -109,8 +109,8 @@ namespace XNS::Server {
 			}
 		};
 
-		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), stopFuture(false), stopIsCalled(false), closeIsCalled(false) {}
-		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), stopFuture(false), stopIsCalled(false), closeIsCalled(false) {}
+		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr) {}
+		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr) {}
 
 		virtual ~SPPQueue() {}
 
@@ -167,9 +167,9 @@ namespace XNS::Server {
 		void runThread();
 		void sendThread();
 
-		bool           stopFuture;
-		bool           stopIsCalled;
-		bool           closeIsCalled;
+		QAtomicInt     stopFuture;
+		QAtomicInt     stopIsCalled;
+		QAtomicInt     closeIsCalled;
 		QFuture<void>  futureRun;
 		QFuture<void>  futureSend;
 

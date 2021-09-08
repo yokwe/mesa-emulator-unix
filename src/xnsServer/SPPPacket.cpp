@@ -40,6 +40,8 @@ static const Logger logger = Logger::getLogger("spp-packet");
 #include "SPPPacket.h"
 
 
+using XNS::Server::SPPPacket;
+
 SPPPacket* SPPPacket::clone() {
 	SPPPacket* ret = new SPPPacket(*this);
 	return ret;
@@ -48,8 +50,8 @@ SPPPacket* SPPPacket::clone() {
 void SPPPacket::run(FunctionTable functionTable) {
 	logger.info("run START");
 
-	XNS::Data data;
-	XNS::SPP  spp;
+	Data data;
+	SPP  spp;
 	for(;;) {
 		if (functionTable.stopRun()) break;
 		bool getData = functionTable.recv(&data, &spp);

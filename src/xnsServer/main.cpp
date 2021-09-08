@@ -53,8 +53,9 @@ static const Logger logger = Logger::getLogger("xnsServer");
 
 
 using XNS::Server::Server;
-using XNS::Server::SPPCourier;
 using XNS::Server::SPPServer;
+using XNS::Server::SPPPacket;
+using XNS::Server::SPPQueueServer;
 
 int main(int, char**) {
 	logger.info("START");

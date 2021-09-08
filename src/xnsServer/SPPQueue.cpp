@@ -45,14 +45,10 @@ static const Logger logger = Logger::getLogger("spp-queue");
 #include "SPPQueue.h"
 
 using Network::Packet;
-using XNS::Data;
-using XNS::Config;
-using XNS::Context;
-using XNS::IDP;
-using XNS::SPP;
 using Courier::BLOCK;
 using Courier::Services;
-
+using XNS::Server::SPPQueue;
+using XNS::Server::SPPQueueServer;
 
 SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), stopFuture(false) {}
 SPPQueue::SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), stopFuture(false) {}
@@ -142,7 +138,7 @@ XNS::Server::Listeners* SPPQueue::getListeners() {
 void SPPQueueServer::start() {
 	if (myServer == nullptr) ERROR();
 }
-void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
+void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPQueueServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
@@ -167,7 +163,7 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 			state.localSocket  = listeners->getUnusedSocket();
 			state.localID      = data.timeStamp / 100;
 
-			state.recvSST      = XNS::SPP::SST::DATA;
+			state.recvSST      = SPP::SST::DATA;
 
 			// first reply packet is system, so sequence number is still 0
 			state.recvSeq      = 0;
@@ -213,5 +209,3 @@ void SPPQueueServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
 		ERROR();
 	}
 }
-
-

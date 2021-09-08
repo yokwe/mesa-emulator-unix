@@ -112,15 +112,17 @@ namespace XNS::Server {
 			}
 		};
 
-		SPPServerImpl() : SPPListener() {}
+		SPPServerImpl() : SPPListener(), myServer(nullptr) {}
 		virtual ~SPPServerImpl() {}
 
 		SPPServerImpl(const SPPServerImpl& that) : SPPListener(that) {
-			this->myState = that.myState;
+			this->myState  = that.myState;
+			this->myServer = that.myServer;
 		}
 		SPPServerImpl& operator = (const SPPServerImpl& that) {
 			SPPListener::operator =(that);
-			this->myState = that.myState;
+			this->myState  = that.myState;
+			this->myServer = that.myServer;
 			return *this;
 		}
 
@@ -128,8 +130,8 @@ namespace XNS::Server {
 			myState = state_;
 		}
 
-		SPPServerImpl(const char* name, quint16 socket) : SPPListener(name, socket) {}
-		SPPServerImpl(const State& state_) : SPPListener(state_.name, state_.localSocket), myState(state_) {}
+		SPPServerImpl(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr) {}
+		SPPServerImpl(const State& state_) : SPPListener(state_.name, state_.localSocket), myState(state_), myServer(nullptr) {}
 
 		void handle(const XNS::Data& data, const XNS::SPP& spp);
 
@@ -161,14 +163,14 @@ namespace XNS::Server {
 	// If packet is arrived, clone ServerImpl and set new name and socket and add to listeners
 	class SPPServer : public SPPListener {
 	public:
-		SPPServer(SPPServerImpl* impl_) : SPPListener(impl_->name(), impl_->socket()), impl(impl_) {}
+		SPPServer(SPPServerImpl* impl_) : SPPListener(impl_->name(), impl_->socket()), impl(impl_), myServer(nullptr) {}
 		virtual ~SPPServer() {}
 
 		void init (Server* server);
 		void start();
 		void stop ();
 
-		void handle(const XNS::Data& data, const XNS::SPP& spp);
+		void handle(const Data& data, const SPP& spp);
 
 	protected:
 		SPPServerImpl* impl;

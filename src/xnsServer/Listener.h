@@ -47,12 +47,6 @@
 #include "../courierImpl/Service.h"
 
 namespace XNS::Server {
-	using XNS::IDP;
-	using XNS::RIP;
-	using XNS::Echo;
-	using XNS::PEX;
-	using XNS::SPP;
-	using XNS::Boot;
 	using Courier::Services;
 	using Courier::BLOCK;
 

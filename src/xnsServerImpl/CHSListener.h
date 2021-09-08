@@ -38,9 +38,9 @@
 #include "../xnsServer/Listener.h"
 #include "../xnsServer/PEXListener.h"
 
-class CHSListener : public PEXListener {
+class CHSListener : public XNS::Server::PEXListener {
 public:
-	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS) {}
+	CHSListener() : PEXListener("CHSListener", XNS::Socket::CHS, XNS::PEX::Type::CHS), myServer(nullptr) {}
 
 	void init (XNS::Server::Server* server) {
 		myServer = server;

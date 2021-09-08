@@ -38,7 +38,7 @@
 #include "../xnsServer/Listener.h"
 #include "../xnsServer/PEXListener.h"
 
-class TimeListener : public PEXListener {
+class TimeListener : public XNS::Server::PEXListener {
 public:
 	TimeListener() : PEXListener("TimeListener", XNS::Socket::TIME, XNS::PEX::Type::TIME) {}
 

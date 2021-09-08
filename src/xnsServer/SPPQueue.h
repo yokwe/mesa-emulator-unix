@@ -42,151 +42,152 @@
 #include "SPPListener.h"
 
 
-// forward declaration
 namespace XNS::Server {
+	// forward declaration
 	class Server;
+
+	class SPPQueue : public SPPListener {
+	public:
+		class State {
+			void copyFrom(const State& that) {
+				this->name         = that.name;
+				this->time         = that.time;
+				this->remoteHost   = that.remoteHost;
+				this->remoteSocket = that.remoteSocket;
+				this->remoteID     = that.remoteID;
+				this->localSocket  = that.localSocket;
+				this->localID      = that.localID;
+
+				this->recvSST      = that.recvSST;
+				this->recvSeq      = that.recvSeq;
+				this->sendSeq      = that.sendSeq;
+			}
+		public:
+			const char* name;
+			quint64     time;
+			quint64     remoteHost;
+			quint16     remoteSocket;
+			quint16     remoteID;
+			quint16     localSocket;
+			quint16     localID;
+
+			quint16     recvSST;
+			quint16     recvSeq;
+			quint16     sendSeq;
+
+			// When sending data to remote,
+			// sendSeq is used as seq
+			// recvSeq is used as ack and alloc (window size is one)
+
+			// When receiving data from remote,
+			// if seq equals to recvSeq, use receive this data and increment recvSeq.
+			// if ack equals to sendSeq plus one, increment sendSeq.
+			// if there is a data in sendQeueu, send data with updated recvSeq and sendSeq.
+			// if there is no data in sendQeueu, send system ack packet
+
+			// The Sequence Number counts packets sent on the connection.
+			// The first packet is assigned number zero, and the count proceeds from there.
+			// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
+
+			// The Acknowledge Number field specifies the sequence number of the first packet which has not yet been seen traveling in the reverse direction.
+			// Acknowledge Number indicates the sequence number of the next expected packet.
+
+			// The Allocation Number specifies the sequence number up to and including which packets will be accepted from the other end.
+			// One plus the difference between the Allocation Number and the Acknowledge Number indicates the number of packets that may be outstanding in the reverse direction
+
+			// Packets with the Attention bit set must have only one byte of data.
+
+
+			State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0),
+				recvSST(0), recvSeq(0), sendSeq(0) {}
+			State(const State& that) {
+				copyFrom(that);
+			}
+			State& operator = (const State& that) {
+				copyFrom(that);
+				return *this;
+			}
+		};
+
+		SPPQueue(const char* name, quint16 socket);
+		virtual ~SPPQueue() {}
+
+		SPPQueue(const SPPQueue& that);
+
+		void init(Server* server);
+		void start();
+		void stop();
+
+		void handle(const Data& data, const SPP& spp);
+
+		// clone method for SPPQueue
+		virtual SPPQueue* clone() = 0;
+		// create copy constructor and call it in clone()
+		// return new SPPServerImpl(*this);
+
+		void state(const State& state_) {
+			myState = state_;
+		}
+
+	protected:
+		// if recv returns true, data and spp are assigned
+		// if recv returns false, data and spp are NOT assigned
+		bool                    recv(Data* data, SPP* spp);
+		void                    send(Data* data, SPP* spp);
+		void                    close();
+		bool                    stopRun();
+		XNS::Config*            getConfig();
+		XNS::Context*           getContext();
+		XNS::Server::Listeners* getListeners();
+
+		class FunctionTable {
+		public:
+			std::function<bool(Data*, SPP*)> recv;
+			std::function<void(Data*, SPP*)> send;
+			std::function<void(void)>        close;
+			std::function<bool(void)>        stopRun;
+			std::function<Config*(void)>     getConfig;
+			std::function<Context*(void)>    getContext;
+			std::function<Listeners*(void)>  getListeners;
+		};
+		FunctionTable functionTable;
+
+		virtual void run(FunctionTable functionTable) = 0;
+
+		State   myState;
+		Server* myServer;
+
+	private:
+		class MyData {
+		public:
+			Data data;
+			SPP  spp;
+		};
+
+		bool           stopFuture;
+		QFuture<void>  future;
+
+		QList<MyData>  dataList;
+		QMutex         dataListMutex;
+		QWaitCondition dataListCV;
+	};
+
+
+	class SPPQueueServer : public SPPListener {
+	public:
+		SPPQueueServer(SPPQueue* impl) : SPPListener(impl->name(), impl->socket()), myImpl(impl), myServer(nullptr) {}
+
+		void init (Server* server) {
+			myServer = server;
+		}
+		void start();
+		void stop () {}
+
+		void handle(const Data& data, const SPP& spp);
+
+	private:
+		SPPQueue* myImpl;
+		Server*   myServer;
+	};
+
 }
-
-class SPPQueue : public SPPListener {
-public:
-	class State {
-		void copyFrom(const State& that) {
-			this->name         = that.name;
-			this->time         = that.time;
-			this->remoteHost   = that.remoteHost;
-			this->remoteSocket = that.remoteSocket;
-			this->remoteID     = that.remoteID;
-			this->localSocket  = that.localSocket;
-			this->localID      = that.localID;
-
-			this->recvSST      = that.recvSST;
-			this->recvSeq      = that.recvSeq;
-			this->sendSeq      = that.sendSeq;
-		}
-	public:
-		const char* name;
-		quint64     time;
-		quint64     remoteHost;
-		quint16     remoteSocket;
-		quint16     remoteID;
-		quint16     localSocket;
-		quint16     localID;
-
-		quint16     recvSST;
-		quint16     recvSeq;
-		quint16     sendSeq;
-
-		// When sending data to remote,
-		// sendSeq is used as seq
-		// recvSeq is used as ack and alloc (window size is one)
-
-		// When receiving data from remote,
-		// if seq equals to recvSeq, use receive this data and increment recvSeq.
-		// if ack equals to sendSeq plus one, increment sendSeq.
-		// if there is a data in sendQeueu, send data with updated recvSeq and sendSeq.
-		// if there is no data in sendQeueu, send system ack packet
-
-		// The Sequence Number counts packets sent on the connection.
-		// The first packet is assigned number zero, and the count proceeds from there.
-		// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
-
-		// The Acknowledge Number field specifies the sequence number of the first packet which has not yet been seen traveling in the reverse direction.
-		// Acknowledge Number indicates the sequence number of the next expected packet.
-
-		// The Allocation Number specifies the sequence number up to and including which packets will be accepted from the other end.
-		// One plus the difference between the Allocation Number and the Acknowledge Number indicates the number of packets that may be outstanding in the reverse direction
-
-		// Packets with the Attention bit set must have only one byte of data.
-
-
-		State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0),
-			recvSST(0), recvSeq(0), sendSeq(0) {}
-		State(const State& that) {
-			copyFrom(that);
-		}
-		State& operator = (const State& that) {
-			copyFrom(that);
-			return *this;
-		}
-	};
-
-	SPPQueue(const char* name, quint16 socket);
-	virtual ~SPPQueue() {}
-
-	SPPQueue(const SPPQueue& that);
-
-	void init(XNS::Server::Server* server);
-	void start();
-	void stop();
-
-	void handle(const XNS::Data& data, const XNS::SPP& spp);
-
-	// clone method for SPPQueue
-	virtual SPPQueue* clone() = 0;
-	// create copy constructor and call it in clone()
-	// return new SPPServerImpl(*this);
-
-	void state(const State& state_) {
-		myState = state_;
-	}
-
-protected:
-	// if recv returns true, data and spp are assigned
-	// if recv returns false, data and spp are NOT assigned
-	bool                    recv(XNS::Data* data, XNS::SPP* spp);
-	void                    send(XNS::Data* data, XNS::SPP* spp);
-	void                    close();
-	bool                    stopRun();
-	XNS::Config*            getConfig();
-	XNS::Context*           getContext();
-	XNS::Server::Listeners* getListeners();
-
-	class FunctionTable {
-	public:
-		std::function<bool(XNS::Data*, XNS::SPP*)>   recv;
-		std::function<void(XNS::Data*, XNS::SPP*)>   send;
-		std::function<void(void)>                    close;
-		std::function<bool(void)>                    stopRun;
-		std::function<XNS::Config*(void)>            getConfig;
-		std::function<XNS::Context*(void)>           getContext;
-		std::function<XNS::Server::Listeners*(void)> getListeners;
-	};
-	FunctionTable functionTable;
-
-	virtual void run(FunctionTable functionTable) = 0;
-
-	State myState;
-	XNS::Server::Server* myServer;
-
-private:
-	class MyData {
-	public:
-		XNS::Data data;
-		XNS::SPP  spp;
-	};
-
-	bool           stopFuture;
-	QFuture<void>  future;
-
-	QList<MyData>  dataList;
-	QMutex         dataListMutex;
-	QWaitCondition dataListCV;
-};
-
-
-class SPPQueueServer : public SPPListener {
-public:
-	SPPQueueServer(SPPQueue* impl) : SPPListener(impl->name(), impl->socket()), myImpl(impl), myServer(nullptr) {}
-
-	void init (XNS::Server::Server* server) {
-		myServer = server;
-	}
-	void start();
-	void stop () {}
-
-	void handle(const XNS::Data& data, const XNS::SPP& spp);
-
-private:
-	SPPQueue*            myImpl;
-	XNS::Server::Server* myServer;
-};

@@ -37,20 +37,24 @@
 
 #include "Listener.h"
 
-class SPPListener : public XNS::Server::Listener {
-public:
-	SPPListener(const char* name, quint16 socket) : XNS::Server::Listener(name, socket) {}
-	virtual ~SPPListener() {}
+namespace XNS::Server {
 
-	SPPListener() {}
-	SPPListener(const SPPListener& that) : Listener(that) {}
-	SPPListener& operator = (const SPPListener& that) {
-		Listener::operator =(that);
-		return *this;
-	}
+	class SPPListener : public Listener {
+	public:
+		SPPListener(const char* name, quint16 socket) : Listener(name, socket) {}
+		virtual ~SPPListener() {}
 
-	void handle(const XNS::Data& data);
+		SPPListener() {}
+		SPPListener(const SPPListener& that) : Listener(that) {}
+		SPPListener& operator = (const SPPListener& that) {
+			Listener::operator =(that);
+			return *this;
+		}
 
-protected:
-	virtual void handle(const XNS::Data& data, const XNS::SPP& spp) = 0;
-};
+		void handle(const Data& data);
+
+	protected:
+		virtual void handle(const Data& data, const SPP& spp) = 0;
+	};
+
+}

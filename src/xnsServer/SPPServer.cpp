@@ -48,9 +48,10 @@ static const Logger logger = Logger::getLogger("spp-server");
 
 using Courier::BLOCK;
 using Courier::ExpeditedCourier;
+using XNS::Server::SPPServer;
+using XNS::Server::SPPServerImpl;
 
-
-void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& spp) {
+void SPPServerImpl::handle(const Data& data, const SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPServerImpl", TO_CSTRING(header), TO_CSTRING(spp.toString()));
@@ -58,8 +59,8 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
 		// something goes wrong
 		logger.error("Unexpected");
-		logger.error("  expect  %04X  %s-%s", myState.remoteID,     TO_CSTRING(XNS::Host::toString(myState.remoteHost)), TO_CSTRING(XNS::Socket::toString(myState.remoteSocket)));
-		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),           TO_CSTRING(data.idp.srcSocket.toString()));
+		logger.error("  expect  %04X  %s-%s", myState.remoteID,   TO_CSTRING(Host::toString(myState.remoteHost)), TO_CSTRING(Socket::toString(myState.remoteSocket)));
+		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),        TO_CSTRING(data.idp.srcSocket.toString()));
 		ERROR();
 	}
 
@@ -137,7 +138,7 @@ void XNS::Server::SPPServerImpl::handle(const XNS::Data& data, const XNS::SPP& s
 }
 
 
-void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) {
+void SPPServer::handle(const Data& data, const SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
@@ -162,7 +163,7 @@ void XNS::Server::SPPServer::handle(const XNS::Data& data, const XNS::SPP& spp) 
 			state.localSocket  = listeners->getUnusedSocket();
 			state.localID      = data.timeStamp / 100;
 
-			state.sst   = XNS::SPP::SST::DATA;
+			state.sst   = SPP::SST::DATA;
 
 			// first reply packet is system, so sequence number is still 0
 			state.seq   = 0;

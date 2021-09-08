@@ -49,7 +49,7 @@ class RIPListener : public XNS::Server::Listener {
 
 	XNS::RIP::Entry find(quint32 net);
 public:
-	RIPListener() : XNS::Server::Listener("RIPListener", XNS::Socket::RIP), stopFuture(false) {}
+	RIPListener() : XNS::Server::Listener("RIPListener", XNS::Socket::RIP), stopFuture(false), myServer(nullptr) {}
 
 	void init (XNS::Server::Server* server);
 	void start();

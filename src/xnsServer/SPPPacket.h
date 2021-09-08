@@ -38,25 +38,29 @@
 #include "SPPQueue.h"
 
 
-class SPPPacket : public SPPQueue {
-public:
-	SPPPacket() : SPPQueue("SPPPacket", (quint16)XNS::Socket::COURIER) {}
+namespace XNS::Server {
 
-	SPPPacket(const char* name, quint16 socket) : SPPQueue(name, socket) {}
-	SPPPacket(const SPPPacket& that) : SPPQueue(that.name(), that.socket()) {}
+	class SPPPacket : public SPPQueue {
+	public:
+		SPPPacket() : SPPQueue("SPPPacket", (quint16)Socket::COURIER) {}
 
-	// life cycle method
-	void init(XNS::Server::Server* server) {
-		SPPQueue::init(server);
-	}
-	void start() {
-		SPPQueue::start();
-	}
-	void stop() {
-		SPPQueue::stop();
-	}
+		SPPPacket(const char* name, quint16 socket) : SPPQueue(name, socket) {}
+		SPPPacket(const SPPPacket& that) : SPPQueue(that.name(), that.socket()) {}
 
-	SPPPacket* clone();
+		// life cycle method
+		void init(Server* server) {
+			SPPQueue::init(server);
+		}
+		void start() {
+			SPPQueue::start();
+		}
+		void stop() {
+			SPPQueue::stop();
+		}
 
-	void run(FunctionTable functionTable);
-};
+		SPPPacket* clone();
+
+		void run(FunctionTable functionTable);
+	};
+
+}

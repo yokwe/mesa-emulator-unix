@@ -43,13 +43,13 @@ static const Logger logger = Logger::getLogger("spp-cour");
 #include "SPPCourier.h"
 
 
-void XNS::Server::SPPCourier::run(FunctionTable functionTable) {
+void SPPCourier::run(FunctionTable functionTable) {
 	logger.info("run");
 	functionTable.stopRun();
 }
 
 // clone method for SPPServer
-XNS::Server::SPPCourier* XNS::Server::SPPCourier::clone() {
+SPPCourier* SPPCourier::clone() {
 	SPPCourier* ret = new SPPCourier(*this);
 	return ret;
 }

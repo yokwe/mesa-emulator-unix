@@ -42,21 +42,17 @@
 #include "../xnsServer/SPPServer.h"
 
 
-namespace XNS::Server {
+class SPPCourier : public XNS::Server::SPPServerImpl {
+public:
+	SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
+	SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
+	SPPCourier& operator = (const SPPCourier& that) {
+		SPPServerImpl::operator =(that);
+		return *this;
+	}
 
-	class SPPCourier : public SPPServerImpl {
-	public:
-		SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
-		SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
-		SPPCourier& operator = (const SPPCourier& that) {
-			SPPServerImpl::operator =(that);
-			return *this;
-		}
+	void run(FunctionTable functionTable);
 
-		void run(FunctionTable functionTable);
-
-		// clone method for SPPServer
-		SPPCourier* clone();
-	};
-
-}
+	// clone method for SPPServer
+	SPPCourier* clone();
+};

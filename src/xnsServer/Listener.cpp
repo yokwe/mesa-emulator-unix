@@ -51,6 +51,7 @@ void Listeners::add(quint16 socket, Listener* listener) {
 		ERROR();
 	}
 
+	QMutexLocker mutexLocker(&mapMutex);
 	if (map.contains(socket)) {
 		logger.error("Unexpected");
 		logger.error("  listener   %5u %s", listener->socket(), listener->name());
@@ -60,16 +61,12 @@ void Listeners::add(quint16 socket, Listener* listener) {
 
 		// call init
 		listener->init(server);
-		// call start if listener started
-		if (started) listener->start();
 	}
 }
 void Listeners::remove(quint16 socket) {
+	QMutexLocker mutexLocker(&mapMutex);
 	if (map.contains(socket)) {
-		Listener *listener = map.take(socket);
-		if (started) listener->stop();
-		// delete if autoDelete() it true
-		if (listener->autoDelete()) delete listener;
+		map.remove(socket);
 	} else {
 		logger.error("Unexpected");
 		logger.error("  socket %s", XNS::Socket::toString(socket));
@@ -77,6 +74,7 @@ void Listeners::remove(quint16 socket) {
 	}
 }
 Listener* Listeners::getListener(quint16 socket) {
+	QMutexLocker mutexLocker(&mapMutex);
 	if (map.contains(socket)) {
 		return map[socket];
 	} else {
@@ -85,6 +83,7 @@ Listener* Listeners::getListener(quint16 socket) {
 }
 
 quint16 Listeners::getUnusedSocket() const {
+	QMutexLocker mutexLocker(&mapMutex);
 	quint16 socket;
 	for(;;) {
 		socket = (quint16)QDateTime::currentMSecsSinceEpoch();
@@ -98,20 +97,28 @@ quint16 Listeners::getUnusedSocket() const {
 
 // life cycle management
 void Listeners::start() {
+	QMutexLocker mutexLocker(&mapMutex);
 	// call start of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		auto listener = i.value();
-		logger.info("Listeners::start %s", listener->toString());
+		logger.info("Listeners::start  %s", listener->toString());
 		listener->start();
 	}
 	started = true;
 }
 void Listeners::stop() {
+	QMutexLocker mutexLocker(&mapMutex);
 	// call stop of listener in map
 	for(auto i = map.begin(); i != map.end(); i++) {
 		auto listener = i.value();
-		logger.info("Listeners::stop  %s", listener->toString());
+		logger.info("Listeners::stop   %s", listener->toString());
 		listener->stop();
+
+		if (listener->autoDelete()) {
+			map.erase(i);
+			logger.info("Listeners::delete %s", listener->toString());
+			delete listener;
+		}
 	}
 	started = false;
 }

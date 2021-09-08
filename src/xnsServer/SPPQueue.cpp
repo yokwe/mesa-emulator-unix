@@ -65,22 +65,22 @@ void SPPQueue::init(XNS::Server::Server* server) {
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
 
-	stopFuture    = false;
-	stopIsCalled  = false;
-	closeIsCalled = false;
+	stopFuture    = 0;
+	stopIsCalled  = 0;
+	closeIsCalled = 0;
 	futureSend = QtConcurrent::run([this](){this->sendThread();});
 	futureRun  = QtConcurrent::run([this](){this->runThread();});
 }
 void SPPQueue::stop() {
-	stopIsCalled = true;
-	stopFuture   = true;
+	stopIsCalled = 1;
+	stopFuture   = 1;
 
 	futureRun.waitForFinished();
 	futureSend.waitForFinished();
 
 	// delete this at last statement
 	if (closeIsCalled) {
-		logger.info("delete this in stop");
+		logger.info("delete this in stop  %s", toString());
 		delete this;
 	}
 }
@@ -105,9 +105,9 @@ void SPPQueue::runThread() {
 
 delete_this:
 	// wait sendThread and delete this
-	stopFuture = true;
+	stopFuture = 1;
 	futureSend.waitForFinished();
-	logger.info("delete this in runThread");
+	logger.info("delete this in runThread  %s", toString());
 	delete this;
 }
 void SPPQueue::sendThread() {
@@ -139,6 +139,33 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
 	logger.info("%s  SPP   %s  HANDLE", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
+
+	// sanity check
+	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
+		// something goes wrong
+		logger.error("Unexpected");
+		logger.error("  expect  %04X  %s-%s", myState.remoteID,   TO_CSTRING(Host::toString(myState.remoteHost)), TO_CSTRING(Socket::toString(myState.remoteSocket)));
+		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),        TO_CSTRING(data.idp.srcSocket.toString()));
+		ERROR();
+	}
+
+//	if (spp.control.isSystem()) {
+//		if (spp.control.isSendAck()) {
+//
+//		} else {
+//			// ??
+//		}
+//	} else {
+//		if (spp.control.isSendAck()) {
+//
+//		}
+//		if (spp.control.isEndOfMessage()) {
+//
+//		} else {
+//
+//		}
+//	}
+
 
 	recvListMutex.lock();
 	recvList.prepend(myData);
@@ -175,10 +202,11 @@ void SPPQueue::send(Data* data, SPP* spp) {
 	sendListCV.wakeOne();
 }
 void SPPQueue::close() {
+	logger.info("SPPQueue::close  remove listener %s", toString());
 	Listeners* listeners = myServer->getListeners();
 	listeners->remove(socket());
-	closeIsCalled = true;
-	stopFuture    = true;
+	closeIsCalled = 1;
+	stopFuture    = 1;
 }
 bool SPPQueue::stopRun() {
 	return stopFuture;
@@ -242,7 +270,7 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 			// start listening object
 			// newImpl.start() is called during listeners->add()
 			listeners->add(newImpl);
-			newImpl->start();
+			newImpl->startListener();
 		}
 
 		// Send reply packet

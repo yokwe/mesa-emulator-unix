@@ -157,9 +157,10 @@ namespace XNS::Server {
 		Server* server;
 		bool    started;
 
-		// FIXME delete inactive socket
+		// FIXME delete inactive socket - session timeout
 		QMap<quint16, Listener*> map;
 		//   socket
+		mutable QMutex                   mapMutex;
 	};
 
 }

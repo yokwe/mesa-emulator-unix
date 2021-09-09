@@ -130,9 +130,12 @@ namespace XNS {
 		Type  type;
 		BLOCK block;
 
-		QString toString() const;
+		void updateBlock(const BLOCK& that) {
+			block.updateBufferData(that);
+		}
 
 		// Courier::Base
+		QString toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -270,23 +273,6 @@ namespace XNS {
 		static const int MININUM_PACKET_LENGTH = Ethernet::MINIMUM_PACKET_LENGTH - Ethernet::HEADER_LENGTH; // 60 - 16 = 46
 		static const int HEADER_LENGTH         = 30;
 
-		Checksum checksum_;
-		UINT16   length;
-		UINT8    control;
-		Type     type;
-
-		Net      dstNet;
-		Host     dstHost;
-		Socket   dstSocket;
-
-		Net      srcNet;
-		Host     srcHost;
-		Socket   srcSocket;
-
-		BLOCK    block;
-
-		QString toString() const;
-
 		// Set length field of IDP in ByteBuffer
 		// bb.base() must point to head of IDP packet
 		static quint16 getLength(const ByteBuffer& bb);
@@ -302,7 +288,27 @@ namespace XNS {
 		static quint16 computeChecksum(const ByteBuffer& bb);
 
 
+		Checksum checksum_;
+		UINT16   length;
+		UINT8    control;
+		Type     type;
+
+		Net      dstNet;
+		Host     dstHost;
+		Socket   dstSocket;
+
+		Net      srcNet;
+		Host     srcHost;
+		Socket   srcSocket;
+
+		BLOCK    block;
+
+		void updateBlock(const BLOCK& that) {
+			block.updateBufferData(that);
+		}
+
 		// Courier::Base
+		QString toString() const;
 		// fromByteBuffer will set limit of bb from length field
 		void fromByteBuffer(ByteBuffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field
@@ -326,9 +332,22 @@ namespace XNS {
 
 
 	class Data {
+		void deepCopy(const Data& that) {
+			this->timeStamp = that.timeStamp;
+			this->config    = that.config;
+			this->context   = that.context;
+			this->packet    = that.packet;
+			this->ethernet  = that.ethernet;
+			this->idp       = that.idp;
+
+			// address of packet is changed. Need update block
+			BLOCK newValue(this->packet);
+			this->ethernet.updateBlock(newValue);
+			this->idp.updateBlock(newValue);
+		}
 	public:
 		// creation time in milliseconds since unix time epoch, used to remove old entry
-		quint64  timeStamp;
+		qint64   timeStamp;
 		Config*  config;
 		Context* context;
 
@@ -339,24 +358,14 @@ namespace XNS {
 
 		Data() : timeStamp(0), config(nullptr), context(nullptr) {}
 		Data(const Data& that) {
-			this->timeStamp = that.timeStamp;
-			this->config    = that.config;
-			this->context   = that.context;
-			this->packet    = that.packet;
-			this->ethernet  = that.ethernet;
-			this->idp       = that.idp;
+			deepCopy(that);
 		}
 		Data& operator = (const Data& that) {
-			this->timeStamp = that.timeStamp;
-			this->config    = that.config;
-			this->context   = that.context;
-			this->packet    = that.packet;
-			this->ethernet  = that.ethernet;
-			this->idp       = that.idp;
+			deepCopy(that);
 			return *this;
 		}
 
-		Data(quint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+		Data(qint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
 			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
 	};
 

@@ -81,9 +81,8 @@ namespace XNS {
 		public:
 			Host bootFileNumber; // XNS::HOST::BFN_GVWIN
 
-			QString toString() const;
-
 			// Courier::Base
+			QString toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -93,9 +92,12 @@ namespace XNS {
 			UINT16 packetNumber;   // start with 1
 			BLOCK  block;          // one page of data normally or no data means end of file
 
-			QString toString() const;
+			void updateBlock(const BLOCK& that) {
+				block.updateBufferData(that);
+			}
 
 			// Courier::Base
+			QString toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -104,9 +106,8 @@ namespace XNS {
 			Host   bootFileNumber; // XNS::HOST::BFN_GVWIN
 			UINT16 connectionID;
 
-			QString toString() const;
-
 			// Courier::Base
+			QString toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -122,9 +123,17 @@ namespace XNS {
 		void set(const SimpleData&    newValue);
 		void set(const SPPRequest&    newValue);
 
-		QString toString() const;
+		void updateBlock(const BLOCK& that) {
+			if (type == Type::SIMPLE_DATA) {
+				SimpleData newValue;
+				get(newValue);
+				newValue.updateBlock(that);
+				set(newValue);
+			}
+		}
 
 		// Courier::Base
+		QString toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

@@ -44,10 +44,7 @@
 #include "XNS.h"
 
 namespace XNS {
-	using Courier::UINT48;
-	using Courier::UINT32;
 	using Courier::UINT16;
-	using Courier::UINT8;
 	using Courier::BLOCK;
 	using Courier::Base;
 
@@ -95,9 +92,12 @@ namespace XNS {
 		UINT16 param;
 		BLOCK  block;
 
-		QString toString() const;
+		void updateBlock(const BLOCK& that) {
+			block.updateBufferData(that);
+		}
 
 		// Courier::Base
+		QString toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

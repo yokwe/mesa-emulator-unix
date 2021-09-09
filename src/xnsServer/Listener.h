@@ -47,6 +47,7 @@
 #include "../courierImpl/Service.h"
 
 namespace XNS::Server {
+	using Network::Driver;
 	using Courier::Services;
 	using Courier::BLOCK;
 
@@ -122,12 +123,17 @@ namespace XNS::Server {
 		bool        myAutoDelete;
 		State       myState;
 
-		virtual void init  (Server* server)   = 0;
-		virtual void start ()                 = 0;
-		virtual void stop  ()                 = 0;
+		virtual void init  (Server* server) = 0;
+		virtual void start ()               = 0;
+		virtual void stop  ()               = 0;
+
+		// Transmit idp data with padding and set checksum
+		static void transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp);
 
 		// for RIP broadcast
-		static void transmit(const Context* context, quint64 dst, const IDP& idp);
+		static void transmit(const Context* context, quint64 dst, const IDP& idp) {
+			transmit(context->driver, dst, context->address, idp);
+		}
 
 		// transmit idp packet
 		static void transmit(const Data& data, const IDP& idp) {

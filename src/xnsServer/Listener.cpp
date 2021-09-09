@@ -182,10 +182,10 @@ void Listener::stopListener  () {
 QString Listener::toString() {
 	return QString::asprintf("%s-%s-%s", TO_CSTRING(Socket::toString(socket())), name(), toString(myState));
 }
-void Listener::transmit(const Context* context, quint64 dst, const IDP& idp) {
+void Listener::transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
-	packet.write48(context->address);
+	packet.write48(src);
 	packet.write16(XNS::Ethernet::Type::XNS);
 
 	// save packet as start for setChecksum() and computeChecksum()
@@ -234,7 +234,7 @@ void Listener::transmit(const Context* context, quint64 dst, const IDP& idp) {
 	// transmit packet
 	{
 		int opErrno;
-		int ret = context->driver->transmit(packet.data(), packet.limit(), opErrno);
+		int ret = driver->transmit(packet.data(), packet.limit(), opErrno);
 		if (ret < 0) {
 			logger.error("Unexpected");
 			logger.error("ret = %d", ret);

@@ -145,7 +145,7 @@ int Network::FreeBSD::Driver::select  (quint32 timeout, int& opErrno) {
 int Network::FreeBSD::Driver::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	return bpf.transmit(data, dataLen, opErrno);
 }
-int Network::FreeBSD::Driver::receive(quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch) {
+int Network::FreeBSD::Driver::receive(quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
 	return bpf.receive(data, dataLen, opErrno, msecSinceEpoch);
 }
 void Network::FreeBSD::Driver::discard() {

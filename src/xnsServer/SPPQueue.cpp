@@ -51,8 +51,14 @@ using XNS::Server::SPPQueue;
 using XNS::Server::SPPQueueServer;
 
 
+//
+// Life Cycle
+//
 void SPPQueue::init(XNS::Server::Server* server) {
-	myServer = server;
+	myServer  = server;
+	driver    = myServer->getContext()->driver;
+	localNet  = myServer->getConfig()->local.net;
+	localHost = myServer->getConfig()->local.host;
 
 	functionTable.recv         = [this](XNS::Data* data, XNS::SPP* spp){return recv(data, spp);};
 	functionTable.send         = [this](XNS::Data* data, XNS::SPP* spp){return send(data, spp);};
@@ -87,58 +93,16 @@ void SPPQueue::stop() {
 	}
 }
 
-void SPPQueue::runThread() {
-	run(functionTable);
 
-	if (stopIsCalled) {
-		// just return
-		return;
-	} else {
-		if (closeIsCalled) {
-			goto delete_this;
-		} else {
-			// run voluntary returns
-			// just return;
-			logger.debug("Unexpected");
-			logger.debug("  stopFuture %s", stopFuture ? "true" : "false");
-			return;
-		}
-	}
-
-delete_this:
-	// wait sendThread and delete this
-	stopFuture = 1;
-	futureSend.waitForFinished();
-	logger.info("delete this in runThread  %s", toString());
-	delete this;
-}
-void SPPQueue::sendThread() {
-	quint32 WAIT_TIME = 1;
-
-	QMutexLocker mutexLocker(&sendListMutex);
-	for(;;) {
-		if (stopFuture) break;
-		if (sendList.isEmpty()) {
-			// wait until notified
-			(void)sendListCV.wait(&sendListMutex, WAIT_TIME);
-		}
-		if (sendList.isEmpty()) {
-			continue;
-		} else {
-			auto myData = sendList.takeLast();
-			mutexLocker.unlock();
-			Listener::transmit(myData.data, myData.spp);
-			mutexLocker.relock();
-		}
-	}
-}
-
+//
+// process revived data
+//
 void SPPQueue::handle(const Data& data, const SPP& spp) {
 	MyData myData(data, spp);
 
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
-	logger.info("%s  SPP   %s  HANDLE", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()));
+	logger.info("%s  SPP   %s  HANDLE  %s!", TO_CSTRING(header), TO_CSTRING(myData.spp.toString()), TO_CSTRING(myData.spp.block.toString()));
 
 	// sanity check
 	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
@@ -192,7 +156,11 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	}
 }
 
-void SPPQueue::sendSystemAck(const Data& data) {
+
+//
+// Send
+//
+void SPPQueue::sendAck(const Data& data) {
 	SPP spp;
 	spp.control = SPP::Control::BIT_SYSTEM;
 	spp.sst     = SPP::SST::DATA;
@@ -204,8 +172,78 @@ void SPPQueue::sendSystemAck(const Data& data) {
 
 	send(&data, &spp);
 }
+void SPPQueue::sendThread() {
+	quint32 WAIT_TIME = 1;
+
+	QMutexLocker mutexLocker(&sendListMutex);
+	for(;;) {
+		if (stopFuture) break;
+		if (sendList.isEmpty()) {
+			// wait until notified
+			(void)sendListCV.wait(&sendListMutex, WAIT_TIME);
+		}
+		if (sendList.isEmpty()) {
+			continue;
+		} else {
+			auto myData = sendList.takeLast();
+			mutexLocker.unlock();
+			transmit(myData.data, myData.spp);
+			mutexLocker.relock();
+		}
+	}
+}
+void SPPQueue::transmit(const Data& data, const SPP& spp) {
+	Packet level2;
+	TO_BYTE_BUFFER(level2, spp);
+	BLOCK block(level2);
+
+	IDP idp;
+	idp.checksum_ = data.idp.checksum_;
+	idp.length    = (quint16)0;
+	idp.control   = (quint8)0;
+	idp.type      = IDP::Type::SPP;
+	idp.dstNet    = data.idp.srcNet;
+	idp.dstHost   = myState.remoteHost;
+	idp.dstSocket = myState.remoteSocket;
+	idp.srcNet    = localNet;
+	idp.srcHost   = localHost;
+	idp.srcSocket = socket();
+	idp.block     = block;
+
+	// Use ethernet.src for destination. not idp.srcHost
+	// Don't mix with ethernet.src and idp.srcHost
+	Listener::transmit(driver, data.ethernet.src, localHost, idp);
+}
 
 
+//
+// Run
+//
+void SPPQueue::runThread() {
+	run(functionTable);
+
+	if (stopIsCalled) {
+		// just return
+		return;
+	} else {
+		if (closeIsCalled) {
+			goto delete_this;
+		} else {
+			// run voluntary returns
+			// just return;
+			logger.debug("Unexpected");
+			logger.debug("  stopFuture %s", stopFuture ? "true" : "false");
+			return;
+		}
+	}
+
+delete_this:
+	// wait sendThread and delete this
+	stopFuture = 1;
+	futureSend.waitForFinished();
+	logger.info("delete this in runThread  %s", toString());
+	delete this;
+}
 bool SPPQueue::recv(Data* data, SPP* spp) {
 	quint32 WAIT_TIME = 1;
 
@@ -264,11 +302,10 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 	logger.info("%s  SPP   %s  SPPQueueServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 
 	if (spp.control.isSystem() && spp.control.isSendAck()) {
-		// OK
-		SPPQueue::State state;
-		XNS::Server::Listeners* listeners = myServer->getListeners();
+		Listeners* listeners = myServer->getListeners();
 
 		// build state
+		SPPQueue::State state;
 		{
 			QString newName = QString("%1-client").arg(name());
 
@@ -283,42 +320,21 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 			state.localID      = data.timeStamp / 100;
 		}
 
-		// create listener object and add to listeners
+		// build listener newImpl with clone of myImpl
+		SPPQueue* newImpl = myImpl->clone();
 		{
-			SPPQueue* newImpl = myImpl->clone();
 			newImpl->socket(state.localSocket);
 			newImpl->name(state.name.constData());
 			newImpl->autoDelete(true);
 			newImpl->state(state);
-
-			// start listening object
-			// newImpl.start() is called during listeners->add()
-			listeners->add(newImpl);
-			newImpl->startListener();
 		}
 
-		// Send reply packet
-		{
-			SPP reply;
-			reply.control = SPP::Control::BIT_SYSTEM;
-			reply.sst     = SPP::SST::DATA;
-			reply.idSrc   = state.localID;
-			reply.idDst   = state.remoteID;
-			reply.seq     = 0;
-			reply.ack     = 0;
-			reply.alloc   = 0;
-
-			Network::Packet level2;
-			TO_BYTE_BUFFER(level2, reply);
-			BLOCK block(level2);
-
-			IDP idp;
-			setIDP(data, IDP::Type::SPP, block, idp);
-			// change receiving socket to match newImpl
-			idp.srcSocket = state.localSocket;
-
-			transmit(data, idp);
-		}
+		// add to listeners
+		listeners->add(newImpl);
+		// start listening
+		newImpl->startListener();
+		// send ack packet
+		newImpl->sendAck(data);
 	} else {
 		logger.error("Unexpected");
 		ERROR();

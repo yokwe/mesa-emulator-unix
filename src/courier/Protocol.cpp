@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-courier");
+static const Logger logger = Logger::getLogger("cr-protocol");
 
 #include "Protocol.h"
 

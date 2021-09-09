@@ -104,7 +104,7 @@ void xnsDump() {
 			}
 
 			// receive one data
-			quint64 msecsSinceEpoch;
+			qint64 msecsSinceEpoch;
 			{
 				ret = context.driver->receive(level0.data(), level0.capacity(), opErrno, &msecsSinceEpoch);
 				if (ret < 0) {

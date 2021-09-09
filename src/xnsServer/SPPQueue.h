@@ -52,28 +52,24 @@ namespace XNS::Server {
 			void copyFrom(const State& that) {
 				this->name         = that.name;
 				this->time         = that.time;
+
 				this->remoteHost   = that.remoteHost;
 				this->remoteSocket = that.remoteSocket;
 				this->remoteID     = that.remoteID;
+
 				this->localSocket  = that.localSocket;
 				this->localID      = that.localID;
-
-				this->recvSST      = that.recvSST;
-				this->recvSeq      = that.recvSeq;
-				this->sendSeq      = that.sendSeq;
 			}
 		public:
-			const char* name;
-			quint64     time;
-			quint64     remoteHost;
-			quint16     remoteSocket;
-			quint16     remoteID;
-			quint16     localSocket;
-			quint16     localID;
+			QByteArray name;
+			quint64    time;
 
-			quint16     recvSST;
-			quint16     recvSeq;
-			quint16     sendSeq;
+			quint64    remoteHost;
+			quint16    remoteSocket;
+			quint16    remoteID;
+
+			quint16    localSocket;
+			quint16    localID;
 
 			// When sending data to remote,
 			// sendSeq is used as seq
@@ -98,8 +94,7 @@ namespace XNS::Server {
 			// Packets with the Attention bit set must have only one byte of data.
 
 
-			State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0),
-				recvSST(0), recvSeq(0), sendSeq(0) {}
+			State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0) {}
 			State(const State& that) {
 				copyFrom(that);
 			}
@@ -109,8 +104,8 @@ namespace XNS::Server {
 			}
 		};
 
-		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr) {}
-		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr) {}
+		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), sendSeq(0), recvSeq(0) {}
+		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), sendSeq(0), recvSeq(0) {}
 
 		virtual ~SPPQueue() {}
 
@@ -133,7 +128,7 @@ namespace XNS::Server {
 		// if recv returns true, data and spp are assigned
 		// if recv returns false, data and spp are NOT assigned
 		bool       recv(Data* data, SPP* spp);
-		void       send(Data* data, SPP* spp);
+		void       send(const Data* data, const SPP* spp);
 		void       close();
 		bool       stopRun();
 		Config*    getConfig();
@@ -159,13 +154,110 @@ namespace XNS::Server {
 
 	private:
 		class MyData {
+			void copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
+				seq  = seq_;
+				data = data_;
+				spp  = spp_;
+
+				// reflect change of address of data.packet
+				BLOCK newValue(data.packet);
+				spp.updateBlock(newValue);
+			}
 		public:
-			Data data;
-			SPP  spp;
+			quint16 seq;
+			Data    data;
+			SPP     spp;
+
+			MyData() {
+				seq = 0;
+				// reflect change of address of data.packet
+				BLOCK newValue(data.packet);
+				spp.updateBlock(newValue);
+			}
+			MyData(const MyData& that) : MyData(that.seq, that.data, that.spp) {}
+			MyData& operator = (const MyData& that) {
+				copyFrom(that.seq, that.data, that.spp);
+				return *this;
+			}
+
+			MyData(const quint16 seq_, const Data& data_, const SPP& spp_) {
+				copyFrom(seq_, data_, spp_);
+			}
+			MyData(const Data& data_, const SPP& spp_) : MyData(0, data_, spp_) {}
+
+			void empty() {
+				data.timeStamp = 0;
+			}
+			bool isEmpty() {
+				return data.timeStamp == 0;
+			}
+		};
+
+		class RecvBuffer {
+			static const int SIZE = 4;
+		public:
+			MyData array[SIZE];
+
+			void clear() {
+				for(int i = 0; i < SIZE; i++) {
+					array[i].empty();
+				}
+			}
+			int countEmpty() {
+				int ret = 0;
+				for(int i = 0; i < SIZE; i++) {
+					if (array[i].isEmpty()) ret++;
+				}
+				return ret;
+			}
+			bool add(const MyData& newValue) {
+				for(int i = 0; i < SIZE; i++) {
+					MyData *p = array + i;
+
+					if (p->isEmpty()) {
+						*p = newValue;
+						return true;
+					}
+				}
+				return false;
+			}
+			MyData* get(quint16 seq) {
+				for(int i = 0; i < SIZE; i++) {
+					MyData *p = array + i;
+
+					if (p->isEmpty()) continue;
+					if (p->spp.seq == seq) {
+						return p;
+					}
+				}
+				return nullptr;
+			}
+			bool exist(quint16 seq) {
+				return get(seq) != nullptr;
+			}
+			MyData* getYougest() {
+				MyData* ret = nullptr;
+				for(int i = 0; i < SIZE; i++) {
+					MyData *p = array + i;
+
+					if (p->isEmpty()) continue;
+					if (ret == nullptr) {
+						ret = p;
+					} else {
+						if (p->data.timeStamp < ret->data.timeStamp) {
+							ret = p;
+						}
+					}
+				}
+				return ret;
+			}
+
 		};
 
 		void runThread();
 		void sendThread();
+
+		void sendSystemAck(const Data& data);
 
 		QAtomicInt     stopFuture;
 		QAtomicInt     stopIsCalled;
@@ -180,6 +272,12 @@ namespace XNS::Server {
 		QList<MyData>  sendList;
 		QMutex         sendListMutex;
 		QWaitCondition sendListCV;
+
+
+		RecvBuffer recvBuffer;
+		quint16 sendSeq;
+		quint16 recvSeq;
+
 	};
 
 

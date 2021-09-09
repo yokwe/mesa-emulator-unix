@@ -65,6 +65,8 @@ void SPPQueue::init(XNS::Server::Server* server) {
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
 
+	// FIXME how to initialize recvBuffer
+
 	stopFuture    = 0;
 	stopIsCalled  = 0;
 	closeIsCalled = 0;
@@ -132,9 +134,7 @@ void SPPQueue::sendThread() {
 }
 
 void SPPQueue::handle(const Data& data, const SPP& spp) {
-	MyData myData;
-	myData.data = data;
-	myData.spp  = spp;
+	MyData myData(data, spp);
 
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
@@ -149,28 +149,60 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		ERROR();
 	}
 
-//	if (spp.control.isSystem()) {
-//		if (spp.control.isSendAck()) {
-//
-//		} else {
-//			// ??
-//		}
-//	} else {
-//		if (spp.control.isSendAck()) {
-//
-//		}
-//		if (spp.control.isEndOfMessage()) {
-//
-//		} else {
-//
-//		}
-//	}
+	// maintain myState
+	//   if accept this packet, increment recvSeq
+	bool reject        = false;
+	bool needToSendAck = false;
+	{
+		if (spp.seq == recvSeq) {
+			// accept this packet
+			// advance recvSeq
+			// If recvSeq overflow, recvSeq become ZERO
+			recvSeq++;
+			// need to notify other end
+			needToSendAck = true;
+		} else {
+			// unexpected seq number
+			logger.warn("Unexpected seq");
+			logger.warn("  expect %d", recvSeq);
+			logger.warn("  actual %d", (quint16)spp.seq);
+			reject = true;
+		}
+		if (spp.alloc == sendSeq) {
+			// no change
+		} else {
+			quint16 nextSendSeq = sendSeq + 1;
+			if (spp.alloc == nextSendSeq) {
+				// advance
+				sendSeq++;
+				needToSendAck = true;
+			}
+		}
 
+	}
+	if (reject) return;
 
 	recvListMutex.lock();
 	recvList.prepend(myData);
 	recvListMutex.unlock();
 	recvListCV.wakeOne();
+
+	if (needToSendAck) {
+//		sendSystemAck(data);
+	}
+}
+
+void SPPQueue::sendSystemAck(const Data& data) {
+	SPP spp;
+	spp.control = SPP::Control::BIT_SYSTEM;
+	spp.sst     = SPP::SST::DATA;
+	spp.idSrc   = myState.localID;
+	spp.idDst   = myState.remoteID;
+	spp.seq     = sendSeq;
+	spp.ack     = recvSeq;
+	spp.alloc   = recvSeq + recvBuffer.countEmpty();
+
+	send(&data, &spp);
 }
 
 
@@ -191,10 +223,8 @@ bool SPPQueue::recv(Data* data, SPP* spp) {
 		return true;
 	}
 }
-void SPPQueue::send(Data* data, SPP* spp) {
-	MyData myData;
-	myData.data = *data;
-	myData.spp  = *spp;
+void SPPQueue::send(const Data* data, const SPP* spp) {
+	MyData myData(*data, *spp);
 
 	sendListMutex.lock();
 	sendList.prepend(myData);
@@ -242,9 +272,8 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 		{
 			QString newName = QString("%1-client").arg(name());
 
-			state.name = strdup(newName.toUtf8().constData());
-
-			state.time = data.timeStamp;
+			state.name         = newName.toUtf8().constData();
+			state.time         = data.timeStamp;
 
 			state.remoteHost   = data.idp.srcHost;
 			state.remoteSocket = (quint16)data.idp.srcSocket;
@@ -252,21 +281,16 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 
 			state.localSocket  = listeners->getUnusedSocket();
 			state.localID      = data.timeStamp / 100;
-
-			state.recvSST      = SPP::SST::DATA;
-
-			// first reply packet is system, so sequence number is still 0
-			state.recvSeq      = 0;
-			state.sendSeq      = 0;
 		}
 
 		// create listener object and add to listeners
 		{
 			SPPQueue* newImpl = myImpl->clone();
 			newImpl->socket(state.localSocket);
-			newImpl->name(state.name);
+			newImpl->name(state.name.constData());
 			newImpl->autoDelete(true);
 			newImpl->state(state);
+
 			// start listening object
 			// newImpl.start() is called during listeners->add()
 			listeners->add(newImpl);
@@ -277,12 +301,12 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 		{
 			SPP reply;
 			reply.control = SPP::Control::BIT_SYSTEM;
-			reply.sst = SPP::SST::DATA;
-			reply.idSrc = state.localID;
-			reply.idDst = state.remoteID;
-			reply.seq   = state.sendSeq;
-			reply.ack   = state.recvSeq;
-			reply.alloc = state.recvSeq;
+			reply.sst     = SPP::SST::DATA;
+			reply.idSrc   = state.localID;
+			reply.idDst   = state.remoteID;
+			reply.seq     = 0;
+			reply.ack     = 0;
+			reply.alloc   = 0;
 
 			Network::Packet level2;
 			TO_BYTE_BUFFER(level2, reply);

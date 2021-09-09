@@ -47,7 +47,7 @@ class Dummy : public Network::Driver {
 public:
 	int select  (quint32 timeout, int& opErrno); // returns return value of of select().  default timeout is 1 second
 	int transmit(quint8* data, quint32 dataLen, int& opErrno);   // returns return value of send()
-	int receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch);   // returns return value of of recv()
+	int receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch);   // returns return value of of recv()
 
 	// discard received packet
 	void discard();
@@ -65,7 +65,7 @@ int Dummy::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	opErrno = ENETDOWN;
 	return 0;
 }
-int Dummy::receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch) {
+int Dummy::receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
 	(void)data;
 	(void)dataLen;
 	opErrno = ENETDOWN;

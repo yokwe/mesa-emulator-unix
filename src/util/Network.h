@@ -107,7 +107,7 @@ namespace Network {
 		// no error checking
 		virtual int  select  (quint32 timeout, int& opErrno) = 0;
 		virtual int  transmit(quint8* data, quint32 dataLen, int& opErrno) = 0;
-		virtual int  receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch = nullptr) = 0;
+		virtual int  receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch = nullptr) = 0;
 		virtual void discard() = 0;
 
 		Driver(const Device& device_) : device(device_) {}

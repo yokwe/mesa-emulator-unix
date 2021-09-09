@@ -167,7 +167,7 @@ int  BPF::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
-int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch) {
+int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
 	opErrno = 0;
 	// if readData is empty, fill readData
 	if (readData.isEmpty()) read();

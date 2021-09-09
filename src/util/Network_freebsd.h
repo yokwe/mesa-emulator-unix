@@ -53,7 +53,7 @@ namespace Network::FreeBSD {
 		// no error checking
 		int  select  (quint32 timeout, int& opErrno);
 		int  transmit(quint8* data, quint32 dataLen, int& opErrno);
-		int  receive (quint8* data, quint32 dataLen, int& opErrno, quint64* msecSinceEpoch = nullptr);
+		int  receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch = nullptr);
 		void discard();
 
 		Driver(const Network::Device& device_);

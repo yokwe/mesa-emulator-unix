@@ -118,19 +118,24 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	bool reject        = false;
 	bool needToSendAck = false;
 	{
-		if (spp.seq == recvSeq) {
-			// accept this packet
-			// advance recvSeq
-			// If recvSeq overflow, recvSeq become ZERO
-			recvSeq++;
-			// need to notify other end
-			needToSendAck = true;
+		if (spp.control.isSystem()) {
+			// system packet
 		} else {
-			// unexpected seq number
-			logger.warn("Unexpected seq");
-			logger.warn("  expect %d", recvSeq);
-			logger.warn("  actual %d", (quint16)spp.seq);
-			reject = true;
+			// data packet
+			if (spp.seq == recvSeq) {
+				// accept this packet
+				// advance recvSeq
+				// If recvSeq overflow, recvSeq become ZERO
+				recvSeq++;
+				// need to notify other end
+				needToSendAck = true;
+			} else {
+				// unexpected seq number
+				logger.warn("Unexpected seq");
+				logger.warn("  expect %d", recvSeq);
+				logger.warn("  actual %d", (quint16)spp.seq);
+				reject = true;
+			}
 		}
 		if (spp.alloc == sendSeq) {
 			// no change
@@ -152,7 +157,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	recvListCV.wakeOne();
 
 	if (needToSendAck) {
-//		sendSystemAck(data);
+		sendAck(data);
 	}
 }
 
@@ -255,7 +260,7 @@ bool SPPQueue::recv(Data* data, SPP* spp) {
 	if (recvList.isEmpty()) {
 		return false;
 	} else {
-		auto myData = recvList.takeLast();
+		MyData myData = recvList.takeLast();
 		*data = myData.data;
 		*spp  = myData.spp;
 		return true;

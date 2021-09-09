@@ -171,12 +171,12 @@ void xnsDump() {
 					FROM_BYTE_BUFFER(level3, exp);
 					logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(exp.toString()));
 				} else {
-					logger.info("%s  PEX   %s  %s", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
+					logger.info("%s  PEX   %s  %s!", TO_CSTRING(header), TO_CSTRING(pex.toString()), TO_CSTRING(pex.block.toString()));
 				}
 			} else if (idp.type == IDP::Type::SPP) {
 				SPP spp;
 				FROM_BYTE_BUFFER(level2, spp);
-				logger.info("%s  SPP   %s  ???  (%s)", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
+				logger.info("%s  SPP   %s  %s!", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
 			} else if (idp.type == IDP::Type::BOOT) {
 				Boot boot;
 				FROM_BYTE_BUFFER(level2, boot);

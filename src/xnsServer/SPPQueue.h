@@ -155,6 +155,8 @@ namespace XNS::Server {
 		Server* myServer;
 
 	private:
+		// FIXME There is serious problem of copying of MyData from / to QLiist
+		// FIXME Current implementation failed to update SPP.block and and other block
 		class MyData {
 			void copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
 				seq  = seq_;

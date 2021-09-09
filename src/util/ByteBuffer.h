@@ -134,6 +134,10 @@ public:
 		myLimit    = myBase;
 	}
 
+	// set data
+	void data(quint8* data) {
+		myData = data;
+	}
 	// set limit
 	void limit(int newValue);
 

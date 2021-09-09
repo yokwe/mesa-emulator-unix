@@ -338,6 +338,10 @@ namespace Courier {
 			return buffer.isNull();
 		}
 
+		void updateBufferData(const BLOCK& that) {
+			this->buffer.data(that.buffer.data());
+		}
+
 		//
 		// Base
 		//

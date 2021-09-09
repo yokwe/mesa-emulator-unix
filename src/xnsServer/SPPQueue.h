@@ -104,8 +104,8 @@ namespace XNS::Server {
 			}
 		};
 
-		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), sendSeq(0), recvSeq(0) {}
-		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), sendSeq(0), recvSeq(0) {}
+		SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr), sendSeq(0), recvSeq(0), driver(nullptr), localNet(0), localHost(0) {}
+		SPPQueue(const SPPQueue& that)             : SPPListener(that),         myServer(nullptr), sendSeq(0), recvSeq(0), driver(nullptr), localNet(0), localHost(0) {}
 
 		virtual ~SPPQueue() {}
 
@@ -123,6 +123,8 @@ namespace XNS::Server {
 		void state(const State& state_) {
 			myState = state_;
 		}
+
+		void sendAck(const Data& data);
 
 	protected:
 		// if recv returns true, data and spp are assigned
@@ -257,7 +259,7 @@ namespace XNS::Server {
 		void runThread();
 		void sendThread();
 
-		void sendSystemAck(const Data& data);
+		void transmit(const Data& data, const SPP& spp);
 
 		QAtomicInt     stopFuture;
 		QAtomicInt     stopIsCalled;
@@ -273,10 +275,14 @@ namespace XNS::Server {
 		QMutex         sendListMutex;
 		QWaitCondition sendListCV;
 
-
 		RecvBuffer recvBuffer;
 		quint16 sendSeq;
 		quint16 recvSeq;
+
+		// for transmit
+		Driver* driver;
+		quint32 localNet;
+		quint64 localHost;
 
 	};
 

@@ -139,6 +139,9 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 				reject = true;
 			}
 		}
+		if (spp.control.isSendAck()) {
+			needToSendAck = true;
+		}
 		if (spp.alloc == sendSeq) {
 			// no change
 		} else {
@@ -153,29 +156,19 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	}
 	if (reject) return;
 
-	logger.info("data.packet.data %p", data.packet.data());
-	RecvData* myData = new RecvData(data, spp);
-	logger.info("myData->data.packet.data %p", myData->data.packet.data());
-
-	DEBUG_TRACE();
-	logger.info("SPPQueue::handle  myData  %p  %s", myData, myData->spp.block.toString());
-
-
-	recvListMutex.lock();
-	recvList.prepend(myData);
-
-	{
-		const RecvData* p = recvList.first();
-		DEBUG_TRACE();
-		logger.info("SPPQueue::handle  myData  %p  %s", p, p->spp.block.toString());
-	}
-	recvListMutex.unlock();
-	recvListCV.wakeOne();
-
-
 	if (needToSendAck) {
 		sendAck(data);
 	}
+
+	if (spp.control.isSystem()) return;
+
+	// only non system packet is added to recvList
+	QueueData* myData = new QueueData(data, spp);
+
+	recvListMutex.lock();
+	recvList.prepend(myData);
+	recvListMutex.unlock();
+	recvListCV.wakeOne();
 }
 
 
@@ -207,7 +200,7 @@ void SPPQueue::sendThread() {
 		if (sendList.isEmpty()) {
 			continue;
 		} else {
-			RecvData* myData = sendList.takeLast();
+			QueueData* myData = sendList.takeLast();
 			mutexLocker.unlock();
 			transmit(myData->data, myData->spp);
 			mutexLocker.relock();
@@ -270,8 +263,8 @@ delete_this:
 
 // IMPORTANT
 //   Need to be pass one RedvData. Because pss is using data.packet.
-//   Don't break RecvData as Data and SPP
-SPPQueue::RecvData* SPPQueue::recv() {
+//   Don't break QueueData as Data and SPP
+SPPQueue::QueueData* SPPQueue::recv() {
 	quint32 WAIT_TIME = 1;
 
 	QMutexLocker mutexLocker(&recvListMutex);
@@ -282,19 +275,11 @@ SPPQueue::RecvData* SPPQueue::recv() {
 	if (recvList.isEmpty()) {
 		return nullptr;
 	} else {
-		{
-			const auto p = recvList.first();
-			DEBUG_TRACE();
-			logger.info("SPPQueue::recv    myData  %p  %s", p, p->spp.block.toString());
-		}
-		RecvData *myData = recvList.takeLast();
-		DEBUG_TRACE();
-		logger.info("SPPQueue::recv    myData  %p  %s", myData, myData->spp.block.toString());
-		return myData;
+		return recvList.takeLast();
 	}
 }
 void SPPQueue::send(const Data& data, const SPP& spp) {
-	RecvData* myData = new RecvData(data, spp);
+	QueueData* myData = new QueueData(data, spp);
 
 	sendListMutex.lock();
 	sendList.prepend(myData);
@@ -319,6 +304,43 @@ XNS::Context*           SPPQueue::getContext() {
 }
 XNS::Server::Listeners* SPPQueue::getListeners() {
 	return myServer->getListeners();
+}
+
+
+//
+// SPPQueue::QueueData
+//
+void SPPQueue::QueueData::copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
+	seq  = seq_;
+	data = data_;
+	spp  = spp_;
+}
+void SPPQueue::QueueData::fixBlock() {
+	// reflect change of address of data.packet
+	BLOCK newValue(data.packet);
+	data.ethernet.updateBlock(newValue);
+	data.idp.block.updateBufferData(newValue);
+	spp.updateBlock(newValue);
+}
+SPPQueue::QueueData::QueueData() {
+	seq = 0;
+	// reflect change of address of data.packet
+	BLOCK newValue(data.packet);
+	spp.updateBlock(newValue);
+}
+SPPQueue::QueueData::~QueueData() {
+	//
+}
+SPPQueue::QueueData::QueueData(const QueueData& that) : QueueData(that.seq, that.data, that.spp) {}
+SPPQueue::QueueData& SPPQueue::QueueData::operator = (const SPPQueue::QueueData& that) {
+	copyFrom(that.seq, that.data, that.spp);
+	fixBlock();
+	return *this;
+}
+
+SPPQueue::QueueData::QueueData(const quint16 seq_, const Data& data_, const SPP& spp_) {
+	copyFrom(seq_, data_, spp_);
+	fixBlock();
 }
 
 

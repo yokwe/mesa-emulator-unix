@@ -38,6 +38,45 @@ static const Logger logger = Logger::getLogger("bytebuffer");
 
 #include "ByteBuffer.h"
 
+void ByteBuffer::copyFrom(const ByteBuffer& that) {
+	this->myBase     = that.myBase;
+	this->myPosition = that.myPosition;
+	this->myLimit    = that.myLimit;
+	this->myCapacity = that.myCapacity;
+	this->myData     = that.myData;
+	this->myMarkPos  = that.myMarkPos;
+}
+
+ByteBuffer::ByteBuffer() {
+	this->myBase     = 0;
+	this->myPosition = 0;
+	this->myLimit    = 0;
+	this->myCapacity = 0;
+	this->myData     = nullptr;
+	this->myMarkPos  = INVALID_POS;
+}
+ByteBuffer::~ByteBuffer() {
+	//
+}
+
+ByteBuffer::ByteBuffer(const ByteBuffer& that) {
+	copyFrom(that);
+}
+
+ByteBuffer& ByteBuffer::operator =(const ByteBuffer& that) {
+	copyFrom(that);
+	return *this;
+}
+
+ByteBuffer::ByteBuffer(int capacity, quint8* data) {
+	this->myBase     = 0;
+	this->myPosition = 0;
+	this->myLimit    = capacity;
+	this->myCapacity = capacity;
+	this->myData     = data;
+	this->myMarkPos  = INVALID_POS;
+}
+
 
 void ByteBuffer::copyFrom(int len, const quint8* data) {
 	if (len < 0) {

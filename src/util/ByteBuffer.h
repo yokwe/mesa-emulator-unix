@@ -50,25 +50,15 @@ protected:
 	quint8 *myData;
 	int     myMarkPos;
 
-	void copyFrom(const ByteBuffer& that) {
-		this->myBase     = that.myBase;
-		this->myPosition = that.myPosition;
-		this->myLimit    = that.myLimit;
-		this->myCapacity = that.myCapacity;
-		this->myData     = that.myData;
-		this->myMarkPos  = that.myMarkPos;
-	}
-public:
-	ByteBuffer(int capacity, quint8* data) : myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
+	void copyFrom(const ByteBuffer& that);
 
-	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(nullptr), myMarkPos(INVALID_POS) {}
-	ByteBuffer(const ByteBuffer& that) {
-		copyFrom(that);
-	}
-	ByteBuffer& operator =(const ByteBuffer& that) {
-		copyFrom(that);
-		return *this;
-	}
+public:
+	ByteBuffer();
+	~ByteBuffer();
+	ByteBuffer(const ByteBuffer& that);
+	ByteBuffer& operator =(const ByteBuffer& that);
+
+	ByteBuffer(int capacity, quint8* data);
 
 	bool isNull() {
 		return myData == nullptr;

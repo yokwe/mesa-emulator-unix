@@ -132,9 +132,12 @@ namespace XNS::Server {
 				seq  = seq_;
 				data = data_;
 				spp  = spp_;
-
+			}
+			void fixBlock() {
 				// reflect change of address of data.packet
 				BLOCK newValue(data.packet);
+				data.ethernet.updateBlock(newValue);
+				data.idp.block.updateBufferData(newValue);
 				spp.updateBlock(newValue);
 			}
 		public:
@@ -152,11 +155,13 @@ namespace XNS::Server {
 			RecvData(const RecvData& that) : RecvData(that.seq, that.data, that.spp) {}
 			RecvData& operator = (const RecvData& that) {
 				copyFrom(that.seq, that.data, that.spp);
+				fixBlock();
 				return *this;
 			}
 
 			RecvData(const quint16 seq_, const Data& data_, const SPP& spp_) {
 				copyFrom(seq_, data_, spp_);
+				fixBlock();
 			}
 			RecvData(const Data& data_, const SPP& spp_) : RecvData(0, data_, spp_) {}
 
@@ -168,10 +173,10 @@ namespace XNS::Server {
 			}
 		};
 
-		// if recv returns true, data and spp are assigned
-		// if recv returns false, data and spp are NOT assigned
-		bool       recv(RecvData* recvData);
-		void       send(const Data* data, const SPP* spp);
+
+		// if recv returns nullptr, no data is arrived for nwo
+		RecvData*  recv();
+		void       send(const Data& data, const SPP& spp);
 		void       close();
 		bool       stopRun();
 		Config*    getConfig();
@@ -180,8 +185,8 @@ namespace XNS::Server {
 
 		class FunctionTable {
 		public:
-			std::function<bool(RecvData*)>   recv;
-			std::function<void(Data*, SPP*)> send;
+			std::function<RecvData*()>       recv;
+			std::function<void(Data&, SPP&)> send;
 			std::function<void(void)>        close;
 			std::function<bool(void)>        stopRun;
 			std::function<Config*(void)>     getConfig;
@@ -262,23 +267,23 @@ namespace XNS::Server {
 
 		void transmit(const Data& data, const SPP& spp);
 
-		QAtomicInt      stopFuture;
-		QAtomicInt      stopIsCalled;
-		QAtomicInt      closeIsCalled;
-		QFuture<void>   futureRun;
-		QFuture<void>   futureSend;
+		QAtomicInt    stopFuture;
+		QAtomicInt    stopIsCalled;
+		QAtomicInt    closeIsCalled;
+		QFuture<void> futureRun;
+		QFuture<void> futureSend;
 
-		QList<RecvData> recvList;
-		QMutex          recvListMutex;
-		QWaitCondition  recvListCV;
+		QList<RecvData*> recvList;
+		QMutex           recvListMutex;
+		QWaitCondition   recvListCV;
 
-		QList<RecvData> sendList;
-		QMutex          sendListMutex;
-		QWaitCondition  sendListCV;
+		QList<RecvData*> sendList;
+		QMutex           sendListMutex;
+		QWaitCondition   sendListCV;
 
 		RecvBuffer recvBuffer;
-		quint16 sendSeq;
-		quint16 recvSeq;
+		quint16    sendSeq;
+		quint16    recvSeq;
 
 		// for transmit
 		Driver* driver;

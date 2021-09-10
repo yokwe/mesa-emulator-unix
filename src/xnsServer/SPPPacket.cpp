@@ -52,29 +52,33 @@ SPPPacket* SPPPacket::clone() {
 
 void SPPPacket::run(FunctionTable functionTable) {
 	logger.info("SPPPacket::run START");
-	RecvData recvData;
 
 	for(;;) {
 		if (functionTable.stopRun()) break;
-		bool getData = functionTable.recv(&recvData);
-		if (!getData) continue;
+		RecvData* myData = functionTable.recv();
+		if (myData == nullptr) continue;
 
-		Data& data(recvData.data);
-		SPP&  spp(recvData.spp);
+		DEBUG_TRACE();
+		logger.info("SPPPacket::run    myData  %p  %s", myData, myData->spp.block.toString());
 
+		Data& data(myData->data);
+		SPP&  spp (myData->spp);
 		{
 			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			DEBUG_TRACE();
 			logger.info("%s  SPP   %s  RUN  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
 		}
 
 		ByteBuffer level3 = spp.block.toBuffer();
+		logger.info("level3  %s!", level3.toString());
 		ExpeditedCourier exp;
 		FROM_BYTE_BUFFER(level3, exp);
 
 		{
 			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			DEBUG_TRACE();
 			logger.info("%s  SPP   %s  RUN  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(exp.body.toString()));
 		}
 
@@ -85,6 +89,8 @@ void SPPPacket::run(FunctionTable functionTable) {
 		//
 		// FIXME
 		//
+
+		delete myData;
 	}
 	logger.info("SPPPacket::run STOP");
 }

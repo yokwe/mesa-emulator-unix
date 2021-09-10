@@ -42,6 +42,48 @@ static const Logger logger = Logger::getLogger("net");
 //
 // Network::Packet
 //
+void Network::Packet::copyFrom(const ByteBuffer& that) {
+	// copy values from that
+	myBase     = that.base();
+	myPosition = that.position();
+	myLimit    = that.limit();
+	// use packetData for myData
+	myCapacity = SIZE;
+	myData     = packetData;
+	// reset myMarkPos
+	myMarkPos  = INVALID_POS;
+	// copy data from that to packetData
+	memcpy(packetData, that.data(), that.capacity());
+}
+
+Network::Packet::Packet() : ByteBuffer(SIZE, packetData) {
+	//
+}
+Network::Packet::~Packet() {
+	//
+	if (myData != packetData) {
+		logger.error("Unexpected");
+//		ERROR();
+	}
+}
+
+Network::Packet::Packet(const Packet& that) : ByteBuffer() {
+	copyFrom(that);
+}
+Network::Packet& Network::Packet::operator =(const Packet& that) {
+	copyFrom(that);
+	return *this;
+}
+
+Network::Packet::Packet(const ByteBuffer& that) : ByteBuffer() {
+	copyFrom(that);
+}
+
+Network::Packet& Network::Packet::operator =(const ByteBuffer& that) {
+	copyFrom(that);
+	return *this;
+}
+
 QString Network::Packet::toString(int limit) const {
 	ByteBuffer bb(*this);
 	bb.rewind();

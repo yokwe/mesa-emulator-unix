@@ -45,18 +45,18 @@
 namespace Network {
 
 	class Packet : public ByteBuffer {
+		void copyFrom(const ByteBuffer& that);
 	public:
 		static constexpr int SIZE = 1514;
 
-		Packet() : ByteBuffer(SIZE, packetData) {}
+		Packet();
+		~Packet();
 
-		Packet(const ByteBuffer& that) : ByteBuffer() {
-			deepCopy(that);
-		}
-		Packet& operator =(const ByteBuffer& that) {
-			deepCopy(that);
-			return *this;
-		}
+		Packet(const Packet& that);
+		Packet& operator =(const Packet& that);
+
+		Packet(const ByteBuffer& that);
+		Packet& operator =(const ByteBuffer& that);
 
 		// endian conversion
 		void swab() {
@@ -64,23 +64,9 @@ namespace Network {
 		}
 
 		QString toString(int limit = 65535) const;
+
 	private:
 		quint8  packetData[SIZE];
-
-	protected:
-		void deepCopy(const ByteBuffer& that) {
-			// copy values from that
-			myBase     = that.base();
-			myPosition = that.position();
-			myLimit    = that.limit();
-			// use packetData for myData
-			myCapacity = SIZE;
-			myData     = packetData;
-			// reset myMarkPos
-			myMarkPos  = INVALID_POS;
-			// copy data from that to packetData
-			memcpy(packetData, that.data(), that.capacity());
-		}
 	};
 
 	class Device {

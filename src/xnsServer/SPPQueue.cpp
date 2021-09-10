@@ -60,7 +60,7 @@ void SPPQueue::init(XNS::Server::Server* server) {
 	localNet  = myServer->getConfig()->local.net;
 	localHost = myServer->getConfig()->local.host;
 
-	functionTable.recv         = [this](XNS::Data* data, XNS::SPP* spp){return recv(data, spp);};
+	functionTable.recv         = [this](RecvData* redvData){return recv(redvData);};
 	functionTable.send         = [this](XNS::Data* data, XNS::SPP* spp){return send(data, spp);};
 	functionTable.close        = [this](){return close();};
 	functionTable.stopRun      = [this](){return stopRun();};
@@ -98,7 +98,7 @@ void SPPQueue::stop() {
 // process revived data
 //
 void SPPQueue::handle(const Data& data, const SPP& spp) {
-	MyData myData(data, spp);
+	RecvData myData(data, spp);
 
 	QString timeStamp = QDateTime::fromMSecsSinceEpoch(myData.data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
 	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(myData.data.ethernet.toString()), TO_CSTRING(myData.data.idp.toString()));
@@ -249,7 +249,11 @@ delete_this:
 	logger.info("delete this in runThread  %s", toString());
 	delete this;
 }
-bool SPPQueue::recv(Data* data, SPP* spp) {
+
+// IMPORTAN
+//   Need to be pass one RedvData. Because pss is using data.packet.
+//   Don't break RecvData as Data and SPP
+bool SPPQueue::recv(RecvData* recvData) {
 	quint32 WAIT_TIME = 1;
 
 	QMutexLocker mutexLocker(&recvListMutex);
@@ -260,14 +264,12 @@ bool SPPQueue::recv(Data* data, SPP* spp) {
 	if (recvList.isEmpty()) {
 		return false;
 	} else {
-		MyData myData = recvList.takeLast();
-		*data = myData.data;
-		*spp  = myData.spp;
+		*recvData = recvList.takeLast();
 		return true;
 	}
 }
 void SPPQueue::send(const Data* data, const SPP* spp) {
-	MyData myData(*data, *spp);
+	RecvData myData(*data, *spp);
 
 	sendListMutex.lock();
 	sendList.prepend(myData);

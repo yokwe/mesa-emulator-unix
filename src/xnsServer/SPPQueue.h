@@ -127,9 +127,50 @@ namespace XNS::Server {
 		void sendAck(const Data& data);
 
 	protected:
+		class RecvData {
+			void copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
+				seq  = seq_;
+				data = data_;
+				spp  = spp_;
+
+				// reflect change of address of data.packet
+				BLOCK newValue(data.packet);
+				spp.updateBlock(newValue);
+			}
+		public:
+			// seq is for RecvBuffer
+			quint16 seq;
+			Data    data;
+			SPP     spp;
+
+			RecvData() {
+				seq = 0;
+				// reflect change of address of data.packet
+				BLOCK newValue(data.packet);
+				spp.updateBlock(newValue);
+			}
+			RecvData(const RecvData& that) : RecvData(that.seq, that.data, that.spp) {}
+			RecvData& operator = (const RecvData& that) {
+				copyFrom(that.seq, that.data, that.spp);
+				return *this;
+			}
+
+			RecvData(const quint16 seq_, const Data& data_, const SPP& spp_) {
+				copyFrom(seq_, data_, spp_);
+			}
+			RecvData(const Data& data_, const SPP& spp_) : RecvData(0, data_, spp_) {}
+
+			void empty() {
+				data.timeStamp = 0;
+			}
+			bool isEmpty() {
+				return data.timeStamp == 0;
+			}
+		};
+
 		// if recv returns true, data and spp are assigned
 		// if recv returns false, data and spp are NOT assigned
-		bool       recv(Data* data, SPP* spp);
+		bool       recv(RecvData* recvData);
 		void       send(const Data* data, const SPP* spp);
 		void       close();
 		bool       stopRun();
@@ -139,7 +180,7 @@ namespace XNS::Server {
 
 		class FunctionTable {
 		public:
-			std::function<bool(Data*, SPP*)> recv;
+			std::function<bool(RecvData*)>   recv;
 			std::function<void(Data*, SPP*)> send;
 			std::function<void(void)>        close;
 			std::function<bool(void)>        stopRun;
@@ -155,52 +196,10 @@ namespace XNS::Server {
 		Server* myServer;
 
 	private:
-		// FIXME There is serious problem of copying of MyData from / to QLiist
-		// FIXME Current implementation failed to update SPP.block and and other block
-		class MyData {
-			void copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
-				seq  = seq_;
-				data = data_;
-				spp  = spp_;
-
-				// reflect change of address of data.packet
-				BLOCK newValue(data.packet);
-				spp.updateBlock(newValue);
-			}
-		public:
-			quint16 seq;
-			Data    data;
-			SPP     spp;
-
-			MyData() {
-				seq = 0;
-				// reflect change of address of data.packet
-				BLOCK newValue(data.packet);
-				spp.updateBlock(newValue);
-			}
-			MyData(const MyData& that) : MyData(that.seq, that.data, that.spp) {}
-			MyData& operator = (const MyData& that) {
-				copyFrom(that.seq, that.data, that.spp);
-				return *this;
-			}
-
-			MyData(const quint16 seq_, const Data& data_, const SPP& spp_) {
-				copyFrom(seq_, data_, spp_);
-			}
-			MyData(const Data& data_, const SPP& spp_) : MyData(0, data_, spp_) {}
-
-			void empty() {
-				data.timeStamp = 0;
-			}
-			bool isEmpty() {
-				return data.timeStamp == 0;
-			}
-		};
-
 		class RecvBuffer {
 			static const int SIZE = 4;
 		public:
-			MyData array[SIZE];
+			RecvData array[SIZE];
 
 			void clear() {
 				for(int i = 0; i < SIZE; i++) {
@@ -214,9 +213,9 @@ namespace XNS::Server {
 				}
 				return ret;
 			}
-			bool add(const MyData& newValue) {
+			bool add(const RecvData& newValue) {
 				for(int i = 0; i < SIZE; i++) {
-					MyData *p = array + i;
+					RecvData *p = array + i;
 
 					if (p->isEmpty()) {
 						*p = newValue;
@@ -225,9 +224,9 @@ namespace XNS::Server {
 				}
 				return false;
 			}
-			MyData* get(quint16 seq) {
+			RecvData* get(quint16 seq) {
 				for(int i = 0; i < SIZE; i++) {
-					MyData *p = array + i;
+					RecvData *p = array + i;
 
 					if (p->isEmpty()) continue;
 					if (p->spp.seq == seq) {
@@ -239,10 +238,10 @@ namespace XNS::Server {
 			bool exist(quint16 seq) {
 				return get(seq) != nullptr;
 			}
-			MyData* getYougest() {
-				MyData* ret = nullptr;
+			RecvData* getYougest() {
+				RecvData* ret = nullptr;
 				for(int i = 0; i < SIZE; i++) {
-					MyData *p = array + i;
+					RecvData *p = array + i;
 
 					if (p->isEmpty()) continue;
 					if (ret == nullptr) {
@@ -263,19 +262,19 @@ namespace XNS::Server {
 
 		void transmit(const Data& data, const SPP& spp);
 
-		QAtomicInt     stopFuture;
-		QAtomicInt     stopIsCalled;
-		QAtomicInt     closeIsCalled;
-		QFuture<void>  futureRun;
-		QFuture<void>  futureSend;
+		QAtomicInt      stopFuture;
+		QAtomicInt      stopIsCalled;
+		QAtomicInt      closeIsCalled;
+		QFuture<void>   futureRun;
+		QFuture<void>   futureSend;
 
-		QList<MyData>  recvList;
-		QMutex         recvListMutex;
-		QWaitCondition recvListCV;
+		QList<RecvData> recvList;
+		QMutex          recvListMutex;
+		QWaitCondition  recvListCV;
 
-		QList<MyData>  sendList;
-		QMutex         sendListMutex;
-		QWaitCondition sendListCV;
+		QList<RecvData> sendList;
+		QMutex          sendListMutex;
+		QWaitCondition  sendListCV;
 
 		RecvBuffer recvBuffer;
 		quint16 sendSeq;

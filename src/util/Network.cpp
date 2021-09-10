@@ -47,21 +47,21 @@ void Network::Packet::copyFrom(const ByteBuffer& that) {
 	myBase     = that.base();
 	myPosition = that.position();
 	myLimit    = that.limit();
-	// use packetData for myData
+	// use myPacketData for myData
 	myCapacity = SIZE;
-	myData     = packetData;
+	myData     = myPacketData;
 	// reset myMarkPos
 	myMarkPos  = INVALID_POS;
-	// copy data from that to packetData
-	memcpy(packetData, that.data(), that.capacity());
+	// copy data from that to myPacketData
+	memcpy(myPacketData, that.data(), that.capacity());
 }
 
-Network::Packet::Packet() : ByteBuffer(SIZE, packetData) {
+Network::Packet::Packet() : ByteBuffer(SIZE, myPacketData) {
 	//
 }
 Network::Packet::~Packet() {
 	//
-	if (myData != packetData) {
+	if (myData != myPacketData) {
 		logger.error("Unexpected");
 //		ERROR();
 	}
@@ -102,6 +102,10 @@ QString Network::Packet::toString(int limit) const {
 	ret += toHexString(bb.remaining(), data() + bb.position()).left(limit);
 
 	return ret;
+}
+
+quint8* Network::Packet::packetData() {
+	return myPacketData;
 }
 
 

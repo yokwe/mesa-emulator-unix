@@ -60,13 +60,15 @@ namespace Network {
 
 		// endian conversion
 		void swab() {
-			::swab(packetData, packetData, SIZE);
+			::swab(myPacketData, myPacketData, SIZE);
 		}
 
 		QString toString(int limit = 65535) const;
 
+		quint8* packetData();
+
 	private:
-		quint8  packetData[SIZE];
+		quint8  myPacketData[SIZE];
 	};
 
 	class Device {

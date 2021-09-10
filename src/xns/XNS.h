@@ -332,19 +332,8 @@ namespace XNS {
 
 
 	class Data {
-		void deepCopy(const Data& that) {
-			this->timeStamp = that.timeStamp;
-			this->config    = that.config;
-			this->context   = that.context;
-			this->packet    = that.packet;
-			this->ethernet  = that.ethernet;
-			this->idp       = that.idp;
-
-			// address of packet is changed. Need update block
-			BLOCK newValue(this->packet);
-			this->ethernet.updateBlock(newValue);
-			this->idp.updateBlock(newValue);
-		}
+		void copyFrom(const Data& that);
+		void fixBlock();
 	public:
 		// creation time in milliseconds since unix time epoch, used to remove old entry
 		qint64   timeStamp;
@@ -356,17 +345,13 @@ namespace XNS {
 		Ethernet ethernet;
 		IDP      idp;
 
-		Data() : timeStamp(0), config(nullptr), context(nullptr) {}
-		Data(const Data& that) {
-			deepCopy(that);
-		}
-		Data& operator = (const Data& that) {
-			deepCopy(that);
-			return *this;
-		}
+		Data();
+		~Data();
 
-		Data(qint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
-			timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {}
+		Data(const Data& that);
+		Data& operator = (const Data& that);
+
+		Data(qint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_);
 	};
 
 }

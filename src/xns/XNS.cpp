@@ -391,3 +391,45 @@ quint16 XNS::IDP::computeChecksum(const ByteBuffer& bb) {
     }
     return (quint16)s;
 }
+
+
+//
+// XNS::Data
+//
+void XNS::Data::copyFrom(const Data& that) {
+	this->timeStamp = that.timeStamp;
+	this->config    = that.config;
+	this->context   = that.context;
+	this->packet    = that.packet;
+	this->ethernet  = that.ethernet;
+	this->idp       = that.idp;
+}
+void XNS::Data::fixBlock() {
+	// address of packet is changed. Need update block
+	Courier::BLOCK newValue(this->packet);
+	this->ethernet.updateBlock(newValue);
+	this->idp.updateBlock(newValue);
+}
+XNS::Data::Data() {
+	timeStamp = 0;
+	config    = nullptr;
+	context   = nullptr;
+	fixBlock();
+}
+XNS::Data::~Data() {
+	//
+}
+XNS::Data::Data(const Data& that) {
+	copyFrom(that);
+	fixBlock();
+}
+XNS::Data& XNS::Data::operator = (const Data& that) {
+	copyFrom(that);
+	fixBlock();
+	return *this;
+}
+XNS::Data::Data(qint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_) :
+	timeStamp(timeStamp_), config(config_), context(context_), packet(packet_), ethernet(ethernet_), idp(idp_) {
+	fixBlock();
+}
+

@@ -75,7 +75,20 @@ void SPPQueue::init(XNS::Server::Server* server) {
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
 
-	// FIXME how to initialize recvBuffer
+	// clear recvBuffer
+	recvBuffer.clear();
+	// allocate 4 entries
+	recvBuffer.alloc(0);
+	recvBuffer.alloc(1);
+	recvBuffer.alloc(2);
+	recvBuffer.alloc(3);
+
+	// clear recvList
+	recvList.clear();
+	recvListSeq = 0;
+
+	// clear sendBuffer
+	sendBuffer.clear();
 
 	stopFuture    = 0;
 	stopIsCalled  = 0;
@@ -117,57 +130,85 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		ERROR();
 	}
 
+	logger.info("recvBuffer %s", recvBuffer.toString());
+	logger.info("recvSeq %3d  sendSeq %3d", recvSeq, sendSeq);
+
 	// maintain myState
 	//   if accept this packet, increment recvSeq
 	bool reject        = false;
 	bool needToSendAck = false;
+
 	{
-		if (spp.control.isSystem()) {
-			// system packet
-		} else {
-			// data packet
-			if (spp.seq == recvSeq) {
-				// other end acknowledge recvSeq, advance recvSeq
-				recvSeq++;
-				// state is changed. need notify new state to other end.
-				needToSendAck = true;
-			} else {
-				// unexpected seq number
-				logger.warn("Unexpected seq");
-				logger.warn("  expect %d", recvSeq);
-				logger.warn("  actual %d", (quint16)spp.seq);
-				reject = true;
-			}
-		}
 		if (spp.control.isSendAck()) {
 			needToSendAck = true;
 		}
-		if (spp.alloc == sendSeq) {
-			// no change
-		} else {
-			quint16 nextSendSeq = sendSeq + 1;
-			if (spp.alloc == nextSendSeq) {
-				// other end acknowledge sendSeq, advance sendSeq
-				sendSeq++;
-				// state is changed. need notify new state to other end.
-				needToSendAck = true;
+
+		if (spp.control.isData()) {
+			// process data and update recvBuffer
+			Buffer::Entry* entry = recvBuffer.get(spp.seq);
+			if (entry == nullptr) {
+				logger.warn("Unexpected");
+				logger.warn("  spp        %s", spp.toString());
+				logger.warn("  recvBuffer %s", recvBuffer.toString());
+				reject = true;
+			} else {
+				if (entry->inUse()) {
+					// already in buffer
+					reject = true;
+				} else {
+					// new entry
+					QueueData* myData = new QueueData(data, spp);
+					entry->myData = myData;
+				}
 			}
 		}
-
 	}
+
 	if (reject) return;
 
+	if (spp.control.isData()) {
+		// add recvList as many as possible in order by recvListSeq
+		bool needsToWakeOne = false;
+		for(;;) {
+			Buffer::Entry* entry = recvBuffer.get(recvListSeq);
+			if (entry == nullptr) break;
+			if (!entry->inUse()) break;
+
+			recvListMutex.lock();
+			recvList.prepend(entry->myData);
+			recvListMutex.unlock();
+			needsToWakeOne = true;
+
+			// increment recvListSeqs
+			recvListSeq++;
+		}
+		if (needsToWakeOne) recvListCV.wakeOne();
+
+		// check spp.seq if data packet
+		if (spp.seq == recvSeq) {
+			// other end acknowledge recvSeq, increment recvSeq
+			// free current
+			recvBuffer.free(recvSeq);
+			recvSeq++;
+			// alloc next
+			allocNext(recvSeq);
+			// state is changed. need notify new state to other end.
+			needToSendAck = true;
+		}
+	}
+
+	// check spp.alloc
+	{
+		quint16 nextSendSeq = sendSeq + 1;
+		if (spp.alloc == nextSendSeq) {
+			// other end acknowledge sendSeq, increment sendSeq
+			sendSeq++;
+			// state is changed. need notify new state to other end.
+			needToSendAck = true;
+		}
+	}
+
 	if (needToSendAck) sendAck(data);
-
-	if (spp.control.isSystem()) return;
-
-	// only non system packet is added to recvList
-	QueueData* myData = new QueueData(data, spp);
-
-	recvListMutex.lock();
-	recvList.prepend(myData);
-	recvListMutex.unlock();
-	recvListCV.wakeOne();
 }
 
 
@@ -182,7 +223,7 @@ void SPPQueue::sendAck(const Data& data) {
 	spp.idDst   = remoteID;
 	spp.seq     = sendSeq;
 	spp.ack     = recvSeq;
-	spp.alloc   = recvSeq + recvBuffer.countEmpty();
+	spp.alloc   = recvSeq + recvBuffer.countFree();
 
 	send(data, spp);
 }
@@ -260,9 +301,6 @@ delete_this:
 	delete this;
 }
 
-// IMPORTANT
-//   Need to be pass one RedvData. Because pss is using data.packet.
-//   Don't break QueueData as Data and SPP
 SPPQueue::QueueData* SPPQueue::recv() {
 	quint32 WAIT_TIME = 1;
 
@@ -307,13 +345,22 @@ XNS::Server::Listeners* SPPQueue::getListeners() {
 XNS::Server::Services* SPPQueue::getServices() {
 	return myServer->getServices();
 }
+void SPPQueue::allocNext(quint16 seq) {
+	for(;;) {
+		Buffer::Entry* p = recvBuffer.get(seq);
+		if (p == nullptr) {
+			recvBuffer.alloc(seq);
+			break;
+		}
+		seq++;
+	}
+}
 
 
 //
 // SPPQueue::QueueData
 //
-void SPPQueue::QueueData::copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_) {
-	seq  = seq_;
+void SPPQueue::QueueData::copyFrom(const Data& data_, const SPP& spp_) {
 	data = data_;
 	spp  = spp_;
 }
@@ -325,7 +372,6 @@ void SPPQueue::QueueData::fixBlock() {
 	spp.updateBlock(newValue);
 }
 SPPQueue::QueueData::QueueData() {
-	seq = 0;
 	// reflect change of address of data.packet
 	BLOCK newValue(data.packet);
 	spp.updateBlock(newValue);
@@ -333,18 +379,75 @@ SPPQueue::QueueData::QueueData() {
 SPPQueue::QueueData::~QueueData() {
 	//
 }
-SPPQueue::QueueData::QueueData(const QueueData& that) : QueueData(that.seq, that.data, that.spp) {}
+SPPQueue::QueueData::QueueData(const QueueData& that) : QueueData(that.data, that.spp) {}
 SPPQueue::QueueData& SPPQueue::QueueData::operator = (const SPPQueue::QueueData& that) {
-	copyFrom(that.seq, that.data, that.spp);
+	copyFrom(that.data, that.spp);
 	fixBlock();
 	return *this;
 }
-
-SPPQueue::QueueData::QueueData(const quint16 seq_, const Data& data_, const SPP& spp_) {
-	copyFrom(seq_, data_, spp_);
+SPPQueue::QueueData::QueueData(const Data& data_, const SPP& spp_) {
+	copyFrom(data_, spp_);
 	fixBlock();
 }
 
+
+//
+// SPPQueue::Buffer::Entry
+//
+QString SPPQueue::Buffer::Entry::toString() {
+	return QString("(%1 %2)").arg(seq).arg(myData == nullptr ? "notInUse" : "inUse");
+}
+//
+// SPPQueue::Buffer
+//
+SPPQueue::Buffer::~Buffer() {
+	clear();
+}
+SPPQueue::Buffer::Entry* SPPQueue::Buffer::get(quint16 seq) {
+	return map.contains(seq) ? map[seq] : nullptr;
+}
+SPPQueue::Buffer::Entry* SPPQueue::Buffer::alloc(quint16 seq) {
+	if (map.contains(seq)) {
+		logger.error("Unexpected");
+		logger.error("  seq %d", seq);
+		ERROR();
+	} else {
+		Entry* ret = new Entry(seq);
+		map[seq] = ret;
+		return ret;
+	}
+}
+void SPPQueue::Buffer::free(quint16 seq) {
+	auto i = map.find(seq);
+	if (i == map.end()) {
+		logger.error("Unexpected");
+		logger.error("  seq %d", seq);
+		ERROR();
+	}
+	map.erase(i);
+}
+void SPPQueue::Buffer::clear() {
+	// delete element of map
+	for(auto e: map.values()) {
+		delete e;
+	}
+	// clear map
+	map.clear();
+}
+int SPPQueue::Buffer::countFree() {
+	int ret = 0;
+	for(Entry* e: map.values()) {
+		if (!e->inUse()) ret++;
+	}
+	return ret;
+}
+QString SPPQueue::Buffer::toString() {
+	QStringList list;
+	for(auto e: map.values()) {
+		list += e->toString();
+	}
+	return QString("(%1)").arg(list.join(", "));
+}
 
 //
 // SPPQueueServer

@@ -106,11 +106,11 @@ namespace XNS::Server {
 	class SPPQueue : public SPPListener {
 	public:
 		SPPQueue(const char* name, quint16 socket) :
-			SPPListener(name, socket), myServer(nullptr),
+			SPPListener(name, socket), myServer(nullptr), recvListSeq(0),
 			time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sendSeq(0), recvSeq(0),
 			driver(nullptr), localNet(0), localHost(0) {}
 		SPPQueue(const SPPQueue& that)             :
-			SPPListener(that),         myServer(nullptr),
+			SPPListener(that),         myServer(nullptr), recvListSeq(0),
 			time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sendSeq(0), recvSeq(0),
 			driver(nullptr), localNet(0), localHost(0) {}
 
@@ -141,11 +141,9 @@ namespace XNS::Server {
 
 	protected:
 		class QueueData {
-			void copyFrom(const quint16 seq_, const Data& data_, const SPP& spp_);
+			void copyFrom(const Data& data_, const SPP& spp_);
 			void fixBlock();
 		public:
-			// seq is for RecvBuffer
-			quint16 seq;
 			Data    data;
 			SPP     spp;
 
@@ -154,15 +152,7 @@ namespace XNS::Server {
 			QueueData(const QueueData& that);
 			QueueData& operator = (const QueueData& that);
 
-			QueueData(const quint16 seq_, const Data& data_, const SPP& spp_);
-			QueueData(const Data& data_, const SPP& spp_) : QueueData(0, data_, spp_) {}
-
-			void empty() {
-				data.timeStamp = 0;
-			}
-			bool isEmpty() {
-				return data.timeStamp == 0;
-			}
+			QueueData(const Data& data_, const SPP& spp_);
 		};
 
 
@@ -197,73 +187,48 @@ namespace XNS::Server {
 
 
 	private:
-		class RecvBuffer {
-			static const int SIZE = 4;
+		class Buffer {
 		public:
-			RecvBuffer() {
-				for(int i = 0; i < SIZE; i++) {
-					array[i].seq = i;
-					array[i].empty();
-				}
-			}
+			class Entry {
+			public:
+				quint16    seq;
+				QueueData *myData;
 
-			QueueData array[SIZE];
-
-			void clear() {
-				for(int i = 0; i < SIZE; i++) {
-					array[i].empty();
+				Entry() : seq(0), myData(nullptr) {}
+				Entry(const Entry& that) {
+					this->seq    = that.seq;
+					this->myData = that.myData;
 				}
-			}
-			int countEmpty() {
-				int ret = 0;
-				for(int i = 0; i < SIZE; i++) {
-					if (array[i].isEmpty()) ret++;
+				Entry& operator = (const Entry& that) {
+					this->seq    = that.seq;
+					this->myData = that.myData;
+					return *this;
 				}
-				return ret;
-			}
-			bool add(const QueueData& newValue) {
-				for(int i = 0; i < SIZE; i++) {
-					QueueData *p = array + i;
 
-					if (p->isEmpty()) {
-						*p = newValue;
-						return true;
-					}
+				Entry(quint16 seq_) : seq(seq_), myData(nullptr) {}
+
+				bool inUse() {
+					return myData != nullptr;
 				}
-				return false;
-			}
-			QueueData* get(quint16 seq) {
-				for(int i = 0; i < SIZE; i++) {
-					QueueData *p = array + i;
+				QString toString();
+			};
 
-					if (p->isEmpty()) continue;
-					if (p->spp.seq == seq) {
-						return p;
-					}
-				}
-				return nullptr;
-			}
-			bool exist(quint16 seq) {
-				return get(seq) != nullptr;
-			}
-			QueueData* getYougest() {
-				QueueData* ret = nullptr;
-				for(int i = 0; i < SIZE; i++) {
-					QueueData *p = array + i;
+			~Buffer();
+			// ger return nullptr if entry is not found
+			Entry* get  (quint16 seq);
+			Entry* alloc(quint16 seq);
+			void   free (quint16 seq);
 
-					if (p->isEmpty()) continue;
-					if (ret == nullptr) {
-						ret = p;
-					} else {
-						if (p->data.timeStamp < ret->data.timeStamp) {
-							ret = p;
-						}
-					}
-				}
-				return ret;
-			}
+			void   clear();
+			int    countFree();
 
+			QString toString();
+		private:
+			QMap<quint16, Entry*> map;
+			//   seq
 		};
+
+		void allocNext(quint16 seq);
 
 		void runThread();
 		void sendThread();
@@ -287,6 +252,7 @@ namespace XNS::Server {
 		//
 		// variables for recvList
 		//
+		quint16           recvListSeq;
 		QList<QueueData*> recvList;
 		QMutex            recvListMutex;
 		QWaitCondition    recvListCV;
@@ -298,7 +264,11 @@ namespace XNS::Server {
 		QMutex            sendListMutex;
 		QWaitCondition    sendListCV;
 
-		RecvBuffer recvBuffer;
+		//
+		// receive buffer
+		//
+		Buffer recvBuffer;
+		Buffer sendBuffer;
 
 		//
 		// variables for recv/send
@@ -310,7 +280,11 @@ namespace XNS::Server {
 		quint16    remoteID;
 		quint16    localSocket;
 		quint16    localID;
+		// sendSeq is used as spp.seq in transmit
+		// The Sequence Number counts data packets sent on the connection.
 		quint16    sendSeq;
+		// recvSeq is used as spp.ack in transmit
+		// Acknowledge Number indicates the sequence number of the next data packet.
 		quint16    recvSeq;
 
 		//

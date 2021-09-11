@@ -106,6 +106,10 @@ namespace XNS {
 				return value() & BIT_END_OF_MESSAGE;
 			}
 
+			bool isData() const {
+				return !isSystem();
+			}
+
 			QString toString() const;
 		};
 

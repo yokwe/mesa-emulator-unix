@@ -166,7 +166,11 @@ namespace XNS::Server {
 		};
 
 
-		// if recv returns nullptr, no data is arrived for nwo
+		//
+		// FunctionTable for run
+		//
+
+		// if recv returns nullptr, no data is arrived for now
 		QueueData* recv();
 		void       send(const Data& data, const SPP& spp);
 		void       close();
@@ -178,7 +182,7 @@ namespace XNS::Server {
 
 		class FunctionTable {
 		public:
-			std::function<QueueData*()>       recv;
+			std::function<QueueData*()>      recv;
 			std::function<void(Data&, SPP&)> send;
 			std::function<void(void)>        close;
 			std::function<bool(void)>        stopRun;
@@ -266,25 +270,39 @@ namespace XNS::Server {
 
 		void transmit(const Data& data, const SPP& spp);
 
+		//
+		// variable for access context, config, listeners and services
+		//
 		Server* myServer;
 
+		//
+		// variables for future
+		//
 		QAtomicInt    stopFuture;
 		QAtomicInt    stopIsCalled;
 		QAtomicInt    closeIsCalled;
 		QFuture<void> futureRun;
 		QFuture<void> futureSend;
 
+		//
+		// variables for recvList
+		//
 		QList<QueueData*> recvList;
 		QMutex            recvListMutex;
 		QWaitCondition    recvListCV;
 
+		//
+		// variables for sendList
+		//
 		QList<QueueData*> sendList;
 		QMutex            sendListMutex;
 		QWaitCondition    sendListCV;
 
 		RecvBuffer recvBuffer;
 
-		// context
+		//
+		// variables for recv/send
+		//
 		QByteArray newName;
 		quint64    time;
 		quint64    remoteHost;
@@ -295,7 +313,9 @@ namespace XNS::Server {
 		quint16    sendSeq;
 		quint16    recvSeq;
 
-		// for transmit
+		//
+		// variables for transmit packet
+		//
 		Driver* driver;
 		quint32 localNet;
 		quint64 localHost;

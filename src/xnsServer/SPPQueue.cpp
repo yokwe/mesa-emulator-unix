@@ -49,6 +49,7 @@ using Courier::BLOCK;
 using Courier::Services;
 using XNS::Data;
 using XNS::SPP;
+using XNS::Server::SPPListener;
 using XNS::Server::SPPQueue;
 using XNS::Server::SPPQueueServer;
 
@@ -69,6 +70,7 @@ void SPPQueue::init(XNS::Server::Server* server) {
 	functionTable.getConfig    = [this](){return getConfig();};
 	functionTable.getContext   = [this](){return getContext();};
 	functionTable.getListeners = [this](){return getListeners();};
+	functionTable.getServices  = [this](){return getServices();};
 }
 void SPPQueue::start() {
 	if (myServer == nullptr) ERROR();
@@ -78,8 +80,8 @@ void SPPQueue::start() {
 	stopFuture    = 0;
 	stopIsCalled  = 0;
 	closeIsCalled = 0;
-	futureSend = QtConcurrent::run([this](){this->sendThread();});
-	futureRun  = QtConcurrent::run([this](){this->runThread();});
+	futureSend    = QtConcurrent::run([this](){this->sendThread();});
+	futureRun     = QtConcurrent::run([this](){this->runThread();});
 }
 void SPPQueue::stop() {
 	stopIsCalled = 1;
@@ -107,11 +109,11 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	}
 
 	// sanity check
-	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
+	if (remoteHost != data.idp.srcHost || remoteSocket != data.idp.srcSocket || remoteID != spp.idSrc) {
 		// something goes wrong
 		logger.error("Unexpected");
-		logger.error("  expect  %04X  %s-%s", myState.remoteID,   TO_CSTRING(Host::toString(myState.remoteHost)), TO_CSTRING(Socket::toString(myState.remoteSocket)));
-		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),        TO_CSTRING(data.idp.srcSocket.toString()));
+		logger.error("  expect  %04X  %s-%s", remoteID,           TO_CSTRING(Host::toString(remoteHost)),  TO_CSTRING(Socket::toString(remoteSocket)));
+		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()), TO_CSTRING(data.idp.srcSocket.toString()));
 		ERROR();
 	}
 
@@ -125,11 +127,9 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		} else {
 			// data packet
 			if (spp.seq == recvSeq) {
-				// accept this packet
-				// advance recvSeq
-				// If recvSeq overflow, recvSeq become ZERO
+				// other end acknowledge recvSeq, advance recvSeq
 				recvSeq++;
-				// need to notify other end
+				// state is changed. need notify new state to other end.
 				needToSendAck = true;
 			} else {
 				// unexpected seq number
@@ -147,8 +147,9 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		} else {
 			quint16 nextSendSeq = sendSeq + 1;
 			if (spp.alloc == nextSendSeq) {
-				// advance
+				// other end acknowledge sendSeq, advance sendSeq
 				sendSeq++;
+				// state is changed. need notify new state to other end.
 				needToSendAck = true;
 			}
 		}
@@ -156,9 +157,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	}
 	if (reject) return;
 
-	if (needToSendAck) {
-		sendAck(data);
-	}
+	if (needToSendAck) sendAck(data);
 
 	if (spp.control.isSystem()) return;
 
@@ -179,8 +178,8 @@ void SPPQueue::sendAck(const Data& data) {
 	SPP spp;
 	spp.control = SPP::Control::BIT_SYSTEM;
 	spp.sst     = SPP::SST::DATA;
-	spp.idSrc   = myState.localID;
-	spp.idDst   = myState.remoteID;
+	spp.idSrc   = localID;
+	spp.idDst   = remoteID;
 	spp.seq     = sendSeq;
 	spp.ack     = recvSeq;
 	spp.alloc   = recvSeq + recvBuffer.countEmpty();
@@ -219,8 +218,8 @@ void SPPQueue::transmit(const Data& data, const SPP& spp) {
 	idp.control   = (quint8)0;
 	idp.type      = IDP::Type::SPP;
 	idp.dstNet    = data.idp.srcNet;
-	idp.dstHost   = myState.remoteHost;
-	idp.dstSocket = myState.remoteSocket;
+	idp.dstHost   = remoteHost;
+	idp.dstSocket = remoteSocket;
 	idp.srcNet    = localNet;
 	idp.srcHost   = localHost;
 	idp.srcSocket = socket();
@@ -305,6 +304,9 @@ XNS::Context*           SPPQueue::getContext() {
 XNS::Server::Listeners* SPPQueue::getListeners() {
 	return myServer->getListeners();
 }
+XNS::Server::Services* SPPQueue::getServices() {
+	return myServer->getServices();
+}
 
 
 //
@@ -347,6 +349,8 @@ SPPQueue::QueueData::QueueData(const quint16 seq_, const Data& data_, const SPP&
 //
 // SPPQueueServer
 //
+SPPQueueServer::SPPQueueServer(SPPQueue* impl) : SPPListener(impl->name(), impl->socket()), myImpl(impl), myServer(nullptr) {}
+
 void SPPQueueServer::start() {
 	if (myServer == nullptr) ERROR();
 }
@@ -359,28 +363,28 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 		Listeners* listeners = myServer->getListeners();
 
 		// build state
-		SPPQueue::State state;
+		Context context;
 		{
-			QString newName = QString("%1-client").arg(name());
+			QString tempName = QString("%1-client").arg(name());
 
-			state.name         = newName.toUtf8().constData();
-			state.time         = data.timeStamp;
+			context.newName      = tempName.toUtf8().constData();
+			context.time         = data.timeStamp;
 
-			state.remoteHost   = data.idp.srcHost;
-			state.remoteSocket = (quint16)data.idp.srcSocket;
-			state.remoteID     = spp.idSrc;
+			context.remoteHost   = data.idp.srcHost;
+			context.remoteSocket = (quint16)data.idp.srcSocket;
+			context.remoteID     = spp.idSrc;
 
-			state.localSocket  = listeners->getUnusedSocket();
-			state.localID      = data.timeStamp / 100;
+			context.localSocket  = listeners->getUnusedSocket();
+			context.localID      = data.timeStamp / 100;
 		}
 
 		// build listener newImpl with clone of myImpl
 		SPPQueue* newImpl = myImpl->clone();
 		{
-			newImpl->socket(state.localSocket);
-			newImpl->name(state.name.constData());
 			newImpl->autoDelete(true);
-			newImpl->state(state);
+			newImpl->socket(context.localSocket);
+			newImpl->name(context.newName.constData());
+			newImpl->set(context);
 		}
 
 		// add to listeners

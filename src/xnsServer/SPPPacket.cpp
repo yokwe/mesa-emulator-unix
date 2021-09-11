@@ -78,7 +78,8 @@ void SPPPacket::run(FunctionTable functionTable) {
 
 		Packet result;
 		bool useBulk;
-		myServer->getServices()->call(exp.body, result, useBulk);
+
+		functionTable.getServices()->call(exp.body, result, useBulk);
 
 		//
 		// FIXME

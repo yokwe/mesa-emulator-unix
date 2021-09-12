@@ -127,15 +127,7 @@ namespace XNS::Server {
 		// create copy constructor and call it in clone()
 		// return new SPPServerImpl(*this);
 
-		void set(const SPPQueueServer::Context& context) {
-			newName      = context.newName;
-			time         = context.time;
-			remoteHost   = context.remoteHost;
-			remoteSocket = context.remoteSocket;
-			remoteID     = context.remoteID;
-			localSocket  = context.localSocket;
-			localID      = context.localID;
-		}
+		void set(const SPPQueueServer::Context& context);
 
 		void sendAck(const Data& data);
 
@@ -290,12 +282,13 @@ namespace XNS::Server {
 		quint16    remoteID;
 		quint16    localSocket;
 		quint16    localID;
+
 		// sendSeq is used as spp.seq in transmit
 		// The Sequence Number counts data packets sent on the connection.
-		quint16    sendSeq;
+		QAtomicInteger<quint16> sendSeq;
 		// recvSeq is used as spp.ack in transmit
 		// Acknowledge Number indicates the sequence number of the next data packet.
-		quint16    recvSeq;
+		QAtomicInteger<quint16> recvSeq;
 
 		//
 		// variables for transmit packet

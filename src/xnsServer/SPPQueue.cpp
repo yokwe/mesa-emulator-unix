@@ -136,7 +136,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 	}
 
 	logger.info("recvBuffer %s", recvBuffer.toString());
-	logger.info("recvSeq %3d  sendSeq %3d", recvSeq, sendSeq);
+	logger.info("recvSeq %3d  sendSeq %3d", (quint16)recvSeq, (quint16)sendSeq);
 
 	// maintain myState
 	//   if accept this packet, increment recvSeq
@@ -524,6 +524,16 @@ QString SPPQueue::Buffer::toString() {
 	}
 	return QString("(%1)").arg(list.join(", "));
 }
+void SPPQueue::set(const SPPQueueServer::Context& context) {
+	newName      = context.newName;
+	time         = context.time;
+	remoteHost   = context.remoteHost;
+	remoteSocket = context.remoteSocket;
+	remoteID     = context.remoteID;
+	localSocket  = context.localSocket;
+	localID      = context.localID;
+}
+
 
 //
 // SPPQueueServer

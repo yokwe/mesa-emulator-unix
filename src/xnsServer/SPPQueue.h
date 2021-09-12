@@ -221,6 +221,9 @@ namespace XNS::Server {
 
 			void   clear();
 			int    countFree();
+			bool   isEmpty() {
+				return map.isEmpty();
+			}
 
 			QString toString();
 		private:
@@ -232,8 +235,9 @@ namespace XNS::Server {
 
 		void runThread();
 		void sendThread();
+		void transmitThread();
 
-		void transmit(const Data& data, const SPP& spp);
+		void transmit(QueueData* myData);
 
 		//
 		// variable for access context, config, listeners and services
@@ -248,6 +252,12 @@ namespace XNS::Server {
 		QAtomicInt    closeIsCalled;
 		QFuture<void> futureRun;
 		QFuture<void> futureSend;
+		QFuture<void> futureTransmit;
+
+		//
+		// variable for temporary receiving data
+		//
+		Buffer recvBuffer;
 
 		//
 		// variables for recvList
@@ -258,17 +268,17 @@ namespace XNS::Server {
 		QWaitCondition    recvListCV;
 
 		//
-		// variables for sendList
+		// variable for temporary sending data
 		//
-		QList<QueueData*> sendList;
-		QMutex            sendListMutex;
-		QWaitCondition    sendListCV;
+		Buffer         sendBuffer;
+		QMutex         sendBufferMutex;
+		QWaitCondition sendBufferCV;
 
 		//
-		// receive buffer
-		//
-		Buffer recvBuffer;
-		Buffer sendBuffer;
+		// variable for transmitList
+		QList<QueueData*> transmitList;
+		QMutex            transmitListMutex;
+		QWaitCondition    transmitListCV;
 
 		//
 		// variables for recv/send

@@ -42,6 +42,14 @@
 #include "SPPListener.h"
 
 
+// FIXME When remote side behave wrong, close connection and delete socket.
+// FIXME If we didn't get packet more then 30 seconds, close connection and delete socket.
+// FIXME   other end is down
+// FIXME If we retransmit same packet more than 30 seconds, close connection and delete socket.
+// FIXME   other end is up but not accept packet
+
+// FIXME process ATTENTION packet
+
 // When sending data to remote,
 // sendSeq is used as seq
 // recvSeq is used as ack and alloc (window size is one)
@@ -105,14 +113,8 @@ namespace XNS::Server {
 
 	class SPPQueue : public SPPListener {
 	public:
-		SPPQueue(const char* name, quint16 socket) :
-			SPPListener(name, socket), myServer(nullptr), recvListSeq(0),
-			time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sendSeq(0), recvSeq(0),
-			driver(nullptr), localNet(0), localHost(0) {}
-		SPPQueue(const SPPQueue& that)             :
-			SPPListener(that),         myServer(nullptr), recvListSeq(0),
-			time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sendSeq(0), recvSeq(0),
-			driver(nullptr), localNet(0), localHost(0) {}
+		SPPQueue(const char* name, quint16 socket);
+		SPPQueue(const SPPQueue& that);
 
 		virtual ~SPPQueue() {}
 

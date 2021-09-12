@@ -55,6 +55,40 @@ using XNS::Server::SPPQueueServer;
 
 
 //
+// SPPQueue
+//
+SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket) {
+	myServer     = nullptr;
+	recvListSeq  = 0;
+	time         = 0;
+	remoteHost   = 0;
+	remoteSocket = 0;
+	remoteID     = 0;
+	localSocket  = 0;
+	localID      = 0;
+	sendSeq      = 0;
+	recvSeq      = 0;
+	driver       = nullptr;
+	localNet     = 0;
+	localHost    = 0;
+}
+SPPQueue::SPPQueue(const SPPQueue& that)             : SPPListener(that) {
+	myServer     = nullptr;
+	recvListSeq  = 0;
+	time         = 0;
+	remoteHost   = 0;
+	remoteSocket = 0;
+	remoteID     = 0;
+	localSocket  = 0;
+	localID      = 0;
+	sendSeq      = 0;
+	recvSeq      = 0;
+	driver       = nullptr;
+	localNet     = 0;
+	localHost    = 0;
+}
+
+//
 // Life Cycle
 //
 void SPPQueue::init(XNS::Server::Server* server) {

@@ -90,11 +90,15 @@ void SPPQueue::start() {
 	// clear sendBuffer
 	sendBuffer.clear();
 
-	stopFuture    = 0;
-	stopIsCalled  = 0;
-	closeIsCalled = 0;
-	futureSend    = QtConcurrent::run([this](){this->sendThread();});
-	futureRun     = QtConcurrent::run([this](){this->runThread();});
+	// clear transmitList
+	transmitList.clear();
+
+	stopFuture     = 0;
+	stopIsCalled   = 0;
+	closeIsCalled  = 0;
+	futureTransmit = QtConcurrent::run([this](){this->transmitThread();});
+	futureSend     = QtConcurrent::run([this](){this->sendThread();});
+	futureRun      = QtConcurrent::run([this](){this->runThread();});
 }
 void SPPQueue::stop() {
 	stopIsCalled = 1;
@@ -102,6 +106,7 @@ void SPPQueue::stop() {
 
 	futureRun.waitForFinished();
 	futureSend.waitForFinished();
+	futureTransmit.waitForFinished();
 
 	// delete this at last statement
 	if (closeIsCalled) {
@@ -135,39 +140,56 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 
 	// maintain myState
 	//   if accept this packet, increment recvSeq
-	bool reject        = false;
 	bool needToSendAck = false;
 
-	{
-		if (spp.control.isSendAck()) {
-			needToSendAck = true;
-		}
+	if (spp.control.isSendAck()) {
+		needToSendAck = true;
+	}
 
+	//
+	// update recvBuffer
+	//
+	{
+		bool ignorePacket  = false;
 		if (spp.control.isData()) {
 			// process data and update recvBuffer
 			Buffer::Entry* entry = recvBuffer.get(spp.seq);
 			if (entry == nullptr) {
+				// spp.seq is out of bounds of recvBuffer
+				// this packet is error
+				// ignore this packet
 				logger.warn("Unexpected");
 				logger.warn("  spp        %s", spp.toString());
 				logger.warn("  recvBuffer %s", recvBuffer.toString());
-				reject = true;
+				ignorePacket = true;
 			} else {
 				if (entry->inUse()) {
-					// already in buffer
-					reject = true;
+					// spp.seq is in recvBuffer and data is already received
+					// this packet is duplicate
+					// ignore this packet
+					logger.warn("Duplicate");
+					logger.warn("  spp        %s", spp.toString());
+					logger.warn("  recvBuffer %s", recvBuffer.toString());
+					ignorePacket = true;
 				} else {
-					// new entry
+					// spp.seq is in recvBuffer and data is not received
+					// this packet is new
+					// accept this packet and set as data in recvBuffer
 					QueueData* myData = new QueueData(data, spp);
 					entry->myData = myData;
 				}
 			}
 		}
+		if (ignorePacket) return;
 	}
 
-	if (reject) return;
-
+	//
+	// update recvList with recvList
+	//
 	if (spp.control.isData()) {
-		// add recvList as many as possible in order by recvListSeq
+		// move data from recvBuffer to recvList if possible
+		// To move data in sequential, we are using recvListSeq
+		// recvListSeq is next seq to added to recvList
 		bool needsToWakeOne = false;
 		for(;;) {
 			Buffer::Entry* entry = recvBuffer.get(recvListSeq);
@@ -183,8 +205,14 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 			recvListSeq++;
 		}
 		if (needsToWakeOne) recvListCV.wakeOne();
+	}
 
-		// check spp.seq if data packet
+	//
+	// update recvSeq and recvBuffer
+	//
+	// spp.seq in system packet is for next data packet. so process only data packet
+	if (spp.control.isData()) {
+		// If we accept next expecting data packet, update recvSeq for spp.ack
 		if (spp.seq == recvSeq) {
 			// other end acknowledge recvSeq, increment recvSeq
 			// free current
@@ -197,12 +225,16 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		}
 	}
 
-	// check spp.alloc
+	// update sendSeq
 	{
 		quint16 nextSendSeq = sendSeq + 1;
 		if (spp.alloc == nextSendSeq) {
 			// other end acknowledge sendSeq, increment sendSeq
+			// free current
+			sendBufferMutex.lock();
+			sendBuffer.free(sendSeq);
 			sendSeq++;
+			sendBufferMutex.unlock();
 			// state is changed. need notify new state to other end.
 			needToSendAck = true;
 		}
@@ -215,7 +247,33 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 //
 // Send
 //
+void SPPQueue::sendThread() {
+	// retransmit data in sendBuffer in every WAIT_TIME
+	quint32 WAIT_TIME = 500; // unit is msec
+
+	QMutexLocker mutexLocker(&sendBufferMutex);
+	for(;;) {
+		if (stopFuture) break;
+		if (sendBuffer.isEmpty()) {
+			// wait until notified
+			(void)sendBufferCV.wait(&sendBufferMutex, WAIT_TIME);
+		}
+		if (sendBuffer.isEmpty()) {
+			continue;
+		} else {
+			quint16 seq = sendSeq;
+			for(;;) {
+				Buffer::Entry* entry = sendBuffer.get(seq);
+				if (entry == nullptr) break;
+				transmit(entry->myData);
+				seq++;
+			}
+		}
+	}
+}
 void SPPQueue::sendAck(const Data& data) {
+	// spp.block don't share with data.packet
+	// no need to fix spp.block
 	SPP spp;
 	spp.control = SPP::Control::BIT_SYSTEM;
 	spp.sst     = SPP::SST::DATA;
@@ -225,50 +283,63 @@ void SPPQueue::sendAck(const Data& data) {
 	spp.ack     = recvSeq;
 	spp.alloc   = recvSeq + recvBuffer.countFree();
 
-	send(data, spp);
+	QueueData* myData = new QueueData(data, spp);
+	transmit(myData);
 }
-void SPPQueue::sendThread() {
-	quint32 WAIT_TIME = 1;
 
-	QMutexLocker mutexLocker(&sendListMutex);
+
+//
+// transmit
+//
+void SPPQueue::transmit(QueueData* myData) {
+	transmitListMutex.lock();
+	transmitList.append(myData);
+	transmitListMutex.unlock();
+	transmitListCV.wakeOne();
+}
+void SPPQueue::transmitThread() {
+	quint32 WAIT_TIME = 1000; // unit is msec
+	QMutexLocker mutexLocker(&transmitListMutex);
+
 	for(;;) {
 		if (stopFuture) break;
-		if (sendList.isEmpty()) {
+
+		if (transmitList.isEmpty()) {
 			// wait until notified
-			(void)sendListCV.wait(&sendListMutex, WAIT_TIME);
+			(void)transmitListCV.wait(&transmitListMutex, WAIT_TIME);
 		}
-		if (sendList.isEmpty()) {
+		if (transmitList.isEmpty()) {
 			continue;
 		} else {
-			QueueData* myData = sendList.takeLast();
-			mutexLocker.unlock();
-			transmit(myData->data, myData->spp);
-			mutexLocker.relock();
-			delete myData;
+			// transmit all in transmitList
+			for(auto e: transmitList) {
+				Data& data(e->data);
+				SPP&  spp (e->spp);
+
+				Packet level2;
+				TO_BYTE_BUFFER(level2, spp);
+				BLOCK block(level2);
+
+				IDP idp;
+				idp.checksum_ = data.idp.checksum_;
+				idp.length    = (quint16)0;
+				idp.control   = (quint8)0;
+				idp.type      = IDP::Type::SPP;
+				idp.dstNet    = data.idp.srcNet;
+				idp.dstHost   = remoteHost;
+				idp.dstSocket = remoteSocket;
+				idp.srcNet    = localNet;
+				idp.srcHost   = localHost;
+				idp.srcSocket = socket();
+				idp.block     = block;
+
+				Listener::transmit(driver, data.ethernet.src, localHost, idp);
+
+				delete e;
+			}
+			transmitList.clear();
 		}
 	}
-}
-void SPPQueue::transmit(const Data& data, const SPP& spp) {
-	Packet level2;
-	TO_BYTE_BUFFER(level2, spp);
-	BLOCK block(level2);
-
-	IDP idp;
-	idp.checksum_ = data.idp.checksum_;
-	idp.length    = (quint16)0;
-	idp.control   = (quint8)0;
-	idp.type      = IDP::Type::SPP;
-	idp.dstNet    = data.idp.srcNet;
-	idp.dstHost   = remoteHost;
-	idp.dstSocket = remoteSocket;
-	idp.srcNet    = localNet;
-	idp.srcHost   = localHost;
-	idp.srcSocket = socket();
-	idp.block     = block;
-
-	// Use ethernet.src for destination. not idp.srcHost
-	// Don't mix with ethernet.src and idp.srcHost
-	Listener::transmit(driver, data.ethernet.src, localHost, idp);
 }
 
 
@@ -297,12 +368,13 @@ delete_this:
 	// wait sendThread and delete this
 	stopFuture = 1;
 	futureSend.waitForFinished();
+	futureTransmit.waitForFinished();
 	logger.info("delete this in runThread  %s", toString());
 	delete this;
 }
 
 SPPQueue::QueueData* SPPQueue::recv() {
-	quint32 WAIT_TIME = 1;
+	quint32 WAIT_TIME = 1000; // unit is msec
 
 	QMutexLocker mutexLocker(&recvListMutex);
 	if (recvList.isEmpty()) {
@@ -318,10 +390,12 @@ SPPQueue::QueueData* SPPQueue::recv() {
 void SPPQueue::send(const Data& data, const SPP& spp) {
 	QueueData* myData = new QueueData(data, spp);
 
-	sendListMutex.lock();
-	sendList.prepend(myData);
-	sendListMutex.unlock();
-	sendListCV.wakeOne();
+	sendBufferMutex.lock();
+	Buffer::Entry* entry = sendBuffer.alloc(spp.seq);
+	entry->myData = myData;
+	sendBufferMutex.unlock();
+
+	sendBufferCV.wakeOne();
 }
 void SPPQueue::close() {
 	logger.info("SPPQueue::close  remove listener %s", toString());
@@ -409,7 +483,8 @@ SPPQueue::Buffer::Entry* SPPQueue::Buffer::get(quint16 seq) {
 SPPQueue::Buffer::Entry* SPPQueue::Buffer::alloc(quint16 seq) {
 	if (map.contains(seq)) {
 		logger.error("Unexpected");
-		logger.error("  seq %d", seq);
+		logger.error("  seq    %d", seq);
+		logger.error("  buffer %s", toString());
 		ERROR();
 	} else {
 		Entry* ret = new Entry(seq);
@@ -421,7 +496,8 @@ void SPPQueue::Buffer::free(quint16 seq) {
 	auto i = map.find(seq);
 	if (i == map.end()) {
 		logger.error("Unexpected");
-		logger.error("  seq %d", seq);
+		logger.error("  seq    %d", seq);
+		logger.error("  buffer %s", toString());
 		ERROR();
 	}
 	map.erase(i);

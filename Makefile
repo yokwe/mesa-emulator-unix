@@ -3,7 +3,8 @@
 #
 
 MODULE := main test guam-headless \
-          util mesa agent opcode trace symbols xns courier courierImpl xnsDump xnsServer xnsServerImpl
+          util mesa agent opcode trace symbols xns courier courierImpl xnsDump xnsServer xnsServerImpl \
+          dumpSymbol
 
 .PHONY: all clean distclean gamke fix-permission
 .PHONY:     main     test     xnsDump     xnsServer
@@ -11,6 +12,7 @@ MODULE := main test guam-headless \
 .PHONY:     guam-headless prepare-run-guam
 .PONEY: run-guam-headless-gvwin run-guam-headless-gvwin21 run-guam-headless-dawn
 .PHONY: util mesa symbols xns courier
+.PHONY: dumpSymbol run-dumpSymbol
 
 all:
 	echo "all"
@@ -73,6 +75,9 @@ xnsDump: xns
 
 guam-headless: util mesa
 	( cd src/guam-headless; make all )
+	
+dumpSymbol: symbols util
+	( cd src/dumpSymbol; make all )
 
 prepare-run-guam:
 	@if [ ! -d tmp/run ]; then \
@@ -135,3 +140,10 @@ run-guam-headless-gvwin21: guam-headless prepare-run-guam
 run-guam-headless-dawn: guam-headless prepare-run-guam
 	echo -n >tmp/run/debug.log
 	tmp/build/guam-headless/guam-headless Dawn
+
+run-dumpSymbol: dumpSymbol
+	echo -n >tmp/debug.log
+	tmp/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/GermOpsImpl.bcd
+
+
+

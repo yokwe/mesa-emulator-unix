@@ -4,3 +4,4 @@ data/GVWin*/
 data/floppy/
 src/*/Makefile
 src/*/.qmake.stash
+build/

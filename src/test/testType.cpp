@@ -144,11 +144,17 @@ public:
 		CPPUNIT_ASSERT_EQUAL((CARD16)0xabcd, Rotate((CARD16)0xabcd,  0));
 	}
 	void testArithShift() {
-		CPPUNIT_ASSERT_EQUAL((INT16)0xacd0, ArithShift((INT16)0xa2cd,  4));
-		CPPUNIT_ASSERT_EQUAL((INT16)0xfabc, ArithShift((INT16)0xabcd, -4));
+		// shift left
+		CPPUNIT_ASSERT_EQUAL((INT16)0xacd0, ArithShift((INT16)0xa2cd,   4));
+		CPPUNIT_ASSERT_EQUAL((INT16)0x3cd0, ArithShift((INT16)0x7bcd,   4));
+		CPPUNIT_ASSERT_EQUAL((INT16)0x8000, ArithShift((INT16)0xa2cd,  16));
+		CPPUNIT_ASSERT_EQUAL((INT16)0x0000, ArithShift((INT16)0x7bcd,  16));
 
-		CPPUNIT_ASSERT_EQUAL((INT16)0x3cd0, ArithShift((INT16)0x7bcd,  4));
-		CPPUNIT_ASSERT_EQUAL((INT16)0x07bc, ArithShift((INT16)0x7bcd, -4));
+		// shift right
+		CPPUNIT_ASSERT_EQUAL((INT16)0xfabc, ArithShift((INT16)0xabcd,  -4));
+		CPPUNIT_ASSERT_EQUAL((INT16)0x07bc, ArithShift((INT16)0x7bcd,  -4));
+		CPPUNIT_ASSERT_EQUAL((INT16)0xffff, ArithShift((INT16)0xabcd, -16));
+		CPPUNIT_ASSERT_EQUAL((INT16)0x0000, ArithShift((INT16)0x7bcd, -16));
 
 		CPPUNIT_ASSERT_EQUAL((INT16)0xabcd, ArithShift((INT16)0xabcd,  0));
 	}
@@ -170,11 +176,17 @@ public:
 		CPPUNIT_ASSERT_EQUAL((CARD32)0xcafebabe, LongShift((INT32)0xcafebabe,  0));
 	}
 	void testLongArithShift() {
+		// shift left
 		CPPUNIT_ASSERT_EQUAL((INT32)0xafebabe0, LongArithShift((INT32)0xcafebabe,  4));
-		CPPUNIT_ASSERT_EQUAL((INT32)0xfcafebab, LongArithShift((INT32)0xcafebabe, -4));
-
 		CPPUNIT_ASSERT_EQUAL((INT32)0x2febabe0, LongArithShift((INT32)0x4afebabe,  4));
-		CPPUNIT_ASSERT_EQUAL((INT32)0x04afebab, LongArithShift((INT32)0x4afebabe, -4));
+		CPPUNIT_ASSERT_EQUAL((INT32)0x80000000, LongArithShift((INT32)0xcafebabe, 31));
+		CPPUNIT_ASSERT_EQUAL((INT32)0x00000000, LongArithShift((INT32)0x4afebabe, 31));
+
+		// right
+		CPPUNIT_ASSERT_EQUAL((INT32)0xfcafebab, LongArithShift((INT32)0xcafebabe,  -4));
+		CPPUNIT_ASSERT_EQUAL((INT32)0x04afebab, LongArithShift((INT32)0x4afebabe,  -4));
+		CPPUNIT_ASSERT_EQUAL((INT32)0xffffffff, LongArithShift((INT32)0xcafebabe, -31));
+		CPPUNIT_ASSERT_EQUAL((INT32)0x00000000, LongArithShift((INT32)0x4afebabe, -31));
 
 		CPPUNIT_ASSERT_EQUAL((INT32)0xcafebabe, LongArithShift((INT32)0xcafebabe,  0));
 	}

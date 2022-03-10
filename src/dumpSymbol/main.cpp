@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 
 	setSignalHandler();
 
-	QString outDirPath("tmp/dumpSymbol");
+	QString outDirPath("tmp/dumpSymbol/symbol");
 	logger.info("outDirPath %s", outDirPath.toLocal8Bit().constData());
 	if (!QFile::exists(outDirPath)) {
 		logger.fatal("outDirPath does not exist. outDirPath = %s", outDirPath.toLocal8Bit().constData());

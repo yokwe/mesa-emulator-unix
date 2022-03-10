@@ -142,8 +142,8 @@ run-guam-headless-dawn: guam-headless prepare-run-guam
 	tmp/build/guam-headless/guam-headless Dawn
 
 run-dumpSymbol: dumpSymbol
-	echo -n >tmp/debug.log
-	tmp/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/GermOpsImpl.bcd
+	echo -n >tmp/run/debug.log
+	tmp/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd
 
 
 

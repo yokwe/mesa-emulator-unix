@@ -106,13 +106,16 @@ inline UNSPEC Rotate(UNSPEC data, int count) {
 }
 
 // 2.1.3.2 Basic Arithmetic Operator
+// This operation is similar to logical shift, except that
+// when shifting right, a copy of bit zero (the sign bit) is shifted into the left of data;
+// when shifting left, bit zero is undisturbed.
 inline INT16 ArithShift(INT16 data, int count) {
 	if (0 < count) {
-		if (16 <= count) return 0;
+		if (15 < count) count = 15;
 		return (INT16)(((data << count) & 0x7fff) | (data & 0x8000));
 	}
 	if (count < 0) {
-		if (count <= -16) return 0;
+		if (count < -15) count = -15;
 		return (INT16)(data >> (-count));
 	}
 	return data;
@@ -158,11 +161,11 @@ inline LONG_UNSPEC LongShift(LONG_UNSPEC data, int count) {
 }
 inline INT32 LongArithShift(INT32 data, int count) {
 	if (0 < count) {
-		if (32 <= count) return 0;
+		if (31 < count) count = 31;
 		return (INT32)(((data << count) & 0x7fffffff) | (data & 0x80000000));
 	}
 	if (count < 0) {
-		if (count <= -32) count = -32;
+		if (count < -31) count = -31;
 		return (INT32)(data >> (-count));
 	}
 	return data;

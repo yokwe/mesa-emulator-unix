@@ -5,9 +5,16 @@ INCLUDEPATH += .
 
 LIBS += -llog4cpp
 
+CONFIG += c++17
+
 macx {
 	INCLUDEPATH += /opt/local/include
 	LIBS        += -L/opt/local/lib
+	
+	# build for build target
+	QMAKE_MACOSX_DEPLOYMENT_TARGET = $$system(sw_vers -productVersion)
+	# or build for specific version
+	# QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.0
 }
 
 freebsd {
@@ -15,7 +22,7 @@ freebsd {
 }
 
 
-QMAKE_CXXFLAGS += -std=c++17 -Werror -g
+QMAKE_CXXFLAGS += -Werror -g
 
 QMAKE_LFLAGS   += -g -rdynamic -v
 

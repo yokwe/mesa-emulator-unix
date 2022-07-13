@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.settings">
+        		
+        <cconfiguration id="org.eclipse.cdt.core.default.config.1901322054">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.1901322054" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
+                				
+                <externalSettings/>
+                				
+                <extensions/>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    	
+    <storageModule moduleId="scannerConfiguration"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.pathentry">
+        		
+        <pathentry include="/usr/local/include/qt5" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/local/include/qt5/QtGui" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/local/include/qt5/QtCore" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/local/include/libdrm" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/local/include" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/local/lib/qt5/mkspecs/freebsd-clang" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/include/c++/v1" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/lib/clang/10.0.1/include" kind="inc" path="" system="true"/>
+        		
+        <pathentry include="/usr/include" kind="inc" path="" system="true"/>
+        		
+        <pathentry kind="mac" name="__cplusplus" path="" value="201703L"/>
+        		
+        <pathentry excluding="src/" kind="src" path=""/>
+        		
+        <pathentry kind="out" path=""/>
+        		
+        <pathentry kind="src" path="src"/>
+        	
+    </storageModule>
+    
+</cproject>

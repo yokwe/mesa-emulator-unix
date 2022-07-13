@@ -9,6 +9,8 @@ CONFIG += cmdline
 # Input
 SOURCES += main.cpp
 
+# show include path
+QMAKE_CXXFLAGS += -v 
 
 LIBS += ../../tmp/build/util/libutil.a
 

@@ -5,7 +5,7 @@ INCLUDEPATH += .
 
 LIBS += -llog4cpp
 
-CONFIG += c++17
+CONFIG += c++1z
 
 macx {
 	INCLUDEPATH += /opt/local/include

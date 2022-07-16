@@ -330,6 +330,13 @@ public:
 			if (PERF_ENABLE) hit++;
 			return cacheLF + ptr;
 		}
+
+		if ((CARD16)(0-SIZE(LocalOverhead)) <= ptr) {
+			if (PERF_ENABLE) overhead++;
+			CARD16 p = SIZE(LocalOverhead) + ptr;
+			return cacheLF + p - SIZE(LocalOverhead);
+		}
+
 		if (PERF_ENABLE) miss++;
 		return store(Memory::lengthenPointer(lf + ptr));
 	}
@@ -340,6 +347,7 @@ protected:
 	static CARD16*   cacheLF;
 	static long long hit;
 	static long long miss;
+	static long long overhead;
 
 	static CARD16* store(CARD32 ptr);
 };

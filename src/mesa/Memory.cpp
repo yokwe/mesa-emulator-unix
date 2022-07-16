@@ -92,6 +92,7 @@ CARD16          LFCache::endCacheLF = 0;
 CARD16*         LFCache::cacheLF    = 0;
 long long       LFCache::hit        = 0;
 long long       LFCache::miss       = 0;
+long long       LFCache::overhead   = 0;
 
 
 CARD8* CodeCache::page    = 0;
@@ -422,8 +423,9 @@ void PageCache::stats() {
 
 void LFCache::stats() {
 	if (!PERF_ENABLE) return;
-	long long total = hit + miss;
-	logger.info("LFCache   %10llu %6.2f%%   miss %10llu", total, ((double)hit / total) * 100.0, miss);
+	long long total = hit + miss + overhead;
+	logger.info("LFCache   hit %10llu   overhead %10llu   miss %10llu", hit, overhead, miss);
+	logger.info("LFCache   hit %10.2f%%  overhead %10.2f%%  miss %10.2f%%", ((double)hit / total) * 100.0, ((double)overhead / total) * 100.0, ((double)miss / total) * 100.0);
 }
 
 CARD16* LFCache::store(CARD32 ptr) {

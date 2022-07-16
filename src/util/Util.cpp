@@ -67,23 +67,25 @@ void setSignalHandler(int signum) {
 
 
 // Logger
-static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& string) {
+static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& qString) {
+	std::string string = qString.toStdString();
+
 	if (context.line == 0) {
 		switch(type) {
 		case QtDebugMsg:
-			logger.debug("%s", string);
+			logger.debug(string);
 			break;
 		case QtInfoMsg:
-			logger.info("%s", string);
+			logger.info(string);
 			break;
 		case QtWarningMsg:
-			logger.warn("%s", string);
+			logger.warn(string);
 			break;
 		case QtCriticalMsg:
-			logger.error("%s", string);
+			logger.error(string);
 			break;
 		case QtFatalMsg:
-			logger.fatal("%s", string);
+			logger.fatal(string);
 			break;
 		default:
 			ERROR();
@@ -91,19 +93,19 @@ static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, 
 	} else {
 		switch(type) {
 		case QtDebugMsg:
-			logger.debug("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			logger.debug("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
 			break;
 		case QtInfoMsg:
-			logger.info("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			logger.info("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
 			break;
 		case QtWarningMsg:
-			logger.warn("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			logger.warn("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
 			break;
 		case QtCriticalMsg:
-			logger.error("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			logger.error("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
 			break;
 		case QtFatalMsg:
-			logger.fatal("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string);
+			logger.fatal("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
 			break;
 		default:
 			ERROR();

@@ -119,20 +119,55 @@ public:
 		qInstallMessageHandler(getQtMessageHandler());
 	}
 
+	// std::string
+	void debug(const std::string& string) const {
+		category->debug(string);
+	}
+	void info(const std::string& string) const {
+		category->info(string);
+	}
+	void warn(const std::string& string) const{
+		category->warn(string);
+	}
+	void error(const std::string& string) const {
+		category->error(string);
+	}
+	void fatal(const std::string& string) const {
+		category->fatal(string);
+	}
+
+	// const char*
+	void debug(const char* string) const {
+		category->debug(std::string(string));
+	}
+	void info(const char* string) const {
+		category->info(std::string(string));
+	}
+	void warn(const char* string) const {
+		category->warn(std::string(string));
+	}
+	void error(const char* string) const {
+		category->error(std::string(string));
+	}
+	void fatal(const char* string) const {
+		category->fatal(std::string(string));
+	}
+
+
     template<typename... Args> void debug(const char* format, Args&& ... args) const {
-    	category->debug(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    	category->debug(std_sprintf(format, args...));
     }
     template<typename... Args> void info(const char* format, Args&& ... args) const {
-     	category->info(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+     	category->info(std_sprintf(format, args...));
      }
     template<typename... Args> void warn(const char* format, Args&& ... args) const {
-     	category->warn(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+     	category->warn(std_sprintf(format, args...));
      }
     template<typename... Args> void error(const char* format, Args&& ... args) const {
-    	category->error(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    	category->error(std_sprintf(format, args...));
     }
     template<typename... Args> void fatal(const char* format, Args&& ... args) const {
-    	category->fatal(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    	category->fatal(std_sprintf(format, args...));
     }
 
 private:

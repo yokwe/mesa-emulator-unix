@@ -114,7 +114,7 @@ void E_LID0() {
 ///////////////////////////////////////////////////////////////////////////////
 __attribute__((always_inline)) static inline void E_LA_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LA %5d", savedPC, arg);
-	Push(LFCache::LF() + arg);
+	Push(LF + arg);
 }
 #define LAn(n) \
 void E_LA##n () { \

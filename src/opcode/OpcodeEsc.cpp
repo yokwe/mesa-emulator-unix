@@ -228,7 +228,7 @@ void E_WOB() {
 void E_DSK() {
 	CARD16 arg = GetCodeByte();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DSK %02X", savedPC, arg);
-	POINTER state = LFCache::LF() + arg;
+	POINTER state = LF + arg;
 	SaveStack(LengthenPointer(state));
 }
 // 041  ASSIGN_ESC(b, XE)
@@ -237,7 +237,7 @@ void E_DSK() {
 void E_LSK() {
 	CARD16 arg = GetCodeByte();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LSK %02X", savedPC, arg);
-	POINTER state = LFCache::LF() + arg;
+	POINTER state = LF + arg;
 	LoadStack(LengthenPointer(state));
 }
 // 044  ASSIGN_ESC(a, BNDCKL)

@@ -283,7 +283,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 0), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 0), stack[0]);
 	}
 	void testLA1() {
 		page_CB[(PC / 2) + 0] = zLA1 << 8 | 0x00;
@@ -291,7 +291,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 1), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 1), stack[0]);
 	}
 	void testLA2() {
 		page_CB[(PC / 2) + 0] = zLA2 << 8 | 0x00;
@@ -299,7 +299,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 2), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 2), stack[0]);
 	}
 	void testLA3() {
 		page_CB[(PC / 2) + 0] = zLA3 << 8 | 0x00;
@@ -307,7 +307,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 3), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 3), stack[0]);
 	}
 	void testLA6() {
 		page_CB[(PC / 2) + 0] = zLA6 << 8 | 0x00;
@@ -315,7 +315,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 6), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 6), stack[0]);
 	}
 	void testLA8() {
 		page_CB[(PC / 2) + 0] = zLA8 << 8 | 0x00;
@@ -323,7 +323,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + 8), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + 8), stack[0]);
 	}
 	void testLAB() {
 		CARD8 alpha = 0xa0;
@@ -332,7 +332,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + alpha), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + alpha), stack[0]);
 	}
 	void testLAW() {
 		BytePair alpha = {0x7000};
@@ -342,7 +342,7 @@ class testOpcode_300 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 3, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)(LFCache::LF() + alpha.u), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)(LF + alpha.u), stack[0]);
 	}
 
 	//	void testGA0() {}
@@ -596,11 +596,11 @@ class testOpcode_300 : public testBase {
 		page_CB[(PC / 2) + 1] = (CARD8)(nPC.right) << 8 | 0x00;
 		page_CB[nPC.u / 2] = 0; // set fsi = 0
 		CARD16 nLF = page_AV[0];
-		CARD16 oLF = LFCache::LF();
+		CARD16 oLF = LF;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL((CARD16)(savedPC + 3), page_LF[-1]); // PC of caller
-		CPPUNIT_ASSERT_EQUAL(nLF, LFCache::LF());                // new LF
+		CPPUNIT_ASSERT_EQUAL(nLF, LF);                // new LF
 		CPPUNIT_ASSERT_EQUAL((CARD16)(nPC.u + 1), PC);            // new PC
 		CPPUNIT_ASSERT_EQUAL(GFI, page_MDS[nLF - 2]);             // stored GFI in LocalOverhead.globallink
 		CPPUNIT_ASSERT_EQUAL(oLF, page_MDS[nLF - 3]);             // stored LF in LocalOverhead.returnllink
@@ -635,7 +635,7 @@ class testOpcode_300 : public testBase {
 		page_MDS[dst - 1] = nPC;     // set pc of dst os nPC
 		page_LF[-4] = 0;             // set fsi of current LF
 		page_LF[-3] = dst;           // set returnlink of current LF
-		CARD16 oLF = LFCache::LF();
+		CARD16 oLF = LF;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(GFI_EFC, GFI);

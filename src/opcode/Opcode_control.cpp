@@ -57,7 +57,7 @@ static inline void Trap(POINTER ptr) {
 	PC = savedPC;
 	SP = savedSP;
 	if (ValidContext()) *StoreLF(LO_OFFSET(0, pc)) = PC;
-	XFER(handler, LFCache::LF(), XferType::trap, 0);
+	XFER(handler, LF, XferType::trap, 0);
 }
 
 // TrapZero: PROC[ptr: POINTER TO ControlLink]
@@ -227,7 +227,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 
 	LinkType linkType = ControlLinkType(nDst);
 	Trace::Context context;
-	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
+	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LF);
 
 	switch (linkType) {
 	case LinkType::oldProcedure : {
@@ -307,8 +307,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		Discard();
 	}
 	if (freeFlag)
-		Free(LFCache::LF());
-	LFCache::setLF(nLF);
+		Free(LF);
+	LF = nLF;
 	GFI = nGFI;
 	PC = nPC;
 	CheckForXferTraps(dst, type);
@@ -318,7 +318,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 // Call: PROC[dst: ControlLink]
 static inline void Call(ControlLink dst) {
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
-	XFER(dst, LFCache::LF(), XferType::call, 0);
+	XFER(dst, LF, XferType::call, 0);
 }
 ///////////////////////////////////////////////////////////////////////
 
@@ -367,7 +367,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 	Trace::Context context;
-	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LFCache::LF());
+	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LF);
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
@@ -378,8 +378,8 @@ void  E_LFC() {
 	CARD16 nLF = Alloc(fsi);
 	nPC = nPC + 1;
 	*StoreMds(LO_OFFSET(nLF, globallink)) = GFI;
-	*StoreMds(LO_OFFSET(nLF, returnlink)) = LFCache::LF();
-	LFCache::setLF(nLF);
+	*StoreMds(LO_OFFSET(nLF, returnlink)) = LF;
+	LF = nLF;
 	PC = nPC;
 
 	context.setContext(GFI, nPC - 1, Memory::MDS(), nLF);
@@ -437,7 +437,7 @@ void E_PO() {
 	Pop();
 	PortLink port = Pop();
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
-	*StoreMds(port + OFFSET_PORT(inport)) = LFCache::LF();
+	*StoreMds(port + OFFSET_PORT(inport)) = LF;
 	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
 // aPOR - 016
@@ -447,7 +447,7 @@ void E_POR() {
 	Pop();
 	PortLink port = Pop();
 	*StoreLF(LO_OFFSET(0, pc)) = PC;
-	*StoreMds(port + OFFSET_PORT(inport)) = LFCache::LF();
+	*StoreMds(port + OFFSET_PORT(inport)) = LF;
 	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
 

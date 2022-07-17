@@ -281,9 +281,9 @@ void testBase::setUp() {
 	initPDA();
 
 	int fsi = 10;
-	LFCache::setLF(page_AV[fsi]);
-	page_AV[fsi] = page_MDS[LFCache::LF()];
-	page_LF  = Memory::getAddress(Memory::MDS() + LFCache::LF());
+	LF = page_AV[fsi];
+	page_AV[fsi] = page_MDS[LF];
+	page_LF  = Memory::getAddress(Memory::MDS() + LF);
 
 	PSB = 1;
 }

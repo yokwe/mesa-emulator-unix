@@ -391,7 +391,7 @@ class testOpcode_esc : public testBase {
 		page_CB[outport.pc / 2] = 0; // set fsi = 0
 		stack[SP++] = port;
 		stack[SP++] = 0;
-		CARD16 oLF = LFCache::LF();
+		CARD16 oLF = LF;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, SP);
@@ -400,8 +400,8 @@ class testOpcode_esc : public testBase {
 		//
 		CPPUNIT_ASSERT_EQUAL(GFI_EFC, GFI);
 		CPPUNIT_ASSERT_EQUAL((CARD16)(outport.pc + 1), PC);
-		CPPUNIT_ASSERT_EQUAL(port, page_MDS[LFCache::LF() - 3]); // returnlink
-		CPPUNIT_ASSERT_EQUAL(GFI,  page_MDS[LFCache::LF() - 2]); // globallink
+		CPPUNIT_ASSERT_EQUAL(port, page_MDS[LF - 3]); // returnlink
+		CPPUNIT_ASSERT_EQUAL(GFI,  page_MDS[LF - 2]); // globallink
 	}
 	void testPOR() {
 		testPO();
@@ -764,7 +764,7 @@ class testOpcode_esc : public testBase {
 		page_LF[alpha + 3] = HighHalf(dst.u); // dst
 		page_CB[dst.pc / 2] = 0; // set fsi = 0
 		page_LF[-4] = 0; // fsi in LocalWord;
-		CARD16 oLF = LFCache::LF();
+		CARD16 oLF = LF;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(GFI_EFC, GFI);

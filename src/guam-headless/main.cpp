@@ -111,7 +111,6 @@ int main(int argc, char** argv) {
 	PERF_LOG();
 	PageCache::stats();
 	CodeCache::stats();
-	LFCache::stats();
 
 	//extern void MonoBlt_MemoryCache_stats();
 	//MonoBlt_MemoryCache_stats();

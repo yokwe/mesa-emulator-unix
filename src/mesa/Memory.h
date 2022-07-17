@@ -283,8 +283,8 @@ static inline CARD16* Store(CARD32 virtualAddress) {
 }
 static inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(ReadDbl)
-	const CARD16* p0 = Fetch(virtualAddress);
-	const CARD16* p1 = ((virtualAddress & (PageSize - 1)) == (PageSize - 1)) ? Fetch(virtualAddress + 1) : (p0 + 1);
+	CARD16* p0 = PageCache::fetch(virtualAddress);
+	CARD16* p1 = ((virtualAddress & (PageSize - 1)) == (PageSize - 1)) ? PageCache::fetch(virtualAddress + 1) : (p0 + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -298,7 +298,7 @@ __attribute__((always_inline)) static inline CARD32 LengthenPointer(CARD16 point
 }
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
 	PERF_COUNT(FetchMds)
-	return PageCache::store(Memory::lengthenPointer(ptr));
+	return PageCache::fetch(Memory::lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 	PERF_COUNT(StoreMds)
@@ -306,8 +306,8 @@ __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(ReadDblMds)
-	const CARD16* p0 = PageCache::store(Memory::lengthenPointer(ptr + 0));
-	const CARD16* p1 = (ptr & (PageSize - 1)) == (PageSize - 1) ? PageCache::store(Memory::lengthenPointer(ptr + 1)) : (p0 + 1);
+	CARD16* p0 = PageCache::fetch(Memory::lengthenPointer(ptr + 0));
+	CARD16* p1 = (ptr & (PageSize - 1)) == (PageSize - 1) ? PageCache::fetch(Memory::lengthenPointer(ptr + 1)) : (p0 + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -315,54 +315,20 @@ __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	return (*p1 << WordSize) | *p0;
 }
 
-class LFCache {
-public:
-	static void setLF(CARD16 newValue) {
-		lf = newValue;
-		endCacheLF = PageSize - (lf % PageSize) - 1;
-		cacheLF = PageCache::store(Memory::lengthenPointer(lf));
-	}
-	static CARD16 LF() {
-		return lf;
-	}
-	__attribute__((always_inline)) static inline CARD16* storeLF(CARD16 ptr) {
-		if (ptr <= endCacheLF) {
-			if (PERF_ENABLE) hit++;
-			return cacheLF + ptr;
-		}
-
-		if ((CARD16)(0-SIZE(LocalOverhead)) <= ptr) {
-			if (PERF_ENABLE) overhead++;
-			CARD16 p = SIZE(LocalOverhead) + ptr;
-			return cacheLF + p - SIZE(LocalOverhead);
-		}
-
-		if (PERF_ENABLE) miss++;
-		return store(Memory::lengthenPointer(lf + ptr));
-	}
-	static void stats();
-protected:
-	static CARD16    lf;
-	static CARD16    endCacheLF;
-	static CARD16*   cacheLF;
-	static long long hit;
-	static long long miss;
-	static long long overhead;
-
-	static CARD16* store(CARD32 ptr);
-};
 __attribute__((always_inline)) static inline CARD16* FetchLF(CARD16 ptr) {
 	PERF_COUNT(FetchLF)
-	return LFCache::storeLF(ptr);
+	return PageCache::fetch(Memory::lengthenPointer(LF + ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreLF(CARD16 ptr) {
 	PERF_COUNT(StoreLF)
-	return LFCache::storeLF(ptr);
+	return PageCache::store(Memory::lengthenPointer(LF + ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblLF(CARD16 ptr) {
 	PERF_COUNT(ReadDblLF)
-	const CARD16* p0 = LFCache::storeLF(ptr + 0);
-	const CARD16* p1 = LFCache::storeLF(ptr + 1);
+	CARD32 p = Memory::lengthenPointer(LF + ptr);
+	
+	CARD16* p0 = PageCache::fetch(p);
+	CARD16* p1 = (p & (PageSize - 1)) == (PageSize - 1) ? PageCache::fetch(p + 1) : (p0 + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;

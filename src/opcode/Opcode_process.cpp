@@ -165,13 +165,13 @@ void SaveProcess(int preemption) {
 			else state = LengthenPdaPtr(*FetchPda(OFFSET_PDA3(block, PSB, context)));
 			SaveStack(state);
 //			*Store(state + OFFSET(StateVector, frame)) = LF;
-			*Store(state + OFFSET_SV(frame)) = LFCache::LF();
+			*Store(state + OFFSET_SV(frame)) = LF;
 			if (!link.permanent) *StorePda(OFFSET_PDA3(block, PSB, context)) = OffsetPda(state);
 		} else {
-			if (!link.permanent) *StorePda(OFFSET_PDA3(block, PSB, context)) = LFCache::LF();
+			if (!link.permanent) *StorePda(OFFSET_PDA3(block, PSB, context)) = LF;
 			else {
 				StateHandle state = LengthenPdaPtr(*FetchPda(OFFSET_PDA3(block, PSB, context)));
-				*Store(state + OFFSET_SV(frame)) = LFCache::LF();
+				*Store(state + OFFSET_SV(frame)) = LF;
 			}
 		}
 		*StorePda(OFFSET_PDA3(block, PSB, link)) = link.u;
@@ -220,7 +220,7 @@ void Reschedule(int preemption) {
 	CARD16 oldPSB = PSB;
 	CARD16 oldGFI = GFI;
 	CARD16 oldPC  = savedPC;
-	CARD16 oldLF  = LFCache::LF();
+	CARD16 oldLF  = LF;
 #endif
 
 	if (ProcessorThread::getRunning()) SaveProcess(preemption);
@@ -235,20 +235,20 @@ void Reschedule(int preemption) {
 	}
 	PSB = psb;
 	PC = savedPC = 0;
-	LFCache::setLF(LoadProcess());
+	LF = LoadProcess();
 	if (!ProcessorThread::getRunning()) {
 		if (DEBUG_SHOW_RUNNING) logger.debug("start running");
 		ProcessorThread::startRunning();
 	}
 
 #ifdef  TRACE_RESCHEDULE
-	logger.debug("RESCHED  %04X %04X  %04X+%04X-%04X  %04X+%04X-%04X", oldPSB, PSB, oldGFI, oldPC, oldLF, GFI, PC, LFCache::LF());
+	logger.debug("RESCHED  %04X %04X  %04X+%04X-%04X  %04X+%04X-%04X", oldPSB, PSB, oldGFI, oldPC, oldLF, GFI, PC, LF);
 #endif
 
 //	running = 1;
 //	ProcessorThread::startRunning();
 	//logger.debug("%s XFER PSB = %4d  GFI = %04X  CB = %08X  PC = %04X  LF = %04X", __FUNCTION__, PSB, GFI, CB, PC, LF);
-	XFER((CARD32)LFCache::LF(), 0, XferType::processSwitch, 0);
+	XFER((CARD32)LF, 0, XferType::processSwitch, 0);
 	return;
 BusyWait:
 	if (!InterruptThread::isEnabled()) RescheduleError();

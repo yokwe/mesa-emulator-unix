@@ -151,8 +151,7 @@ void Interpreter::initRegisters() {
 	PSB = 0; // PsbIndex - 10.1.1
 //	MDS = 0;
 	Memory::setMDS(0);
-//	LF  = 0;  // POINTER TO LocalVariables
-	LFCache::setLF(0);
+	LF  = 0;  // POINTER TO LocalVariables
 	GF  = 0;  // LONG POINTER TO GlobalVarables
 	CodeCache::setCB(0);  // LONG POINTER TO CodeSegment
 	PC  = 0;

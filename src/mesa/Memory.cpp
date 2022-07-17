@@ -51,7 +51,7 @@ CARD16 XTS = 0;    // Xfer trap status - 9.5.5
 // 3.3.1 Control Registers
 CARD16            PSB = 0; // PsbIndex - 10.1.1
 //MdsHandle         MDS = 0;
-//LocalFrameHandle  LF  = 0;  // POINTER TO LocalVariables
+LocalFrameHandle  LF  = 0;  // POINTER TO LocalVariables
 GlobalFrameHandle GF  = 0;  // LONG POINTER TO GlobalVarables
 //CARD32            CB  = 0;  // LONG POINTER TO CodeSegment
 CARD16            PC  = 0;
@@ -85,14 +85,6 @@ CARD32         Memory::displayWidth        = 0;
 CARD32         Memory::displayHeight       = 0;
 CARD32         Memory::displayBytesPerLine = 0;
 CARD32         Memory::mds   = 0;
-
-
-CARD16          LFCache::lf         = 0;
-CARD16          LFCache::endCacheLF = 0;
-CARD16*         LFCache::cacheLF    = 0;
-long long       LFCache::hit        = 0;
-long long       LFCache::miss       = 0;
-long long       LFCache::overhead   = 0;
 
 
 CARD8* CodeCache::page    = 0;
@@ -378,10 +370,11 @@ void PageCache::fetchSetup(Entry *p, CARD32 vp) {
 		else missEmpty++;
 	}
 	// Overwrite content of entry
+	p->page      = Memory::Fetch(vp * PageSize);
+	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;
 	p->flagStore = 0;
-	p->page      = Memory::Fetch(vp * PageSize);
 }
 void PageCache::fetchMaintainFlag(Entry *p, CARD32 vp) {
 	Memory::setReferencedFlag(vp);
@@ -396,10 +389,11 @@ void PageCache::storeSetup(Entry *p, CARD32 vp) {
 		else missEmpty++;
 	}
 	// Overwrite content of entry
+	p->page      = Memory::Store(vp * PageSize);
+	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;
 	p->flagStore = 1;
-	p->page      = Memory::Store(vp * PageSize);
 }
 void PageCache::storeMaintainFlag(Entry *p, CARD32 vp) {
 	Memory::setReferencedDirtyFlag(vp);
@@ -419,17 +413,6 @@ void PageCache::stats() {
 	} else {
 		logger.info("PageCache %5d / %5d", used, N_ENTRY);
 	}
-}
-
-void LFCache::stats() {
-	if (!PERF_ENABLE) return;
-	long long total = hit + miss + overhead;
-	logger.info("LFCache   hit %10llu   overhead %10llu   miss %10llu", hit, overhead, miss);
-	logger.info("LFCache   hit %10.2f%%  overhead %10.2f%%  miss %10.2f%%", ((double)hit / total) * 100.0, ((double)overhead / total) * 100.0, ((double)miss / total) * 100.0);
-}
-
-CARD16* LFCache::store(CARD32 ptr) {
-	return PageCache::store(ptr);
 }
 
 void CodeCache::stats() {

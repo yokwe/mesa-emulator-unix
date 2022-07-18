@@ -320,67 +320,32 @@ __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 }
 
 // 3.1.4.3 Code Segments
-class CodeCache {
-public:
-	__attribute__((always_inline)) static inline CARD8 getCodeByte() {
-		if (PC < startPC || endPC < PC) {
-			if (PERF_ENABLE) miss++;
-			setup();
-		} else {
-			if (PERF_ENABLE) hit++;
-		}
-		return page[(PC++ + offset) ^1];
-		// TODO Code above is for Little Endian
-		// TODO For Big Endian code should be "return page[(PC++ + offset)];"
-	}
-	static inline CARD16 getCodeWord() {
-		BytePair ret;
-		ret.left  = getCodeByte();
-		ret.right = getCodeByte();
-		return ret.u;
-	}
-	static inline CARD32 CB() {
-		return CB_;
-	}
-	static inline void setCB(CARD32 newValue) {
-		CB_ = newValue;
-		invalidate();
-	}
-	static void stats();
-private:
-	static const CARD32 PAGE_SIZE = PageSize * 2;
-	static const CARD32 PAGE_MASK = PAGE_SIZE - 1;
-	static CARD8* page;
-	static INT32  offset;  // byte offset of PC to access data in page (can be negative)
-	static CARD16 startPC; // valid PC range (startPC <= PC <= endPC)
-	static CARD16 endPC;   // valid PC range (startPC <= PC <= endPC)
-	static CARD32 CB_;
-	static long long miss;
-	static long long hit;
-	//
-	static void setup();
-	static inline void invalidate() {
-		startPC = 0xffff;
-		endPC   = 0;
-		page    = 0;
-	}
-};
-__attribute__((always_inline)) static inline CARD16* FetchCode(CARD16 offset) {
-	PERF_COUNT(FetchCode)
-	return PageCache::fetch(CodeCache::CB() + offset);
-}
 __attribute__((always_inline)) static inline CARD16 ReadCode(CARD16 offset) {
-	return *FetchCode(offset);
+	return *PageCache::fetch(CB + offset);
 }
 
 // 4.3 Instruction Fetch
 __attribute__((always_inline)) static inline CARD8 GetCodeByte() {
 	PERF_COUNT(GetCodeByte)
-	return CodeCache::getCodeByte();
+	CARD16 word = ReadCode(PC / 2);
+	// NO PAGE FAULT AFTER HERE
+	return (PC++ & 1) ? LowByte(word) : HighByte(word);
 }
 __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
 	PERF_COUNT(GetCodeWord)
-	return CodeCache::getCodeWord();
+	CARD32 ptr = CB + (PC / 2);
+	CARD16* p0 = PageCache::fetch(ptr + 0);
+	if (PC & 1) {
+		// PC is odd
+		CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(ptr + 1);
+		// NO PAGE FAULT AFTER HERE
+		PC += 2;
+		return (LowByte(*p0) << 8) | HighByte(*p1);
+	} else {
+		// NO PAGE FAULT AFTER HERE
+		PC += 2;
+		return *p0;
+	}
 }
 
 // 7.4 String Instructions
@@ -445,8 +410,8 @@ static inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
 // 9.4.2 External Function Calls
 static inline CARD32 FetchLink(CARD32 offset) {
 	GlobalWord word = {*Fetch(GO_OFFSET(GF, word))};
-	//CARD32 pointer = word.codelinks ? (CodeCache::CB() - (CARD32)((offset + 1) * 2)) : (GlobalBase(GF) - (CARD32)((offset + 1) * 2));
-	CARD32 pointer = (word.codelinks ? CodeCache::CB() : GlobalBase(GF)) - (CARD32)((offset + 1) * 2);
+	//CARD32 pointer = word.codelinks ? (CB - (CARD32)((offset + 1) * 2)) : (GlobalBase(GF) - (CARD32)((offset + 1) * 2));
+	CARD32 pointer = (word.codelinks ? CB : GlobalBase(GF)) - (CARD32)((offset + 1) * 2);
 	return ReadDbl(pointer);
 }
 

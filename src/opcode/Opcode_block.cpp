@@ -229,7 +229,7 @@ void E_BLTC() {
 	if (count == 0) return;
 
 	CARD32 d = LengthenPointer(dest);
-	CARD32 s = CodeCache::CB() + source;
+	CARD32 s = CB + source;
 	CARD32 c = count;
 	CARD32 r;
 
@@ -284,7 +284,7 @@ void E_BLTCL() {
 	if (count == 0) return;
 
 	CARD32 d = dest;
-	CARD32 s = CodeCache::CB() + source;
+	CARD32 s = CB + source;
 	CARD32 c = count;
 	CARD32 r;
 
@@ -463,7 +463,7 @@ void E_BLECL() {
 	}
 
 	CARD32 a = ptr;
-	CARD32 b = CodeCache::CB() + offset;
+	CARD32 b = CB + offset;
 	CARD32 c = count;
 	CARD32 r;
 	CARD32 result;

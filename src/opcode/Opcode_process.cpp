@@ -411,7 +411,7 @@ void FrameFault(FSIndex fsi) {
 	PERF_COUNT(FrameFault)
 	if (DEBUG_SHOW_FRAME_FAULT) {
 		if (Opcode::getLast()) {
-			logger.debug("%-10s %8d  %-8s  %8X+%4X  %8X", __FUNCTION__, fsi, Opcode::getLast()->getName(), CodeCache::CB(), savedPC, (CodeCache::CB() + savedPC));
+			logger.debug("%-10s %8d  %-8s  %8X+%4X  %8X", __FUNCTION__, fsi, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
 		} else {
 			logger.debug("%-10s %8d", __FUNCTION__, fsi);
 		}
@@ -424,7 +424,7 @@ void PageFault(LONG_POINTER ptr) {
 	PERF_COUNT(PageFault)
 	if (DEBUG_SHOW_PAGE_FAULT) {
 		if (Opcode::getLast()) {
-			logger.debug("%-10s %08X  %-8s  %8X+%4X  %8X", __FUNCTION__, ptr, Opcode::getLast()->getName(), CodeCache::CB(), savedPC, (CodeCache::CB() + savedPC));
+			logger.debug("%-10s %08X  %-8s  %8X+%4X  %8X", __FUNCTION__, ptr, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
 		} else {
 			logger.debug("%-10s %08X", __FUNCTION__, ptr);
 		}

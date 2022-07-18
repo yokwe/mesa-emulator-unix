@@ -60,7 +60,6 @@ PERF_DECLARE(ReadDbl)
 PERF_DECLARE(FetchMds)
 PERF_DECLARE(StoreMds)
 PERF_DECLARE(ReadDblMds)
-PERF_DECLARE(FetchCode)
 PERF_DECLARE(GetCodeByte)
 PERF_DECLARE(GetCodeWord)
 PERF_DECLARE(FetchByte)
@@ -92,7 +91,6 @@ if (PERF_ENABLE) { \
 	PERF_DUMP(FetchMds) \
 	PERF_DUMP(StoreMds) \
 	PERF_DUMP(ReadDblMds) \
-	PERF_DUMP(FetchCode) \
 	PERF_DUMP(GetCodeByte) \
 	PERF_DUMP(GetCodeWord) \
 	PERF_DUMP(FetchByte) \

@@ -95,7 +95,7 @@ void testBase::initGFT() {
 
 	GFTItem item;
 	item.globalFrame = GF;
-	item.codebase = CodeCache::CB();
+	item.codebase = CB;
 	// GFI_GF
 	page_GFT[GFI_GF + 0] = LowHalf(item.globalFrame);
 	page_GFT[GFI_GF + 1] = HighHalf(item.globalFrame);
@@ -225,7 +225,7 @@ void testBase::setUp() {
 
 	// mPDA = 0x0001000
 	// mGFT = 0x0002000
-	CodeCache::setCB(0x00030080);
+	CB  = 0x00030080;
 	Memory::setMDS(0x00040000);
 	GF  = 0x00050080 + SIZE(GlobalOverhead);
 	PC  = 0x20;
@@ -257,7 +257,7 @@ void testBase::setUp() {
 
 	page_PDA = Memory::getAddress(mPDA);
 	page_GFT = Memory::getAddress(mGFT);
-	page_CB  = Memory::getAddress(CodeCache::CB());
+	page_CB  = Memory::getAddress(CB);
 	page_MDS = Memory::getAddress(Memory::MDS());
 	page_AV  = Memory::getAddress(Memory::MDS() + mAV);
 	page_SD  = Memory::getAddress(Memory::MDS() + mSD);

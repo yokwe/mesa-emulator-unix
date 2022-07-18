@@ -53,7 +53,7 @@ CARD16            PSB = 0; // PsbIndex - 10.1.1
 //MdsHandle         MDS = 0;
 LocalFrameHandle  LF  = 0;  // POINTER TO LocalVariables
 GlobalFrameHandle GF  = 0;  // LONG POINTER TO GlobalVarables
-//CARD32            CB  = 0;  // LONG POINTER TO CodeSegment
+CARD32            CB  = 0;  // LONG POINTER TO CodeSegment
 CARD16            PC  = 0;
 GFTHandle         GFI = 0;
 
@@ -85,15 +85,6 @@ CARD32         Memory::displayWidth        = 0;
 CARD32         Memory::displayHeight       = 0;
 CARD32         Memory::displayBytesPerLine = 0;
 CARD32         Memory::mds   = 0;
-
-
-CARD8* CodeCache::page    = 0;
-INT32  CodeCache::offset  = 0;      // byte offset of PC to access data in page (can be negative)
-CARD16 CodeCache::startPC = 0xffff; // valid PC range (startPC <= PC <= endPC)
-CARD16 CodeCache::endPC   = 0;      // valid PC range (startPC <= PC <= endPC)
-CARD32 CodeCache::CB_     = 0;
-long long CodeCache::hit  = 0;
-long long CodeCache::miss = 0;
 
 
 // Implementation Specific
@@ -344,26 +335,6 @@ void Memory::WriteMap(CARD32 vp, Map map) {
 	PageCache::invalidate(vp);
 }
 
-void CodeCache::setup() {
-	// To prevent bogus PageFault, PC need to have real value
-	const CARD32 ptr = (CB_ + (PC / 2)) & ~(PageSize - 1);
-	page   = (CARD8*)PageCache::fetch(ptr); // address of page
-	CARD32 offsetCB = (CB_ * 2) & PAGE_MASK;
-
-	if ((PC + offsetCB) < PAGE_SIZE) {
-		// Valid PC range is [startPC..endPC]
-		startPC = 0;
-		endPC   = PAGE_SIZE - offsetCB - 1;
-		offset  = offsetCB;
-	} else {
-		// Valid PC range is [startPC..endPC]
-		startPC = ((PC + offsetCB) & ~PAGE_MASK) - offsetCB;
-		endPC   = startPC + PAGE_SIZE - 1;    // whole 1 page
-		offset  = -startPC;
-	}
-	//logger.info("SETUP  ptr = %6d  offset = %8X (%d)  offsetCB = %8X  startPC = %4X  endPC = %4X", ptr, offset, offset, offsetCB, startPC, endPC);
-}
-
 void PageCache::fetchSetup(Entry *p, CARD32 vp) {
 	if (PERF_ENABLE) {
 		if (p->vpno) missConflict++;
@@ -413,10 +384,4 @@ void PageCache::stats() {
 	} else {
 		logger.info("PageCache %5d / %5d", used, N_ENTRY);
 	}
-}
-
-void CodeCache::stats() {
-	if (!PERF_ENABLE) return;
-	long long total = hit + miss;
-	logger.info("CodeCache %10llu %6.2f%%   miss %10llu", total, ((double)hit / total) * 100.0, miss);
 }

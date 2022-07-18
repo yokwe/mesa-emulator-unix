@@ -91,7 +91,7 @@ void ProcessorThread::run() {
 	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
 
 	XFER(bootLink.u, 0, XferType::call, 0);
-	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CodeCache::CB(), GF);
+	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, Memory::MDS());
 
 	stopThread = 0;
@@ -153,7 +153,7 @@ void ProcessorThread::run() {
 	} catch (ErrorError& e) {
 		logger.fatal("Error %-20s %4d %s", e.func, e.line, e.file);
 		// Output for postmortem  examination
-		logger.fatal("GFI %4X  CB %8X  PC %d", GFI, CodeCache::CB(), PC);
+		logger.fatal("GFI %4X  CB %8X  PC %d", GFI, CB, PC);
 	}
 
 exitLoop:

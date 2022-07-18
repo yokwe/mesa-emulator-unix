@@ -140,7 +140,7 @@ void StackError() {
 	if (DEBUG_SHOW_STACK_ERROR) logger.debug("%s", __FUNCTION__);
 	if (DEBUG_STOP_AT_STACK_ERROR) {
 		logger.fatal("StackError  SP = %d savedSP = %d", SP, savedSP);
-		logger.fatal("GFI = %04X  CB = %8X  PC = %4X  savedPC = %4X", GFI, CodeCache::CB(), PC, savedPC);
+		logger.fatal("GFI = %04X  CB = %8X  PC = %4X  savedPC = %4X", GFI, CB, PC, savedPC);
 		ERROR();
 	}
 	TrapZero(SD + OFFSET_SD(sStackError));
@@ -238,8 +238,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
 		if (GF != LengthenPointer(gf)) ERROR(); // Sanity check
-		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (CodeCache::CB() & 1) {
+		CB = ReadDbl(GFT_OFFSET(nGFI, codebase));
+		if (CB & 1) {
 			CodeTrap(nGFI);
 		}
 		nPC = proc.pc;
@@ -259,8 +259,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		nGFI = *FetchMds(LO_OFFSET(nLF, globallink));
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
-		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (CodeCache::CB() & 1) {
+		CB = ReadDbl(GFT_OFFSET(nGFI, codebase));
+		if (CB & 1) {
 			CodeTrap(nGFI);
 		}
 		nPC = *FetchMds(LO_OFFSET(nLF, pc));
@@ -276,8 +276,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		nGFI = proc.taggedGFI & 0xfffc; // 177774
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
-		CodeCache::setCB(ReadDbl(GFT_OFFSET(nGFI, codebase)));
-		if (CodeCache::CB() & 1) {
+		CB = ReadDbl(GFT_OFFSET(nGFI, codebase));
+		if (CB & 1) {
 			CodeTrap(nGFI);
 		}
 		nPC = proc.pc;

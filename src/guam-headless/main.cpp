@@ -110,7 +110,6 @@ int main(int argc, char** argv) {
 	Interpreter::stats();
 	PERF_LOG();
 	PageCache::stats();
-	CodeCache::stats();
 
 	//extern void MonoBlt_MemoryCache_stats();
 	//MonoBlt_MemoryCache_stats();

@@ -153,7 +153,7 @@ void Interpreter::initRegisters() {
 	Memory::setMDS(0);
 	LF  = 0;  // POINTER TO LocalVariables
 	GF  = 0;  // LONG POINTER TO GlobalVarables
-	CodeCache::setCB(0);  // LONG POINTER TO CodeSegment
+	CB  = 0;  // LONG POINTER TO CodeSegment
 	PC  = 0;
 	GFI = 0;
 

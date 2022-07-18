@@ -232,11 +232,12 @@ public:
 		missConflict = 0;
 	}
 	static inline void invalidate(CARD32 vp_) {
-		const CARD32 index = hash(vp_);
-		if (entry[index].vpno != vp_) return;
-		// void entry of vp_
-		entry[index].flag = 0;
-		entry[index].page = 0;
+		Entry *p = entry + hash(vp_);
+		if (p->vpno == vp_) {
+			// void entry of vp_
+			p->flag = 0;
+			p->page = 0;
+		}
 	}
 	static void stats();
 

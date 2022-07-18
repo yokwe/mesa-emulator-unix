@@ -556,7 +556,7 @@ void E_ACD() {
 // 0273  ASSIGN_MOP(z, AL0IB)
 __attribute__((always_inline)) static inline void E_AL0I_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  AL0I %02X", savedPC, arg);
-	CARD16* p = FetchLF(0);
+	CARD16* p = FetchMds(LF);
 	// NO PAGE FAULT AFTER HERE
 	Push(*p + arg);
 }

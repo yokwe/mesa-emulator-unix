@@ -157,7 +157,7 @@ static void FreeState(CARD16 pri, StateHandle state) {
 void SaveProcess(int preemption) {
 	try {
 		PsbLink link = {*FetchPda(OFFSET_PDA3(block, PSB, link))};
-		if (ValidContext()) *StoreLF(LO_OFFSET(0, pc)) = PC;
+		if (ValidContext()) *StoreMds(LO_OFFSET(LF, pc)) = PC;
 		link.preempted = preemption;
 		if (preemption) {
 			StateHandle state;

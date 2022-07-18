@@ -281,10 +281,13 @@ static inline CARD16* Store(CARD32 virtualAddress) {
 	PERF_COUNT(Store)
 	return PageCache::store(virtualAddress);
 }
+__attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
+	return (ptrA / PageSize) == (ptrB / PageSize);
+}
 static inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(ReadDbl)
-	CARD16* p0 = PageCache::fetch(virtualAddress);
-	CARD16* p1 = ((virtualAddress & (PageSize - 1)) == (PageSize - 1)) ? PageCache::fetch(virtualAddress + 1) : (p0 + 1);
+	CARD16* p0 = PageCache::fetch(virtualAddress + 0);
+	CARD16* p1 = isSamePage(virtualAddress + 0, virtualAddress + 1) ? (p0 + 1) : PageCache::fetch(virtualAddress + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -307,35 +310,13 @@ __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(ReadDblMds)
 	CARD16* p0 = PageCache::fetch(Memory::lengthenPointer(ptr + 0));
-	CARD16* p1 = (ptr & (PageSize - 1)) == (PageSize - 1) ? PageCache::fetch(Memory::lengthenPointer(ptr + 1)) : (p0 + 1);
+	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(Memory::lengthenPointer(ptr + 1));
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
 //	return t.u;
 	return (*p1 << WordSize) | *p0;
 }
-
-__attribute__((always_inline)) static inline CARD16* FetchLF(CARD16 ptr) {
-	PERF_COUNT(FetchLF)
-	return PageCache::fetch(Memory::lengthenPointer(LF + ptr));
-}
-__attribute__((always_inline)) static inline CARD16* StoreLF(CARD16 ptr) {
-	PERF_COUNT(StoreLF)
-	return PageCache::store(Memory::lengthenPointer(LF + ptr));
-}
-__attribute__((always_inline)) static inline CARD32 ReadDblLF(CARD16 ptr) {
-	PERF_COUNT(ReadDblLF)
-	CARD32 p = Memory::lengthenPointer(LF + ptr);
-	
-	CARD16* p0 = PageCache::fetch(p);
-	CARD16* p1 = (p & (PageSize - 1)) == (PageSize - 1) ? PageCache::fetch(p + 1) : (p0 + 1);
-//	Long t;
-//	t.low  = *p0;
-//	t.high = *p1;
-//	return t.u;
-	return (*p1 << WordSize) | *p0;
-}
-
 
 // 3.1.4.3 Code Segments
 class CodeCache {

@@ -56,7 +56,7 @@ static inline void Trap(POINTER ptr) {
 	ControlLink handler = ReadDblMds(ptr);
 	PC = savedPC;
 	SP = savedSP;
-	if (ValidContext()) *StoreLF(LO_OFFSET(0, pc)) = PC;
+	if (ValidContext()) *StoreMds(LO_OFFSET(LF, pc)) = PC;
 	XFER(handler, LF, XferType::trap, 0);
 }
 
@@ -69,15 +69,15 @@ static inline void TrapZero(POINTER ptr) {
 // TrapOne: PROC[ptr POINTER TO ControlLink, parameter: UNSPEC]
 static inline void TrapOne(POINTER ptr, UNSPEC parameter) {
 	Trap(ptr);
-	*StoreLF(0) = parameter;
+	*StoreMds(LF + 0) = parameter;
 	ERROR_Abort();
 }
 
 // TrapTwo: PROC[ptr POINTER TO ControlLink, parameter: LONG UNSPEC]
 static inline void TrapTwo(POINTER ptr, LONG_UNSPEC parameter) {
 	Trap(ptr);
-	*StoreLF(0) = LowHalf(parameter);
-	*StoreLF(1) = HighHalf(parameter);
+	*StoreMds(LF + 0) = LowHalf(parameter);
+	*StoreMds(LF + 1) = HighHalf(parameter);
 	ERROR_Abort();
 }
 
@@ -165,9 +165,9 @@ static inline void CheckForXferTraps(ControlLink dst, XferType type) {
 			XTS = XTS >> 1;
 			if (DEBUG_SHOW_XFER_TRAP) logger.debug("XferTrap %08X %d", dst, type);
 			Trap(SD + OFFSET_SD(sXferTrap));
-			*StoreLF(0) = LowHalf(dst);
-			*StoreLF(1) = HighHalf(dst);
-			*StoreLF(2) = (CARD16)type;
+			*StoreMds(LF + 0) = LowHalf(dst);
+			*StoreMds(LF + 1) = HighHalf(dst);
+			*StoreMds(LF + 2) = (CARD16)type;
 			ERROR_Abort();
 		}
 	} else {
@@ -317,7 +317,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 // 9.4.2 External Function Calls
 // Call: PROC[dst: ControlLink]
 static inline void Call(ControlLink dst) {
-	*StoreLF(LO_OFFSET(0, pc)) = PC;
+	*StoreMds(LO_OFFSET(LF, pc)) = PC;
 	XFER(dst, LF, XferType::call, 0);
 }
 ///////////////////////////////////////////////////////////////////////
@@ -371,7 +371,7 @@ void  E_LFC() {
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
-	*StoreLF(LO_OFFSET(0, pc)) = PC;
+	*StoreMds(LO_OFFSET(LF, pc)) = PC;
 	if (nPC == 0) UnboundTrap(0);
 	BytePair word = { ReadCode(nPC / 2) };
 	FSIndex fsi = ((nPC % 2) == 0) ? word.left : word.right;
@@ -399,7 +399,7 @@ void E_SFC() {
 // zRET - 0357
 void E_RET() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RET", savedPC);
-	ControlLink dst = {*FetchLF(LO_OFFSET(0, returnlink))};
+	ControlLink dst = {*FetchMds(LO_OFFSET(LF, returnlink))};
 	XFER(dst, 0, XferType::return_, 1);
 }
 // zKFCB - 0360
@@ -436,7 +436,7 @@ void E_PO() {
 	/* UNSPEC reserved = */
 	Pop();
 	PortLink port = Pop();
-	*StoreLF(LO_OFFSET(0, pc)) = PC;
+	*StoreMds(LO_OFFSET(LF, pc)) = PC;
 	*StoreMds(port + OFFSET_PORT(inport)) = LF;
 	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
@@ -446,7 +446,7 @@ void E_POR() {
 	/* UNSPEC reserved = */
 	Pop();
 	PortLink port = Pop();
-	*StoreLF(LO_OFFSET(0, pc)) = PC;
+	*StoreMds(LO_OFFSET(LF, pc)) = PC;
 	*StoreMds(port + OFFSET_PORT(inport)) = LF;
 	XFER(ReadDblMds(port + OFFSET_PORT(outport)), port, XferType::port, 0);
 }
@@ -458,9 +458,9 @@ void E_XE() {
 		POINTER ptr = GetCodeByte();
 		if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  XE %02X", savedPC, ptr);
 
-		*StoreLF(LO_OFFSET(0, pc)) = PC; // Store location of next instruction
-		ControlLink      dst = ReadDblLF(ptr + OFFSET(TransferDescriptor, dst));
-		ShortControlLink src = *FetchLF (ptr + OFFSET(TransferDescriptor, src));
+		*StoreMds(LO_OFFSET(LF, pc)) = PC; // Store location of next instruction
+		ControlLink      dst = ReadDblMds(LF + ptr + OFFSET(TransferDescriptor, dst));
+		ShortControlLink src = *FetchMds (LF + ptr + OFFSET(TransferDescriptor, src));
 		XFER(dst, src, XferType::xfer, 0);
 
 		if (InterruptThread::getWDC() == 0) InterruptError();
@@ -474,8 +474,8 @@ void E_XF() {
 	POINTER ptr = GetCodeByte();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  XF %02X", savedPC, ptr);
 
-	*StoreLF(LO_OFFSET(0, pc)) = PC;  // Store location of next instruction
-	ControlLink      dst = ReadDblLF(ptr + OFFSET(TransferDescriptor, dst));
-	ShortControlLink src = *FetchLF (ptr + OFFSET(TransferDescriptor, src));
+	*StoreMds(LO_OFFSET(LF, pc)) = PC;  // Store location of next instruction
+	ControlLink      dst = ReadDblMds(LF + ptr + OFFSET(TransferDescriptor, dst));
+	ShortControlLink src = *FetchMds (LF + ptr + OFFSET(TransferDescriptor, src));
 	XFER(dst, src, XferType::xfer, 1);
 }

@@ -169,7 +169,7 @@ public:
 		return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
 	}
 
-	static CARD32 lengthenPointer(CARD16 pointer) {
+	__attribute__((always_inline)) static inline CARD32 lengthenPointer(CARD16 pointer) {
 		return mds + pointer;
 	}
 	static void setMDS(CARD32 newValue) {
@@ -273,18 +273,18 @@ public:
 };
 
 // 3.1.3 Virtual Memory Access
-static inline CARD16* Fetch(CARD32 virtualAddress) {
+__attribute__((always_inline)) static inline CARD16* Fetch(CARD32 virtualAddress) {
 	PERF_COUNT(Fetch)
 	return PageCache::fetch(virtualAddress);
 }
-static inline CARD16* Store(CARD32 virtualAddress) {
+__attribute__((always_inline)) static inline CARD16* Store(CARD32 virtualAddress) {
 	PERF_COUNT(Store)
 	return PageCache::store(virtualAddress);
 }
 __attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
 	return (ptrA / PageSize) == (ptrB / PageSize);
 }
-static inline CARD32 ReadDbl(CARD32 virtualAddress) {
+__attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(ReadDbl)
 	CARD16* p0 = PageCache::fetch(virtualAddress + 0);
 	CARD16* p1 = isSamePage(virtualAddress + 0, virtualAddress + 1) ? (p0 + 1) : PageCache::fetch(virtualAddress + 1);
@@ -364,11 +364,11 @@ private:
 		page    = 0;
 	}
 };
-static inline CARD16* FetchCode(CARD16 offset) {
+__attribute__((always_inline)) static inline CARD16* FetchCode(CARD16 offset) {
 	PERF_COUNT(FetchCode)
 	return PageCache::fetch(CodeCache::CB() + offset);
 }
-static inline CARD16 ReadCode(CARD16 offset) {
+__attribute__((always_inline)) static inline CARD16 ReadCode(CARD16 offset) {
 	return *FetchCode(offset);
 }
 
@@ -450,10 +450,10 @@ static inline CARD32 FetchLink(CARD32 offset) {
 }
 
 // 10.1.1 Process Data Area
-static inline LONG_POINTER LengthenPdaPtr(POINTER ptr) {
+__attribute__((always_inline)) static inline LONG_POINTER LengthenPdaPtr(POINTER ptr) {
 	return PDA + ptr;
 }
-static inline POINTER OffsetPda(LONG_POINTER ptr) {
+__attribute__((always_inline)) static inline POINTER OffsetPda(LONG_POINTER ptr) {
 	if ((ptr & 0xffff0000) != (PDA & 0xffff0000)) ERROR();
 	return (CARD16)(ptr - PDA);
 }
@@ -490,7 +490,7 @@ static inline void LoadStack(StateHandle state) {
 }
 
 // 10.4.1 Scheduler
-static inline int ValidContext() {
+__attribute__((always_inline)) static inline int ValidContext() {
 	return (SIZE(CodeSegment) * 2) <= PC;
 }
 

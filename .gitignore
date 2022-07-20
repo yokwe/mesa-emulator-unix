@@ -5,3 +5,4 @@ data/floppy/
 src/*/Makefile
 src/*/.qmake.stash
 build/
+.cproject

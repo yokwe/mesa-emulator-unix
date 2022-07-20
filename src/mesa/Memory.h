@@ -197,12 +197,12 @@ private:
 
 class PageCache {
 protected:
-	static const CARD32 N_BIT = 14;
+	static const CARD32 N_BIT = 16;
 	static const CARD32 N_ENTRY = 1 << N_BIT;
 	static const CARD32 MASK = (1 << N_BIT) - 1;
 	static inline CARD32 hash(CARD32 vp_) {
-		return ((vp_ >> N_BIT) ^ vp_) & MASK;
-		// NOTE above expression calculate better hash value than "vp_ & MASK"
+		// When N_BIT == 16, there is no conflict during booting gvwin
+		return vp_ & MASK;
 	}
 	//
 	struct Entry {

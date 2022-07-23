@@ -38,6 +38,10 @@ qmake:
 	@echo "MODULE $(MODULE)!"
 	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
 
+qmake-prof:
+	@echo "MODULE $(MODULE)!"
+	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake "PROF=YES"); done
+
 fix-permission:
 	find . -type d -exec chmod 0755 {} \;
 	find . -type f -exec chmod 0644 {} \;

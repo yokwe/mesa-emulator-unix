@@ -16,7 +16,7 @@ macx {
 	# or build for specific version
 	# QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.0
 	
-	# Use Link Time Optimization
+	# Link Time Optimization
 	QMAKE_CXXFLAGS += -flto
 	QMAKE_LFLAGS   += -flto
 	
@@ -27,9 +27,10 @@ macx {
 } else:freebsd {
 	LIBS += -lexecinfo
 	
-	# Use Link Time Optimization
-	QMAKE_CXXFLAGS += -flto
-	QMAKE_LFLAGS   += -flto
+	# Link Time Optimization
+	# clang++ of FreeBSD 12.2 doesn't support LTO. So disable LTO for now.
+	# QMAKE_CXXFLAGS += -flto
+	# QMAKE_LFLAGS   += -flto
 	
 	# Profiler
 	defined(PROF,var) {

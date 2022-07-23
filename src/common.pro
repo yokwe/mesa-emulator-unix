@@ -15,10 +15,28 @@ macx {
 	QMAKE_MACOSX_DEPLOYMENT_TARGET = $$system(sw_vers -productVersion)
 	# or build for specific version
 	# QMAKE_MACOSX_DEPLOYMENT_TARGET = 12.0
-}
-
-freebsd {
+	
+	# Use Link Time Optimization
+	QMAKE_CXXFLAGS += -flto
+	QMAKE_LFLAGS   += -flto
+	
+	# Profiler
+	defined(PROF,var) {
+		message("PROF macx")
+	}
+} else:freebsd {
 	LIBS += -lexecinfo
+	
+	# Use Link Time Optimization
+	QMAKE_CXXFLAGS += -flto
+	QMAKE_LFLAGS   += -flto
+	
+	# Profiler
+	defined(PROF,var) {
+		message("PROF freebsd")
+	}
+} else {
+	error("Unexpected")
 }
 
 

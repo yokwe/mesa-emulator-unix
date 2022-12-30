@@ -26,6 +26,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # default compiler options
 set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 
+# default linker options
+SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
+
 #
 # platform dependant setting
 #

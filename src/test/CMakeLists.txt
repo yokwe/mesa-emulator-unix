@@ -12,8 +12,4 @@ add_executable (
 
 add_dependencies(test mesa opcode agent util trace)
 
-target_link_directories(
-  test
-  PRIVATE tmp/build/mesa tmp/build/opcode tmp/build/agent tmp/build/util tmp/build/trace)
-
 target_link_libraries (test mesa opcode agent util trace cppunit)

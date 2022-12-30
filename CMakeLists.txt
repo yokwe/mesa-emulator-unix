@@ -79,7 +79,7 @@ link_libraries (Qt${QT_VERSION}Gui Qt${QT_VERSION}Core)
 
 # custom target
 add_custom_target(dist-clean rm -rf .ninja_deps .ninja_logs build.ninja cmake_install.cmake CMakeCache.txt CMakeFiles tmp/build)
-add_custom_target(run-test LOG4CXX_CONFIG=data/log4cxx.xml tmp/build/test/test)
+add_custom_target(run-test LOG4CPP_CONFIG=data/debug.properties tmp/build/test/test)
 
 
 add_subdirectory (src/util   tmp/build/util)

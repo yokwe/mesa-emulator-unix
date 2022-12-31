@@ -5,11 +5,11 @@
 SHELL := $(shell which bash)
 export SHELL
 
-LOG4CPP_CONFIG := tmp/run/debug.properties
-export LOG4CPP_CONFIG
-
 HOSTNAME := $(shell uname -n)
 export HOSTNAME
+
+LOG4CPP_CONFIG := tmp/cmake/${HOSTNAME}/run/debug.properties
+export LOG4CPP_CONFIG
 
 # include common part
 include Makefile

@@ -6,6 +6,7 @@
 /src/*/.qmake.stash
 /build/
 /.cproject
+/.settings
 /.ninja*
 /build.ninja
 /cmake_install.cmake

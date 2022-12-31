@@ -43,7 +43,8 @@ fix-permission:
 	find . -type f -exec chmod 0644 {} \;
 
 clear-log:
-	echo -n >tmp/run/debug.log
+	mkdir -p ${CMAKE_BUILD}/run
+	echo -n >${CMAKE_BUILD}/run/debug.log
 
 run-test: clear-log
 	${CMAKE_BUILD}/build/test/test

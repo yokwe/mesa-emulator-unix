@@ -39,6 +39,12 @@ fix-permission:
 	find . -type d -exec chmod 0755 {} \;
 	find . -type f -exec chmod 0644 {} \;
 
+clear-log:
+	echo -n >tmp/run/debug.log
+
+run-test: clear-log
+	tmp/build/${HOSTNAME}/test/test
+	
 
 # include legacy part
 include Makefile-qmake

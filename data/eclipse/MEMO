@@ -1,4 +1,0 @@
-Include file path is taken from clang++ with -v options.
-See compiler output of src/main/main.cpp
-
-You can copy these cproject-* file to .cproject

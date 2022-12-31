@@ -106,9 +106,9 @@ run-xnsDump: xnsDump
 	echo -n >tmp/run/debug.log
 	tmp/build/xnsDump/xnsDump
 
-run-test: test
-	echo -n >tmp/run/debug.log
-	tmp/build/test/test
+#run-test: test
+#	echo -n >tmp/run/debug.log
+#	tmp/build/test/test
 
 run-guam-headless-gvwin: guam-headless prepare-run-guam
 	echo -n >tmp/run/debug.log

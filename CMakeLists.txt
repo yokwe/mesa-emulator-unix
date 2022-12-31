@@ -83,9 +83,9 @@ link_libraries (Qt${QT_VERSION}Gui Qt${QT_VERSION}Core)
 
 
 # add subdirectory
-add_subdirectory (src/util   tmp/build/${HOST_NAME}/util)
-add_subdirectory (src/mesa   tmp/build/${HOST_NAME}/mesa)
-add_subdirectory (src/opcode tmp/build/${HOST_NAME}/opcode)
-add_subdirectory (src/agent  tmp/build/${HOST_NAME}/agent)
-add_subdirectory (src/trace  tmp/build/${HOST_NAME}/trace)
-add_subdirectory (src/test   tmp/build/${HOST_NAME}/test)
+add_subdirectory (src/util   build/util)
+add_subdirectory (src/mesa   build/mesa)
+add_subdirectory (src/opcode build/opcode)
+add_subdirectory (src/agent  build/agent)
+add_subdirectory (src/trace  build/trace)
+add_subdirectory (src/test   build/test)

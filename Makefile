@@ -2,30 +2,33 @@
 # Makefile
 #
 
+CMAKE_BUILD := tmp/cmake/${HOSTNAME}
+
 .PHONY: all clean cmake build distclean distclean-qmake fix-permission
 
 all:
-	echo "all"
-	cmake --build . --target help
+	@echo "all"
+	@echo "CMAKE_BUILD ${CMAKE_BUILD}"
 
 clean:
-	cmake --build . --target clean
+	cmake --build ${CMAKE_BUILD} --target clean
+
+help:
+	cmake --build ${CMAKE_BUILD} --target help
 
 cmake:
-	cmake -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=OFF .
+	cmake -B ${CMAKE_BUILD} -S . -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=OFF .
+	@echo "copy eclipse setting files .project .cproject and .settings to current directory"
+	cp -p  ${CMAKE_BUILD}/.project  .
+	cp -p  ${CMAKE_BUILD}/.cproject .
+	cp -rp ${CMAKE_BUILD}/.settings .
 
 build:
-	time cmake --build .
+	time cmake --build ${CMAKE_BUILD}
 	
-distclean: distclean-ninja distclean-cmake distclean-qmake
+distclean: distclean-qmake
 	rm -rf build
-	rm -rf tmp/build
-
-distclean-ninja:
-	rm -rf .ninja_deps .ninja_log build.ninja
-
-distclean-cmake:
-	rm -rf cmake_install.cmake CMakeCache.txt CMakeFiles
+	rm -rf ${CMAKE_BUILD}
 
 distclean-qmake:
 	rm -f  src/*/Makefile
@@ -43,7 +46,7 @@ clear-log:
 	echo -n >tmp/run/debug.log
 
 run-test: clear-log
-	tmp/build/${HOSTNAME}/test/test
+	${CMAKE_BUILD}/build/test/test
 	
 
 # include legacy part

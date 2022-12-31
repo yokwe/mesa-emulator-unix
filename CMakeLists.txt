@@ -7,6 +7,13 @@ option(USE_QT6 "Use QT6" OFF) # QT5 or QT6
 #
 # common setting
 #
+# host name and system
+cmake_host_system_information(RESULT HOST_NAME QUERY HOSTNAME)
+set(HOST_SYSTEM ${CMAKE_HOST_SYSTEM_NAME})
+message(STATUS "NAME       ${HOST_NAME}")
+message(STATUS "SYSTEM     ${HOST_SYSTEM}")
+
+# qt setting
 if (${USE_QT6})
   set(QT_VERSION 6)
 else()
@@ -32,8 +39,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 #
 # platform dependant setting
 #
-message(STATUS "SYSTEM     ${CMAKE_HOST_SYSTEM_NAME}")
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL FreeBSD)
+if(${HOST_SYSTEM} STREQUAL FreeBSD)
   #
   # FreeBSD
   #
@@ -47,9 +53,8 @@ if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL FreeBSD)
   link_libraries (execinfo)
   
   set(QT_DIR /usr/local/lib/qt${QT_VERSION})
-    
 else()
-  message(FATAL_ERROR "Unknown system ${CMAKE_HOST_SYSTEM_NAME}")
+  message(FATAL_ERROR "Unknown system ${HOST_SYSTEM}")
 endif()
 
 message(STATUS "QT_DIR     ${QT_DIR}")
@@ -77,15 +82,10 @@ link_libraries (log4cpp)
 link_libraries (Qt${QT_VERSION}Gui Qt${QT_VERSION}Core)
 
 
-# custom target
-add_custom_target(dist-clean rm -rf .ninja_deps .ninja_logs build.ninja cmake_install.cmake CMakeCache.txt CMakeFiles tmp/build)
-add_custom_target(run-test LOG4CPP_CONFIG=data/debug.properties tmp/build/test/test)
-
-
-add_subdirectory (src/util   tmp/build/util)
-add_subdirectory (src/mesa   tmp/build/mesa)
-add_subdirectory (src/opcode tmp/build/opcode)
-add_subdirectory (src/agent  tmp/build/agent)
-add_subdirectory (src/trace  tmp/build/trace)
-add_subdirectory (src/test   tmp/build/test)
-
+# add subdirectory
+add_subdirectory (src/util   tmp/build/${HOST_NAME}/util)
+add_subdirectory (src/mesa   tmp/build/${HOST_NAME}/mesa)
+add_subdirectory (src/opcode tmp/build/${HOST_NAME}/opcode)
+add_subdirectory (src/agent  tmp/build/${HOST_NAME}/agent)
+add_subdirectory (src/trace  tmp/build/${HOST_NAME}/trace)
+add_subdirectory (src/test   tmp/build/${HOST_NAME}/test)

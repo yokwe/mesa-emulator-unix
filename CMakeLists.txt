@@ -36,6 +36,9 @@ set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 # default linker options
 SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
+# prepare logger configuration file
+configure_file(data/debug.properties.in run/debug.properties @ONLY)
+
 #
 # platform dependant setting
 #

@@ -24,7 +24,7 @@ cmake:
 	cp -rp ${CMAKE_BUILD}/.settings .
 
 build:
-	time cmake --build ${CMAKE_BUILD}
+	/usr/bin/time cmake --build ${CMAKE_BUILD}
 	
 distclean: distclean-qmake
 	rm -rf build

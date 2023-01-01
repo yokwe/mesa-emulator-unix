@@ -46,34 +46,46 @@ if(${HOST_SYSTEM} STREQUAL FreeBSD)
   #
   # FreeBSD
   #
+  set(QT_DIR /usr/local/lib/qt${QT_VERSION})  
   
   # default include directories
   include_directories(SYSTEM /usr/include /usr/local/include /usr/include/c++/v1)
-  
+  include_directories(SYSTEM
+    /usr/local/include/qt${QT_VERSION}
+    /usr/local/include/qt${QT_VERSION}/QtCore
+    /usr/local/include/qt${QT_VERSION}/QtWidgets
+    )
+    
   # default link directories
-  link_directories(/usr/lib /usr/local/lib /usr/local/lib/qt${QT_VERSION})
+  link_directories(/usr/lib /usr/local/lib)
   # default library
   link_libraries (execinfo)
+elseif (${HOST_SYSTEM} STREQUAL Darwin)
+  #
+  # MacOS
+  #
+  set(CMAKE_OSX_ARCHITECTURES arm64)
+  set(QT_DIR /opt/local/libexec/qt${QT_VERSION})
   
-  set(QT_DIR /usr/local/lib/qt${QT_VERSION})
+  # default include directories
+  include_directories(SYSTEM /usr/include /opt/local/include)
+  include_directories(SYSTEM
+    ${QT_DIR}/include
+    ${QT_DIR}/include/QtCore
+    ${QT_DIR}/include/QtWidgets
+    )
+  
+  # default link directories
+  link_directories(/usr/lib /opt/local/lib)
 else()
   message(FATAL_ERROR "Unknown system ${HOST_SYSTEM}")
 endif()
 
 message(STATUS "QT_DIR     ${QT_DIR}")
 
-include_directories(SYSTEM
-  /usr/local/include/qt${QT_VERSION}
-  /usr/local/include/qt${QT_VERSION}/QtCore
-  /usr/local/include/qt${QT_VERSION}/QtWidgets
-)
-
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-find_package(${QT_NAME} REQUIRED COMPONENTS Core)
-find_package(${QT_NAME} REQUIRED COMPONENTS Widgets)
 
 if (${QT_VERSION} EQUAL 6)
   qt_standard_project_setup()
@@ -81,8 +93,9 @@ endif()
 
 
 # common library
+find_package(${QT_NAME} COMPONENTS Core Gui REQUIRED)
 link_libraries (log4cpp)
-link_libraries (Qt${QT_VERSION}Gui Qt${QT_VERSION}Core)
+link_libraries(${QT_NAME}::Gui ${QT_NAME}::Core)
 
 
 # add subdirectory

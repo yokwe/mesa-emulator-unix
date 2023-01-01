@@ -47,35 +47,38 @@ if(${HOST_SYSTEM} STREQUAL FreeBSD)
   #
   # FreeBSD
   #
-  set(QT_DIR /usr/local/lib/qt${QT_VERSION})  
-  
+  # require for backtrace
+  link_libraries (execinfo)
+  # QT_DIR QT_INCLUDE
+  set(QT_DIR     /usr/local/lib/qt${QT_VERSION})  
+  set(QT_INCLUDE /usr/local/include/qt${QT_VERSION})
   # default include directories
-  include_directories(SYSTEM /usr/include /usr/local/include /usr/include/c++/v1)
   include_directories(SYSTEM
-    /usr/local/include/qt${QT_VERSION}
-    /usr/local/include/qt${QT_VERSION}/QtCore
-    /usr/local/include/qt${QT_VERSION}/QtWidgets
+    /usr/include
+    /usr/local/include
+    ${QT_INCLUDE}
+    ${QT_INCLUDE}/QtCore
+    ${QT_INCLUDE}/QtGui
     )
-    
   # default link directories
   link_directories(/usr/lib /usr/local/lib)
-  # default library
-  link_libraries (execinfo)
 elseif (${HOST_SYSTEM} STREQUAL Darwin)
   #
   # MacOS
   #
+  # Compile for arm64
   set(CMAKE_OSX_ARCHITECTURES arm64)
-  set(QT_DIR /opt/local/libexec/qt${QT_VERSION})
-  
+  # QT_DIR QT_INCLUDE
+  set(QT_DIR     /opt/local/libexec/qt${QT_VERSION})
+  set(QT_INCLUDE ${QT_DIR}/include)
   # default include directories
-  include_directories(SYSTEM /usr/include /opt/local/include)
   include_directories(SYSTEM
-    ${QT_DIR}/include
-    ${QT_DIR}/include/QtCore
-    ${QT_DIR}/include/QtWidgets
+    /usr/include
+    /opt/local/include
+    ${QT_INCLUDE}
+    ${QT_INCLUDE}/QtCore
+    ${QT_INCLUDE}/QtGui
     )
-  
   # default link directories
   link_directories(/usr/lib /opt/local/lib)
 else()
@@ -93,13 +96,7 @@ find_package(${QT_NAME} COMPONENTS Core Gui REQUIRED)
 
 # common library
 link_libraries (log4cpp)
-link_libraries(${QT_NAME}::Gui ${QT_NAME}::Core)
-
-# after find package
-if (${QT_VERSION} EQUAL 6)
-  qt_standard_project_setup()
-endif()
-
+link_libraries(${QT_NAME}::Core ${QT_NAME}::Gui)
 
 # add subdirectory
 add_subdirectory (src/agent         build/agent)

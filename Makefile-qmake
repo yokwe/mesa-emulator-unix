@@ -15,6 +15,10 @@ MODULE := main test guam-headless \
 .PHONY: dumpSymbol run-dumpSymbol
 
 
+qmake:
+	@echo "MODULE $(MODULE)!"
+	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake); done
+
 qmake5:
 	@echo "MODULE $(MODULE)!"
 	@for i in $(MODULE); do echo "cd src/$$i; qmake"; (cd src/$$i; qmake-qt5); done

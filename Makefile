@@ -16,12 +16,25 @@ clean:
 help:
 	cmake --build ${CMAKE_BUILD} --target help
 
-cmake:
+cmake-eclipse-qt5:
 	cmake -B ${CMAKE_BUILD} -S . -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=OFF .
 	@echo "copy eclipse setting files .project .cproject and .settings to current directory"
 	cp -p  ${CMAKE_BUILD}/.project  .
 	cp -p  ${CMAKE_BUILD}/.cproject .
 	cp -rp ${CMAKE_BUILD}/.settings .
+
+cmake-eclipse-qt6:
+	cmake -B ${CMAKE_BUILD} -S . -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=ON .
+	@echo "copy eclipse setting files .project .cproject and .settings to current directory"
+	cp -p  ${CMAKE_BUILD}/.project  .
+	cp -p  ${CMAKE_BUILD}/.cproject .
+	cp -rp ${CMAKE_BUILD}/.settings .
+
+cmake-qt5:
+	cmake -B ${CMAKE_BUILD} -S . -G Ninja -DUSE_QT6=OFF .
+
+cmake-qt6:
+	cmake -B ${CMAKE_BUILD} -S . -G Ninja -DUSE_QT6=ON .
 
 build:
 	/usr/bin/time cmake --build ${CMAKE_BUILD}

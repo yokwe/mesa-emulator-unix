@@ -39,6 +39,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
 # prepare logger configuration file
 configure_file(data/debug.properties.in run/debug.properties @ONLY)
+configure_file(data/setting.json.in     run/setting.json     @ONLY)
 
 #
 # platform dependant setting

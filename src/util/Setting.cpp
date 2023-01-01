@@ -268,7 +268,7 @@ void Setting::initMap(const Setting& setting) {
 		}
 		{
 			// check duplicate of levelVKeys name
-			QMap<QString, QString> map;
+			QMap<QString, int> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.name)) {
 					logger.error("levelVkeys duplicate name %s  %3d  %s", e.name, e.keyName, map[e.name]);
@@ -294,7 +294,7 @@ void Setting::initMap(const Setting& setting) {
 		}
 		{
 			// check duplicate of keyboard name
-			QMap<QString, QString> map;
+			QMap<QString, int> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.name)) {
 					logger.error("keyboard duplicate name %s  %3d  %s", e.name, e.scanCode, map[e.name]);

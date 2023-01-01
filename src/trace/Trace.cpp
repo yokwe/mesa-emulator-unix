@@ -79,7 +79,7 @@ static QMap<CARD16, QSet<CARD16>> entryMap;
 static void initEttName() {
 	char name[10];
 	for(int i = 0; i < 256; i++) {
-		sprintf(name, "ETT-%d", i);
+		snprintf(name, sizeof(name), "ETT-%d", i);
 		ettName[i] = strdup(name);
 	}
 }

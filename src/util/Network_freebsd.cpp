@@ -93,7 +93,7 @@ QList<Network::Device> Network::FreeBSD::getDeviceList() {
 
 				// copy name
 				for(int i = 0; i < sdl->sdl_nlen; i++) {
-					device.name.append(data[i]);
+					device.name.append((char)data[i]);
 				}
 				// copy address
 				ByteBuffer bb(sdl->sdl_alen, data + sdl->sdl_nlen);

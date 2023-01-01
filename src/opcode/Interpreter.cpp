@@ -56,8 +56,12 @@ void Interpreter::assignMop(Opcode::EXEC exec_, const QString& name_, CARD32 cod
 		logger.fatal("assignMop exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_ == 0) {
-		logger.fatal("assignMop name_ == 0  code = %d", code_);
+	if (name_.isNull()) {
+		logger.fatal("assignMop name_.isNull()  code = %d", code_);
+		ERROR();
+	}
+	if (name_.isEmpty()) {
+		logger.fatal("assignMop name_.isEmpty()  code = %d", code_);
 		ERROR();
 	}
 
@@ -74,8 +78,12 @@ void Interpreter::assignEsc(Opcode::EXEC exec_, const QString& name_, CARD32 cod
 		logger.fatal("assignEsc exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_ == 0) {
-		logger.fatal("assignEsc name_ == 0  code = %d", code_);
+	if (name_.isNull()) {
+		logger.fatal("assignEsc name_.isNull()  code = %d", code_);
+		ERROR();
+	}
+	if (name_.isEmpty()) {
+		logger.fatal("assignEsc name_.isEmpty()  code = %d", code_);
 		ERROR();
 	}
 

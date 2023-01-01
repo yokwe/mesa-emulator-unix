@@ -64,40 +64,6 @@ guam-headless: util mesa
 dumpSymbol: symbols util
 	( cd src/dumpSymbol; make all )
 
-prepare-run-guam:
-	@if [ ! -d tmp/run ]; then \
-		echo "create tmp/run"; \
-		mkdir -p tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/debug.properties ]; then \
-		echo "copy debug.properties"; \
-		cp data/debug.properties tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/setting.json ]; then \
-		echo "copy setting.json"; \
-		cp data/setting.json tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/xns-config.json ]; then \
-		echo "copy xns-config.json"; \
-		cp data/xns-config.json tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/GVWIN.DSK ]; then \
-		echo "copy GVWIN.DSK"; \
-		cp data/GVWin/GVWIN.DSK tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/GVWIN21.DSK ]; then \
-		echo "copy GVWIN21.DSK"; \
-		cp data/GVWin21/GVWIN21.DSK tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/Dawn.dsk ]; then \
-		echo "copy Dawn.dsk"; \
-		cp data/Dawn/Dawn.dsk tmp/run ; \
-	fi
-	@if [ ! -f tmp/run/floppy144 ]; then \
-		echo "copy floppy144"; \
-		cp data/floppy/floppy144 tmp/run ; \
-	fi
-	
 run-main: main prepare-run-guam
 	echo -n >tmp/run/debug.log
 	tmp/build/main/main
@@ -109,22 +75,6 @@ run-xnsServer: xnsServer
 run-xnsDump: xnsDump
 	echo -n >tmp/run/debug.log
 	tmp/build/xnsDump/xnsDump
-
-#run-test: test
-#	echo -n >tmp/run/debug.log
-#	tmp/build/test/test
-
-run-guam-headless-gvwin: guam-headless prepare-run-guam
-	echo -n >tmp/run/debug.log
-	tmp/build/guam-headless/guam-headless GVWin
-
-run-guam-headless-gvwin21: guam-headless prepare-run-guam
-	echo -n >tmp/run/debug.log
-	tmp/build/guam-headless/guam-headless GVWin21
-
-run-guam-headless-dawn: guam-headless prepare-run-guam
-	echo -n >tmp/run/debug.log
-	tmp/build/guam-headless/guam-headless Dawn
 
 run-dumpSymbol: dumpSymbol
 	echo -n >tmp/run/debug.log

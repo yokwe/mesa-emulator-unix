@@ -88,7 +88,7 @@ void MesaProcessor::initialize() {
 	floppy.addDiskFile(&floppyFile);
 
 	// AgentNetwork use networkPacket
-	logger.info("networkInterfaceName = %s", networkInterfaceName);
+	logger.info("networkInterfaceName = %s", qPrintable(networkInterfaceName));
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
 

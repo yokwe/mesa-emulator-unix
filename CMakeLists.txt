@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.24.0)
 project(mesa-emulator-unix VERSION 0.0.1 LANGUAGES CXX)
 
 option(USE_QT6 "Use QT6" OFF) # QT5 or QT6
+message(STATUS "USE_QT6    ${USE_QT6}")
 
 #
 # common setting
@@ -87,15 +88,17 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# find package
+find_package(${QT_NAME} COMPONENTS Core Gui REQUIRED)
+
+# common library
+link_libraries (log4cpp)
+link_libraries(${QT_NAME}::Gui ${QT_NAME}::Core)
+
+# after find package
 if (${QT_VERSION} EQUAL 6)
   qt_standard_project_setup()
 endif()
-
-
-# common library
-find_package(${QT_NAME} COMPONENTS Core Gui REQUIRED)
-link_libraries (log4cpp)
-link_libraries(${QT_NAME}::Gui ${QT_NAME}::Core)
 
 
 # add subdirectory

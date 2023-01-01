@@ -35,10 +35,6 @@ static const Logger logger = Logger::getLogger("setting");
 #include "Setting.h"
 
 
-static const char* PATH_FILE = "tmp/run/setting.json";
-
-
-// Setting::Entry::Display
 void Setting::Entry::Display::fromJsonObject(const QJsonObject& jsonObject) {
 	GET_JSON_OBJECT(width);
 	GET_JSON_OBJECT(height);
@@ -201,21 +197,22 @@ QJsonObject Setting::toJsonObject() const {
 	return jsonObject;
 }
 
-Setting Setting::getInstance() {
-	logger.info("path       %s", PATH_FILE);
+Setting Setting::getInstance(const QString& basePath) {
+	QString path = QString("%1/run/setting.json").arg(basePath);
+	logger.info("path       %s", qPrintable(path));
 
 	// sanity check
 	{
-		if (!QFile::exists(PATH_FILE)) {
+		if (!QFile::exists(path)) {
 			logger.fatal("file does not exist");
-			logger.fatal("  path = %s!", PATH_FILE);
+			logger.fatal("  path = %s!", qPrintable(path));
 			ERROR();
 		}
 	}
 
 	Setting setting;
 	{
-		QJsonObject jsonObject = JSONUtil::loadObject(PATH_FILE);
+		QJsonObject jsonObject = JSONUtil::loadObject(path);
 		setting.fromJsonObject(jsonObject);
 	}
 

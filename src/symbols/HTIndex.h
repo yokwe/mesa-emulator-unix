@@ -93,6 +93,13 @@ public:
 
 	QString toString() const;
 
+	const Symbols* getSymbols() const {
+		return symbols;
+	}
+	CARD16 getIndex() const {
+		return index;
+	}
+
 private:
 	typedef Symbols::Key Key;
 	static QMap<Key, HTRecord*> all;

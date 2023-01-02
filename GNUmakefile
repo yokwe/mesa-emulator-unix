@@ -8,8 +8,11 @@ export SHELL
 HOSTNAME := $(shell uname -n)
 export HOSTNAME
 
-LOG4CPP_CONFIG := tmp/cmake/${HOSTNAME}/run/debug.properties
-export LOG4CPP_CONFIG
+BUILD_DIR := tmp/cmake/${HOSTNAME}
+export BUILD_DIR
+
+LOG_CONFIG := ${BUILD_DIR}/run/debug.properties
+export LOG_CONFIG
 
 # include common part
 include Makefile

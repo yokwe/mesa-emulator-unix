@@ -2,15 +2,17 @@
 # BSDmakefile
 #
 
-
 SHELL != which bash
 .export-env SHELL
 
 HOSTNAME != uname -n
 .export-env HOSTNAME
 
-LOG4CPP_CONFIG := tmp/cmake/${HOSTNAME}/run/debug.properties
-.export-env LOG4CPP_CONFIG
+BUILD_DIR := tmp/cmake/${HOSTNAME}
+.export-env BUILD_DIR
+
+LOG_CONFIG := ${BUILD_DIR}/run/debug.properties
+.export-env LOG_CONFIG
 
 # include common part
 include Makefile

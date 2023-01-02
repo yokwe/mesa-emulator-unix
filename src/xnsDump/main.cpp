@@ -80,8 +80,11 @@ void xnsDump() {
 	using XNS::Context;
 	using Courier::ExpeditedCourier;
 
+	const char* buildDir = getBuildDir();
+	QString path = QString("%1/run/xns-config.json").arg(buildDir);
+	logger.info("path = %s", qPrintable(path));
 
-	Config  config  = XNS::loadConfig("tmp/run/xns-config.json");
+	Config  config  = XNS::loadConfig(path);
 	Context context = Context(config);
 
 	{

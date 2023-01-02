@@ -120,9 +120,10 @@ XNS::Context::Context(Config& config) {
 	}
 	if (device.address == 0) {
 		logger.error("Unexpected");
-		logger.error("  name = %s", device.name);
+		logger.error("  name = %s!", qPrintable(device.name));
+		logger.error("  list = %d", list.size());
 		for(auto e: list) {
-			logger.error("  available interface = %s", e.name);
+			logger.error("  available interface = %s", qPrintable(e.name));
 		}
 		ERROR()
 	}
@@ -185,28 +186,41 @@ static quint64 getValue(int base, int factor, QStringList list) {
 #define HEXSEP "[-:]?"
 
 quint64 XNS::Host::fromString(QString string) {
-	static QRegExp dec4("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
-	static QRegExp dec5("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
-	static QRegExp hex("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
-	static QRegExp oct("([0-7]+)b");
+	static QRegularExpression dec4("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
+	static QRegularExpression dec5("([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})-([1-9][0-9]{0,2})");
+	static QRegularExpression hex("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
+	static QRegularExpression oct("([0-7]+)b");
 
-	if (dec4.exactMatch(string)) {
-		QStringList list = dec4.capturedTexts();
-		return getValue(10, 1000, list);
+	{
+		auto m = dec4.match(string);
+		if (m.hasMatch()) {
+			QStringList list = m.capturedTexts();
+			return getValue(10, 1000, list);
+		}
 	}
-	if (dec5.exactMatch(string)) {
-		QStringList list = dec5.capturedTexts();
-		logger.info("list %d", list.size());
-		return getValue(10, 1000, list);
+	{
+		auto m = dec5.match(string);
+		if (m.hasMatch()) {
+			QStringList list = m.capturedTexts();
+			logger.info("list %d", list.size());
+			return getValue(10, 1000, list);
+		}
 	}
-	if (hex.exactMatch(string)) {
-		QStringList list = hex.capturedTexts();
-		return getValue(16, 256, list);
+	{
+		auto m = hex.match(string);
+		if (m.hasMatch()) {
+			QStringList list = m.capturedTexts();
+			return getValue(10, 256, list);
+		}
 	}
-	if (oct.exactMatch(string)) {
-		QStringList list = oct.capturedTexts();
-		return list[1].toLongLong(0, 8);
+	{
+		auto m = oct.match(string);
+		if (m.hasMatch()) {
+			QStringList list = m.capturedTexts();
+			return list[1].toLongLong(0, 8);
+		}
 	}
+
 	logger.error("Unexpected");
 	logger.error("  string = %s!", string);
 	ERROR();

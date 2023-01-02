@@ -71,7 +71,3 @@ run-xnsServer: xnsServer
 run-xnsDump: xnsDump
 	echo -n >tmp/run/debug.log
 	tmp/build/xnsDump/xnsDump
-
-run-dumpSymbol: dumpSymbol
-	echo -n >tmp/run/debug.log
-	tmp/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd

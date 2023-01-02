@@ -69,6 +69,9 @@ run-test: clear-log
 run-main: clear-log
 	${CMAKE_BUILD}/build/main/main
 	
+run-dumpSymbol: clear-log
+	${CMAKE_BUILD}/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd
+
 run-guam-headless-gvwin: prepare-run-guam clear-log
 	${CMAKE_BUILD}/build/guam-headless/guam-headless ${CMAKE_BUILD} GVWin
 

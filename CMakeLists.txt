@@ -2,8 +2,7 @@ cmake_minimum_required (VERSION 3.24.0)
 
 project(mesa-emulator-unix VERSION 0.0.1 LANGUAGES CXX)
 
-option(USE_QT6 "Use QT6" OFF) # QT5 or QT6
-message(STATUS "USE_QT6    ${USE_QT6}")
+option(USE_QT6 "Use QT6" ON) # default is QT6
 
 #
 # common setting
@@ -105,7 +104,7 @@ add_subdirectory (src/agent         build/agent)
 #add_subdirectory (src/courierImpl   build/courierImpl)
 #add_subdirectory (src/dumpSymbol    build/dumpSymbol)
 add_subdirectory (src/guam-headless build/guam-headless)
-#add_subdirectory (src/main          build/main)
+add_subdirectory (src/main          build/main)
 add_subdirectory (src/mesa          build/mesa)
 add_subdirectory (src/opcode        build/opcode)
 #add_subdirectory (src/symbol        build/symbol)

@@ -9,4 +9,4 @@ add_executable (
 
 add_dependencies(guam-headless mesa opcode agent util trace)
 
-target_link_libraries (guam-headless mesa opcode agent util trace cppunit)
+target_link_libraries (guam-headless mesa opcode agent util trace)

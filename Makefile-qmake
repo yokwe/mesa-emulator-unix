@@ -67,7 +67,3 @@ dumpSymbol: symbols util
 run-xnsServer: xnsServer
 	echo -n >tmp/run/debug.log
 	tmp/build/xnsServer/xnsServer
-
-run-xnsDump: xnsDump
-	echo -n >tmp/run/debug.log
-	tmp/build/xnsDump/xnsDump

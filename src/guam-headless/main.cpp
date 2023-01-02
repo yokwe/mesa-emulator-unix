@@ -55,16 +55,14 @@ int main(int argc, char** argv) {
 	GuiOp::setContext(new NullGuiOp);
 
 	// sanity check
-	if (argc != 3) {
+	if (argc != 2) {
 		logger.error("Unexpected argc %d", argc);
 		ERROR();
 	}
-	QString basePath  = argv[1];
-	QString entryName = argv[2];
-	logger.info("basePath  = %s", qPrintable(basePath));
+	QString entryName = argv[1];
 	logger.info("entryName = %s", qPrintable(entryName));
 
-	Setting setting = Setting::getInstance(basePath);
+	Setting setting = Setting::getInstance();
 	Setting::Entry entry = setting.getEntry(entryName);
 
 	CARD32  displayWidth     = entry.display.width;

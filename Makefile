@@ -2,50 +2,55 @@
 # Makefile
 #
 
-CMAKE_BUILD := tmp/cmake/${HOSTNAME}
+# BSDMakefile or GNUMakefile will define SHELL HOSTNAME BUILD_DIR LOG_CONFIG
+#   SHELL       path of bash
+#   HOSTNAME    name of host
+#   BUILD_DIR   path of build
+#   LOG_CONFIG  path of logger configuration file
+
 
 .PHONY: all clean cmake build distclean distclean-qmake fix-permission
 
 all:
 	@echo "all"
-	@echo "CMAKE_BUILD ${CMAKE_BUILD}"
+	@echo "BUILD_DIR ${BUILD_DIR}"
 
 clean:
-	cmake --build ${CMAKE_BUILD} --target clean
+	cmake --build ${BUILD_DIR} --target clean
 
 help:
-	cmake --build ${CMAKE_BUILD} --target help
+	cmake --build ${BUILD_DIR} --target help
 
 cmake:
-	cmake -B ${CMAKE_BUILD} -S . -G Ninja .
+	cmake -B ${BUILD_DIR} -S . -G Ninja .
 
 cmake-eclipse:
-	cmake -B ${CMAKE_BUILD} -S . -G 'Eclipse CDT4 - Ninja' .
+	cmake -B ${BUILD_DIR} -S . -G 'Eclipse CDT4 - Ninja' .
 	@echo "copy eclipse setting files .project .cproject and .settings to current directory"
-	cp -p  ${CMAKE_BUILD}/.project  .
-	cp -p  ${CMAKE_BUILD}/.cproject .
-	cp -rp ${CMAKE_BUILD}/.settings .
+	cp -p  ${BUILD_DIR}/.project  .
+	cp -p  ${BUILD_DIR}/.cproject .
+	cp -rp ${BUILD_DIR}/.settings .
 
 #
 # Use qt5
 #
 cmake-eclipse-qt5:
-	cmake -B ${CMAKE_BUILD} -S . -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=OFF .
+	cmake -B ${BUILD_DIR} -S . -G 'Eclipse CDT4 - Ninja' -DUSE_QT6=OFF .
 	@echo "copy eclipse setting files .project .cproject and .settings to current directory"
-	cp -p  ${CMAKE_BUILD}/.project  .
-	cp -p  ${CMAKE_BUILD}/.cproject .
-	cp -rp ${CMAKE_BUILD}/.settings .
+	cp -p  ${BUILD_DIR}/.project  .
+	cp -p  ${BUILD_DIR}/.cproject .
+	cp -rp ${BUILD_DIR}/.settings .
 
 cmake-qt5:
-	cmake -B ${CMAKE_BUILD} -S . -G Ninja -DUSE_QT6=OFF .
+	cmake -B ${BUILD_DIR} -S . -G Ninja -DUSE_QT6=OFF .
 
 
 build:
-	/usr/bin/time cmake --build ${CMAKE_BUILD}
+	/usr/bin/time cmake --build ${BUILD_DIR}
 	
 distclean: distclean-qmake
 	rm -rf build
-	rm -rf ${CMAKE_BUILD}
+	rm -rf ${BUILD_DIR}
 
 distclean-qmake:
 	rm -f  src/*/Makefile
@@ -60,48 +65,93 @@ fix-permission:
 	find . -type f -exec chmod 0644 {} \;
 
 clear-log:
-	mkdir -p ${CMAKE_BUILD}/run
-	echo -n >${CMAKE_BUILD}/run/debug.log
+	mkdir -p ${BUILD_DIR}/run
+	echo -n >${BUILD_DIR}/run/debug.log
 
+check-bpf:
+	@if [ -c /dev/bpf ]; then \
+	if [ ! -w /dev/bpf -o ! -r /dev/bpf ]; then \
+		ls -l /dev/bpf; \
+		echo "sudo chmod 666 /dev/bpf"; \
+		sudo chmod 666 /dev/bpf; \
+		ls -l /dev/bpf; \
+	fi ; \
+	fi
+	@if [ -c /dev/bpf0 ]; then \
+	if [ ! -w /dev/bpf0 -o ! -r /dev/bpf0 ]; then \
+		ls -l /dev/bpf0; \
+		echo "sudo chmod 666 /dev/bpf0"; \
+		sudo chmod 666 /dev/bpf0; \
+		ls -l /dev/bpf0; \
+	fi ; \
+	fi
+	@if [ -c /dev/bpf1 ]; then \
+	if [ ! -w /dev/bpf1 -o ! -r /dev/bpf1 ]; then \
+		ls -l /dev/bpf1; \
+		echo "sudo chmod 666 /dev/bpf1"; \
+		sudo chmod 666 /dev/bpf1; \
+		ls -l /dev/bpf1; \
+	fi ; \
+	fi
+	@if [ -c /dev/bpf2 ]; then \
+	if [ ! -w /dev/bpf2 -o ! -r /dev/bpf2 ]; then \
+		ls -l /dev/bpf2; \
+		echo "sudo chmod 666 /dev/bp21"; \
+		sudo chmod 666 /dev/bpf2; \
+		ls -l /dev/bpf2; \
+	fi ; \
+	fi
+	@if [ -c /dev/bpf3 ]; then \
+	if [ ! -w /dev/bpf3 -o ! -r /dev/bpf3 ]; then \
+		ls -l /dev/bpf3; \
+		echo "sudo chmod 666 /dev/bp31"; \
+		sudo chmod 666 /dev/bpf3; \
+		ls -l /dev/bpf; \
+	fi ; \
+	fi
+	
 run-test: clear-log
-	${CMAKE_BUILD}/build/test/test
+	${BUILD_DIR}/build/test/test
 	
 run-main: clear-log
-	${CMAKE_BUILD}/build/main/main
+	${BUILD_DIR}/build/main/main
 	
 run-dumpSymbol: clear-log
-	${CMAKE_BUILD}/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd
+	${BUILD_DIR}/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd
+
+run-xnsDump: clear-log check-bpf
+	${BUILD_DIR}/build/xnsDump/xnsDump
 
 run-guam-headless-gvwin: prepare-run-guam clear-log
-	${CMAKE_BUILD}/build/guam-headless/guam-headless ${CMAKE_BUILD} GVWin
+	${BUILD_DIR}/build/guam-headless/guam-headless GVWin
 
 run-guam-headless-gvwin21: prepare-run-guam clear-log
-	${CMAKE_BUILD}/build/guam-headless/guam-headless ${CMAKE_BUILD} GVWin21
+	${BUILD_DIR}/build/guam-headless/guam-headless GVWin21
 
 run-guam-headless-dawn: prepare-run-guam clear-log
-	${CMAKE_BUILD}/build/guam-headless/guam-headless ${CMAKE_BUILD} Dawn
+	${BUILD_DIR}/build/guam-headless/guam-headless Dawn
 
 
 prepare-run-guam:
-	@if [ ! -f ${CMAKE_BUILD}/run/xns-config.json ]; then \
-		echo "copy xns-config.json to ${CMAKE_BUILD}/run"; \
-		cp data/xns-config.json ${CMAKE_BUILD}/run ; \
+	@if [ ! -f ${BUILD_DIR}/run/xns-config.json ]; then \
+		echo "copy xns-config.json to ${BUILD_DIR}/run"; \
+		cp data/xns-config.json ${BUILD_DIR}/run ; \
 	fi
-	@if [ ! -f ${CMAKE_BUILD}/run/GVWIN.DSK ]; then \
-		echo "copy GVWIN.DSK to ${CMAKE_BUILD}/run"; \
-		cp data/GVWin/GVWIN.DSK ${CMAKE_BUILD}/run ; \
+	@if [ ! -f ${BUILD_DIR}/run/GVWIN.DSK ]; then \
+		echo "copy GVWIN.DSK to ${BUILD_DIR}/run"; \
+		cp data/GVWin/GVWIN.DSK ${BUILD_DIR}/run ; \
 	fi
-	@if [ ! -f ${CMAKE_BUILD}/run/GVWIN21.DSK ]; then \
-		echo "copy GVWIN21.DSK to ${CMAKE_BUILD}/run"; \
-		cp data/GVWin21/GVWIN21.DSK ${CMAKE_BUILD}/run ; \
+	@if [ ! -f ${BUILD_DIR}/run/GVWIN21.DSK ]; then \
+		echo "copy GVWIN21.DSK to ${BUILD_DIR}/run"; \
+		cp data/GVWin21/GVWIN21.DSK ${BUILD_DIR}/run ; \
 	fi
-	@if [ ! -f ${CMAKE_BUILD}/run/Dawn.dsk ]; then \
-		echo "copy Dawn.dsk to ${CMAKE_BUILD}/run"; \
-		cp data/Dawn/Dawn.dsk ${CMAKE_BUILD}/run ; \
+	@if [ ! -f ${BUILD_DIR}/run/Dawn.dsk ]; then \
+		echo "copy Dawn.dsk to ${BUILD_DIR}/run"; \
+		cp data/Dawn/Dawn.dsk ${BUILD_DIR}/run ; \
 	fi
-	@if [ ! -f ${CMAKE_BUILD}/run/floppy144 ]; then \
-		echo "copy floppy144 to ${CMAKE_BUILD}/run"; \
-		cp data/floppy/floppy144 ${CMAKE_BUILD}/run ; \
+	@if [ ! -f ${BUILD_DIR}/run/floppy144 ]; then \
+		echo "copy floppy144 to ${BUILD_DIR}/run"; \
+		cp data/floppy/floppy144 ${BUILD_DIR}/run ; \
 	fi
 
 # include legacy part

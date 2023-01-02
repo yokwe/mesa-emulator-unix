@@ -47,7 +47,7 @@
 class BCD;
 
 namespace bcd {
-	static const CARD16 T_LIMIT = 0177777;
+	static constexpr CARD16 T_LIMIT = 0177777;
 }
 
 
@@ -89,7 +89,7 @@ private:
 // NullName: NameRecord = [1];
 class NameRecord {
 public:
-	static const CARD16 NullName = 1;
+	static constexpr CARD16 NullName = 1;
 
 	const CARD16  index;
 	const QString name;
@@ -107,8 +107,8 @@ public:
 	// FTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO FTRecord;
 	// FTNull: FTIndex = LAST[FTIndex];
 	// FTSelf: FTIndex = LAST[FTIndex] - 1;
-	static const CARD16 FT_NULL = bcd::T_LIMIT;
-	static const CARD16 FT_SELF = bcd::T_LIMIT - 1;
+	static constexpr CARD16 FT_NULL = bcd::T_LIMIT;
+	static constexpr CARD16 FT_SELF = bcd::T_LIMIT - 1;
 
 	static FTRecord* getInstance(BCD* bcd, CARD16 index);
 	static FTRecord* getNull();
@@ -143,7 +143,7 @@ class SGRecord {
 public:
 	// SGIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO SGRecord;
 	// SGNull: SGIndex = LAST[SGIndex];
-	static const CARD16 SG_NULL = bcd::T_LIMIT;
+	static constexpr CARD16 SG_NULL = bcd::T_LIMIT;
 
 	// SegClass: TYPE = {code, symbols, acMap, other};
 	enum class SegClass {
@@ -181,7 +181,7 @@ private:
 //ENNull: ENIndex = LAST[ENIndex];
 class ENRecord {
 public:
-	static const CARD16 EN_NULL = bcd::T_LIMIT;
+	static constexpr CARD16 EN_NULL = bcd::T_LIMIT;
 
 	static ENRecord* getInstance(BCD* bcd, CARD16 index);
 	static ENRecord* getNull();
@@ -242,7 +242,7 @@ private:
 //MTNull: MTIndex = LAST[MTIndex];
 class MTRecord {
 public:
-	static const CARD16 MT_NULL = bcd::T_LIMIT;
+	static constexpr CARD16 MT_NULL = bcd::T_LIMIT;
 
 	static MTRecord* getInstance(BCD* bcd, CARD16 index);
 	static MTRecord* getNull();
@@ -303,7 +303,7 @@ private:
 class BCD {
 public:
 	//VersionID: CARDINAL = 6103
-	static const CARD16 VersionID = 6103;
+	static constexpr CARD16 VersionID = 6103;
 
 	BCD(QString path) : BCD(BCDFile::getInstance(path)) {}
 

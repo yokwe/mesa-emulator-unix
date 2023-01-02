@@ -55,7 +55,7 @@ private:
 	CARD16    index;
 
 public:
-	static const CARD16  MD_OWN  = 0;
+	static constexpr CARD16  MD_OWN  = 0;
 
 	static void checkAll();
 	static MDIndex* getNull();
@@ -103,6 +103,13 @@ public:
 	const CARD16     file;
 
 	QString toString() const;
+
+	const Symbols* getSymbols() const {
+		return symbols;
+	}
+	CARD16 getIndex() const {
+		return index;
+	}
 
 private:
 	typedef Symbols::Key Key;

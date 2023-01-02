@@ -197,8 +197,8 @@ QJsonObject Setting::toJsonObject() const {
 	return jsonObject;
 }
 
-Setting Setting::getInstance(const QString& basePath) {
-	QString path = QString("%1/run/setting.json").arg(basePath);
+Setting Setting::getInstance() {
+	QString path = QString("%1/run/setting.json").arg(getBuildDir());
 	logger.info("path       %s", qPrintable(path));
 
 	// sanity check

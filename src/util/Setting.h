@@ -264,7 +264,7 @@ public:
 	void fromJsonObject(const QJsonObject& jsonObject);
 	QJsonObject toJsonObject() const;
 
-	static Setting getInstance(const QString& basePath);
+	static Setting getInstance();
 	
 	Entry getEntry(QString name);
 

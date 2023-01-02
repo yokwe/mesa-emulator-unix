@@ -7,7 +7,7 @@ list(APPEND fileList Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp ByteBu
 if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL FreeBSD)
   list(APPEND fileList BPF.cpp Network_freebsd.cpp)
 else()
-  list(APPEND Network_dummy.cpp)
+  list(APPEND fileList Network_dummy.cpp)
 endif()
 
 add_library (util STATIC ${fileList})

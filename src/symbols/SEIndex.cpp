@@ -94,7 +94,6 @@ SEIndex* SEIndex::find(CARD16 index_) const {
 //  RETURN [WITH t: h.seb[sei] SELECT FROM transfer => t.mode, ENDCASE => none]};
 SEIndex::TransferMode SEIndex::xferMode() const {
 	const SEIndex* sei = underType();
-	sei->getValue().getCons().tag;
 	return sei->getValue().getCons().tag == SERecord::Cons::Tag::TRANSFER ? sei->getValue().getCons().getTransfer().mode : SEIndex::TransferMode::NONE;
 }
 

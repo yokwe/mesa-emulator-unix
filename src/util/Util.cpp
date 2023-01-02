@@ -117,7 +117,11 @@ QtMessageHandler Logger::getQtMessageHandler() {
 }
 
 Logger Logger::getLogger(const char *name) {
-	static char *fileName = getenv("LOG4CPP_CONFIG");
+	static char *fileName = getenv("LOG_CONFIG");
+	if (fileName == nullptr) {
+		log4cpp::Category::getRoot().fatal("LOG_CONFIG is nullptr");
+		exit(1);
+	}
 
 	if (fileName) log4cpp::PropertyConfigurator::configure(fileName);
 	if (log4cpp::Category::exists(name)) {
@@ -372,5 +376,11 @@ void Util::toBigEndian(quint16* source, quint16* dest, int size) {
 }
 void Util::fromBigEndian(quint16* source, quint16* dest, int size) {
 	qFromBigEndian<quint16>(source, size, dest);
+}
+
+// get build directory from Environment variable BUILD_DIR
+const char* getBuildDir() {
+	char *buildDir = getenv("BUILD_DIR");
+	return buildDir == nullptr ? "." : buildDir;
 }
 

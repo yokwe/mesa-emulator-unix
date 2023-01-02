@@ -218,6 +218,8 @@ __attribute__((always_inline)) static inline quint16 bitField(quint16 word, int 
 // count number of element in array
 #define COUNT_ELEMENT(array) ((sizeof(array)) / (sizeof(array[0])))
 
+// get build directory from Environment variable BUILD_DIR
+const char* getBuildDir();
 
 class Util {
 public:

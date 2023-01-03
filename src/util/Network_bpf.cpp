@@ -30,7 +30,7 @@
 
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("net-freebsd");
+static const Logger logger = Logger::getLogger("net-bpf");
 
 #include <net/bpf.h>
 #include <net/if.h>
@@ -42,11 +42,11 @@ static const Logger logger = Logger::getLogger("net-freebsd");
 #include <QtCore>
 
 #include "Network.h"
-#include "Network_freebsd.h"
+#include "Network_bpf.h"
 
 
 // add user to group wheel to get access /dev/bpf
-// OSX
+// MacOS
 //   dseditgroup -o edit -a hasegawa -t use wheel
 // FreeBSD
 //   pw group mod wheel -m hasegawa
@@ -60,20 +60,20 @@ static const Logger logger = Logger::getLogger("net-freebsd");
 
 
 QList<Network::Device> Network::getDeviceList() {
-	static QList<Network::Device> list = Network::FreeBSD::getDeviceList();
+	static QList<Network::Device> list = Network::BPF::getDeviceList();
 	return list;
 }
 
 Network::Driver*       Network::getDriver(const Network::Device& device) {
-	Network::FreeBSD::Driver* driver = new Network::FreeBSD::Driver(device);
+	Network::BPF::Driver* driver = new Network::BPF::Driver(device);
 	return driver;
 }
 
 
 //
-// Network::FreeBSD::getDeviceList
+// Network::BPF::getDeviceList
 //
-QList<Network::Device> Network::FreeBSD::getDeviceList() {
+QList<Network::Device> Network::BPF::getDeviceList() {
 	QList<Network::Device> list;
 
 	struct ifaddrs *ifap;
@@ -111,9 +111,9 @@ QList<Network::Device> Network::FreeBSD::getDeviceList() {
 }
 
 //
-// Network::FreeBSD::Driver
+// Network::BPF::Driver
 //
-Network::FreeBSD::Driver::Driver(const Network::Device& device_) : Network::Driver(device_) {
+Network::BPF::Driver::Driver(const Network::Device& device_) : Network::Driver(device_) {
 	bpf.open();
 	logger.info("bpf.fd         = %d", bpf.fd);
 	logger.info("bpf.path       = %s", bpf.path);
@@ -124,7 +124,7 @@ Network::FreeBSD::Driver::Driver(const Network::Device& device_) : Network::Driv
 	bpf.setImmediate(1);
 	bpf.setHeaderComplete(0);
 	bpf.setReadTimeout(1);
-	bpf.setReadFilter(BPF::PROGRAM_XNS);
+	bpf.setReadFilter(::BPF::PROGRAM_XNS);
 
 	logger.info("bufferSize     = %d", bpf.getBufferSize());
 	logger.info("seeSent        = %d", bpf.getSeeSent());
@@ -135,20 +135,20 @@ Network::FreeBSD::Driver::Driver(const Network::Device& device_) : Network::Driv
 	logger.info("buffer         = %p", bpf.buffer);
 }
 
-Network::FreeBSD::Driver::~Driver() {
+Network::BPF::Driver::~Driver() {
 	bpf.close();
 }
 
-int Network::FreeBSD::Driver::select  (quint32 timeout, int& opErrno) {
+int Network::BPF::Driver::select  (quint32 timeout, int& opErrno) {
 	return bpf.select(timeout, opErrno);
 }
-int Network::FreeBSD::Driver::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+int Network::BPF::Driver::transmit(quint8* data, quint32 dataLen, int& opErrno) {
 	return bpf.transmit(data, dataLen, opErrno);
 }
-int Network::FreeBSD::Driver::receive(quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
+int Network::BPF::Driver::receive(quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
 	return bpf.receive(data, dataLen, opErrno, msecSinceEpoch);
 }
-void Network::FreeBSD::Driver::discard() {
+void Network::BPF::Driver::discard() {
 	bpf.discard();
 }
 

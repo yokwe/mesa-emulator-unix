@@ -46,7 +46,7 @@
 #include "Network.h"
 
 
-namespace Network::FreeBSD {
+namespace Network::BPF {
 
 	class Driver : public Network::Driver {
 	public:
@@ -60,7 +60,7 @@ namespace Network::FreeBSD {
 		~Driver();
 
 	protected:
-		BPF bpf;
+		class BPF bpf;
 	};
 
 	QList<Network::Device> getDeviceList();

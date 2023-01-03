@@ -127,7 +127,7 @@ Network::FreeBSD::Driver::Driver(const Network::Device& device_) : Network::Driv
 	bpf.setReadFilter(BPF::PROGRAM_XNS);
 
 	logger.info("bufferSize     = %d", bpf.getBufferSize());
-	logger.info("direction      = %d", bpf.getDirection());
+	logger.info("seeSent        = %d", bpf.getSeeSent());
 	logger.info("headerComplete = %d", bpf.getHeaderComplete());
 	logger.info("interface      = %s", bpf.getInterface());
 	logger.info("nbrb           = %d", bpf.getNonBlockingReadBytes());

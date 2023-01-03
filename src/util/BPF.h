@@ -172,15 +172,31 @@ public:
 	//   Default value is 0
 	void setHeaderComplete(quint32 value);
 
-	// BIOCGDIRECTION
-	//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-	quint32 getDirection();
+//	// BIOCGDIRECTION
+//	//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+//	quint32 getDirection();
+//
+//	// BIOCSDIRECTION
+//	//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+//	//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
+//	//   Default is BPF_D_INOUT
+//	void setDirection(quint32 value);
 
-	// BIOCSDIRECTION
-	//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-	//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
-	//   Default is BPF_D_INOUT
-	void setDirection(quint32 value);
+	// BIOCGSEESENT
+	//   These commands are obsolete but left for compatibility.
+	//   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
+	//   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
+	//   Set to zero to see only incoming packets on the interface.  Set to one to see packets
+	quint32 getSeeSent();
+
+	// BIOCSSEESENT
+	// These commands are obsolete but left for compatibility.
+	//   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
+	//   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
+	//   Set to zero to see only incoming packets on the interface.
+	//   Set to one to see packets originating locally and remotely on the interface.
+	//   This flag is initialized to one by default.
+	void setSeeSent(quint32 value);
 
 	// BIOCSTSTAMP
 	//   Set format and resolution of the time stamps returned by BPF

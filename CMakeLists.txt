@@ -36,9 +36,13 @@ set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 # default linker options
 SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
-# prepare logger configuration file
+# prepare data files
+message(STATUS "Copy debug.properties")
 configure_file(data/debug.properties.in run/debug.properties @ONLY)
+message(STATUS "Copy setting.json")
 configure_file(data/setting.json.in     run/setting.json     @ONLY)
+message(STATUS "Copy xns-config.json")
+configure_file(data/xns-config.json     run/xns-config.json  COPYONLY)
 
 #
 # platform dependant setting
@@ -73,7 +77,7 @@ elseif (${HOST_SYSTEM} STREQUAL Darwin)
   set(QT_INCLUDE ${QT_DIR}/include)
   # default include directories
   include_directories(SYSTEM
-    /usr/include
+    /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/
     /opt/local/include
     ${QT_INCLUDE}
     ${QT_INCLUDE}/QtCore
@@ -113,5 +117,5 @@ add_subdirectory (src/trace         build/trace)
 add_subdirectory (src/util          build/util)
 add_subdirectory (src/xns           build/xns)
 add_subdirectory (src/xnsDump       build/xnsDump)
-#add_subdirectory (src/xnsServer     build/xnsServer)
-#add_subdirectory (src/xnsServerImpl build/xnsServerImpl)
+add_subdirectory (src/xnsServer     build/xnsServer)
+add_subdirectory (src/xnsServerImpl build/xnsServerImpl)

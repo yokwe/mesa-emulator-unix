@@ -87,7 +87,10 @@ int main(int, char**) {
 
 	// init server
 	logger.info("server.init");
-	server.init("tmp/run/xns-config.json");
+	const char* buildDir = getBuildDir();
+	QString path = QString("%1/run/xns-config.json").arg(buildDir);
+	logger.info("path = %s", qPrintable(path));
+	server.init(path);
 
 	// add service
 	server.add(&chService2);

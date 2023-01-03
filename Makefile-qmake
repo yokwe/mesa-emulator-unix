@@ -63,7 +63,3 @@ guam-headless: util mesa
 	
 dumpSymbol: symbols util
 	( cd src/dumpSymbol; make all )
-
-run-xnsServer: xnsServer
-	echo -n >tmp/run/debug.log
-	tmp/build/xnsServer/xnsServer

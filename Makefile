@@ -72,41 +72,41 @@ check-bpf:
 	@if [ -c /dev/bpf ]; then \
 	if [ ! -w /dev/bpf -o ! -r /dev/bpf ]; then \
 		ls -l /dev/bpf; \
-		echo "sudo chmod 666 /dev/bpf"; \
-		sudo chmod 666 /dev/bpf; \
+		echo "sudo chmod 660 /dev/bpf"; \
+		sudo chmod 660 /dev/bpf; \
 		ls -l /dev/bpf; \
 	fi ; \
 	fi
 	@if [ -c /dev/bpf0 ]; then \
 	if [ ! -w /dev/bpf0 -o ! -r /dev/bpf0 ]; then \
 		ls -l /dev/bpf0; \
-		echo "sudo chmod 666 /dev/bpf0"; \
-		sudo chmod 666 /dev/bpf0; \
+		echo "sudo chmod 660 /dev/bpf0"; \
+		sudo chmod 660 /dev/bpf0; \
 		ls -l /dev/bpf0; \
 	fi ; \
 	fi
 	@if [ -c /dev/bpf1 ]; then \
 	if [ ! -w /dev/bpf1 -o ! -r /dev/bpf1 ]; then \
 		ls -l /dev/bpf1; \
-		echo "sudo chmod 666 /dev/bpf1"; \
-		sudo chmod 666 /dev/bpf1; \
+		echo "sudo chmod 660 /dev/bpf1"; \
+		sudo chmod 660 /dev/bpf1; \
 		ls -l /dev/bpf1; \
 	fi ; \
 	fi
 	@if [ -c /dev/bpf2 ]; then \
 	if [ ! -w /dev/bpf2 -o ! -r /dev/bpf2 ]; then \
 		ls -l /dev/bpf2; \
-		echo "sudo chmod 666 /dev/bp21"; \
-		sudo chmod 666 /dev/bpf2; \
+		echo "sudo chmod 660 /dev/bpf2"; \
+		sudo chmod 660 /dev/bpf2; \
 		ls -l /dev/bpf2; \
 	fi ; \
 	fi
 	@if [ -c /dev/bpf3 ]; then \
 	if [ ! -w /dev/bpf3 -o ! -r /dev/bpf3 ]; then \
 		ls -l /dev/bpf3; \
-		echo "sudo chmod 666 /dev/bp31"; \
-		sudo chmod 666 /dev/bpf3; \
-		ls -l /dev/bpf; \
+		echo "sudo chmod 660 /dev/bpf3"; \
+		sudo chmod 660 /dev/bpf3; \
+		ls -l /dev/bpf3; \
 	fi ; \
 	fi
 	
@@ -122,6 +122,9 @@ run-dumpSymbol: clear-log
 run-xnsDump: clear-log check-bpf
 	${BUILD_DIR}/build/xnsDump/xnsDump
 
+run-xnsServer: clear-log check-bpf
+	${BUILD_DIR}/build/xnsServer/xnsServer
+
 run-guam-headless-gvwin: prepare-run-guam clear-log
 	${BUILD_DIR}/build/guam-headless/guam-headless GVWin
 
@@ -133,10 +136,6 @@ run-guam-headless-dawn: prepare-run-guam clear-log
 
 
 prepare-run-guam:
-	@if [ ! -f ${BUILD_DIR}/run/xns-config.json ]; then \
-		echo "copy xns-config.json to ${BUILD_DIR}/run"; \
-		cp data/xns-config.json ${BUILD_DIR}/run ; \
-	fi
 	@if [ ! -f ${BUILD_DIR}/run/GVWIN.DSK ]; then \
 		echo "copy GVWIN.DSK to ${BUILD_DIR}/run"; \
 		cp data/GVWin/GVWIN.DSK ${BUILD_DIR}/run ; \

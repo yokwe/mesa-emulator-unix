@@ -152,6 +152,3 @@ prepare-run-guam:
 		echo "copy floppy144 to ${BUILD_DIR}/run"; \
 		cp data/floppy/floppy144 ${BUILD_DIR}/run ; \
 	fi
-
-# include legacy part
-include Makefile-qmake

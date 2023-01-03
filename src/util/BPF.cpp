@@ -79,11 +79,11 @@ const struct bpf_program* BPF::PROGRAM_XNS = &program_xns;
 
 
 void BPF::open() {
-	char tempPath[sizeof("/dev/bpf00")];
+	char tempPath[sizeof("/dev/bpf00") + 1];
 	int  tempFD;
 
 	for(int i = 0; i < 99; i++) {
-		sprintf(tempPath, "/dev/bpf%d", i);
+		snprintf(tempPath, sizeof(tempPath), "/dev/bpf%d", i);
 		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
 		if (tempFD < 0) {
 			int opErrno = errno;
@@ -294,22 +294,46 @@ void BPF::setHeaderComplete(quint32 value) {
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRSIG, &value))
 }
 
-// BIOCGDIRECTION
-//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-quint32 BPF::getDirection() {
+//// BIOCGDIRECTION
+////   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+//quint32 BPF::getDirection() {
+//	int ret;
+//	quint32 value;
+//	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGDIRECTION, &value))
+//	return value;
+//}
+//
+//// BIOCSDIRECTION
+////   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
+////   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
+////   Default is BPF_D_INOUT
+//void BPF::setDirection(quint32 value) {
+//	int ret;
+//	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSDIRECTION, &value))
+//}
+
+// BIOCGSEESENT
+//   These commands are obsolete but left for compatibility.
+//   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
+//   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
+//   Set to zero to see only incoming packets on the interface.  Set to one to see packets
+quint32 BPF::getSeeSent() {
 	int ret;
 	quint32 value;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGDIRECTION, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGSEESENT, &value))
 	return value;
 }
 
-// BIOCSDIRECTION
-//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
-//   Default is BPF_D_INOUT
-void BPF::setDirection(quint32 value) {
+// BIOCSSEESENT
+// These commands are obsolete but left for compatibility.
+//   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
+//   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
+//   Set to zero to see only incoming packets on the interface.
+//   Set to one to see packets originating locally and remotely on the interface.
+//   This flag is initialized to one by default.
+void BPF::setSeeSent(quint32 value) {
 	int ret;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSDIRECTION, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSSEESENT, &value))
 }
 
 // FIONREAD

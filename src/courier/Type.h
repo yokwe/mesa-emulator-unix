@@ -386,7 +386,7 @@ namespace Courier {
 
 
 	class STRING : public Base {
-		static const int MAX_LENGTH = 65535;
+		static constexpr int MAX_LENGTH = 65535;
 		mutable QByteArray byteArray;
 
 	public:

@@ -111,23 +111,7 @@ XNS::Context::Context(Config& config) {
 		ERROR()
 	}
 
-	Network::Device device;
-	QList<Network::Device> list = Network::getDeviceList();
-	for(auto e: list) {
-		if (e.name == config.network.interface) {
-			device = e;
-		}
-	}
-	if (device.address == 0) {
-		logger.error("Unexpected");
-		logger.error("  name = %s!", qPrintable(device.name));
-		logger.error("  list = %d", list.size());
-		for(auto e: list) {
-			logger.error("  available interface = %s", qPrintable(e.name));
-		}
-		ERROR()
-	}
-
+	Network::Device device = Network::getDevice(config.network.interface);
 	address = device.address;
 	driver = Network::getDriver(device);
 

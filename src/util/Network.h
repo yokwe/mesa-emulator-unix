@@ -117,5 +117,6 @@ namespace Network {
 	//
 
 	QList<Device> getDeviceList();
+	Device        getDevice(const QString& name);
 	Driver*       getDriver(const Device& device);
 }

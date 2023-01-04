@@ -63,6 +63,21 @@ QList<Network::Device> Network::getDeviceList() {
 	static QList<Network::Device> list = Network::BPF::getDeviceList();
 	return list;
 }
+Network::Device Network::getDevice(const QString& name) {
+	auto list = getDeviceList();
+	for(auto e: list) {
+		if (e.name == name) {
+			return e;
+		}
+	}
+	logger.error("Unexpected");
+	logger.error("  name = %s!", qPrintable(name));
+	logger.error("  list = %d", list.size());
+	for(auto e: list) {
+		logger.error("  available interface = %s", qPrintable(e.name));
+	}
+	ERROR()
+}
 
 Network::Driver*       Network::getDriver(const Network::Device& device) {
 	Network::BPF::Driver* driver = new Network::BPF::Driver(device);

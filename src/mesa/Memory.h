@@ -197,9 +197,9 @@ private:
 
 class PageCache {
 protected:
-	static const CARD32 N_BIT = 16;
-	static const CARD32 N_ENTRY = 1 << N_BIT;
-	static const CARD32 MASK = (1 << N_BIT) - 1;
+	static constexpr CARD32 N_BIT = 16;
+	static constexpr CARD32 N_ENTRY = 1 << N_BIT;
+	static constexpr CARD32 MASK = (1 << N_BIT) - 1;
 	static inline CARD32 hash(CARD32 vp_) {
 		// When N_BIT == 16, there is no conflict during booting gvwin
 		return vp_ & MASK;

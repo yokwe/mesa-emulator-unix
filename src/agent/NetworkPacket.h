@@ -57,7 +57,7 @@
 class NetworkPacket {
 public:
 	// packet type of Xerox IDP
-	static const int ETH_P_IDP = 0x0600;
+	static constexpr int ETH_P_IDP = 0x0600;
 
 	class Result {
 	public:

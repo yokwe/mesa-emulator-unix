@@ -85,8 +85,9 @@ auto std_sprintf_convert_(T&& value) {
 	constexpr auto is_qstring = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, QString>::value;
 
 	// comment out line below to detect QString
-	//static_assert(!is_qstring, "value is QString");
-
+#ifdef STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING
+	static_assert(!is_qstring, "value is QString");
+#endif
 	if constexpr (is_std_string) {
 		return (value).c_str();
 	} else if constexpr (is_qstring) {
@@ -97,27 +98,25 @@ auto std_sprintf_convert_(T&& value) {
 }
 
 template <typename ... Args>
-std::string std_sprintf_(const char* format, Args&& ... args) {
-    int len = std::snprintf(nullptr, 0, format, args ...);
-    char buf[(int)len + 1];
-    std::snprintf(buf, len + 1, format, args ...);
-    return std::string(buf);
-//	int len;
-//	{
-//		char buf[256];
-//		len = std::snprintf(buf, sizeof(buf), format, args ...);
-//		if (len < ((int)sizeof(buf) - 1)) return std::string(buf);
-//	}
-//	{
-//	    char buf[(int)len + 1];
-//	    std::snprintf(buf, len + 1, format, args ...);
-//	    return std::string(buf);
-//	}
+void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&& ... args) {
+	char buf[bufferSize];
+	int ret = std::snprintf(buf, bufferSize, format, args ...);
+	if (bufferSize <= ret) {
+		// failure
+		// + 1 for trailing null character
+		std_sprintf_(result, ret + 1, format, args ...);
+	} else {
+		// success
+		result += buf;
+	}
 }
 
+#define STD_SPRINTF_DEFAULT_BUFFER_SIZE 512
 template<typename ... Args>
 std::string std_sprintf(const char* format, Args&& ... args) {
-    return std_sprintf_(format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+	std::string result;
+    std_sprintf_(result, STD_SPRINTF_DEFAULT_BUFFER_SIZE, format, std_sprintf_convert_(std::forward<Args>(args)) ...);
+    return result;
 }
 
 class Logger {

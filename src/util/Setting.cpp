@@ -235,7 +235,7 @@ Setting::Entry Setting::getEntry(QString name) {
 		}
 	}
 	logger.fatal("Unexpected");
-	logger.fatal("  name = %s!", name);
+	logger.fatal("  name = %s!", name.toStdString());
 	ERROR();
 }
 
@@ -256,7 +256,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<int, QString> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.keyName)) {
-					logger.error("levelVkeys duplicate keyName %3d  %s  %s", e.keyName, e.name, map[e.keyName]);
+					logger.error("levelVkeys duplicate keyName %3d  %s  %s", e.keyName, e.name.toStdString(), map[e.keyName].toStdString());
 					foundError = true;
 				} else {
 					map[e.keyName] = e.name;
@@ -268,7 +268,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<QString, int> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.name)) {
-					logger.error("levelVkeys duplicate name %s  %3d  %s", e.name, e.keyName, map[e.name]);
+					logger.error("levelVkeys duplicate name %s  %3d  %3d", e.name.toStdString(), e.keyName, map[e.name]);
 					foundError = true;
 				} else {
 					map[e.name] = e.keyName;
@@ -282,7 +282,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<int, QString> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.scanCode)) {
-					logger.error("keyboard duplicate scanCode %3d  %s  %s", e.scanCode, e.name, map[e.scanCode]);
+					logger.error("keyboard duplicate scanCode %3d  %s  %s", e.scanCode, e.name.toStdString(), map[e.scanCode].toStdString());
 					foundError = true;
 				} else {
 					map[e.scanCode] = e.name;
@@ -294,7 +294,7 @@ void Setting::initMap(const Setting& setting) {
 			QMap<QString, int> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.name)) {
-					logger.error("keyboard duplicate name %s  %3d  %s", e.name, e.scanCode, map[e.name]);
+					logger.error("keyboard duplicate name %s  %3d  %3d", e.name.toStdString(), e.scanCode, map[e.name]);
 					foundError = true;
 				} else {
 					map[e.name] = e.scanCode;
@@ -310,7 +310,7 @@ void Setting::initMap(const Setting& setting) {
 				if (e.keyboard.isEmpty()) continue;
 
 				if (map.contains(e.keyboard)) {
-					logger.error("keyMap duplicate keyboard %s  %s  %s", e.keyboard, e.levelVKeys, map[e.keyboard]);
+					logger.error("keyMap duplicate keyboard %s  %s  %s", e.keyboard.toStdString(), e.levelVKeys.toStdString(), map[e.keyboard].toStdString());
 					foundError = true;
 				} else {
 					map[e.keyboard] = e.levelVKeys;
@@ -324,7 +324,7 @@ void Setting::initMap(const Setting& setting) {
 				if (e.keyboard.isEmpty()) continue;
 
 				if (map.contains(e.levelVKeys)) {
-					logger.error("keyMap duplicate levelVKeys %s  %s  %s", e.levelVKeys, e.keyboard, map[e.keyboard]);
+					logger.error("keyMap duplicate levelVKeys %s  %s  %s", e.levelVKeys.toStdString(), e.keyboard.toStdString(), map[e.keyboard].toStdString());
 					foundError = true;
 				} else {
 					map[e.levelVKeys] = e.keyboard;

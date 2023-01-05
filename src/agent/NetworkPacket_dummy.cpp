@@ -48,7 +48,7 @@ static const Logger logger = Logger::getLogger("packet");
 void NetworkPacket::attach(const QString& name_) {
 	name = name_;
     logger.info("NetworkPacket dummy");
-    logger.info("name     = %s", name);
+    logger.info("name     = %s", name.toStdString());
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 
     fd = 0;

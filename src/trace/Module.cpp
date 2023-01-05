@@ -76,8 +76,8 @@ static QString readFile(const QString& path) {
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", file.errorString());
-			logger.fatal("  path = %s!", path);
+			logger.fatal("File open error %s", file.errorString().toStdString());
+			logger.fatal("  path = %s!", path.toStdString());
 			ERROR();
 		}
 		byteArray = file.readAll();

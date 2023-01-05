@@ -99,8 +99,6 @@ public:
 	void transmit(Result& result, Data& data);
 	void receive (Result& result, Data& data);
 
-
-
 	// discard already received packet
 	void discardRecievedPacket();
 	void discardOnePacket();
@@ -117,8 +115,8 @@ public:
 
 private:
 	QString name;
-	int    fd;
-	CARD8  address[ETH_ALEN];
+	int     fd;
+	CARD8   address[ETH_ALEN];
 };
 
 #endif

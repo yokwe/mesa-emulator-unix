@@ -59,7 +59,7 @@ public:
 private:
 };
 
-StreamDummy::StreamDummy(CARD32 serverID) : Stream(QString("DUMMY-%1").arg(serverID), serverID) {
+StreamDummy::StreamDummy(CARD32 serverID) : Stream(std_sprintf("DUMMY-%d", serverID), serverID) {
 	//
 }
 

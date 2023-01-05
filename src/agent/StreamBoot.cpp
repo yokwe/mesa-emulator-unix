@@ -53,7 +53,7 @@ StreamBoot::StreamBoot(QString path_) : Stream("BOOT", CoProcessorServerIDs::boo
 	map  = (quint16*)Util::mapFile(path, mapSize);
 	mapSize /= Environment::bytesPerWord;
 	pos = 0;
-	logger.info("%3d %-8s %s", serverID, name, path);
+	logger.info("%3d %-8s %s", serverID, name, path.toStdString());
 }
 
 quint16 StreamBoot::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {

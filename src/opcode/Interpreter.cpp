@@ -51,16 +51,12 @@ long long Interpreter::statMop [Interpreter::TABLE_SIZE];
 long long Interpreter::statEsc [Interpreter::TABLE_SIZE];
 
 
-void Interpreter::assignMop(Opcode::EXEC exec_, const QString& name_, CARD32 code_, CARD32 size_) {
+void Interpreter::assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignMop exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_.isNull()) {
-		logger.fatal("assignMop name_.isNull()  code = %d", code_);
-		ERROR();
-	}
-	if (name_.isEmpty()) {
+	if (name_.empty()) {
 		logger.fatal("assignMop name_.isEmpty()  code = %d", code_);
 		ERROR();
 	}
@@ -73,16 +69,12 @@ void Interpreter::assignMop(Opcode::EXEC exec_, const QString& name_, CARD32 cod
 	Opcode opcode (exec_, name_, code_, size_);
 	tableMop[code_] = opcode;
 }
-void Interpreter::assignEsc(Opcode::EXEC exec_, const QString& name_, CARD32 code_, CARD32 size_) {
+void Interpreter::assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignEsc exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_.isNull()) {
-		logger.fatal("assignEsc name_.isNull()  code = %d", code_);
-		ERROR();
-	}
-	if (name_.isEmpty()) {
+	if (name_.empty()) {
 		logger.fatal("assignEsc name_.isEmpty()  code = %d", code_);
 		ERROR();
 	}
@@ -109,8 +101,8 @@ static void escOpcodeTrap() {
 
 void Interpreter::fillOpcodeTrap() {
 	for(CARD32 i = 0; i < TABLE_SIZE; i++) {
-		if (tableMop[i].isEmpty()) assignMop(mopOpcodeTrap, QString::asprintf("MOP_%03o", i), i, 1); // can be 1, 2 or 3
-		if (tableEsc[i].isEmpty()) assignEsc(escOpcodeTrap, QString::asprintf("ESC_%03o", i), i, 2); // can bw 2 or 3
+		if (tableMop[i].isEmpty()) assignMop(mopOpcodeTrap, std_sprintf("MOP_%03o", i), i, 1); // can be 1, 2 or 3
+		if (tableEsc[i].isEmpty()) assignEsc(escOpcodeTrap, std_sprintf("ESC_%03o", i), i, 2); // can bw 2 or 3
 	}
 }
 

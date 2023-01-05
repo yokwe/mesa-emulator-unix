@@ -69,14 +69,14 @@ int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
 
 void DiskFile::attach(const QString& path_) {
 	path = path_;
-	logger.info("DiskFile::attach %s", path);
+	logger.info("DiskFile::attach %s", path.toStdString());
 
 	page = (Page*)Util::mapFile(path, size);
 	maxBlock = getBlockSize();
 }
 
 void DiskFile::detach() {
-	logger.info("DiskFile::detach %s", path);
+	logger.info("DiskFile::detach %s", path.toStdString());
 
 	Util::unmapFile(page);
 	page              = 0;

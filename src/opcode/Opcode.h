@@ -49,7 +49,7 @@ public:
 	Opcode() : exec(0), name(""), flag(0) {}
 	Opcode(const Opcode& that) :
 		exec(that.exec), name(that.name), flag(that.flag) {}
-	Opcode(EXEC exec_, const QString& name_, CARD32 code_, CARD32 size_) :
+	Opcode(EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) :
 		exec(exec_), name(name_), code(code_), size(size_) {}
 
 	Opcode& operator=(const Opcode& that) {
@@ -71,7 +71,7 @@ public:
 	}
 
 	const char* getName() const {
-		return TO_CSTRING(name);
+		return name.c_str();
 	}
 	CARD32 getCode() const {
 		return code;
@@ -94,7 +94,7 @@ protected:
 	static Opcode* last;
 
 	EXEC        exec;
-	QString     name;
+	std::string name;
 	union {
 		CARD32 flag;
 		struct {

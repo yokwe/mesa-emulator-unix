@@ -131,7 +131,7 @@ QList<Network::Device> Network::BPF::getDeviceList() {
 Network::BPF::Driver::Driver(const Network::Device& device_) : Network::Driver(device_) {
 	bpf.open();
 	logger.info("bpf.fd         = %d", bpf.fd);
-	logger.info("bpf.path       = %s", bpf.path);
+	logger.info("bpf.path       = %s", bpf.path.toStdString());
 	logger.info("bpf.bufferSize = %d", bpf.bufferSize);
 
 	bpf.setInterface(device.name);
@@ -144,7 +144,7 @@ Network::BPF::Driver::Driver(const Network::Device& device_) : Network::Driver(d
 	logger.info("bufferSize     = %d", bpf.getBufferSize());
 	logger.info("seeSent        = %d", bpf.getSeeSent());
 	logger.info("headerComplete = %d", bpf.getHeaderComplete());
-	logger.info("interface      = %s", bpf.getInterface());
+	logger.info("interface      = %s", bpf.getInterface().toStdString());
 	logger.info("nbrb           = %d", bpf.getNonBlockingReadBytes());
 	logger.info("timeout        = %d", bpf.getReadTimeout());
 	logger.info("buffer         = %p", bpf.buffer);

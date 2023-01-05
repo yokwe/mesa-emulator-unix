@@ -109,7 +109,7 @@ void AgentFloppy::Initialize() {
 	for(int i = 0; i < fcb->numberOfDCBs; i++) {
 		DiskFile* diskFile = diskFileList[i];
 		diskFile->setFloppyDCBType(fcb->dcbs + i);
-		logger.debug("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath());
+		logger.debug("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath().toStdString());
 	}
 }
 

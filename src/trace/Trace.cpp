@@ -116,13 +116,13 @@ const char* Trace::getTrapName(ControlLink controlLink) {
 }
 
 
-static void message(const Trace::Context& context, const QString& extraMessae) {
+static void message(const Trace::Context& context, const QString& extraMessage) {
 	QString string = context.toString();
 
-	if (extraMessae.isEmpty()) {
-		logger.info("%s", string.trimmed());
+	if (extraMessage.isEmpty()) {
+		logger.info("%s", string.trimmed().toStdString());
 	} else {
-		logger.info("%s  %s", string, extraMessae);
+		logger.info("%s  %s", string.toStdString(), extraMessage.toStdString());
 	}
 }
 static void message(const Trace::Context& context) {
@@ -137,8 +137,8 @@ QString Trace::Context::toString() const {
 
 	QString ret = QString::asprintf("%-4s %-6s %4X  FROM  %-30s %s%s  TO  %-40s %s  %-8s",
 			opcode, xfer, oldPSB,
-			TO_CSTRING(oldFunc.toString()), TO_CSTRING(oldFrame.toString()), free,
-			TO_CSTRING(newFunc.toString()), TO_CSTRING(newFrame.toString()), link);
+			qPrintable(oldFunc.toString()), qPrintable(oldFrame.toString()), free,
+			qPrintable(newFunc.toString()), qPrintable(newFrame.toString()), link);
 
 	return ret;
 }
@@ -185,8 +185,8 @@ void Trace::Func::addName(CARD16 gfi, const QString& moduleName) {
 	if (moduleNameMap.contains(gfi)) {
 		logger.fatal("Unexpeted");
 		logger.fatal("  gfi = %4X", gfi);
-		logger.fatal("  new = %s!", moduleName);
-		logger.fatal("  old = %s!", moduleNameMap[gfi]);
+		logger.fatal("  new = %s!", moduleName.toStdString());
+		logger.fatal("  old = %s!", moduleNameMap[gfi].toStdString());
 		ERROR();
 	} else {
 		moduleNameMap[gfi] = moduleName;
@@ -202,10 +202,10 @@ void Trace::Func::addName(const QString& moduleName, const QString& funcName, CA
 	//   pc      funcName
 	if (map.contains(pc)) {
 		logger.fatal("Unexpeted");
-		logger.fatal("  moduleName = %s!", moduleName);
-		logger.fatal("  funcName   = %s!", funcName);
+		logger.fatal("  moduleName = %s!", moduleName.toStdString());
+		logger.fatal("  funcName   = %s!", funcName.toStdString());
 		logger.fatal("  pc         = %d  0%oB", pc, pc);
-		logger.fatal("  old        = %s!", map[pc]);
+		logger.fatal("  old        = %s!", map[pc].toStdString());
 		ERROR();
 	} else {
 		map[pc] = funcName;

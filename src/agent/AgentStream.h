@@ -44,10 +44,10 @@ class AgentStream : public Agent {
 public:
 	class Stream {
 	public:
-		const QString name;
-		const quint32 serverID;
+		const std::string name;
+		const quint32     serverID;
 
-		Stream(const QString name_, const quint32 serverID_) : name(name_), serverID(serverID_) {}
+		Stream(const std::string name_, const quint32 serverID_) : name(name_), serverID(serverID_) {}
 		virtual ~Stream() {}
 
 		// provide method for each headCommand that returns headResult

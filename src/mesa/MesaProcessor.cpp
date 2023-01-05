@@ -72,7 +72,7 @@ void MesaProcessor::initialize() {
 		}
 		if (!QFile::exists(path)) break;
 
-		logger.info("Disk  %s", path);
+		logger.info("Disk  %s", path.toStdString());
 
 		DiskFile* diskFile = new DiskFile;
 		diskFile->attach(path);
@@ -83,12 +83,12 @@ void MesaProcessor::initialize() {
 		if (path == diskPath) break;
 	}
 
-	logger.info("Floppy %s", floppyPath);
+	logger.info("Floppy %s", floppyPath.toStdString());
 	floppyFile.attach(floppyPath);
 	floppy.addDiskFile(&floppyFile);
 
 	// AgentNetwork use networkPacket
-	logger.info("networkInterfaceName = %s", qPrintable(networkInterfaceName));
+	logger.info("networkInterfaceName = %s", networkInterfaceName.toStdString());
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
 
@@ -105,7 +105,7 @@ void MesaProcessor::initialize() {
 	Agent::InitializeAgent();
 	logger.info("Agent FCB  %04X %04X", Agent::ioRegionPage * PageSize, Agent::getIORegion());
 
-	logger.info("Boot  %s", bootPath);
+	logger.info("Boot  %s", bootPath.toStdString());
 
 	// Initialization of Stream handler
 	AgentStream* agentStream = (AgentStream*)Agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
@@ -130,7 +130,7 @@ void MesaProcessor::initialize() {
 		// clear boot request
 		::memset(request, 0, sizeof(*request));
 
-		logger.info("bootDevice %s", bootDevice);
+		logger.info("bootDevice %s", bootDevice.toStdString());
 		if (bootDevice == "DISK") {
 			setBootRequestPV(request);
 		} else if (bootDevice == "ETHER") {
@@ -142,7 +142,7 @@ void MesaProcessor::initialize() {
 			ERROR()
 		}
 
-		logger.info("bootSwitch = %s", bootSwitch);
+		logger.info("bootSwitch = %s", bootSwitch.toStdString());
 		setSwitches(request->switches, TO_CSTRING(bootSwitch));
 	}
 
@@ -188,7 +188,7 @@ void MesaProcessor::wait() {
 }
 
 void MesaProcessor::loadGerm(QString& path) {
-	logger.info("germ  path    = %s", path);
+	logger.info("germ  path    = %s", path.toStdString());
 
 	CARD32 mapSize = 0;
 	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);

@@ -171,7 +171,7 @@ int toIntMesaNumber(const QString& string) {
 
 	if (!ok) {
 		logger.error("Unexpected");
-		logger.error("  string %s!", string);
+		logger.error("  string %s!", string.toStdString());
 		ERROR();
 	}
 
@@ -299,7 +299,7 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 	MapInfo* mapInfo = new MapInfo(path);
 
 	if (!mapInfo->file.exists()) {
-		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, path);
+		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, path.toStdString());
 		ERROR();
 	}
 	mapInfo->size = mapInfo->file.size();
@@ -307,17 +307,17 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 
 	bool ok = mapInfo->file.open(QIODevice::ReadWrite);
 	if (!ok) {
-		logger.fatal("file.open returns false.  error = %s", qPrintable(mapInfo->file.errorString()));
+		logger.fatal("file.open returns false.  error = %s", mapInfo->file.errorString().toStdString());
 		ERROR();
 	}
 	mapInfo->page = (void*)mapInfo->file.map(0, mapInfo->size);
 	if (mapInfo->page == 0) {
-		logger.fatal("file.map returns 0.  error  = %s", qPrintable(mapInfo->file.errorString()));
+		logger.fatal("file.map returns 0.  error  = %s", mapInfo->file.errorString().toStdString());
 		ERROR();
 	}
 
 	allMap[mapInfo->page] = mapInfo;
-	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, qPrintable(mapInfo->file.fileName()));
+	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, mapInfo->file.fileName().toStdString());
 
 	return mapInfo->page;
 }
@@ -328,10 +328,10 @@ void  Util::unmapFile(void* page) {
 	}
 	MapInfo* mapInfo = allMap[page];
 
-	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, qPrintable(mapInfo->file.fileName()));
+	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, mapInfo->file.fileName().toStdString());
 
 	if (!mapInfo->file.unmap((uchar*)(mapInfo->page))) {
-		logger.fatal("file.unmap returns false.  error = %s", qPrintable(mapInfo->file.errorString()));
+		logger.fatal("file.unmap returns false.  error = %s", mapInfo->file.errorString().toStdString());
 		ERROR();
 	}
 

@@ -91,8 +91,8 @@ private:
 	static void initTable();
 	static void fillOpcodeTrap();
 
-	static void assignMop(Opcode::EXEC exec_, const QString& name_, CARD32 code_, CARD32 size_);
-	static void assignEsc(Opcode::EXEC exec_, const QString& name_, CARD32 code_, CARD32 size_);
+	static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
+	static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
 };
 
 #endif

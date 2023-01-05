@@ -44,6 +44,10 @@ configure_file(data/setting.json.in     run/setting.json     @ONLY)
 message(STATUS "Copy xns-config.json")
 configure_file(data/xns-config.json     run/xns-config.json  COPYONLY)
 
+# compile definition
+# STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING - stop compile if one of argument of std_sprintf is QString
+#add_compile_definitions("STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING")
+
 #
 # platform dependant setting
 #

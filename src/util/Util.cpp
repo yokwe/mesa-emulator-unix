@@ -178,28 +178,26 @@ int toIntMesaNumber(const QString& string) {
 	return ret;
 }
 
-bool startsWith(const std::string& string, const std::string& literal) {
-	if (string.length() < literal.length()) {
+bool startsWith(const std::string_view& string, const std::string_view& literal) {
+	const size_t string_size(string.size());
+	const size_t literal_size(literal.size());
+
+	if (string_size < literal_size) {
 		return false;
 	} else {
-		std::string::size_type offset = 0;
-		for(std::string::size_type i = 0; i < literal.length(); i++) {
-			if (string[offset + i] != literal[i]) return false;
-		}
-		return true;
+		std::string_view string_view(string.data(), literal_size);
+		return string_view == literal;
 	}
 }
-bool endsWith(const std::string& string, const std::string& literal) {
-	if (string.length() < literal.length()) {
+bool endsWith(const std::string_view& string, const std::string_view& literal) {
+	const size_t string_size(string.size());
+	const size_t literal_size(literal.size());
+
+	if (string_size < literal_size) {
 		return false;
 	} else {
-		std::string::size_type offset = string.length() - literal.length();
-		for(std::string::size_type i = 0; i < literal.length(); i++) {
-			if (string[offset + i] != literal[i]) {
-				return false;
-			}
-		}
-		return true;
+		std::string_view string_view(string.data() + (string_size - literal_size), literal_size);
+		return string_view == literal;
 	}
 }
 int toIntMesaNumber(const std::string& string) {

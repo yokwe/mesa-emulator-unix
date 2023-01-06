@@ -191,8 +191,8 @@ private:
 int toIntMesaNumber(const QString& string);
 int toIntMesaNumber(const std::string& string);
 
-bool startsWith(const std::string& string, const std::string& literal);
-bool endsWith  (const std::string& string, const std::string& literal);
+bool startsWith(const std::string_view& string, const std::string_view& literal);
+bool endsWith  (const std::string_view& string, const std::string_view& literal);
 
 QString toHexString(int size, const quint8* data);
 

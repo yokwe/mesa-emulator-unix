@@ -181,6 +181,7 @@ int toIntMesaNumber(const QString& string) {
 bool startsWith(const std::string_view& string, const std::string_view& literal) {
 	const size_t string_size(string.size());
 	const size_t literal_size(literal.size());
+	assert(0 < literal_size);
 
 	if (string_size < literal_size) {
 		return false;
@@ -192,6 +193,7 @@ bool startsWith(const std::string_view& string, const std::string_view& literal)
 bool endsWith(const std::string_view& string, const std::string_view& literal) {
 	const size_t string_size(string.size());
 	const size_t literal_size(literal.size());
+	assert(0 < literal_size);
 
 	if (string_size < literal_size) {
 		return false;

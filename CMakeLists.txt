@@ -46,7 +46,7 @@ configure_file(data/xns-config.json     run/xns-config.json  COPYONLY)
 
 # compile definition
 # STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING - stop compile if one of argument of std_sprintf is QString
-#add_compile_definitions("STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING")
+add_compile_definitions("STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING")
 
 #
 # platform dependant setting
@@ -79,9 +79,12 @@ elseif (${HOST_SYSTEM} STREQUAL Darwin)
   # QT_DIR QT_INCLUDE
   set(QT_DIR     /opt/local/libexec/qt${QT_VERSION})
   set(QT_INCLUDE ${QT_DIR}/include)
+  # SDK_PATH
+  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE SDK_PATH)
+  message(STATUS "SDK_PATH ${SDK_PATH}")
   # default include directories
   include_directories(SYSTEM
-    /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/
+    ${SDK_PATH}/usr/include
     /opt/local/include
     ${QT_INCLUDE}
     ${QT_INCLUDE}/QtCore
@@ -108,18 +111,18 @@ link_libraries(${QT_NAME}::Core ${QT_NAME}::Gui)
 
 # add subdirectory
 add_subdirectory (src/agent         build/agent)
-add_subdirectory (src/courier       build/courier)
-add_subdirectory (src/courierImpl   build/courierImpl)
-add_subdirectory (src/dumpSymbol    build/dumpSymbol)
+#add_subdirectory (src/courier       build/courier)
+#add_subdirectory (src/courierImpl   build/courierImpl)
+#add_subdirectory (src/dumpSymbol    build/dumpSymbol)
 add_subdirectory (src/guam-headless build/guam-headless)
 add_subdirectory (src/main          build/main)
 add_subdirectory (src/mesa          build/mesa)
 add_subdirectory (src/opcode        build/opcode)
-add_subdirectory (src/symbols       build/symbols)
+#add_subdirectory (src/symbols       build/symbols)
 add_subdirectory (src/test          build/test)
 add_subdirectory (src/trace         build/trace)
 add_subdirectory (src/util          build/util)
-add_subdirectory (src/xns           build/xns)
-add_subdirectory (src/xnsDump       build/xnsDump)
-add_subdirectory (src/xnsServer     build/xnsServer)
-add_subdirectory (src/xnsServerImpl build/xnsServerImpl)
+#add_subdirectory (src/xns           build/xns)
+#add_subdirectory (src/xnsDump       build/xnsDump)
+#add_subdirectory (src/xnsServer     build/xnsServer)
+#add_subdirectory (src/xnsServerImpl build/xnsServerImpl)

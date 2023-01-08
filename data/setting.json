@@ -366,8 +366,8 @@
 		
 		{"levelVKeys": "KeypadAdd",        "keyboard": ""},
 		{"levelVKeys": "KeypadSubtract",   "keyboard": ""},
-		{"levelVKeys": "KeypadAdd",        "keyboard": ""},
-		{"levelVKeys": "KeypadSubtract",   "keyboard": ""},
+		{"levelVKeys": "KeypadMultiply",   "keyboard": ""},
+		{"levelVKeys": "KeypadDivide",     "keyboard": ""},
 		
 		{"levelVKeys": "KeypadClear",      "keyboard": ""},
 		{"levelVKeys": "KeypadSeven",      "keyboard": ""},

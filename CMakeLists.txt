@@ -34,7 +34,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 
 # default linker options
-SET(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
+set(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
 # prepare data files
 message(STATUS "Copy debug.properties")
@@ -80,11 +80,12 @@ elseif (${HOST_SYSTEM} STREQUAL Darwin)
   set(QT_DIR     /opt/local/libexec/qt${QT_VERSION})
   set(QT_INCLUDE ${QT_DIR}/include)
   # SDK_PATH
-  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE SDK_PATH)
+  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE SDK_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)  
   message(STATUS "SDK_PATH ${SDK_PATH}")
   # default include directories
   include_directories(SYSTEM
     ${SDK_PATH}/usr/include
+    ${SDK_PATH}/usr/include/c++/v1
     /opt/local/include
     ${QT_INCLUDE}
     ${QT_INCLUDE}/QtCore

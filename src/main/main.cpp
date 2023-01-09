@@ -60,7 +60,7 @@ int main(int, char**) {
 	DEBUG_TRACE();
 
 	{
-		// write code here.
+		// write code here
 	}
 
 	logger.info("STOP");

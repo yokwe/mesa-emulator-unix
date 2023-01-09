@@ -63,6 +63,7 @@ if(${HOST_SYSTEM} STREQUAL FreeBSD)
   # default include directories
   include_directories(SYSTEM
     /usr/include
+    /usr/include/c++/v1
     /usr/local/include
     ${QT_INCLUDE}
     ${QT_INCLUDE}/QtCore

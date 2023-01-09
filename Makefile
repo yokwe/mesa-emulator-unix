@@ -48,9 +48,7 @@ cmake-qt5:
 build:
 	/usr/bin/time cmake --build ${BUILD_DIR}
 	
-distclean: distclean-qmake
-	rm -rf build
-	rm -rf ${BUILD_DIR}
+distclean: distclean-qmake distclean-eclipse distclean-cmake
 
 distclean-qmake:
 	rm -f  src/*/Makefile
@@ -59,6 +57,12 @@ distclean-qmake:
 	rm -f  src/*/object_script.*.Debug
 	rm -f  src/*/object_script.*.Release
 	rm -f  src/*/.qmake.stash
+
+distclean-eclipse:
+	rm -rf .project .cproject .settings build
+
+distclean-cmake:
+	rm -rf ${BUILD_DIR}
 
 fix-permission:
 	find . -type d -exec chmod 0755 {} \;

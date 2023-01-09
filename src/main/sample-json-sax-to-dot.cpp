@@ -40,6 +40,8 @@ using json = nlohmann::json;
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
+/*
+
 class sax_value {
 public:
 	enum Type {
@@ -141,13 +143,23 @@ public:
 	}
 };
 
+*/
 
 class sax_context {
-public:
 	static std::vector<sax_context> stack;
 
+public:
 	static bool empty() {
 		return stack.empty();
+	}
+	static void push(const sax_context& newValue) {
+		stack.push_back(newValue);
+	}
+	static void pop() {
+		stack.pop_back();
+	}
+	static sax_context& top() {
+		return stack.back();
 	}
 
 	std::string path;
@@ -168,52 +180,57 @@ std::vector<sax_context> sax_context::stack;
 
 class sax_handler : public json::json_sax_t {
   public:
+	static constexpr const char* NULL_STRING  = "NULL";
+	static constexpr const char* TRUE_STRING  = "TRUE";
+	static constexpr const char* FALSE_STRING = "FALSE";
+
+	static const char* to_string(bool value) {
+		return value ? TRUE_STRING : FALSE_STRING;
+	}
+
 	std::string lastKey;
 
     //
     // value
     //
-	std::string toLine(const std::string_view& value) {
-	   	sax_context& back  = sax_context::stack.back();
-		std::string  name  = back.inArray ? back.getIndexName() : lastKey;
-
-		std::string ret = std_sprintf("%s/%s %s", back.path, name, value);
+	std::string toLine(const std::string& value) {
+	   	sax_context& top  = sax_context::top();
+		std::string  name = top.inArray ? top.getIndexName() : lastKey;
+		std::string  ret  = std_sprintf("%s/%s %s", top.path, name, value);
 		return ret;
 	}
 
     bool null() override {
-    	auto value = sax_value::NULL_STRING;
-    	auto line = toLine(value);
+    	std::string value = NULL_STRING;
+    	std::string line = toLine(value);
      	std::cout << line << std::endl;
         return true;
     }
     bool boolean(bool newValue) override {
-    	auto value = sax_value::to_string(newValue);
-    	auto line = toLine(value);
+    	std::string value = to_string(newValue);
+    	std::string line = toLine(value);
      	std::cout << line << std::endl;
         return true;
     }
     bool number_integer(number_integer_t newValue) override {
-    	auto value = std::to_string(newValue);
-       	auto line = toLine(value);
+    	std::string value = std::to_string(newValue);
+       	std::string line = toLine(value);
 		std::cout << line << std::endl;
 		return true;
     }
     bool number_unsigned(number_unsigned_t newValue) override {
-    	auto value = std::to_string(newValue);
-       	auto line = toLine(value);
+    	std::string value = std::to_string(newValue);
+       	std::string line = toLine(value);
 		std::cout << line << std::endl;
 		return true;
     }
     bool number_float(number_float_t , const string_t& newValueString) override {
-    	auto value = newValueString;
-       	auto line = toLine(value);
+       	std::string line = toLine(newValueString);
 		std::cout << line << std::endl;
 		return true;
     }
     bool string(string_t& newValue) override {
-    	auto value = newValue;
-       	auto line = toLine(value);
+       	std::string line = toLine(newValue);
 		std::cout << line << std::endl;
 		return true;
     }
@@ -226,31 +243,30 @@ class sax_handler : public json::json_sax_t {
         return true;
     }
 
+
+    void container(bool inArray) {
+    	if (sax_context::empty()) {
+    		sax_context context = sax_context("", inArray, 0);
+    		sax_context::push(context);
+    	} else {
+    	   	sax_context& top    = sax_context::top();
+    	   	std::string  name    = top.inArray ? top.getIndexName() : lastKey;
+	   		sax_context  context = sax_context(top.path + "/" + name, inArray, 0);
+	   		sax_context::push(context);
+    	}
+    }
     //
     // object
     //
-    void container(bool inArray) {
-    	if (sax_context::stack.empty()) {
-    		sax_context context = sax_context("", inArray, 0);
-    		sax_context::stack.push_back(context);
-    	} else {
-    	   	sax_context& back    = sax_context::stack.back();
-    	   	std::string  name    = back.inArray ? back.getIndexName() : lastKey;
-	   		sax_context  context = sax_context(back.path + "/" + name, inArray, 0);
-	   		sax_context::stack.push_back(context);
-    	}
-    }
     bool start_object(std::size_t) override {
     	bool inArray = false;
     	container(inArray);
     	return true;
     }
-
     bool end_object() override {
-    	sax_context::stack.pop_back();
+    	sax_context::pop();
     	return true;
     }
-
     //
     // array
     //
@@ -259,9 +275,8 @@ class sax_handler : public json::json_sax_t {
     	container(inArray);
     	return true;
     }
-
     bool end_array() override {
-    	sax_context::stack.pop_back();
+    	sax_context::pop();
     	return true;
     }
 

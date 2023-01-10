@@ -43,24 +43,11 @@ static const Logger logger = Logger::getLogger("main");
 
 
 class sax_value {
-public:
+private:
 	enum Type {
 		NULL_, BOOL, INT, UINT, FLOAT, STRING,
 	};
 
-//	static constexpr const char* NULL_STRING  = "NULL";
-//	static constexpr const char* TRUE_STRING  = "TRUE";
-//	static constexpr const char* FALSE_STRING = "FALSE";
-
-	static const std::string NULL_STRING  = "NULL";
-	static const std::string TRUE_STRING  = "TRUE";
-	static const std::string FALSE_STRING = "FALSE";
-
-	static const char* to_string(bool value) {
-		return value ? TRUE_STRING : FALSE_STRING;
-	}
-
-private:
 	const Type        type;
 	const bool        boolValue;
 	const int64_t     intValue;
@@ -69,10 +56,21 @@ private:
 	const std::string stringValue;
 
 public:
+	static const std::string& nullString() {
+		static std::string stringNull = "NULL";
+		return stringNull;
+	}
+
+	static const std::string& to_string(bool value) {
+		static std::string stringTrue  = "TRUE";
+		static std::string stringFalse = "FALSE";
+		return value ? stringTrue : stringFalse;
+	}
+
 	sax_value():
-		type(Type::NULL_), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue(NULL_STRING) {}
+		type(Type::NULL_), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue(nullString()) {}
 	sax_value(bool newValue) :
-		type(Type::BOOL), boolValue(newValue), intValue(0), uintValue(0), doubleValue(0), stringValue(boolValue ? TRUE_STRING : FALSE_STRING) {}
+		type(Type::BOOL), boolValue(newValue), intValue(0), uintValue(0), doubleValue(0), stringValue(to_string(newValue)) {}
 	sax_value(int64_t newValue) :
 		type(Type::INT), boolValue(false), intValue(newValue), uintValue((uint64_t)newValue), doubleValue(0), stringValue(std::to_string(newValue)) {}
 	sax_value(uint64_t newValue) :

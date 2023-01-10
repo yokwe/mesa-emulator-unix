@@ -34,13 +34,13 @@
 #include <ios>
 #include <limits>
 #include <vector>
+#include <utility>
 
 using json = nlohmann::json;
 
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-/*
 
 class sax_value {
 public:
@@ -48,9 +48,13 @@ public:
 		NULL_, BOOL, INT, UINT, FLOAT, STRING,
 	};
 
-	static constexpr const char* NULL_STRING  = "NULL";
-	static constexpr const char* TRUE_STRING  = "TRUE";
-	static constexpr const char* FALSE_STRING = "FALSE";
+//	static constexpr const char* NULL_STRING  = "NULL";
+//	static constexpr const char* TRUE_STRING  = "TRUE";
+//	static constexpr const char* FALSE_STRING = "FALSE";
+
+	static const std::string NULL_STRING  = "NULL";
+	static const std::string TRUE_STRING  = "TRUE";
+	static const std::string FALSE_STRING = "FALSE";
 
 	static const char* to_string(bool value) {
 		return value ? TRUE_STRING : FALSE_STRING;
@@ -58,7 +62,6 @@ public:
 
 private:
 	const Type        type;
-private:
 	const bool        boolValue;
 	const int64_t     intValue;
 	const uint64_t    uintValue;
@@ -66,22 +69,45 @@ private:
 	const std::string stringValue;
 
 public:
-	sax_value()                      : type(Type::NULL_), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue("") {}
-	sax_value(bool newValue)         : type(Type::BOOL), boolValue(newValue), intValue(0), uintValue(0), doubleValue(0), stringValue("") {}
-	sax_value(int64_t newValue)      : type(Type::INT), boolValue(false), intValue(newValue), uintValue((uint64_t)newValue), doubleValue(0), stringValue("") {}
-	sax_value(uint64_t newValue)     : type(Type::UINT), boolValue(false), intValue((int64_t)newValue), uintValue(newValue), doubleValue(0), stringValue("") {}
-	sax_value(double newValue, std::string newValueString) : type(Type::FLOAT), boolValue(false), intValue(0), uintValue(0), doubleValue(newValue), stringValue(newValueString) {}
-	sax_value(std::string newValue)  : type(Type::STRING), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue(newValue) {}
-	sax_value(const sax_value& that) : type(that.type), boolValue(that.boolValue), intValue(that.intValue), uintValue(that.uintValue), doubleValue(that.doubleValue), stringValue(that.stringValue) {}
+	sax_value():
+		type(Type::NULL_), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue(NULL_STRING) {}
+	sax_value(bool newValue) :
+		type(Type::BOOL), boolValue(newValue), intValue(0), uintValue(0), doubleValue(0), stringValue(boolValue ? TRUE_STRING : FALSE_STRING) {}
+	sax_value(int64_t newValue) :
+		type(Type::INT), boolValue(false), intValue(newValue), uintValue((uint64_t)newValue), doubleValue(0), stringValue(std::to_string(newValue)) {}
+	sax_value(uint64_t newValue) :
+		type(Type::UINT), boolValue(false), intValue((int64_t)newValue), uintValue(newValue), doubleValue(0), stringValue(std::to_string(newValue)) {}
+	sax_value(double newValue, std::string newValueString) :
+		type(Type::FLOAT), boolValue(false), intValue(0), uintValue(0), doubleValue(newValue), stringValue(newValueString) {}
+	sax_value(std::string newValue) :
+		type(Type::STRING), boolValue(false), intValue(0), uintValue(0), doubleValue(0), stringValue(newValue) {}
+
+	// copy constructor
+	sax_value(const sax_value& that) :
+		type(that.type),
+		boolValue(that.boolValue),
+		intValue(that.intValue),
+		uintValue(that.uintValue),
+		doubleValue(that.doubleValue),
+		stringValue(that.stringValue) {}
+
+	// move constructor
+	sax_value(sax_value&& that) noexcept :
+		type(that.type),
+		boolValue(that.boolValue),
+		intValue(that.intValue),
+		uintValue(that.uintValue),
+		doubleValue(that.doubleValue),
+		stringValue(std::move(that.stringValue)) {}
 
 	bool isNull() const {
 		return type == Type::NULL_;
 	}
-	bool getBool() const {
+	bool to_bool() const {
 		assert(type == Type::BOOL);
 		return boolValue;
 	}
-	int64_t getInt() const {
+	int64_t to_int() const {
 		switch(type) {
 		case Type::INT:
 			return intValue;
@@ -99,7 +125,7 @@ public:
 		}
 		return 0;
 	}
-	uint64_t getUInt() const {
+	uint64_t to_uint() const {
 		switch(type) {
 		case Type::INT:
 			if (0 <= intValue) {
@@ -117,33 +143,14 @@ public:
 		}
 		return 0;
 	}
-	double getFloat() const {
+	double to_double() const {
 		assert(type == Type::FLOAT);
 		return doubleValue;
 	}
-	std::string getString() const {
-		switch(type) {
-		case Type::NULL_:
-			return NULL_STRING;
-		case Type::BOOL:
-			return boolValue ? TRUE_STRING : "FALSE";
-		case Type::INT:
-			return std::to_string(intValue);
-		case Type::UINT:
-			return std::to_string(uintValue);
-		case Type::FLOAT:
-			return stringValue;
-		case Type::STRING:
-			return stringValue;
-		default:
-			logger.error("Unexpected type %d", type);
-			ERROR();
-		}
-		return "";
+	const std::string& to_string() const {
+		return stringValue;
 	}
 };
-
-*/
 
 class sax_context {
 	static std::vector<sax_context> stack;
@@ -201,35 +208,37 @@ class sax_handler : public json::json_sax_t {
 	}
 
     bool null() override {
-    	std::string value = NULL_STRING;
-    	std::string line = toLine(value);
+    	sax_value value;
+    	std::string line = toLine(value.to_string());
      	std::cout << line << std::endl;
         return true;
     }
     bool boolean(bool newValue) override {
-    	std::string value = to_string(newValue);
-    	std::string line = toLine(value);
+    	sax_value value(newValue);
+    	std::string line = toLine(value.to_string());
      	std::cout << line << std::endl;
         return true;
     }
     bool number_integer(number_integer_t newValue) override {
-    	std::string value = std::to_string(newValue);
-       	std::string line = toLine(value);
+    	sax_value value(newValue);
+    	std::string line = toLine(value.to_string());
 		std::cout << line << std::endl;
 		return true;
     }
     bool number_unsigned(number_unsigned_t newValue) override {
-    	std::string value = std::to_string(newValue);
-       	std::string line = toLine(value);
+    	sax_value value(newValue);
+    	std::string line = toLine(value.to_string());
 		std::cout << line << std::endl;
 		return true;
     }
-    bool number_float(number_float_t , const string_t& newValueString) override {
-       	std::string line = toLine(newValueString);
+    bool number_float(number_float_t newValue, const string_t& newValueString) override {
+    	sax_value value(newValue, newValueString);
+    	std::string line = toLine(value.to_string());
 		std::cout << line << std::endl;
 		return true;
     }
     bool string(string_t& newValue) override {
+    	sax_value value(newValue);
        	std::string line = toLine(newValue);
 		std::cout << line << std::endl;
 		return true;

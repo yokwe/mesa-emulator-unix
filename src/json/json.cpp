@@ -2,6 +2,10 @@
 // json.cpp
 //
 
+#include <ios>
+#include <vector>
+#include <regex>
+
 #include "json.h"
 
 #include <nlohmann/json.hpp>
@@ -97,8 +101,9 @@ public:
 
 class json_dump : public nlohmann::json::json_sax_t {
 public:
-	std::string            lastKey;
-	std::vector<container> stack;
+	std::string             lastKey;
+	std::vector<container>  stack;
+	std::vector<std::regex> pathFilters;
 
 	bool empty() {
 		return stack.empty();
@@ -113,15 +118,71 @@ public:
 		return stack.back();
 	}
 
+	std::string glob_to_regex(std::string glob) {
+		std::string ret;
+		for(size_t i = 0; i < glob.size(); i++) {
+			char c = glob[i];
+			switch(c) {
+			case '?':
+				ret += "[^/]";
+				break;
+			case '*':
+				if ((i + 1) == glob.size()) {
+					ret += "[^/]*?"; // *
+				} else {
+					char next = glob[i + 1];
+					if (next == '*') {
+						ret += ".*?"; // **
+						i++;
+					} else {
+						ret += "[^/]*?"; // *
+					}
+				}
+				break;
+			case '+':
+			case '^':
+			case '$':
+			case '(':
+			case ')':
+			case '[':
+			case ']':
+			case '{':
+			case '}':
+			case '|':
+			case '\\':
+				ret += '\\';
+				ret += c;
+				break;
+			default:
+				ret += c;
+				break;
+			}
+		}
+		return ret;
+	}
+
+	void addPathFilter(std::string glob) {
+		std::string regex = glob_to_regex(glob);
+		std::regex re(regex);
+		pathFilters.push_back(re);
+	}
+	bool matchPathFilter(std::string& path) {
+		for(auto re: pathFilters) {
+			if (std::regex_match(path, re)) return true;
+		}
+		return false;
+	}
+
 	void process(const value& value) {
 		if (top().filter()) return;
 
 		std::string path = top().getPath(lastKey);
-
-		// TODO filter by path
-
-		std::string line = path + " " + value.to_string();
-		std::cout << line << std::endl;
+		if (matchPathFilter(path)) {
+			// filtered
+		} else {
+			std::string line = path + " " + value.to_string();
+			std::cout << line << std::endl;
+		}
 	}
 
 	bool null() override {
@@ -178,10 +239,8 @@ public:
 			push(container);
 		} else {
 			std::string path = top().getPath(lastKey);
-
-			// TODO filter by path
-
 			container container(path, inArray);
+			if (matchPathFilter(path)) container.setFilter();
 			push(container);
 		}
 	}
@@ -230,6 +289,14 @@ public:
 
 bool json::dump(std::istream& in) {
 	json_dump sax;
+
+	sax.addPathFilter("**/id");
+	sax.addPathFilter("**Id");
+	sax.addPathFilter("**/range/**");
+	sax.addPathFilter("**/is*");
+	sax.addPathFilter("**/loc/**");
+	sax.addPathFilter("**/definitionData/**");
+	sax.addPathFilter("**/bases/**");
 
 	return nlohmann::json::sax_parse(in, &sax);
 }

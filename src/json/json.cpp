@@ -10,17 +10,17 @@
 static const Logger logger = Logger::getLogger("json");
 
 
-using string = nlohmann::json;
+//
+// Use unnamed namespace to hide variables and classes
+//
+namespace {
+
+std::string NULL_STRING  = "NULL";
+std::string TRUE_STRING  = "TRUE";
+std::string FALSE_STRING = "FALSE";
 
 
-//
-//
-//
 class value {
-	static std::string NULL_STRING;
-	static std::string TRUE_STRING;
-	static std::string FALSE_STRING;
-
 public:
 	enum Type {
 		NULL_, BOOL, INT, UINT, FLOAT, STRING,
@@ -61,6 +61,7 @@ public:
 	}
 };
 
+
 class container {
 	std::string path;
 	bool        isArray; // array or record
@@ -92,16 +93,6 @@ public:
 	container(container&& that) noexcept :
 		path(std::move(that.path)), isArray(that.isArray), arrayIndex(that.arrayIndex), filterFlag(that.filterFlag) {}
 };
-
-
-
-//
-// static variables
-//
-std::string value::NULL_STRING  = "NULL";
-std::string value::TRUE_STRING  = "TRUE";
-std::string value::FALSE_STRING = "FALSE";
-
 
 
 class json_dump : public nlohmann::json::json_sax_t {
@@ -178,7 +169,6 @@ public:
 		return true;
 	}
 
-
 	//
 	// container
 	//
@@ -235,7 +225,11 @@ public:
 	}
 };
 
+}
+
+
 bool json::dump(std::istream& in) {
 	json_dump sax;
+
 	return nlohmann::json::sax_parse(in, &sax);
 }

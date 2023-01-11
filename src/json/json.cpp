@@ -290,11 +290,16 @@ public:
 bool json::dump(std::istream& in) {
 	json_dump sax;
 
-	sax.addPathFilter("**/id");
 	sax.addPathFilter("**Id");
 	sax.addPathFilter("**/range/**");
 	sax.addPathFilter("**/is*");
-	sax.addPathFilter("**/loc/**");
+	sax.addPathFilter("**/loc/includedFrom/**");
+	sax.addPathFilter("**/loc/offset");
+	sax.addPathFilter("**/loc/line");
+	sax.addPathFilter("**/loc/col");
+	sax.addPathFilter("**/loc/tokLen");
+	sax.addPathFilter("**/loc/spellingLoc/**");
+	sax.addPathFilter("**/loc/expansionLoc/**");
 	sax.addPathFilter("**/definitionData/**");
 	sax.addPathFilter("**/bases/**");
 

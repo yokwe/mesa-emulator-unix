@@ -39,8 +39,8 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	bool result = json::parse(std::cin);
-	logger.info("parse result = %d", result);
+	bool result = json::dump(std::cin);
+	logger.info("dump result = %d", result);
 
 
 	logger.info("STOP");

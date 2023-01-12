@@ -20,6 +20,9 @@ namespace {
 class json_dump : public json::impl::json_sax {
 public:
 	std::vector<std::regex> pathFilters;
+	bool skipFlag = false;
+	std::regex  skipPath;
+	std::string skipValue;
 
 	void addPathFilter(std::string glob) {
 		logger.info("pathFilter %s", glob);
@@ -33,26 +36,39 @@ public:
 		}
 		return false;
 	}
-
+	void skipUntil(const std::string& path, const std::string& value) {
+		logger.info("skipUntil %s %s", path, value);
+		skipFlag  = true;
+		std::string regex = json::impl::glob_to_regex(path);
+		std::regex re(regex);
+		skipPath  = re;
+		skipValue = value;
+	}
 	//
 	// value
 	//
-	void process(const json::impl::json_value& value) {
-		if (top().filter()) return;
+	bool process(const std::string& path, const json::impl::json_value& json_value) {
+		const std::string& value = json_value.to_string();
 
-		std::string path = top().getPath(lastKey);
-		if (matchPathFilter(path)) {
-			// filtered
-		} else {
-			std::string line = path + " " + value.to_string();
-			std::cout << line << std::endl;
+		if (skipFlag && value == skipValue && std::regex_match(path, skipPath)) {
+			skipFlag = false;
 		}
+		if (skipFlag) return false;
+
+		if (top().filter()) return false;
+
+		if (matchPathFilter(path)) return false;
+
+		std::cout << path << " " << value << std::endl;
+		return true;
 	}
 
 	//
 	// container
 	//
 	void process(json::impl::json_container& container) {
+		if (skipFlag) return;
+
 		const std::string& path = container.getPath();
 		if (matchPathFilter(path)) container.setFilter();
 	}
@@ -61,21 +77,16 @@ public:
 }
 
 
-bool json::dump(std::istream& in) {
+int json::dump(std::istream& in) {
 	json_dump sax;
 
-	sax.addPathFilter("**Id");
+	sax.skipUntil("/inner/*/loc/file", "src/main/a.cpp");
+
 	sax.addPathFilter("**/range/**");
-	sax.addPathFilter("**/is*");
-	sax.addPathFilter("**/loc/includedFrom/**");
-	sax.addPathFilter("**/loc/offset");
-	sax.addPathFilter("**/loc/line");
-	sax.addPathFilter("**/loc/col");
-	sax.addPathFilter("**/loc/tokLen");
-	sax.addPathFilter("**/loc/spellingLoc/**");
-	sax.addPathFilter("**/loc/expansionLoc/**");
+	sax.addPathFilter("**/loc/*");
 	sax.addPathFilter("**/definitionData/**");
 	sax.addPathFilter("**/bases/**");
+	sax.addPathFilter("**/referencedDecl/**");
 
 	return sax.parse(in);
 }

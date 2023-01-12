@@ -11,11 +11,6 @@ namespace json {
 namespace node {
 
 
-item_t::~item_t() {
-	if (valueNodeFree) delete valueNode;
-}
-
-
 std::string& item_t::getString() {
 	if (isNode()) {
 		logger.error("item is node");
@@ -25,12 +20,12 @@ std::string& item_t::getString() {
 }
 
 
-node_t& item_t::getNode() {
+std::shared_ptr<node_t> item_t::getNode() {
 	if (!isNode()) {
 		logger.error("item is string");
 		ERROR();
 	}
-	return *valueNode;
+	return valueNode;
 }
 
 

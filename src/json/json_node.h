@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace json {
 namespace node {
@@ -14,31 +15,32 @@ namespace node {
 class node_t;
 
 class item_t {
-	std::string path;
-	std::string valueString;
-	node_t*     valueNode;
-	bool        valueNodeFree;
+	std::string             path;
+	std::string             valueString;
+	std::shared_ptr<node_t> valueNode;
 
 public:
 	item_t(const std::string& path_, const std::string& value_) :
-		path(path_), valueString(value_), valueNode(nullptr), valueNodeFree(false) {}
+		path(path_),
+		valueString(value_),
+		valueNode(nullptr) {}
 	item_t(const std::string& path_, node_t* value_) :
-		path(path_), valueString(""), valueNode(value_), valueNodeFree(true) {}
-	item_t(const std::string& path_, node_t& value_) :
-		path(path_), valueString(""), valueNode(&value_), valueNodeFree(false) {}
+		path(path_),
+		valueString(""),
+		valueNode(value_) {}
 
 	// copy constructor
 	item_t(const item_t& that) :
-		path(that.path), valueString(that.valueString),
-		valueNode(that.valueNode), valueNodeFree(that.valueNodeFree) {}
+		path(that.path),
+		valueString(that.valueString),
+		valueNode(that.valueNode) {}
 
 	// move constructor
 	item_t(item_t&& that) noexcept :
-		path(std::move(that.path)), valueString(std::move(that.valueString)),
-		valueNode(that.valueNode), valueNodeFree(that.valueNodeFree) {}
+		path(std::move(that.path)),
+		valueString(that.valueString),
+		valueNode(that.valueNode) {}
 
-
-	~item_t();
 
 	std::string& getPath() {
 		return path;
@@ -48,8 +50,8 @@ public:
 		return valueNode != nullptr;
 	}
 
-	std::string& getString();
-	node_t&      getNode();
+	std::string&            getString();
+	std::shared_ptr<node_t> getNode();
 };
 
 
@@ -75,10 +77,6 @@ public:
 		entries.push_back(item);
 	}
 	void add(const std::string& path_, node_t* value_) {
-		item_t item(path_, value_);
-		entries.push_back(item);
-	}
-	void add(const std::string& path_, node_t& value_) {
 		item_t item(path_, value_);
 		entries.push_back(item);
 	}

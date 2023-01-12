@@ -2,164 +2,82 @@
 // json.cpp
 //
 
-#include <ios>
-#include <vector>
 #include <regex>
 
 #include "json.h"
 
-#include <nlohmann/json.hpp>
-
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("json");
+const Logger logger = Logger::getLogger("json");
 
+namespace json {
 
 //
-// Use unnamed namespace to hide variables and classes
+// static variable definition
 //
-namespace {
-
-std::string NULL_STRING  = "NULL";
-std::string TRUE_STRING  = "TRUE";
-std::string FALSE_STRING = "FALSE";
+const std::string value::NULL_STRING  = "NULL";
+const std::string value::TRUE_STRING  = "TRUE";
+const std::string value::FALSE_STRING = "FALSE";
 
 
-class value {
-public:
-	enum Type {
-		NULL_, BOOL, INT, UINT, FLOAT, STRING,
-	};
-
-	const Type        type;
-	const std::string string;
-
-	// constructor
-	value():
-		type(Type::NULL_), string(NULL_STRING)  {}
-	value(bool newValue) :
-		type(Type::BOOL), string(newValue ? TRUE_STRING : FALSE_STRING) {}
-	value(int64_t newValue) :
-		type(Type::INT), string(std::to_string(newValue)) {}
-	value(uint64_t newValue) :
-		type(Type::UINT), string(std::to_string(newValue)) {}
-	value(double /*newValue*/, std::string newValueString) :
-		type(Type::FLOAT), string(newValueString) {}
-	value(std::string newValue) :
-		type(Type::STRING), string(newValue) {}
-
-	// copy constructor
-	value(const value& that) :
-		type(that.type),
-		string(that.string) {}
-
-	// move constructor
-	value(value&& that) noexcept :
-		type(that.type),
-		string(std::move(that.string)) {}
-
-	Type to_type() const {
-		return type;
-	}
-	const std::string& to_string() const {
-		return string;
-	}
-};
+bool json_sax::binary(nlohmann::json::binary_t& /*val*/) {
+	ERROR();
+	return true;
+}
+bool json_sax::parse_error(std::size_t position, const std::string& last_token, const nlohmann::json::exception& ex) {
+	logger.error("parser_error");
+	logger.error("  position = %ld  last token = %s  ex = %s", position, last_token, ex.what());
+	ERROR();
+	return false;
+}
 
 
-class container {
-	std::string path;
-	bool        isArray; // array or record
-	int         arrayIndex;
-	bool        filterFlag; // true => filter  false => not filtered
-
-public:
-	std::string getPath(std::string& key) {
-		return path + "/" + (isArray ? std::to_string(arrayIndex++) : key);
-	}
-	void setFilter() {
-		filterFlag = true;
-	}
-	bool filter() {
-		return filterFlag;
-	}
-
-	// default constructor
-	container() :
-		path(""), isArray(false), arrayIndex(0), filterFlag(false) {}
-	container(std::string path_, bool inArray_) :
-		path(path_), isArray(inArray_), arrayIndex(0), filterFlag(false) {}
-
-	// copy constructor
-	container(const container& that) :
-		path(that.path), isArray(that.isArray), arrayIndex(that.arrayIndex), filterFlag(that.filterFlag) {}
-
-	// move constructor
-	container(container&& that) noexcept :
-		path(std::move(that.path)), isArray(that.isArray), arrayIndex(that.arrayIndex), filterFlag(that.filterFlag) {}
-};
-
-
-class json_dump : public nlohmann::json::json_sax_t {
-public:
-	std::string             lastKey;
-	std::vector<container>  stack;
-	std::vector<std::regex> pathFilters;
-
-	bool empty() {
-		return stack.empty();
-	}
-	void push(const container& newValue) {
-		stack.push_back(newValue);
-	}
-	void pop() {
-		stack.pop_back();
-	}
-	container& top() {
-		return stack.back();
-	}
-
-	std::string glob_to_regex(std::string glob) {
-		std::string ret;
-		for(size_t i = 0; i < glob.size(); i++) {
-			char c = glob[i];
-			switch(c) {
-			case '?':
-				ret += "[^/]";
-				break;
-			case '*':
-				if ((i + 1) == glob.size()) {
-					ret += "[^/]*?"; // *
+std::string glob_to_regex(std::string glob) {
+	std::string ret;
+	for(size_t i = 0; i < glob.size(); i++) {
+		char c = glob[i];
+		switch(c) {
+		case '?':
+			ret += "[^/]";
+			break;
+		case '*':
+			if ((i + 1) == glob.size()) {
+				ret += "[^/]*?"; // *
+			} else {
+				char next = glob[i + 1];
+				if (next == '*') {
+					ret += ".*?"; // **
+					i++;
 				} else {
-					char next = glob[i + 1];
-					if (next == '*') {
-						ret += ".*?"; // **
-						i++;
-					} else {
-						ret += "[^/]*?"; // *
-					}
+					ret += "[^/]*?"; // *
 				}
-				break;
-			case '+':
-			case '^':
-			case '$':
-			case '(':
-			case ')':
-			case '[':
-			case ']':
-			case '{':
-			case '}':
-			case '|':
-			case '\\':
-				ret += '\\';
-				ret += c;
-				break;
-			default:
-				ret += c;
-				break;
 			}
+			break;
+		case '+':
+		case '^':
+		case '$':
+		case '(':
+		case ')':
+		case '[':
+		case ']':
+		case '{':
+		case '}':
+		case '|':
+		case '\\':
+			ret += '\\';
+			ret += c;
+			break;
+		default:
+			ret += c;
+			break;
 		}
-		return ret;
 	}
+	return ret;
+}
+
+
+class json_dump : public json_sax {
+public:
+	std::vector<std::regex> pathFilters;
 
 	void addPathFilter(std::string glob) {
 		std::string regex = glob_to_regex(glob);
@@ -173,6 +91,9 @@ public:
 		return false;
 	}
 
+	//
+	// value
+	//
 	void process(const value& value) {
 		if (top().filter()) return;
 
@@ -183,51 +104,6 @@ public:
 			std::string line = path + " " + value.to_string();
 			std::cout << line << std::endl;
 		}
-	}
-
-	bool null() override {
-		value value;
-
-		process(value);
-		return true;
-	}
-	bool boolean(bool newValue) override {
-		value value(newValue);
-
-		process(value);
-		return true;
-	}
-	bool number_integer(number_integer_t newValue) override {
-		value value(newValue);
-
-		process(value);
-		return true;
-	}
-	bool number_unsigned(number_unsigned_t newValue) override {
-		value value(newValue);
-
-		process(value);
-		return true;
-	}
-	bool number_float(number_float_t newValue, const string_t& newValueString) override {
-		value value(newValue, newValueString);
-
-		process(value);
-		return true;
-	}
-	bool string(string_t& newValue) override {
-		value value(newValue);
-
-		process(value);
-		return true;
-	}
-
-	//
-	// key
-	//
-	bool key(string_t& newValue) override {
-		lastKey = newValue;
-		return true;
 	}
 
 	//
@@ -244,50 +120,10 @@ public:
 			push(container);
 		}
 	}
-	// object
-	bool start_object(std::size_t) override {
-		bool inArray = false;
-
-		process(inArray);
-		return true;
-	}
-	bool end_object() override {
-		pop();
-		return true;
-	}
-	// array
-	bool start_array(std::size_t) override {
-		bool inArray = true;
-
-		process(inArray);
-		return true;
-	}
-	bool end_array() override {
-		pop();
-		return true;
-	}
-
-
-	//
-	// binary ???
-	//
-	bool binary(nlohmann::json::binary_t& /*val*/) override {
-		ERROR();
-		return true;
-	}
-
-	bool parse_error(std::size_t position, const std::string& last_token, const nlohmann::json::exception& ex) override {
-		logger.error("parser_error");
-		logger.error("  position = %ld  last token = %s  ex = %s", position, last_token, ex.what());
-		ERROR();
-		return false;
-	}
 };
 
-}
 
-
-bool json::dump(std::istream& in) {
+bool dump(std::istream& in) {
 	json_dump sax;
 
 	sax.addPathFilter("**Id");
@@ -304,4 +140,6 @@ bool json::dump(std::istream& in) {
 	sax.addPathFilter("**/bases/**");
 
 	return nlohmann::json::sax_parse(in, &sax);
+}
+
 }

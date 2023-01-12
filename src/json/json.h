@@ -10,6 +10,6 @@ namespace json {
 //
 //
 //
-bool dump(std::istream& in);
+int dump(std::istream& in);
 
 }

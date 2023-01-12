@@ -48,7 +48,7 @@ cmake-qt5:
 build:
 	/usr/bin/time cmake --build ${BUILD_DIR}
 	
-distclean: distclean-qmake distclean-eclipse distclean-cmake
+distclean: distclean-qmake distclean-eclipse distclean-cmake clean-macos
 
 distclean-qmake:
 	rm -f  src/*/Makefile
@@ -63,6 +63,9 @@ distclean-eclipse:
 
 distclean-cmake:
 	rm -rf ${BUILD_DIR}
+
+distclean-macos:
+	find . -type f -name '._*' -print -delete
 
 fix-permission:
 	find . -type d -exec chmod 0755 {} \;
@@ -118,7 +121,10 @@ run-test: clear-log
 	${BUILD_DIR}/build/test/test
 	
 run-main: clear-log
-	${BUILD_DIR}/build/main/main
+	/usr/bin/time ${BUILD_DIR}/build/main/main <tmp/a
+	
+run-json: clear-log
+	/usr/bin/time ${BUILD_DIR}/build/json/json <tmp/a
 	
 run-dumpSymbol: clear-log
 	${BUILD_DIR}/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd

@@ -39,8 +39,8 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	bool result = json::dump(std::cin);
-	logger.info("dump result = %d", result);
+	int countValue = json::dump(std::cin);
+	logger.info("dump %d", countValue);
 
 
 	logger.info("STOP");

@@ -116,11 +116,14 @@ class json_sax : public nlohmann::json::json_sax_t {
 public:
 	std::string                 lastKey;
 	std::vector<json_container> stack;
+	int                         countValue;
 
-	bool parse(std::istream& in) {
-		return nlohmann::json::sax_parse(in, this);
+	int parse(std::istream& in) {
+		countValue = 0;
+		bool result = nlohmann::json::sax_parse(in, this);
+		if (!result) countValue = -countValue;
+		return countValue;
 	}
-
 
 	bool empty() {
 		return stack.empty();
@@ -136,42 +139,48 @@ public:
 	}
 
 
-	virtual void process(const json_value& value) = 0;
+	virtual bool process(const std::string& path, const json_value& value) = 0;
+
+	void processCount(const json_value& value) {
+		std::string path = top().getPath(lastKey);
+
+		if (process(path, value)) countValue++;
+	}
 
 	bool null() override {
 		json_value value;
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 	bool boolean(bool newValue) override {
 		json_value value(newValue);
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 	bool number_integer(number_integer_t newValue) override {
 		json_value value(newValue);
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 	bool number_unsigned(number_unsigned_t newValue) override {
 		json_value value(newValue);
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 	bool number_float(number_float_t newValue, const string_t& newValueString) override {
 		json_value value(newValue, newValueString);
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 	bool string(string_t& newValue) override {
 		json_value value(newValue);
 
-		process(value);
+		processCount(value);
 		return true;
 	}
 

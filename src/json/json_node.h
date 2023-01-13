@@ -7,81 +7,181 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <iostream>
+
+#include <nlohmann/json.hpp>
+
+#include "json_impl.h"
 
 namespace json {
 namespace node {
 
 
-class node_t;
-
-class item_t {
-	std::string             path;
-	std::string             valueString;
-	std::shared_ptr<node_t> valueNode;
+class json_node : public nlohmann::json::json_sax_t {
+	std::string lastKey;
 
 public:
-	item_t(const std::string& path_, const std::string& value_) :
-		path(path_),
-		valueString(value_),
-		valueNode(nullptr) {}
-	item_t(const std::string& path_, node_t* value_) :
-		path(path_),
-		valueString(""),
-		valueNode(value_) {}
+	class context {
+		static std::vector<context> stack;
 
-	// copy constructor
-	item_t(const item_t& that) :
-		path(that.path),
-		valueString(that.valueString),
-		valueNode(that.valueNode) {}
+		bool        isArray;
+		int         arrayIndex;
+		int         level;
+		std::string path;
+		std::string name;
 
-	// move constructor
-	item_t(item_t&& that) noexcept :
-		path(std::move(that.path)),
-		valueString(std::move(that.valueString)),
-		valueNode(std::move(that.valueNode)) {}
+		std::string makeName(const std::string& key) {
+			return isArray ? std::to_string(arrayIndex++) : key;
+		}
+
+	public:
+		context(bool isArray_, const std::string& path_, const std::string& name_) :
+			isArray(isArray_),
+			arrayIndex(0),
+			level((int)stack.size()),
+			path(path_),
+			name(name_) {}
+
+		// copy constructor
+		context(const context& that) :
+			isArray(that.isArray),
+			arrayIndex(that.arrayIndex),
+			level(that.level),
+			path(that.path),
+			name(that.name) {}
+		// move constructor
+		context(context&& that) noexcept :
+			isArray(that.isArray),
+			arrayIndex(that.arrayIndex),
+			level(that.level),
+			path(std::move(that.path)),
+			name(std::move(that.name)) {}
 
 
-	std::string& getPath() {
-		return path;
+		static void push(const context& newValue) {
+			stack.push_back(newValue);
+		}
+		static void pop() {
+			stack.pop_back();
+		}
+		static std::tuple<std::string, std::string> getPathName(const std::string& key) {
+			//           path         name
+			if (stack.empty()) {
+				return {"", ""};
+			} else {
+				context&    parent = stack.back();
+				std::string name   = parent.makeName(key);
+				std::string path   = parent.path + "/" + name;
+				return {path, name};
+			}
+		}
+	};
+
+	static void push(const context& newValue) {
+		context::push(newValue);
+	}
+	static void pop() {
+		context::pop();
 	}
 
-	bool isNode() {
-		return valueNode != nullptr;
+
+	//
+	// parse input stream
+	//
+	bool parse(std::istream& in) {
+		return nlohmann::json::sax_parse(in, this);
 	}
 
-	std::string&            getString();
-	std::shared_ptr<node_t> getNode();
+
+	//
+	// key
+	//
+	bool key(string_t& newValue) override {
+		lastKey = newValue;
+		return true;
+	}
+
+
+	//
+	// value
+	//
+	void processValue(const std::string& value) {
+		const auto[path, name] = context::getPathName(lastKey);
+		std::cout << path << " " << value << std::endl;
+	}
+	bool null() override {
+		processValue("NULL");
+		return true;
+	}
+	bool boolean(bool newValue) override {
+		processValue(newValue ? "TRUE" : "FALSE");
+		return true;
+	}
+	bool number_integer(number_integer_t newValue) override {
+		processValue(std::to_string(newValue));
+		return true;
+	}
+	bool number_unsigned(number_unsigned_t newValue) override {
+		processValue(std::to_string(newValue));
+		return true;
+	}
+	bool number_float(number_float_t newValue, const string_t& newValueString) override {
+		(void)newValue;
+		processValue(newValueString);
+		return true;
+	}
+	bool string(string_t& newValue) override {
+		processValue(newValue);
+		return true;
+	}
+
+
+	//
+	// container
+	//
+	void processContainer(bool isArray) {
+		const auto[path, name] = context::getPathName(lastKey);
+		context my(isArray, path, name);
+		push(my);
+	}
+	// object
+	bool start_object(std::size_t) override {
+		bool isArray = false;
+
+		processContainer(isArray);
+		return true;
+	}
+	bool end_object() override {
+		pop();
+		return true;
+	}
+	// array
+	bool start_array(std::size_t) override {
+		bool isArray = true;
+
+		processContainer(isArray);
+		return true;
+	}
+	bool end_array() override {
+		pop();
+		return true;
+	}
+
+
+	//
+	// binary
+	//
+	bool binary(nlohmann::json::binary_t& /*val*/) override;
+
+
+	//
+	// error
+	//
+	bool parse_error(std::size_t position, const std::string& last_token, const nlohmann::json::exception& ex) override;
 };
 
 
-class node_t {
-public:
-	std::string         path;
-	std::vector<item_t> entries;
-
-	node_t(const std::string& path_) : path(path_) {}
-
-	// copy constructor
-	node_t(const node_t& that) : path(that.path), entries(that.entries) {}
-
-	// move constructor
-	node_t(node_t&& that) noexcept :
-		path(std::move(that.path)) {
-		std::move(that.entries.begin(), that.entries.end(), std::back_inserter(entries));
-	}
-
-
-	void add(const std::string& path_, const std::string& value_) {
-		item_t item(path_, value_);
-		entries.push_back(item);
-	}
-	void add(const std::string& path_, node_t* value_) {
-		item_t item(path_, value_);
-		entries.push_back(item);
-	}
-};
-
+int dump(std::istream& in);
 
 }
 }

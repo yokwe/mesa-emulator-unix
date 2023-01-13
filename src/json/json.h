@@ -14,5 +14,6 @@ std::string glob_to_regex(std::string glob);
 
 
 int dump(std::istream& in);
+int dump2(std::istream& in);
 
 }

@@ -7,6 +7,7 @@
 
 #include "json.h"
 #include "json_impl.h"
+#include "json_node.h"
 
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("json");

@@ -103,9 +103,13 @@ public:
 	//
 	// value
 	//
+	void process(const std::string& path, const std::string& name, const std::string& value) {
+		// FIXME
+		std::cout << path << " " << value << std::endl;
+	}
 	void processValue(const std::string& value) {
 		const auto[path, name] = context::getPathName(lastKey);
-		std::cout << path << " " << value << std::endl;
+		process(path, name, value);
 	}
 	bool null() override {
 		processValue("NULL");
@@ -137,10 +141,15 @@ public:
 	//
 	// container
 	//
+	void process(const std::string& path, const std::string& name, const context& my) {
+		// FIXME
+	}
 	void processContainer(bool isArray) {
 		const auto[path, name] = context::getPathName(lastKey);
 		context my(isArray, path, name);
 		push(my);
+
+		process(path, name, my);
 	}
 	// object
 	bool start_object(std::size_t) override {

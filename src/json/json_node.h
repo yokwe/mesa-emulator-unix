@@ -38,8 +38,8 @@ public:
 	// move constructor
 	item_t(item_t&& that) noexcept :
 		path(std::move(that.path)),
-		valueString(that.valueString),
-		valueNode(that.valueNode) {}
+		valueString(std::move(that.valueString)),
+		valueNode(std::move(that.valueNode)) {}
 
 
 	std::string& getPath() {

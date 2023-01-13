@@ -11,8 +11,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "json_impl.h"
-
 namespace json {
 namespace node {
 

@@ -248,5 +248,7 @@ public:
 };
 
 
+int dump(std::istream& in);
+
 }
 }

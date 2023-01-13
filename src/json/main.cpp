@@ -32,6 +32,7 @@
 static const Logger logger = Logger::getLogger("main");
 
 #include "json.h"
+#include "json_impl.h"
 #include "json_node.h"
 
 int main(int, char**) {
@@ -40,10 +41,10 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	// int countValue = json::dump(std::cin);
-	int countValue = json::node::dump(std::cin);
+	int countValue = json::impl::dump(std::cin);
 	logger.info("dump %d", countValue);
 
+	json::node::dump(std::cin);
 
 	logger.info("STOP");
 	return 0;

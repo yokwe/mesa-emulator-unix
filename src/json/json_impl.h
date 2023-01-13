@@ -2,6 +2,7 @@
 //
 //
 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -11,13 +12,6 @@
 
 namespace json {
 namespace impl {
-
-//
-// utility function
-//
-std::string glob_to_regex(std::string glob);
-
-
 //
 // json_value
 //
@@ -86,8 +80,8 @@ public:
 		return filterFlag;
 	}
 
-	std::string getPath(const std::string& key) {
-		return path + "/" + (isArray ? std::to_string(arrayIndex++) : key);
+	std::string getName(const std::string& key) {
+		return isArray ? std::to_string(arrayIndex++) : key;
 	}
 	const std::string& getPath() const {
 		return path;
@@ -139,12 +133,15 @@ public:
 	}
 
 
-	virtual bool process(const std::string& path, const json_value& value) = 0;
+	virtual bool process(const std::string& path, const std::string& name, const json_value& value) = 0;
 
 	void processCount(const json_value& value) {
-		std::string path = top().getPath(lastKey);
+		json_container& parent = top();
 
-		if (process(path, value)) countValue++;
+		std::string name = parent.getName(lastKey);
+		std::string path = parent.getPath() + "/" + name;
+
+		if (process(path, name, value)) countValue++;
 	}
 
 	bool null() override {
@@ -195,13 +192,23 @@ public:
 	//
 	// container
 	//
-	virtual void process(json_container& conatiner) = 0;
+	virtual void process(const std::string& path, const std::string& name, json_container& conatiner) = 0;
 
 	void process(bool isArray) {
-		std::string path = empty() ? "" : top().getPath(lastKey);
+		std::string path;
+		std::string name;
+
+		if (empty()) {
+			// Special case for root
+		} else {
+			json_container& parent = top();
+
+			name = parent.getName(lastKey);
+			path = parent.getPath() + "/" + name;
+		}
 
 		json_container container(path, isArray);
-		process(container);
+		process(path, name, container);
 		push(container);
 	}
 	// object

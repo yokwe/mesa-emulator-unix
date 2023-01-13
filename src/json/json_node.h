@@ -22,19 +22,19 @@ public:
 	class context {
 		static std::vector<context> stack;
 
-		bool        isArray;
+		bool        arrayFlag;
 		int         arrayIndex;
 		int         level;
 		std::string path;
 		std::string name;
 
 		std::string makeName(const std::string& key) {
-			return isArray ? std::to_string(arrayIndex++) : key;
+			return arrayFlag ? std::to_string(arrayIndex++) : key;
 		}
 
 	public:
 		context(bool isArray_, const std::string& path_, const std::string& name_) :
-			isArray(isArray_),
+			arrayFlag(isArray_),
 			arrayIndex(0),
 			level((int)stack.size()),
 			path(path_),
@@ -42,20 +42,39 @@ public:
 
 		// copy constructor
 		context(const context& that) :
-			isArray(that.isArray),
+			arrayFlag(that.arrayFlag),
 			arrayIndex(that.arrayIndex),
 			level(that.level),
 			path(that.path),
 			name(that.name) {}
 		// move constructor
 		context(context&& that) noexcept :
-			isArray(that.isArray),
+			arrayFlag(that.arrayFlag),
 			arrayIndex(that.arrayIndex),
 			level(that.level),
 			path(std::move(that.path)),
 			name(std::move(that.name)) {}
 
 
+		bool isArray() {
+			return arrayFlag;
+		}
+		int getArrayIndex() {
+			return arrayIndex;
+		}
+		int getLevel() {
+			return level;
+		}
+		const std::string& getPath() const {
+			return path;
+		}
+		const std::string& getName() const {
+			return name;
+		}
+
+		static context& top() {
+			return stack.back();
+		}
 		static void push(const context& newValue) {
 			stack.push_back(newValue);
 		}
@@ -75,6 +94,9 @@ public:
 		}
 	};
 
+	static context& top() {
+		return context::top();
+	}
 	static void push(const context& newValue) {
 		context::push(newValue);
 	}
@@ -104,6 +126,9 @@ public:
 	// value
 	//
 	void process(const std::string& path, const std::string& name, const std::string& value) {
+		(void)path;
+		(void)name;
+		(void)value;
 		// FIXME
 		std::cout << path << " " << value << std::endl;
 	}
@@ -141,7 +166,12 @@ public:
 	//
 	// container
 	//
-	void process(const std::string& path, const std::string& name, const context& my) {
+	void enter(const context& my) {
+		(void)my;
+		// FIXME
+	}
+	void leave(const context& my) {
+		(void)my;
 		// FIXME
 	}
 	void processContainer(bool isArray) {
@@ -149,7 +179,7 @@ public:
 		context my(isArray, path, name);
 		push(my);
 
-		process(path, name, my);
+		enter(my);
 	}
 	// object
 	bool start_object(std::size_t) override {
@@ -159,6 +189,8 @@ public:
 		return true;
 	}
 	bool end_object() override {
+		leave(top());
+
 		pop();
 		return true;
 	}
@@ -170,6 +202,8 @@ public:
 		return true;
 	}
 	bool end_array() override {
+		leave(top());
+
 		pop();
 		return true;
 	}

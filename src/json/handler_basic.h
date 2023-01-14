@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 #include "handler.h"
 
@@ -12,7 +13,7 @@
 namespace json {
 namespace handler {
 
-	class hander_basic_t : public handler_t {
+	class handler_basic_t : public handler_t {
 	public:
 		void start() {
 			std::cout << "START" << std::endl;

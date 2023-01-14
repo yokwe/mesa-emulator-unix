@@ -41,7 +41,7 @@ namespace handler {
 				m_name(std::move(that.m_name)) {}
 
 
-			std::string makeName(const std::string& key) {
+			std::string make_name(const std::string& key) {
 				return m_arrayFlag ? std::to_string(m_arrayIndex++) : key;
 			}
 			bool array() {
@@ -63,7 +63,7 @@ namespace handler {
 				return {"", ""};
 			} else {
 				context_t&  parent = m_stack.back();
-				std::string name   = parent.makeName(key);
+				std::string name   = parent.make_name(key);
 				std::string path   = parent.path() + "/" + name;
 				return {path, name};
 			}

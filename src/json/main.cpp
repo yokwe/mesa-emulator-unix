@@ -34,7 +34,7 @@ static const Logger logger = Logger::getLogger("main");
 #include "handler_basic.h"
 
 int main(int, char**) {
-	logger.info("START");
+	logger.info("START ");
 
 	setSignalHandler(SIGSEGV);
 	setSignalHandler(SIGILL);

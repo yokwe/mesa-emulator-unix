@@ -8,6 +8,7 @@ add_executable (
   json.cpp
   json_handler.cpp
   handler_basic.cpp
+  handler_dot.cpp
   )
 
 add_dependencies(json util)

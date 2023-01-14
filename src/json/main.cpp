@@ -31,7 +31,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-#include "handler_basic.h"
+#include "handler_dot.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -40,7 +40,7 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	json::handler::dump_basic(std::cin);
+	json::handler::dump_dot(std::cin);
 
 	logger.info("STOP");
 	return 0;

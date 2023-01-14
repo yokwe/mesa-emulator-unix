@@ -18,7 +18,7 @@ namespace handler {
 			std::cout << "START" << std::endl;
 		}
 		void stop() {
-			std::cout << "START" << std::endl;
+			std::cout << "STOP" << std::endl;
 		}
 		void item (const std::string& key, const std::string& value) {
 			std::cout << "ITEM  " << key << " " << value << std::endl;

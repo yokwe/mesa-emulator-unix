@@ -16,18 +16,18 @@ namespace json {
 class json_handler_t : public nlohmann::json::json_sax_t {
 public:
 	std::string lastKey;
-	handler_t*  handler;
+	handler_t&  handler;
 
-	json_handler_t(handler_t* handler_) : handler(handler_) {}
+	json_handler_t(handler_t& handler_) : handler(handler_) {}
 
 
 	//
 	// parse input stream
 	//
 	void parse(std::istream& in) {
-		handler->start();
+		handler.start();
 		nlohmann::json::sax_parse(in, this);
-		handler->stop();
+		handler.stop();
 	}
 
 
@@ -44,7 +44,7 @@ public:
 	// value
 	//
 	void item(const std::string& key, const std::string& value) {
-		handler->item(key, value);
+		handler.item(key, value);
 	}
 	bool null() override {
 		item(lastKey, "NULL");
@@ -77,10 +77,10 @@ public:
 	// container
 	//
 	void leave() {
-		handler->leave();
+		handler.leave();
 	}
 	void enter(const std::string& key, bool isArray) {
-		handler->enter(key, isArray);
+		handler.enter(key, isArray);
 	}
 	// object
 	bool start_object(std::size_t) override {

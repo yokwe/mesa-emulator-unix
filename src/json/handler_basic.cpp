@@ -11,11 +11,11 @@ namespace handler {
 
 
 void dump_basic(std::istream& in) {
-	hander_basic_t handler;
+	handler_basic_t handler;
 
-	json_handler_t sax(&handler);
+	json_handler_t json_handler(handler);
 
-	sax.parse(in);
+	json_handler.parse(in);
 }
 
 

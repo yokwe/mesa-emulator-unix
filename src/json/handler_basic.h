@@ -24,7 +24,7 @@ namespace handler {
 			std::cout << "ITEM  " << key << " " << value << std::endl;
 		}
 		void enter(const std::string& key, const bool         isArray){
-			std::cout << "ENTER " << key << " " << (isArray ? "ARRAY" : "OBJECT") << std::endl;
+			std::cout << "ENTER " << (isArray ? "ARRAY " : "OBJECT") << " " << key << std::endl;
 		}
 		void leave() {
 			std::cout << "LEAVE" << std::endl;

@@ -64,6 +64,10 @@ class token_handler_t {
 public:
 	virtual ~token_handler_t() {}
 
+	// life cycle event
+	virtual void start() = 0;
+	virtual void stop()  = 0;
+	// data event
 	virtual void item (token_t& token) = 0;
 	virtual void enter(token_t& token) = 0;
 	virtual void leave(token_t& token) = 0;
@@ -127,7 +131,9 @@ public:
 	// parse input stream
 	//
 	void parse(std::istream& in) {
+		m_handler.start();
 		nlohmann::json::sax_parse(in, this);
+		m_handler.stop();
 	}
 
 

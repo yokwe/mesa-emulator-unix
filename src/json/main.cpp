@@ -33,7 +33,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "json_token.h"
+#include "token_basic.h"
 
 
 #include "../util/Util.h"
@@ -47,7 +47,7 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	json::token::dump(std::cin);
+	json::token::dump_basic(std::cin);
 
 	logger.info("STOP");
 	return 0;

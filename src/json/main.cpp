@@ -28,10 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+#include <string>
+#include <iostream>
+
+#include <nlohmann/json.hpp>
+
+#include "json_token.h"
+
+
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-#include "handler_dot.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -40,7 +47,7 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	json::handler::dump_dot(std::cin);
+	json::token::dump(std::cin);
 
 	logger.info("STOP");
 	return 0;

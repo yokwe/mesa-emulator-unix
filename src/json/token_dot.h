@@ -15,10 +15,9 @@ namespace token {
 
 
 class json_token_dot_t : public token_handler_t {
-public:
 	std::vector<std::string> pathList;
 
-
+public:
 	void start() {
 		std::cout << "##START##" << std::endl;
 	}

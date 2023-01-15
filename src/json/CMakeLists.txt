@@ -10,6 +10,7 @@ add_executable (
   handler_basic.cpp
   handler_dot.cpp
   json_token.cpp
+  json_token_stream.cpp
   )
 
 add_dependencies(json util)

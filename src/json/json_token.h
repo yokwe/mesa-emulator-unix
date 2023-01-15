@@ -254,8 +254,5 @@ public:
 };
 
 
-void dump(std::istream& in);
-
-
 }
 }

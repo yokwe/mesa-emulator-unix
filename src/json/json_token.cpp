@@ -23,30 +23,5 @@ bool json_token_t::parse_error(std::size_t position, const std::string& last_tok
 	return false;
 }
 
-
-class token_handler_dump_t : public token_handler_t {
-public:
-	void item (token_t& token) {
-		std::cout << "ITEM " << token.name << " " << token.value << std::endl;
-	}
-	void enter(token_t& token) {
-		std::cout << (token.arrayFlag ? "ARRAY  " : "OBJECT ") << token.name << std::endl;
-	}
-	void leave(token_t& token) {
-		(void)token;
-		std::cout << "LEAVE" << std::endl;
-	}
-};
-
-
-void dump(std::istream& in) {
-	token_handler_dump_t token_handler;
-
-	json_token_t sax(token_handler);
-
-	sax.parse(in);
-}
-
-
 }
 }

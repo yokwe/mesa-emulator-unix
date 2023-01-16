@@ -5,7 +5,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "json_token.h"
 
@@ -15,24 +14,24 @@ namespace token {
 
 
 class json_token_dot_t : public token_handler_t {
-	std::vector<std::string> pathList;
+	string_list_t pathList;
 
 public:
-	void start() {
+	void start() override {
 		std::cout << "##START##" << std::endl;
 	}
-	void stop()  {
+	void stop()  override {
 		std::cout << "##STOP##" << std::endl;
 	}
 
-	void item (token_t& token) {
+	void item (const token_t& token) override {
 		std::cout << pathList.back() << "/" << token.name << " " << token.value << std::endl;
 	}
-	void enter(token_t& token) {
+	void enter(const token_t& token) override {
 		std::string path = pathList.empty() ? "" : (pathList.back() + "/" + token.name);
 		pathList.push_back(path);
 	}
-	void leave(token_t& token) {
+	void leave(const token_t& token) override {
 		(void)token;
 		pathList.pop_back();
 	}

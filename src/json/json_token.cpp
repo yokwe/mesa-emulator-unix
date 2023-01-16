@@ -1,5 +1,5 @@
 //
-//
+// json_token.cpp
 //
 
 #include "json_token.h"
@@ -22,6 +22,7 @@ bool json_token_t::parse_error(std::size_t position, const std::string& last_tok
 	ERROR();
 	return false;
 }
+
 
 }
 }

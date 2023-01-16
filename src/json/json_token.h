@@ -15,6 +15,7 @@
 namespace json {
 namespace token {
 
+
 class token_t {
 public:
 	enum Type {
@@ -60,6 +61,10 @@ private:
 };
 
 
+typedef std::vector<token_t>     token_list_t;
+typedef std::vector<std::string> string_list_t;
+
+
 class token_handler_t {
 public:
 	virtual ~token_handler_t() {}
@@ -68,9 +73,61 @@ public:
 	virtual void start() = 0;
 	virtual void stop()  = 0;
 	// data event
-	virtual void item (token_t& token) = 0;
-	virtual void enter(token_t& token) = 0;
-	virtual void leave(token_t& token) = 0;
+	virtual void item (const token_t& token) = 0;
+	virtual void enter(const token_t& token) = 0;
+	virtual void leave(const token_t& token) = 0;
+};
+
+
+class token_record_t {
+	std::string  m_path;
+	int          m_item_count;
+	token_list_t m_token_list;
+public:
+	void start(const std::string& path) {
+		m_path       = path;
+		m_item_count = 0;
+		m_token_list.clear();
+	}
+
+	void add(const token_t& token) {
+		m_token_list.push_back(token);
+		if (token.type == token_t::Type::ITEM) m_item_count++;
+	}
+
+	bool empty() {
+		return m_item_count == 0;
+	}
+
+	const std::string& path() const {
+		return m_path;
+	}
+	int item_count() const {
+		return m_item_count;
+	}
+	const token_list_t& token_list() const {
+		return m_token_list;
+	}
+
+	void parse(token_handler_t& handler) {
+		handler.start();
+		for(token_t& token: m_token_list) {
+			switch(token.type) {
+			case token_t::Type::ITEM:
+				handler.item(token);
+				break;
+			case token_t::Type::ENTER:
+				handler.enter(token);
+				break;
+			case token_t::Type::LEAVE:
+				handler.leave(token);
+				break;
+			default:
+				assert(false);
+			}
+		}
+		handler.stop();
+	}
 };
 
 
@@ -154,6 +211,7 @@ public:
 	int  level() {
 		return (int)m_stack.size();
 	}
+
 
 	//
 	// key

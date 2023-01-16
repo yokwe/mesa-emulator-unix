@@ -33,7 +33,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include "token_record.h"
+#include "json.h"
+#include "handler.h"
 
 
 #include "../util/Util.h"
@@ -47,7 +48,13 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	json::token::dump_record(std::cin);
+	//json::basic_handler_t handler;
+	json::dot_handler_t   dot_handler;
+
+
+	json::block_handler_t handler(3, &dot_handler);
+
+	json::parse(std::cin, &handler);
 
 	logger.info("STOP");
 	return 0;

@@ -22,14 +22,13 @@ public:
 	}
 
 	void item (const token_t& token) override {
-		std::cout << "ITEM " << token.name << " " << token.value << std::endl;
+		std::cout << "ITEM   " << token.path << " " << token.value << std::endl;
 	}
 	void enter(const token_t& token) override {
-		std::cout << (token.arrayFlag ? "ARRAY  " : "OBJECT ") << token.name << std::endl;
+		std::cout << (token.arrayFlag ? "ARRAY  " : "OBJECT ") << token.path << std::endl;
 	}
 	void leave(const token_t& token) override {
-		(void)token;
-		std::cout << "LEAVE" << std::endl;
+		std::cout << "LEAVE  " << token.path << std::endl;
 	}
 };
 

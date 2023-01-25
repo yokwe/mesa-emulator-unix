@@ -50,7 +50,7 @@ int main(int, char**) {
 
 	{
 		json::basic_handler_t basic_handler(true);
-		json::block_handler_t block_handler(3,  &basic_handler);
+		json::block_handler_t block_handler(3, &basic_handler);
 		json::parse(std::cin, &block_handler);
 	}
 

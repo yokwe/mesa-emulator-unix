@@ -13,7 +13,10 @@ namespace json {
 
 
 class basic_handler_t : public handler_t {
+	bool only_item;
 public:
+	basic_handler_t(bool only_item_ = false) : only_item(only_item_) {}
+
 	void start() override {
 		std::cout << "START" << std::endl;
 	}
@@ -25,10 +28,10 @@ public:
 		std::cout << "ITEM   " << token.path << " " << token.value << std::endl;
 	}
 	void enter(const token_t& token) override {
-		std::cout << (token.arrayFlag ? "ARRAY  " : "OBJECT ") << token.path << std::endl;
+		if (!only_item) std::cout << (token.arrayFlag ? "ARRAY  " : "OBJECT ") << token.path << std::endl;
 	}
 	void leave(const token_t& token) override {
-		std::cout << "LEAVE  " << token.path << std::endl;
+		if (!only_item) std::cout << "LEAVE  " << token.path << std::endl;
 	}
 };
 
@@ -67,17 +70,15 @@ class block_handler_t : public handler_t {
 	token_list_t token_list;
 
 public:
-
 	block_handler_t(int record_level_, handler_t* handler_) :
 		record_level(record_level_), handler(handler_), count_item(0), count_level(0) {}
 
 	void start() override {
-		//std::cout << "#START block_handler_t ##" << std::endl;
-		record_level = 3;
+//		std::cout << "## block_handler_t START ##" << std::endl;
 		count_item   = 0;
 	}
 	void stop() override {
-		//std::cout << "##STOP block_handler_t ##" << std::endl;
+//		std::cout << "## block_handler_t STOP ##" << std::endl;
 	}
 
 	void item (const token_t& token) override {
@@ -104,7 +105,9 @@ public:
 		// process tokenList
 		if (count_level == record_level) {
 			if (0 < count_item) {
+				std::cout << "## block_handler_t HANDLER START ##" << std::endl;
 				parse(token_list, handler);
+				std::cout << "## block_handler_t HANDLER STOP ##" << std::endl;
 			}
 		}
 

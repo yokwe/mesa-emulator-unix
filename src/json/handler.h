@@ -12,6 +12,23 @@
 namespace json {
 
 
+class null_handler_t : public handler_t {
+public:
+	void start() override {}
+	void stop()  override {}
+
+	void item (const token_t& token) override {
+		(void)token;
+	}
+	void enter(const token_t& token) override {
+		(void)token;
+	}
+	void leave(const token_t& token) override {
+		(void)token;
+	}
+};
+
+
 class basic_handler_t : public handler_t {
 	bool only_item;
 public:

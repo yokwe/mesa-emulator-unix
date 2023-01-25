@@ -19,6 +19,7 @@ public:
 		ITEM, ENTER, LEAVE, END
 	};
 
+	const std::string path;
 	const Type        type;
 	const std::string name;
 	const bool        arrayFlag;
@@ -26,35 +27,46 @@ public:
 
 	// copy constructor
 	token_t(const token_t& that) :
-		type(that.type), name(that.name),
+		path(that.path), type(that.type), name(that.name),
 		arrayFlag(that.arrayFlag), value(that.value) {}
 	// move constructor
 	token_t(token_t&& that) noexcept :
-		type(that.type), name(std::move(that.name)),
+		path(std::move(that.path)), type(that.type), name(std::move(that.name)),
 		arrayFlag(that.arrayFlag), value(std::move(that.value)) {}
 
-	static token_t item(const std::string& name, const std::string& value) {
-		return token_t(Type::ITEM, name, value);
+	// copy constructor
+	token_t(const token_t& that, const std::string& path_) :
+		path(path_), type(that.type), name(that.name),
+		arrayFlag(that.arrayFlag), value(that.value) {}
+	// move constructor
+	token_t(token_t&& that, const std::string& path_) noexcept :
+		path(path_), type(that.type), name(std::move(that.name)),
+		arrayFlag(that.arrayFlag), value(std::move(that.value)) {}
+
+
+	static token_t item(const std::string& path, const std::string& name, const std::string& value) {
+		return token_t(path, Type::ITEM, name, value);
 	}
-	static token_t enter(const std::string& name, bool isArray) {
-		return token_t(Type::ENTER, name, isArray);
+	static token_t enter(const std::string& path, const std::string& name, bool isArray) {
+		return token_t(path, Type::ENTER, name, isArray);
 	}
-	static token_t leave() {
-		static token_t ret(Type::LEAVE);
-		return ret;
+	static token_t leave(const std::string& path, const std::string& name) {
+		return token_t(path, Type::LEAVE, name);
 	}
-	static token_t end() {
-		static token_t ret(Type::END);
+	static token_t end(const std::string& path) {
+		static token_t ret(path, Type::END);
 		return ret;
 	}
 
 private:
-	token_t(Type type_, const std::string& name_, const std::string& value_) :
-		type(type_), name(name_), arrayFlag(false), value(value_) {}
-	token_t(Type type_, const std::string& name_, bool isArray) :
-		type(type_), name(name_), arrayFlag(isArray), value() {}
-	token_t( Type type_) :
-		type(type_), name(), arrayFlag(false), value() {}
+	token_t(const std::string& path_, Type type_, const std::string& name_, const std::string& value_) :
+		path(path_), type(type_), name(name_), arrayFlag(false), value(value_) {}
+	token_t(const std::string& path_, Type type_, const std::string& name_, bool isArray) :
+		path(path_), type(type_), name(name_), arrayFlag(isArray), value() {}
+	token_t(const std::string& path_, Type type_, const std::string& name_) :
+		path(path_), type(type_), name(name_), arrayFlag(false), value() {}
+	token_t(const std::string& path_, Type type_) :
+		path(path_), type(type_), name(), arrayFlag(false), value() {}
 };
 
 

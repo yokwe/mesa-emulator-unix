@@ -16,7 +16,7 @@ namespace json {
 class token_t {
 public:
 	enum Type {
-		ITEM, ENTER, LEAVE, END
+		ITEM, ENTER, LEAVE
 	};
 
 	const std::string path;
@@ -53,10 +53,6 @@ public:
 	static token_t leave(const std::string& path, const std::string& name) {
 		return token_t(path, Type::LEAVE, name);
 	}
-	static token_t end(const std::string& path) {
-		static token_t ret(path, Type::END);
-		return ret;
-	}
 
 private:
 	token_t(const std::string& path_, Type type_, const std::string& name_, const std::string& value_) :
@@ -65,8 +61,6 @@ private:
 		path(path_), type(type_), name(name_), arrayFlag(isArray), value() {}
 	token_t(const std::string& path_, Type type_, const std::string& name_) :
 		path(path_), type(type_), name(name_), arrayFlag(false), value() {}
-	token_t(const std::string& path_, Type type_) :
-		path(path_), type(type_), name(), arrayFlag(false), value() {}
 };
 
 

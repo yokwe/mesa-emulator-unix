@@ -71,6 +71,8 @@ bool empty_item(const token_list_t& token_list) {
 // parse function
 //
 
+namespace {
+
 class json_token_t : public nlohmann::json::json_sax_t {
 public:
 	handler_t* m_handler;
@@ -257,6 +259,7 @@ public:
 	}
 };
 
+}
 
 
 void parse(std::istream& in, handler_t *handler) {

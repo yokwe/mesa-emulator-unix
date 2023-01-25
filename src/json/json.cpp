@@ -267,17 +267,32 @@ void parse(std::istream& in, handler_t *handler) {
 
 
 void parse(const token_list_t& token_list, handler_t *handler) {
+	std::vector<std::string> path_stack;
+
 	handler->start();
 	for(const token_t& token: token_list) {
 		switch(token.type) {
-		case token_t::Type::ITEM:
-			handler->item(token);
+		case token_t::Type::ITEM: {
+			std::string new_path = path_stack.back() + "/" + token.name;
+			token_t new_token(token, new_path);
+			handler->item(new_token);
+		}
 			break;
-		case token_t::Type::ENTER:
-			handler->enter(token);
+		case token_t::Type::ENTER: {
+			std::string new_path = path_stack.empty() ? "" : (path_stack.back() + "/" + token.name);
+			token_t new_token(token, new_path);
+			handler->enter(new_token);
+			// update path_stack
+			path_stack.push_back(new_path);
+		}
 			break;
-		case token_t::Type::LEAVE:
-			handler->leave(token);
+		case token_t::Type::LEAVE: {
+			std::string new_path = path_stack.back();
+			token_t new_token(token, new_path);
+			handler->leave(new_token);
+			// update path_stack
+			path_stack.pop_back();
+		}
 			break;
 		default:
 			logger.error("Unexpected type");

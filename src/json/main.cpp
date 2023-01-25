@@ -48,10 +48,16 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-	json::basic_handler_t basic_handler(true);
-	json::block_handler_t block_handler(3, &basic_handler);
+	{
+		json::basic_handler_t basic_handler(true);
+		json::block_handler_t block_handler(3, &basic_handler);
+		json::parse(std::cin, &block_handler);
+	}
 
-	json::parse(std::cin, &block_handler);
+//	{
+//		json::null_handler_t  null_handler;
+//		json::parse(std::cin, &null_handler);
+//	}
 
 	logger.info("STOP");
 	return 0;

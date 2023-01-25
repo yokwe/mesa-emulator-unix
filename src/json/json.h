@@ -91,6 +91,9 @@ std::string glob_to_regex(std::string glob);
 // return true if token_list contains no item
 bool empty_item(const token_list_t& token_list);
 
+bool contains(const token_list_t& token_list, const std::string& path, const std::string& value);
+
+token_list_t update_path(const token_list_t& token_list);
 
 //
 // parse function

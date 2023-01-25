@@ -66,6 +66,44 @@ bool empty_item(const token_list_t& token_list) {
 	return true;
 }
 
+bool contains(const token_list_t& token_list, const std::string& path, const std::string& value) {
+	for(const token_t& token: token_list) {
+		if (token.path == path && token.value == value) return true;
+	}
+	return false;
+}
+
+token_list_t update_path(const token_list_t& token_list) {
+	token_list_t result;
+
+	std::vector<std::string> path_list;
+
+	std::string new_path;
+	for(const token_t& token: token_list) {
+		// maintain path_list
+		switch(token.type) {
+		case token_t::Type::ITEM:
+			new_path = path_list.back() + "/" + token.name;
+			break;
+		case token_t::Type::ENTER:
+			new_path = path_list.empty() ? "" : (path_list.back() + "/" + token.name);
+			path_list.push_back(new_path);
+			break;
+		case token_t::Type::LEAVE:
+			new_path = path_list.back();
+			path_list.pop_back();
+			break;
+		default:
+			ERROR();
+			break;
+		}
+
+		token_t new_token(token, new_path);
+		result.push_back(new_token);
+	}
+	return result;
+}
+
 
 //
 // parse function
@@ -272,30 +310,24 @@ void parse(std::istream& in, handler_t *handler) {
 void parse(const token_list_t& token_list, handler_t *handler) {
 	std::vector<std::string> path_stack;
 
+	std::string new_path;
+
 	handler->start();
 	for(const token_t& token: token_list) {
 		switch(token.type) {
-		case token_t::Type::ITEM: {
-			std::string new_path = path_stack.back() + "/" + token.name;
-			token_t new_token(token, new_path);
-			handler->item(new_token);
-		}
+		case token_t::Type::ITEM:
+			handler->item(token_t(token, path_stack.back() + "/" + token.name));
 			break;
-		case token_t::Type::ENTER: {
-			std::string new_path = path_stack.empty() ? "" : (path_stack.back() + "/" + token.name);
-			token_t new_token(token, new_path);
-			handler->enter(new_token);
+		case token_t::Type::ENTER:
+			new_path = path_stack.empty() ? "" : (path_stack.back() + "/" + token.name);
+			handler->enter(token_t(token, new_path));
 			// update path_stack
 			path_stack.push_back(new_path);
-		}
 			break;
-		case token_t::Type::LEAVE: {
-			std::string new_path = path_stack.back();
-			token_t new_token(token, new_path);
-			handler->leave(new_token);
+		case token_t::Type::LEAVE:
+			handler->leave(token_t(token, path_stack.back()));
 			// update path_stack
 			path_stack.pop_back();
-		}
 			break;
 		default:
 			logger.error("Unexpected type");

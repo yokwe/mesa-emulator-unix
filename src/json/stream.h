@@ -89,11 +89,11 @@ public:
 
 template <typename T, typename R>
 class tail_t : public base_t {
-	iterator_t<T>* m_iterator;
+	iterator_t<T>* m_previous;
 public:
 	tail_t(const char* name, base_t* previous) :
 		base_t(type_t::TAIL, name),
-		m_iterator(dynamic_cast<iterator_t<T>*>(previous)) {}
+		m_previous(dynamic_cast<iterator_t<T>*>(previous)) {}
 	virtual ~tail_t() {}
 
 	// need to implement virtual method of parent classes
@@ -119,8 +119,8 @@ public:
 	}
 
 	R process() {
-		while(m_iterator->has_next()) {
-			T t = m_iterator->next();
+		while(m_previous->has_next()) {
+			T t = m_previous->next();
 			accept(t);
 		}
 		base_t::close();
@@ -131,21 +131,21 @@ public:
 
 // 1 to 1
 template <typename T, typename R>
-class body11_t : public base_t, public iterator_t<R> {
-	iterator_t<T>* m_iterator;
+class map_t : public base_t, public iterator_t<R> {
+	iterator_t<T>* m_previous;
 public:
-	body11_t(const char* name, base_t* previous) :
+	map_t(const char* name, base_t* previous) :
 		base_t(type_t::BODY, name),
-		m_iterator(dynamic_cast<iterator_t<T>*>(previous)) {}
-	virtual ~body11_t() {}
+		m_previous(dynamic_cast<iterator_t<T>*>(previous)) {}
+	virtual ~map_t() {}
 
 	virtual R apply(T& newValue) = 0;
 
-	bool has_next() {
-		return m_iterator->has_next();
+	bool has_next() override {
+		return m_previous->has_next();
 	}
-	R next() {
-		T newValue = m_iterator->next();
+	R next() override {
+		T newValue = m_previous->next();
 		return apply(newValue);
 	}
 };

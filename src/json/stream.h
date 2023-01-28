@@ -67,7 +67,7 @@ public:
 	virtual ~head_t() {}
 
 	// need to implement virtual method of parent classes
-	//   stream_base   close_impl()
+	//   base_t   close_impl()
 
 	virtual bool has_next_impl() = 0;
 	virtual T    next_impl()     = 0;
@@ -104,13 +104,13 @@ public:
 	virtual ~tail_t() {}
 
 	// need to implement virtual method of parent classes
-	//   stream_base   close_impl()
+	//   base_t   close_impl()
 
 	virtual void accept_impl(T& newValue) = 0;
 	virtual R    result_impl()            = 0;
 
 	R result() {
-		if (base_t::closed()) {
+		if (closed()) {
 			return result_impl();
 		} else {
 			ERROR();
@@ -118,7 +118,7 @@ public:
 	}
 
 	void accept(T& newValue) {
-		if (base_t::closed()) {
+		if (closed()) {
 			ERROR();
 		} else {
 			accept_impl(newValue);

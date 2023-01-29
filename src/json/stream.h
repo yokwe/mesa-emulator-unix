@@ -75,6 +75,7 @@ public:
 	}
 };
 
+
 template <typename T>
 class vector_t : public head_t<T> {
 	::std::vector<T> m_data;
@@ -153,31 +154,31 @@ public:
 	}
 };
 
+
 template <typename T, typename R=T>
 class sum_t : public tail_t<T, R> {
 	static_assert(::std::is_integral<T>::value || ::std::is_floating_point<T>::value,  "T is not number");
 	static_assert(::std::is_integral<R>::value || ::std::is_floating_point<R>::value,  "R is not number");
 
 	R sum;
+
+	void close_impl() override {}
+	void accept_impl(T& newValue) override {
+		sum += newValue;
+	}
+	R result_impl() override {
+		return sum;
+	}
 public:
 	sum_t(base_t* upstream) : tail_t<T, R>(__func__, upstream), sum(0) {}
 	~sum_t() {
 		base_t::close();
 	}
-
-	void close_impl() {}
-	void accept_impl(T& newValue) {
-		sum += newValue;
-	}
-	R result_impl() {
-		return sum;
-	}
 };
 
 
-
 template <typename T, typename R=T>
-class map_t : public base_t, public iterator_t<R> {
+class map_abstract_t : public base_t, public iterator_t<R> {
 	iterator_t<T>* upstream;
 
 	// You need to implement base_t::close_impl() in implementing class
@@ -185,7 +186,7 @@ class map_t : public base_t, public iterator_t<R> {
 	virtual R apply(T& newValue) = 0;
 
 public:
-	map_t(const char* name, base_t* upstream_) :
+	map_abstract_t(const char* name, base_t* upstream_) :
 		base_t(name, upstream_),
 		upstream(dynamic_cast<iterator_t<T>*>(upstream_)) {
 		if (upstream == nullptr) {
@@ -197,8 +198,46 @@ public:
 			ERROR();
 		}
 	}
-	virtual ~map_t() {}
+	virtual ~map_abstract_t() {}
 
+	bool has_next() override {
+		return upstream->has_next();
+	}
+	R next() override {
+		if (has_next()) {
+			T newValue = upstream->next();
+			return apply(newValue);
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
+		}
+	}
+};
+
+
+template <typename T, typename R=T>
+class map_t : public base_t, public iterator_t<R> {
+	typedef ::std::function<R(T)> func_apply;
+	iterator_t<T>* upstream;
+	func_apply     apply;
+
+	void close_impl() override {}
+
+public:
+	map_t(base_t* upstream_, func_apply apply_) :
+		base_t(__func__, upstream_),
+		upstream(dynamic_cast<iterator_t<T>*>(upstream_)),
+		apply(apply_) {
+		if (upstream == nullptr) {
+			logger.error("upstream doesn't have iterator");
+			logger.error("  myself    %s!", this->name());
+			logger.error("  upstream_ %s!", upstream_->name());
+			logger.error("  T         %s!", demangle(typeid(T).name()));
+			logger.error("  R         %s!", demangle(typeid(R).name()));
+			ERROR();
+		}
+	}
 	bool has_next() override {
 		return upstream->has_next();
 	}

@@ -177,6 +177,28 @@ public:
 };
 
 
+template <typename T, typename R=int>
+class count_t : public tail_t<T, R> {
+	static_assert(::std::is_integral<R>::value || ::std::is_floating_point<R>::value,  "R is not number");
+
+	R m_count;
+
+	void close_impl() override {}
+	void accept_impl(T& newValue) override {
+		(void)newValue;
+		m_count++;
+	}
+	R result_impl() override {
+		return m_count;
+	}
+public:
+	count_t(base_t* upstream) : tail_t<T, R>(__func__, upstream), m_count(0) {}
+	~count_t() {
+		base_t::close();
+	}
+};
+
+
 template <typename T, typename R=T>
 class map_abstract_t : public base_t, public iterator_t<R> {
 	iterator_t<T>* upstream;
@@ -254,4 +276,33 @@ public:
 };
 
 
+template <typename T>
+vector_t<T> vector(::std::initializer_list<T> init) {
+	return vector_t<T>(init);
 }
+
+template<typename S, typename T, typename R=T>
+sum_t<T, R> sum(map_t<S, T>* upstream) {
+	return sum_t<T, R>(upstream);
+}
+
+template <typename T, typename R>
+map_t<T, R> map(base_t* upstream, ::std::function<R(T)> func) {
+	return map_t<T, R>(upstream, func);
+}
+
+
+}
+
+
+//{
+//	::std::function<int(int)> func_add = [](int a){return a + 1000;};
+//	::std::function<int(int)> func_sub = [](int a){return a - 1000;};
+//
+//	auto head = stream::vector({1, 2, 3, 4});
+//	auto add  = stream::map(&head, func_add);
+//	auto sub  = stream::map(&add,  func_sub);
+//	auto sum  = stream::sum(&sub);
+//
+//	logger.info("sum %s", std::to_string(sum.process()));
+//}

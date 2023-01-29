@@ -4,9 +4,12 @@
 
 #pragma once
 
+#include <string>
+
 #include "../util/Util.h"
 
 namespace stream {
+
 
 template <typename T>
 class iterator_t {
@@ -17,71 +20,57 @@ public:
 	virtual T    next()     = 0;
 };
 
-enum type_t {
-	HEAD, BODY, TAIL,
-};
-
 
 class base_t {
 public:
-	base_t(type_t type, const char* name) :
-		m_type(type), m_name(name), m_closed(false) {}
+	base_t(const char* name) : m_name(name), m_closed(false), m_upstream(nullptr) {}
+	base_t(const char* name, base_t* upstream) : m_name(name), m_closed(false), m_upstream(upstream) {}
 	virtual ~base_t() {}
 
-	void close_impl() {} // do nothing
+	virtual void close_impl() = 0; // most of case do nothing
 
 	void close() {
-		if (!closed()) {
+		if (!m_closed) {
 			m_closed = true;
 			close_impl();
 		}
 	}
 
-	type_t type() {
-		return m_type;
-	}
 	const char* name() {
 		return m_name;
 	}
-	bool closed() {
-		return m_closed;
+	base_t* upstream() {
+		return m_upstream;
 	}
 
 protected:
-	type_t         m_type;
 	const char*    m_name;
 	bool           m_closed;
+	base_t*        m_upstream;
 };
 
 
 template <typename T>
 class head_t : public base_t, public iterator_t<T> {
 public:
-	head_t(const char* name) : base_t(type_t::HEAD, name) {}
+	head_t(const char* name) : base_t(name) {}
 	virtual ~head_t() {}
 
-	// need to implement virtual method of parent classes
-	//   base_t   close_impl()
-
+	// You need to implement base_t::close_impl() in implementing class
+	// void close_impl();
 	virtual bool has_next_impl() = 0;
 	virtual T    next_impl()     = 0;
 
 	bool has_next() override {
-		if (base_t::closed()) {
-			return false;
-		} else {
-			bool ret = has_next_impl();
-			// if no more data, call close
-			if (!ret) base_t::close();
-			return ret;
-		}
+		return has_next_impl();
 	}
 	T next() override {
-		if (base_t::closed()) {
-			logger.error("logger is already closed");
-			ERROR();
-		} else {
+		if (has_next()) {
 			return next_impl();
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
 		}
 	}
 };
@@ -89,64 +78,91 @@ public:
 
 template <typename T, typename R>
 class tail_t : public base_t {
-	iterator_t<T>* m_previous;
+	iterator_t<T>* upstream;
 public:
-	tail_t(const char* name, base_t* previous) :
-		base_t(type_t::TAIL, name),
-		m_previous(dynamic_cast<iterator_t<T>*>(previous)) {}
+	tail_t(const char* name, base_t* upstream_) :
+		base_t(name, upstream_),
+		upstream(dynamic_cast<iterator_t<T>*>(upstream_)) {
+		if (upstream == nullptr) {
+			logger.error("upstream doesn't have iterator");
+			logger.error("  myself    %s!", this->name());
+			logger.error("  upstream_ %s!", upstream_->name());
+			logger.error("  T         %s!", demangle(typeid(T).name()));
+			logger.error("  R         %s!", demangle(typeid(R).name()));
+			ERROR();
+		}
+	}
 	virtual ~tail_t() {}
 
-	// need to implement virtual method of parent classes
-	//   base_t   close_impl()
-
+	// You need to implement base_t::close_impl() in implementing class
+	// void close_impl();
 	virtual void accept_impl(T& newValue) = 0;
 	virtual R    result_impl()            = 0;
 
 	R result() {
-		if (base_t::closed()) {
-			return result_impl();
-		} else {
-			ERROR();
-		}
+		return result_impl();
 	}
 
 	void accept(T& newValue) {
-		if (base_t::closed()) {
-			ERROR();
-		} else {
-			accept_impl(newValue);
-		}
+		logger.info("accept T&");
+		accept_impl(newValue);
+	}
+	void accept(int newValue) {
+		logger.info("accept int");
+		accept_impl(newValue);
+	}
+	void accept(long newValue) {
+		logger.info("accept long");
+		accept_impl(newValue);
+	}
+	void accept(double newValue) {
+		logger.info("accept double");
+		accept_impl(newValue);
 	}
 
 	R process() {
-		while(m_previous->has_next()) {
-			T t = m_previous->next();
-			accept(t);
+		while(upstream->has_next()) {
+			accept(upstream->next());
 		}
-		base_t::close();
 		return result();
 	}
 };
 
 
-// 1 to 1
 template <typename T, typename R>
 class map_t : public base_t, public iterator_t<R> {
-	iterator_t<T>* m_previous;
+	iterator_t<T>* upstream;
 public:
-	map_t(const char* name, base_t* previous) :
-		base_t(type_t::BODY, name),
-		m_previous(dynamic_cast<iterator_t<T>*>(previous)) {}
+	map_t(const char* name, base_t* upstream_) :
+		base_t(name, upstream_),
+		upstream(dynamic_cast<iterator_t<T>*>(upstream_)) {
+		if (upstream == nullptr) {
+			logger.error("upstream doesn't have iterator");
+			logger.error("  myself    %s!", this->name());
+			logger.error("  upstream_ %s!", upstream_->name());
+			logger.error("  T         %s!", demangle(typeid(T).name()));
+			logger.error("  R         %s!", demangle(typeid(R).name()));
+			ERROR();
+		}
+	}
 	virtual ~map_t() {}
 
+	// You need to implement base_t::close_impl() in implementing class
+	// void close_impl();
 	virtual R apply(T& newValue) = 0;
 
 	bool has_next() override {
-		return m_previous->has_next();
+		return upstream->has_next();
 	}
 	R next() override {
-		T newValue = m_previous->next();
-		return apply(newValue);
+		if (has_next()) {
+			T newValue = upstream->next();
+			return apply(newValue);
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
+		}
 	}
 };
 

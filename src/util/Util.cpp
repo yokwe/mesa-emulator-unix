@@ -48,9 +48,29 @@ void logBackTrace() {
 
 	char **msg = backtrace_symbols(buffer, size);
 
-	// print out all the frames to fno
+	// print out all the frames
 	for(int i = 0; i < size; i++) {
-		logger.fatal("%3d %s", i, msg[i]);
+		std::string line(msg[i]);
+		auto pos = line.find("_Z");
+		if (pos == std::string::npos) {
+			// contains no mangled name
+			logger.fatal("%3d %s", i, msg[i]);
+		} else {
+			// contains mangled name
+			std::string left(line.substr(0, pos));
+			std::string middle;
+			for(; pos < line.size(); pos++) {
+				char c = line.at(pos);
+				if (std::isalnum(c) || c == '_') {
+					middle += c;
+					continue;
+				}
+				break;
+			}
+			std::string right(line.substr(pos));
+			middle = demangle(middle.c_str());
+			logger.fatal("%3d %s%s%s", i, left, middle, right);
+		}
 	}
 }
 
@@ -62,6 +82,20 @@ static void signalHandler(int signum) {
 
 void setSignalHandler(int signum) {
 	signal(signum, signalHandler);
+}
+
+std::string demangle(const char* mangled) {
+	char buffer[512];
+	size_t length(sizeof(buffer));
+	int status(0);
+
+	char* demangled = __cxxabiv1::__cxa_demangle(mangled, buffer, &length, &status);
+	if (status != 0) {
+		logger.warn("demange %d %s", status, mangled);
+	}
+
+	std::string ret(demangled);
+	return ret;
 }
 
 

@@ -37,6 +37,7 @@
 #include <log4cpp/Category.hh>
 
 #include <signal.h>
+#include <cxxabi.h>
 
 #include <QtCore>
 #include <QtGlobal>
@@ -77,6 +78,8 @@ public:
 
 void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);
+
+std::string demangle(const char* mangled);
 
 
 template<typename T>

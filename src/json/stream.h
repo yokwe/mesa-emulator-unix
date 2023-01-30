@@ -178,12 +178,13 @@ public:
 	}
 };
 
+template <typename T, typename R>
+using map_apply = ::std::function<R(T)>;
 
 template <typename T, typename R=T>
 class map_t : public source_t<R> {
-	typedef ::std::function<R(T)> func_apply;
-	source_t<T>* upstream;
-	func_apply   apply;
+	source_t<T>*    upstream;
+	map_apply<T, R> apply;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
@@ -194,10 +195,50 @@ class map_t : public source_t<R> {
 		return apply(newValue);
 	}
 public:
-	map_t(source_t<T>* upstream_, func_apply apply_) :
+	map_t(source_t<T>* upstream_, map_apply<T, R> apply_) :
 		source_t<T>(__func__),
 		upstream(upstream_),
 		apply(apply_) {}
+};
+
+
+template <typename T>
+using filter_test = ::std::function<bool(T)>;
+
+template <typename T>
+class filter_t : public source_t<T> {
+	source_t<T>* upstream;
+	filter_test<T>    test;
+	bool         hasValue;
+	T            value;
+
+	void close_impl() override {}
+	bool has_next_impl() override {
+		for(;;) {
+			if (hasValue) break;
+			if (!upstream->has_next()) break;
+			value = upstream->next();
+			hasValue = test(value);
+		}
+		return hasValue;
+	}
+	T next_impl() override {
+		if (has_next_impl()) {
+			hasValue = false;
+			return value;
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
+		}
+	}
+
+public:
+	filter_t(source_t<T>* upstream_, filter_test<T> test_) :
+		source_t<T>(__func__),
+		upstream(upstream_),
+		test(test_),
+		hasValue(false) {}
 };
 
 
@@ -212,22 +253,29 @@ sum_t<T, R> sum(map_t<S, T>* upstream) {
 }
 
 template <typename T, typename R>
-map_t<T, R> map(source_t<T>* upstream, ::std::function<R(T)> func) {
+map_t<T, R> map(source_t<T>* upstream, map_apply<T, R> func) {
 	return map_t<T, R>(upstream, func);
 }
 
+template <typename T>
+filter_t<T>	filter(source_t<T>* upstream, filter_test<T> func) {
+	return filter_t<T>(upstream, func);
+}
 
 }
 
+#if 0
+{
+	stream::map_apply<int, int> func_add    = [](int a){return a + 1000;};
+	stream::map_apply<int, int> func_sub    = [](int a){return a - 1000;};
+	stream::filter_test<int>    func_filter = [](int a){return a < 3;};
 
-//{
-//	::std::function<int(int)> func_add = [](int a){return a + 1000;};
-//	::std::function<int(int)> func_sub = [](int a){return a - 1000;};
-//
-//	auto head = stream::vector({1, 2, 3, 4});
-//	auto add  = stream::map(&head, func_add);
-//	auto sub  = stream::map(&add,  func_sub);
-//	auto sum  = stream::sum(&sub);
-//
-//	logger.info("sum %s", std::to_string(sum.process()));
-//}
+	auto head   = stream::vector({1, 2, 3, 4});
+	auto filter = stream::filter(&head, func_filter);
+	auto add    = stream::map(&filter, func_add);
+	auto sub    = stream::map(&add,  func_sub);
+	auto sum    = stream::sum(&sub);
+
+	logger.info("sum %s", std::to_string(sum.process()));
+}
+#endif

@@ -277,6 +277,8 @@ auto map(source_t<T>* upstream,  Function apply) {
 }
 template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
+	using R = typename std::invoke_result<decltype(test), T>::type;
+	static_assert (std::is_same<R, bool>::value, "return type of test is not bool.");
 	return filter_t<T>(upstream, test);
 }
 template <typename T>

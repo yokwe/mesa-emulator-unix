@@ -139,8 +139,8 @@ public:
 
 template <typename T, typename R=T>
 class sum_t : public sink_t<T, R> {
-	static_assert(::std::is_integral<T>::value || ::std::is_floating_point<T>::value,  "T is not number");
-	static_assert(::std::is_integral<R>::value || ::std::is_floating_point<R>::value,  "R is not number");
+	static_assert(::std::is_integral_v<T> || ::std::is_floating_point_v<T>,  "T is not number");
+	static_assert(::std::is_integral_v<R> || ::std::is_floating_point_v<R>,  "R is not number");
 
 	R sum;
 
@@ -272,13 +272,14 @@ vector_t<T> vector(::std::initializer_list<T> init) {
 //
 template <typename T, typename Function>
 auto map(source_t<T>* upstream,  Function apply) {
-	using R = typename std::invoke_result<decltype(apply), T>::type;
+	using R = std::invoke_result_t<decltype(apply), T>;
 	return map_t<T, R>(upstream, apply);
 }
 template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
-	using R = typename std::invoke_result<decltype(test), T>::type;
-	static_assert (std::is_same<R, bool>::value, "return type of test is not bool.");
+	// FIXME how to check parameter of test
+	using R = std::invoke_result_t<decltype(test), T>;
+	static_assert (std::is_same_v<R, bool>, "return type of test is not bool.");
 	return filter_t<T>(upstream, test);
 }
 template <typename T>
@@ -301,8 +302,8 @@ sum_t<T, R> sum(source_t<T>* upstream) {
 	auto head   = stream::vector({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
 	auto countA = stream::count(&head, "countA");
 	auto filter = stream::filter(&countA, [](int a){return a < 6;});
-	auto add    = stream::map(&filter,  [](int a){return a + 1000;});
-	auto sub    = stream::map(&add,     [](int a){return a - 1000;});
+	auto add    = stream::map(&filter,    [](int a){return a + 1000;});
+	auto sub    = stream::map(&add,       [](int a){return a - 1000;});
 	auto countB = stream::count(&sub, "countB");
 	auto sum    = stream::sum(&countB);
 

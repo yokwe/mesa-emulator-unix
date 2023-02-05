@@ -45,7 +45,7 @@ class source_t : public base_t {
 	virtual T    next_impl()     = 0;
 
 public:
-	const ::std::string data_type_name = demangle(typeid(T).name());
+	const std::string data_type_name = demangle(typeid(T).name());
 
 	source_t(const char* name) : base_t(name) {}
 
@@ -68,8 +68,8 @@ public:
 
 template <typename T>
 class vector_t : public source_t<T> {
-	::std::vector<T> m_data;
-	::std::size_t    m_pos;
+	std::vector<T> m_data;
+	std::size_t    m_pos;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
@@ -80,10 +80,10 @@ class vector_t : public source_t<T> {
 	}
 
 public:
-	vector_t(::std::vector<T>& data) :
+	vector_t(std::vector<T>& data) :
 		source_t<T>(__func__), m_data(data),
 		m_pos(0) {}
-	vector_t(::std::initializer_list<T> init) :
+	vector_t(std::initializer_list<T> init) :
 		source_t<T>(__func__), m_data(init.begin(), init.end()),
 		m_pos(0) {}
 	~vector_t() {
@@ -149,8 +149,8 @@ public:
 
 template <typename T, typename R=T>
 class sum_t : public sink_t<T, R> {
-	static_assert(::std::is_integral_v<T> || ::std::is_floating_point_v<T>,  "T is not number");
-	static_assert(::std::is_integral_v<R> || ::std::is_floating_point_v<R>,  "R is not number");
+	static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>,  "T is not number");
+	static_assert(std::is_integral_v<R> || std::is_floating_point_v<R>,  "R is not number");
 
 	R sum;
 
@@ -172,7 +172,7 @@ public:
 
 template <typename T, typename R=T>
 class map_t : public source_t<R> {
-	using map_apply = ::std::function<R(T)>;
+	using map_apply = std::function<R(T)>;
 
 	source_t<T>* upstream;
 	map_apply    apply;
@@ -188,7 +188,7 @@ class map_t : public source_t<R> {
 
 public:
 	map_t(source_t<T>* upstream_, map_apply apply_) :
-		source_t<T>(__func__),
+		source_t<R>(__func__),
 		upstream(upstream_),
 		apply(apply_) {}
 	~map_t() {
@@ -199,7 +199,7 @@ public:
 
 template <typename T>
 class filter_t : public source_t<T> {
-	using filter_test = ::std::function<bool(T)>;
+	using filter_test = std::function<bool(T)>;
 
 	source_t<T>* upstream;
 	filter_test  test;
@@ -307,7 +307,7 @@ logger.info("arg0     %s", demangle(typeid(typename args0::type)));
 // source
 //
 template <typename T>
-vector_t<T> vector(::std::initializer_list<T> init) {
+vector_t<T> vector(std::initializer_list<T> init) {
 	return vector_t<T>(init);
 }
 
@@ -316,19 +316,53 @@ vector_t<T> vector(::std::initializer_list<T> init) {
 //
 template <typename T, typename Function>
 auto map(source_t<T>* upstream,  Function apply) {
-	static_assert(std::is_invocable_v<decltype(apply), T>, "apply is not invokable with T.");
+	using trait = trait_function<Function>;
+	using R   = typename trait::ret_type;
+	using A0  = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0T = typename A0::type;
 
-	using R = std::invoke_result_t<decltype(apply), T>;
+	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
+
+	// assert T == A0T
+	if constexpr (!std::is_same_v<T, A0T>) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("T != A0T");
+		logger.error("T  %s", demangle(typeid(T).name()));
+		logger.error("A0 %s", demangle(typeid(A0T).name()));
+		ERROR();
+	}
+
 	return map_t<T, R>(upstream, apply);
 }
 template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
-	// FIXME how to check parameter of test
-	static_assert(std::is_invocable_v<decltype(test), T>, "test is not invokable with T.");
-//	static_assert(std::is_convertible_v<decltype(test), typename filter_t<T>::filter_test>, "not convertible");
+	using trait = trait_function<Predicate>;
+	using R   = typename trait::ret_type;
+	using A0  = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0T = typename A0::type;
 
-	using R = std::invoke_result_t<decltype(test), T>;
-	static_assert (std::is_same_v<R, bool>, "return type of test is not bool.");
+	//logger.debug("filter T=%s R=%s Predicater=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Predicate).name()));
+
+	// assert T == A0T
+	if constexpr (!std::is_same_v<T, A0T>) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("T != A0T");
+		logger.error("T  %s", demangle(typeid(T).name()));
+		logger.error("A0 %s", demangle(typeid(A0T).name()));
+		assert(false);
+	}
+
+	// assrt R == bool
+	if constexpr (!std::is_same_v<R, bool>) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("R != bool");
+		logger.error("R  %s", demangle(typeid(R).name()));
+		assert(false);
+	}
+
 	return filter_t<T>(upstream, test);
 }
 template <typename T>

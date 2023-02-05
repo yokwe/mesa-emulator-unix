@@ -5,6 +5,7 @@
 #pragma once
 
 #include <type_traits>
+#include <tuple>
 #include <string>
 
 #include "../util/Util.h"
@@ -122,6 +123,15 @@ public:
 		accept_impl(newValue);
 	}
 	void accept(long long newValue) {
+		accept_impl(newValue);
+	}
+	void accept(unsigned int newValue) {
+		accept_impl(newValue);
+	}
+	void accept(unsigned long newValue) {
+		accept_impl(newValue);
+	}
+	void accept(unsigned long long newValue) {
 		accept_impl(newValue);
 	}
 	void accept(double newValue) {
@@ -258,6 +268,40 @@ public:
 //
 // function
 //
+template <typename T>
+struct trait_function : trait_function<decltype(&T::operator())> {};
+template <typename C, typename R, typename... A>
+struct trait_function<R(C::*)(A...) const> {
+	enum {type = 100};
+
+	// use enum to define type not constant
+	enum {arity = sizeof...(A)};
+	// return type
+	using ret_type = R;
+	// argument type as std::tuple<>
+	using arg_type = std::tuple<A...>;
+};
+template <typename R, typename... A>
+struct trait_function<R(*)(A...)> {
+	enum {type = 200};
+
+	// use enum to define type not constant
+	enum {arity = sizeof...(A)};
+	// return type
+	using ret_type = R;
+	// argument type as std::tuple<>
+	using arg_type = std::tuple<A...>;
+};
+#if 0
+using trait = trait_function<T>;
+logger.info("trait    %s", demangle(typeid(trait)));
+logger.info("type     %d", trait::type);
+logger.info("arity    %d", trait::arity);
+logger.info("ret_type %s", demangle(typeid(typename trait::ret_type)));
+using args0 = typename std::tuple_element<0, typename trait::arg_type>;
+logger.info("arg0     %s", demangle(typeid(typename args0::type)));
+#endif
+
 
 //
 // source
@@ -272,12 +316,17 @@ vector_t<T> vector(::std::initializer_list<T> init) {
 //
 template <typename T, typename Function>
 auto map(source_t<T>* upstream,  Function apply) {
+	static_assert(std::is_invocable_v<decltype(apply), T>, "apply is not invokable with T.");
+
 	using R = std::invoke_result_t<decltype(apply), T>;
 	return map_t<T, R>(upstream, apply);
 }
 template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
 	// FIXME how to check parameter of test
+	static_assert(std::is_invocable_v<decltype(test), T>, "test is not invokable with T.");
+//	static_assert(std::is_convertible_v<decltype(test), typename filter_t<T>::filter_test>, "not convertible");
+
 	using R = std::invoke_result_t<decltype(test), T>;
 	static_assert (std::is_same_v<R, bool>, "return type of test is not bool.");
 	return filter_t<T>(upstream, test);

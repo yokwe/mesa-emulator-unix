@@ -318,18 +318,22 @@ template <typename T, typename Function>
 auto map(source_t<T>* upstream,  Function apply) {
 	using trait = trait_function<Function>;
 	using R   = typename trait::ret_type;
-	using A0  = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0T = typename A0::type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
 
 	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
+	static_assert(trait::arity == 1,       "arity != 1");
+	static_assert(std::is_same_v<T, A0>,   "T != A0");
 
-	// assert T == A0T
-	if constexpr (!std::is_same_v<T, A0T>) {
+	// assert T     == A0T
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1)) {
 		logger.error("ASSERTION FAILED");
 		logger.error("function %s", __func__);
-		logger.error("T != A0T");
-		logger.error("T  %s", demangle(typeid(T).name()));
-		logger.error("A0 %s", demangle(typeid(A0T).name()));
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0).name()));
 		ERROR();
 	}
 
@@ -339,27 +343,24 @@ template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
 	using trait = trait_function<Predicate>;
 	using R   = typename trait::ret_type;
-	using A0  = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0T = typename A0::type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
 
 	//logger.debug("filter T=%s R=%s Predicater=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Predicate).name()));
+	static_assert(trait::arity == 1,       "arity != 1");
+	static_assert(std::is_same_v<T, A0>,   "T != A0");
+	static_assert(std::is_same_v<R, bool>, "R != bool");
 
-	// assert T == A0T
-	if constexpr (!std::is_same_v<T, A0T>) {
+	// assert T     == A0T
+	// assert R     == bool
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !std::is_same_v<R, bool> || !(trait::arity == 1)) {
 		logger.error("ASSERTION FAILED");
 		logger.error("function %s", __func__);
-		logger.error("T != A0T");
-		logger.error("T  %s", demangle(typeid(T).name()));
-		logger.error("A0 %s", demangle(typeid(A0T).name()));
-		assert(false);
-	}
-
-	// assrt R == bool
-	if constexpr (!std::is_same_v<R, bool>) {
-		logger.error("ASSERTION FAILED");
-		logger.error("function %s", __func__);
-		logger.error("R != bool");
-		logger.error("R  %s", demangle(typeid(R).name()));
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0_).name()));
 		assert(false);
 	}
 

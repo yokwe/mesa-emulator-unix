@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include <type_traits>
-#include <tuple>
-#include <string>
+#include <initializer_list>
 
 #include "../util/Util.h"
 
@@ -268,40 +266,6 @@ public:
 //
 // function
 //
-template <typename T>
-struct trait_function : trait_function<decltype(&T::operator())> {};
-template <typename C, typename R, typename... A>
-struct trait_function<R(C::*)(A...) const> {
-	enum {type = 100};
-
-	// use enum to define type not constant
-	enum {arity = sizeof...(A)};
-	// return type
-	using ret_type = R;
-	// argument type as std::tuple<>
-	using arg_type = std::tuple<A...>;
-};
-template <typename R, typename... A>
-struct trait_function<R(*)(A...)> {
-	enum {type = 200};
-
-	// use enum to define type not constant
-	enum {arity = sizeof...(A)};
-	// return type
-	using ret_type = R;
-	// argument type as std::tuple<>
-	using arg_type = std::tuple<A...>;
-};
-#if 0
-using trait = trait_function<T>;
-logger.info("trait    %s", demangle(typeid(trait)));
-logger.info("type     %d", trait::type);
-logger.info("arity    %d", trait::arity);
-logger.info("ret_type %s", demangle(typeid(typename trait::ret_type)));
-using args0 = typename std::tuple_element<0, typename trait::arg_type>;
-logger.info("arg0     %s", demangle(typeid(typename args0::type)));
-#endif
-
 
 //
 // source

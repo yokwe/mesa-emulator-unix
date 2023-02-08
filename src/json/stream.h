@@ -125,7 +125,6 @@ public:
 			T newValue = upstream->next();
 			accept(newValue);
 		}
-		logger.info("process result");
 		return result();
 	}
 };

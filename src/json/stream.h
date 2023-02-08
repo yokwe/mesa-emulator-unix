@@ -111,25 +111,9 @@ public:
 	}
 
 	void accept(T& newValue) {
-		logger.info("accept T&");
 		accept_impl(newValue);
 	}
 	void accept(int newValue) {
-		accept_impl(newValue);
-	}
-	void accept(long newValue) {
-		accept_impl(newValue);
-	}
-	void accept(long long newValue) {
-		accept_impl(newValue);
-	}
-	void accept(unsigned int newValue) {
-		accept_impl(newValue);
-	}
-	void accept(unsigned long newValue) {
-		accept_impl(newValue);
-	}
-	void accept(unsigned long long newValue) {
 		accept_impl(newValue);
 	}
 	void accept(double newValue) {
@@ -138,8 +122,10 @@ public:
 
 	R process() {
 		while(upstream->has_next()) {
-			accept(upstream->next());
+			T newValue = upstream->next();
+			accept(newValue);
 		}
+		logger.info("process result");
 		return result();
 	}
 };
@@ -167,6 +153,24 @@ public:
 	}
 };
 
+template <typename T, typename R=int>
+class count_sink_t : public sink_t<T, R> {
+	R count;
+	void close_impl() override {}
+	void accept_impl(T& newValue) override {
+		(void)newValue;
+		count++;
+	}
+	R result_impl() override {
+		return count;
+	}
+
+public:
+	count_sink_t(source_t<T>* upstream) : sink_t<T, R>(__func__, upstream), count(0) {}
+	~count_sink_t() {
+		base_t::close();
+	}
+};
 
 template <typename T, typename R=T>
 class map_t : public source_t<R> {
@@ -342,6 +346,12 @@ template<typename T, typename R=T>
 sum_t<T, R> sum(source_t<T>* upstream) {
 	return sum_t<T, R>(upstream);
 }
+
+template<typename T, typename R=int>
+count_sink_t<T, R> count(source_t<T>* upstream) {
+	return count_sink_t<T, R>(upstream);
+}
+
 
 }
 

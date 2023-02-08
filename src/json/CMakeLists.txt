@@ -7,6 +7,10 @@ add_executable (
   main.cpp
   json.cpp
   handler.h
+  # stream
+  stream.h
+  stream_json.cpp
+  stream_json.h
   )
 
 add_dependencies(json util)

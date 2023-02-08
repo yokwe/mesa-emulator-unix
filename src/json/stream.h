@@ -25,7 +25,7 @@ public:
 		}
 	}
 
-	const char* name() {
+	const char* name() const {
 		return m_name;
 	}
 

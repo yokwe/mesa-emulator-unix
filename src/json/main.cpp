@@ -30,6 +30,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
@@ -48,16 +49,28 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
+#if 0
 	{
-		json::basic_handler_t basic_handler(true);
-		json::block_handler_t block_handler(3, &basic_handler);
-		json::parse(std::cin, &block_handler);
-	}
+		auto head   = stream::vector({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		auto countA = stream::count(&head, "countA");
+		auto filter = stream::filter(&countA, [](int a){return a < 6;});
+		auto add    = stream::map(&filter,    [](int a){return (long)a + 1000;});
+		auto sub    = stream::map(&add,       [](long a){return a - 1000;});
+		auto countB = stream::count(&sub, "countB");
+		auto sum    = stream::sum(&countB);
 
-//	{
-//		json::null_handler_t  null_handler;
-//		json::parse(std::cin, &null_handler);
-//	}
+		logger.info("sum %s", std::to_string(sum.process()));
+	}
+#endif
+
+	{
+		stream::json_t json;
+
+		json.parse(std::cin);
+		auto count = stream::count(&json);
+
+		logger.info("count %s", std::to_string(count.process()));
+	}
 
 	logger.info("STOP");
 	return 0;

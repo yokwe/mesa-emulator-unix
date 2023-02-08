@@ -23,6 +23,7 @@ class json_t : public handler_t, public source_t<token_t> {
 
 	bool    m_end_of_stream;
 	bool    m_stop_capture;
+	bool    m_thread_active;
 	int     m_count_token;
 	int     m_count_capture;
 	int     m_count_next;
@@ -36,6 +37,7 @@ class json_t : public handler_t, public source_t<token_t> {
 	void initialize() {
 		m_end_of_stream  = false;
 		m_stop_capture   = false;
+		m_thread_active  = false;
 		m_count_token    = 0;
 		m_count_capture  = 0;
 		m_count_next     = 0;
@@ -49,6 +51,13 @@ public:
 
 	~json_t() {
 		base_t::close();
+	}
+
+	bool thread_active() {
+		return m_thread_active;
+	}
+	void thread_active(bool newValue) {
+		m_thread_active = newValue;
 	}
 
 	void parse(std::istream& in);

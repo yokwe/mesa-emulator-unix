@@ -21,29 +21,41 @@ using seconds   = std::chrono::seconds;
 namespace stream {
 
 
-void parse_impl(std::istream* in, json_t* that) {
-	json::parse(*in, that);
+void parse_impl(std::istream* in, json_t* json) {
+	logger.info("parse thread start");
+	json->thread_active(true);
+	json::parse(*in, json);
+	json->thread_active(false);
+	logger.info("parse thread stop");
 }
 void json_t::parse(std::istream& in) {
-	logger.info("parse start");
-
 	// initialize variables
 	initialize();
-
+	// start thread
 	auto thread = std::thread(parse_impl, &in, this);
-	thread.join();
-
-	logger.info("end of stream  %s",  m_end_of_stream ? "T" : "F");
-	logger.info("stop capture   %s",  m_stop_capture ? "T" : "F");
-	logger.info("count token    %6d", m_count_token);
-	logger.info("count capture  %6d", m_count_capture);
-	logger.info("count next     %6d", m_count_next);
+	// detach thread
+	thread.detach();
 }
 
 
 void json_t::close_impl() {
-	m_stop_capture = true;
-	m_fill_queue.notify_one();
+	if (m_thread_active) {
+		logger.info("close thread is active");
+		m_stop_capture = true;
+		m_fill_queue.notify_one();
+		for(int i = 0; i < 3; i++) {
+			logger.info("close sleep %d", i);
+			std::this_thread::sleep_for(m_wait_time);
+			if (m_thread_active) break;
+		}
+	}
+
+	logger.info("close end of stream  %s",  m_end_of_stream ? "T" : "F");
+	logger.info("close stop   capture %s",  m_stop_capture ? "T" : "F");
+	logger.info("close thread active  %s",  m_thread_active ? "T" : "F");
+	logger.info("close count token    %10d", m_count_token);
+	logger.info("close count capture  %10d", m_count_capture);
+	logger.info("close count next     %10d", m_count_next);
 }
 bool json_t::has_next_impl() {
 	std::unique_lock<std::mutex> lock(m_mutex);
@@ -76,9 +88,11 @@ token_t json_t::next_impl() {
 }
 
 void json_t::start() {
+	logger.info("json token start");
 	m_end_of_stream = false;
 }
 void json_t::stop() {
+	logger.info("json_token stop");
 	m_end_of_stream = true;
 	m_stop_capture  = true;
 

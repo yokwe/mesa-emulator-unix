@@ -67,8 +67,11 @@ int main(int, char**) {
 
 	{
 		stream::json_t json(std::cin);
-		auto count = stream::count(&json);
-
+		auto countA = stream::count(&json, "countA");
+		auto split  = stream::split(&countA, "/inner/*");
+		auto filter = stream::filter(&split, [](json::token_list_t t){return json::conatins_path_value(t, "/kind", "EnumDecl");});
+		auto dump   = stream::map(&filter,   [](json::token_list_t t){json::dump(t); return t;});
+		auto count  = stream::count(&dump);
 		logger.info("count %s", std::to_string(count.process()));
 	}
 

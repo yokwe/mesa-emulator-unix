@@ -14,6 +14,7 @@ namespace stream {
 
 using token_t   = json::token_t;
 using handler_t = json::handler_t;
+using token_list_t = json::token_list_t;
 
 class json_t : public handler_t, public source_t<token_t> {
 	using seconds = std::chrono::seconds;
@@ -44,9 +45,10 @@ class json_t : public handler_t, public source_t<token_t> {
 
 		m_queue.clear();
 	}
+	void parse(std::istream& in);
 public:
-	json_t(int max_queue_size = 100, int wait_time = 1) : source_t(__func__), m_max_queue_size(max_queue_size), m_wait_time(wait_time) {
-		initialize();
+	json_t(std::istream& in, int max_queue_size = 1000, int wait_time = 1) : source_t(__func__), m_max_queue_size(max_queue_size), m_wait_time(wait_time) {
+		parse(in);
 	}
 
 	~json_t() {
@@ -59,8 +61,6 @@ public:
 	void thread_active(bool newValue) {
 		m_thread_active = newValue;
 	}
-
-	void parse(std::istream& in);
 
 	//
 	// token_t
@@ -89,6 +89,32 @@ public:
 	}
 };
 
+
+class json_split : public handler_t, public source_t<token_list_t> {
+	source_t<token_t>* m_upstream;
+	std::string        m_pattern;
+	bool               m_has_value;
+	token_list_t       m_value;
+
+public:
+	json_split(source_t<token_t>* upstream, std::string glob) :
+		source_t(__func__),
+		m_upstream(upstream),
+		m_pattern(json::glob_to_regex(glob)) {}
+	~json_split() {
+		base_t::close();
+	}
+
+	// source_t
+	void         close_impl()    override;
+	bool         has_next_impl() override;
+	token_list_t next_impl()     override;
+
+	// handler_t
+	void item (const token_t& token) override;
+	void enter(const token_t& token) override;
+	void leave(const token_t& token) override;
+};
 
 //
 }

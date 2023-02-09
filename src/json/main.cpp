@@ -41,6 +41,8 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
+#include "stream.h"
+#include "stream_json.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -64,9 +66,7 @@ int main(int, char**) {
 #endif
 
 	{
-		stream::json_t json;
-
-		json.parse(std::cin);
+		stream::json_t json(std::cin);
 		auto count = stream::count(&json);
 
 		logger.info("count %s", std::to_string(count.process()));

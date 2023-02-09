@@ -4,6 +4,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <regex>
+
 #include "json.h"
 
 
@@ -66,12 +68,36 @@ bool empty_item(const token_list_t& token_list) {
 	return true;
 }
 
-bool contains(const token_list_t& token_list, const std::string& path, const std::string& value) {
-	for(const token_t& token: token_list) {
-		if (token.path == path && token.value == value) return true;
+bool conatins_path(const token_list_t& list, const std::string& glob_path) {
+	std::regex regex_path(json::glob_to_regex(glob_path));
+	for(const auto& e: list) {
+		if (std::regex_match(e.path, regex_path)) return true;
 	}
 	return false;
 }
+bool conatins_value(const token_list_t& list, const std::string& glob_value) {
+	std::regex regex_value(json::glob_to_regex(glob_value));
+	for(const auto& e: list) {
+		if (std::regex_match(e.value, regex_value)) return true;
+	}
+	return false;
+}
+bool conatins_path_value(const token_list_t& list, const std::string& glob_path, const std::string& glob_value) {
+	std::regex regex_path(json::glob_to_regex(glob_path));
+	std::regex regex_value(json::glob_to_regex(glob_value));
+	for(const auto& e: list) {
+		if (std::regex_match(e.path, regex_path) && std::regex_match(e.value, regex_value)) return true;
+	}
+	return false;
+}
+
+void dump(const token_list_t& list) {
+	logger.info("==== dump ====");
+	for(const auto& e: list) {
+		if (e.type == token_t::Type::ITEM) logger.info("%s %s", e.path, e.value);
+	}
+}
+
 
 token_list_t update_path(const token_list_t& token_list) {
 	token_list_t result;

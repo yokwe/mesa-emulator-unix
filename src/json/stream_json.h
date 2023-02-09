@@ -90,18 +90,21 @@ public:
 };
 
 
-class json_split : public handler_t, public source_t<token_list_t> {
+class json_split_t : public source_t<token_list_t> {
 	source_t<token_t>* m_upstream;
 	std::string        m_pattern;
+	std::regex         m_regex;
 	bool               m_has_value;
 	token_list_t       m_value;
 
 public:
-	json_split(source_t<token_t>* upstream, std::string glob) :
+	json_split_t(source_t<token_t>* upstream, std::string glob) :
 		source_t(__func__),
 		m_upstream(upstream),
-		m_pattern(json::glob_to_regex(glob)) {}
-	~json_split() {
+		m_pattern(json::glob_to_regex(glob)),
+		m_regex(std::regex(m_pattern)),
+		m_has_value(false) {}
+	~json_split_t() {
 		base_t::close();
 	}
 
@@ -109,12 +112,13 @@ public:
 	void         close_impl()    override;
 	bool         has_next_impl() override;
 	token_list_t next_impl()     override;
-
-	// handler_t
-	void item (const token_t& token) override;
-	void enter(const token_t& token) override;
-	void leave(const token_t& token) override;
 };
+
+
+template <typename T>
+json_split_t split(source_t<T>* upstream, const char* glob) {
+	return json_split_t(upstream, glob);
+}
 
 //
 }

@@ -14,13 +14,18 @@ static const Logger logger = Logger::getLogger("stream_json");
 #include "stream_json.h"
 
 
-using token_t   = json::token_t;
-using handler_t = json::handler_t;
-using seconds   = std::chrono::seconds;
+using token_t      = json::token_t;
+using token_list_t = json::token_list_t;
+using handler_t    = json::handler_t;
+using seconds      = std::chrono::seconds;
+
 
 namespace stream {
 
 
+//
+// json_t
+//
 void parse_impl(std::istream* in, json_t* json) {
 	logger.info("parse thread start");
 	json->thread_active(true);
@@ -116,6 +121,73 @@ void json_t::process_token(const token_t& token) {
 	}
 	m_count_capture++;
 	m_queue.push_front(token);
+}
+
+
+//
+// json_split_t
+//
+// soruce_t<token_list_t>
+void json_split_t::close_impl() {
+	// FIXME
+}
+bool json_split_t::has_next_impl() {
+	if (m_has_value) return true;
+
+	// build m_has_value and m_value
+	std::string path("//");
+	int prefix = 0;
+	bool capturing = false;
+	for(;;) {
+		// reach end of stream
+		if (!m_upstream->has_next()) return false;
+
+		token_t token = m_upstream->next();
+		if (capturing) {
+			m_value.emplace_back(token, token.path.substr(prefix));
+		}
+
+		switch(token.type) {
+		case token_t::Type::ENTER:
+			if (std::regex_match(token.path, m_regex)) {
+				// found interest node
+				path = token.path;
+				prefix = path.size();
+				capturing = true;
+				//
+				m_value.clear();
+				m_value.emplace_back(token, token.path.substr(prefix));
+			}
+			break;
+		case token_t::Type::LEAVE:
+			if (token.path == path) {
+				// end of interest node
+				path = "//";
+				prefix = 0;
+				capturing = false;
+				//
+				m_has_value = true;
+				return true;
+			}
+			break;
+		case token_t::Type::ITEM:
+			break;
+		default:
+			ERROR();
+			break;
+		}
+	}
+}
+token_list_t json_split_t::next_impl() {
+	if (m_has_value) {
+		m_has_value = false;
+		return m_value;
+	} else {
+		// if there is no next and call next(), it is error
+		logger.error("there is no next and call next() is error");
+		ERROR();
+		return m_value;
+	}
 }
 
 

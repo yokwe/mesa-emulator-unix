@@ -78,7 +78,7 @@ bool conatins_path(const token_list_t& list, const std::string& glob_path) {
 bool conatins_value(const token_list_t& list, const std::string& glob_value) {
 	std::regex regex_value(json::glob_to_regex(glob_value));
 	for(const auto& e: list) {
-		if (std::regex_match(e.value, regex_value)) return true;
+		if (e.match_value(regex_value)) return true;
 	}
 	return false;
 }
@@ -86,15 +86,30 @@ bool conatins_path_value(const token_list_t& list, const std::string& glob_path,
 	std::regex regex_path(json::glob_to_regex(glob_path));
 	std::regex regex_value(json::glob_to_regex(glob_value));
 	for(const auto& e: list) {
-		if (std::regex_match(e.path, regex_path) && std::regex_match(e.value, regex_value)) return true;
+		if (e.match_path_value(regex_path, regex_value)) return true;
 	}
 	return false;
 }
 
-void dump(const token_list_t& list) {
+void dump(const std::string& prefix, const token_list_t& list) {
 	logger.info("==== dump ====");
 	for(const auto& e: list) {
-		if (e.type == token_t::Type::ITEM) logger.info("%s %s", e.path, e.value);
+		dump(prefix, e);
+	}
+}
+void dump(const std::string& prefix, const token_t& token) {
+	switch(token.type) {
+	case token_t::Type::ENTER:
+		logger.info("%s\"%s\" %s", prefix, token.path, token.arrayFlag ? "ARRAY" : "OBJECT");
+		break;
+	case token_t::Type::LEAVE:
+		logger.info("%s\"%s\" %s", prefix, token.path, "END");
+		break;
+	case token_t::Type::ITEM:
+		logger.info("%s\"%s\" %s", prefix, token.path, token.value);
+		break;
+	default:
+		ERROR();
 	}
 }
 

@@ -65,15 +65,37 @@ int main(int, char**) {
 	}
 #endif
 
+#if 1
 	{
 		stream::json_t json(std::cin);
-		auto countA = stream::count(&json, "countA");
-		auto split  = stream::split(&countA, "/inner/*");
-		auto filter = stream::filter(&split, [](json::token_list_t t){return json::conatins_path_value(t, "/kind", "EnumDecl");});
-		auto dump   = stream::map(&filter,   [](json::token_list_t t){json::dump(t); return t;});
-		auto count  = stream::count(&dump);
+		auto countA  = stream::count(&json, "countA");
+		auto splitA  = stream::split(&countA, "/inner/*");
+		auto filterA = stream::filter(&splitA, [](json::token_list_t t){return json::conatins_path_value(t, "/kind", "EnumDecl");});
+		auto peekA   = stream::peek(&filterA, [](json::token_list_t){});
+		auto countB  = stream::count(&peekA, "countB");
+		auto expandA = stream::expand(&countB);
+
+		std::regex regexA(json::glob_to_regex("**/range/**"));
+//		std::regex regexB(json::glob_to_regex("**/range"));
+//		std::regex regexC(json::glob_to_regex("**/loc/**"));
+//		std::regex regexD(json::glob_to_regex("**/loc"));
+
+		auto filterB = stream::filter(&expandA, [regexA](json::token_t t){return !t.match_path(regexA);});
+
+		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump("BB ", t);});
+		auto count   = stream::count(&peekB);
 		logger.info("count %s", std::to_string(count.process()));
 	}
+#endif
+
+#if 0
+	{
+		stream::json_t json(std::cin);
+		auto countA  = stream::filter(&json, [](json::token_t t){dump("AA ", t);return true;});
+		auto count   = stream::count(&countA);
+		logger.info("count %s", std::to_string(count.process()));
+	}
+#endif
 
 	logger.info("STOP");
 	return 0;

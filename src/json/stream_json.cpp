@@ -42,7 +42,7 @@ void json_t::parse(std::istream& in) {
 	thread.detach();
 }
 
-
+// source_t<token_t>
 void json_t::close_impl() {
 	if (m_thread_active) {
 		logger.info("close thread is active");
@@ -91,7 +91,7 @@ token_t json_t::next_impl() {
 		return ret;
 	}
 }
-
+// handler_t
 void json_t::start() {
 	logger.info("json token start");
 	m_end_of_stream = false;
@@ -103,7 +103,6 @@ void json_t::stop() {
 
 	m_queue_is_filled.notify_one();
 }
-
 void json_t::process_token(const token_t& token) {
 	m_count_token++;
 	if (m_stop_capture) return;
@@ -190,6 +189,85 @@ token_list_t json_split_t::next_impl() {
 	}
 }
 
+
+//
+// json_exand_t
+//
+// source_t<token_t>
+
+// FIXME need to return root array
+void json_expand_t::close_impl() {
+	// FIXME
+}
+bool json_expand_t::has_next_impl() {
+	if (m_has_value) return true;
+
+	if (m_need_first_array) {
+		m_need_first_array = false;
+		//
+		m_value = token_t::enter("", "", true);
+		m_has_value = true;
+		return true;
+	}
+
+	// m_list is empty, fill with upstream
+	if (m_list.empty()) {
+		if (m_upstream->has_next()) {
+			m_list = m_upstream->next();
+			m_list_index = -1;
+		} else {
+			// no next data
+			if (m_need_last_leave) {
+				m_need_last_leave = false;
+				//
+				m_value = token_t::leave("", "");
+				m_has_value = true;
+				return true;
+			}
+			return false;
+		}
+	}
+
+	if (m_list_index == -1) {
+		// special case for begin of m_list
+		m_array_name = std::to_string(m_array_index);
+		m_has_value  = true;
+		m_value      = token_t::enter("/" + m_array_name, m_array_name, true);
+		//
+		m_list_index = 0;
+		return true;
+	} else if (0 <= m_list_index && m_list_index < (int)m_list.size()) {
+		// expected
+		token_t token = m_list.at(m_list_index);
+		m_has_value   = true;
+		m_value       = token_t(token, "/" + m_array_name + token.path);
+		//
+		m_list_index++;
+		// special case for end of m_list
+		if (m_list_index == (int)m_list.size()) {
+			m_array_index++;
+			m_list.clear();
+		}
+		return true;
+	} else {
+		logger.error("Unexpected m_list_index");
+		logger.error("  m_list_index %4d", m_list_index);
+		logger.error("  m_list.size  %4d", m_list.size());
+		ERROR();
+		return false;
+	}
+}
+token_t json_expand_t::next_impl() {
+	if (m_has_value) {
+		m_has_value = false;
+		return m_value;
+	} else {
+		// if there is no next and call next(), it is error
+		logger.error("there is no next and call next() is error");
+		ERROR();
+		return m_value;
+	}
+}
 
 #if 0
 json_t parse(std::istream& in) {

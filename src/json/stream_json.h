@@ -4,6 +4,11 @@
 
 #pragma once
 
+#include <string>
+#include <regex>
+#include <initializer_list>
+#include <tuple>
+
 #include "../util/Util.h"
 
 #include "stream.h"
@@ -115,9 +120,39 @@ public:
 };
 
 
-template <typename T>
+class json_expand_t : public source_t<token_t> {
+	source_t<token_list_t>* m_upstream;
+	int                     m_array_index;
+	int                     m_list_index;
+	bool                    m_has_value;
+	bool                    m_need_first_array;
+	bool                    m_need_last_leave;
+	token_t                 m_value;
+	token_list_t            m_list;
+	std::string             m_array_name;
+public:
+	json_expand_t(source_t<token_list_t>* upstream) : source_t(__func__),
+		m_upstream(upstream),
+		m_array_index(0),
+		m_list_index(0),
+		m_has_value(false),
+		m_need_first_array(true),
+		m_need_last_leave(true) {}
+
+	// source_t
+	void    close_impl()    override;
+	bool    has_next_impl() override;
+	token_t next_impl()     override;
+};
+
+
+template<typename T=token_t>
 json_split_t split(source_t<T>* upstream, const char* glob) {
 	return json_split_t(upstream, glob);
+}
+template<typename T=token_list_t>
+json_expand_t expand(source_t<T>* upstream) {
+	return json_expand_t(upstream);
 }
 
 //

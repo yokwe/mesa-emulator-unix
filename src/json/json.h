@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <regex>
 
 namespace json {
 
@@ -19,20 +20,19 @@ public:
 		ITEM, ENTER, LEAVE
 	};
 
-	const std::string path;
-	const Type        type;
-	const std::string name;
-	const bool        arrayFlag;
-	const std::string value;
+	std::string path;
+	Type        type;
+	std::string name;
+	bool        arrayFlag;
+	std::string value;
 
-	// copy constructor
-	token_t(const token_t& that) :
-		path(that.path), type(that.type), name(that.name),
-		arrayFlag(that.arrayFlag), value(that.value) {}
-	// move constructor
-	token_t(token_t&& that) noexcept :
-		path(std::move(that.path)), type(that.type), name(std::move(that.name)),
-		arrayFlag(that.arrayFlag), value(std::move(that.value)) {}
+	// default constructor
+	token_t() :
+		path("*NULL*"),
+		type(Type::LEAVE),
+		name("*NULL*"),
+		arrayFlag(false),
+		value("*NULL*") {}
 
 	// copy constructor
 	token_t(const token_t& that, const std::string& path_) :
@@ -52,6 +52,19 @@ public:
 	}
 	static token_t leave(const std::string& path, const std::string& name) {
 		return token_t(path, Type::LEAVE, name);
+	}
+
+	bool match_path(const std::regex& regex) const {
+		return std::regex_match(path, regex);
+	}
+	bool match_value(const std::regex& regex) const {
+		return std::regex_match(value, regex);
+	}
+	bool match_path_value(const std::regex& regex_path, const std::regex& regex_value) const {
+		return match_path(regex_path) && match_value(regex_value);
+	}
+	bool item() const {
+		return type == Type::ITEM;
 	}
 
 private:
@@ -91,11 +104,12 @@ std::string glob_to_regex(std::string glob);
 // return true if token_list contains no item
 bool empty_item(const token_list_t& token_list);
 
-bool conatins_path(const token_list_t& list, const std::string& path);
-bool conatins_value(const token_list_t& list, const std::string& value);
-bool conatins_path_value(const token_list_t& list, const std::string& path, const std::string& value);
+bool conatins_path(const token_list_t& list, const std::string& path_glob);
+bool conatins_value(const token_list_t& list, const std::string& value_glob);
+bool conatins_path_value(const token_list_t& list, const std::string& path_glob, const std::string& value_glob);
 
-void dump(const token_list_t& list);
+void dump(const std::string& prefix, const token_list_t& list);
+void dump(const std::string& prefix, const token_t&      token);
 
 
 

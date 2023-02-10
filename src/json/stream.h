@@ -5,6 +5,7 @@
 #pragma once
 
 #include <initializer_list>
+#include <tuple>
 
 #include "../util/Util.h"
 
@@ -171,6 +172,35 @@ public:
 	}
 };
 
+
+template <typename T>
+class peek_t : public source_t<T> {
+	using peek_apply = std::function<void(T)>;
+
+	source_t<T>* upstream;
+	peek_apply   apply;
+
+	void close_impl() override {}
+	bool has_next_impl() override {
+		return upstream->has_next();
+	}
+	T next_impl() override {
+		T newValue = upstream->next();
+		apply(newValue);
+		return newValue;
+	}
+
+public:
+	peek_t(source_t<T>* upstream_, peek_apply apply_) :
+		source_t<T>(__func__),
+		upstream(upstream_),
+		apply(apply_) {}
+	~peek_t() {
+		base_t::close();
+	}
+};
+
+
 template <typename T, typename R=T>
 class map_t : public source_t<R> {
 	using map_apply = std::function<R(T)>;
@@ -282,6 +312,32 @@ vector_t<T> vector(std::initializer_list<T> init) {
 // between
 //
 template <typename T, typename Function>
+auto peek(source_t<T>* upstream,  Function apply) {
+	using trait = trait_function<Function>;
+	using R   = typename trait::ret_type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
+
+	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
+
+	// assert T     == A0T
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1) || !std::is_same_v<R, void>) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0).name()));
+		ERROR();
+	}
+
+	return peek_t<T>(upstream, apply);
+}
+
+template <typename T, typename Function>
 auto map(source_t<T>* upstream,  Function apply) {
 	using trait = trait_function<Function>;
 	using R   = typename trait::ret_type;
@@ -289,8 +345,8 @@ auto map(source_t<T>* upstream,  Function apply) {
 	using A0  = typename A0_::type;
 
 	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
-	static_assert(trait::arity == 1,       "arity != 1");
-	static_assert(std::is_same_v<T, A0>,   "T != A0");
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
 
 	// assert T     == A0T
 	// assert arity == 1
@@ -314,9 +370,9 @@ filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
 	using A0  = typename A0_::type;
 
 	//logger.debug("filter T=%s R=%s Predicater=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Predicate).name()));
-	static_assert(trait::arity == 1,       "arity != 1");
-	static_assert(std::is_same_v<T, A0>,   "T != A0");
-	static_assert(std::is_same_v<R, bool>, "R != bool");
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
+	static_assert(std::is_same_v<R, bool>);
 
 	// assert T     == A0T
 	// assert R     == bool

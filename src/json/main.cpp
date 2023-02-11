@@ -70,17 +70,23 @@ int main(int, char**) {
 		stream::json_t json(std::cin);
 		auto countA  = stream::count(&json, "countA");
 		auto splitA  = stream::split(&countA, "/inner/*");
-		auto filterA = stream::filter(&splitA, [](json::token_list_t t){return json::conatins_path_value(t, "/kind", "EnumDecl");});
+		auto filterA = stream::include_path_value(&splitA, "/kind", "EnumDecl");
 		auto peekA   = stream::peek(&filterA, [](json::token_list_t){});
+
+		// auto peekA = stream::peek(&filterA, [](auto t){(void)t;});
+		// Don't check argument type and result type of lambda
+
 		auto countB  = stream::count(&peekA, "countB");
 		auto expandA = stream::expand(&countB);
-
-		std::regex regexA(json::glob_to_regex("**/range/**"));
-//		std::regex regexB(json::glob_to_regex("**/range"));
-//		std::regex regexC(json::glob_to_regex("**/loc/**"));
-//		std::regex regexD(json::glob_to_regex("**/loc"));
-
-		auto filterB = stream::filter(&expandA, [regexA](json::token_t t){return !t.match_path(regexA);});
+		
+		auto filterB = stream::exclude_path(&expandA,
+				"**/range/**",
+				"**/loc/**",
+				"**/includedFrom/**",
+				"**/range",
+				"**/loc",
+				"**/includedFrom"
+				);
 
 		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump("BB ", t);});
 		auto count   = stream::count(&peekB);

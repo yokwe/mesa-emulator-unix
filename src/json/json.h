@@ -111,6 +111,9 @@ bool conatins_path_value(const token_list_t& list, const std::string& path_glob,
 void dump(const std::string& prefix, const token_list_t& list);
 void dump(const std::string& prefix, const token_t&      token);
 
+void dump_item(const std::string& prefix, const token_list_t& list);
+void dump_item(const std::string& prefix, const token_t&      token);
+
 
 
 token_list_t update_path(const token_list_t& token_list);

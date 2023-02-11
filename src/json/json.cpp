@@ -112,6 +112,27 @@ void dump(const std::string& prefix, const token_t& token) {
 		ERROR();
 	}
 }
+void dump_item(const std::string& prefix, const token_list_t& list) {
+	logger.info("==== dump_item ====");
+	for(const auto& e: list) {
+		dump_item(prefix, e);
+	}
+}
+void dump_item(const std::string& prefix, const token_t& token) {
+	switch(token.type) {
+	case token_t::Type::ENTER:
+//		logger.info("%s\"%s\" %s", prefix, token.path, token.arrayFlag ? "ARRAY" : "OBJECT");
+		break;
+	case token_t::Type::LEAVE:
+//		logger.info("%s\"%s\" %s", prefix, token.path, "END");
+		break;
+	case token_t::Type::ITEM:
+		logger.info("%s\"%s\" %s", prefix, token.path, token.value);
+		break;
+	default:
+		ERROR();
+	}
+}
 
 
 token_list_t update_path(const token_list_t& token_list) {

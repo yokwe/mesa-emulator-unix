@@ -88,7 +88,7 @@ int main(int, char**) {
 				"**/includedFrom"
 				);
 
-		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump("BB ", t);});
+		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
 		auto count   = stream::count(&peekB);
 		logger.info("count %s", std::to_string(count.process()));
 	}

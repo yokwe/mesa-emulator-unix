@@ -146,18 +146,24 @@ public:
 };
 
 
-template<typename T=token_t>
+template<typename T>
 json_split_t split(source_t<T>* upstream, const char* glob) {
+	static_assert(std::is_same_v<T, token_t>);
+
 	return json_split_t(upstream, glob);
 }
-template<typename T=token_list_t>
+template<typename T>
 json_expand_t expand(source_t<T>* upstream) {
+	static_assert(std::is_same_v<T, token_list_t>);
+
 	return json_expand_t(upstream);
 }
 
 
-template<typename T=token_list_t>
+template<typename T>
 class json_include_path_value_predicate_t {
+	static_assert(std::is_same_v<T, token_list_t>);
+
 	std::regex regex_path;
 	std::regex regex_value;
 public:
@@ -172,45 +178,41 @@ public:
 	    return false;
 	}
 };
-template<typename T=token_list_t>
+template<typename T>
 filter_t<T> include_path_value(source_t<T>* upstream, const std::string& glob_path, const std::string& glob_value) {
+	static_assert(std::is_same_v<T, token_list_t>);
+
 	json_include_path_value_predicate_t<T> predicate(glob_path, glob_value);
 	return filter(upstream, predicate);
 }
 
 
-template<typename T=token_t, class... Args>
+template<typename T>
 class json_exclude_path_predicate_t {
+	static_assert(std::is_same_v<T, token_t>);
+
 	std::regex m_regex;
 public:
-	json_exclude_path_predicate_t(Args... args) {
-		std::tuple<Args...> tuple(args...);
+	json_exclude_path_predicate_t(std::initializer_list<std::string> args) {
+		assert(args.size() != 0);
 
-		std::vector<std::string> regex_string_list;
-		{
-			auto func = [&](auto&&... args){(regex_string_list.push_back(json::glob_to_regex(args)), ...);};
-			std::apply(func, tuple);
+		std::string string;
+		for(auto e: args) {
+			string.append("|(?:" + json::glob_to_regex(e) + ")");
 		}
-
-		std::string regex_string;
-		for(int i = 0; i < (int)regex_string_list.size(); i++) {
-			if (1 <= i) regex_string.append("|");
-			regex_string.append("(?:" + regex_string_list.at(i) + ")");
-		}
-
-		m_regex = std::regex(regex_string);
+		m_regex = std::regex(string.substr(1));
 	}
-	json_exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
-	json_exclude_path_predicate_t(const json_exclude_path_predicate_t& that) : m_regex(that.m_regex) {}
 
 	bool operator()(T token) const {
 		// negate regex_match for exclude
 		return !std::regex_match(token.path, m_regex);
 	}
 };
-template<typename T=token_t, class... Args>
-filter_t<T> exclude_path(source_t<T>* upstream, Args... args) {
-	json_exclude_path_predicate_t predicate(args...);
+template<typename T>
+filter_t<T> exclude_path(source_t<T>* upstream, std::initializer_list<std::string> args) {
+	static_assert(std::is_same_v<T, token_t>);
+
+	json_exclude_path_predicate_t<T> predicate(args);
 	return filter(upstream, predicate);
 }
 

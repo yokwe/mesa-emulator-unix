@@ -80,13 +80,15 @@ int main(int, char**) {
 		auto expandA = stream::expand(&countB);
 		
 		auto filterB = stream::exclude_path(&expandA,
+			{
 				"**/range/**",
 				"**/loc/**",
 				"**/includedFrom/**",
 				"**/range",
 				"**/loc",
 				"**/includedFrom"
-				);
+			}
+		);
 
 		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
 		auto count   = stream::count(&peekB);

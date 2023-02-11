@@ -155,5 +155,59 @@ json_expand_t expand(source_t<T>* upstream) {
 	return json_expand_t(upstream);
 }
 
+
+template<typename T=token_list_t>
+class json_include_path_value_predicate_t {
+	std::regex regex_path;
+	std::regex regex_value;
+public:
+	json_include_path_value_predicate_t(const std::string& glob_path, const std::string& glob_value) :
+		regex_path(json::glob_to_regex(glob_path)),
+		regex_value(json::glob_to_regex(glob_value)) {}
+
+	bool operator()(T list) const {
+	    for(const auto& e: list) {
+	    	if (std::regex_match(e.path, regex_path) && std::regex_match(e.value, regex_value)) return true;
+	    }
+	    return false;
+	}
+};
+template<typename T=token_list_t>
+filter_t<T> include_path_value(source_t<T>* upstream, const std::string& glob_path, const std::string& glob_value) {
+	json_include_path_value_predicate_t<T> predicate(glob_path, glob_value);
+	return filter(upstream, predicate);
+}
+
+
+template<typename T=token_t, class... Args>
+class json_exclude_path_predicate_t {
+	std::vector<std::regex> regex_list;
+public:
+	json_exclude_path_predicate_t() {}
+	json_exclude_path_predicate_t(const json_exclude_path_predicate_t& that) : regex_list(that.regex_list) {}
+
+	void add(std::string glob) {
+		std::string regex = json::glob_to_regex(glob);
+		regex_list.push_back(std::regex(regex));
+	}
+
+	bool operator()(T token) const {
+		for(const auto& e: regex_list) {
+			if (std::regex_match(token.path, e)) return false;
+		}
+		return true;
+	}
+};
+template<typename T=token_t, class... Args>
+filter_t<T> exclude_path(source_t<T>* upstream, Args... args) {
+	std::tuple<Args...> tuple(args...);
+
+	json_exclude_path_predicate_t<T> predicate;
+	auto func = [&](auto&&... args){(predicate.add(args), ...);};
+	std::apply(func, tuple);
+
+	return filter(upstream, predicate);
+}
+
 //
 }

@@ -205,6 +205,8 @@ bool json_expand_t::has_next_impl() {
 	if (m_need_first_array) {
 		m_need_first_array = false;
 		//
+		// start of root array
+		//
 		m_value = token_t::enter("", "", true);
 		m_has_value = true;
 		return true;
@@ -214,11 +216,14 @@ bool json_expand_t::has_next_impl() {
 	if (m_list.empty()) {
 		if (m_upstream->has_next()) {
 			m_list = m_upstream->next();
-			m_list_index = -1;
+			m_array_name = std::to_string(m_array_index);
+			m_list_index = 0;
 		} else {
 			// no next data
 			if (m_need_last_leave) {
 				m_need_last_leave = false;
+				//
+				// end of root array
 				//
 				m_value = token_t::leave("", "");
 				m_has_value = true;
@@ -228,15 +233,7 @@ bool json_expand_t::has_next_impl() {
 		}
 	}
 
-	if (m_list_index == -1) {
-		// special case for begin of m_list
-		m_array_name = std::to_string(m_array_index);
-		m_has_value  = true;
-		m_value      = token_t::enter("/" + m_array_name, m_array_name, true);
-		//
-		m_list_index = 0;
-		return true;
-	} else if (0 <= m_list_index && m_list_index < (int)m_list.size()) {
+	if (0 <= m_list_index && m_list_index < (int)m_list.size()) {
 		// expected
 		token_t token = m_list.at(m_list_index);
 		m_has_value   = true;

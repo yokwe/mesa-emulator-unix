@@ -127,9 +127,7 @@ void json_t::process_token(const token_t& token) {
 // json_split_t
 //
 // soruce_t<token_list_t>
-void json_split_t::close_impl() {
-	// FIXME
-}
+void json_split_t::close_impl() {}
 bool json_split_t::has_next_impl() {
 	if (m_has_value) return true;
 

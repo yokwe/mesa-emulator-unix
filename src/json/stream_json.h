@@ -17,8 +17,8 @@
 namespace stream {
 //
 
-using token_t   = json::token_t;
-using handler_t = json::handler_t;
+using token_t      = json::token_t;
+using handler_t    = json::handler_t;
 using token_list_t = json::token_list_t;
 
 class json_t : public handler_t, public source_t<token_t> {
@@ -95,7 +95,7 @@ public:
 };
 
 
-class json_split_t : public between_t<token_t, token_list_t> {
+class json_split_t : public pipe_t<token_t, token_list_t> {
 	std::string  m_pattern;
 	std::regex   m_regex;
 	bool         m_has_value;
@@ -103,7 +103,7 @@ class json_split_t : public between_t<token_t, token_list_t> {
 
 public:
 	json_split_t(source_t<token_t>* upstream, std::string glob) :
-		between_t(__func__, upstream),
+		pipe_t(__func__, upstream),
 		m_pattern(json::glob_to_regex(glob)),
 		m_regex(std::regex(m_pattern)),
 		m_has_value(false) {}
@@ -118,7 +118,7 @@ public:
 };
 
 
-class json_expand_t : public between_t<token_list_t, token_t> {
+class json_expand_t : public pipe_t<token_list_t, token_t> {
 	int          m_array_index;
 	int          m_list_index;
 	bool         m_has_value;
@@ -128,7 +128,7 @@ class json_expand_t : public between_t<token_list_t, token_t> {
 	token_list_t m_list;
 	std::string  m_array_name;
 public:
-	json_expand_t(source_t<token_list_t>* upstream) : between_t(__func__, upstream),
+	json_expand_t(source_t<token_list_t>* upstream) : pipe_t(__func__, upstream),
 		m_array_index(0),
 		m_list_index(0),
 		m_has_value(false),

@@ -62,7 +62,7 @@ public:
 
 
 template <typename T, typename R>
-class between_t : public source_t<R> {
+class pipe_t : public source_t<R> {
 protected:
 	source_t<T>* m_upstream;
 
@@ -70,8 +70,8 @@ public:
 	const std::string type_T = demangle(typeid(T).name());
 	const std::string type_R = demangle(typeid(R).name());
 
-	between_t(const char* name, source_t<T>* upstream) : source_t<R>(name), m_upstream(upstream) {}
-	virtual ~between_t() {}
+	pipe_t(const char* name, source_t<T>* upstream) : source_t<R>(name), m_upstream(upstream) {}
+	virtual ~pipe_t() {}
 };
 
 
@@ -190,26 +190,26 @@ public:
 
 
 //
-// between_t
+// pipe_t
 //
 template <typename T, typename R=T>
-class peek_t : public between_t<T, R> {
+class peek_t : public pipe_t<T, R> {
 	using peek_apply = std::function<void(T)>;
 	peek_apply   m_apply;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
-		return between_t<T, R>::m_upstream->has_next();
+		return pipe_t<T, R>::m_upstream->has_next();
 	}
 	R next_impl() override {
-		R newValue = between_t<T, R>::m_upstream->next();
+		R newValue = pipe_t<T, R>::m_upstream->next();
 		m_apply(newValue);
 		return newValue;
 	}
 
 public:
 	peek_t(source_t<T>* upstream, peek_apply apply) :
-		between_t<T, R>(__func__, upstream),
+		pipe_t<T, R>(__func__, upstream),
 		m_apply(apply) {}
 	~peek_t() {
 		base_t::close();
@@ -218,23 +218,23 @@ public:
 
 
 template <typename T, typename R>
-class map_t : public between_t<T, R> {
+class map_t : public pipe_t<T, R> {
 	using map_apply = std::function<R(T)>;
 
 	map_apply    m_apply;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
-		return between_t<T, R>::m_upstream->has_next();
+		return pipe_t<T, R>::m_upstream->has_next();
 	}
 	R next_impl() override {
-		T newValue = between_t<T, R>::m_upstream->next();
+		T newValue = pipe_t<T, R>::m_upstream->next();
 		return m_apply(newValue);
 	}
 
 public:
 	map_t(source_t<T>* upstream, map_apply apply) :
-		between_t<T, R>(__func__, upstream),
+		pipe_t<T, R>(__func__, upstream),
 		m_apply(apply) {}
 	~map_t() {
 		base_t::close();
@@ -243,7 +243,7 @@ public:
 
 
 template <typename T>
-class filter_t : public between_t<T, T> {
+class filter_t : public pipe_t<T, T> {
 	using filter_test = std::function<bool(T)>;
 
 	filter_test  m_test;
@@ -254,8 +254,8 @@ class filter_t : public between_t<T, T> {
 	bool has_next_impl() override {
 		for(;;) {
 			if (m_has_value) break;
-			if (!between_t<T, T>::m_upstream->has_next()) break;
-			m_value = between_t<T, T>::m_upstream->next();
+			if (!pipe_t<T, T>::m_upstream->has_next()) break;
+			m_value = pipe_t<T, T>::m_upstream->next();
 			m_has_value = m_test(m_value);
 		}
 		return m_has_value;
@@ -273,7 +273,7 @@ class filter_t : public between_t<T, T> {
 
 public:
 	filter_t(source_t<T>* upstream, filter_test test) :
-		between_t<T, T>(__func__, upstream),
+		pipe_t<T, T>(__func__, upstream),
 		m_test(test),
 		m_has_value(false) {}
 	~filter_t() {

@@ -13,26 +13,23 @@ namespace stream {
 
 
 class base_t {
+	const char* m_name;
+	bool        m_closed;
+
 public:
 	base_t(const char* name) : m_name(name), m_closed(false) {}
 	virtual ~base_t() {}
 
 	virtual void close_impl() = 0; // most of case do nothing
-
 	void close() {
 		if (!m_closed) {
 			m_closed = true;
 			close_impl();
 		}
 	}
-
 	const char* name() const {
 		return m_name;
 	}
-
-private:
-	const char* m_name;
-	bool        m_closed;
 };
 
 
@@ -44,10 +41,9 @@ class source_t : public base_t {
 	virtual T    next_impl()     = 0;
 
 public:
-	const std::string data_type_name = demangle(typeid(T).name());
+	const std::string type_T = demangle(typeid(T).name());
 
 	source_t(const char* name) : base_t(name) {}
-
 	virtual ~source_t() {}
 
 	bool has_next() {
@@ -65,6 +61,63 @@ public:
 };
 
 
+template <typename T, typename R>
+class between_t : public source_t<R> {
+protected:
+	source_t<T>* m_upstream;
+
+public:
+	const std::string type_T = demangle(typeid(T).name());
+	const std::string type_R = demangle(typeid(R).name());
+
+	between_t(const char* name, source_t<T>* upstream) : source_t<R>(name), m_upstream(upstream) {}
+	virtual ~between_t() {}
+};
+
+
+template <typename T, typename R>
+class sink_t : public base_t {
+	source_t<T>* m_upstream;
+
+	// You need to implement base_t::close_impl() in implementing class
+	// void close_impl();
+	virtual void accept_impl(T& newValue) = 0;
+	virtual R    result_impl()            = 0;
+
+public:
+	const std::string type_T = demangle(typeid(T).name());
+	const std::string type_R = demangle(typeid(R).name());
+
+	sink_t(const char* name, source_t<T>* upstream_) : base_t(name), m_upstream(upstream_) {}
+	virtual ~sink_t() {}
+
+	R result() {
+		return result_impl();
+	}
+
+	void accept(T& newValue) {
+		accept_impl(newValue);
+	}
+	void accept(int newValue) {
+		accept_impl(newValue);
+	}
+	void accept(double newValue) {
+		accept_impl(newValue);
+	}
+
+	R process() {
+		while(m_upstream->has_next()) {
+			T newValue = m_upstream->next();
+			accept(newValue);
+		}
+		return result();
+	}
+};
+
+
+//
+// source_t
+//
 template <typename T>
 class vector_t : public source_t<T> {
 	std::vector<T> m_data;
@@ -91,63 +144,26 @@ public:
 };
 
 
-template <typename T, typename R>
-class sink_t : public base_t {
-	source_t<T>* upstream;
-
-	// You need to implement base_t::close_impl() in implementing class
-	// void close_impl();
-	virtual void accept_impl(T& newValue) = 0;
-	virtual R    result_impl()            = 0;
-
-public:
-	sink_t(const char* name, source_t<T>* upstream_) :
-		base_t(name),
-		upstream(upstream_) {
-	}
-	virtual ~sink_t() {}
-
-	R result() {
-		return result_impl();
-	}
-
-	void accept(T& newValue) {
-		accept_impl(newValue);
-	}
-	void accept(int newValue) {
-		accept_impl(newValue);
-	}
-	void accept(double newValue) {
-		accept_impl(newValue);
-	}
-
-	R process() {
-		while(upstream->has_next()) {
-			T newValue = upstream->next();
-			accept(newValue);
-		}
-		return result();
-	}
-};
-
-
+//
+// sink_t
+//
 template <typename T, typename R=T>
 class sum_t : public sink_t<T, R> {
 	static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>,  "T is not number");
 	static_assert(std::is_integral_v<R> || std::is_floating_point_v<R>,  "R is not number");
 
-	R sum;
+	R m_sum;
 
 	void close_impl() override {}
 	void accept_impl(T& newValue) override {
-		sum += newValue;
+		m_sum += newValue;
 	}
 	R result_impl() override {
-		return sum;
+		return m_sum;
 	}
 
 public:
-	sum_t(source_t<T>* upstream) : sink_t<T, R>(__func__, upstream), sum(0) {}
+	sum_t(source_t<T>* upstream) : sink_t<T, R>(__func__, upstream), m_sum(0) {}
 	~sum_t() {
 		base_t::close();
 	}
@@ -155,73 +171,71 @@ public:
 
 template <typename T, typename R=int>
 class count_sink_t : public sink_t<T, R> {
-	R count;
+	R m_count;
 	void close_impl() override {}
 	void accept_impl(T& newValue) override {
 		(void)newValue;
-		count++;
+		m_count++;
 	}
 	R result_impl() override {
-		return count;
+		return m_count;
 	}
 
 public:
-	count_sink_t(source_t<T>* upstream) : sink_t<T, R>(__func__, upstream), count(0) {}
+	count_sink_t(source_t<T>* upstream) : sink_t<T, R>(__func__, upstream), m_count(0) {}
 	~count_sink_t() {
 		base_t::close();
 	}
 };
 
 
-template <typename T>
-class peek_t : public source_t<T> {
+//
+// between_t
+//
+template <typename T, typename R=T>
+class peek_t : public between_t<T, R> {
 	using peek_apply = std::function<void(T)>;
-
-	source_t<T>* upstream;
-	peek_apply   apply;
+	peek_apply   m_apply;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
-		return upstream->has_next();
+		return between_t<T, R>::m_upstream->has_next();
 	}
-	T next_impl() override {
-		T newValue = upstream->next();
-		apply(newValue);
+	R next_impl() override {
+		R newValue = between_t<T, R>::m_upstream->next();
+		m_apply(newValue);
 		return newValue;
 	}
 
 public:
-	peek_t(source_t<T>* upstream_, peek_apply apply_) :
-		source_t<T>(__func__),
-		upstream(upstream_),
-		apply(apply_) {}
+	peek_t(source_t<T>* upstream, peek_apply apply) :
+		between_t<T, R>(__func__, upstream),
+		m_apply(apply) {}
 	~peek_t() {
 		base_t::close();
 	}
 };
 
 
-template <typename T, typename R=T>
-class map_t : public source_t<R> {
+template <typename T, typename R>
+class map_t : public between_t<T, R> {
 	using map_apply = std::function<R(T)>;
 
-	source_t<T>* upstream;
-	map_apply    apply;
+	map_apply    m_apply;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
-		return upstream->has_next();
+		return between_t<T, R>::m_upstream->has_next();
 	}
 	R next_impl() override {
-		T newValue = upstream->next();
-		return apply(newValue);
+		T newValue = between_t<T, R>::m_upstream->next();
+		return m_apply(newValue);
 	}
 
 public:
-	map_t(source_t<T>* upstream_, map_apply apply_) :
-		source_t<R>(__func__),
-		upstream(upstream_),
-		apply(apply_) {}
+	map_t(source_t<T>* upstream, map_apply apply) :
+		between_t<T, R>(__func__, upstream),
+		m_apply(apply) {}
 	~map_t() {
 		base_t::close();
 	}
@@ -229,28 +243,27 @@ public:
 
 
 template <typename T>
-class filter_t : public source_t<T> {
+class filter_t : public between_t<T, T> {
 	using filter_test = std::function<bool(T)>;
 
-	source_t<T>* upstream;
-	filter_test  test;
-	bool         hasValue;
-	T            value;
+	filter_test  m_test;
+	bool         m_has_value;
+	T            m_value;
 
 	void close_impl() override {}
 	bool has_next_impl() override {
 		for(;;) {
-			if (hasValue) break;
-			if (!upstream->has_next()) break;
-			value = upstream->next();
-			hasValue = test(value);
+			if (m_has_value) break;
+			if (!between_t<T, T>::m_upstream->has_next()) break;
+			m_value = between_t<T, T>::m_upstream->next();
+			m_has_value = m_test(m_value);
 		}
-		return hasValue;
+		return m_has_value;
 	}
 	T next_impl() override {
 		if (has_next_impl()) {
-			hasValue = false;
-			return value;
+			m_has_value = false;
+			return m_value;
 		} else {
 			// if there is no next and call next(), it is error
 			logger.error("stream has no next");
@@ -259,11 +272,10 @@ class filter_t : public source_t<T> {
 	}
 
 public:
-	filter_t(source_t<T>* upstream_, filter_test test_) :
-		source_t<T>(__func__),
-		upstream(upstream_),
-		test(test_),
-		hasValue(false) {}
+	filter_t(source_t<T>* upstream, filter_test test) :
+		between_t<T, T>(__func__, upstream),
+		m_test(test),
+		m_has_value(false) {}
 	~filter_t() {
 		base_t::close();
 	}

@@ -70,14 +70,19 @@ int main(int, char**) {
 		stream::json_t json(std::cin);
 		auto countA  = stream::count(&json, "countA");
 		auto splitA  = stream::split(&countA, "/inner/*");
-		auto filterA = stream::include_path_value(&splitA, "/kind", "EnumDecl");
-		auto peekA   = stream::peek(&filterA, [](json::token_list_t){});
+		// auto splitA = stream::token_list(&countA, "/inner/*");
+		// auto_splitA = stream::token::token_list(&countA, "/inner/*");
 
-		// auto peekA = stream::peek(&filterA, [](auto t){(void)t;});
-		// Don't check argument type and result type of lambda
+		auto filterA = stream::include_path_value(&splitA, "/kind", "EnumDecl");
+		// auto filterA = stream::include_token_list(&splitA, "/kind", "EnumDecl");
+		// auto filterA = stream:::token_list::include(&splitA, "/kind", "EnumDecl");
+
+		auto peekA   = stream::peek(&filterA, [](json::token_list_t){});
 
 		auto countB  = stream::count(&peekA, "countB");
 		auto expandA = stream::expand(&countB);
+		// auto expandA = stream::expand_token_list(&countB);
+		// auto expandA = stream::token_list::expand(&countB);
 		
 		auto filterB = stream::exclude_path(&expandA,
 			{
@@ -89,6 +94,8 @@ int main(int, char**) {
 				"**/includedFrom"
 			}
 		);
+		// auto filterB = stream::exclude_token_path(&expandA, ...);
+		// auto filgerB = stream::token::exclude_path(&expandA, ...);
 
 		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
 		auto count   = stream::count(&peekB);

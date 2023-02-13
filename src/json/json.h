@@ -201,6 +201,6 @@ void dump_item(const std::string& prefix, const token_t&      token);
 //
 // parse function
 //
-void parse(std::istream&       in, handler_t *handler);
+void parse(std::istream& in, handler_t *handler);
 
 }

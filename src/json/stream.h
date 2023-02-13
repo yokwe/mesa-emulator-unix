@@ -356,7 +356,6 @@ auto map(source_t<T>* upstream,  Function apply) {
 	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
 	using A0  = typename A0_::type;
 
-	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
 	static_assert(trait::arity == 1);
 	static_assert(std::is_same_v<T, A0>);
 
@@ -421,17 +420,3 @@ count_sink_t<T, R> count(source_t<T>* upstream) {
 
 
 }
-
-#if 0
-{
-	auto head   = stream::vector({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
-	auto countA = stream::count(&head, "countA");
-	auto filter = stream::filter(&countA, [](int a){return a < 6;});
-	auto add    = stream::map(&filter,    [](int a){return a + 1000;});
-	auto sub    = stream::map(&add,       [](int a){return a - 1000;});
-	auto countB = stream::count(&sub, "countB");
-	auto sum    = stream::sum(&countB);
-
-	logger.info("sum %s", std::to_string(sum.process()));
-}
-#endif

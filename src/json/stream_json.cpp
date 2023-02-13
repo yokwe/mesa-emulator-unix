@@ -12,19 +12,17 @@
 static const Logger logger = Logger::getLogger("stream_json");
 
 // stream_json.h includes stream.h
-// stream.h use variable logger
-// stream.h needs after ../util/Util.h
+// template inside stream.h use variable logger
+// so stream.h must be after definition of logger
 #include "stream_json.h"
 
 
-using token_t      = json::token_t;
-using token_list_t = json::token_list_t;
-using handler_t    = json::handler_t;
-using seconds      = std::chrono::seconds;
+constexpr auto glob_to_regex = json::glob_to_regex;
+constexpr auto parse         = json::parse;
 
 
 namespace stream {
-
+namespace json {
 
 //
 // json_t
@@ -32,7 +30,7 @@ namespace stream {
 void parse_impl(std::istream* in, json_t* json) {
 	logger.info("parse thread start");
 	json->thread_active(true);
-	json::parse(*in, json);
+	parse(*in, json);
 	json->thread_active(false);
 	logger.info("parse thread stop");
 }
@@ -131,8 +129,8 @@ void json_t::data(const token_t& token) {
 // json_split_t
 //
 // soruce_t<token_list_t>
-void json_split_t::close_impl() {}
-bool json_split_t::has_next_impl() {
+void split_t::close_impl() {}
+bool split_t::has_next_impl() {
 	if (m_has_value) return true;
 
 	// build m_has_value and m_value
@@ -176,7 +174,7 @@ bool json_split_t::has_next_impl() {
 	}
 	return false;
 }
-token_list_t json_split_t::next_impl() {
+token_list_t split_t::next_impl() {
 	if (m_has_value) {
 		m_has_value = false;
 		return m_value;
@@ -190,15 +188,10 @@ token_list_t json_split_t::next_impl() {
 
 
 //
-// json_exand_t
+// expand
 //
-// source_t<token_t>
-
-// FIXME need to return root array
-void json_expand_t::close_impl() {
-	// FIXME
-}
-bool json_expand_t::has_next_impl() {
+void expand_t::close_impl() {}
+bool expand_t::has_next_impl() {
 	if (m_has_value) return true;
 
 	if (m_need_first_array) {
@@ -253,7 +246,7 @@ bool json_expand_t::has_next_impl() {
 		return false;
 	}
 }
-token_t json_expand_t::next_impl() {
+token_t expand_t::next_impl() {
 	if (m_has_value) {
 		m_has_value = false;
 		return m_value;
@@ -265,13 +258,63 @@ token_t json_expand_t::next_impl() {
 	}
 }
 
-#if 0
-json_t parse(std::istream& in) {
-	json_t json;
-	json.parse(in);
-	return json;
+
+
+//
+// include_path_value
+//
+namespace {
+class include_path_value_predicate_t {
+	std::regex regex_path;
+	std::regex regex_value;
+public:
+	include_path_value_predicate_t(const std::string& glob_path, const std::string& glob_value) :
+		regex_path(glob_to_regex(glob_path)),
+		regex_value(glob_to_regex(glob_value)) {}
+
+	bool operator()(token_list_t list) const {
+	    for(const auto& e: list) {
+	    	if (std::regex_match(e.path(), regex_path) && std::regex_match(e.value(), regex_value)) return true;
+	    }
+	    return false;
+	}
+};
 }
-#endif
+filter_t<token_list_t> include_path_value(source_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
+	include_path_value_predicate_t predicate(glob_path, glob_value);
+	return filter(upstream, predicate);
+}
 
 
+
+//
+// exclude_path
+//
+namespace {
+class exclude_path_predicate_t {
+	std::regex m_regex;
+public:
+	exclude_path_predicate_t(std::initializer_list<std::string> args) {
+		assert(args.size() != 0);
+
+		std::string string;
+		for(auto e: args) {
+			string.append("|(?:" + glob_to_regex(e) + ")");
+		}
+		m_regex = std::regex(string.substr(1));
+	}
+
+	bool operator()(token_t token) const {
+		// negate regex_match for exclude
+		return !std::regex_match(token.path(), m_regex);
+	}
+};
+}
+filter_t<token_t> exclude_path(source_t<token_t>* upstream, std::initializer_list<std::string> args) {
+	exclude_path_predicate_t predicate(args);
+	return filter(upstream, predicate);
+}
+
+
+}
 }

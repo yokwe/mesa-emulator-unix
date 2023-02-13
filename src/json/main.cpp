@@ -66,24 +66,24 @@ int main(int, char**) {
 
 #if 1
 	{
-		stream::json_t json(std::cin);
+		stream::json::json_t json(std::cin);
 		auto countA  = stream::count(&json, "countA");
-		auto splitA  = stream::split(&countA, "/inner/*");
+		auto splitA  = stream::json::split(&countA, "/inner/*");
 		// auto splitA = stream::token_list(&countA, "/inner/*");
 		// auto_splitA = stream::token::token_list(&countA, "/inner/*");
 
-		auto filterA = stream::include_path_value(&splitA, "/kind", "EnumDecl");
+		auto filterA = stream::json::include_path_value(&splitA, "/kind", "EnumDecl");
 		// auto filterA = stream::include_token_list(&splitA, "/kind", "EnumDecl");
 		// auto filterA = stream:::token_list::include(&splitA, "/kind", "EnumDecl");
 
 		auto peekA   = stream::peek(&filterA, [](json::token_list_t){});
 
 		auto countB  = stream::count(&peekA, "countB");
-		auto expandA = stream::expand(&countB);
+		auto expandA = stream::json::expand(&countB);
 		// auto expandA = stream::expand_token_list(&countB);
 		// auto expandA = stream::token_list::expand(&countB);
 		
-		auto filterB = stream::exclude_path(&expandA,
+		auto filterB = stream::json::exclude_path(&expandA,
 			{
 				"**/range/**",
 				"**/loc/**",

@@ -43,6 +43,7 @@ static const Logger logger = Logger::getLogger("main");
 #include "stream.h"
 #include "stream_json.h"
 
+
 int main(int, char**) {
 	logger.info("START");
 
@@ -96,7 +97,24 @@ int main(int, char**) {
 		// auto filterB = stream::exclude_token_path(&expandA, ...);
 		// auto filgerB = stream::token::exclude_path(&expandA, ...);
 
-		auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
+		//auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
+
+		class : public stream::tee_t<json::token_t>::callback_t {
+		public:
+			void start() {
+				logger.info("start my_callback_t");
+			}
+			void stop() {
+				logger.info("stop my_callback_t");
+			}
+			void data(json::token_t& newValue) {
+				json::dump_item("CC ", newValue);
+			}
+		} my_callback;
+
+		auto peekB = stream::tee(&filterB, my_callback);
+
+
 		auto count   = stream::count(&peekB);
 		logger.info("count %s", std::to_string(count.process()));
 	}

@@ -217,6 +217,43 @@ public:
 };
 
 
+template <typename T, typename R=T>
+class tee_t : public pipe_t<T, R> {
+public:
+	class callback_t {
+	public:
+		virtual ~callback_t() {}
+		// life cycle event
+		virtual void start() = 0;
+		virtual void stop() = 0;
+		// data event
+		virtual void data(T& t) = 0;
+	};
+	callback_t& m_callback;
+
+	tee_t(source_t<T>* upstream, callback_t& callback_) :
+		pipe_t<T, R>(__func__, upstream),
+		m_callback(callback_) {
+		m_callback.start();
+	}
+	~tee_t() {
+		base_t::close();
+	}
+
+	void close_impl() override {
+		m_callback.stop();
+	}
+	bool has_next_impl() override {
+		return pipe_t<T, R>::m_upstream->has_next();
+	}
+	R next_impl() override {
+		R newValue = pipe_t<T, R>::m_upstream->next();
+		m_callback.data(newValue);
+		return newValue;
+	}
+};
+
+
 template <typename T, typename R>
 class map_t : public pipe_t<T, R> {
 	using map_apply = std::function<R(T)>;
@@ -321,8 +358,13 @@ vector_t<T> vector(std::initializer_list<T> init) {
 }
 
 //
-// between
+// pipe
 //
+template <typename T>
+auto tee(source_t<T>* upstream, typename tee_t<T>::callback_t& callback_) {
+	return tee_t<T>(upstream, callback_);
+}
+
 template <typename T, typename Function>
 auto peek(source_t<T>* upstream,  Function apply) {
 	using trait = trait_function<Function>;

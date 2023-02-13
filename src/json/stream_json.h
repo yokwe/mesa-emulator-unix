@@ -169,7 +169,7 @@ public:
 
 	bool operator()(T list) const {
 	    for(const auto& e: list) {
-	    	if (std::regex_match(e.path, regex_path) && std::regex_match(e.value, regex_value)) return true;
+	    	if (std::regex_match(e.path(), regex_path) && std::regex_match(e.value(), regex_value)) return true;
 	    }
 	    return false;
 	}
@@ -201,7 +201,7 @@ public:
 
 	bool operator()(T token) const {
 		// negate regex_match for exclude
-		return !std::regex_match(token.path, m_regex);
+		return !std::regex_match(token.path(), m_regex);
 	}
 };
 template<typename T>

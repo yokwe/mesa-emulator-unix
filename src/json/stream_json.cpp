@@ -11,6 +11,9 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("stream_json");
 
+// stream_json.h includes stream.h
+// stream.h use variable logger
+// stream.h needs after ../util/Util.h
 #include "stream_json.h"
 
 
@@ -66,8 +69,8 @@ bool json_t::has_next_impl() {
 	std::unique_lock<std::mutex> lock(m_mutex);
 	if (m_queue.empty()) {
 		for(;;) {
-			if (m_end_of_stream) return false;
-			if (m_stop_capture)  return false;
+			if (m_end_of_stream) break;
+			if (m_stop_capture)  break;
 			// notify item/enter/leave
 			m_fill_queue.notify_one();
 			// wait notification or timeout
@@ -75,6 +78,7 @@ bool json_t::has_next_impl() {
 			// if there is data in m_queue, return true;
 			if (!m_queue.empty()) return true;
 		}
+		return false;
 	} else {
 		return true;
 	}
@@ -137,27 +141,27 @@ bool json_split_t::has_next_impl() {
 	bool capturing = false;
 	for(;;) {
 		// reach end of stream
-		if (!m_upstream->has_next()) return false;
+		if (!m_upstream->has_next()) break;
 
 		token_t token = m_upstream->next();
 		if (capturing) {
-			m_value.emplace_back(token, token.path.substr(prefix));
+			m_value.emplace_back(token, token.path().substr(prefix));
 		}
 
-		switch(token.type) {
-		case token_t::Type::ENTER:
-			if (std::regex_match(token.path, m_regex)) {
+		if (token.is_item()) {
+			// OK
+		} else if (token.is_start()) {
+			if (std::regex_match(token.path(), m_regex)) {
 				// found interest node
-				path = token.path;
+				path = token.path();
 				prefix = path.size();
 				capturing = true;
 				//
 				m_value.clear();
-				m_value.emplace_back(token, token.path.substr(prefix));
+				m_value.emplace_back(token, token.path().substr(prefix));
 			}
-			break;
-		case token_t::Type::LEAVE:
-			if (token.path == path) {
+		} else if (token.is_end()) {
+			if (token.path() == path) {
 				// end of interest node
 				path = "//";
 				prefix = 0;
@@ -166,14 +170,11 @@ bool json_split_t::has_next_impl() {
 				m_has_value = true;
 				return true;
 			}
-			break;
-		case token_t::Type::ITEM:
-			break;
-		default:
+		} else {
 			ERROR();
-			break;
 		}
 	}
+	return false;
 }
 token_list_t json_split_t::next_impl() {
 	if (m_has_value) {
@@ -205,7 +206,7 @@ bool json_expand_t::has_next_impl() {
 		//
 		// start of root array
 		//
-		m_value = token_t::enter("", "", true);
+		m_value = token_t::make_start_array("", "");
 		m_has_value = true;
 		return true;
 	}
@@ -223,7 +224,7 @@ bool json_expand_t::has_next_impl() {
 				//
 				// end of root array
 				//
-				m_value = token_t::leave("", "");
+				m_value = token_t::make_end_array("", "");
 				m_has_value = true;
 				return true;
 			}
@@ -235,7 +236,7 @@ bool json_expand_t::has_next_impl() {
 		// expected
 		token_t token = m_list.at(m_list_index);
 		m_has_value   = true;
-		m_value       = token_t(token, "/" + m_array_name + token.path);
+		m_value       = token_t(token, "/" + m_array_name + token.path());
 		//
 		m_list_index++;
 		// special case for end of m_list

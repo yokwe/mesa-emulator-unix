@@ -82,16 +82,7 @@ public:
 	void stop()  override;
 
 	// data event
-	void process_token(const token_t& token);
-	void item (const token_t& token) override {
-		process_token(token);
-	}
-	void enter(const token_t& token) override {
-		process_token(token);
-	}
-	void leave(const token_t& token) override {
-		process_token(token);
-	}
+	void data(const token_t& token) override;
 };
 
 

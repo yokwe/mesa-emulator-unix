@@ -107,7 +107,7 @@ void json_t::stop() {
 
 	m_queue_is_filled.notify_one();
 }
-void json_t::process_token(const token_t& token) {
+void json_t::data(const token_t& token) {
 	m_count_token++;
 	if (m_stop_capture) return;
 

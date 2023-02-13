@@ -181,9 +181,7 @@ public:
 	virtual void stop()  = 0;
 
 	// data event
-	virtual void item (const token_t& token) = 0;
-	virtual void enter(const token_t& token) = 0;
-	virtual void leave(const token_t& token) = 0;
+	virtual void data(const token_t& token) = 0;
 };
 
 

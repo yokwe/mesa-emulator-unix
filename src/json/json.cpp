@@ -280,37 +280,37 @@ public:
 	bool null() override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_null(path, name);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 	bool boolean(bool newValue) override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_bool(path, name, newValue);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 	bool number_integer(number_integer_t newValue) override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_singned_integer(path, name, newValue);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 	bool number_unsigned(number_unsigned_t newValue) override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_unsigned_integer(path, name, newValue);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 	bool number_float(number_float_t newValue, const string_t& newStringValue) override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_float(path, name, newStringValue, newValue);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 	bool string(string_t& newValue) override {
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_string(path, name, newValue);
-		m_handler->item(token);
+		m_handler->data(token);
 		return true;
 	}
 
@@ -324,7 +324,7 @@ public:
 		//
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_start_object(path, name);
-		m_handler->enter(token);
+		m_handler->data(token);
 		// update m_stack
 		context_t my(isArray, path, name);
 		m_stack.push_back(my);
@@ -333,7 +333,7 @@ public:
 	bool end_object() override {
 		const context_t& top = m_stack.back();
 		token_t token = token_t::make_end_object(top.path(), top.name());
-		m_handler->leave(token);
+		m_handler->data(token);
 		// update m_stack
 		m_stack.pop_back();
 		return true;
@@ -344,7 +344,7 @@ public:
 		//
 		auto [path, name] = make_path_name(lastKey);
 		token_t token = token_t::make_start_array(path, name);
-		m_handler->enter(token);
+		m_handler->data(token);
 		// update m_stack
 		context_t my(isArray, path, name);
 		m_stack.push_back(my);
@@ -353,7 +353,7 @@ public:
 	bool end_array() override {
 		const context_t& top = m_stack.back();
 		token_t token = token_t::make_end_array(top.path(), top.name());
-		m_handler->leave(token);
+		m_handler->data(token);
 		// update m_stack
 		m_stack.pop_back();
 		return true;

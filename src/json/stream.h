@@ -142,6 +142,10 @@ public:
 		base_t::close();
 	}
 };
+template <typename T>
+vector_t<T> vector(std::initializer_list<T> init) {
+	return vector_t<T>(init);
+}
 
 
 //
@@ -168,6 +172,11 @@ public:
 		base_t::close();
 	}
 };
+template<typename T, typename R=T>
+sum_t<T, R> sum(source_t<T>* upstream) {
+	return sum_t<T, R>(upstream);
+}
+
 
 template <typename T, typename R=int>
 class count_sink_t : public sink_t<T, R> {
@@ -187,6 +196,10 @@ public:
 		base_t::close();
 	}
 };
+template<typename T, typename R=int>
+count_sink_t<T, R> count(source_t<T>* upstream) {
+	return count_sink_t<T, R>(upstream);
+}
 
 
 //
@@ -215,33 +228,106 @@ public:
 		base_t::close();
 	}
 };
+template <typename T, typename Function>
+auto peek(source_t<T>* upstream,  Function apply) {
+	using trait = trait_function<Function>;
+	using R   = typename trait::ret_type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
+
+	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
+
+	// assert T     == A0T
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1) || !std::is_same_v<R, void>) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0).name()));
+		ERROR();
+	}
+
+	return peek_t<T>(upstream, apply);
+}
 
 
-template <typename T, typename R=T>
+template <typename Type, typename = void>
+struct has_start : std::false_type {};
+template <typename T>
+struct has_start<T, typename std::enable_if<std::is_member_function_pointer<decltype(&T::start)>::value>::type> : std::true_type {};
+//
+template <typename Type, typename = void>
+struct has_stop : std::false_type {};
+template <typename T>
+struct has_stop<T, typename std::enable_if<std::is_member_function_pointer<decltype(&T::stop)>::value>::type> : std::true_type {};
+//
+template <typename Type, typename = void>
+struct has_data : std::false_type {};
+template <typename T>
+struct has_data<T, typename std::enable_if<std::is_member_function_pointer<decltype(&T::data)>::value>::type> : std::true_type {};
+//
+template <typename T, typename R, typename Callback>
 class tee_t : public pipe_t<T, R> {
 public:
-	class callback_t {
-	public:
-		virtual ~callback_t() {}
-		// life cycle event
-		virtual void start() = 0;
-		virtual void stop() = 0;
-		// data event
-		virtual void data(T& t) = 0;
-	};
-	callback_t& m_callback;
+	Callback m_callback;
 
-	tee_t(source_t<T>* upstream, callback_t& callback_) :
-		pipe_t<T, R>(__func__, upstream),
-		m_callback(callback_) {
-		m_callback.start();
+	tee_t(source_t<T>* upstream, Callback callback_) :
+		pipe_t<T, R>(__func__, upstream), m_callback(callback_) {
+		// sanity check
+		if constexpr (has_start<Callback>::value) {
+			if constexpr (std::is_invocable_r_v<void, decltype(&Callback::start), Callback&>) {
+				logger.info("Callback::start is void start()");
+			} else {
+				logger.info("Callback::start is not void start()");
+			}
+			static_assert(std::is_invocable_v<decltype(&Callback::start), Callback&>);
+		} else {
+			logger.info("no Callback::start");
+		}
+		if constexpr (has_stop<Callback>::value) {
+			if constexpr (std::is_invocable_r_v<void, decltype(&Callback::stop), Callback&>) {
+				logger.info("Callback::stop is void stop()");
+			} else {
+				logger.info("Callback::stop is not void stop()");
+			}
+			static_assert(std::is_invocable_v<decltype(&Callback::stop), Callback&>);
+		} else {
+			logger.info("no Callback::stop");
+		}
+		if constexpr (has_data<Callback>::value) {
+			if constexpr (std::is_invocable_r_v<void, decltype(&Callback::data), Callback&, T>) {
+				logger.info("Callback::data is void data(T)");
+			} else {
+				logger.info("Callback::data is not void data(T)");
+			}
+			static_assert(std::is_invocable_v<decltype(&Callback::data), Callback&, T>);
+		} else {
+			logger.info("no Callback::data");
+		}
+		static_assert(has_data<Callback>::value);
+
+		// call start
+		if constexpr (has_start<Callback>::value) {
+			if constexpr (std::is_invocable_v<decltype(&Callback::start), Callback&>) {
+				m_callback.start();
+			}
+		}
 	}
 	~tee_t() {
 		base_t::close();
 	}
 
 	void close_impl() override {
-		m_callback.stop();
+		// call stop
+		if constexpr (has_stop<Callback>::value) {
+			if constexpr (std::is_invocable_v<decltype(&Callback::stop), Callback&>) {
+				m_callback.stop();
+			}
+		}
 	}
 	bool has_next_impl() override {
 		return pipe_t<T, R>::m_upstream->has_next();
@@ -252,6 +338,10 @@ public:
 		return newValue;
 	}
 };
+template <typename T, typename Callback>
+auto tee(source_t<T>* upstream, Callback callback) {
+	return tee_t<T, T, Callback>(upstream, callback);
+}
 
 
 template <typename T, typename R>
@@ -277,6 +367,30 @@ public:
 		base_t::close();
 	}
 };
+template <typename T, typename Function>
+auto map(source_t<T>* upstream,  Function apply) {
+	using trait = trait_function<Function>;
+	using R   = typename trait::ret_type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
+
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
+
+	// assert T     == A0T
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1)) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0).name()));
+		ERROR();
+	}
+
+	return map_t<T, R>(upstream, apply);
+}
 
 
 template <typename T>
@@ -317,104 +431,6 @@ public:
 		base_t::close();
 	}
 };
-
-
-template <typename T>
-class count_t : public source_t<T> {
-	source_t<T>* upstream;
-	int          count;
-
-	void close_impl() override {}
-	bool has_next_impl() override {
-		return upstream->has_next();
-	}
-	T next_impl() override {
-		count++;
-		return upstream->next();
-	}
-
-public:
-	count_t(source_t<T>* upstream_, const char* name_) :
-		source_t<T>(name_),
-		upstream(upstream_),
-		count(false) {}
-	~count_t() {
-		base_t::close();
-		logger.info("count_t %s %d", base_t::name(), count);
-	}
-};
-
-
-//
-// function
-//
-
-//
-// source
-//
-template <typename T>
-vector_t<T> vector(std::initializer_list<T> init) {
-	return vector_t<T>(init);
-}
-
-//
-// pipe
-//
-template <typename T>
-auto tee(source_t<T>* upstream, typename tee_t<T>::callback_t& callback_) {
-	return tee_t<T>(upstream, callback_);
-}
-
-template <typename T, typename Function>
-auto peek(source_t<T>* upstream,  Function apply) {
-	using trait = trait_function<Function>;
-	using R   = typename trait::ret_type;
-	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0  = typename A0_::type;
-
-	//logger.debug("map T=%s R=%s Function=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Function).name()));
-	static_assert(trait::arity == 1);
-	static_assert(std::is_same_v<T, A0>);
-
-	// assert T     == A0T
-	// assert arity == 1
-	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1) || !std::is_same_v<R, void>) {
-		logger.error("ASSERTION FAILED");
-		logger.error("function %s", __func__);
-		logger.error("arity %d", trait::arity);
-		logger.error("R     %s", demangle(typeid(R).name()));
-		logger.error("T     %s", demangle(typeid(T).name()));
-		logger.error("A0    %s", demangle(typeid(A0).name()));
-		ERROR();
-	}
-
-	return peek_t<T>(upstream, apply);
-}
-
-template <typename T, typename Function>
-auto map(source_t<T>* upstream,  Function apply) {
-	using trait = trait_function<Function>;
-	using R   = typename trait::ret_type;
-	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0  = typename A0_::type;
-
-	static_assert(trait::arity == 1);
-	static_assert(std::is_same_v<T, A0>);
-
-	// assert T     == A0T
-	// assert arity == 1
-	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1)) {
-		logger.error("ASSERTION FAILED");
-		logger.error("function %s", __func__);
-		logger.error("arity %d", trait::arity);
-		logger.error("R     %s", demangle(typeid(R).name()));
-		logger.error("T     %s", demangle(typeid(T).name()));
-		logger.error("A0    %s", demangle(typeid(A0).name()));
-		ERROR();
-	}
-
-	return map_t<T, R>(upstream, apply);
-}
 template <typename T, typename Predicate>
 filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
 	using trait = trait_function<Predicate>;
@@ -442,22 +458,35 @@ filter_t<T>	filter(source_t<T>* upstream, Predicate test) {
 
 	return filter_t<T>(upstream, test);
 }
+
+
+template <typename T>
+class count_t : public source_t<T> {
+	source_t<T>* upstream;
+	int          count;
+
+	void close_impl() override {}
+	bool has_next_impl() override {
+		return upstream->has_next();
+	}
+	T next_impl() override {
+		count++;
+		return upstream->next();
+	}
+
+public:
+	count_t(source_t<T>* upstream_, const char* name_) :
+		source_t<T>(name_),
+		upstream(upstream_),
+		count(false) {}
+	~count_t() {
+		base_t::close();
+		logger.info("count_t %s %d", base_t::name(), count);
+	}
+};
 template <typename T>
 count_t<T>	count(source_t<T>* upstream, const char* name) {
 	return count_t<T>(upstream, name);
-}
-
-//
-// sink
-//
-template<typename T, typename R=T>
-sum_t<T, R> sum(source_t<T>* upstream) {
-	return sum_t<T, R>(upstream);
-}
-
-template<typename T, typename R=int>
-count_sink_t<T, R> count(source_t<T>* upstream) {
-	return count_sink_t<T, R>(upstream);
 }
 
 

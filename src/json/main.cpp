@@ -99,19 +99,18 @@ int main(int, char**) {
 
 		//auto peekB   = stream::peek(&filterB,   [](json::token_t t){json::dump_item("BB ", t);});
 
-		class : public stream::tee_t<json::token_t>::callback_t {
+		class {
 		public:
 			void start() {
-				logger.info("start my_callback_t");
+				logger.info("my_callback start");
 			}
 			void stop() {
-				logger.info("stop my_callback_t");
+				logger.info("my_callback stop");
 			}
-			void data(json::token_t& newValue) {
+			void data(json::token_t newValue) {
 				json::dump_item("CC ", newValue);
 			}
 		} my_callback;
-
 		auto peekB = stream::tee(&filterB, my_callback);
 
 

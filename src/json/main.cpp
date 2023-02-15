@@ -32,11 +32,12 @@
 
 #include "json.h"
 
-
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-#include "stream3.h"
+#include "stream.h"
+#include "stream_util.h"
+#include "stream_json.h"
 
 
 int main(int, char**) {
@@ -48,12 +49,13 @@ int main(int, char**) {
 
 #if 1
 	{
-		auto head = stream::vector({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		auto head = stream::json::json(std::cin);
 		logger.info("head %s", demangle(typeid(head).name()));
 
-		auto add  = stream::map(&head, [](int a){return a + 10;});
+		auto map = stream::map(&head, [](json::token_t t){return t;});
+		logger.info("map %s", demangle(typeid(map).name()));
 
-		auto tail = stream::sum(&add);
+		auto tail = stream::count(&map);
 		logger.info("tail %s", demangle(typeid(tail).name()));
 
 		logger.info("tail %d", tail.process());

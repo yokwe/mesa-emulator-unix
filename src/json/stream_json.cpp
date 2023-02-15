@@ -20,6 +20,9 @@ namespace stream {
 namespace json {
 
 
+//
+// json
+//
 struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 	using seconds = std::chrono::seconds;
 
@@ -156,6 +159,8 @@ source_t<token_t> json(std::istream& in, int max_queue_size, int wait_time) {
 	return source_t<token_t>(impl, __func__);
 }
 
+// FIXME add split and expand
+// FIXME add include_path_value exlclude_path
 
 
 }

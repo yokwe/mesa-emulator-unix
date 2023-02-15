@@ -41,25 +41,23 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(const U& u) : m_object(u) {}
+			wrapper_t(U* u) : m_object(u) {}
 
 			void close() override {
-				m_object.close();
+				m_object->close();
 			}
 			void accept(T& t) override {
-				m_object.accept(t);
+				m_object->accept(t);
 			}
 			R    result() override {
-				return m_object.result();
+				return m_object->result();
 			}
 
-			U m_object;
+			std::shared_ptr<U> m_object;
 		};
 
 		template <typename U>
-		impl_t(const U& u) : m_base(std::make_shared<wrapper_t<U>>(u)) {
-			logger.info("impl_t constructor %s", demangle(typeid(U).name()));
-		}
+		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();
@@ -118,25 +116,23 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(const U& u) : m_object(u) {}
+			wrapper_t(U* u) : m_object(u) {}
 
 			void close() override {
-				m_object.close();
+				m_object->close();
 			}
 			bool has_next() override {
-				return m_object.has_next();
+				return m_object->has_next();
 			}
 			T    next() override {
-				return m_object.next();
+				return m_object->next();
 			}
 
-			U m_object;
+			std::shared_ptr<U> m_object;
 		};
 
 		template <typename U>
-		impl_t(const U& u) : m_base(std::make_shared<wrapper_t<U>>(u)) {
-			logger.info("impl_t constructor %s", demangle(typeid(U).name()));
-		}
+		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();
@@ -194,25 +190,23 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(const U& u) : m_object(u) {}
+			wrapper_t(U* u) : m_object(u) {}
 
 			void close() override {
-				m_object.close();
+				m_object->close();
 			}
 			bool has_next() override {
-				return m_object.has_next();
+				return m_object->has_next();
 			}
 			R    next() override {
-				return m_object.next();
+				return m_object->next();
 			}
 
-			U m_object;
+			std::shared_ptr<U> m_object;
 		};
 
 		template <typename U>
-		impl_t(const U& u) : m_base(std::make_shared<wrapper_t<U>>(u)) {
-			logger.info("impl_t constructor %s", demangle(typeid(U).name()));
-		}
+		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();

@@ -9,8 +9,9 @@ add_executable (
   json.cpp
    # stream
   stream.h
-  stream_json.cpp
+  stream_util.h
   stream_json.h
+  stream_json.cpp
   )
 
 add_dependencies(json util)

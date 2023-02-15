@@ -28,10 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <string>
-#include <iostream>
-#include <vector>
-
 #include <nlohmann/json.hpp>
 
 #include "json.h"
@@ -40,8 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("main");
 
-#include "stream.h"
-#include "stream_json.h"
+#include "stream3.h"
 
 
 int main(int, char**) {
@@ -50,6 +45,20 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
+
+#if 1
+	{
+		auto head = stream::vector({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+		logger.info("head %s", demangle(typeid(head).name()));
+
+		auto add  = stream::map(&head, [](int a){return a + 10;});
+
+		auto tail = stream::sum(&add);
+		logger.info("tail %s", demangle(typeid(tail).name()));
+
+		logger.info("tail %d", tail.process());
+	}
+#endif
 
 #if 0
 	{
@@ -65,7 +74,7 @@ int main(int, char**) {
 	}
 #endif
 
-#if 1
+#if 0
 	{
 		stream::json::json_t json(std::cin);
 		auto countA  = stream::count(&json, "countA");

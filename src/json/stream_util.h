@@ -103,7 +103,6 @@ struct source_count_impl_t : public source_base_t<T> {
 
 	source_count_impl_t(upstream_t* upstream, const std::string& name) : m_upstream(upstream), m_name(name) {}
 
-
 	void close() override {
 		logger.info("count %s %d", m_name, m_count);
 	}
@@ -129,7 +128,7 @@ source_t<T> count(source_base_t<T>* upstream, const char* name) {
 
 
 //
-// null
+// sink null
 //
 template <typename T, typename R>
 struct sink_null_impl_t : public sink_t<T, R>::base_t {
@@ -142,7 +141,6 @@ sink_t<T, void> null(source_base_t<T>* upstream) {
 	auto impl = std::make_shared<sink_null_impl_t<T, void>>();
 	return sink_t<T, void>(impl, __func__, upstream);
 }
-
 
 
 // source map

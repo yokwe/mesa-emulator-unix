@@ -146,15 +146,15 @@ sink_t<T, void> null(source_base_t<T>* upstream) {
 //
 // source map
 //
-template <typename T, typename R>
+// R Function()(T)
+template <typename T, typename R, typename Function>
 struct map_impl_t : public source_base_t<R> {
 	using upstream_t = source_base_t<T>;
-	using map_apply  = std::function<R(T)>;
 
 	upstream_t* m_upstream;
-	map_apply   m_apply;
+	Function    m_function;
 
-	map_impl_t(upstream_t* upstream_, map_apply apply_) : m_upstream(upstream_), m_apply(apply_) {}
+	map_impl_t(upstream_t* upstream_, Function function_) : m_upstream(upstream_), m_function(function_) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -162,7 +162,7 @@ struct map_impl_t : public source_base_t<R> {
 	}
 	R next() override {
 		T newValue = m_upstream->next();
-		return m_apply(newValue);
+		return m_function(newValue);
 	}
 };
 template <typename T, typename Function>
@@ -187,7 +187,7 @@ auto map(source_base_t<T>* upstream,  Function apply) {
 //		ERROR();
 //	}
 
-	auto impl = std::make_shared<map_impl_t<T, R>>(upstream, apply);
+	auto impl = std::make_shared<map_impl_t<T, R, Function>>(upstream, apply);
 	return source_t<R>(impl, __func__);
 }
 
@@ -195,17 +195,17 @@ auto map(source_base_t<T>* upstream,  Function apply) {
 //
 // source filter
 //
-template <typename T>
+// bool Predicate()(T)
+template <typename T, typename Predicate>
 struct filter_impl_t : public source_base_t<T> {
 	using upstream_t = source_base_t<T>;
-	using filter_test  = std::function<bool(T)>;
 
 	upstream_t* m_upstream;
-	filter_test  m_test;
-	bool         m_has_value = false;
-	T            m_value;
+	Predicate   m_predicate;
+	bool        m_has_value = false;
+	T           m_value;
 
-	filter_impl_t(upstream_t* upstream, filter_test test) : m_upstream(upstream), m_test(test) {}
+	filter_impl_t(upstream_t* upstream, Predicate predicate) : m_upstream(upstream), m_predicate(predicate) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -213,7 +213,7 @@ struct filter_impl_t : public source_base_t<T> {
 			if (m_has_value) break;
 			if (!m_upstream->has_next()) break;
 			m_value = m_upstream->next();
-			m_has_value = m_test(m_value);
+			m_has_value = m_predicate(m_value);
 		}
 		return m_has_value;
 	}
@@ -229,7 +229,7 @@ struct filter_impl_t : public source_base_t<T> {
 	}
 };
 template <typename T, typename Predicate>
-source_t<T>	filter(source_base_t<T>* upstream, Predicate test) {
+source_t<T>	filter(source_base_t<T>* upstream, Predicate predicate) {
 	using trait = trait_function<Predicate>;
 	using R   = typename trait::ret_type;
 	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
@@ -253,7 +253,7 @@ source_t<T>	filter(source_base_t<T>* upstream, Predicate test) {
 		assert(false);
 	}
 
-	auto impl = std::make_shared<filter_impl_t<T>>(upstream, test);
+	auto impl = std::make_shared<filter_impl_t<T, Predicate>>(upstream, predicate);
 	return source_t<T>(impl, __func__);
 
 }
@@ -262,10 +262,10 @@ source_t<T>	filter(source_base_t<T>* upstream, Predicate test) {
 //
 // source peek
 //
+// void Consumer()(T)
 template <typename T, typename Consumer>
 struct peek_impl_t : public source_base_t<T> {
 	using upstream_t  = source_base_t<T>;
-	using peek_accept = std::function<void(T)>;
 
 	upstream_t* m_upstream;
 	Consumer    m_consumer;

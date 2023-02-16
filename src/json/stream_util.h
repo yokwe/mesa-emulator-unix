@@ -143,7 +143,9 @@ sink_t<T, void> null(source_base_t<T>* upstream) {
 }
 
 
+//
 // source map
+//
 template <typename T, typename R>
 struct map_impl_t : public source_base_t<R> {
 	using upstream_t = source_base_t<T>;
@@ -190,7 +192,9 @@ auto map(source_base_t<T>* upstream,  Function apply) {
 }
 
 
+//
 // source filter
+//
 template <typename T>
 struct filter_impl_t : public source_base_t<T> {
 	using upstream_t = source_base_t<T>;
@@ -252,6 +256,36 @@ source_t<T>	filter(source_base_t<T>* upstream, Predicate test) {
 	auto impl = std::make_shared<filter_impl_t<T>>(upstream, test);
 	return source_t<T>(impl, __func__);
 
+}
+
+
+//
+// source peek
+//
+template <typename T, typename Consumer>
+struct peek_impl_t : public source_base_t<T> {
+	using upstream_t  = source_base_t<T>;
+	using peek_accept = std::function<void(T)>;
+
+	upstream_t* m_upstream;
+	Consumer    m_consumer;
+
+	peek_impl_t(upstream_t* upstream, Consumer consumer) : m_upstream(upstream), m_consumer(consumer) {}
+
+	void close() override {}
+	bool has_next() override {
+		return m_upstream->has_next();
+	}
+	T next() override {
+		T newValue = m_upstream->next();
+		m_consumer(newValue);
+		return newValue;
+	}
+};
+template <typename T, typename Consumer>
+source_t<T>	peek(source_base_t<T>* upstream, Consumer consumer) {
+	auto impl = std::make_shared<peek_impl_t<T, Consumer>>(upstream, consumer);
+	return source_t<T>(impl, __func__);
 }
 
 

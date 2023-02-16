@@ -27,7 +27,7 @@ source_t<token_list_t> split(source_base_t<token_t>* upstream, const char*      
 
 source_t<token_t>      expand(source_base_t<token_list_t>* upstream);
 
-source_t<token_list_t> include_path_value(source_base_t<token_list_t>* upstream, std::string glob_path, std::string glob_value);
+source_t<token_list_t> include_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
 source_t<token_t>      exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args);
 

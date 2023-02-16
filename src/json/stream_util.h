@@ -62,9 +62,10 @@ struct sum_impl_t : public sink_t<T, R>::base_t {
 	}
 };
 template<typename T, typename R=T>
-sink_t<T, R> sum(source_base_t<T>* upstream) {
+auto sum(source_base_t<T>* upstream) {
 	auto impl = std::make_shared<sum_impl_t<T, R>>();
-	return sink_t<T, R>(impl, __func__, upstream);
+	sink_t<T, R> sink(impl, __func__, upstream);
+	return sink.process();
 }
 
 
@@ -85,9 +86,10 @@ struct sink_count_impl_t : public sink_t<T, R>::base_t {
 	}
 };
 template <typename T, typename R=int>
-sink_t<T, R> count(source_base_t<T>* upstream) {
+auto count(source_base_t<T>* upstream) {
 	auto impl = std::make_shared<sink_count_impl_t<T, R>>();
-	return sink_t<T, R>(impl, __func__, upstream);
+	sink_t<T, R> sink(impl, __func__, upstream);
+	return sink.process();
 }
 
 
@@ -138,9 +140,10 @@ struct sink_null_impl_t : public sink_t<T, R>::base_t {
 	R    result()   override {}
 };
 template <typename T>
-sink_t<T, void> null(source_base_t<T>* upstream) {
+void null(source_base_t<T>* upstream) {
 	auto impl = std::make_shared<sink_null_impl_t<T, void>>();
-	return sink_t<T, void>(impl, __func__, upstream);
+	sink_t<T, void> sink(impl, __func__, upstream);
+	sink.process();
 }
 
 

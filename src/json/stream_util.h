@@ -62,7 +62,7 @@ struct sum_impl_t : public sink_t<T, R>::base_t {
 };
 template<typename T, typename R=T>
 sink_t<T, R> sum(source_base_t<T>* upstream) {
-	auto impl = std::make_shared<sink_t<T, R>>();
+	auto impl = std::make_shared<sum_impl_t<T, R>>();
 	return sink_t<T, R>(impl, __func__, upstream);
 }
 
@@ -71,7 +71,7 @@ sink_t<T, R> sum(source_base_t<T>* upstream) {
 // sink  count
 //
 template <typename T, typename R>
-struct count_impl_t : public sink_t<T, R>::base_t {
+struct sink_count_impl_t : public sink_t<T, R>::base_t {
 	R m_count = 0;
 
 	void close() override {}
@@ -83,14 +83,69 @@ struct count_impl_t : public sink_t<T, R>::base_t {
 		return m_count;
 	}
 };
-template<typename T, typename R=int>
+template <typename T, typename R=int>
 sink_t<T, R> count(source_base_t<T>* upstream) {
-	auto impl = std::make_shared<count_impl_t<T, R>>();
+	auto impl = std::make_shared<sink_count_impl_t<T, R>>();
 	return sink_t<T, R>(impl, __func__, upstream);
 }
 
 
-// pipe map
+//
+// source count
+//
+template <typename T>
+struct source_count_impl_t : public source_base_t<T> {
+	using upstream_t = source_base_t<T>;
+
+	upstream_t* m_upstream;
+	std::string m_name;
+	int         m_count = 0;
+
+	source_count_impl_t(upstream_t* upstream, const std::string& name) : m_upstream(upstream), m_name(name) {}
+
+
+	void close() override {
+		logger.info("count %s %d", m_name, m_count);
+	}
+	bool has_next() override {
+		return m_upstream->has_next();
+	}
+	T next() override {
+		m_count++;
+		T newValue = m_upstream->next();
+		return newValue;
+	}
+};
+template <typename T>
+source_t<T> count(source_base_t<T>* upstream, const std::string& name) {
+	auto impl = std::make_shared<source_count_impl_t<T>>(upstream, name);
+	return source_t<T>(impl, __func__);
+}
+template <typename T>
+source_t<T> count(source_base_t<T>* upstream, const char* name) {
+	auto impl = std::make_shared<source_count_impl_t<T>>(upstream, std::string(name));
+	return source_t<T>(impl, __func__);
+}
+
+
+//
+// null
+//
+template <typename T, typename R>
+struct sink_null_impl_t : public sink_t<T, R>::base_t {
+	void close()    override {}
+	void accept(T&) override {}
+	R    result()   override {}
+};
+template <typename T>
+sink_t<T, void> null(source_base_t<T>* upstream) {
+	auto impl = std::make_shared<sink_null_impl_t<T, void>>();
+	return sink_t<T, void>(impl, __func__, upstream);
+}
+
+
+
+// source map
 template <typename T, typename R>
 struct map_impl_t : public source_base_t<R> {
 	using upstream_t = source_base_t<T>;
@@ -133,9 +188,73 @@ auto map(source_base_t<T>* upstream,  Function apply) {
 //	}
 
 	auto impl = std::make_shared<map_impl_t<T, R>>(upstream, apply);
-	return pipe_t<T, R>(impl, __func__);
+	return source_t<R>(impl, __func__);
 }
 
+
+// source filter
+template <typename T>
+struct filter_impl_t : public source_base_t<T> {
+	using upstream_t = source_base_t<T>;
+	using filter_test  = std::function<bool(T)>;
+
+	upstream_t* m_upstream;
+	filter_test  m_test;
+	bool         m_has_value = false;
+	T            m_value;
+
+	filter_impl_t(upstream_t* upstream, filter_test test) : m_upstream(upstream), m_test(test) {}
+
+	void close() override {}
+	bool has_next() override {
+		for(;;) {
+			if (m_has_value) break;
+			if (!m_upstream->has_next()) break;
+			m_value = m_upstream->next();
+			m_has_value = m_test(m_value);
+		}
+		return m_has_value;
+	}
+	T next() override {
+		if (has_next()) {
+			m_has_value = false;
+			return m_value;
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
+		}
+	}
+};
+template <typename T, typename Predicate>
+source_t<T>	filter(source_base_t<T>* upstream, Predicate test) {
+	using trait = trait_function<Predicate>;
+	using R   = typename trait::ret_type;
+	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
+	using A0  = typename A0_::type;
+
+	//logger.debug("filter T=%s R=%s Predicater=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Predicate).name()));
+	static_assert(trait::arity == 1);
+	static_assert(std::is_same_v<T, A0>);
+	static_assert(std::is_same_v<R, bool>);
+
+	// assert T     == A0T
+	// assert R     == bool
+	// assert arity == 1
+	if constexpr (!std::is_same_v<T, A0> || !std::is_same_v<R, bool> || !(trait::arity == 1)) {
+		logger.error("ASSERTION FAILED");
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("R     %s", demangle(typeid(R).name()));
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("A0    %s", demangle(typeid(A0_).name()));
+		assert(false);
+	}
+
+	auto impl = std::make_shared<filter_impl_t<T>>(upstream, test);
+	return source_t<T>(impl, __func__);
+
+}
 
 
 // end of namespace stream

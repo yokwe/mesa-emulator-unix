@@ -49,16 +49,38 @@ int main(int, char**) {
 
 #if 1
 	{
-		auto head = stream::json::json(std::cin);
-		logger.info("head %s", demangle(typeid(head).name()));
+		auto head   = stream::json::json(std::cin);
+//		logger.info("head %s", demangle(typeid(head).name()));
+//		while(head.has_next()) head.next();
 
-		auto map = stream::map(&head, [](json::token_t t){return t;});
-		logger.info("map %s", demangle(typeid(map).name()));
+		auto countA  = stream::count(&head, "countA");
+		auto map     = stream::map(&countA, [](auto t){return t;});
+		auto split   = stream::json::split(&map, "/inner/*");
+		auto countB  = stream::count(&split, "countB");
+		auto filterA = stream::json::include_path_value(&countB, "/kind", "EnumDecl");
+		auto countC  = stream::count(&filterA, "countC");
+		auto expand  = stream::json::expand(&countC);
+		auto countD  = stream::count(&expand, "countD");
+		auto filterB = stream::json::exclude_path(&countD,
+			{
+				"**/range/**",
+				"**/loc/**",
+				"**/includedFrom/**",
+				"**/range",
+				"**/loc",
+				"**/includedFrom"
+			}
+		);
+		auto countE  = stream::count(&filterB, "countE");
 
-		auto tail = stream::count(&map);
-		logger.info("tail %s", demangle(typeid(tail).name()));
+		auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
+		auto countF  = stream::count(&filterC, "countF");
 
-		logger.info("tail %d", tail.process());
+		auto dump    = stream::peek(&countF, [](auto token){json::dump("PEEK ", token);});
+
+		auto tail = stream::null(&dump);
+//		logger.info("tail %s %s", tail.name(), demangle(typeid(tail).name()));
+		tail.process();
 	}
 #endif
 

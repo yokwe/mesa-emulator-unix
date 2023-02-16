@@ -11,7 +11,11 @@
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("stream_json");
 
+#include "stream_util.h"
 #include "stream_json.h"
+
+
+constexpr auto glob_to_regex = json::glob_to_regex;
 
 
 namespace stream {
@@ -338,14 +342,57 @@ source_t<token_t> expand(source_base_t<token_list_t>* upstream) {
 //
 // include_path_value
 //
-//source_t<token_list_t> include_path_value(source_base_t<token_list_t>* upstream, std::string glob_path, std::string glob_value) {
+struct include_path_value_predicate_t {
+	std::regex regex_path;
+	std::regex regex_value;
+
+	include_path_value_predicate_t(const std::string& glob_path, const std::string& glob_value) :
+		regex_path (glob_to_regex(glob_path)),
+		regex_value(glob_to_regex(glob_value)) {}
+
+	bool operator()(token_list_t list) const {
+	    for(const auto& e: list) {
+	    	if (std::regex_match(e.path(), regex_path) && std::regex_match(e.value(), regex_value)) return true;
+	    }
+	    return false;
+	}
+};
+source_t<token_list_t> include_path_value(
+	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
+	auto predicate(include_path_value_predicate_t(glob_path, glob_value));
+	return stream::filter(upstream, predicate);
+}
+
+
 //
-//}
+// exlude_path
+//
+struct exclude_path_predicate_t {
+	std::regex m_regex;
+
+	exclude_path_predicate_t(const std::initializer_list<std::string>& args) {
+		assert(args.size() != 0);
+
+		std::string string;
+		for(auto e: args) {
+			string.append("|(?:" + glob_to_regex(e) + ")");
+		}
+		m_regex = std::regex(string.substr(1));
+	}
+
+	bool operator()(token_t token) const {
+		// negate regex_match for exclude
+		return !std::regex_match(token.path(), m_regex);
+	}
+};
+source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args) {
+	auto predicate = exclude_path_predicate_t(args);
+	return stream::filter(upstream, predicate);
+}
 
 
-// FIXME add exlclude_path
-//source_t<token_t>      exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args);
 
 
+// end of namespace
 }
 }

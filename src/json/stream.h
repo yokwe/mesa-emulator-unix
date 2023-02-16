@@ -1,5 +1,5 @@
 //
-// stream3.h
+// stream.h
 //
 
 #pragma once
@@ -19,6 +19,80 @@ struct source_base_t {
 	virtual void close()    = 0;
 	virtual bool has_next() = 0;
 	virtual T    next()     = 0;
+};
+
+
+//
+// source_t
+//
+template <typename T>
+class source_t : public source_base_t<T> {
+private:
+	using base_t = source_base_t<T>;
+	struct impl_t : public base_t {
+		template<typename U>
+		struct wrapper_t : public base_t {
+			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
+
+			void close() override {
+				m_object->close();
+			}
+			bool has_next() override {
+				return m_object->has_next();
+			}
+			T    next() override {
+				return m_object->next();
+			}
+
+			std::shared_ptr<U> m_object;
+		};
+
+		template <typename U>
+		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
+
+		void close() override {
+			m_base->close();
+		}
+		bool has_next() override {
+			return m_base->has_next();
+		}
+		T next() override {
+			return m_base->next();
+		}
+
+		std::shared_ptr<base_t> m_base;
+	};
+
+	impl_t      m_impl;
+	std::string m_name;
+	bool        m_closed = false;
+public:
+	source_t(impl_t impl, const char* name) : m_impl(impl),  m_name(name) {}
+	~source_t() {
+		close();
+	}
+
+	void close() override {
+		if (!m_closed) {
+			m_closed = true;
+			m_impl.close();
+		}
+	}
+	bool has_next() override {
+		if (m_closed) {
+			return false;
+		} else {
+			return m_impl.has_next();
+		}
+	}
+	T next() override {
+		if (has_next()) {
+			return m_impl.next();
+		} else {
+			// if there is no next and call next(), it is error
+			assert(false);
+		}
+	}
 };
 
 
@@ -102,154 +176,6 @@ public:
 			accept(newValue);
 		}
 		return result();
-	}
-};
-
-
-//
-// source_t
-//
-template <typename T>
-class source_t : public source_base_t<T> {
-private:
-	using base_t = source_base_t<T>;
-	struct impl_t : public base_t {
-		template<typename U>
-		struct wrapper_t : public base_t {
-			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
-
-			void close() override {
-				m_object->close();
-			}
-			bool has_next() override {
-				return m_object->has_next();
-			}
-			T    next() override {
-				return m_object->next();
-			}
-
-			std::shared_ptr<U> m_object;
-		};
-
-		template <typename U>
-		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
-
-		void close() override {
-			m_base->close();
-		}
-		bool has_next() override {
-			return m_base->has_next();
-		}
-		T next() override {
-			return m_base->next();
-		}
-
-		std::shared_ptr<base_t> m_base;
-	};
-
-	impl_t      m_impl;
-	std::string m_name;
-	bool        m_closed = false;
-public:
-	source_t(impl_t impl, const char* name) : m_impl(impl),  m_name(name) {}
-	~source_t() {
-		close();
-	}
-
-	void close() override {
-		if (!m_closed) {
-			m_closed = true;
-			m_impl.close();
-		}
-	}
-	bool has_next() override {
-		if (m_closed) {
-			return false;
-		} else {
-			return m_impl.has_next();
-		}
-	}
-	T next() override {
-		if (has_next()) {
-			return m_impl.next();
-		} else {
-			// if there is no next and call next(), it is error
-			assert(false);
-		}
-	}
-};
-
-
-//
-// pipe_t
-//
-template <typename T, typename R>
-class pipe_t : public source_base_t<R> {
-private:
-	using base_t = source_base_t<R>;
-	struct impl_t : public base_t {
-		template<typename U>
-		struct wrapper_t : public base_t {
-			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
-
-			void close() override {
-				m_object->close();
-			}
-			bool has_next() override {
-				return m_object->has_next();
-			}
-			R    next() override {
-				return m_object->next();
-			}
-
-			std::shared_ptr<U> m_object;
-		};
-
-		template <typename U>
-		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
-
-		void close() override {
-			m_base->close();
-		}
-		bool has_next() override {
-			return m_base->has_next();
-		}
-		T next() override {
-			return m_base->next();
-		}
-
-		std::shared_ptr<base_t> m_base;
-	};
-
-	impl_t      m_impl;
-	std::string m_name;
-	bool        m_closed = false;
-public:
-	pipe_t(impl_t impl, const char* name) : m_impl(impl),  m_name(name) {}
-	~pipe_t() {
-		close();
-	}
-
-	void close() override {
-		if (!m_closed) {
-			m_closed = true;
-			m_impl.close();
-		}
-	}
-	bool has_next() override {
-		if (m_closed) {
-			return false;
-		} else {
-			return m_impl.has_next();
-		}
-	}
-	R next() override {
-		if (has_next()) {
-			return m_impl.next();
-		} else {
-			// if there is no next and call next(), it is error
-			assert(false);
-		}
 	}
 };
 

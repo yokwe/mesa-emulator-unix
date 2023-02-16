@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <type_traits>
 
 #include "../util/Util.h"
 
@@ -166,29 +167,21 @@ struct map_impl_t : public source_base_t<R> {
 	}
 };
 template <typename T, typename Function>
-auto map(source_base_t<T>* upstream,  Function apply) {
-	using trait = trait_function<Function>;
-	using R   = typename trait::ret_type;
-	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0  = typename A0_::type;
+auto map(source_base_t<T>* upstream,  Function function) {
+	if constexpr (std::is_invocable_v<Function, T>) {
+		using R = std::invoke_result_t<Function, T>;
 
-	static_assert(trait::arity == 1);
-	static_assert(std::is_same_v<T, A0>);
+//		logger.error("function %s", demangle(typeid(Function).name()));
+//		logger.error("T        %s", demangle(typeid(T).name()));
+//		logger.error("R        %s", demangle(typeid(T).name()));
 
-	// assert T     == A0T
-	// assert arity == 1
-//	if constexpr (!std::is_same_v<T, A0> || !(trait::arity == 1)) {
-//		logger.error("ASSERTION FAILED");
-//		logger.error("function %s", __func__);
-//		logger.error("arity %d", trait::arity);
-//		logger.error("R     %s", demangle(typeid(R).name()));
-//		logger.error("T     %s", demangle(typeid(T).name()));
-//		logger.error("A0    %s", demangle(typeid(A0).name()));
-//		ERROR();
-//	}
-
-	auto impl = std::make_shared<map_impl_t<T, R, Function>>(upstream, apply);
-	return source_t<R>(impl, __func__);
+		auto impl = std::make_shared<map_impl_t<T, R, Function>>(upstream, function);
+		return source_t<R>(impl, __func__);
+	} else {
+		logger.error("function %s", demangle(typeid(Function).name()));
+		logger.error("T        %s", demangle(typeid(T).name()));
+		ERROR();
+	}
 }
 
 
@@ -230,32 +223,21 @@ struct filter_impl_t : public source_base_t<T> {
 };
 template <typename T, typename Predicate>
 source_t<T>	filter(source_base_t<T>* upstream, Predicate predicate) {
-	using trait = trait_function<Predicate>;
-	using R   = typename trait::ret_type;
-	using A0_ = typename std::tuple_element<0, typename trait::arg_type>;
-	using A0  = typename A0_::type;
+	if constexpr (std::is_invocable_v<Predicate, T>) {
+		using R = std::invoke_result_t<Predicate, T>;
+		static_assert(std::is_same_v<R, bool>);
 
-	//logger.debug("filter T=%s R=%s Predicater=%s", demangle(typeid(T).name()), demangle(typeid(R).name()), demangle(typeid(Predicate).name()));
-	static_assert(trait::arity == 1);
-	static_assert(std::is_same_v<T, A0>);
-	static_assert(std::is_same_v<R, bool>);
+//		logger.error("function %s", demangle(typeid(Predicate).name()));
+//		logger.error("T        %s", demangle(typeid(T).name()));
+//		logger.error("R        %s", demangle(typeid(T).name()));
 
-	// assert T     == A0T
-	// assert R     == bool
-	// assert arity == 1
-	if constexpr (!std::is_same_v<T, A0> || !std::is_same_v<R, bool> || !(trait::arity == 1)) {
-		logger.error("ASSERTION FAILED");
-		logger.error("function %s", __func__);
-		logger.error("arity %d", trait::arity);
-		logger.error("R     %s", demangle(typeid(R).name()));
-		logger.error("T     %s", demangle(typeid(T).name()));
-		logger.error("A0    %s", demangle(typeid(A0_).name()));
-		assert(false);
+		auto impl = std::make_shared<filter_impl_t<T, Predicate>>(upstream, predicate);
+		return source_t<T>(impl, __func__);
+	} else {
+		logger.error("function %s", demangle(typeid(Predicate).name()));
+		logger.error("T        %s", demangle(typeid(T).name()));
+		ERROR();
 	}
-
-	auto impl = std::make_shared<filter_impl_t<T, Predicate>>(upstream, predicate);
-	return source_t<T>(impl, __func__);
-
 }
 
 
@@ -284,8 +266,21 @@ struct peek_impl_t : public source_base_t<T> {
 };
 template <typename T, typename Consumer>
 source_t<T>	peek(source_base_t<T>* upstream, Consumer consumer) {
-	auto impl = std::make_shared<peek_impl_t<T, Consumer>>(upstream, consumer);
-	return source_t<T>(impl, __func__);
+	if constexpr (std::is_invocable_v<Consumer, T>) {
+		using R = std::invoke_result_t<Consumer, T>;
+		static_assert(std::is_same_v<R, void>);
+
+//		logger.error("function %s", demangle(typeid(Function).name()));
+//		logger.error("T        %s", demangle(typeid(T).name()));
+//		logger.error("R        %s", demangle(typeid(T).name()));
+
+		auto impl = std::make_shared<peek_impl_t<T, Consumer>>(upstream, consumer);
+		return source_t<T>(impl, __func__);
+	} else {
+		logger.error("consumer %s", demangle(typeid(Consumer).name()));
+		logger.error("T        %s", demangle(typeid(T).name()));
+		ERROR();
+	}
 }
 
 

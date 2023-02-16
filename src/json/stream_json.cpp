@@ -6,14 +6,12 @@
 #include <chrono>
 #include <mutex>
 #include <deque>
+#include <regex>
 
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("stream_json");
 
 #include "stream_json.h"
-
-
-//constexpr auto glob_to_regex = json::glob_to_regex;
 
 
 namespace stream {
@@ -159,8 +157,194 @@ source_t<token_t> json(std::istream& in, int max_queue_size, int wait_time) {
 	return source_t<token_t>(impl, __func__);
 }
 
-// FIXME add split and expand
-// FIXME add include_path_value exlclude_path
+
+//
+// split
+//
+struct split_impl_t : public source_base_t<token_list_t> {
+	using upstream_t = source_base_t<token_t>;
+
+	upstream_t*   m_upstream;
+	std::string  m_pattern;
+	std::regex   m_regex;
+	bool         m_has_value;
+	token_list_t m_value;
+
+	split_impl_t(upstream_t* upstream, std::string glob) :
+		m_upstream(upstream),
+		m_pattern(::json::glob_to_regex(glob)),
+		m_regex(std::regex(m_pattern)),
+		m_has_value(false) {}
+
+	void close() override {}
+	bool has_next() override {
+		if (m_has_value) return true;
+
+		// build m_has_value and m_value
+		std::string path("//");
+		int prefix = 0;
+		bool capturing = false;
+		for(;;) {
+			// reach end of stream
+			if (!m_upstream->has_next()) break;
+
+			token_t token = m_upstream->next();
+			if (capturing) {
+				m_value.emplace_back(token, token.path().substr(prefix));
+			}
+
+			if (token.is_item()) {
+				// OK
+			} else if (token.is_start()) {
+				if (std::regex_match(token.path(), m_regex)) {
+					// found interest node
+					path = token.path();
+					prefix = path.size();
+					capturing = true;
+					//
+					m_value.clear();
+					m_value.emplace_back(token, token.path().substr(prefix));
+				}
+			} else if (token.is_end()) {
+				if (token.path() == path) {
+					// end of interest node
+					path = "//";
+					prefix = 0;
+					capturing = false;
+					//
+					m_has_value = true;
+					return true;
+				}
+			} else {
+				ERROR();
+			}
+		}
+		return false;
+	}
+	token_list_t next() override {
+		if (m_has_value) {
+			m_has_value = false;
+			return m_value;
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("there is no next and call next() is error");
+			ERROR();
+			return m_value;
+		}
+	}
+};
+source_t<token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob) {
+	auto impl = std::make_shared<split_impl_t>(upstream, glob);
+	return source_t<token_list_t>(impl, __func__);
+}
+source_t<token_list_t> split(source_base_t<token_t>* upstream, const char* glob) {
+	auto impl = std::make_shared<split_impl_t>(upstream, std::string(glob));
+	return source_t<token_list_t>(impl, __func__);
+}
+
+
+//
+// expand
+//
+struct expand_impl_t : public source_base_t<token_t> {
+	using upstream_t = source_base_t<token_list_t>;
+
+	upstream_t*   m_upstream;
+	int           m_array_index      = 0;
+	int           m_list_index       = 0;
+	bool          m_has_value        = false;
+	bool          m_need_first_array = true;
+	bool          m_need_last_leave  = true;
+	token_t       m_value;
+	token_list_t  m_list;
+	std::string   m_array_name;
+
+	expand_impl_t(upstream_t* upstream) : m_upstream(upstream) {}
+
+	void close() {}
+	bool has_next() {
+		if (m_has_value) return true;
+
+		if (m_need_first_array) {
+			m_need_first_array = false;
+			//
+			// start of root array
+			//
+			m_value = token_t::make_start_array("", "");
+			m_has_value = true;
+			return true;
+		}
+
+		// m_list is empty, fill with upstream
+		if (m_list.empty()) {
+			if (m_upstream->has_next()) {
+				m_list = m_upstream->next();
+				m_array_name = std::to_string(m_array_index);
+				m_list_index = 0;
+			} else {
+				// no next data
+				if (m_need_last_leave) {
+					m_need_last_leave = false;
+					//
+					// end of root array
+					//
+					m_value = token_t::make_end_array("", "");
+					m_has_value = true;
+					return true;
+				}
+				return false;
+			}
+		}
+
+		if (0 <= m_list_index && m_list_index < (int)m_list.size()) {
+			// expected
+			token_t token = m_list.at(m_list_index);
+			m_has_value   = true;
+			m_value       = token_t(token, "/" + m_array_name + token.path());
+			//
+			m_list_index++;
+			// special case for end of m_list
+			if (m_list_index == (int)m_list.size()) {
+				m_array_index++;
+				m_list.clear();
+			}
+			return true;
+		} else {
+			logger.error("Unexpected m_list_index");
+			logger.error("  m_list_index %4d", m_list_index);
+			logger.error("  m_list.size  %4d", m_list.size());
+			ERROR();
+			return false;
+		}
+	}
+	token_t next() {
+		if (m_has_value) {
+			m_has_value = false;
+			return m_value;
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("there is no next and call next() is error");
+			ERROR();
+			return m_value;
+		}
+	}
+};
+source_t<token_t> expand(source_base_t<token_list_t>* upstream) {
+	auto impl = std::make_shared<expand_impl_t>(upstream);
+	return source_t<token_t>(impl, __func__);
+}
+
+
+//
+// include_path_value
+//
+//source_t<token_list_t> include_path_value(source_base_t<token_list_t>* upstream, std::string glob_path, std::string glob_value) {
+//
+//}
+
+
+// FIXME add exlclude_path
+//source_t<token_t>      exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args);
 
 
 }

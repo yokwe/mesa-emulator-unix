@@ -35,12 +35,12 @@ struct vector_impl_t : source_base_t<T> {
 };
 template <typename T>
 source_t<T> vector(std::initializer_list<T> init) {
-	auto impl = new vector_impl_t<T>(init);
+	auto impl = std::make_shared<vector_impl_t<T>>(init);
 	return source_t<T>(impl, __func__);
 }
 template <typename T>
 source_t<T> vector(std::vector<T>& data) {
-	auto impl = new vector_impl_t<T>(data);
+	auto impl = std::make_shared<vector_impl_t<T>>(data);
 	return source_t<T>(impl, __func__);
 }
 
@@ -62,7 +62,7 @@ struct sum_impl_t : public sink_t<T, R>::base_t {
 };
 template<typename T, typename R=T>
 sink_t<T, R> sum(source_base_t<T>* upstream) {
-	auto impl = new sink_t<T, R>;
+	auto impl = std::make_shared<sink_t<T, R>>();
 	return sink_t<T, R>(impl, __func__, upstream);
 }
 
@@ -85,7 +85,7 @@ struct count_impl_t : public sink_t<T, R>::base_t {
 };
 template<typename T, typename R=int>
 sink_t<T, R> count(source_base_t<T>* upstream) {
-	auto impl = new count_impl_t<T, R>;
+	auto impl = std::make_shared<count_impl_t<T, R>>();
 	return sink_t<T, R>(impl, __func__, upstream);
 }
 
@@ -132,7 +132,7 @@ auto map(source_base_t<T>* upstream,  Function apply) {
 //		ERROR();
 //	}
 
-	auto impl = new map_impl_t<T, R>(upstream, apply);
+	auto impl = std::make_shared<map_impl_t<T, R>>(upstream, apply);
 	return pipe_t<T, R>(impl, __func__);
 }
 

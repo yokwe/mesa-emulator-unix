@@ -155,7 +155,7 @@ struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 	}
 };
 source_t<token_t> json(std::istream& in, int max_queue_size, int wait_time) {
-	auto impl = new json_impl_t(in, max_queue_size, wait_time);
+	auto impl = std::make_shared<json_impl_t>(in, max_queue_size, wait_time);
 	return source_t<token_t>(impl, __func__);
 }
 

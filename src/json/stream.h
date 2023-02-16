@@ -41,7 +41,7 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(U* u) : m_object(u) {}
+			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
 
 			void close() override {
 				m_object->close();
@@ -57,7 +57,7 @@ private:
 		};
 
 		template <typename U>
-		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
+		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();
@@ -116,7 +116,7 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(U* u) : m_object(u) {}
+			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
 
 			void close() override {
 				m_object->close();
@@ -132,7 +132,7 @@ private:
 		};
 
 		template <typename U>
-		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
+		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();
@@ -190,7 +190,7 @@ private:
 	struct impl_t : public base_t {
 		template<typename U>
 		struct wrapper_t : public base_t {
-			wrapper_t(U* u) : m_object(u) {}
+			wrapper_t(std::shared_ptr<U> u) : m_object(u) {}
 
 			void close() override {
 				m_object->close();
@@ -206,7 +206,7 @@ private:
 		};
 
 		template <typename U>
-		impl_t(U* u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
+		impl_t(std::shared_ptr<U> u) : m_base(std::make_shared<wrapper_t<U>>(u)) {}
 
 		void close() override {
 			m_base->close();

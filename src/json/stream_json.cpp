@@ -241,10 +241,6 @@ source_t<token_list_t> split(source_base_t<token_t>* upstream, const std::string
 	auto impl = std::make_shared<split_impl_t>(upstream, glob);
 	return source_t<token_list_t>(impl, __func__);
 }
-source_t<token_list_t> split(source_base_t<token_t>* upstream, const char* glob) {
-	auto impl = std::make_shared<split_impl_t>(upstream, std::string(glob));
-	return source_t<token_list_t>(impl, __func__);
-}
 
 
 //

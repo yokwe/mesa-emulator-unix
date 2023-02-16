@@ -71,6 +71,9 @@ public:
 	~source_t() {
 		close();
 	}
+	std::string name() {
+		return m_name;
+	}
 
 	void close() override {
 		if (!m_closed) {
@@ -154,6 +157,9 @@ public:
 	sink_t(impl_t impl, const char* name, source_base_t<T>* upstream_) : m_impl(impl),  m_name(name), m_upstream(upstream_) {}
 	virtual ~sink_t() {
 		close();
+	}
+	std::string name() {
+		return m_name;
 	}
 
 	void close() {

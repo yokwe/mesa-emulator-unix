@@ -47,6 +47,7 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
+
 #if 1
 	{
 		auto head   = stream::json::json(std::cin);
@@ -54,8 +55,12 @@ int main(int, char**) {
 //		while(head.has_next()) head.next();
 
 		auto countA  = stream::count(&head, "countA");
-		auto map     = stream::map(&countA, [](auto t){return t;});
-		auto split   = stream::json::split(&map, "/inner/*");
+//		auto map     = stream::map(&countA, [](auto t){return t;});
+
+		auto mapA    = stream::map([](json::token_t t){return t;});
+		mapA.upstream(&countA);
+
+		auto split   = stream::json::split(&mapA, "/inner/*");
 		auto countB  = stream::count(&split, "countB");
 		auto filterA = stream::json::include_path_value(&countB, "/kind", "EnumDecl");
 		auto countC  = stream::count(&filterA, "countC");
@@ -76,11 +81,12 @@ int main(int, char**) {
 		auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
 		auto countF  = stream::count(&filterC, "countF");
 
-		auto dump    = stream::peek(&countF, [](auto token){json::dump("PEEK ", token);});
+		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/});
 
-		auto tail = stream::null(&dump);
+		stream::null(&dump);
+		//logger.info("stream::count() %d", stream::count(&dump));
+
 //		logger.info("tail %s %s", tail.name(), demangle(typeid(tail).name()));
-		tail.process();
 	}
 #endif
 

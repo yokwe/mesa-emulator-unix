@@ -155,17 +155,17 @@ template <typename T, typename R, typename Function>
 struct map_impl_t : public pipe_base_t<T, R> {
 	using upstream_t = source_base_t<T>;
 	
-	upstream_t*& m_upstream = pipe_base_t<T, R>::m_upstream;
 	Function     m_function;
 
 	map_impl_t(upstream_t* upstream_, Function function_) : pipe_base_t<T, R>(upstream_), m_function(function_) {}
+	map_impl_t(Function function_) : pipe_base_t<T, R>(), m_function(function_) {}
 
 	void close() override {}
 	bool has_next() override {
-		return m_upstream->has_next();
+		return this->m_upstream->has_next();
 	}
 	R next() override {
-		T newValue = m_upstream->next();
+		T newValue = this->m_upstream->next();
 		return m_function(newValue);
 	}
 };
@@ -174,15 +174,29 @@ auto map(source_base_t<T>* upstream,  Function function) {
 	if constexpr (std::is_invocable_v<Function, T>) {
 		using R = std::invoke_result_t<Function, T>;
 
-//		logger.error("function %s", demangle(typeid(Function).name()));
-//		logger.error("T        %s", demangle(typeid(T).name()));
-//		logger.error("R        %s", demangle(typeid(T).name()));
-
 		auto impl = std::make_shared<map_impl_t<T, R, Function>>(upstream, function);
 		return pipe_t<T, R>(impl, __func__);
 	} else {
 		logger.error("function %s", demangle(typeid(Function).name()));
 		logger.error("T        %s", demangle(typeid(T).name()));
+		ERROR();
+	}
+}
+template <typename Function>
+auto map(Function function) {
+	// take type from Function
+	using trait = trait_function<Function>;
+	using T = typename std::tuple_element<0, typename trait::arg_type>::type;
+	using R = typename trait::ret_type;
+
+	if constexpr(trait::arity == 1) {
+		auto impl = std::make_shared<map_impl_t<T, R, Function>>(function);
+		return pipe_t<T, R>(impl, __func__);
+	} else {
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("R     %s", demangle(typeid(R).name()));
 		ERROR();
 	}
 }

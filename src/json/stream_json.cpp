@@ -366,15 +366,7 @@ source_t<token_list_t> include_path_value(
 struct exclude_path_predicate_t {
 	std::regex m_regex;
 
-	exclude_path_predicate_t(const std::initializer_list<std::string>& args) {
-		assert(args.size() != 0);
-
-		std::string string;
-		for(auto e: args) {
-			string.append("|(?:" + glob_to_regex(e) + ")");
-		}
-		m_regex = std::regex(string.substr(1));
-	}
+	exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
 
 	bool operator()(token_t token) const {
 		// negate regex_match for exclude
@@ -382,7 +374,21 @@ struct exclude_path_predicate_t {
 	}
 };
 source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args) {
-	auto predicate = exclude_path_predicate_t(args);
+	assert(args.size() != 0);
+
+	std::string string;
+	for(auto e: args) {
+		string.append("|(?:" + glob_to_regex(e) + ")");
+	}
+	std::regex regex = std::regex(string.substr(1));
+
+	auto predicate = exclude_path_predicate_t(regex);
+	return stream::filter(upstream, predicate);
+}
+source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::string glob_path) {
+	std::regex regex = std::regex(glob_to_regex(glob_path));
+
+	auto predicate = exclude_path_predicate_t(regex);
 	return stream::filter(upstream, predicate);
 }
 

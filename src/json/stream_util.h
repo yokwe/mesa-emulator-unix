@@ -152,13 +152,13 @@ void null(source_base_t<T>* upstream) {
 //
 // R Function()(T)
 template <typename T, typename R, typename Function>
-struct map_impl_t : public source_base_t<R> {
+struct map_impl_t : public pipe_base_t<T, R> {
 	using upstream_t = source_base_t<T>;
+	
+	upstream_t*& m_upstream = pipe_base_t<T, R>::m_upstream;
+	Function     m_function;
 
-	upstream_t* m_upstream;
-	Function    m_function;
-
-	map_impl_t(upstream_t* upstream_, Function function_) : m_upstream(upstream_), m_function(function_) {}
+	map_impl_t(upstream_t* upstream_, Function function_) : pipe_base_t<T, R>(upstream_), m_function(function_) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -179,7 +179,7 @@ auto map(source_base_t<T>* upstream,  Function function) {
 //		logger.error("R        %s", demangle(typeid(T).name()));
 
 		auto impl = std::make_shared<map_impl_t<T, R, Function>>(upstream, function);
-		return source_t<R>(impl, __func__);
+		return pipe_t<T, R>(impl, __func__);
 	} else {
 		logger.error("function %s", demangle(typeid(Function).name()));
 		logger.error("T        %s", demangle(typeid(T).name()));

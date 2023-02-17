@@ -22,6 +22,21 @@ struct source_base_t {
 };
 
 
+template <typename T, typename R>
+struct pipe_base_t : public source_base_t<R> {
+	using upstream_t = source_base_t<T>;
+
+	pipe_base_t(upstream_t* upstream_) : m_upstream(upstream_) {}
+	virtual ~pipe_base_t() {}
+
+	void upstream(upstream_t* upstream) {
+		m_upstream = upstream;
+	}
+protected:
+	upstream_t* m_upstream = nullptr;
+};
+
+
 //
 // source_t
 //
@@ -63,6 +78,55 @@ public:
 			// if there is no next and call next(), it is error
 			assert(false);
 		}
+	}
+};
+
+
+//
+// pipe_t
+//
+template <typename T, typename R>
+class pipe_t : public source_base_t<R> {
+private:
+	using base_t     = pipe_base_t<T, R>;
+	using impl_t     = std::shared_ptr<base_t>;
+	using upstream_t = source_base_t<R>;
+
+	impl_t      m_impl;
+	std::string m_name;
+	bool        m_closed = false;
+public:
+	pipe_t(impl_t impl, const char* name) : m_impl(impl),  m_name(name) {}
+	~pipe_t() {
+		close();
+	}
+	std::string name() {
+		return m_name;
+	}
+
+	void close() override {
+		if (!m_closed) {
+			m_closed = true;
+			m_impl->close();
+		}
+	}
+	bool has_next() override {
+		if (m_closed) {
+			return false;
+		} else {
+			return m_impl->has_next();
+		}
+	}
+	R next() override {
+		if (has_next()) {
+			return m_impl->next();
+		} else {
+			// if there is no next and call next(), it is error
+			assert(false);
+		}
+	}
+	void upstream(upstream_t upstream_) {
+		m_impl->upstream(upstream_);
 	}
 };
 

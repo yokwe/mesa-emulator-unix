@@ -188,10 +188,7 @@ namespace {
 
 class json_token_t : public nlohmann::json::json_sax_t {
 public:
-	handler_t* m_handler;
-
-	json_token_t() : m_handler(nullptr) {}
-
+	handler_t* m_handler = nullptr;
 
 	//
 	// parse input stream

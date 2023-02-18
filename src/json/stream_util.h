@@ -35,12 +35,12 @@ struct vector_impl_t : source_base_t<T> {
 	vector_impl_t(std::initializer_list<T> init) :m_data(init.begin(), init.end()) {}
 };
 template <typename T>
-source_t<T> vector(std::initializer_list<T> init) {
+auto vector(std::initializer_list<T> init) {
 	auto impl = std::make_shared<vector_impl_t<T>>(init);
 	return source_t<T>(impl, __func__);
 }
 template <typename T>
-source_t<T> vector(std::vector<T>& data) {
+auto vector(std::vector<T>& data) {
 	auto impl = std::make_shared<vector_impl_t<T>>(data);
 	return source_t<T>(impl, __func__);
 }
@@ -94,43 +94,6 @@ auto count(source_base_t<T>* upstream) {
 
 
 //
-// source count
-//
-template <typename T>
-struct source_count_impl_t : public source_base_t<T> {
-	using upstream_t = source_base_t<T>;
-
-	upstream_t* m_upstream;
-	std::string m_name;
-	int         m_count = 0;
-
-	source_count_impl_t(upstream_t* upstream, const std::string& name) : m_upstream(upstream), m_name(name) {}
-
-	void close() override {
-		logger.info("count %s %d", m_name, m_count);
-	}
-	bool has_next() override {
-		return m_upstream->has_next();
-	}
-	T next() override {
-		m_count++;
-		T newValue = m_upstream->next();
-		return newValue;
-	}
-};
-template <typename T>
-source_t<T> count(source_base_t<T>* upstream, const std::string& name) {
-	auto impl = std::make_shared<source_count_impl_t<T>>(upstream, name);
-	return source_t<T>(impl, __func__);
-}
-template <typename T>
-source_t<T> count(source_base_t<T>* upstream, const char* name) {
-	auto impl = std::make_shared<source_count_impl_t<T>>(upstream, std::string(name));
-	return source_t<T>(impl, __func__);
-}
-
-
-//
 // sink null
 //
 template <typename T, typename R>
@@ -140,7 +103,7 @@ struct sink_null_impl_t : public sink_t<T, R>::base_t {
 	R    result()   override {}
 };
 template <typename T>
-void null(source_base_t<T>* upstream) {
+auto null(source_base_t<T>* upstream) {
 	auto impl = std::make_shared<sink_null_impl_t<T, void>>();
 	sink_t<T, void> sink(impl, __func__, upstream);
 	sink.process();
@@ -148,7 +111,49 @@ void null(source_base_t<T>* upstream) {
 
 
 //
-// source map
+// pipe count
+//
+template <typename T>
+struct pipe_count_impl_t : public pipe_base_t<T, T> {
+	using upstream_t = source_base_t<T>;
+
+	std::string m_name;
+	int         m_count = 0;
+
+	pipe_count_impl_t(upstream_t* upstream, const std::string& name) : pipe_base_t<T, T>(upstream), m_name(name) {}
+
+	void close() override {
+		logger.info("count %s %d", m_name, m_count);
+	}
+	bool has_next() override {
+		return this->m_upstream->has_next();
+	}
+	T next() override {
+		m_count++;
+		T newValue = this->m_upstream->next();
+		return newValue;
+	}
+};
+template <typename T>
+auto count(source_base_t<T>* upstream, const std::string& name) {
+	auto impl = std::make_shared<pipe_count_impl_t<T>>(upstream, name);
+	return pipe_t<T, T>(impl, __func__);
+}
+template <typename T>
+auto count(source_base_t<T>* upstream, const char* name) {
+	auto impl = std::make_shared<pipe_count_impl_t<T>>(upstream, std::string(name));
+	return pipe_t<T, T>(impl, __func__);
+}
+template <typename T>
+auto count(const char* name) {
+	auto impl = std::make_shared<pipe_count_impl_t<T>>(nullptr, std::string(name));
+	return pipe_t<T, T>(impl, __func__);
+}
+
+
+
+//
+// pipe map
 //
 // R Function()(T)
 template <typename T, typename R, typename Function>
@@ -158,7 +163,6 @@ struct map_impl_t : public pipe_base_t<T, R> {
 	Function     m_function;
 
 	map_impl_t(upstream_t* upstream_, Function function_) : pipe_base_t<T, R>(upstream_), m_function(function_) {}
-	map_impl_t(Function function_) : pipe_base_t<T, R>(), m_function(function_) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -190,7 +194,7 @@ auto map(Function function) {
 	using R = typename trait::ret_type;
 
 	if constexpr(trait::arity == 1) {
-		auto impl = std::make_shared<map_impl_t<T, R, Function>>(function);
+		auto impl = std::make_shared<map_impl_t<T, R, Function>>(nullptr, function);
 		return pipe_t<T, R>(impl, __func__);
 	} else {
 		logger.error("function %s", __func__);
@@ -203,26 +207,25 @@ auto map(Function function) {
 
 
 //
-// source filter
+// pipe filter
 //
 // bool Predicate()(T)
 template <typename T, typename Predicate>
-struct filter_impl_t : public source_base_t<T> {
+struct filter_impl_t : public pipe_base_t<T, T> {
 	using upstream_t = source_base_t<T>;
 
-	upstream_t* m_upstream;
 	Predicate   m_predicate;
 	bool        m_has_value = false;
 	T           m_value;
 
-	filter_impl_t(upstream_t* upstream, Predicate predicate) : m_upstream(upstream), m_predicate(predicate) {}
+	filter_impl_t(upstream_t* upstream, Predicate predicate) : pipe_base_t<T, T>(upstream), m_predicate(predicate) {}
 
 	void close() override {}
 	bool has_next() override {
 		for(;;) {
 			if (m_has_value) break;
-			if (!m_upstream->has_next()) break;
-			m_value = m_upstream->next();
+			if (!this->m_upstream->has_next()) break;
+			m_value = this->m_upstream->next();
 			m_has_value = m_predicate(m_value);
 		}
 		return m_has_value;
@@ -239,7 +242,7 @@ struct filter_impl_t : public source_base_t<T> {
 	}
 };
 template <typename T, typename Predicate>
-source_t<T>	filter(source_base_t<T>* upstream, Predicate predicate) {
+auto filter(source_base_t<T>* upstream, Predicate predicate) {
 	if constexpr (std::is_invocable_v<Predicate, T>) {
 		using R = std::invoke_result_t<Predicate, T>;
 		static_assert(std::is_same_v<R, bool>);
@@ -249,40 +252,57 @@ source_t<T>	filter(source_base_t<T>* upstream, Predicate predicate) {
 //		logger.error("R        %s", demangle(typeid(T).name()));
 
 		auto impl = std::make_shared<filter_impl_t<T, Predicate>>(upstream, predicate);
-		return source_t<T>(impl, __func__);
+		return pipe_t<T, T>(impl, __func__);
 	} else {
 		logger.error("function %s", demangle(typeid(Predicate).name()));
 		logger.error("T        %s", demangle(typeid(T).name()));
 		ERROR();
 	}
 }
+template <typename Predicate>
+auto filter(Predicate predicate) {
+	// take type from Function
+	using trait = trait_function<Predicate>;
+	using T = typename std::tuple_element<0, typename trait::arg_type>::type;
+	using R = typename trait::ret_type;
+
+	if constexpr(trait::arity == 1 && std::is_same_v<R, bool>) {
+		auto impl = std::make_shared<filter_impl_t<T, Predicate>>(nullptr, predicate);
+		return pipe_t<T, T>(impl, __func__);
+	} else {
+		logger.error("function %s", __func__);
+		logger.error("arity %d", trait::arity);
+		logger.error("T     %s", demangle(typeid(T).name()));
+		logger.error("R     %s", demangle(typeid(R).name()));
+		ERROR();
+	}
+}
 
 
 //
-// source peek
+// pipe peek
 //
 // void Consumer()(T)
 template <typename T, typename Consumer>
-struct peek_impl_t : public source_base_t<T> {
+struct peek_impl_t : public pipe_base_t<T, T> {
 	using upstream_t  = source_base_t<T>;
 
-	upstream_t* m_upstream;
 	Consumer    m_consumer;
 
-	peek_impl_t(upstream_t* upstream, Consumer consumer) : m_upstream(upstream), m_consumer(consumer) {}
+	peek_impl_t(upstream_t* upstream, Consumer consumer) : pipe_base_t<T, T>(upstream), m_consumer(consumer) {}
 
 	void close() override {}
 	bool has_next() override {
-		return m_upstream->has_next();
+		return this->m_upstream->has_next();
 	}
 	T next() override {
-		T newValue = m_upstream->next();
+		T newValue = this->m_upstream->next();
 		m_consumer(newValue);
 		return newValue;
 	}
 };
 template <typename T, typename Consumer>
-source_t<T>	peek(source_base_t<T>* upstream, Consumer consumer) {
+auto peek(source_base_t<T>* upstream, Consumer consumer) {
 	if constexpr (std::is_invocable_v<Consumer, T>) {
 		using R = std::invoke_result_t<Consumer, T>;
 		static_assert(std::is_same_v<R, void>);
@@ -292,7 +312,25 @@ source_t<T>	peek(source_base_t<T>* upstream, Consumer consumer) {
 //		logger.error("R        %s", demangle(typeid(T).name()));
 
 		auto impl = std::make_shared<peek_impl_t<T, Consumer>>(upstream, consumer);
-		return source_t<T>(impl, __func__);
+		return pipe_t<T, T>(impl, __func__);
+	} else {
+		logger.error("consumer %s", demangle(typeid(Consumer).name()));
+		logger.error("T        %s", demangle(typeid(T).name()));
+		ERROR();
+	}
+}
+template <typename T, typename Consumer>
+auto peek(Consumer consumer) {
+	if constexpr (std::is_invocable_v<Consumer, T>) {
+		using R = std::invoke_result_t<Consumer, T>;
+		static_assert(std::is_same_v<R, void>);
+
+//		logger.error("function %s", demangle(typeid(Function).name()));
+//		logger.error("T        %s", demangle(typeid(T).name()));
+//		logger.error("R        %s", demangle(typeid(T).name()));
+
+		auto impl = std::make_shared<peek_impl_t<T, Consumer>>(nullptr, consumer);
+		return pipe_t<T, T>(impl, __func__);
 	} else {
 		logger.error("consumer %s", demangle(typeid(Consumer).name()));
 		logger.error("T        %s", demangle(typeid(T).name()));

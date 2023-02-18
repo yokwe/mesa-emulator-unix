@@ -55,8 +55,8 @@ int main(int, char**) {
 //		while(head.has_next()) head.next();
 
 		auto countA  = stream::count(&head, "countA");
-//		auto map     = stream::map(&countA, [](auto t){return t;});
 
+//		auto map     = stream::map(&countA, [](auto t){return t;});
 		auto mapA    = stream::map([](json::token_t t){return t;});
 		mapA.upstream(&countA);
 
@@ -78,7 +78,11 @@ int main(int, char**) {
 		);
 		auto countE  = stream::count(&filterB, "countE");
 
-		auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
+//		auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
+		auto filterC = stream::filter([](json::token_t t){return t.name() != "id";});
+		filterC.upstream(&countE);
+
+
 		auto countF  = stream::count(&filterC, "countF");
 
 		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/});

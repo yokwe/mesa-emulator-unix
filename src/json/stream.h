@@ -26,7 +26,6 @@ template <typename T, typename R>
 struct pipe_base_t : public source_base_t<R> {
 	using upstream_t = source_base_t<T>;
 
-	pipe_base_t() {}
 	pipe_base_t(upstream_t* upstream_) : m_upstream(upstream_) {}
 	virtual ~pipe_base_t() {}
 

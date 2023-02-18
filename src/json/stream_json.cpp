@@ -23,7 +23,7 @@ namespace json {
 
 
 //
-// json
+// source json
 //
 struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 	using seconds = std::chrono::seconds;
@@ -163,22 +163,17 @@ source_t<token_t> json(std::istream& in, int max_queue_size, int wait_time) {
 
 
 //
-// split
+// pipe split
 //
-struct split_impl_t : public source_base_t<token_list_t> {
+struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	using upstream_t = source_base_t<token_t>;
 
-	upstream_t*   m_upstream;
-	std::string  m_pattern;
 	std::regex   m_regex;
-	bool         m_has_value;
+	bool         m_has_value = false;
 	token_list_t m_value;
 
-	split_impl_t(upstream_t* upstream, std::string glob) :
-		m_upstream(upstream),
-		m_pattern(::json::glob_to_regex(glob)),
-		m_regex(std::regex(m_pattern)),
-		m_has_value(false) {}
+	split_impl_t(upstream_t* upstream, std::string glob) : pipe_base_t<token_t, token_list_t>(upstream),
+		m_regex(std::regex(::json::glob_to_regex(glob))) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -190,9 +185,9 @@ struct split_impl_t : public source_base_t<token_list_t> {
 		bool capturing = false;
 		for(;;) {
 			// reach end of stream
-			if (!m_upstream->has_next()) break;
+			if (!this->m_upstream->has_next()) break;
 
-			token_t token = m_upstream->next();
+			token_t token = this->m_upstream->next();
 			if (capturing) {
 				m_value.emplace_back(token, token.path().substr(prefix));
 			}
@@ -237,19 +232,22 @@ struct split_impl_t : public source_base_t<token_list_t> {
 		}
 	}
 };
-source_t<token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob) {
+pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob) {
 	auto impl = std::make_shared<split_impl_t>(upstream, glob);
-	return source_t<token_list_t>(impl, __func__);
+	return pipe_t<token_t, token_list_t>(impl, __func__);
+}
+pipe_t<token_t, token_list_t> split(const std::string& glob) {
+	source_base_t<token_t>* upstream = nullptr;
+	return split(upstream, glob);
 }
 
 
 //
-// expand
+// pipe expand
 //
-struct expand_impl_t : public source_base_t<token_t> {
+struct expand_impl_t : public pipe_base_t<token_list_t, token_t> {
 	using upstream_t = source_base_t<token_list_t>;
 
-	upstream_t*   m_upstream;
 	int           m_array_index      = 0;
 	int           m_list_index       = 0;
 	bool          m_has_value        = false;
@@ -259,7 +257,7 @@ struct expand_impl_t : public source_base_t<token_t> {
 	token_list_t  m_list;
 	std::string   m_array_name;
 
-	expand_impl_t(upstream_t* upstream) : m_upstream(upstream) {}
+	expand_impl_t(upstream_t* upstream) : pipe_base_t<token_list_t, token_t>(upstream) {}
 
 	void close() {}
 	bool has_next() {
@@ -277,8 +275,8 @@ struct expand_impl_t : public source_base_t<token_t> {
 
 		// m_list is empty, fill with upstream
 		if (m_list.empty()) {
-			if (m_upstream->has_next()) {
-				m_list = m_upstream->next();
+			if (this->m_upstream->has_next()) {
+				m_list = this->m_upstream->next();
 				m_array_name = std::to_string(m_array_index);
 				m_list_index = 0;
 			} else {
@@ -329,14 +327,18 @@ struct expand_impl_t : public source_base_t<token_t> {
 		}
 	}
 };
-source_t<token_t> expand(source_base_t<token_list_t>* upstream) {
+pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream) {
 	auto impl = std::make_shared<expand_impl_t>(upstream);
-	return source_t<token_t>(impl, __func__);
+	return pipe_t<token_list_t, token_t>(impl, __func__);
+}
+pipe_t<token_list_t, token_t> expand() {
+	source_base_t<token_list_t>* upstream = nullptr;
+	return expand(upstream);
 }
 
 
 //
-// include_path_value
+// pipe include_path_value
 //
 struct include_path_value_predicate_t {
 	std::regex regex_path;
@@ -353,15 +355,20 @@ struct include_path_value_predicate_t {
 	    return false;
 	}
 };
-source_t<token_list_t> include_path_value(
+pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
-	auto predicate(include_path_value_predicate_t(glob_path, glob_value));
+	auto predicate = include_path_value_predicate_t(glob_path, glob_value);
 	return stream::filter(upstream, predicate);
+}
+pipe_t<token_list_t, token_list_t> include_path_value(
+	const std::string& glob_path, const std::string& glob_value) {
+	source_base_t<token_list_t>* upstream = nullptr;
+	return include_path_value(upstream, glob_path, glob_value);
 }
 
 
 //
-// exlude_path
+// pipe exlude_path
 //
 struct exclude_path_predicate_t {
 	std::regex m_regex;
@@ -373,7 +380,7 @@ struct exclude_path_predicate_t {
 		return !std::regex_match(token.path(), m_regex);
 	}
 };
-source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args) {
+pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args) {
 	assert(args.size() != 0);
 
 	std::string string;
@@ -385,11 +392,19 @@ source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::initialize
 	auto predicate = exclude_path_predicate_t(regex);
 	return stream::filter(upstream, predicate);
 }
-source_t<token_t> exclude_path(source_base_t<token_t>* upstream, std::string glob_path) {
-	std::regex regex = std::regex(glob_to_regex(glob_path));
+pipe_t<token_t, token_t> exclude_path(std::initializer_list<std::string> args) {
+	source_base_t<token_t>* upstream = nullptr;
+	return exclude_path(upstream, args);
+}
 
+pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, std::string glob_path) {
+	std::regex regex = std::regex(glob_to_regex(glob_path));
 	auto predicate = exclude_path_predicate_t(regex);
 	return stream::filter(upstream, predicate);
+}
+pipe_t<token_t, token_t> exclude_path(std::string glob_path) {
+	source_base_t<token_t>* upstream = nullptr;
+	return exclude_path(upstream, glob_path);
 }
 
 

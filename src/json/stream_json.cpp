@@ -408,8 +408,6 @@ pipe_t<token_t, token_t> exclude_path(std::string glob_path) {
 }
 
 
-
-
 // end of namespace
 }
 }

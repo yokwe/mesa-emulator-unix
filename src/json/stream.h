@@ -125,6 +125,7 @@ public:
 			assert(false);
 		}
 	}
+
 	void upstream(upstream_t* upstream_) {
 		m_impl->upstream(upstream_);
 	}
@@ -148,12 +149,6 @@ public:
 	};
 	using impl_t = std::shared_ptr<base_t>;
 
-private:
-	impl_t       m_impl;
-	std::string  m_name;
-	upstream_t*  m_upstream;
-	bool         m_closed = false;
-public:
 	sink_t(impl_t impl, const char* name, source_base_t<T>* upstream_) : m_impl(impl),  m_name(name), m_upstream(upstream_) {}
 	virtual ~sink_t() {
 		close();
@@ -161,6 +156,20 @@ public:
 	std::string name() {
 		return m_name;
 	}
+
+	R process() {
+		while(m_upstream->has_next()) {
+			T newValue = m_upstream->next();
+			accept(newValue);
+		}
+		return result();
+	}
+
+private:
+	impl_t       m_impl;
+	std::string  m_name;
+	upstream_t*  m_upstream;
+	bool         m_closed = false;
 
 	void close() {
 		if (!m_closed) {
@@ -174,14 +183,6 @@ public:
 
 	void accept(T& newValue) {
 		m_impl->accept(newValue);
-	}
-
-	R process() {
-		while(m_upstream->has_next()) {
-			T newValue = m_upstream->next();
-			accept(newValue);
-		}
-		return result();
 	}
 };
 

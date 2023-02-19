@@ -140,13 +140,8 @@ auto count(source_base_t<T>* upstream, const std::string& name) {
 	return pipe_t<T, T>(impl, __func__);
 }
 template <typename T>
-auto count(source_base_t<T>* upstream, const char* name) {
-	auto impl = std::make_shared<pipe_count_impl_t<T>>(upstream, std::string(name));
-	return pipe_t<T, T>(impl, __func__);
-}
-template <typename T>
-auto count(const char* name) {
-	auto impl = std::make_shared<pipe_count_impl_t<T>>(nullptr, std::string(name));
+auto count(const std::string& name) {
+	auto impl = std::make_shared<pipe_count_impl_t<T>>(nullptr, name);
 	return pipe_t<T, T>(impl, __func__);
 }
 

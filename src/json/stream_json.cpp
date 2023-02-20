@@ -360,28 +360,41 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 // pipe file
 //
 struct file_t {
-	// TODO copy constructor is called when std::make_shared is called in peek()
-	// TODO keep data in std::shared_ptr
-	// TODO When desturctor is called and std::shard_ptr::use_count() == 1, do post process and close file
+	struct state_t {
+		int         m_level;
+		bool        m_array;
+		int         m_count = 0;
+		std::string m_pad;
+
+		state_t(int level, bool array) {
+			m_level = level;
+			m_array = array;
+			for(int i = 0; i < m_level; i++) {
+				m_pad.append("    ");
+			}
+		}
+	};
+
 	struct context_t {
-		std::string   header;
-		std::FILE*    out;
-		char          buffer[1024 * 64];
+		std::FILE*  m_file;
+		char        m_buffer[1024 * 64];
+		int         m_level = 0;
+
+		std::vector<state_t> m_states;
 
 		context_t(const std::string& path) {
 			logger.info("context_t()");
-			header = std_sprintf("%p", this);
-			out = std::fopen(path.c_str(), "w");
+			m_file = std::fopen(path.c_str(), "w");
 			{
-				out = std::fopen(path.c_str(), "w");
-				if (out == NULL) {
+				m_file = std::fopen(path.c_str(), "w");
+				if (m_file == NULL) {
 					int errno_ = errno;
 					logger.error("fopen errno = %d", errno_);
 					assert(false);
 				}
 			}
 			{
-				int ret = setvbuf(out, buffer, _IOFBF, sizeof(buffer));
+				int ret = setvbuf(m_file, m_buffer, _IOFBF, sizeof(m_buffer));
 				if (ret) {
 					int errno_ = errno;
 					logger.error("setvbuf errno = %d", ret, errno_);
@@ -392,6 +405,15 @@ struct file_t {
 		}
 		~context_t() {
 			logger.info("~context_t()");
+		}
+
+		state_t& state() {
+			assert(!m_states.empty());
+			return m_states.back();
+		}
+
+		const char* pad() {
+			return m_states.empty() ? "" : m_states.back().m_pad.c_str();
 		}
 	};
 	std::shared_ptr<context_t> m_context;
@@ -408,7 +430,7 @@ struct file_t {
 		if (m_context.use_count() == 1) {
 			logger.info("~file_t  ~context_");
 			{
-				int ret = std::fclose(m_context->out);
+				int ret = std::fclose(m_context->m_file);
 				if (ret) {
 					logger.error("fclose errno = %d", errno);
 					assert(false);
@@ -418,40 +440,50 @@ struct file_t {
 	}
 
 	void operator()(const token_t& token) {
-		if (token.is_item()) {
-			std::string string = std_sprintf("%s %s\n", token.path(), token.value());
-			{
-				int ret = fputs(string.c_str(), m_context->out);
-				if (ret == EOF) {
-					logger.error("fputs errno = %d", errno);
-					assert(false);
-				}
-			}
-		} else if (token.is_start()) {
-			std::string string = std_sprintf("%s %s\n", token.path(), token.is_array() ? "ARRAY" : "OBJECT");
-			{
-				int ret = fputs(string.c_str(), m_context->out);
-				if (ret == EOF) {
-					logger.error("fputs errno = %d", errno);
-					assert(false);
-				}
-			}
-		} else if (token.is_end()) {
-			std::string string = std_sprintf("%s %s\n", token.path(), "END");
-			{
-				int ret = fputs(string.c_str(), m_context->out);
-				if (ret == EOF) {
-					logger.error("fputs errno = %d", errno);
-					assert(false);
-				}
-			}
-		} else {
-			ERROR();
+		// FIXME detect end of array or object and output correct comma for token
+		if (m_context->m_level) {
+			fprintf(m_context->m_file, (m_context->state().m_count == 0) ? "\n" : ",\n");
 		}
 
-		if (count++ == 0) {
-			std::string str = std_sprintf("data %s %p ", m_context->header, this);
-		    dump(str, token);
+		if (token.is_item()) {
+			fprintf(m_context->m_file, "%s", m_context->pad());
+			if (m_context->m_level) {
+				if (m_context->state().m_array) {
+					//
+				} else {
+					fprintf(m_context->m_file, "%s: ", token.name().c_str());
+				}
+			}
+
+			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+			// maintain state
+			m_context->state().m_count++;
+		} else if (token.is_start()) {
+			fprintf(m_context->m_file, "%s", m_context->pad());
+			if (m_context->m_level) {
+				if (m_context->state().m_array) {
+					//
+				} else {
+					fprintf(m_context->m_file, "%s: ", token.name().c_str());
+				}
+			}
+
+			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+			// maintain state
+			m_context->m_states.emplace_back(++m_context->m_level, token.is_array());
+		} else if (token.is_end()) {
+			// maintain state
+			m_context->m_states.pop_back();
+			if (!m_context->m_states.empty()) {
+				m_context->state().m_count++;
+			}
+			--m_context->m_level;
+			//
+			fprintf(m_context->m_file, "%s", m_context->pad());
+			//
+			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+		} else {
+			ERROR();
 		}
 	}
 };

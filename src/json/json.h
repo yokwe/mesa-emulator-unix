@@ -23,6 +23,34 @@ class token_t {
 		START_ARRAY,  END_ARRAY,
 	};
 
+	static std::string to_string(Type type) {
+		switch(type) {
+		case Type::STRING:
+			return "STRING";
+		case Type::BOOL:
+			return "BOOL";
+		case Type::SIGNED_INTEGER:
+			return "SIGNED_INTEGER";
+		case Type::UNSIGNED_INTEGER:
+			return "UNSIGNED_INTEGER";
+		case Type::FLOAT:
+			return "FLOAT";
+		case Type::NULL_TYPE:
+			return "NULL_TYPE";
+		case Type::START_OBJECT:
+			return "START_OBJECT";
+		case Type::END_OBJECT:
+			return "END_OBJECT";
+		case Type::START_ARRAY:
+			return "START_ARRAY";
+		case Type::END_ARRAY:
+			return "END_ARRAY";
+		default:
+			assert(false);
+			return "*ERROR*";
+		}
+	}
+
 	std::string m_path;
 	Type        m_type;
 	std::string m_name;
@@ -174,7 +202,7 @@ public:
 		case Type::SIGNED_INTEGER:
 		case Type::UNSIGNED_INTEGER:
 		case Type::FLOAT:
-			return "\"" + m_value + "\"";
+			return m_value;
 		case Type::NULL_TYPE:
 			return "null";
 		case Type::START_OBJECT:
@@ -189,6 +217,10 @@ public:
 			assert(false);
 			return "*ERROR*";
 		}
+	}
+
+	std::string type_string() const {
+		return to_string(m_type);
 	}
 };
 

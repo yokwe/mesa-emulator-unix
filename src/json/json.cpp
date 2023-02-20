@@ -190,6 +190,43 @@ void dump_item(const std::string& prefix, const token_t& token) {
 	}
 }
 
+std::string json_quote(const std::string& string) {
+	std::string ret;
+
+	for(size_t i = 0; i < string.size(); i++) {
+		char c = string[i];
+		switch(c) {
+		case '\"':
+			ret += R"(\")";
+			break;
+		case '\\':
+			ret += R"(\\)";
+			break;
+		case '\b':
+			ret += R"(\b)";
+			break;
+		case '\f':
+			ret += R"(\f)";
+			break;
+		case '\n':
+			ret += R"(\n)";
+			break;
+		case '\r':
+			ret += R"(\r)";
+			break;
+		case '\t':
+			ret += R"(\t)";
+			break;
+		default:
+			ret += c;
+			break;
+		}
+	}
+
+	return ret;
+}
+
+
 
 //
 // parse function

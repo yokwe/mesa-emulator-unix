@@ -361,6 +361,7 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 struct file_t {
 	// TODO copy constructor is called when std::make_shared is called in peek()
 	// TODO keep data in std::shared_ptr
+	// TODO When desturctor is called and std::shard_ptr::use_count() == 1, do post process and close file
 	std::shared_ptr<std::string> header;
 	int count = 0;
 	file_t(const std::string& path) {

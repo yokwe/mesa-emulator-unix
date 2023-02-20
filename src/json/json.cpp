@@ -107,6 +107,17 @@ double token_t::doubleValue() const {
 // utility function
 //
 std::string glob_to_regex(std::string glob) {
+	// special case **/abc/** => .*?/abc(?:/.*?)?
+	{
+		std::regex regex("\\*\\*/([^/]+)/\\*\\*");
+		std::smatch match;
+		if (std::regex_match(glob, match, regex)) {
+			return ".*?/" + match[1].str() + "(?:/.*?)?";
+		}
+	}
+
+	// *  => [^/]*?
+	// ** => .*?
 	std::string ret;
 	for(size_t i = 0; i < glob.size(); i++) {
 		char c = glob[i];

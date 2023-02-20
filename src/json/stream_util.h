@@ -273,7 +273,7 @@ struct peek_impl_t : public pipe_base_t<T, T> {
 
 	Consumer    m_consumer;
 
-	peek_impl_t(upstream_t* upstream, Consumer& consumer) : pipe_base_t<T, T>(upstream), m_consumer(}
+	peek_impl_t(upstream_t* upstream, Consumer& consumer) : pipe_base_t<T, T>(upstream), m_consumer(consumer) {}
 	~peek_impl_t() {}
 
 	void close() override {}

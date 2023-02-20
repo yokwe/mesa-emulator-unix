@@ -139,12 +139,6 @@ auto count(source_base_t<T>* upstream, const std::string& name) {
 	auto impl = std::make_shared<pipe_count_impl_t<T>>(upstream, name);
 	return pipe_t<T, T>(impl, __func__);
 }
-template <typename T>
-auto count(const std::string& name) {
-	auto impl = std::make_shared<pipe_count_impl_t<T>>(nullptr, name);
-	return pipe_t<T, T>(impl, __func__);
-}
-
 
 
 //
@@ -178,24 +172,6 @@ auto map(source_base_t<T>* upstream,  Function function) {
 	} else {
 		logger.error("function %s", demangle(typeid(Function).name()));
 		logger.error("T        %s", demangle(typeid(T).name()));
-		ERROR();
-	}
-}
-template <typename Function>
-auto map(Function function) {
-	// take type from Function
-	using trait = trait_function<Function>;
-	using T = typename std::tuple_element<0, typename trait::arg_type>::type;
-	using R = typename trait::ret_type;
-
-	if constexpr(trait::arity == 1) {
-		auto impl = std::make_shared<map_impl_t<T, R, Function>>(nullptr, function);
-		return pipe_t<T, R>(impl, __func__);
-	} else {
-		logger.error("function %s", __func__);
-		logger.error("arity %d", trait::arity);
-		logger.error("T     %s", demangle(typeid(T).name()));
-		logger.error("R     %s", demangle(typeid(R).name()));
 		ERROR();
 	}
 }
@@ -254,24 +230,6 @@ auto filter(source_base_t<T>* upstream, Predicate predicate) {
 		ERROR();
 	}
 }
-template <typename Predicate>
-auto filter(Predicate predicate) {
-	// take type from Function
-	using trait = trait_function<Predicate>;
-	using T = typename std::tuple_element<0, typename trait::arg_type>::type;
-	using R = typename trait::ret_type;
-
-	if constexpr(trait::arity == 1 && std::is_same_v<R, bool>) {
-		auto impl = std::make_shared<filter_impl_t<T, Predicate>>(nullptr, predicate);
-		return pipe_t<T, T>(impl, __func__);
-	} else {
-		logger.error("function %s", __func__);
-		logger.error("arity %d", trait::arity);
-		logger.error("T     %s", demangle(typeid(T).name()));
-		logger.error("R     %s", demangle(typeid(R).name()));
-		ERROR();
-	}
-}
 
 
 //
@@ -307,24 +265,6 @@ auto peek(source_base_t<T>* upstream, Consumer consumer) {
 //		logger.error("R        %s", demangle(typeid(T).name()));
 
 		auto impl = std::make_shared<peek_impl_t<T, Consumer>>(upstream, consumer);
-		return pipe_t<T, T>(impl, __func__);
-	} else {
-		logger.error("consumer %s", demangle(typeid(Consumer).name()));
-		logger.error("T        %s", demangle(typeid(T).name()));
-		ERROR();
-	}
-}
-template <typename T, typename Consumer>
-auto peek(Consumer consumer) {
-	if constexpr (std::is_invocable_v<Consumer, T>) {
-		using R = std::invoke_result_t<Consumer, T>;
-		static_assert(std::is_same_v<R, void>);
-
-//		logger.error("function %s", demangle(typeid(Function).name()));
-//		logger.error("T        %s", demangle(typeid(T).name()));
-//		logger.error("R        %s", demangle(typeid(T).name()));
-
-		auto impl = std::make_shared<peek_impl_t<T, Consumer>>(nullptr, consumer);
 		return pipe_t<T, T>(impl, __func__);
 	} else {
 		logger.error("consumer %s", demangle(typeid(Consumer).name()));

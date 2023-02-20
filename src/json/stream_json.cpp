@@ -8,6 +8,7 @@
 #include <deque>
 #include <regex>
 #include <iostream>
+#include <cstdio>
 
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("stream_json");
@@ -362,24 +363,96 @@ struct file_t {
 	// TODO copy constructor is called when std::make_shared is called in peek()
 	// TODO keep data in std::shared_ptr
 	// TODO When desturctor is called and std::shard_ptr::use_count() == 1, do post process and close file
-	std::shared_ptr<std::string> header;
+	struct context_t {
+		std::string   header;
+		std::FILE*    out;
+		char          buffer[1024 * 64];
+
+		context_t(const std::string& path) {
+			logger.info("context_t()");
+			header = std_sprintf("%p", this);
+			out = std::fopen(path.c_str(), "w");
+			{
+				out = std::fopen(path.c_str(), "w");
+				if (out == NULL) {
+					int errno_ = errno;
+					logger.error("fopen errno = %d", errno_);
+					assert(false);
+				}
+			}
+			{
+				int ret = setvbuf(out, buffer, _IOFBF, sizeof(buffer));
+				if (ret) {
+					int errno_ = errno;
+					logger.error("setvbuf errno = %d", ret, errno_);
+					assert(false);
+				}
+			}
+
+		}
+		~context_t() {
+			logger.info("~context_t()");
+		}
+	};
+	std::shared_ptr<context_t> m_context;
 	int count = 0;
 	file_t(const std::string& path) {
-		(void)path;
 		// start of stream
-		header = std::make_shared<std::string>(std_sprintf("%p", this));
+		m_context = std::make_shared<context_t>(path);
 
 		logger.info("file start %p", this);
 	}
 	~file_t() {
 		// end of stream
-		logger.info("file stop  %p", this);
+		logger.info("file stop  %p  %d", this, m_context.use_count());
+		if (m_context.use_count() == 1) {
+			logger.info("~file_t  ~context_");
+			{
+				int ret = std::fclose(m_context->out);
+				if (ret) {
+					logger.error("fclose errno = %d", errno);
+					assert(false);
+				}
+			}
+		}
 	}
 
 	void operator()(const token_t& token) {
-		(void)token;
-		std::string str = std_sprintf("data %s %p ", *header, this);
-	    if (count++ == 0) dump(str, token);
+		if (token.is_item()) {
+			std::string string = std_sprintf("%s %s\n", token.path(), token.value());
+			{
+				int ret = fputs(string.c_str(), m_context->out);
+				if (ret == EOF) {
+					logger.error("fputs errno = %d", errno);
+					assert(false);
+				}
+			}
+		} else if (token.is_start()) {
+			std::string string = std_sprintf("%s %s\n", token.path(), token.is_array() ? "ARRAY" : "OBJECT");
+			{
+				int ret = fputs(string.c_str(), m_context->out);
+				if (ret == EOF) {
+					logger.error("fputs errno = %d", errno);
+					assert(false);
+				}
+			}
+		} else if (token.is_end()) {
+			std::string string = std_sprintf("%s %s\n", token.path(), "END");
+			{
+				int ret = fputs(string.c_str(), m_context->out);
+				if (ret == EOF) {
+					logger.error("fputs errno = %d", errno);
+					assert(false);
+				}
+			}
+		} else {
+			ERROR();
+		}
+
+		if (count++ == 0) {
+			std::string str = std_sprintf("data %s %p ", m_context->header, this);
+		    dump(str, token);
+		}
 	}
 };
 pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path) {

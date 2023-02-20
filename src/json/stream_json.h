@@ -67,5 +67,10 @@ pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, Args&& .
 }
 
 //
+// file - save stream to file
+//
+pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path);
+
+//
 }
 }

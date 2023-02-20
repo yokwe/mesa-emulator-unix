@@ -7,6 +7,7 @@
 #include <mutex>
 #include <deque>
 #include <regex>
+#include <iostream>
 
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("stream_json");
@@ -351,6 +352,38 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
 	auto predicate = include_path_value_predicate_t(glob_path, glob_value);
 	return stream::filter(upstream, predicate);
+}
+
+
+//
+// pipe file
+//
+struct file_t {
+	// TODO copy constructor is called when std::make_shared is called in peek()
+	// TODO keep data in std::shared_ptr
+	std::shared_ptr<std::string> header;
+	int count = 0;
+	file_t(const std::string& path) {
+		(void)path;
+		// start of stream
+		header = std::make_shared<std::string>(std_sprintf("%p", this));
+
+		logger.info("file start %p", this);
+	}
+	~file_t() {
+		// end of stream
+		logger.info("file stop  %p", this);
+	}
+
+	void operator()(const token_t& token) {
+		(void)token;
+		std::string str = std_sprintf("data %s %p ", *header, this);
+	    if (count++ == 0) dump(str, token);
+	}
+};
+pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path) {
+	file_t consumer(path);
+	return stream::peek(upstream, consumer);
 }
 
 

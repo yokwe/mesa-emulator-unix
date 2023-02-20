@@ -47,6 +47,14 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
+#if 0
+	{
+		auto head   = stream::json::json(std::cin);
+		auto file   = stream::json::file(&head, "tmp/a.json");
+		auto peek   = stream::peek(&file, [](auto t){(void)t;});
+		stream::null(&peek);
+	}
+#endif
 
 #if 1
 	{
@@ -55,39 +63,28 @@ int main(int, char**) {
 //		while(head.has_next()) head.next();
 
 		auto countA  = stream::count(&head, "countA");
-
-//		auto map     = stream::map(&countA, [](auto t){return t;});
-		auto mapA    = stream::map([](json::token_t t){return t;});
-		mapA.upstream(&countA);
-
-		auto split   = stream::json::split(&mapA, "/inner/*");
+		auto map     = stream::map(&countA, [](auto t){return t;});
+		auto split   = stream::json::split(&map, "/inner/*");
 		auto countB  = stream::count(&split, "countB");
 		auto filterA = stream::json::include_path_value(&countB, "/kind", "EnumDecl");
 		auto countC  = stream::count(&filterA, "countC");
 		auto expand  = stream::json::expand(&countC);
 		auto countD  = stream::count(&expand, "countD");
 		auto filterB = stream::json::exclude_path(&countD,
-			{
 				"**/range/**",
 				"**/loc/**",
-				"**/includedFrom/**",
-				"**/range",
-				"**/loc",
-				"**/includedFrom"
-			}
+				"**/includedFrom/**"
 		);
 		auto countE  = stream::count(&filterB, "countE");
-
-//		auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
-		auto filterC = stream::filter([](json::token_t t){return t.name() != "id";});
-		filterC.upstream(&countE);
-
+		//auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
+		auto filterC = stream::json::exclude_path(&countE, "**/abc");
 
 		auto countF  = stream::count(&filterC, "countF");
+		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/ });
 
-		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/});
+		auto file    = stream::json::file(&dump, "tmp/a.json");
 
-		stream::null(&dump);
+		stream::null(&file);
 		//logger.info("stream::count() %d", stream::count(&dump));
 
 //		logger.info("tail %s %s", tail.name(), demangle(typeid(tail).name()));

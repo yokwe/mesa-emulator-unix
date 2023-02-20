@@ -14,6 +14,14 @@ namespace json {
 
 
 //
+// utility function
+//
+std::string glob_to_regex(std::string glob);
+
+std::string json_quote(const std::string& string);
+
+
+//
 // data
 //
 class token_t {
@@ -198,7 +206,7 @@ public:
 		case Type::BOOL:
 			return boolValue() ? "true" : "false";
 		case Type::STRING:
-			return "\"" + m_value + "\""; // FIXME need quote special character
+			return "\"" + json_quote(m_value) + "\""; // FIXME need quote special character
 		case Type::SIGNED_INTEGER:
 		case Type::UNSIGNED_INTEGER:
 		case Type::FLOAT:
@@ -229,6 +237,14 @@ typedef std::vector<const token_t> token_list_t;
 typedef std::vector<std::string>   string_list_t;
 
 
+// utility function
+void dump(const std::string& prefix, const token_list_t& list);
+void dump(const std::string& prefix, const token_t&      token);
+
+void dump_item(const std::string& prefix, const token_list_t& list);
+void dump_item(const std::string& prefix, const token_t&      token);
+
+
 class handler_t {
 public:
 	virtual ~handler_t() {}
@@ -240,19 +256,6 @@ public:
 	// data event
 	virtual void data(const token_t& token) = 0;
 };
-
-
-//
-// utility function
-//
-std::string glob_to_regex(std::string glob);
-
-void dump(const std::string& prefix, const token_list_t& list);
-void dump(const std::string& prefix, const token_t&      token);
-
-void dump_item(const std::string& prefix, const token_list_t& list);
-void dump_item(const std::string& prefix, const token_t&      token);
-
 
 
 //

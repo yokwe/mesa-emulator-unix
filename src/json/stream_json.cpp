@@ -236,10 +236,6 @@ pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std:
 	auto impl = std::make_shared<split_impl_t>(upstream, glob);
 	return pipe_t<token_t, token_list_t>(impl, __func__);
 }
-pipe_t<token_t, token_list_t> split(const std::string& glob) {
-	source_base_t<token_t>* upstream = nullptr;
-	return split(upstream, glob);
-}
 
 
 //
@@ -331,10 +327,6 @@ pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream) {
 	auto impl = std::make_shared<expand_impl_t>(upstream);
 	return pipe_t<token_list_t, token_t>(impl, __func__);
 }
-pipe_t<token_list_t, token_t> expand() {
-	source_base_t<token_list_t>* upstream = nullptr;
-	return expand(upstream);
-}
 
 
 //
@@ -359,52 +351,6 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
 	auto predicate = include_path_value_predicate_t(glob_path, glob_value);
 	return stream::filter(upstream, predicate);
-}
-pipe_t<token_list_t, token_list_t> include_path_value(
-	const std::string& glob_path, const std::string& glob_value) {
-	source_base_t<token_list_t>* upstream = nullptr;
-	return include_path_value(upstream, glob_path, glob_value);
-}
-
-
-//
-// pipe exlude_path
-//
-struct exclude_path_predicate_t {
-	std::regex m_regex;
-
-	exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
-
-	bool operator()(token_t token) const {
-		// negate regex_match for exclude
-		return !std::regex_match(token.path(), m_regex);
-	}
-};
-pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args) {
-	assert(args.size() != 0);
-
-	std::string string;
-	for(auto e: args) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-	std::regex regex = std::regex(string.substr(1));
-
-	auto predicate = exclude_path_predicate_t(regex);
-	return stream::filter(upstream, predicate);
-}
-pipe_t<token_t, token_t> exclude_path(std::initializer_list<std::string> args) {
-	source_base_t<token_t>* upstream = nullptr;
-	return exclude_path(upstream, args);
-}
-
-pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, std::string glob_path) {
-	std::regex regex = std::regex(glob_to_regex(glob_path));
-	auto predicate = exclude_path_predicate_t(regex);
-	return stream::filter(upstream, predicate);
-}
-pipe_t<token_t, token_t> exclude_path(std::string glob_path) {
-	source_base_t<token_t>* upstream = nullptr;
-	return exclude_path(upstream, glob_path);
 }
 
 

@@ -8,6 +8,7 @@
 #include <deque>
 #include <chrono>
 #include <mutex>
+#include <regex>
 
 
 #include "stream.h"
@@ -19,33 +20,51 @@ using token_t      = ::json::token_t;
 using token_list_t = ::json::token_list_t;
 
 
-// function
-source_t<token_t>
-	json(std::istream& in, int max_queue_size = 1000, int wait_time = 1);
+//
+// json
+//
+source_t<token_t> json(std::istream& in, int max_queue_size = 1000, int wait_time = 1);
 
-pipe_t<token_t, token_list_t>
-	split(source_base_t<token_t>* upstream, const std::string& glob);
-pipe_t<token_t, token_list_t>
-	split(const std::string& glob);
+//
+// split
+//
+pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob);
 
-pipe_t<token_list_t, token_t>
-	expand(source_base_t<token_list_t>* upstream);
-pipe_t<token_list_t, token_t>
-	expand();
+//
+// expand
+//
+pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream);
 
-pipe_t<token_list_t, token_list_t>
-	include_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
-pipe_t<token_list_t, token_list_t>
-	include_path_value(const std::string& glob_path, const std::string& glob_value);
+//
+//  include_path_value
+//
+pipe_t<token_list_t, token_list_t> include_path_value(
+	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
-pipe_t<token_t, token_t>
-	exclude_path(source_base_t<token_t>* upstream, std::initializer_list<std::string> args);
-pipe_t<token_t, token_t>
-	exclude_path(source_base_t<token_t>* upstream, std::string glob_path);
-pipe_t<token_t, token_t>
-	exclude_path(std::initializer_list<std::string> args);
-pipe_t<token_t, token_t>
-	exclude_path(std::string glob_path);
+//
+// exclude_path()
+//
+struct exclude_path_predicate_t {
+	std::regex m_regex;
+
+	exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
+
+	bool operator()(token_t token) const {
+		// negate regex_match for exclude
+		return !std::regex_match(token.path(), m_regex);
+	}
+};
+template<typename ... Args>
+pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+	}
+	std::regex regex = std::regex(string.substr(1));
+
+	auto predicate = exclude_path_predicate_t(regex);
+	return stream::filter(upstream, predicate);
+}
 
 //
 }

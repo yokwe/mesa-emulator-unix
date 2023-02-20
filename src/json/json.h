@@ -165,6 +165,31 @@ public:
 
 	double doubleValue() const;
 
+	std::string value_string() const {
+		switch(m_type) {
+		case Type::BOOL:
+			return boolValue() ? "true" : "false";
+		case Type::STRING:
+			return "\"" + m_value + "\""; // FIXME need quote special character
+		case Type::SIGNED_INTEGER:
+		case Type::UNSIGNED_INTEGER:
+		case Type::FLOAT:
+			return "\"" + m_value + "\"";
+		case Type::NULL_TYPE:
+			return "null";
+		case Type::START_OBJECT:
+			return "{";
+		case Type::END_OBJECT:
+			return "}";
+		case Type::START_ARRAY:
+			return "[";
+		case Type::END_ARRAY:
+			return "]";
+		default:
+			assert(false);
+			return "*ERROR*";
+		}
+	}
 };
 
 

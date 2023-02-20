@@ -47,16 +47,16 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-#if 0
+#if 1
 	{
 		auto head   = stream::json::json(std::cin);
 		auto file   = stream::json::file(&head, "tmp/a.json");
-		auto peek   = stream::peek(&file, [](auto t){(void)t;});
-		stream::null(&peek);
+//		auto peek   = stream::peek(&file, [](auto t){(void)t;});
+		stream::null(&file);
 	}
 #endif
 
-#if 1
+#if 0
 	{
 		auto head   = stream::json::json(std::cin);
 //		logger.info("head %s", demangle(typeid(head).name()));

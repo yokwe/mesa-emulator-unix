@@ -403,9 +403,7 @@ struct file_t {
 			}
 
 		}
-		~context_t() {
-			logger.info("~context_t()");
-		}
+		~context_t() {}
 
 		state_t& state() {
 			assert(!m_states.empty());
@@ -421,14 +419,10 @@ struct file_t {
 	file_t(const std::string& path) {
 		// start of stream
 		m_context = std::make_shared<context_t>(path);
-
-		logger.info("file start %p", this);
 	}
 	~file_t() {
 		// end of stream
-		logger.info("file stop  %p  %d", this, m_context.use_count());
 		if (m_context.use_count() == 1) {
-			logger.info("~file_t  ~context_");
 			{
 				int ret = std::fclose(m_context->m_file);
 				if (ret) {
@@ -440,9 +434,9 @@ struct file_t {
 	}
 
 	void operator()(const token_t& token) {
-		// FIXME detect end of array or object and output correct comma for token
 		if (m_context->m_level) {
-			fprintf(m_context->m_file, (m_context->state().m_count == 0) ? "\n" : ",\n");
+			fprintf(m_context->m_file, "%s",
+				(m_context->state().m_count == 0 || token.is_end()) ? "\n" : ",\n");
 		}
 
 		if (token.is_item()) {
@@ -451,7 +445,7 @@ struct file_t {
 				if (m_context->state().m_array) {
 					//
 				} else {
-					fprintf(m_context->m_file, "%s: ", token.name().c_str());
+					fprintf(m_context->m_file, "\"%s\": ", token.name().c_str());
 				}
 			}
 
@@ -464,7 +458,7 @@ struct file_t {
 				if (m_context->state().m_array) {
 					//
 				} else {
-					fprintf(m_context->m_file, "%s: ", token.name().c_str());
+					fprintf(m_context->m_file, "\"%s\": ", token.name().c_str());
 				}
 			}
 

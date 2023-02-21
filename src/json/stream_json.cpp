@@ -359,19 +359,25 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 //
 // pipe file
 //
+#define check_error(cond) { \
+	if (!(cond)) { \
+		int errno_ = errno; \
+		logger.error("errno = %d %s", errno_, strerror(errno_)); \
+		assert(false); \
+	} \
+}
+
 struct file_t {
 	struct state_t {
 		int         m_level;
-		bool        m_array;
+		bool        m_object;
 		int         m_count = 0;
 		std::string m_pad;
 
-		state_t(int level, bool array) {
-			m_level = level;
-			m_array = array;
-			for(int i = 0; i < m_level; i++) {
-				m_pad.append("    ");
-			}
+		state_t(int level, bool object) {
+			m_level  = level;
+			m_object = object;
+			m_pad    = std::string(m_level * 4, ' ');
 		}
 	};
 
@@ -383,27 +389,22 @@ struct file_t {
 		std::vector<state_t> m_states;
 
 		context_t(const std::string& path) {
-			logger.info("context_t()");
+			logger.info("context_t %s", path);
 			m_file = std::fopen(path.c_str(), "w");
-			{
-				m_file = std::fopen(path.c_str(), "w");
-				if (m_file == NULL) {
-					int errno_ = errno;
-					logger.error("fopen errno = %d", errno_);
-					assert(false);
-				}
-			}
+			check_error(m_file != NULL)
+
 			{
 				int ret = setvbuf(m_file, m_buffer, _IOFBF, sizeof(m_buffer));
-				if (ret) {
-					int errno_ = errno;
-					logger.error("setvbuf errno = %d", ret, errno_);
-					assert(false);
-				}
+				check_error(ret == 0);
 			}
 
 		}
-		~context_t() {}
+		~context_t() {
+			{
+				int ret = std::fclose(m_file);
+				check_error(ret == 0);
+			}
+		}
 
 		state_t& state() {
 			assert(!m_states.empty());
@@ -414,57 +415,55 @@ struct file_t {
 			return m_states.empty() ? "" : m_states.back().m_pad.c_str();
 		}
 	};
+
 	std::shared_ptr<context_t> m_context;
-	int count = 0;
+
 	file_t(const std::string& path) {
-		// start of stream
 		m_context = std::make_shared<context_t>(path);
 	}
-	~file_t() {
-		// end of stream
-		if (m_context.use_count() == 1) {
-			{
-				int ret = std::fclose(m_context->m_file);
-				if (ret) {
-					logger.error("fclose errno = %d", errno);
-					assert(false);
-				}
-			}
-		}
+	~file_t() {}
+
+	void puts(const char* string) {
+		int ret = fputs(string, m_context->m_file);
+		check_error(ret != EOF);
+	}
+	void puts(const std::string& string) {
+		puts(string.c_str());
+	}
+	void puts_name(const token_t& token) {
+		std::string string;
+		string.append("\"").append(token.name()).append("\": ");
+		puts(string);
+	}
+	void puts_pad() {
+		puts(m_context->pad());
 	}
 
 	void operator()(const token_t& token) {
 		if (m_context->m_level) {
-			fprintf(m_context->m_file, "%s",
-				(m_context->state().m_count == 0 || token.is_end()) ? "\n" : ",\n");
+			puts((m_context->state().m_count == 0 || token.is_end()) ? "\n" : ",\n");
 		}
 
 		if (token.is_item()) {
-			fprintf(m_context->m_file, "%s", m_context->pad());
-			if (m_context->m_level) {
-				if (m_context->state().m_array) {
-					//
-				} else {
-					fprintf(m_context->m_file, "\"%s\": ", token.name().c_str());
-				}
+			puts_pad();
+
+			if (m_context->m_level && m_context->state().m_object) {
+				puts_name(token);
 			}
 
-			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+			puts(token.value_string());
 			// maintain state
 			m_context->state().m_count++;
 		} else if (token.is_start()) {
-			fprintf(m_context->m_file, "%s", m_context->pad());
-			if (m_context->m_level) {
-				if (m_context->state().m_array) {
-					//
-				} else {
-					fprintf(m_context->m_file, "\"%s\": ", token.name().c_str());
-				}
+			puts_pad();
+
+			if (m_context->m_level && m_context->state().m_object) {
+				puts_name(token);
 			}
 
-			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+			puts(token.value_string());
 			// maintain state
-			m_context->m_states.emplace_back(++m_context->m_level, token.is_array());
+			m_context->m_states.emplace_back(++m_context->m_level, token.is_object());
 		} else if (token.is_end()) {
 			// maintain state
 			m_context->m_states.pop_back();
@@ -473,9 +472,8 @@ struct file_t {
 			}
 			--m_context->m_level;
 			//
-			fprintf(m_context->m_file, "%s", m_context->pad());
-			//
-			fprintf(m_context->m_file, "%s", token.value_string().c_str());
+			puts_pad();
+			puts(token.value_string());
 		} else {
 			ERROR();
 		}

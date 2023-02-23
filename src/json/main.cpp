@@ -81,18 +81,20 @@ int main(int, char**) {
 		auto filterB = stream::json::exclude_path(&countD,
 				"**/range/**",
 				"**/loc/**",
-				"**/includedFrom/**"
+				"**/includedFrom/**",
+				"**/definitionData/**",
+				"**/referencedDecl/**"
 		);
 		auto countE  = stream::count(&filterB, "countE");
 		//auto filterC = stream::filter(&countE, [](auto t){return t.name() != "id";});
-		auto filterC = stream::json::exclude_path(&countE, "**/abc");
+		//auto filterC = stream::json::exclude_path(&countE, "**/abc");
 
-		auto countF  = stream::count(&filterC, "countF");
-		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/ });
+		auto dump    = stream::peek(&countE, [](auto token){(void)token; /*json::dump("PEEK ", token);*/ });
 
-		auto filterD = stream::json::include_path(&dump, "**/kind", "**/name", "**/qualType", "**/value");
+		auto filterD = stream::json::include_path(&dump, "**/kind", "**/name", "**/qualType", "**/value", "**/opcode");
+		auto countF  = stream::count(&filterD, "countF");
 
-		auto file    = stream::json::file(&filterD, "tmp/a.json");
+		auto file    = stream::json::file(&countF, "tmp/a.json");
 
 		stream::null(&file);
 		//logger.info("stream::count() %d", stream::count(&dump));

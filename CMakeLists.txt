@@ -29,6 +29,7 @@ message(STATUS "QT_NAME    ${QT_NAME}")
 # default c++ language level
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_definitions("__cplusplus=201703L")
 
 # default compiler options
 set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")

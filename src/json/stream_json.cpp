@@ -357,6 +357,33 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 
 
 //
+// include_loc_file
+//
+struct include_loc_file_predicate_t {
+	std::string m_path;
+	std::string m_value;
+	bool        m_include = false;
+
+	include_loc_file_predicate_t(const std::string& path, const std::string& value) : m_path(path), m_value(value) {}
+
+	bool operator()(token_list_t list) {
+	    for(const auto& e: list) {
+	    	if (e.path() == m_path) {
+	    		logger.info("include_loc_file_predicate_t %s", e.value());
+	    		m_include = e.value() == m_value;
+	    		break;
+	    	}
+	    }
+	    return m_include;
+	}
+};
+pipe_t<token_list_t, token_list_t> include_loc_file(source_base_t<token_list_t>* upstream, const std::string& path) {
+	auto predicate = include_loc_file_predicate_t("/loc/file", path);
+	return stream::filter(upstream, predicate);
+}
+
+
+//
 // pipe file
 //
 #define check_error(cond) { \

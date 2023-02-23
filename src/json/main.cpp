@@ -39,6 +39,13 @@ static const Logger logger = Logger::getLogger("main");
 #include "stream_util.h"
 #include "stream_json.h"
 
+/*
+# macmini2020.lan
+clang -Xclang -ast-dump=json -fsyntax-only -I /opt/local/include -I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include -I /opt/local/libexec/qt6/include -I /opt/local/libexec/qt6/include/QtCore -std=c++17 src/main/main.cpp | LOG_CONFIG=tmp/cmake/macmini2020.lan/run/debug.properties tmp/cmake/macmini2020.lan/build/main/main
+
+# dev-clang
+clang -Xclang -ast-dump=json -fsyntax-only -I /usr/local/include -I /usr/local/include/qt6 -I /usr/local/include/qt6/QtCore -std=c++17 -fPIC src/main/main.cpp | LOG_CONFIG=tmp/cmake/dev-clang/run/debug.properties tmp/cmake/dev-clang/build/main/main
+*/
 
 int main(int, char**) {
 	logger.info("START");
@@ -47,7 +54,7 @@ int main(int, char**) {
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
 
-#if 1
+#if 0
 	{
 		auto head   = stream::json::json(std::cin);
 		auto file   = stream::json::file(&head, "tmp/a.json");
@@ -56,7 +63,7 @@ int main(int, char**) {
 	}
 #endif
 
-#if 0
+#if 1
 	{
 		auto head   = stream::json::json(std::cin);
 //		logger.info("head %s", demangle(typeid(head).name()));
@@ -66,7 +73,8 @@ int main(int, char**) {
 		auto map     = stream::map(&countA, [](auto t){return t;});
 		auto split   = stream::json::split(&map, "/inner/*");
 		auto countB  = stream::count(&split, "countB");
-		auto filterA = stream::json::include_path_value(&countB, "/kind", "EnumDecl");
+		auto filterA = stream::json::include_loc_file(&countB, "src/main/a.cpp");
+//		auto filterA = stream::json::include_path_value(&countB, "/kind", "EnumDecl");
 		auto countC  = stream::count(&filterA, "countC");
 		auto expand  = stream::json::expand(&countC);
 		auto countD  = stream::count(&expand, "countD");
@@ -82,7 +90,9 @@ int main(int, char**) {
 		auto countF  = stream::count(&filterC, "countF");
 		auto dump    = stream::peek(&countF, [](auto token){(void)token; /*json::dump("PEEK ", token);*/ });
 
-		auto file    = stream::json::file(&dump, "tmp/a.json");
+		auto filterD = stream::json::include_path(&dump, "**/kind", "**/name", "**/qualType", "**/value");
+
+		auto file    = stream::json::file(&filterD, "tmp/a.json");
 
 		stream::null(&file);
 		//logger.info("stream::count() %d", stream::count(&dump));

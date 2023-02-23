@@ -42,6 +42,11 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
 //
+// include_loc_file
+//
+pipe_t<token_list_t, token_list_t> include_loc_file(source_base_t<token_list_t>* upstream, const std::string& path);
+
+//
 // exclude_path()
 //
 struct exclude_path_predicate_t {
@@ -65,6 +70,32 @@ pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, Args&& .
 	auto predicate = exclude_path_predicate_t(regex);
 	return stream::filter(upstream, predicate);
 }
+
+
+//
+// include_path
+//
+struct include_path_predicate_t {
+	std::regex m_regex;
+
+	include_path_predicate_t(std::regex regex) : m_regex(regex) {}
+
+	bool operator()(token_t token) const {
+		return token.is_item() ? std::regex_match(token.path(), m_regex) : true;
+	}
+};
+template<typename ... Args>
+pipe_t<token_t, token_t> include_path(source_base_t<token_t>* upstream, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+	}
+	std::regex regex = std::regex(string.substr(1));
+
+	auto predicate = include_path_predicate_t(regex);
+	return stream::filter(upstream, predicate);
+}
+
 
 //
 // file - save stream to file

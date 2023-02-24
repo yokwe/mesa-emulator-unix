@@ -161,35 +161,6 @@ std::string glob_to_regex(std::string glob) {
 }
 
 
-void dump(const std::string& prefix, const token_list_t& list) {
-	logger.info("==== dump ====");
-	for(const auto& e: list) {
-		dump(prefix, e);
-	}
-}
-void dump(const std::string& prefix, const token_t& token) {
-	if (token.is_item()) {
-		logger.info("%s\"%s\" %s", prefix, token.path(), token.value());
-	} else if (token.is_start()) {
-		logger.info("%s\"%s\" %s", prefix, token.path(), token.is_array() ? "ARRAY" : "OBJECT");
-	} else if (token.is_end()) {
-		logger.info("%s\"%s\" %s", prefix, token.path(), "END");
-	} else {
-		ERROR();
-	}
-}
-void dump_item(const std::string& prefix, const token_list_t& list) {
-	logger.info("==== dump_item ====");
-	for(const auto& e: list) {
-		dump_item(prefix, e);
-	}
-}
-void dump_item(const std::string& prefix, const token_t& token) {
-	if (token.is_item()) {
-		logger.info("%s\"%s\" %s", prefix, token.path(), token.value());
-	}
-}
-
 std::string json_quote(const std::string& string) {
 	std::string ret;
 

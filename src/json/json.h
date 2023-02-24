@@ -235,14 +235,6 @@ public:
 typedef std::vector<token_t> token_list_t;
 
 
-// utility function
-void dump(const std::string& prefix, const token_list_t& list);
-void dump(const std::string& prefix, const token_t&      token);
-
-void dump_item(const std::string& prefix, const token_list_t& list);
-void dump_item(const std::string& prefix, const token_t&      token);
-
-
 class handler_t {
 public:
 	virtual ~handler_t() {}

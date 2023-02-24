@@ -70,7 +70,6 @@ class token_t {
 	token_t(const std::string& path_, Type type_, const std::string& name_, const std::string& value_, int64_t int64_value_, double double_value_) :
 		m_path(path_), m_type(type_), m_name(name_), m_value(value_), m_int64_value(int64_value_), m_double_value(double_value_) {}
 
-
 public:
 	token_t() :
 		m_path("*NULL*"),
@@ -234,7 +233,6 @@ public:
 
 
 typedef std::vector<token_t> token_list_t;
-typedef std::vector<std::string>   string_list_t;
 
 
 // utility function

@@ -16,9 +16,9 @@ template <typename T>
 struct source_base_t {
 	virtual ~source_base_t() {}
 
-	virtual void close()    = 0;
-	virtual bool has_next() = 0;
-	virtual T    next()     = 0;
+	virtual void        close()    = 0;
+	virtual bool        has_next() = 0;
+	virtual const T&    next()     = 0;
 };
 
 
@@ -71,7 +71,7 @@ public:
 			return m_impl->has_next();
 		}
 	}
-	T next() override {
+	const T& next() override {
 		if (has_next()) {
 			return m_impl->next();
 		} else {
@@ -117,7 +117,7 @@ public:
 			return m_impl->has_next();
 		}
 	}
-	R next() override {
+	const R& next() override {
 		if (has_next()) {
 			return m_impl->next();
 		} else {

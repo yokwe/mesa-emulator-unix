@@ -27,7 +27,7 @@ struct vector_impl_t : source_base_t<T> {
 	bool has_next() override {
 		return 0 <= m_pos && m_pos < m_data.size();
 	}
-	T next() override {
+	const T& next() override {
 		return m_data[m_pos++];
 	}
 
@@ -127,10 +127,9 @@ struct pipe_count_impl_t : public pipe_base_t<T, T> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	T next() override {
+	const T& next() override {
 		m_count++;
-		T newValue = this->m_upstream->next();
-		return newValue;
+		return this->m_upstream->next();
 	}
 };
 template <typename T>
@@ -156,9 +155,8 @@ struct map_impl_t : public pipe_base_t<T, R> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	R next() override {
-		T newValue = this->m_upstream->next();
-		return m_function(newValue);
+	const R& next() override {
+		return m_function(this->m_upstream->next());
 	}
 };
 template <typename T, typename Function>
@@ -213,7 +211,7 @@ struct filter_impl_t : public pipe_base_t<T, T> {
 		}
 		return m_has_value;
 	}
-	T next() override {
+	const T& next() override {
 		if (has_next()) {
 			m_has_value = false;
 			return m_value;
@@ -270,7 +268,8 @@ template <typename T, typename Consumer>
 struct peek_impl_t : public pipe_base_t<T, T> {
 	using upstream_t  = source_base_t<T>;
 
-	Consumer    m_consumer;
+	Consumer m_consumer;
+	T        m_value;
 
 	peek_impl_t(upstream_t* upstream, Consumer& consumer) : pipe_base_t<T, T>(upstream), m_consumer(consumer) {}
 	~peek_impl_t() {}
@@ -279,10 +278,10 @@ struct peek_impl_t : public pipe_base_t<T, T> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	T next() override {
-		T newValue = this->m_upstream->next();
-		m_consumer(newValue);
-		return newValue;
+	const T& next() override {
+		m_value = this->m_upstream->next();
+		m_consumer(m_value);
+		return m_value;
 	}
 };
 template <typename T, typename Consumer>

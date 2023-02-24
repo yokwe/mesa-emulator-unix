@@ -41,6 +41,7 @@ struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 	int     m_count_next    = 0;
 
 	std::deque<token_t>     m_queue;
+	token_t                 m_value;
 
 	std::mutex              m_mutex;
 	std::condition_variable m_fill_queue;
@@ -112,16 +113,16 @@ struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 			return true;
 		}
 	}
-	token_t next() override {
+	const token_t& next() override {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		if (m_queue.empty()) {
 			logger.error("call next while m_queue.empty() is error");
 			ERROR();
 		} else {
 			m_count_next++;
-			auto ret = m_queue.back();
+			m_value = m_queue.back();
 			m_queue.pop_back();
-			return ret;
+			return m_value;
 		}
 	}
 
@@ -222,7 +223,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 		}
 		return false;
 	}
-	token_list_t next() override {
+	const token_list_t& next() override {
 		if (m_has_value) {
 			m_has_value = false;
 			return m_value;
@@ -313,7 +314,7 @@ struct expand_impl_t : public pipe_base_t<token_list_t, token_t> {
 			return false;
 		}
 	}
-	token_t next() {
+	const token_t& next() {
 		if (m_has_value) {
 			m_has_value = false;
 			return m_value;

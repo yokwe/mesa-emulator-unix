@@ -49,46 +49,27 @@ auto vector(std::vector<T>& data) {
 //
 // sink  sum
 //
-template <typename T, typename R>
-struct sum_impl_t : public sink_t<T, R>::base_t {
-	R m_sum = 0;
-
-	void close() override {}
-	void accept(const T& newValue) override {
-		m_sum += newValue;
-	}
-	R result() override {
-		return m_sum;
-	}
-};
-template<typename T, typename R=T>
+template <typename T, typename R=T>
 auto sum(source_base_t<T>* upstream) {
-	auto impl = std::make_shared<sum_impl_t<T, R>>();
-	sink_t<T, R> sink(impl, __func__, upstream);
-	return sink.process();
+	R m_sum = 0;
+	while(upstream->has_next()) {
+		m_sum += upstream->next();
+	}
+	return m_sum;
 }
 
 
 //
 // sink  count
 //
-template <typename T, typename R>
-struct sink_count_impl_t : public sink_t<T, R>::base_t {
-	R m_count = 0;
-
-	void close() override {}
-	void accept(const T&) override {
-		m_count++;
-	}
-	R result() override {
-		return m_count;
-	}
-};
 template <typename T, typename R=int>
 auto count(source_base_t<T>* upstream) {
-	auto impl = std::make_shared<sink_count_impl_t<T, R>>();
-	sink_t<T, R> sink(impl, __func__, upstream);
-	return sink.process();
+	R m_count = 0;
+	while(upstream->has_next()) {
+		upstream->next();
+		m_count++;
+	}
+	return m_count;
 }
 
 

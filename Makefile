@@ -9,6 +9,7 @@
 #   LOG_CONFIG  path of logger configuration file
 
 
+
 .PHONY: all clean cmake build distclean distclean-qmake fix-permission
 
 all:
@@ -124,7 +125,23 @@ run-main: clear-log
 	/usr/bin/time ${BUILD_DIR}/build/main/main <tmp/a
 	
 run-json: clear-log
-	/usr/bin/time ${BUILD_DIR}/build/json/json <tmp/a
+	@if [ ${HOST_OS} = "Darwin" ]; then \
+		clang -Xclang -ast-dump=json -fsyntax-only \
+			-I /opt/local/include \
+			-I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
+			-I /opt/local/libexec/qt6/include \
+			-I /opt/local/libexec/qt6/include/QtCore \
+			-std=c++17 src/json/dummy.cpp | \
+			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/../mesa/Pilot.h tmp/pilot.json; \
+	fi
+	@if [ ${HOST_OS} = "FreeBSD" ]; then \
+		clang -Xclang -ast-dump=json -fsyntax-only \
+			-I /usr/local/include \
+			-I /usr/local/include/qt6 \
+			-I /usr/local/include/qt6/QtCore \
+			-std=c++17 src/json/dummy.cpp | \
+			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/../mesa/Pilot.h tmp/pilot.json; \
+	fi
 	
 run-dumpSymbol: clear-log
 	${BUILD_DIR}/build/dumpSymbol/dumpSymbol tmp/dumpSymbol/*.bcd

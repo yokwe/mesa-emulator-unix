@@ -8,6 +8,9 @@ SHELL != which bash
 HOSTNAME != uname -n
 .export-env HOSTNAME
 
+HOST_OS != uname -s
+.export-env HOST_OS
+
 BUILD_DIR := tmp/cmake/${HOSTNAME}
 .export-env BUILD_DIR
 

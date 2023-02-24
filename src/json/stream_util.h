@@ -95,17 +95,11 @@ auto count(source_base_t<T>* upstream) {
 //
 // sink null
 //
-template <typename T, typename R>
-struct sink_null_impl_t : public sink_t<T, R>::base_t {
-	void close()    override {}
-	void accept(const T&) override {}
-	R    result()   override {}
-};
 template <typename T>
-auto null(source_base_t<T>* upstream) {
-	auto impl = std::make_shared<sink_null_impl_t<T, void>>();
-	sink_t<T, void> sink(impl, __func__, upstream);
-	sink.process();
+void null(source_base_t<T>* upstream) {
+	while(upstream->has_next()) {
+		upstream->next();
+	}
 }
 
 

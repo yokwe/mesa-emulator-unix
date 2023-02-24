@@ -233,7 +233,7 @@ public:
 };
 
 
-typedef std::vector<const token_t> token_list_t;
+typedef std::vector<token_t> token_list_t;
 typedef std::vector<std::string>   string_list_t;
 
 

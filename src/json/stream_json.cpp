@@ -342,7 +342,7 @@ struct include_path_value_predicate_t {
 		regex_path (glob_to_regex(glob_path)),
 		regex_value(glob_to_regex(glob_value)) {}
 
-	bool operator()(token_list_t list) const {
+	bool operator()(const token_list_t& list) const {
 	    for(const auto& e: list) {
 	    	if (std::regex_match(e.path(), regex_path) && std::regex_match(e.value(), regex_value)) return true;
 	    }
@@ -366,7 +366,7 @@ struct include_loc_file_predicate_t {
 
 	include_loc_file_predicate_t(const std::string& path, const std::string& value) : m_path(path), m_value(value) {}
 
-	bool operator()(token_list_t list) {
+	bool operator()(const token_list_t& list) {
 	    for(const auto& e: list) {
 	    	if (e.path() == m_path) {
 	    		logger.info("include_loc_file_predicate_t %s", e.value());

@@ -143,9 +143,9 @@ public:
 	struct base_t {
 		virtual ~base_t() {}
 
-		virtual void close()      = 0;
-		virtual void accept(T& t) = 0;
-		virtual R    result()     = 0;
+		virtual void close()            = 0;
+		virtual void accept(const T& t) = 0;
+		virtual R    result()           = 0;
 	};
 	using impl_t = std::shared_ptr<base_t>;
 
@@ -181,7 +181,7 @@ private:
 		return m_impl->result();
 	}
 
-	void accept(T& newValue) {
+	void accept(const T& newValue) {
 		m_impl->accept(newValue);
 	}
 };

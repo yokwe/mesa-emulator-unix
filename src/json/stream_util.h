@@ -54,7 +54,7 @@ struct sum_impl_t : public sink_t<T, R>::base_t {
 	R m_sum = 0;
 
 	void close() override {}
-	void accept(T& newValue) override {
+	void accept(const T& newValue) override {
 		m_sum += newValue;
 	}
 	R result() override {
@@ -77,8 +77,7 @@ struct sink_count_impl_t : public sink_t<T, R>::base_t {
 	R m_count = 0;
 
 	void close() override {}
-	void accept(T& newValue) override {
-		(void)newValue;
+	void accept(const T&) override {
 		m_count++;
 	}
 	R result() override {
@@ -99,7 +98,7 @@ auto count(source_base_t<T>* upstream) {
 template <typename T, typename R>
 struct sink_null_impl_t : public sink_t<T, R>::base_t {
 	void close()    override {}
-	void accept(T&) override {}
+	void accept(const T&) override {}
 	R    result()   override {}
 };
 template <typename T>

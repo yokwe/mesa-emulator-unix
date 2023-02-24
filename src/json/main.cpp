@@ -65,6 +65,8 @@ int main(int argc, char** argv) {
 
 #if 0
 	{
+		(void)argc;
+		(void)argv;
 		auto head = stream::json::json(std::cin);
 		stream::null(&head);
 	}
@@ -78,28 +80,26 @@ int main(int argc, char** argv) {
 		logger.info("file_path   %s", file_path);
 		logger.info("output_path %s", output_path);
 
-		auto head   = stream::json::json(std::cin);
-
-		auto countA  = stream::count(&head, "countA");
-		auto map     = stream::map(&countA, [](auto t){return t;});
-		auto split   = stream::json::split(&map, "/inner/*");
-		auto countB  = stream::count(&split, "countB");
-		auto filterA = stream::json::include_loc_file(&countB, file_path);
-		auto countC  = stream::count(&filterA, "countC");
-		auto expand  = stream::json::expand(&countC);
-		auto countD  = stream::count(&expand, "countD");
-		auto filterB = stream::json::exclude_path(&countD,
-				"**/range/**",
-				"**/loc/**",
-				"**/includedFrom/**",
-				"**/definitionData/**",
-				"**/referencedDecl/**"
+		auto head    = stream::json::json(std::cin);
+		auto split   = stream::json::split(&head, "/inner/*");
+		auto filterA = stream::json::include_loc_file(&split, file_path);
+		auto expand  = stream::json::expand(&filterA);
+		auto filterB = stream::json::exclude_path(&expand,
+			"**/range/**",
+			"**/loc/**",
+			"**/includedFrom/**",
+			"**/definitionData/**",
+			"**/referencedDecl/**"
 		);
-		auto countE  = stream::count(&filterB, "countE");
-		auto filterD = stream::json::include_path(&countE, "**/kind", "**/name", "**/qualType", "**/value", "**/opcode");
-		auto countF  = stream::count(&filterD, "countF");
-
-		auto file    = stream::json::file(&countF, output_path);
+		auto filterC = stream::json::include_path(&filterB,
+			"**/kind",
+			"**/name",
+			"**/qualType",
+			"**/value",
+			"**/opcode"
+		);
+		auto count   = stream::count(&filterC, "count");
+		auto file    = stream::json::file(&count, output_path);
 
 		stream::null(&file);
 	}

@@ -59,9 +59,9 @@ clang -Xclang -ast-dump=json -fsyntax-only
 int main(int argc, char** argv) {
 	logger.info("START");
 
-	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
+//	setSignalHandler(SIGSEGV);
+//	setSignalHandler(SIGILL);
+//	setSignalHandler(SIGABRT);
 
 #if 0
 	{
@@ -73,6 +73,33 @@ int main(int argc, char** argv) {
 #endif
 
 #if 1
+	{
+		assert(argc == 3);
+		const char* file_path   = argv[1];
+		const char* output_path = argv[2];
+		logger.info("file_path   %s", file_path);
+		logger.info("output_path %s", output_path);
+
+		auto head    = stream::json::json(std::cin);
+		auto countA  = stream::count(&head, "countA");
+		auto split   = stream::json::split(&countA, "/inner/*");
+//		auto filterA = stream::json::include_loc_file(&split, file_path);
+		auto countB  = stream::count(&split, "countB");
+		auto peek    = stream::peek(&countB, [](const json::token_list_t& list){
+			logger.info("==== list ====");
+			json::dump("AA ", list);
+			json::element_t element;
+			json::list_to_element(list, element);
+			logger.info("==== element ====");
+			json::dump("BB ", element);
+			logger.info("====");
+		});
+
+		stream::null(&peek);
+	}
+#endif
+
+#if 0
 	{
 		assert(argc == 3);
 		const char* file_path   = argv[1];

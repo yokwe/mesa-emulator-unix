@@ -1,5 +1,11 @@
 //
-// a.cpp
+// dummy.cpp
 //
 
-#include "../mesa/Pilot.h"
+enum e1 {
+	A, B, C,
+};
+
+enum class e2 {
+	A, B, C,
+};

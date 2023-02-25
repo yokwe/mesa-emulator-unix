@@ -132,7 +132,7 @@ run-json: clear-log
 			-I /opt/local/libexec/qt6/include \
 			-I /opt/local/libexec/qt6/include/QtCore \
 			-std=c++17 src/json/dummy.cpp | \
-			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/../mesa/Pilot.h tmp/pilot.json; \
+			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/dummy.cpp tmp/dummy.json; \
 	fi
 	@if [ ${HOST_OS} = "FreeBSD" ]; then \
 		clang -Xclang -ast-dump=json -fsyntax-only \
@@ -140,7 +140,7 @@ run-json: clear-log
 			-I /usr/local/include/qt6 \
 			-I /usr/local/include/qt6/QtCore \
 			-std=c++17 src/json/dummy.cpp | \
-			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/../mesa/Pilot.h tmp/pilot.json; \
+			/usr/bin/time ${BUILD_DIR}/build/json/json src/json/dummy.cpp tmp/dummy.json; \
 	fi
 	
 run-dumpSymbol: clear-log

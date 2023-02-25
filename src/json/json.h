@@ -31,31 +31,43 @@ class token_t {
 		START_ARRAY,  END_ARRAY,
 	};
 
-	static std::string to_string(Type type) {
+	static const std::string& to_string(Type type) {
+		static std::string type_string          ("STRING");
+		static std::string type_bool            ("BOOL");
+		static std::string type_signed_integer  ("SIGNED_INTEGER");
+		static std::string type_unsigned_integer("UNSIGNED_INTEGER");
+		static std::string type_float           ("FLOAT");
+		static std::string type_null            ("NULL_TYPE");
+		static std::string type_start_object    ("START_OBJECT");
+		static std::string type_end_object      ("END_OBJECT");
+		static std::string type_start_array     ("START_ARRAY");
+		static std::string type_end_array       ("END_ARRAY");
+		static std::string type_error           ("*ERROR*");
+
 		switch(type) {
 		case Type::STRING:
-			return "STRING";
+			return type_string;
 		case Type::BOOL:
-			return "BOOL";
+			return type_bool;
 		case Type::SIGNED_INTEGER:
-			return "SIGNED_INTEGER";
+			return type_signed_integer;
 		case Type::UNSIGNED_INTEGER:
-			return "UNSIGNED_INTEGER";
+			return type_unsigned_integer;
 		case Type::FLOAT:
-			return "FLOAT";
+			return type_float;
 		case Type::NULL_TYPE:
-			return "NULL_TYPE";
+			return type_null;
 		case Type::START_OBJECT:
-			return "START_OBJECT";
+			return type_start_object;
 		case Type::END_OBJECT:
-			return "END_OBJECT";
+			return type_end_object;
 		case Type::START_ARRAY:
-			return "START_ARRAY";
+			return type_start_array;
 		case Type::END_ARRAY:
-			return "END_ARRAY";
+			return type_end_array;
 		default:
 			assert(false);
-			return "*ERROR*";
+			return type_error;
 		}
 	}
 
@@ -169,6 +181,18 @@ public:
 	bool is_object() const {
 		return m_type == Type::START_OBJECT || m_type == Type::END_OBJECT;
 	}
+	bool is_start_object() const {
+		return m_type == Type::START_OBJECT;
+	}
+	bool is_start_array() const {
+		return m_type == Type::START_ARRAY;
+	}
+	bool is_end_object() const {
+		return m_type == Type::END_OBJECT;
+	}
+	bool is_end_array() const {
+		return m_type == Type::END_ARRAY;
+	}
 	// return contents
 	const std::string& path() const {
 		return m_path;
@@ -226,7 +250,7 @@ public:
 		}
 	}
 
-	std::string type_string() const {
+	const std::string& type_string() const {
 		return to_string(m_type);
 	}
 };
@@ -234,6 +258,66 @@ public:
 
 typedef std::vector<token_t> token_list_t;
 
+
+// element can be item, object or array
+struct element_t;
+struct element_t {
+	token_t                          m_token;
+	std::map<std::string, element_t> m_object;
+	std::vector<element_t>           m_array;
+
+	element_t(const token_t& token) : m_token(token) {}
+	element_t() {}
+	~element_t() {}
+
+	const std::string& name() const {
+		return m_token.name();
+	}
+	const std::string& path() const {
+		return m_token.path();
+	}
+	const std::string value_string() const {
+		return m_token.value_string();
+	}
+	const std::string& type_string() const {
+		return m_token.type_string();
+	}
+	bool is_item() const {
+		return m_token.is_item();
+	}
+	bool is_start_object() const {
+		return m_token.is_start_object();
+	}
+	bool is_end_object() const {
+		return m_token.is_end_object();
+	}
+	bool is_start_array() const {
+		return m_token.is_start_array();
+	}
+	bool is_end_array() const {
+		return m_token.is_end_array();
+	}
+
+	void add_child(const element_t& child) {
+		if (is_item()) {
+			assert(false);
+		} else if (is_start_object()) {
+			m_object.emplace(child.name(), child);
+		} else if (is_start_array()) {
+			m_array.emplace_back(child);
+		} else {
+			assert(false);
+		}
+	}
+};
+
+void list_to_element(const token_list_t& list, element_t& root);
+
+void element_to_list(const element_t& element, token_list_t& list);
+
+
+void dump(const std::string& prefix, const element_t&    element);
+void dump(const std::string& prefix, const token_list_t& list);
 
 class handler_t {
 public:

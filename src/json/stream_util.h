@@ -27,7 +27,7 @@ struct vector_impl_t : source_base_t<T> {
 	bool has_next() override {
 		return 0 <= m_pos && m_pos < m_data.size();
 	}
-	const T& next() override {
+	T next() override {
 		return m_data[m_pos++];
 	}
 
@@ -102,7 +102,7 @@ struct pipe_count_impl_t : public pipe_base_t<T, T> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	const T& next() override {
+	T next() override {
 		m_count++;
 		return this->m_upstream->next();
 	}
@@ -130,10 +130,11 @@ struct map_impl_t : public pipe_base_t<T, R> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	const R& next() override {
+	R next() override {
 		return m_function(this->m_upstream->next());
 	}
 };
+// NOTE function is reference
 template <typename T, typename Function>
 auto map(source_base_t<T>* upstream,  Function& function) {
 	if constexpr (std::is_invocable_v<Function, T>) {
@@ -147,6 +148,7 @@ auto map(source_base_t<T>* upstream,  Function& function) {
 		ERROR();
 	}
 }
+// NOTE function is rvalue reference
 template <typename T, typename Function>
 auto map(source_base_t<T>* upstream,  Function&& function) {
 	if constexpr (std::is_invocable_v<Function, T>) {
@@ -186,7 +188,7 @@ struct filter_impl_t : public pipe_base_t<T, T> {
 		}
 		return m_has_value;
 	}
-	const T& next() override {
+	T next() override {
 		if (has_next()) {
 			m_has_value = false;
 			return m_value;
@@ -197,6 +199,7 @@ struct filter_impl_t : public pipe_base_t<T, T> {
 		}
 	}
 };
+// NOTE predicate is reference
 template <typename T, typename Predicate>
 auto filter(source_base_t<T>* upstream, Predicate& predicate) {
 	if constexpr (std::is_invocable_v<Predicate, T>) {
@@ -215,6 +218,7 @@ auto filter(source_base_t<T>* upstream, Predicate& predicate) {
 		ERROR();
 	}
 }
+// NOTE predicate is rvalue reference
 template <typename T, typename Predicate>
 auto filter(source_base_t<T>* upstream, Predicate&& predicate) {
 	if constexpr (std::is_invocable_v<Predicate, T>) {
@@ -253,12 +257,13 @@ struct peek_impl_t : public pipe_base_t<T, T> {
 	bool has_next() override {
 		return this->m_upstream->has_next();
 	}
-	const T& next() override {
+	T next() override {
 		m_value = this->m_upstream->next();
 		m_consumer(m_value);
 		return m_value;
 	}
 };
+// NOTE consumer is reference
 template <typename T, typename Consumer>
 auto peek(source_base_t<T>* upstream, Consumer& consumer) {
 	if constexpr (std::is_invocable_v<Consumer, T>) {
@@ -277,6 +282,7 @@ auto peek(source_base_t<T>* upstream, Consumer& consumer) {
 		ERROR();
 	}
 }
+// NOTE consumer is rvalue reference
 template <typename T, typename Consumer>
 auto peek(source_base_t<T>* upstream, Consumer&& consumer) {
 	if constexpr (std::is_invocable_v<Consumer, T>) {

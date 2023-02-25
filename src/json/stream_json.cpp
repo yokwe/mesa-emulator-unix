@@ -113,7 +113,7 @@ struct json_impl_t : public ::json::handler_t, public source_base_t<token_t> {
 			return true;
 		}
 	}
-	const token_t& next() override {
+	token_t next() override {
 		std::unique_lock<std::mutex> lock(m_mutex);
 		if (m_queue.empty()) {
 			logger.error("call next while m_queue.empty() is error");
@@ -223,7 +223,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 		}
 		return false;
 	}
-	const token_list_t& next() override {
+	token_list_t next() override {
 		if (m_has_value) {
 			m_has_value = false;
 			return m_value;
@@ -314,7 +314,7 @@ struct expand_impl_t : public pipe_base_t<token_list_t, token_t> {
 			return false;
 		}
 	}
-	const token_t& next() {
+	token_t next() {
 		if (m_has_value) {
 			m_has_value = false;
 			return m_value;

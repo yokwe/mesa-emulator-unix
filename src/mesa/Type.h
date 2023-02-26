@@ -36,8 +36,6 @@
 #ifndef TYPE_H__
 #define TYPE_H__
 
-#include "../util/Util.h"
-
 #include "MesaBasic.h"
 #include "Constant.h"
 

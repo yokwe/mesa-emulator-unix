@@ -109,9 +109,10 @@ int main(int argc, char** argv) {
 
 		auto head    = stream::json::json(std::cin);
 		auto countA  = stream::count(&head, "countA");
-		auto split   = stream::json::split(&countA, "/inner/*");
+		auto saveA   = stream::json::file(&countA, "tmp/dummy-a.json");
+		auto split   = stream::json::split(&saveA, "/inner/*");
 		auto countB  = stream::count(&split, "countB");
-		auto filterA = stream::json::include_loc_file(&countB, file_path);
+		auto filterA = stream::json::include_file(&countB, file_path);
 		auto filterB = stream::json::exclude_path(&filterA,
 			"**/range/**",
 			"**/loc/**",

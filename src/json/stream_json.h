@@ -44,7 +44,7 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 //
 // include_loc_file
 //
-pipe_t<token_list_t, token_list_t> include_loc_file(source_base_t<token_list_t>* upstream, const std::string& path);
+pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* upstream, const std::string& glob_path);
 
 //
 // exclude_path()

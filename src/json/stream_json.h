@@ -42,7 +42,7 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
 //
-// include_loc_file
+// include_file
 //
 pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* upstream, const std::string& glob_path);
 
@@ -79,6 +79,7 @@ struct exclude_path_function_t {
 	exclude_path_function_t(std::regex regex) : m_regex(regex) {}
 
 	token_list_t operator()(const token_list_t& list) {
+		m_result.clear();
 		for(const token_t& token: list) {
 			if (std::regex_match(token.path(), m_regex)) {
 				// token path match condition => exclude
@@ -134,6 +135,7 @@ struct include_path_function_t {
 	include_path_function_t(std::regex regex) : m_regex(regex) {}
 
 	token_list_t operator()(const token_list_t& list) {
+		m_result.clear();
 		for(const token_t& token: list) {
 			if (token.is_item()) {
 				if (std::regex_match(token.path(), m_regex)) {

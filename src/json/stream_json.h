@@ -21,19 +21,39 @@ using token_list_t = ::json::token_list_t;
 
 
 //
-// json
+// json - std::cin to token_t stream
 //
 source_t<token_t> json(std::istream& in, int max_queue_size = 1000, int wait_time = 1);
 
+
 //
-// split
+// split - convert token_t stream to token_list_t stream by glob path
 //
 pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob);
 
+
 //
-// expand
+// expand - convert token_list_t stream to token_t stream
 //
 pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream);
+
+
+//
+// file - save token_list_t stream as file
+//
+pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path);
+
+
+//
+// For token_list_t
+//
+
+
+//
+// include_file - include only token_list_t from glob_path
+//
+pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* upstream, const std::string& glob_path);
+
 
 //
 //  include_path_value
@@ -42,36 +62,8 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
 //
-// include_file
+// exclude_path - exclude token_t that match args (glob)
 //
-pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* upstream, const std::string& glob_path);
-
-//
-// exclude_path()
-//
-// For token_t
-struct exclude_path_predicate_t {
-	std::regex m_regex;
-
-	exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
-
-	bool operator()(const token_t& token) const {
-		// negate regex_match for exclude
-		return !std::regex_match(token.path(), m_regex);
-	}
-};
-template<typename ... Args>
-pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
-	}
-	std::regex regex = std::regex(string.substr(1));
-
-	auto predicate = exclude_path_predicate_t(regex);
-	return stream::filter(upstream, predicate);
-}
-// For token_list_t
 struct exclude_path_function_t {
 	std::regex   m_regex;
 	token_list_t m_result;
@@ -104,30 +96,8 @@ pipe_t<token_list_t, token_list_t> exclude_path(source_base_t<token_list_t>* ups
 
 
 //
-// include_path
+// include_path - include token_t that match args (glob)
 //
-// For token_t
-struct include_path_predicate_t {
-	std::regex m_regex;
-
-	include_path_predicate_t(std::regex regex) : m_regex(regex) {}
-
-	bool operator()(const token_t& token) const {
-		return token.is_item() ? std::regex_match(token.path(), m_regex) : true;
-	}
-};
-template<typename ... Args>
-pipe_t<token_t, token_t> include_path(source_base_t<token_t>* upstream, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
-	}
-	std::regex regex = std::regex(string.substr(1));
-
-	auto predicate = include_path_predicate_t(regex);
-	return stream::filter(upstream, predicate);
-}
-// For token_list_t
 struct include_path_function_t {
 	std::regex   m_regex;
 	token_list_t m_result;
@@ -165,9 +135,60 @@ pipe_t<token_list_t, token_list_t> include_path(source_base_t<token_list_t>* ups
 
 
 //
-// file - save stream to file
+// For token_t
 //
-pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path);
+
+
+//
+// exclude_path - exclude token_t that path match args (glob)
+//
+struct exclude_path_predicate_t {
+	std::regex m_regex;
+
+	exclude_path_predicate_t(std::regex regex) : m_regex(regex) {}
+
+	bool operator()(const token_t& token) const {
+		// negate regex_match for exclude
+		return !std::regex_match(token.path(), m_regex);
+	}
+};
+template<typename ... Args>
+pipe_t<token_t, token_t> exclude_path(source_base_t<token_t>* upstream, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+	}
+	std::regex regex = std::regex(string.substr(1));
+
+	auto predicate = exclude_path_predicate_t(regex);
+	return stream::filter(upstream, predicate);
+}
+
+
+//
+// include_path - include token_t that path match args (glob)
+//
+struct include_path_predicate_t {
+	std::regex m_regex;
+
+	include_path_predicate_t(std::regex regex) : m_regex(regex) {}
+
+	bool operator()(const token_t& token) const {
+		return token.is_item() ? std::regex_match(token.path(), m_regex) : true;
+	}
+};
+template<typename ... Args>
+pipe_t<token_t, token_t> include_path(source_base_t<token_t>* upstream, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+	}
+	std::regex regex = std::regex(string.substr(1));
+
+	auto predicate = include_path_predicate_t(regex);
+	return stream::filter(upstream, predicate);
+}
+
 
 //
 }

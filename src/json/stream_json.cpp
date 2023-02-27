@@ -358,7 +358,7 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 
 
 //
-// include_loc_file
+// include_file
 //
 struct include_file_predicate_t {
 	std::string m_path;

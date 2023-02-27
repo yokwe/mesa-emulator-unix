@@ -56,9 +56,22 @@ pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* ups
 
 
 //
+// include_soruce - include /log/file match glob_path
+//
+pipe_t<token_list_t, token_list_t> include_source(source_base_t<token_list_t>* upstream, const std::string& glob_path);
+pipe_t<token_list_t, token_list_t> exclude_builtin_source(source_base_t<token_list_t>* upstream);
+
+
+//
 //  include_path_value
 //
 pipe_t<token_list_t, token_list_t> include_path_value(
+	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
+
+//
+//  exclude_path_value
+//
+pipe_t<token_list_t, token_list_t> exclude_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
 
 //

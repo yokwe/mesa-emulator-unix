@@ -175,8 +175,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	bool         m_has_value = false;
 	token_list_t m_value;
 
-	split_impl_t(upstream_t* upstream, std::string glob) : pipe_base_t<token_t, token_list_t>(upstream),
-		m_regex(std::regex(::json::glob_to_regex(glob))) {}
+	split_impl_t(upstream_t* upstream, std::regex regex) : pipe_base_t<token_t, token_list_t>(upstream), m_regex(regex) {}
 
 	void close() override {}
 	bool has_next() override {
@@ -236,7 +235,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	}
 };
 pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob) {
-	auto impl = std::make_shared<split_impl_t>(upstream, glob);
+	auto impl = std::make_shared<split_impl_t>(upstream, std::regex(glob_to_regex(glob)));
 	return pipe_t<token_t, token_list_t>(impl, __func__);
 }
 
@@ -336,23 +335,22 @@ pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream) {
 // pipe include_path_value
 //
 struct include_path_value_predicate_t {
-	std::regex regex_path;
-	std::regex regex_value;
+	std::regex m_regex_path;
+	std::regex m_regex_value;
 
-	include_path_value_predicate_t(const std::string& glob_path, const std::string& glob_value) :
-		regex_path (glob_to_regex(glob_path)),
-		regex_value(glob_to_regex(glob_value)) {}
+	include_path_value_predicate_t(std::regex regex_path, std::regex regex_value) :
+		m_regex_path (regex_path), m_regex_value(regex_value) {}
 
 	bool operator()(const token_list_t& list) const {
 	    for(const auto& e: list) {
-	    	if (std::regex_match(e.path(), regex_path) && std::regex_match(e.value(), regex_value)) return true;
+	    	if (std::regex_match(e.path(), m_regex_path) && std::regex_match(e.value(), m_regex_value)) return true;
 	    }
 	    return false;
 	}
 };
 pipe_t<token_list_t, token_list_t> include_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
-	auto predicate = include_path_value_predicate_t(glob_path, glob_value);
+	auto predicate = include_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(glob_to_regex(glob_value)));
 	return stream::filter(upstream, predicate);
 }
 
@@ -361,53 +359,22 @@ pipe_t<token_list_t, token_list_t> include_path_value(
 // pipe exclude_path_value
 //
 struct exclude_path_value_predicate_t {
-	std::regex regex_path;
-	std::regex regex_value;
+	std::regex m_regex_path;
+	std::regex m_regex_value;
 
-	exclude_path_value_predicate_t(const std::string& glob_path, const std::string& glob_value) :
-		regex_path (glob_to_regex(glob_path)),
-		regex_value(glob_to_regex(glob_value)) {}
+	exclude_path_value_predicate_t(const std::regex& regex_path, const std::regex& regex_value) :
+		m_regex_path (regex_path), m_regex_value(regex_value) {}
 
 	bool operator()(const token_list_t& list) {
 	    for(const auto& token: list) {
-	    	if (std::regex_match(token.path(), regex_path) && std::regex_match(token.value(), regex_value)) return false;
+	    	if (std::regex_match(token.path(), m_regex_path) && std::regex_match(token.value(), m_regex_value)) return false;
 	    }
 	    return true;
 	}
 };
 pipe_t<token_list_t, token_list_t> exclude_path_value(
 	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
-	logger.info("##  %s  %s  %s", __func__, glob_path, glob_value);
-	auto predicate = exclude_path_value_predicate_t(glob_path, glob_value);
-	return stream::filter(upstream, predicate);
-}
-
-
-//
-// include_file
-//
-struct include_file_predicate_t {
-	static constexpr const char* target_path  = "/loc/file";
-
-	std::regex  m_regex_value;
-	bool        m_include = false;
-
-	include_file_predicate_t(const std::string& glob_value) :
-		m_regex_value(glob_to_regex(glob_value)) {}
-
-	bool operator()(const token_list_t& list) {
-	    for(const auto& e: list) {
-	    	if (e.path() == target_path) {
-	    		logger.info("include_file_predicate %s", e.value());
-	    		m_include = std::regex_match(e.value(), m_regex_value);
-	    		break;
-	    	}
-	    }
-	    return m_include;
-	}
-};
-pipe_t<token_list_t, token_list_t> include_file(source_base_t<token_list_t>* upstream, const std::string& glob_path) {
-	auto predicate = include_file_predicate_t(glob_path);
+	auto predicate = exclude_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(glob_to_regex(glob_value)));
 	return stream::filter(upstream, predicate);
 }
 
@@ -462,7 +429,6 @@ struct include_source_function_t {
 	}
 };
 pipe_t<token_list_t, token_list_t> include_source(source_base_t<token_list_t>* upstream, const std::string& glob_path) {
-	std::string regex_path = glob_to_regex(glob_path);
 	auto function = include_source_function_t(std::regex(glob_to_regex(glob_path)));
 	return stream::map(upstream, function);
 }

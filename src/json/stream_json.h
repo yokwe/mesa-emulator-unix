@@ -47,6 +47,7 @@ pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::strin
 
 //
 // include_source - include only source files that match glob_path
+// NOTE Source of data is output of "clang --asd-dump=json"
 //
 pipe_t<token_list_t, token_list_t> include_source(source_base_t<token_list_t>* upstream, const std::string& glob_path);
 pipe_t<token_list_t, token_list_t> exclude_builtin_source(source_base_t<token_list_t>* upstream);

@@ -112,13 +112,18 @@ int main(int argc, char** argv) {
 			"**/value",
 			"**/opcode"
 		);
-		auto countF  = stream::count(&filterC, "countF");
+		auto countF  = stream::count(&filterD, "countF");
 
 		auto filterE = stream::json::include_token_list_by_path_value(&countF, "/kind", "EnumDecl");
 		auto countG  = stream::count(&filterE, "countG");
 
-		auto expand  = stream::json::expand(&countG);
+		auto filterF = stream::json::exclude_ojbect_by_path_value(&countG, "**/kind",
+			"*Expr",
+			"*Literal"
+			);
+		auto countH  = stream::count(&filterF, "countH");
 
+		auto expand  = stream::json::expand(&countH);
 		auto countZ  = stream::count(&expand, "countZ");
 		auto saveZ   = stream::json::file(&countZ, "tmp/save-z.json");
 		stream::null(&saveZ);

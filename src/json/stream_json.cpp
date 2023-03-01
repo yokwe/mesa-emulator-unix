@@ -17,9 +17,6 @@ static const Logger logger = Logger::getLogger("stream_json");
 #include "stream_json.h"
 
 
-constexpr auto glob_to_regex = json::glob_to_regex;
-
-
 namespace stream {
 namespace json {
 
@@ -328,54 +325,6 @@ struct expand_impl_t : public pipe_base_t<token_list_t, token_t> {
 pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream) {
 	auto impl = std::make_shared<expand_impl_t>(upstream);
 	return pipe_t<token_list_t, token_t>(impl, __func__);
-}
-
-
-//
-// pipe include_token_list_by_path_value
-//
-struct include_token_list_by_path_value_predicate_t {
-	std::regex m_regex_path;
-	std::regex m_regex_value;
-
-	include_token_list_by_path_value_predicate_t(std::regex regex_path, std::regex regex_value) :
-		m_regex_path (regex_path), m_regex_value(regex_value) {}
-
-	bool operator()(const token_list_t& list) const {
-	    for(const auto& e: list) {
-	    	if (std::regex_match(e.path(), m_regex_path) && std::regex_match(e.value(), m_regex_value)) return true;
-	    }
-	    return false;
-	}
-};
-pipe_t<token_list_t, token_list_t> include_token_list_by_path_value(
-	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
-	auto predicate = include_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(glob_to_regex(glob_value)));
-	return stream::filter(upstream, predicate);
-}
-
-
-//
-// pipe exclude_token_list_by_path_value
-//
-struct exclude_token_list_by_path_value_predicate_t {
-	std::regex m_regex_path;
-	std::regex m_regex_value;
-
-	exclude_token_list_by_path_value_predicate_t(const std::regex& regex_path, const std::regex& regex_value) :
-		m_regex_path (regex_path), m_regex_value(regex_value) {}
-
-	bool operator()(const token_list_t& list) {
-	    for(const auto& token: list) {
-	    	if (std::regex_match(token.path(), m_regex_path) && std::regex_match(token.value(), m_regex_value)) return false;
-	    }
-	    return true;
-	}
-};
-pipe_t<token_list_t, token_list_t> exclude_token_list_by_path_value(
-	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value) {
-	auto predicate = exclude_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(glob_to_regex(glob_value)));
-	return stream::filter(upstream, predicate);
 }
 
 

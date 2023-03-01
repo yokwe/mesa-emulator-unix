@@ -19,6 +19,8 @@ namespace json {
 using token_t      = ::json::token_t;
 using token_list_t = ::json::token_list_t;
 
+constexpr auto glob_to_regex = ::json::glob_to_regex;
+
 
 //
 // json - std::cin to token_t stream
@@ -99,7 +101,7 @@ template<typename ... Args>
 pipe_t<token_list_t, token_list_t> include_clang_source(source_base_t<token_list_t>* upstream, Args&& ... args) {
 	std::string string;
 	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+		string.append("|(?:" + glob_to_regex(e) + ")");
 	}
 
 	auto function = include_clang_source_function_t(std::regex(string.substr(1)));
@@ -111,15 +113,57 @@ pipe_t<token_list_t, token_list_t> exclude_clang_builtin_source(source_base_t<to
 //
 //  include_token_list_by_path_value
 //
-pipe_t<token_list_t, token_list_t> include_token_list_by_path_value(
-	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
+struct include_token_list_by_path_value_predicate_t {
+	std::regex m_regex_path;
+	std::regex m_regex_value;
+
+	include_token_list_by_path_value_predicate_t(std::regex regex_path, std::regex regex_value) :
+		m_regex_path (regex_path), m_regex_value(regex_value) {}
+
+	bool operator()(const token_list_t& list) const {
+	    for(const auto& e: list) {
+	    	if (std::regex_match(e.path(), m_regex_path) && std::regex_match(e.value(), m_regex_value)) return true;
+	    }
+	    return false;
+	}
+};
+template<typename ... Args>
+pipe_t<token_list_t, token_list_t> include_token_list_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + glob_to_regex(e) + ")");
+	}
+	auto predicate = include_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(string.substr(1)));
+	return stream::filter(upstream, predicate);
+}
 
 
 //
 //  exclude_token_list_by_path_value
 //
-pipe_t<token_list_t, token_list_t> exclude_token_list_by_path_value(
-	source_base_t<token_list_t>* upstream, const std::string& glob_path, const std::string& glob_value);
+struct exclude_token_list_by_path_value_predicate_t {
+	std::regex m_regex_path;
+	std::regex m_regex_value;
+
+	exclude_token_list_by_path_value_predicate_t(const std::regex& regex_path, const std::regex& regex_value) :
+		m_regex_path (regex_path), m_regex_value(regex_value) {}
+
+	bool operator()(const token_list_t& list) {
+	    for(const auto& token: list) {
+	    	if (std::regex_match(token.path(), m_regex_path) && std::regex_match(token.value(), m_regex_value)) return false;
+	    }
+	    return true;
+	}
+};
+template<typename ... Args>
+pipe_t<token_list_t, token_list_t> exclude_token_list_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + glob_to_regex(e) + ")");
+	}
+	auto predicate = exclude_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(string.substr(1)));
+	return stream::filter(upstream, predicate);
+}
 
 
 //
@@ -147,7 +191,7 @@ template<typename ... Args>
 pipe_t<token_list_t, token_list_t> exclude_token_by_path(source_base_t<token_list_t>* upstream, Args&& ... args) {
 	std::string string;
 	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+		string.append("|(?:" + glob_to_regex(e) + ")");
 	}
 
 	auto function = exclude_token_by_path_function_t(std::regex(string.substr(1)));
@@ -185,7 +229,7 @@ template<typename ... Args>
 pipe_t<token_list_t, token_list_t> include_token_by_path(source_base_t<token_list_t>* upstream, Args&& ... args) {
 	std::string string;
 	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + ::json::glob_to_regex(e) + ")");
+		string.append("|(?:" + glob_to_regex(e) + ")");
 	}
 
 	auto function = include_token_by_path_function_t(std::regex(string.substr(1)));

@@ -112,8 +112,12 @@ int main(int argc, char** argv) {
 			"**/value",
 			"**/opcode"
 		);
+		auto countF  = stream::count(&filterC, "countF");
 
-		auto expand  = stream::json::expand(&filterD);
+		auto filterE = stream::json::include_token_list_by_path_value(&countF, "/kind", "EnumDecl");
+		auto countG  = stream::count(&filterE, "countG");
+
+		auto expand  = stream::json::expand(&countG);
 
 		auto countZ  = stream::count(&expand, "countZ");
 		auto saveZ   = stream::json::file(&countZ, "tmp/save-z.json");

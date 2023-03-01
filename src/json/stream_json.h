@@ -5,10 +5,8 @@
 #pragma once
 
 #include <string>
-#include <deque>
-#include <chrono>
-#include <mutex>
 #include <regex>
+#include <istream>
 
 
 #include "stream.h"

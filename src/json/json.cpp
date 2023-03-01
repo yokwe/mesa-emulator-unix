@@ -5,7 +5,6 @@
 #include <nlohmann/json.hpp>
 
 #include <regex>
-#include <cstdint>
 
 
 #include "../util/Util.h"
@@ -25,13 +24,13 @@ bool token_t::boolValue() const {
 	return m_int64_value != 0;
 }
 template<>
-int64_t token_t::intValue() const {
+std::int64_t token_t::intValue() const {
 	// check overflow
 	if (m_type == Type::UNSIGNED_INTEGER) {
 		// valid range is [0 .. INT64_MAX]
-		uint64_t value     = (uint64_t)m_int64_value;
-		uint64_t min_value = 0;
-		uint64_t max_value = INT64_MAX;
+		std::uint64_t value     = (uint64_t)m_int64_value;
+		std::uint64_t min_value = 0;
+		std::uint64_t max_value = INT64_MAX;
 		if (!(min_value <= value && value <= max_value)) ERROR();
 	} else if (m_type == Type::SIGNED_INTEGER) {
 		// SAME TYPE
@@ -41,18 +40,18 @@ int64_t token_t::intValue() const {
 	return m_int64_value;
 }
 template<>
-int32_t token_t::intValue() const {
+std::int32_t token_t::intValue() const {
 	// check overflow
 	if (m_type == Type::UNSIGNED_INTEGER) {
 		// valid range is [0 .. INT32_MAX]
-		uint64_t value     = (uint64_t)m_int64_value;
-		uint64_t max_value = INT32_MAX;
+		std::uint64_t value     = (uint64_t)m_int64_value;
+		std::uint64_t max_value = INT32_MAX;
 		if (!(value <= max_value)) ERROR();
 	} else if (m_type == Type::SIGNED_INTEGER) {
 		// valid range is [INT32_MIN .. INT32_MAX]
-		int64_t value     = m_int64_value;
-		int64_t min_value = INT32_MIN;
-		int64_t max_value = INT32_MAX;
+		std::int64_t value     = m_int64_value;
+		std::int64_t min_value = INT32_MIN;
+		std::int64_t max_value = INT32_MAX;
 		if (!(min_value <= value && value <= max_value)) ERROR();
 	} else {
 		ERROR();
@@ -60,15 +59,15 @@ int32_t token_t::intValue() const {
 	return m_int64_value;
 }
 template<>
-uint64_t token_t::intValue() const {
+std::uint64_t token_t::intValue() const {
 	// check overflow
 	if (m_type == Type::UNSIGNED_INTEGER) {
 		// SAME TYPE
 	} else if (m_type == Type::SIGNED_INTEGER) {
 		// valid range is [0 .. INT64_MAX]
-		int64_t value     = m_int64_value;
-		int64_t min_value = 0;
-		int64_t max_value = INT64_MAX;
+		std::int64_t value     = m_int64_value;
+		std::int64_t min_value = 0;
+		std::int64_t max_value = INT64_MAX;
 		if (!(min_value <= value && value <= max_value)) ERROR();
 	} else {
 		ERROR();
@@ -76,18 +75,18 @@ uint64_t token_t::intValue() const {
 	return (uint64_t)m_int64_value;
 }
 template<>
-uint32_t token_t::intValue() const {
+std::uint32_t token_t::intValue() const {
 	// check overflow
 	if (m_type == Type::UNSIGNED_INTEGER) {
 		// valid range is [0 .. UINT32_MAX]
-		uint64_t value     = (uint64_t)m_int64_value;
-		uint64_t max_value = UINT32_MAX;
+		std::uint64_t value     = (uint64_t)m_int64_value;
+		std::uint64_t max_value = UINT32_MAX;
 		if (!(value <= max_value)) ERROR();
 	} else if (m_type == Type::SIGNED_INTEGER) {
 		// valid range is [0 .. INT32_MAX]
-		int64_t value     = m_int64_value;
-		int64_t min_value = 0;
-		int64_t max_value = INT32_MAX;
+		std::int64_t value     = m_int64_value;
+		std::int64_t min_value = 0;
+		std::int64_t max_value = INT32_MAX;
 		if (!(min_value <= value && value <= max_value)) ERROR();
 	} else {
 		ERROR();
@@ -101,195 +100,11 @@ double token_t::doubleValue() const {
 }
 
 
-
-//
-// element function
-//
-void build_array_element (element_t& parent, token_list_t::const_iterator& i, token_list_t::const_iterator end);
-void build_object_element(element_t& parent, token_list_t::const_iterator& i, token_list_t::const_iterator end);
-
-void list_to_element(const token_list_t& list, element_t& root) {
-	assert(1 <= list.size());
-
-	token_list_t::const_iterator i = list.cbegin();
-
-	root = element_t(*i++);
-
-	if (root.is_item()) {
-		assert(i == list.cend());
-	} else if (root.is_start_object()) {
-		build_object_element(root, i, list.cend());
-	} else if (root.is_start_array()) {
-		build_array_element(root, i, list.cend());
-	} else {
-		assert(false);
-	}
-}
-void build_object_element(element_t& parent, token_list_t::const_iterator& i, token_list_t::const_iterator end) {
-	for(;;) {
-		if (i == end) break;
-		element_t child(*i++);
-		if (child.is_item()) {
-			parent.add_child(child);
-		} else if (child.is_start_object()) {
-			build_object_element(child, i, end);
-			parent.add_child(child);
-		} else if (child.is_start_array()) {
-			build_array_element(child, i, end);
-			parent.add_child(child);
-		} else if (child.is_end_object()) {
-			parent.add_child(child);
-			break;
-		} else if (child.is_end_array()){
-			assert(false);
-		} else {
-			assert(false);
-		}
-	}
-}
-void build_array_element(element_t& parent, token_list_t::const_iterator& i, token_list_t::const_iterator end) {
-	for(;;) {
-		if (i == end) break;
-		element_t child(*i++);
-		if (child.is_item()) {
-			parent.add_child(child);
-		} else if (child.is_start_object()) {
-			build_object_element(child, i, end);
-			parent.add_child(child);
-		} else if (child.is_start_array()) {
-			build_array_element(child, i, end);
-			parent.add_child(child);
-		} else if (child.is_end_object()) {
-			assert(false);
-		} else if (child.is_end_array()){
-			parent.add_child(child);
-			break;
-		} else {
-			assert(false);
-		}
-	}
-}
-
-void dump_array(const std::string& prefix, const element_t& element);
-void dump_item(const std::string& prefix, const token_t& token) {
-	logger.info("%s%s %s", prefix, token.path(), token.value());
-}
-void dump_item(const std::string& prefix, const element_t& element) {
-	dump_item(prefix, element.m_token);
-}
-void dump_object(const std::string& prefix, const element_t& element) {
-	std::string new_prefix = prefix + "    ";
-	for(const auto& [key, child] : element.m_object) {
-		if (child.is_item()) {
-			logger.info("%s%s: %s", new_prefix, key, child.value_string());
-		} else if (child.is_start_object()) {
-			logger.info("%s%s: {", new_prefix, key);
-			dump_object(new_prefix, child);
-			logger.info("%s}", new_prefix);
-		} else if (child.is_start_array()) {
-			logger.info("%s%s: [", new_prefix, key);
-			dump_array(new_prefix, child);
-			logger.info("%s]", new_prefix);
-		} else if (child.is_end_object()) {
-			//
-		} else {
-			logger.error("token %s %s %s", child.path(), child.type_string(), child.value_string());
-			assert(false);
-		}
-	}
-}
-void dump_array(const std::string& prefix, const element_t& element) {
-	std::string new_prefix = prefix + "    ";
-	for(const auto& value: element.m_array) {
-		const token_t& token = value.m_token;
-		if (token.is_item()) {
-			logger.info("%s%s", new_prefix, token.value_string());
-		} else if (token.is_start_object()) {
-			logger.info("%s{", new_prefix);
-			dump_object(new_prefix, value);
-			logger.info("%s}", new_prefix);
-		} else if (token.is_start_array()) {
-			logger.info("%s[", new_prefix);
-			dump_array(new_prefix, value);
-			logger.info("%s]", new_prefix);
-		} else if (token.is_end_array()) {
-			//
-		} else {
-			assert(false);
-		}
-	}
-}
-void dump(const std::string& prefix, const element_t& element) {
-	if (element.is_item()) {
-		dump_item(prefix, element);
-	} else if (element.is_start_object()) {
-		logger.info("%s{", prefix);
-		dump_object(prefix, element);
-		logger.info("%s}", prefix);
-	} else if (element.is_start_array()) {
-		logger.info("%s[");
-		dump_array(prefix, element);
-		logger.info("%s]");
-	}
-}
-
-
 void dump(const std::string& prefix, const token_list_t& list) {
 	for(const auto& e: list) {
 		logger.info("%s%s %s", prefix, e.path(), e.value_string());
 	}
 }
-
-
-void element_to_list_object(const element_t& element, token_list_t& list);
-void element_to_list_array (const element_t& element, token_list_t& list);
-void element_to_list_object(const element_t& element, token_list_t& list) {
-	list.emplace_back(element.m_token);
-	for(const auto& [key, value] : element.m_object) {
-		const element_t& child(value);
-		if (child.is_item()) {
-			list.emplace_back(child.m_token);
-		} else if (child.is_start_object()) {
-			element_to_list_object(child, list);
-		} else if (child.is_start_array()) {
-			element_to_list_array(child, list);
-		} else if (child.is_end_object()) {
-			list.emplace_back(child.m_token);
-		} else {
-			logger.error("child %s %s %s", child.path(), child.type_string(), child.value_string());
-			assert(false);
-		}
-	}
-}
-void element_to_list_array (const element_t& element, token_list_t& list) {
-	list.emplace_back(element.m_token);
-	for(const auto& value: element.m_array) {
-		const element_t& child(value);
-		if (child.is_item()) {
-			list.emplace_back(child.m_token);
-		} else if (child.is_start_object()) {
-			element_to_list_object(child, list);
-		} else if (child.is_start_array()) {
-			element_to_list_array(child, list);
-		} else if (child.is_end_array()) {
-			list.emplace_back(child.m_token);
-		} else {
-			logger.error("child %s %s %s", child.path(), child.type_string(), child.value_string());
-			assert(false);
-		}
-	}
-}
-void element_to_list(const element_t& element, token_list_t& list) {
-	if (element.is_item()) {
-		list.emplace_back(element.m_token);
-	} else if (element.is_start_object()) {
-		element_to_list_object(element, list);
-	} else if (element.is_start_array()) {
-		element_to_list_array(element, list);
-	}
-}
-
-
 
 
 //

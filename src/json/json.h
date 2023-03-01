@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <istream>
 
 #include "../util/Util.h"
 
@@ -71,15 +72,15 @@ class token_t {
 		}
 	}
 
-	std::string m_path;
-	Type        m_type;
-	std::string m_name;
-	std::string m_value;
+	std::string  m_path;
+	Type         m_type;
+	std::string  m_name;
+	std::string  m_value;
 	//
-	int64_t     m_int64_value;
-	double      m_double_value;
+	std::int64_t m_int64_value;
+	double       m_double_value;
 
-	token_t(const std::string& path_, Type type_, const std::string& name_, const std::string& value_, int64_t int64_value_, double double_value_) :
+	token_t(const std::string& path_, Type type_, const std::string& name_, const std::string& value_, std::int64_t int64_value_, double double_value_) :
 		m_path(path_), m_type(type_), m_name(name_), m_value(value_), m_int64_value(int64_value_), m_double_value(double_value_) {}
 
 public:
@@ -214,13 +215,13 @@ public:
 		return t;
 	}
 	template<>
-	int64_t intValue() const;
+	std::int64_t intValue() const;
 	template<>
-	int32_t intValue() const;
+	std::int32_t intValue() const;
 	template<>
-	uint64_t intValue() const;
+	std::uint64_t intValue() const;
 	template<>
-	uint32_t intValue() const;
+	std::uint32_t intValue() const;
 
 	double doubleValue() const;
 
@@ -259,64 +260,6 @@ public:
 typedef std::vector<token_t> token_list_t;
 
 
-// element can be item, object or array
-struct element_t;
-struct element_t {
-	token_t                          m_token;
-	std::map<std::string, element_t> m_object;
-	std::vector<element_t>           m_array;
-
-	element_t(const token_t& token) : m_token(token) {}
-	element_t() {}
-	~element_t() {}
-
-	const std::string& name() const {
-		return m_token.name();
-	}
-	const std::string& path() const {
-		return m_token.path();
-	}
-	const std::string value_string() const {
-		return m_token.value_string();
-	}
-	const std::string& type_string() const {
-		return m_token.type_string();
-	}
-	bool is_item() const {
-		return m_token.is_item();
-	}
-	bool is_start_object() const {
-		return m_token.is_start_object();
-	}
-	bool is_end_object() const {
-		return m_token.is_end_object();
-	}
-	bool is_start_array() const {
-		return m_token.is_start_array();
-	}
-	bool is_end_array() const {
-		return m_token.is_end_array();
-	}
-
-	void add_child(const element_t& child) {
-		if (is_item()) {
-			assert(false);
-		} else if (is_start_object()) {
-			m_object.emplace(child.name(), child);
-		} else if (is_start_array()) {
-			m_array.emplace_back(child);
-		} else {
-			assert(false);
-		}
-	}
-};
-
-void list_to_element(const token_list_t& list, element_t& root);
-
-void element_to_list(const element_t& element, token_list_t& list);
-
-
-void dump(const std::string& prefix, const element_t&    element);
 void dump(const std::string& prefix, const token_list_t& list);
 
 class handler_t {

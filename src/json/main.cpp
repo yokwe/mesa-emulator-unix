@@ -59,16 +59,65 @@ clang -Xclang -ast-dump=json -fsyntax-only
 int main(int argc, char** argv) {
 	logger.info("START");
 
+	(void)argc;
+	(void)argv;
+
+
 //	setSignalHandler(SIGSEGV);
 //	setSignalHandler(SIGILL);
 //	setSignalHandler(SIGABRT);
 
 #if 0
 	{
-		(void)argc;
-		(void)argv;
-		auto head = stream::json::json(std::cin);
-		stream::null(&head);
+		auto head    = stream::json::json(std::cin);
+		auto split   = stream::json::split(&head, "/inner/*");
+		auto filterA = stream::json::include_source_file(&split, "src/**");
+		auto filterB = stream::json::exclude_builtin_source_file(&filterA);
+		while(filterB.has_next()) {
+			json::token_list_t list = filterB.next();
+			logger.info("====");
+			json::dump("AA ", list);
+		}
+	}
+#endif
+
+#if 1
+	{
+		auto head    = stream::json::json(std::cin);
+		auto saveA   = stream::json::file(&head, "tmp/save-a.json");
+		auto countA  = stream::count(&saveA, "countA");
+		auto split   = stream::json::split(&countA, "/inner/*");
+		auto countB  = stream::count(&split, "countB");
+
+		auto filterA = stream::json::include_clang_source(&countB,
+			"**/Pilot.h",
+			"**/Type.h"
+			);
+		auto countC  = stream::count(&filterA, "countC");
+		auto filterB = stream::json::exclude_clang_builtin_source(&countC);
+		auto countD  = stream::count(&filterB, "countD");
+		auto filterC = stream::json::exclude_token_by_path(&countD,
+			"**/range/**",
+			"**/loc/**",
+			"**/includedFrom/**",
+			"**/definitionData/**",
+			"**/referencedDecl/**"
+		);
+		auto countE  = stream::count(&filterC, "countE");
+		auto filterD = stream::json::include_token_by_path(&countE,
+			"/source",
+			"**/kind",
+			"**/name",
+			"**/qualType",
+			"**/value",
+			"**/opcode"
+		);
+
+		auto expand  = stream::json::expand(&filterD);
+
+		auto countZ  = stream::count(&expand, "countZ");
+		auto saveZ   = stream::json::file(&countZ, "tmp/save-z.json");
+		stream::null(&saveZ);
 	}
 #endif
 
@@ -99,20 +148,16 @@ int main(int argc, char** argv) {
 	}
 #endif
 
-#if 1
+#if 0
 	{
-		assert(argc == 3);
-		const char* file_path   = argv[1];
-		const char* output_path = argv[2];
-		logger.info("file_path   %s", file_path);
-		logger.info("output_path %s", output_path);
-
 		auto head    = stream::json::json(std::cin);
 		auto countA  = stream::count(&head, "countA");
-		auto saveA   = stream::json::file(&countA, "tmp/dummy-a.json");
+		auto saveA   = stream::json::file(&countA, "tmp/save-a.json");
 		auto split   = stream::json::split(&saveA, "/inner/*");
+		auto expand  = stream::json::expand(&split);
+
 		auto countB  = stream::count(&split, "countB");
-		auto filterA = stream::json::include_file(&countB, file_path);
+		auto filterA = stream::json::include_file(&countB, "src/**/Type.h");
 		auto filterB = stream::json::exclude_path(&filterA,
 			"**/range/**",
 			"**/loc/**",
@@ -120,17 +165,19 @@ int main(int argc, char** argv) {
 			"**/definitionData/**",
 			"**/referencedDecl/**"
 		);
-		auto filterC = stream::json::include_path(&filterB,
+		auto filterC = stream::json::include_token_by_path(&filterB,
+			"**/id",
 			"**/kind",
 			"**/name",
 			"**/qualType",
 			"**/value",
-			"**/opcode"
+			"**/opcode",
+			"/loc/file"
 		);
 		auto countC  = stream::count(&filterC, "countC");
 		auto expand  = stream::json::expand(&countC);
 		auto countZ  = stream::count(&expand, "countZ");
-		auto file    = stream::json::file(&countZ, output_path);
+		auto file    = stream::json::file(&countZ, "tmp/save-z.json");
 
 		stream::null(&file);
 	}

@@ -2,14 +2,10 @@
 // dummy.cpp
 //
 
-namespace dummy {
+//#include "../util/Util.h"
 
-enum e1 {
-	A, B, C,
-};
+#include "../mesa/Type.h"
 
-enum class e2 {
-	A, B, C,
-};
+#include "../mesa/Pilot.h"
 
-}
+//enum E1 { A, B, C };

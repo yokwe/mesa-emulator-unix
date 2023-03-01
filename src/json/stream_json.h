@@ -213,6 +213,73 @@ pipe_t<token_list_t, token_list_t> include_token_by_path(source_base_t<token_lis
 }
 
 
+struct exclude_object_by_path_value_function_t {
+	std::regex   m_regex_path;
+	std::regex   m_regex_value;
+	token_list_t m_result;
+
+	exclude_object_by_path_value_function_t(std::regex regex_path, std::regex regex_value) :
+		m_regex_path(regex_path), m_regex_value(regex_value) {}
+
+	token_list_t operator()(const token_list_t& list) {
+		std::string regex_string;
+
+		for(auto i = list.cbegin(); i != list.cend(); i++) {
+			const token_t& token = *i;
+			if (std::regex_match(token.path(), m_regex_path) && std::regex_match(token.value(), m_regex_value)) {
+				std::string path = token.path();
+				std::string string = path.substr(0, path.size() - token.name().size()) + "**";
+				regex_string.append("|(?:" + ::json::glob_to_regex_string(string) + ")");
+
+				int level = 0;
+				for(; i != list.cend(); i++) {
+					const token_t& next = *i;
+					if (next.is_start_object()) level++;
+					if (next.is_end_object())   level--;
+					if (level < 0) break;
+				}
+			}
+		}
+
+		if (regex_string.empty()) {
+			m_result = list;
+		} else {
+			std::regex regex(regex_string.substr(1));
+
+			m_result.clear();
+			for(const token_t& token: list) {
+				if (std::regex_match(token.path(), regex)) {
+					// exclude
+				} else {
+					bool push_token = true;
+					if (token.is_end_object()) {
+						if (!m_result.empty() && m_result.back().is_start_object()) {
+							// remove empty object
+							m_result.pop_back();
+							push_token = false;
+						}
+					}
+					if (token.is_end_array()) {
+						if (!m_result.empty() && m_result.back().is_start_array()) {
+							// remove empty array
+							m_result.pop_back();
+							push_token = false;
+						}
+					}
+					if (push_token) m_result.push_back(token);
+				}
+			}
+		}
+
+		return m_result;
+	}
+};
+template<typename ... Args>
+pipe_t<token_list_t, token_list_t> exclude_ojbect_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	auto function = exclude_object_by_path_value_function_t(::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
+	return stream::map(upstream, function);
+}
+
 //
 }
 }

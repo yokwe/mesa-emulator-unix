@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstdint>
 #include <istream>
+#include <regex>
 
 #include "../util/Util.h"
 
@@ -17,7 +18,18 @@ namespace json {
 //
 // utility function
 //
-std::string glob_to_regex(std::string glob);
+std::string glob_to_regex_string(const std::string& glob);
+
+std::regex  glob_to_regex(const std::string& glob);
+
+template<typename ... Args>
+std::regex  glob_to_regex(Args&& ... args) {
+	std::string string;
+	for (auto e : std::initializer_list<std::string>{args...}) {
+		string.append("|(?:" + glob_to_regex_string(e) + ")");
+	}
+	return std::regex(string.substr(1));
+}
 
 std::string json_quote(const std::string& string);
 

@@ -110,7 +110,7 @@ void dump(const std::string& prefix, const token_list_t& list) {
 //
 // utility function
 //
-std::string glob_to_regex(std::string glob) {
+std::string glob_to_regex_string(const std::string& glob) {
 	// special case **/abc/** => .*?/abc(?:/.*?)?
 	{
 		std::regex regex("\\*\\*/([^/]+)/\\*\\*");
@@ -164,6 +164,17 @@ std::string glob_to_regex(std::string glob) {
 	return ret;
 }
 
+
+std::regex glob_to_regex(const std::string& glob) {
+	return std::regex(glob_to_regex_string(glob));
+}
+std::regex  glob_to_regex(const std::initializer_list<std::string>& list) {
+	std::string string;
+	for (const std::string& e : list) {
+		string.append("|(?:" + glob_to_regex_string(e) + ")");
+	}
+	return std::regex(string);
+}
 
 std::string json_quote(const std::string& string) {
 	std::string ret;

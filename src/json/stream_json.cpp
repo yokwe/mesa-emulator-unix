@@ -232,7 +232,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	}
 };
 pipe_t<token_t, token_list_t> split(source_base_t<token_t>* upstream, const std::string& glob) {
-	auto impl = std::make_shared<split_impl_t>(upstream, std::regex(glob_to_regex(glob)));
+	auto impl = std::make_shared<split_impl_t>(upstream, ::json::glob_to_regex(glob));
 	return pipe_t<token_t, token_list_t>(impl, __func__);
 }
 

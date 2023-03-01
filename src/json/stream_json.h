@@ -17,9 +17,6 @@ namespace json {
 using token_t      = ::json::token_t;
 using token_list_t = ::json::token_list_t;
 
-constexpr auto glob_to_regex = ::json::glob_to_regex;
-
-
 //
 // json - std::cin to token_t stream
 //
@@ -97,12 +94,7 @@ struct include_clang_source_function_t {
 };
 template<typename ... Args>
 pipe_t<token_list_t, token_list_t> include_clang_source(source_base_t<token_list_t>* upstream, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-
-	auto function = include_clang_source_function_t(std::regex(string.substr(1)));
+	auto function = include_clang_source_function_t(::json::glob_to_regex(args...));
 	return stream::map(upstream, function);
 }
 pipe_t<token_list_t, token_list_t> exclude_clang_builtin_source(source_base_t<token_list_t>* upstream);
@@ -126,12 +118,10 @@ struct include_token_list_by_path_value_predicate_t {
 	}
 };
 template<typename ... Args>
-pipe_t<token_list_t, token_list_t> include_token_list_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-	auto predicate = include_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(string.substr(1)));
+pipe_t<token_list_t, token_list_t> include_token_list_by_path_value(
+	source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	auto predicate = include_token_list_by_path_value_predicate_t(
+		::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
 	return stream::filter(upstream, predicate);
 }
 
@@ -154,12 +144,10 @@ struct exclude_token_list_by_path_value_predicate_t {
 	}
 };
 template<typename ... Args>
-pipe_t<token_list_t, token_list_t> exclude_token_list_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-	auto predicate = exclude_token_list_by_path_value_predicate_t(std::regex(glob_to_regex(glob_path)), std::regex(string.substr(1)));
+pipe_t<token_list_t, token_list_t> exclude_token_list_by_path_value(
+	source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	auto predicate = exclude_token_list_by_path_value_predicate_t(
+		::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
 	return stream::filter(upstream, predicate);
 }
 
@@ -187,12 +175,7 @@ struct exclude_token_by_path_function_t {
 };
 template<typename ... Args>
 pipe_t<token_list_t, token_list_t> exclude_token_by_path(source_base_t<token_list_t>* upstream, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-
-	auto function = exclude_token_by_path_function_t(std::regex(string.substr(1)));
+	auto function = exclude_token_by_path_function_t(::json::glob_to_regex(args...));
 	return stream::map(upstream, function);
 }
 
@@ -225,12 +208,7 @@ struct include_token_by_path_function_t {
 };
 template<typename ... Args>
 pipe_t<token_list_t, token_list_t> include_token_by_path(source_base_t<token_list_t>* upstream, Args&& ... args) {
-	std::string string;
-	for (auto e : std::initializer_list<std::string>{args...}) {
-		string.append("|(?:" + glob_to_regex(e) + ")");
-	}
-
-	auto function = include_token_by_path_function_t(std::regex(string.substr(1)));
+	auto function = include_token_by_path_function_t(::json::glob_to_regex(args...));
 	return stream::map(upstream, function);
 }
 

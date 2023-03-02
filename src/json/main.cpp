@@ -122,7 +122,8 @@ int main(int argc, char** argv) {
 			"FunctionDecl",
 			"*Comment",
 			"*Operator",
-			"*DestructorDecl"
+			"*DestructorDecl",
+			"EmptyDecl"
 			);
 
 		auto countG  = stream::count(&filterF, "countG");

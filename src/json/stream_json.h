@@ -41,65 +41,6 @@ pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream);
 pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::string& path);
 
 
-
-//
-// include_source - include only source files that match glob_path
-// NOTE Source of data is output of "clang --asd-dump=json"
-//
-struct include_clang_source_function_t {
-	static constexpr const char* token_path   = "/source";
-	static constexpr const char* token_name   = token_path + 1;
-	static constexpr const char* target_path  = "/loc/file";
-	static constexpr const char* default_path = "default";
-
-	std::regex   m_regex;
-	std::string  m_source = default_path;
-	token_list_t m_value;
-
-	include_clang_source_function_t(const std::regex& regex) : m_regex(regex) {}
-	~include_clang_source_function_t() {}
-
-	token_list_t operator()(const token_list_t& list) {
-	    assert(2 <= list.size());
-	    token_t front = list.front();
-	    token_t back  = list.back();
-
-	    assert(front.is_start_object());
-	    assert(back.is_end_object());
-
-	    for(const auto& e: list) {
-	    	// update m_source
-	    	if (e.path() == target_path) {
-    			m_source = e.value();
-	    		logger.info("clang_include_source %s %s", (std::regex_match(m_source, m_regex) ? "*" : " "), m_source);
-	    		break;
-	    	}
-	    }
-	    // build m_value
-		bool match = std::regex_match(m_source, m_regex);
-
-	    token_t source = token_t::make_string(token_path, token_name, match ? m_source : default_path);
-	    m_value.clear();
-    	m_value.reserve(list.size() + 1);
-	    if (match) {
-	    	m_value = list;
-	    	m_value.insert(m_value.begin() + 1, source);
-	    } else {
-		    m_value.push_back(front);
-		    m_value.push_back(source);
-		    m_value.push_back(back);
-	    }
-	    return m_value;
-	}
-};
-template<typename ... Args>
-pipe_t<token_list_t, token_list_t> include_clang_source(source_base_t<token_list_t>* upstream, Args&& ... args) {
-	auto function = include_clang_source_function_t(::json::glob_to_regex(args...));
-	return stream::map(upstream, function);
-}
-pipe_t<token_list_t, token_list_t> exclude_clang_builtin_source(source_base_t<token_list_t>* upstream);
-
-
 //
 //  include_token_list_by_path_value
 //
@@ -279,6 +220,76 @@ pipe_t<token_list_t, token_list_t> exclude_ojbect_by_path_value(source_base_t<to
 	auto function = exclude_object_by_path_value_function_t(::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
 	return stream::map(upstream, function);
 }
+
+
+//
+// include_source - include only source files that match glob_path
+// NOTE Source of data is output of "clang --asd-dump=json"
+//
+struct include_clang_source_function_t {
+	static constexpr const char* token_path   = "/source";
+	static constexpr const char* token_name   = token_path + 1;
+	static constexpr const char* target_path  = "/loc/file";
+	static constexpr const char* default_path = "default";
+
+	std::regex   m_regex;
+	std::string  m_source = default_path;
+	token_list_t m_value;
+
+	include_clang_source_function_t(const std::regex& regex) : m_regex(regex) {}
+	~include_clang_source_function_t() {}
+
+	token_list_t operator()(const token_list_t& list) {
+	    assert(2 <= list.size());
+	    token_t front = list.front();
+	    token_t back  = list.back();
+
+	    assert(front.is_start_object());
+	    assert(back.is_end_object());
+
+	    for(const auto& e: list) {
+	    	// update m_source
+	    	if (e.path() == target_path) {
+    			m_source = e.value();
+	    		logger.info("clang_include_source %s %s", (std::regex_match(m_source, m_regex) ? "*" : " "), m_source);
+	    		break;
+	    	}
+	    }
+	    // build m_value
+		bool match = std::regex_match(m_source, m_regex);
+
+	    token_t source = token_t::make_string(token_path, token_name, match ? m_source : default_path);
+	    m_value.clear();
+	    if (match) {
+	    	m_value.reserve(list.size() + 1);
+	    	m_value = list;
+	    	m_value.insert(m_value.begin() + 1, source);
+	    } else {
+//		    m_value.push_back(front);
+//		    m_value.push_back(source);
+//		    m_value.push_back(back);
+	    }
+	    return m_value;
+	}
+};
+struct include_clang_source_predicate_t {
+	bool operator()(const token_list_t& list) {
+		if (list.empty()) return false;
+//		if (list.size() == 2) {
+//			if (list.front().is_start_object() && list.back().is_end_object()) return false;
+//			if (list.front().is_start_array() && list.back().is_end_array()) return false;
+//		}
+
+		return true;
+	}
+};
+template<typename ... Args>
+pipe_t<token_list_t, token_list_t> include_clang_source(source_base_t<token_list_t>* upstream, Args&& ... args) {
+	auto function  = include_clang_source_function_t(::json::glob_to_regex(args...));
+	auto predicate = include_clang_source_predicate_t();
+	return stream::map_filter(upstream, function, predicate);
+}
+
 
 //
 }

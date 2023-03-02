@@ -329,14 +329,6 @@ pipe_t<token_list_t, token_t> expand(source_base_t<token_list_t>* upstream) {
 
 
 //
-// include_source
-//
-pipe_t<token_list_t, token_list_t> exclude_clang_builtin_source(source_base_t<token_list_t>* upstream) {
-	return exclude_token_list_by_path_value(upstream, include_clang_source_function_t::token_path, include_clang_source_function_t::default_path);
-}
-
-
-//
 // pipe file
 //
 #define check_error(cond) { \

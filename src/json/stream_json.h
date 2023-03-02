@@ -192,22 +192,7 @@ struct exclude_object_by_path_value_function_t {
 				if (std::regex_match(token.path(), regex)) {
 					// exclude
 				} else {
-					bool push_token = true;
-					if (token.is_end_object()) {
-						if (!m_result.empty() && m_result.back().is_start_object()) {
-							// remove empty object
-							m_result.pop_back();
-							push_token = false;
-						}
-					}
-					if (token.is_end_array()) {
-						if (!m_result.empty() && m_result.back().is_start_array()) {
-							// remove empty array
-							m_result.pop_back();
-							push_token = false;
-						}
-					}
-					if (push_token) m_result.push_back(token);
+					m_result.push_back(token);
 				}
 			}
 		}
@@ -279,6 +264,11 @@ pipe_t<token_list_t, token_list_t> include_clang_source(source_base_t<token_list
 	return stream::map_filter(upstream, function, predicate);
 }
 
+
+//
+// normalize
+//
+pipe_t<token_list_t, token_list_t> normalize(source_base_t<token_list_t>* upstream);
 
 //
 }

@@ -457,6 +457,48 @@ pipe_t<token_t, token_t> file(source_base_t<token_t>* upstream, const std::strin
 }
 
 
+//
+// normalize
+//
+struct normalize_function_t {
+	token_list_t m_result;
+
+	token_list_t operator()(const token_list_t& list) {
+		m_result.clear();
+		for(const token_t& token: list) {
+			bool push_token = true;
+			// remove empty object
+			if (token.is_end_object()) {
+				if (!m_result.empty() && m_result.back().is_start_object()) {
+					m_result.pop_back();
+					push_token = false;
+				}
+			}
+			// remove empty array
+			if (token.is_end_array()) {
+				if (!m_result.empty() && m_result.back().is_start_array()) {
+					m_result.pop_back();
+					push_token = false;
+				}
+			}
+			if (push_token) m_result.push_back(token);
+		}
+
+		return m_result;
+	}
+};
+struct normalize_predicate_t {
+	bool operator()(const token_list_t& list) {
+		return !list.empty();
+	}
+};
+pipe_t<token_list_t, token_list_t> normalize(source_base_t<token_list_t>* upstream) {
+	auto function  = normalize_function_t();
+	auto predicate = normalize_predicate_t();
+	return stream::map_filter(upstream, function, predicate);
+}
+
+
 // end of namespace
 }
 }

@@ -258,29 +258,18 @@ struct include_clang_source_function_t {
 	    // build m_value
 		bool match = std::regex_match(m_source, m_regex);
 
-	    token_t source = token_t::make_string(token_path, token_name, match ? m_source : default_path);
 	    m_value.clear();
 	    if (match) {
 	    	m_value.reserve(list.size() + 1);
 	    	m_value = list;
-	    	m_value.insert(m_value.begin() + 1, source);
-	    } else {
-//		    m_value.push_back(front);
-//		    m_value.push_back(source);
-//		    m_value.push_back(back);
+	    	m_value.insert(m_value.begin() + 1, token_t::make_string(token_path, token_name, m_source));
 	    }
 	    return m_value;
 	}
 };
 struct include_clang_source_predicate_t {
 	bool operator()(const token_list_t& list) {
-		if (list.empty()) return false;
-//		if (list.size() == 2) {
-//			if (list.front().is_start_object() && list.back().is_end_object()) return false;
-//			if (list.front().is_start_array() && list.back().is_end_array()) return false;
-//		}
-
-		return true;
+		return !list.empty();
 	}
 };
 template<typename ... Args>

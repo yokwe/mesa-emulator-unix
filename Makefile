@@ -127,8 +127,11 @@ run-main: clear-log
 run-json: clear-log
 	@if [ ${HOST_OS} = "Darwin" ]; then \
 		clang -Xclang -ast-dump=json -fsyntax-only \
+		    -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 \
+		    -I /Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include \
+		    -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
+		    -I /Library/Developer/CommandLineTools/usr/include \
 			-I /opt/local/include \
-			-I /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include \
 			-I /opt/local/libexec/qt6/include \
 			-I /opt/local/libexec/qt6/include/QtCore \
 			-std=c++17 src/json/dummy.cpp | \

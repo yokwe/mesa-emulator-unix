@@ -85,36 +85,6 @@ void null(source_base_t<T>* upstream) {
 
 
 //
-// pipe count
-//
-template <typename T>
-struct pipe_count_impl_t : public pipe_base_t<T, T> {
-	using upstream_t = source_base_t<T>;
-
-	std::string m_name;
-	int         m_count = 0;
-
-	pipe_count_impl_t(upstream_t* upstream, const std::string& name) : pipe_base_t<T, T>(upstream), m_name(name) {}
-
-	void close() override {
-		logger.info("count %s %d", m_name, m_count);
-	}
-	bool has_next() override {
-		return this->m_upstream->has_next();
-	}
-	T next() override {
-		m_count++;
-		return this->m_upstream->next();
-	}
-};
-template <typename T>
-auto count(source_base_t<T>* upstream, const std::string& name) {
-	auto impl = std::make_shared<pipe_count_impl_t<T>>(upstream, name);
-	return pipe_t<T, T>(impl, __func__);
-}
-
-
-//
 // pipe map
 //
 // R Function()(T)
@@ -301,6 +271,39 @@ auto peek(source_base_t<T>* upstream, Consumer&& consumer) {
 		ERROR();
 	}
 }
+
+
+//
+// peek count
+//
+template <typename T>
+struct count_consumer_t {
+	struct context_t {
+		std::string m_name;
+		int         m_count = 0;
+
+		context_t(const std::string& name) : m_name(name) {}
+		~context_t() {
+			logger.info("%s %d", m_name, m_count);
+		}
+	};
+
+	std::shared_ptr<context_t> m_context;
+	count_consumer_t(const std::string& name) {
+		m_context = std::make_shared<context_t>(name);
+	}
+
+	void operator()(T newValue) {
+		(void)newValue;
+		m_context->m_count++;
+	}
+};
+template <typename T>
+auto count(source_base_t<T>* upstream, const std::string& name) {
+	count_consumer_t<T> consumer(name);
+	return stream::peek(upstream, consumer);
+}
+
 
 
 // end of namespace stream

@@ -94,17 +94,15 @@ int main(int argc, char** argv) {
 			"**/Type.h"
 			);
 		auto countC  = stream::count(&filterA, "countC");
-		auto filterB = stream::json::exclude_clang_builtin_source(&countC);
-		auto countD  = stream::count(&filterB, "countD");
-		auto filterC = stream::json::exclude_token_by_path(&countD,
+		auto filterC = stream::json::exclude_token_by_path(&countC,
 			"**/range/**",
 			"**/loc/**",
 			"**/includedFrom/**",
 			"**/definitionData/**",
 			"**/referencedDecl/**"
 		);
-		auto countE  = stream::count(&filterC, "countE");
-		auto filterD = stream::json::include_token_by_path(&countE,
+		auto countD  = stream::count(&filterC, "countD");
+		auto filterD = stream::json::include_token_by_path(&countD,
 			"/source",
 			"**/kind",
 			"**/name",
@@ -112,17 +110,25 @@ int main(int argc, char** argv) {
 			"**/value",
 			"**/opcode"
 		);
-		auto countF  = stream::count(&filterD, "countF");
+		auto countE  = stream::count(&filterD, "countD");
+		auto filterE = stream::json::include_token_list_by_path_value(&countE, "/kind", "*Decl");
 
-		auto filterE = stream::json::include_token_list_by_path_value(&countF, "/kind", "EnumDecl");
-		auto countG  = stream::count(&filterE, "countG");
-
-		auto filterF = stream::json::exclude_ojbect_by_path_value(&countG, "**/kind",
+		auto countF  = stream::count(&filterE, "countF");
+		auto filterF = stream::json::exclude_ojbect_by_path_value(&countF, "**/kind",
 			"*Expr",
-			"*Literal"
+			"*Literal",
+			"*Stmt",
+			"TypedefDecl",
+			"FunctionDecl",
+			"*Comment",
+			"*Operator",
+			"*DestructorDecl"
 			);
-		auto countH  = stream::count(&filterF, "countH");
 
+		auto countG  = stream::count(&filterF, "countG");
+		auto filterG = stream::json::normalize(&countG);
+
+		auto countH  = stream::count(&filterG, "countH");
 		auto expand  = stream::json::expand(&countH);
 		auto countZ  = stream::count(&expand, "countZ");
 		auto saveZ   = stream::json::file(&countZ, "tmp/save-z.json");

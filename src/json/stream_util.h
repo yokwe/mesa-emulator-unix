@@ -210,6 +210,84 @@ auto filter(source_base_t<T>* upstream, Predicate&& predicate) {
 
 
 //
+// pipe map_filter
+//
+// bool Predicate()(T)
+template <typename T, typename Function, typename Predicate>
+struct map_filter_impl_t : public pipe_base_t<T, T> {
+	using upstream_t = source_base_t<T>;
+
+	Function   m_function;
+	Predicate  m_predicate;
+	bool       m_has_value = false;
+	T          m_value;
+
+	map_filter_impl_t(upstream_t* upstream, Function function, Predicate predicate) : pipe_base_t<T, T>(upstream), m_function(function), m_predicate(predicate) {}
+
+	void close() override {}
+	bool has_next() override {
+		for(;;) {
+			if (m_has_value) break;
+			if (!this->m_upstream->has_next()) break;
+			m_value     = m_function(this->m_upstream->next());
+			m_has_value = m_predicate(m_value);
+		}
+		return m_has_value;
+	}
+	T next() override {
+		if (has_next()) {
+			m_has_value = false;
+			return m_value;
+		} else {
+			// if there is no next and call next(), it is error
+			logger.error("stream has no next");
+			ERROR();
+		}
+	}
+};
+// NOTE predicate is reference
+template <typename T, typename Function, typename Predicate>
+auto map_filter(source_base_t<T>* upstream, Function& function, Predicate& predicate) {
+	if constexpr (std::is_invocable_v<Function, T>) {
+		using R = std::invoke_result_t<Function, T>;
+
+		if constexpr (std::is_invocable_v<Predicate, R>) {
+			using R2 = std::invoke_result_t<Predicate, T>;
+			static_assert(std::is_same_v<R2, bool>);
+
+			auto impl = std::make_shared<map_filter_impl_t<T, Function, Predicate>>(upstream, function, predicate);
+			return pipe_t<T, R>(impl, __func__);
+		}
+	}
+
+	logger.error("function  %s", demangle(typeid(Function).name()));
+	logger.error("predicate %s", demangle(typeid(Predicate).name()));
+	logger.error("T         %s", demangle(typeid(T).name()));
+	ERROR();
+}
+// NOTE predicate is rvalue reference
+template <typename T, typename Function, typename Predicate>
+auto map_filter(source_base_t<T>* upstream, Function&& function, Predicate&& predicate) {
+	if constexpr (std::is_invocable_v<Function, T>) {
+		using R = std::invoke_result_t<Function, T>;
+
+		if constexpr (std::is_invocable_v<Predicate, R>) {
+			using R2 = std::invoke_result_t<Predicate, T>;
+			static_assert(std::is_same_v<R2, bool>);
+
+			auto impl = std::make_shared<map_filter_impl_t<T, Function, Predicate>>(upstream, function, predicate);
+			return pipe_t<T, R>(impl, __func__);
+		}
+	}
+
+	logger.error("function  %s", demangle(typeid(Function).name()));
+	logger.error("predicate %s", demangle(typeid(Predicate).name()));
+	logger.error("T         %s", demangle(typeid(T).name()));
+	ERROR();
+}
+
+
+//
 // pipe peek
 //
 // void Consumer()(T)

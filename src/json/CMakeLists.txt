@@ -2,18 +2,22 @@
 # json
 #
 
-add_executable (
-  json
-  main.cpp
-  json.h
+list(APPEND
+  fileList
   json.cpp
-   # stream
-  stream.h
-  stream_util.h
-  stream_json.h
   stream_json.cpp
   )
 
-add_dependencies(json util)
+# libjson
+add_library (json STATIC ${fileList})
 
-target_link_libraries (json util)
+
+# json-main
+add_executable (
+  json-main
+  main.cpp
+  )
+
+add_dependencies(json-main util)
+
+target_link_libraries (json-main json util)

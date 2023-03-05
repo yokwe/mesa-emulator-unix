@@ -154,6 +154,9 @@ pipe_t<token_list_t, token_list_t> include_token_by_path(source_base_t<token_lis
 }
 
 
+//
+// exlcude_object_bye_path_value - exclude object that has glob_path and args(glob)
+//
 struct exclude_object_by_path_value_function_t {
 	std::regex   m_regex_path;
 	std::regex   m_regex_value;
@@ -203,6 +206,61 @@ struct exclude_object_by_path_value_function_t {
 template<typename ... Args>
 pipe_t<token_list_t, token_list_t> exclude_ojbect_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
 	auto function = exclude_object_by_path_value_function_t(::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
+	return stream::map(upstream, function);
+}
+
+
+//
+// inlcude_object_by_path_value - include object that has glob_path and args(glob)
+//
+struct include_object_by_path_value_function_t {
+	std::regex   m_regex_path;
+	std::regex   m_regex_value;
+	token_list_t m_result;
+
+	include_object_by_path_value_function_t(std::regex regex_path, std::regex regex_value) :
+		m_regex_path(regex_path), m_regex_value(regex_value) {}
+
+	token_list_t operator()(const token_list_t& list) {
+		m_result.clear();
+		m_result.push_back(token_t::make_start_array("/", ""));
+
+		token_list_t save;
+		for(auto i = list.cbegin(); i != list.cend(); i++) {
+			const token_t& token = *i;
+			if (token.is_start_object()) save.clear();
+			save.push_back(token);
+
+			if (std::regex_match(token.path(), m_regex_path) && std::regex_match(token.value(), m_regex_value)) {
+				for(const auto& e: save) {
+					m_result.push_back(e);
+				}
+
+				// copy until exit current level
+				i++;
+				int level = 0;
+				for(;i != list.cend(); i++) {
+					const token_t& next = *i;
+					m_result.push_back(next);
+
+					if (next.is_start_object()) level++;
+					if (next.is_end_object())   level--;
+					if (level < 0) break;
+				}
+			}
+		}
+
+		m_result.push_back(token_t::make_end_array("/", ""));
+		if (m_result.size() == 2) m_result.clear();
+
+		//dump("include ", m_result);
+
+		return m_result;
+	}
+};
+template<typename ... Args>
+pipe_t<token_list_t, token_list_t> include_ojbect_by_path_value(source_base_t<token_list_t>* upstream, const std::string& glob_path, Args&& ... args) {
+	auto function = include_object_by_path_value_function_t(::json::glob_to_regex(glob_path), ::json::glob_to_regex(args...));
 	return stream::map(upstream, function);
 }
 

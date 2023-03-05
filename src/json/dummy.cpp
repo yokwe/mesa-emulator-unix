@@ -7,5 +7,3 @@
 #include "../mesa/Type.h"
 
 #include "../mesa/Pilot.h"
-
-//enum E1 { A, B, C };

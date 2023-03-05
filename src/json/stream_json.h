@@ -253,7 +253,7 @@ struct include_object_by_path_value_function_t {
 		m_result.push_back(token_t::make_end_array("/", ""));
 		if (m_result.size() == 2) m_result.clear();
 
-		//dump("include ", m_result);
+		// FIXME set correct path in m_result
 
 		return m_result;
 	}

@@ -107,6 +107,91 @@ void dump(const std::string& prefix, const token_list_t& list) {
 }
 
 
+struct fix_path_name_t {
+	struct context_t {
+		bool        m_arrayFlag;
+		int         m_arrayIndex;
+		std::string m_path;
+		std::string m_name;
+
+		context_t(bool isArray, const std::string& path_, const std::string& name_) :
+			m_arrayFlag(isArray),
+			m_arrayIndex(0),
+			m_path(path_),
+			m_name(name_) {}
+		// copy constructor
+		context_t(const context_t& that) :
+			m_arrayFlag(that.m_arrayFlag),
+			m_arrayIndex(that.m_arrayIndex),
+			m_path(that.m_path),
+			m_name(that.m_name) {}
+		// move constructor
+		context_t(context_t&& that) noexcept :
+			m_arrayFlag(that.m_arrayFlag),
+			m_arrayIndex(that.m_arrayIndex),
+			m_path(std::move(that.m_path)),
+			m_name(std::move(that.m_name)) {}
+
+
+		std::string make_name(const std::string& key) {
+			return m_arrayFlag ? std::to_string(m_arrayIndex++) : key;
+		}
+		std::tuple<std::string, std::string> path_name() const {
+			return {m_path, m_name};
+		}
+		std::string path() {
+			return m_path;
+		}
+	};
+
+	std::vector<context_t> m_stack;
+	std::tuple<std::string, std::string> make_path_name(const std::string& key) {
+	//         path         name
+		if (m_stack.empty()) {
+			std::string empty;
+			return {empty, empty};
+		} else {
+			context_t& top = m_stack.back();
+			//
+			std::string name = top.make_name(key);
+			std::string path = top.path() + "/" + name;
+			return {path, name};
+		}
+	}
+
+	void fix(token_list_t& list) {
+		for(token_t& token: list) {
+			if (token.is_item()) {
+				if (m_stack.empty()) assert(false);
+				auto [path, name] = make_path_name(token.name());
+				token.path_name(path, name);
+			} else if (token.is_start()) {
+				bool isArray = token.is_array();
+				//
+				auto [path, name] = make_path_name(token.name());
+				token.path_name(path, name);
+				// update m_stack
+				m_stack.emplace_back(isArray, path, name);
+			} else if (token.is_end()) {
+				const context_t& top = m_stack.back();
+				auto [path, name] = top.path_name();
+				token.path_name(path, name);
+				// update m_stack
+				m_stack.pop_back();
+			} else {
+				assert(false);
+			}
+		}
+	}
+};
+
+
+void fix_path_name(token_list_t& list) {
+	fix_path_name_t fix_path_name;
+	fix_path_name.fix(list);
+}
+
+
 //
 // utility function
 //

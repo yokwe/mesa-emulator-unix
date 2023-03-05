@@ -206,6 +206,13 @@ public:
 	bool is_end_array() const {
 		return m_type == Type::END_ARRAY;
 	}
+	// path
+	//	void path_name(const std::string& path, const std::string& name);
+	void path_name(const std::string& path, const std::string& name) {
+		m_path = path;
+		m_name = name;
+	}
+
 	// return contents
 	const std::string& path() const {
 		return m_path;
@@ -271,6 +278,8 @@ public:
 
 typedef std::vector<token_t> token_list_t;
 
+// fix path name
+void fix_path_name(token_list_t& list);
 
 void dump(const std::string& prefix, const token_list_t& list);
 

@@ -379,6 +379,9 @@ struct file_t {
 		}
 
 		state_t& state() {
+			if (m_states.empty()) {
+				ERROR();
+			}
 			assert(!m_states.empty());
 			return m_states.back();
 		}
@@ -482,6 +485,14 @@ struct normalize_function_t {
 				}
 			}
 			if (push_token) m_result.push_back(token);
+		}
+
+		// remove outer most array for include_object_by_path_value
+		if (!m_result.empty()) {
+			if (m_result.front().is_start_array() && m_result.back().is_end_array()) {
+				m_result.pop_back();
+				m_result.erase(m_result.begin());
+			}
 		}
 
 		return m_result;

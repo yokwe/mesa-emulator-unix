@@ -104,21 +104,6 @@ public:
 		m_int64_value(0),
 		m_double_value(0) {}
 
-	token_t(const token_t& that, const std::string& path_) :
-		m_path(path_),
-		m_type(that.m_type),
-		m_name(that.m_name),
-		m_value(that.m_value),
-		m_int64_value(that.m_int64_value),
-		m_double_value(that.m_double_value) {}
-	token_t(token_t&& that, const std::string& path_) noexcept :
-		m_path(path_),
-		m_type(that.m_type),
-		m_name(std::move(that.m_name)),
-		m_value(std::move(that.m_value)),
-		m_int64_value(that.m_int64_value),
-		m_double_value(that.m_double_value) {}
-
 	// item
 	static token_t make_float(const std::string& path_, const std::string& name_, const std::string& value_, const double double_value_) {
 		return token_t(path_, Type::FLOAT, name_, value_, 0, double_value_);
@@ -211,6 +196,9 @@ public:
 	void path_name(const std::string& path, const std::string& name) {
 		m_path = path;
 		m_name = name;
+	}
+	void path(const std::string& path) {
+		m_path = path;
 	}
 
 	// return contents

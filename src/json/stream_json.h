@@ -200,6 +200,7 @@ struct exclude_object_by_path_value_function_t {
 			}
 		}
 
+		::json::fix_path_name(m_result);
 		return m_result;
 	}
 };
@@ -223,7 +224,7 @@ struct include_object_by_path_value_function_t {
 
 	token_list_t operator()(const token_list_t& list) {
 		m_result.clear();
-		m_result.push_back(token_t::make_start_array("/", ""));
+		m_result.push_back(token_t::make_start_array("", ""));
 
 		token_list_t save;
 		for(auto i = list.cbegin(); i != list.cend(); i++) {
@@ -250,11 +251,10 @@ struct include_object_by_path_value_function_t {
 			}
 		}
 
-		m_result.push_back(token_t::make_end_array("/", ""));
+		m_result.push_back(token_t::make_end_array("", ""));
 		if (m_result.size() == 2) m_result.clear();
 
-		// FIXME set correct path in m_result
-
+		::json::fix_path_name(m_result);
 		return m_result;
 	}
 };

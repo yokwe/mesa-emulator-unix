@@ -222,6 +222,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	token_list_t next() override {
 		if (m_has_value) {
 			m_has_value = false;
+			::json::fix_path_name(m_value);
 			return m_value;
 		} else {
 			// if there is no next and call next(), it is error
@@ -495,6 +496,7 @@ struct normalize_function_t {
 			}
 		}
 
+		::json::fix_path_name(m_result);
 		return m_result;
 	}
 };

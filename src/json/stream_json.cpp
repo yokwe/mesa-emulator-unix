@@ -188,7 +188,8 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 
 			token_t token = this->m_upstream->next();
 			if (capturing) {
-				m_value.emplace_back(token, token.path().substr(prefix));
+				m_value.emplace_back(token);
+				m_value.back().path(token.path().substr(prefix));
 			}
 
 			if (token.is_item()) {
@@ -201,7 +202,8 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 					capturing = true;
 					//
 					m_value.clear();
-					m_value.emplace_back(token, token.path().substr(prefix));
+					m_value.emplace_back(token);
+					m_value.back().path(token.path().substr(prefix));
 				}
 			} else if (token.is_end()) {
 				if (token.path() == path) {
@@ -292,9 +294,9 @@ struct expand_impl_t : public pipe_base_t<token_list_t, token_t> {
 
 		if (0 <= m_list_index && m_list_index < (int)m_list.size()) {
 			// expected
-			token_t token = m_list.at(m_list_index);
-			m_has_value   = true;
-			m_value       = token_t(token, "/" + m_array_name + token.path());
+			m_has_value = true;
+			m_value     = m_list.at(m_list_index);
+			m_value.path("/" + m_array_name + m_value.path());
 			//
 			m_list_index++;
 			// special case for end of m_list

@@ -29,11 +29,12 @@
  *******************************************************************************/
 
 #include <cstdio>
+#include <fstream>
 
 #include "json.h"
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("gen_introspection");
+static const Logger logger = Logger::getLogger("gen");
 
 #include "stream.h"
 #include "stream_util.h"
@@ -77,6 +78,8 @@ struct peek_consumer_t {
 	struct context_t {
 		std::FILE*  m_file;
 		char        m_buffer[1024 * 64];
+		std::string m_enum_name;
+		int         m_enum_value = 0;
 
 		context_t(const std::string& path) {
 			logger.info("peek_consumer file %s", path);
@@ -103,9 +106,52 @@ struct peek_consumer_t {
 	}
 
 	int count = 0;
-	void operator()(const json::token_t& list) {
-		(void)list;
-//		dump("operator ", list);
+	void operator()(const json::token_list_t& list) {
+		assert(list.front().is_start_object());
+
+		{
+			json::token_list_t level1 = json::copy_object(list, 1);
+//			json::dump("AAA ", level1);
+
+			auto kind_opt     = json::get_item_by_name(level1, "kind",     0);
+			assert(kind_opt.has_value());
+			std::string kind = kind_opt->value();
+			assert(kind == "EnumConstantDecl");
+
+			auto name_opt     = json::get_item_by_name(level1, "name", 0);
+			assert(name_opt.has_value());
+			std::string name = name_opt->value();
+
+			auto qualType_opt = json::get_item_by_name(level1, "qualType", 1);
+			assert(qualType_opt.has_value());
+			std::string qualType = qualType_opt->value();
+
+			if (m_context->m_enum_name != qualType) {
+				m_context->m_enum_name = qualType;
+				m_context->m_enum_value = -1;
+			}
+
+			auto const_expr  = json::get_object_by_name_value(list, "kind", "ConstantExpr");
+			std::string value;
+
+			if (const_expr.has_value()) {
+				auto const_expr0 = json::copy_object(const_expr.value(), 0);
+				auto value_opt   = json::get_item_by_name(const_expr0, "value", 0);
+
+				if (value_opt.has_value()) {
+					value = value_opt->value();
+					m_context->m_enum_value = atoi(value.c_str());
+				} else {
+					++(m_context->m_enum_value);
+					value = std::to_string(m_context->m_enum_value);
+				}
+			} else {
+				++(m_context->m_enum_value);
+				value = std::to_string(m_context->m_enum_value);
+			}
+			logger.info("### enum %-40s %-20s %4s",  qualType, name, value);
+			fprintf(m_context->m_file, "add(%-40s, %-20s, %4s);\n", qualType.c_str(), name.c_str(), value.c_str());
+		}
 	}
 };
 
@@ -114,6 +160,10 @@ int main(int argc, char** argv) {
 
 	(void)argc;
 	(void)argv;
+
+	setSignalHandler(SIGSEGV);
+	setSignalHandler(SIGILL);
+	setSignalHandler(SIGABRT);
 
 	{
 		auto head    = stream::json::json(std::cin);
@@ -131,8 +181,8 @@ int main(int argc, char** argv) {
 			"**/id"
 		);
 		auto filterD = stream::json::exclude_ojbect_by_path_value(&filterC, "**/kind",
-			"ImplicitCastExpr",
-			"ConstantExpr"
+			"zzImplicitCastExpr",
+			"zzConstantExpr"
 		);
 
 		auto filterZ = stream::json::normalize(&filterD);
@@ -140,9 +190,13 @@ int main(int argc, char** argv) {
 		auto saveZ   = stream::json::file(&expand, "tmp/save-gen.json");
 		auto countZ  = stream::count(&saveZ, "countZ");
 
-		stream::null(&countZ);
-	}
+		auto split2  = stream::json::split(&countZ, "/*");
 
+		peek_consumer_t consumer("src/json/introspection_enum.cpp");
+		auto peek    = stream::peek(&split2, consumer);
+
+		stream::null(&peek);
+	}
 
 	logger.info("STOP");
 	return 0;

@@ -54,9 +54,10 @@ std::int32_t token_t::intValue() const {
 		std::int64_t max_value = INT32_MAX;
 		if (!(min_value <= value && value <= max_value)) ERROR();
 	} else {
+		logger.info("m_type %s %s", name(), type_string());
 		ERROR();
 	}
-	return m_int64_value;
+	return (std::int32_t)m_int64_value;
 }
 template<>
 std::uint64_t token_t::intValue() const {
@@ -91,7 +92,7 @@ std::uint32_t token_t::intValue() const {
 	} else {
 		ERROR();
 	}
-	return (uint64_t)m_int64_value;
+	return (std::uint64_t)m_int64_value;
 }
 
 double token_t::doubleValue() const {
@@ -100,6 +101,9 @@ double token_t::doubleValue() const {
 }
 
 
+//
+// utility function for token_list_t
+//
 void dump(const std::string& prefix, const token_list_t& list) {
 	for(const auto& e: list) {
 		logger.info("%s%s %s", prefix, e.path(), e.value_string());
@@ -162,7 +166,11 @@ struct fix_path_name_t {
 	void fix(token_list_t& list) {
 		for(token_t& token: list) {
 			if (token.is_item()) {
-				if (m_stack.empty()) assert(false);
+				if (m_stack.empty()) {
+					logger.error("list %d", list.size());
+					dump("ERROR dump ", list);
+					ERROR();
+				}
 				auto [path, name] = make_path_name(token.name());
 				token.path_name(path, name);
 			} else if (token.is_start()) {
@@ -184,11 +192,118 @@ struct fix_path_name_t {
 		}
 	}
 };
-
-
 void fix_path_name(token_list_t& list) {
+	if (list.empty()) return;
+
 	fix_path_name_t fix_path_name;
 	fix_path_name.fix(list);
+}
+
+void normalize(token_list_t& list) {
+	for(auto i = list.begin(); i != list.end(); i++) {
+		if (i->is_start_object() && (i + 1)->is_end_object()) {
+			i = list.erase(i, i + 2); // erase element [i, i + 2)
+		}
+		if (i->is_start_array() && (i + 1)->is_end_array()) {
+			i = list.erase(i, i + 2); // erase element [i, i + 2)
+		}
+	}
+}
+
+
+
+token_list_t copy_object(const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const int max_nest_level) {
+	std::vector<token_t> result;
+
+	//int nest_level = begin->is_start() ? -1 : 0;
+	assert(begin->is_start_object());
+	int nest_level = -1;
+
+	for(auto i = begin; i != end; i++) {
+		const token_t& token = *i;
+		if (token.is_item()) {
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				result.push_back(token);
+			}
+		} else if (token.is_start()) {
+			nest_level++;
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				result.push_back(token);
+			}
+		} else if (token.is_end()) {
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				result.push_back(token);
+			}
+			nest_level--;
+		} else {
+			assert(false);
+		}
+
+		// leave loop if exit from start nest level
+		if (nest_level < 0) break;
+	}
+
+	normalize(result);
+
+	return result;
+}
+
+
+std::vector<token_list_t> list_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value) {
+	std::vector<token_list_t> result;
+
+	for(auto i = list.cbegin(); i != list.cend(); i++) {
+		if (i->is_start_object()) {
+			bool found = find_item_by_name_value(i, list.cend(), name, value, 0);
+			if (found) {
+				token_list_t object;
+
+				// copy this object to object
+				int nest_level = 0;
+				while(i != list.cend()) {
+					if (i->is_start_object()) nest_level++;
+					if (i->is_end_object())   nest_level--;
+
+					object.push_back(*i);
+
+					if (nest_level == 0) break;
+					i++;
+				}
+
+				fix_path_name(object);
+				// append object to result
+				result.push_back(object);
+			}
+		}
+	}
+
+	return result;
+}
+
+
+token_list_t list_item_by_name (const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const std::string& name, const int max_nest_level) {
+	token_list_t result;
+
+	int nest_level = begin->is_start() ? -1 : 0;
+	for(auto i = begin; i != end; i++) {
+		const token_t& token = *i;
+		if (token.is_item()) {
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				if (token.name() == name) result.push_back(token);
+			}
+		} else if (token.is_start()) {
+			nest_level++;
+		} else if (token.is_end()) {
+			nest_level--;
+		} else {
+			assert(false);
+		}
+
+		// leave loop if exit from start nest level
+		if (nest_level < 0) break;
+	}
+
+	return result;
 }
 
 

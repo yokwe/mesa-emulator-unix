@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <istream>
 #include <regex>
+#include <optional>
 
 #include "../util/Util.h"
 
@@ -266,11 +267,97 @@ public:
 
 typedef std::vector<token_t> token_list_t;
 
-// fix path name
+// utility function for token_list_t
 void fix_path_name(token_list_t& list);
 
+// remove empty object and empty array
+void normalize(token_list_t& list);
+
+//
+// copy object with nest level
+//
+token_list_t copy_object(const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const int max_nest_level = 0);
+inline token_list_t copy_object(const token_list_t& list, const int max_nest_level = 0) {
+	if (list.empty()) return list;
+	return copy_object(list.cbegin(), list.cend(), max_nest_level);
+}
+
+
+//
+// list object by name value
+//
+std::vector<token_list_t> list_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value);
+
+
+//
+// get object by name value
+//
+inline std::optional<token_list_t> get_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value) {
+	auto result_list = list_object_by_name_value(list, name, value);
+	int  result_size = result_list.size();
+
+	if (result_size == 0) {
+		return std::nullopt;
+	} else if (result_size == 1) {
+		return result_list.front();
+	} else {
+		assert(false);
+	}
+}
+
+
+//
+// list item by name
+//
+token_list_t list_item_by_name (const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const std::string& name, const int max_nest_level = 0);
+inline token_list_t list_item_by_name (const token_list_t& list, const std::string& name, const int max_nest_level = 0) {
+	if (list.empty()) return list;
+	return list_item_by_name(list.cbegin(), list.cend(), name, max_nest_level);
+}
+
+//
+// get item by name
+//
+inline std::optional<token_t> get_item_by_name(const token_list_t& list, const std::string& name, const int max_nest_level = 0) {
+	auto result_list = list_item_by_name(list, name, max_nest_level);
+	int  result_size = result_list.size();
+
+	if (result_size == 0) {
+		return std::nullopt;
+	} else if (result_size == 1) {
+		return result_list.front();
+	} else {
+		assert(false);
+	}
+}
+
+//
+// find item by name value
+//
+inline bool find_item_by_name_value(const token_list_t::const_iterator begin, const token_list_t::const_iterator end,
+	const std::string& name, const std::string& value, const int max_nest_level = 0) {
+	token_list_t list = list_item_by_name(begin, end, name, max_nest_level);
+	for(const token_t& token: list) {
+		if (token.value() == value) return true;
+	}
+
+	return false;
+}
+
+
+
+
+//
+// dump
+//
 void dump(const std::string& prefix, const token_list_t& list);
 
+
+
+
+//
+// parse function
+//
 class handler_t {
 public:
 	virtual ~handler_t() {}
@@ -283,10 +370,6 @@ public:
 	virtual void data(const token_t& token) = 0;
 };
 
-
-//
-// parse function
-//
 void parse(std::istream& in, handler_t *handler);
 
 }

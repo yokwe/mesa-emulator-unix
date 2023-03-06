@@ -111,7 +111,6 @@ struct peek_consumer_t {
 
 		{
 			json::token_list_t level1 = json::copy_object(list, 1);
-//			json::dump("AAA ", level1);
 
 			auto kind_opt     = json::get_item_by_name(level1, "kind",     0);
 			assert(kind_opt.has_value());
@@ -135,21 +134,17 @@ struct peek_consumer_t {
 			std::string value;
 
 			if (const_expr.has_value()) {
-				auto const_expr0 = json::copy_object(const_expr.value(), 0);
-				auto value_opt   = json::get_item_by_name(const_expr0, "value", 0);
-
+				auto value_opt = json::get_item_by_name(const_expr.value(), "value", 0);
 				if (value_opt.has_value()) {
 					value = value_opt->value();
 					m_context->m_enum_value = atoi(value.c_str());
-				} else {
-					++(m_context->m_enum_value);
-					value = std::to_string(m_context->m_enum_value);
 				}
-			} else {
-				++(m_context->m_enum_value);
+			}
+			if (value.empty()) {
+				++m_context->m_enum_value;
 				value = std::to_string(m_context->m_enum_value);
 			}
-			logger.info("### enum %-40s %-20s %4s",  qualType, name, value);
+			logger.info("add(%-40s, %-20s, %4s);\n",  qualType, name, value);
 			fprintf(m_context->m_file, "add(%-40s, %-20s, %4s);\n", qualType.c_str(), name.c_str(), value.c_str());
 		}
 	}
@@ -167,31 +162,30 @@ int main(int argc, char** argv) {
 
 	{
 		auto head    = stream::json::json(std::cin);
-		auto splitA  = stream::json::split(&head, "/inner/*");
+		auto saveA   = stream::json::file(&head, "tmp/save-a.json");
+		auto splitA  = stream::json::split(&saveA, "/inner/*");
 		auto filterA = stream::json::include_clang_source(&splitA,
 			"**/Pilot.h",
 			"**/Type.h"
 			);
-		auto filterB = stream::json::include_ojbect_by_path_value(&filterA, "**/kind",
-			"EnumConstantDecl"
-		);
-		auto filterC = stream::json::exclude_token_by_path(&filterB,
+		auto filterB = stream::json::exclude_token_by_path(&filterA,
 			"**/range/**",
 			"**/loc/**",
-			"**/id"
+			"**/referencedDecl/**",
+			"**/definitionData/**"
+		);
+		auto filterC = stream::json::include_ojbect_by_path_value(&filterB, "**/kind",
+			"EnumConstantDecl"
 		);
 		auto filterD = stream::json::exclude_ojbect_by_path_value(&filterC, "**/kind",
-			"zzImplicitCastExpr",
-			"zzConstantExpr"
+			"IntegerLiteral"
 		);
-
 		auto filterZ = stream::json::normalize(&filterD);
 		auto expand  = stream::json::expand(&filterZ);
 		auto saveZ   = stream::json::file(&expand, "tmp/save-gen.json");
 		auto countZ  = stream::count(&saveZ, "countZ");
 
 		auto split2  = stream::json::split(&countZ, "/*");
-
 		peek_consumer_t consumer("src/json/introspection_enum.cpp");
 		auto peek    = stream::peek(&split2, consumer);
 

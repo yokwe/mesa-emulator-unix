@@ -144,7 +144,7 @@ struct peek_consumer_t {
 				++m_context->m_enum_value;
 				value = std::to_string(m_context->m_enum_value);
 			}
-			logger.info("add(%-40s, %-20s, %4s);\n",  qualType, name, value);
+			logger.info("add(%-40s, %-20s, %4s);",  qualType, name, value);
 			fprintf(m_context->m_file, "add(%-40s, %-20s, %4s);\n", qualType.c_str(), name.c_str(), value.c_str());
 		}
 	}

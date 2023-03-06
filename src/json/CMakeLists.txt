@@ -16,6 +16,7 @@ add_library (json STATIC ${fileList})
 add_executable (
   json-main
   main.cpp
+  introspection.cpp
   )
 
 add_dependencies(json-main util)

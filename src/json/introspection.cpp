@@ -9,6 +9,9 @@
 
 #include "introspection.h"
 
+#include "../mesa/Type.h"
+#include "../mesa/Pilot.h"
+
 #include "../util/Util.h"
 static const Logger logger = Logger::getLogger("introspection");
 
@@ -99,9 +102,15 @@ struct enum_map_t {
 
 enum_map_t enum_map;
 
-#define add(type_name, value) enum_map.add(#type_name, type_name::value, #value)
+#define add_debug(type_name, name, value) \
+	{ static_assert((int)::type_name::name == value); \
+	enum_map.add(#type_name, value, #name); }
+#define add(type_name, name, value) \
+	enum_map.add(#type_name, value, #name)
+
+// FIXME read json file for initialize_enum_map
 void initialize_enum_map() {
-	// add(LevelVKeys::KeyName, null);
+	add(SrcFunc                                 , SF_null             ,    0);
 
 #include "introspection_enum.cpp"
 }

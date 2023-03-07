@@ -124,7 +124,7 @@ run-test: clear-log
 run-main: clear-log
 	/usr/bin/time ${BUILD_DIR}/build/main/main <tmp/a
 	
-run-json: clear-log
+run-json-main: clear-log
 	@if [ ${HOST_OS} = "Darwin" ]; then \
 		clang -Xclang -ast-dump=json -fsyntax-only \
 		    -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 \
@@ -144,6 +144,28 @@ run-json: clear-log
 			-I /usr/local/include/qt6/QtCore \
 			-std=c++17 src/json/dummy.cpp | \
 			/usr/bin/time ${BUILD_DIR}/build/json/json-main; \
+	fi
+	
+run-json-gen: clear-log
+	@if [ ${HOST_OS} = "Darwin" ]; then \
+		clang -Xclang -ast-dump=json -fsyntax-only \
+		    -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1 \
+		    -I /Library/Developer/CommandLineTools/usr/lib/clang/14.0.0/include \
+		    -I /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include \
+		    -I /Library/Developer/CommandLineTools/usr/include \
+			-I /opt/local/include \
+			-I /opt/local/libexec/qt6/include \
+			-I /opt/local/libexec/qt6/include/QtCore \
+			-std=c++17 src/json/dummy.cpp | \
+			/usr/bin/time ${BUILD_DIR}/build/json/json-gen; \
+	fi
+	@if [ ${HOST_OS} = "FreeBSD" ]; then \
+		clang -Xclang -ast-dump=json -fsyntax-only \
+			-I /usr/local/include \
+			-I /usr/local/include/qt6 \
+			-I /usr/local/include/qt6/QtCore \
+			-std=c++17 src/json/dummy.cpp | \
+			/usr/bin/time ${BUILD_DIR}/build/json/json-gen; \
 	fi
 	
 run-dumpSymbol: clear-log

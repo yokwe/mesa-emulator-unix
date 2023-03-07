@@ -98,11 +98,11 @@ class token_t {
 
 public:
 	token_t() :
-		m_path("*NULL*"),
+		m_path("*UNDEFINED*"),
 		m_type(Type::NULL_TYPE),
-		m_name("*NULL*"),
-		m_value("*NULL*"),
-		m_int64_value(0),
+		m_name("*UNDEFINED*"),
+		m_value("*UNDEFINED*"),
+		m_int64_value(-1),
 		m_double_value(0) {}
 
 	// item
@@ -197,6 +197,11 @@ public:
 	void path_name(const std::string& path, const std::string& name) {
 		m_path = path;
 		m_name = name;
+	}
+	void path_name(std::pair<std::string, std::string> pair) {
+		//                   path         name
+		m_path = pair.first;
+		m_name = pair.second;
 	}
 	void path(const std::string& path) {
 		m_path = path;
@@ -381,101 +386,66 @@ public:
 	void clear() {
 		m_list.clear();
 	}
+
+
+	//
+	// normalize remove empty object and array and set correct path and name
+	//
+	void set_path_name();
+	void normalize();
+
+	//
+	// get_object returns list of object that contains item.name() == name && item.value() == value within max_nest_level
+	//   if there is no such object, this method returns empty std::vector
+	//
+	std::vector<token_list_t> get_objects(const std::string& name, const std::string& value) const {
+		return get_objects(m_list.cbegin(), name, value);
+	}
+	token_list_t get_object(const std::string& name, const std::string& value) const {
+		auto list = get_objects(name, value);
+		if (list.size() == 1) {
+			return list.front();
+		} else {
+			const Logger logger = Logger::getLogger("json.h");
+			logger.error("%s  list %d", __func__, list.size());
+			ERROR();
+			return token_list_t();
+		}
+	}
+
+	//
+	// get_item returns token_t contains item.name() == name within max_nest_level
+	//   if there is no such item, this method returns token_t.is_undefined() == true
+	//
+	std::vector<token_t> get_items(const std::string& name, int max_nest_level = 0) const {
+		return get_items(m_list.cbegin(), name, max_nest_level);
+	}
+	bool find_item(const std::string& name, const std::string& value, int max_nest_level = 0) const {
+		return find_item(m_list.cbegin(), name, value, max_nest_level);
+	}
+	token_t get_item(const std::string& name, int max_nest_level = 0) const {
+		auto list = get_items(name, max_nest_level);
+		if (list.size() == 1) {
+			return list.front();
+		} else {
+			const Logger logger = Logger::getLogger("json.h");
+			logger.error("%s  list %d", __func__, list.size());
+			ERROR();
+			return token_t();
+		}
+	}
+
+private:
+	std::vector<token_list_t> get_objects(const_iterator begin, const std::string& name, const std::string& value) const;
+	std::vector<token_t>      get_items  (const_iterator begin, const std::string& name,                           int max_nest_level = 0) const;
+	bool                      find_item  (const_iterator begin, const std::string& name, const std::string& value, int max_nest_level = 0) const;
 };
-
-
-
-
-
-
-
-
-// utility function for token_list_t
-void fix_path_name(token_list_t& list);
-
-// remove empty object and empty array
-void normalize(token_list_t& list);
-
-//
-// copy object with nest level
-//
-token_list_t copy_object(const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const int max_nest_level = 0);
-inline token_list_t copy_object(const token_list_t& list, const int max_nest_level = 0) {
-	if (list.empty()) return list;
-	return copy_object(list.cbegin(), list.cend(), max_nest_level);
-}
-
-
-//
-// list object by name value
-//
-std::vector<token_list_t> list_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value);
-
-
-//
-// get object by name value
-//
-inline std::optional<token_list_t> get_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value) {
-	auto result_list = list_object_by_name_value(list, name, value);
-	int  result_size = result_list.size();
-
-	if (result_size == 0) {
-		return std::nullopt;
-	} else if (result_size == 1) {
-		return result_list.front();
-	} else {
-		assert(false);
-	}
-}
-
-
-//
-// list item by name
-//
-token_list_t list_item_by_name (const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const std::string& name, const int max_nest_level = 0);
-inline token_list_t list_item_by_name (const token_list_t& list, const std::string& name, const int max_nest_level = 0) {
-	if (list.empty()) return list;
-	return list_item_by_name(list.cbegin(), list.cend(), name, max_nest_level);
-}
-
-//
-// get item by name
-//
-inline std::optional<token_t> get_item_by_name(const token_list_t& list, const std::string& name, const int max_nest_level = 0) {
-	auto result_list = list_item_by_name(list, name, max_nest_level);
-	int  result_size = result_list.size();
-
-	if (result_size == 0) {
-		return std::nullopt;
-	} else if (result_size == 1) {
-		return result_list.front();
-	} else {
-		assert(false);
-	}
-}
-
-//
-// find item by name value
-//
-inline bool find_item_by_name_value(const token_list_t::const_iterator begin, const token_list_t::const_iterator end,
-	const std::string& name, const std::string& value, const int max_nest_level = 0) {
-	token_list_t list = list_item_by_name(begin, end, name, max_nest_level);
-	for(const token_t& token: list) {
-		if (token.value() == value) return true;
-	}
-
-	return false;
-}
-
-
 
 
 //
 // dump
 //
 void dump(const std::string& prefix, const token_list_t& list);
-
-
 
 
 //

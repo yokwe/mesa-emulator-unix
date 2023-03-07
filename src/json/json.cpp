@@ -111,202 +111,6 @@ void dump(const std::string& prefix, const token_list_t& list) {
 }
 
 
-struct fix_path_name_t {
-	struct context_t {
-		bool        m_arrayFlag;
-		int         m_arrayIndex;
-		std::string m_path;
-		std::string m_name;
-
-		context_t(bool isArray, const std::string& path_, const std::string& name_) :
-			m_arrayFlag(isArray),
-			m_arrayIndex(0),
-			m_path(path_),
-			m_name(name_) {}
-		// copy constructor
-		context_t(const context_t& that) :
-			m_arrayFlag(that.m_arrayFlag),
-			m_arrayIndex(that.m_arrayIndex),
-			m_path(that.m_path),
-			m_name(that.m_name) {}
-		// move constructor
-		context_t(context_t&& that) noexcept :
-			m_arrayFlag(that.m_arrayFlag),
-			m_arrayIndex(that.m_arrayIndex),
-			m_path(std::move(that.m_path)),
-			m_name(std::move(that.m_name)) {}
-
-
-		std::string make_name(const std::string& key) {
-			return m_arrayFlag ? std::to_string(m_arrayIndex++) : key;
-		}
-		std::tuple<std::string, std::string> path_name() const {
-			return {m_path, m_name};
-		}
-		std::string path() {
-			return m_path;
-		}
-	};
-
-	std::vector<context_t> m_stack;
-	std::tuple<std::string, std::string> make_path_name(const std::string& key) {
-	//         path         name
-		if (m_stack.empty()) {
-			std::string empty;
-			return {empty, empty};
-		} else {
-			context_t& top = m_stack.back();
-			//
-			std::string name = top.make_name(key);
-			std::string path = top.path() + "/" + name;
-			return {path, name};
-		}
-	}
-
-	void fix(token_list_t& list) {
-		for(token_t& token: list) {
-			if (token.is_item()) {
-				if (m_stack.empty()) {
-					logger.error("list %d", list.size());
-					dump("ERROR dump ", list);
-					ERROR();
-				}
-				auto [path, name] = make_path_name(token.name());
-				token.path_name(path, name);
-			} else if (token.is_start()) {
-				bool isArray = token.is_array();
-				//
-				auto [path, name] = make_path_name(token.name());
-				token.path_name(path, name);
-				// update m_stack
-				m_stack.emplace_back(isArray, path, name);
-			} else if (token.is_end()) {
-				const context_t& top = m_stack.back();
-				auto [path, name] = top.path_name();
-				token.path_name(path, name);
-				// update m_stack
-				m_stack.pop_back();
-			} else {
-				assert(false);
-			}
-		}
-	}
-};
-void fix_path_name(token_list_t& list) {
-	if (list.empty()) return;
-
-	fix_path_name_t fix_path_name;
-	fix_path_name.fix(list);
-}
-
-void normalize(token_list_t& list) {
-	for(auto i = list.begin(); i != list.end(); i++) {
-		if (i->is_start_object() && (i + 1)->is_end_object()) {
-			i = list.erase(i, i + 2); // erase element [i, i + 2)
-		}
-		if (i->is_start_array() && (i + 1)->is_end_array()) {
-			i = list.erase(i, i + 2); // erase element [i, i + 2)
-		}
-	}
-}
-
-
-
-token_list_t copy_object(const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const int max_nest_level) {
-	token_list_t result;
-
-	//int nest_level = begin->is_start() ? -1 : 0;
-	assert(begin->is_start_object());
-	int nest_level = -1;
-
-	for(auto i = begin; i != end; i++) {
-		const token_t& token = *i;
-		if (token.is_item()) {
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				result.push_back(token);
-			}
-		} else if (token.is_start()) {
-			nest_level++;
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				result.push_back(token);
-			}
-		} else if (token.is_end()) {
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				result.push_back(token);
-			}
-			nest_level--;
-		} else {
-			assert(false);
-		}
-
-		// leave loop if exit from start nest level
-		if (nest_level < 0) break;
-	}
-
-	normalize(result);
-
-	return result;
-}
-
-
-std::vector<token_list_t> list_object_by_name_value(const token_list_t& list, const std::string& name, const std::string& value) {
-	std::vector<token_list_t> result;
-
-	for(auto i = list.cbegin(); i != list.cend(); i++) {
-		if (i->is_start_object()) {
-			bool found = find_item_by_name_value(i, list.cend(), name, value, 0);
-			if (found) {
-				token_list_t object;
-
-				// copy this object to object
-				int nest_level = 0;
-				while(i != list.cend()) {
-					if (i->is_start_object()) nest_level++;
-					if (i->is_end_object())   nest_level--;
-
-					object.push_back(*i);
-
-					if (nest_level == 0) break;
-					i++;
-				}
-
-				fix_path_name(object);
-				// append object to result
-				result.push_back(object);
-			}
-		}
-	}
-
-	return result;
-}
-
-
-token_list_t list_item_by_name (const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const std::string& name, const int max_nest_level) {
-	token_list_t result;
-
-	int nest_level = begin->is_start() ? -1 : 0;
-	for(auto i = begin; i != end; i++) {
-		const token_t& token = *i;
-		if (token.is_item()) {
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				if (token.name() == name) result.push_back(token);
-			}
-		} else if (token.is_start()) {
-			nest_level++;
-		} else if (token.is_end()) {
-			nest_level--;
-		} else {
-			assert(false);
-		}
-
-		// leave loop if exit from start nest level
-		if (nest_level < 0) break;
-	}
-
-	return result;
-}
-
-
 //
 // utility function
 //
@@ -619,6 +423,186 @@ void parse(std::istream& in, handler_t *handler) {
 	json_token_t json_token;
 
 	json_token.parse(in, handler);
+}
+
+
+
+//
+// token_list_t
+//
+struct set_path_name_t {
+	struct context_t {
+		bool        m_arrayFlag;
+		std::string m_path;
+		std::string m_name;
+		int         m_arrayIndex = 0;
+
+		context_t(bool isArray, const std::string& path, const std::string& name) :
+			m_arrayFlag(isArray),
+			m_path(path),
+			m_name(name) {}
+
+		std::string make_name(const std::string& key) {
+			return m_arrayFlag ? std::to_string(m_arrayIndex++) : key;
+		}
+		std::pair<std::string, std::string> path_name() const {
+			return {m_path, m_name};
+		}
+		std::string path() {
+			return m_path;
+		}
+	};
+
+	std::vector<context_t> m_stack;
+	std::pair<std::string, std::string> make_path_name(const std::string& key) {
+	//         path         name
+		if (m_stack.empty()) {
+			std::string empty;
+			return {empty, empty};
+		} else {
+			context_t& top = m_stack.back();
+			//
+			std::string name = top.make_name(key);
+			std::string path = top.path() + "/" + name;
+			return {path, name};
+		}
+	}
+
+	void set(std::vector<token_t>& list) {
+		for(token_t& token: list) {
+			if (token.is_item()) {
+				if (m_stack.empty()) {
+					ERROR();
+				}
+				token.path_name(make_path_name(token.name()));
+			} else if (token.is_start()) {
+				token.path_name(make_path_name(token.name()));
+				// update m_stack
+				m_stack.emplace_back(token.is_array(), token.path(), token.name());
+			} else if (token.is_end()) {
+				const context_t& top = m_stack.back();
+				token.path_name(top.path_name());
+				// update m_stack
+				m_stack.pop_back();
+			} else {
+				assert(false);
+			}
+		}
+	}
+};
+
+void token_list_t::set_path_name() {
+	set_path_name_t set_path_name;
+	set_path_name.set(m_list);
+}
+
+void token_list_t::normalize() {
+	for(auto i = m_list.begin(); i != m_list.end(); i++) {
+		if (i->is_start_object() && (i + 1)->is_end_object()) {
+			i = m_list.erase(i, i + 2); // erase element [i, i + 2)
+		}
+		if (i->is_start_array() && (i + 1)->is_end_array()) {
+			i = m_list.erase(i, i + 2); // erase element [i, i + 2)
+		}
+	}
+
+	set_path_name();
+}
+
+
+
+std::vector<token_t> token_list_t::get_items(const_iterator begin, const std::string& name, int max_nest_level) const {
+	std::vector<token_t> result;
+
+	auto end   = m_list.cend();
+
+	int nest_level = begin->is_start() ? -1 : 0;
+	for(auto i = begin; i != end; i++) {
+		const token_t& token = *i;
+		if (token.is_item()) {
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				if (token.name() == name) result.push_back(token);
+			}
+		} else if (token.is_start()) {
+			nest_level++;
+		} else if (token.is_end()) {
+			nest_level--;
+		} else {
+			assert(false);
+		}
+
+		// leave loop if exit from start nest level
+		if (nest_level < 0) break;
+	}
+
+	return result;
+}
+
+bool token_list_t::find_item(const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const {
+	auto end   = m_list.cend();
+
+	int nest_level = begin->is_start() ? -1 : 0;
+	for(auto i = begin; i != end; i++) {
+		const token_t& token = *i;
+		if (token.is_item()) {
+			if (0 <= nest_level && nest_level <= max_nest_level) {
+				if (token.name() == name && token.value() == value) return true;
+			}
+		} else if (token.is_start()) {
+			nest_level++;
+		} else if (token.is_end()) {
+			nest_level--;
+		} else {
+			assert(false);
+		}
+
+		// leave loop if exit from start nest level
+		if (nest_level < 0) break;
+	}
+	return false;
+}
+
+std::vector<token_list_t> token_list_t::get_objects(const_iterator begin, const std::string& name, const std::string& value) const {
+	std::vector<token_list_t> result;
+
+	auto end = m_list.cend();
+
+	int nest_level = 0;
+	for(const_iterator i = begin; i != end; i++) {
+		if (i->is_start_object()) {
+			nest_level++;
+			bool found = find_item(i, name, value, 0);
+			if (found) {
+				token_list_t object;
+
+				// copy this object
+				int nest = 0;
+				while(i != end) {
+					if (i->is_start_object()) nest++;
+					if (i->is_end_object())   nest--;
+
+					object.push_back(*i);
+
+					if (nest == 0) break;
+					i++;
+				}
+
+				object.normalize();
+
+				// append object to result
+				result.push_back(object);
+
+				nest_level--;
+			}
+		} else if (i->is_end_object()) {
+			nest_level--;
+		}
+
+		// leave loop if exit from start nest level
+		if (nest_level < 0) break;
+	}
+
+	return result;
 }
 
 

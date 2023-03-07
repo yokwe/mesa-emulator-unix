@@ -78,8 +78,8 @@ struct peek_consumer_t {
 	struct context_t {
 		std::FILE*  m_file;
 		char        m_buffer[1024 * 64];
-		std::string m_enum_name;
-		int         m_enum_value = 0;
+		std::string m_qualType;
+		int         m_value = 0;
 
 		context_t(const std::string& path) {
 			logger.info("peek_consumer file %s", path);
@@ -105,48 +105,36 @@ struct peek_consumer_t {
 		m_context = std::make_shared<context_t>(path);
 	}
 
-	int count = 0;
 	void operator()(const json::token_list_t& list) {
+		if (!list.front().is_start_object()) {
+			json::dump("##  ", list);
+			ERROR();
+		}
 		assert(list.front().is_start_object());
 
-		{
-			json::token_list_t level1 = json::copy_object(list, 1);
-
-			auto kind_opt     = json::get_item_by_name(level1, "kind",     0);
-			assert(kind_opt.has_value());
-			std::string kind = kind_opt->value();
-			assert(kind == "EnumConstantDecl");
-
-			auto name_opt     = json::get_item_by_name(level1, "name", 0);
-			assert(name_opt.has_value());
-			std::string name = name_opt->value();
-
-			auto qualType_opt = json::get_item_by_name(level1, "qualType", 1);
-			assert(qualType_opt.has_value());
-			std::string qualType = qualType_opt->value();
-
-			if (m_context->m_enum_name != qualType) {
-				m_context->m_enum_name = qualType;
-				m_context->m_enum_value = -1;
-			}
-
-			auto const_expr  = json::get_object_by_name_value(list, "kind", "ConstantExpr");
-			std::string value;
-
-			if (const_expr.has_value()) {
-				auto value_opt = json::get_item_by_name(const_expr.value(), "value", 0);
-				if (value_opt.has_value()) {
-					value = value_opt->value();
-					m_context->m_enum_value = atoi(value.c_str());
-				}
-			}
-			if (value.empty()) {
-				++m_context->m_enum_value;
-				value = std::to_string(m_context->m_enum_value);
-			}
-			logger.info("add(%-40s, %-20s, %4s);",  qualType, name, value);
-			fprintf(m_context->m_file, "add(%-40s, %-20s, %4s);\n", qualType.c_str(), name.c_str(), value.c_str());
+		if (!list.find_item("kind", "EnumConstantDecl", 99)) {
+			logger.info("no EnumConstantDecl");
+			json::dump("##  ", list);
+			return;
 		}
+
+		auto name     = list.get_item("name", 0).value();
+		auto qualType = list.get_item("qualType", 1).value();
+
+		if (m_context->m_qualType != qualType) {
+			m_context->m_qualType = qualType;
+			m_context->m_value    = 0;
+		}
+		std::string value;
+		if (list.find_item("kind", "ConstantExpr", 99)) {
+			auto const_expr = list.get_object("kind", "ConstantExpr");
+			value = const_expr.get_item("value", 0).value();
+			m_context->m_value = stoi(value);
+		} else {
+			value = std::to_string(m_context->m_value++);
+		}
+		logger.info("add(%-40s, %-20s, %4s);",  qualType, name, value);
+		fprintf(m_context->m_file, "add(%-40s, %-20s, %4s);\n", qualType.c_str(), name.c_str(), value.c_str());
 	}
 };
 

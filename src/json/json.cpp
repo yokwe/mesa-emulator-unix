@@ -213,7 +213,7 @@ void normalize(token_list_t& list) {
 
 
 token_list_t copy_object(const token_list_t::const_iterator begin, const token_list_t::const_iterator end, const int max_nest_level) {
-	std::vector<token_t> result;
+	token_list_t result;
 
 	//int nest_level = begin->is_start() ? -1 : 0;
 	assert(begin->is_start_object());

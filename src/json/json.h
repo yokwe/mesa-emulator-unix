@@ -36,7 +36,7 @@ std::string json_quote(const std::string& string);
 
 
 //
-// data
+// token_t
 //
 class token_t {
 	enum class Type {
@@ -265,7 +265,130 @@ public:
 };
 
 
-typedef std::vector<token_t> token_list_t;
+//
+// token_list_t
+//typedef std::vector<token_t> token_list_t;
+class token_list_t {
+	std::vector<token_t> m_list;
+public:
+	token_list_t() {}
+	token_list_t(const std::vector<token_t>& list) : m_list(list) {}
+
+	// type
+	using iterator        = decltype(m_list)::iterator;
+	using const_iterator  = decltype(m_list)::const_iterator;
+	using size_type       = decltype(m_list)::size_type;
+	using reference       = decltype(m_list)::reference;
+	using const_reference = decltype(m_list)::const_reference;
+
+	// methods from m_list
+	// iterator
+	// begin
+	iterator begin() noexcept {
+		return m_list.begin();
+	}
+	const_iterator begin() const noexcept {
+		return m_list.begin();
+	}
+	// end
+	iterator end() noexcept {
+		return m_list.end();
+	}
+	const_iterator end() const noexcept {
+		return m_list.end();
+	}
+	// cbegin
+	const_iterator cbegin() const noexcept {
+		return m_list.cbegin();
+	}
+	// cend
+	const_iterator cend() const noexcept {
+		return m_list.cend();
+	}
+	// storage
+	// size
+	size_type size() const noexcept {
+		return m_list.size();
+	}
+	// empty
+	bool empty() const noexcept {
+		return m_list.empty();
+	}
+	// reserve
+	void reserve(size_type size) {
+		m_list.reserve(size);
+	}
+	// element access
+	// operator[]
+	reference operator[](size_type index) {
+		return m_list[index];
+	}
+	const_reference operator[](size_type index) const {
+		return m_list[index];
+	}
+	// at
+	reference at(size_type index) {
+		return m_list.at(index);
+	}
+	const_reference at(size_type index) const {
+		return m_list.at(index);
+	}
+	// front
+	reference front() {
+		return m_list.front();
+	}
+	const_reference front() const {
+		return m_list.front();
+	}
+	// back
+	reference back() {
+		return m_list.back();
+	}
+	const_reference back() const {
+		return m_list.back();
+	}
+	// push_back
+	void push_back(const token_t& new_value) {
+		m_list.push_back(new_value);
+	}
+	void push_back(token_t&& new_value) {
+		m_list.push_back(new_value);
+	}
+	// emplace_back
+	template <class... Args>
+	reference emplace_back(Args&&... args) {
+		return m_list.emplace_back(args...);
+	}
+	// pop_back
+	void pop_back() {
+		m_list.pop_back();
+	}
+	// insert
+	iterator insert(const_iterator position, const token_t& new_value) {
+		return m_list.insert(position, new_value);
+	}
+	iterator insert(const_iterator position, token_t&& new_value) {
+		return m_list.insert(position, new_value);
+	}
+	// erase
+	iterator erase(const_iterator position) {
+		return m_list.erase(position);
+	}
+	iterator erase(const_iterator first, const_iterator last) {
+		return m_list.erase(first, last);
+	}
+	// clear
+	void clear() {
+		m_list.clear();
+	}
+};
+
+
+
+
+
+
+
 
 // utility function for token_list_t
 void fix_path_name(token_list_t& list);

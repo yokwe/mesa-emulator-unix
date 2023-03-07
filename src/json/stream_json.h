@@ -200,7 +200,7 @@ struct exclude_object_by_path_value_function_t {
 			}
 		}
 
-		::json::fix_path_name(m_result);
+		m_result.set_path_name();
 		return m_result;
 	}
 };
@@ -254,7 +254,7 @@ struct include_object_by_path_value_function_t {
 		m_result.push_back(token_t::make_end_array("", ""));
 		if (m_result.size() == 2) m_result.clear();
 
-		::json::fix_path_name(m_result);
+		m_result.set_path_name();
 		return m_result;
 	}
 };

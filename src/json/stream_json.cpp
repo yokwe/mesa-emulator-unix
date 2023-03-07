@@ -224,7 +224,7 @@ struct split_impl_t : public pipe_base_t<token_t, token_list_t> {
 	token_list_t next() override {
 		if (m_has_value) {
 			m_has_value = false;
-			::json::fix_path_name(m_value);
+			m_value.set_path_name();
 			return m_value;
 		} else {
 			// if there is no next and call next(), it is error
@@ -470,25 +470,7 @@ struct normalize_function_t {
 	token_list_t m_result;
 
 	token_list_t operator()(const token_list_t& list) {
-		m_result.clear();
-		for(const token_t& token: list) {
-			bool push_token = true;
-			// remove empty object
-			if (token.is_end_object()) {
-				if (!m_result.empty() && m_result.back().is_start_object()) {
-					m_result.pop_back();
-					push_token = false;
-				}
-			}
-			// remove empty array
-			if (token.is_end_array()) {
-				if (!m_result.empty() && m_result.back().is_start_array()) {
-					m_result.pop_back();
-					push_token = false;
-				}
-			}
-			if (push_token) m_result.push_back(token);
-		}
+		m_result = list;
 
 		// remove outer most array for include_object_by_path_value
 		if (!m_result.empty()) {
@@ -498,7 +480,7 @@ struct normalize_function_t {
 			}
 		}
 
-		::json::fix_path_name(m_result);
+		m_result.normalize();
 		return m_result;
 	}
 };

@@ -112,23 +112,23 @@ struct peek_consumer_t {
 		}
 		assert(list.front().is_start_object());
 
-		if (!list.find_item("kind", "EnumConstantDecl", 0)) {
+		if (!list.find_first_item("kind", "EnumConstantDecl", 0)) {
 			logger.info("no EnumConstantDecl");
 			json::dump("##  ", list);
 			return;
 		}
 
-		auto name     = list.get_item("name", 0).value();
-		auto qualType = list.get_item("qualType", 1).value();
+		std::string name     = list.get_first_item("name", 0).value().value();
+		std::string qualType = list.get_first_item("qualType", 1).value().value();
 
 		if (m_context->m_qualType != qualType) {
 			m_context->m_qualType = qualType;
 			m_context->m_value    = 0;
 		}
 		std::string value;
-		if (list.find_item("kind", "ConstantExpr", 9)) {
-			auto const_expr = list.get_object("kind", "ConstantExpr", 9);
-			value = const_expr.get_item("value", 0).value();
+		if (list.find_first_item("kind", "ConstantExpr", 9)) {
+			auto const_expr = list.get_first_object("kind", "ConstantExpr", 9).value();
+			value = const_expr.get_first_item("value", 0).value().value();
 			m_context->m_value = stoi(value);
 		} else {
 			value = std::to_string(m_context->m_value++);

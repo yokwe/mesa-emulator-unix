@@ -496,7 +496,7 @@ void token_list_t::set_path_name() {
 	set_path_name.set(m_list);
 }
 
-void token_list_t::normalize() {
+void token_list_t::remove_empty_object_array() {
 	for(auto i = m_list.begin(); i != m_list.end(); i++) {
 		if (i->is_start_object() && (i + 1)->is_end_object()) {
 			i = m_list.erase(i, i + 2); // erase element [i, i + 2)
@@ -505,116 +505,138 @@ void token_list_t::normalize() {
 			i = m_list.erase(i, i + 2); // erase element [i, i + 2)
 		}
 	}
-
-	set_path_name();
 }
 
 
+std::optional<token_list_t> token_list_t::get_first_object(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const {
+	// special case
+	if (begin == end) return std::nullopt;
 
-std::vector<token_t> token_list_t::get_items(const_iterator begin, const std::string& name, int max_nest_level) const {
-	std::vector<token_t> result;
+	// sanity check
+	assert(0 <= max_nest_level);
+	if (begin->is_start_object()) {
+		assert((end - 1)->is_end_object());
+	} else if (begin->is_start_array())	{
+		assert((end - 1)->is_end_array());
+	} else {
+		assert(false);
+	}
 
-	auto end   = m_list.cend();
-
-	int nest_level = begin->is_start() ? -1 : 0;
-	for(auto i = begin; i != end; i++) {
+	std::vector<std::pair<const_iterator, const_iterator>> children;
+	for(auto i = begin + 1; i != end - 1; i++) {
 		const token_t& token = *i;
 		if (token.is_item()) {
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				if (token.name() == name) result.push_back(token);
+			if (token.name() == name && token.value() == value) {
+				return token_list_t(begin, end);
 			}
 		} else if (token.is_start()) {
-			nest_level++;
-		} else if (token.is_end()) {
-			nest_level--;
+			auto a = i;
+			int nest = 0;
+			while(i != end) {
+				if (i->is_start()) nest++;
+				if (i->is_end())   nest--;
+				if (nest == 0) break;
+				i++;
+			}
+			auto b = i + 1;
+			children.emplace_back(a, b);
 		} else {
 			assert(false);
 		}
-
-		// leave loop if exit from start nest level
-		if (nest_level < 0) break;
 	}
 
-	return result;
+	if (max_nest_level == 0) return std::nullopt;
+	for(const auto& pair: children) {
+		auto result = get_first_object(pair.first, pair.second, name, value, max_nest_level - 1);
+		if (result.has_value()) return result;
+	}
+
+	return std::nullopt;
 }
+std::optional<token_t>      token_list_t::get_first_item  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const  {
+	// special case
+	if (begin == end) return std::nullopt;
 
-bool token_list_t::find_item(const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const {
-	auto end   = m_list.cend();
+	// sanity check
+	assert(0 <= max_nest_level);
+	if (begin->is_start_object()) {
+		assert((end - 1)->is_end_object());
+	} else if (begin->is_start_array())	{
+		assert((end - 1)->is_end_array());
+	} else {
+		assert(false);
+	}
 
-	int nest_level = begin->is_start() ? -1 : 0;
-	for(auto i = begin; i != end; i++) {
+	std::vector<std::pair<const_iterator, const_iterator>> children;
+	for(auto i = begin + 1; i != end - 1; i++) {
 		const token_t& token = *i;
 		if (token.is_item()) {
-			if (0 <= nest_level && nest_level <= max_nest_level) {
-				if (token.name() == name && token.value() == value) return true;
-			}
+			if (token.name() == name) return token;
 		} else if (token.is_start()) {
-			nest_level++;
-		} else if (token.is_end()) {
-			nest_level--;
+			auto a = i;
+			int nest = 0;
+			while(i != end) {
+				if (i->is_start()) nest++;
+				if (i->is_end())   nest--;
+				if (nest == 0) break;
+				i++;
+			}
+			auto b = i + 1;
+			children.emplace_back(a, b);
 		} else {
 			assert(false);
 		}
-
-		// leave loop if exit from start nest level
-		if (nest_level < 0) break;
 	}
+
+	if (max_nest_level == 0) return std::nullopt;
+	for(const auto& pair: children) {
+		auto result = get_first_item(pair.first, pair.second, name, max_nest_level - 1);
+		if (result.has_value()) return result;
+	}
+
+	return std::nullopt;
+}
+bool     token_list_t::find_first_item  (const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const  {
+	// special case
+	if (begin == end) return false;
+
+	// sanity check
+	assert(0 <= max_nest_level);
+	if (begin->is_start_object()) {
+		assert((end - 1)->is_end_object());
+	} else if (begin->is_start_array())	{
+		assert((end - 1)->is_end_array());
+	} else {
+		assert(false);
+	}
+
+	std::vector<std::pair<const_iterator, const_iterator>> children;
+	for(auto i = begin + 1; i != end - 1; i++) {
+		const token_t& token = *i;
+		if (token.is_item()) {
+			if (token.name() == name && token.value() == value) return true;
+		} else if (token.is_start()) {
+			auto a = i;
+			int nest = 0;
+			while(i != end) {
+				if (i->is_start()) nest++;
+				if (i->is_end())   nest--;
+				if (nest == 0) break;
+				i++;
+			}
+			auto b = i + 1;
+			children.emplace_back(a, b);
+		} else {
+			assert(false);
+		}
+	}
+
+	if (max_nest_level == 0) return false;
+	for(const auto& pair: children) {
+		if (find_first_item(pair.first, pair.second, name, value, max_nest_level - 1)) return true;
+	}
+
 	return false;
-}
-
-std::vector<token_list_t> token_list_t::get_objects(const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const {
-	std::vector<token_list_t> result;
-
-	auto end = m_list.cend();
-
-	int nest_level = begin->is_start() ? -1 : 0;
-
-	for(const_iterator i = begin; i != end; i++) {
-		const token_t& token = *i;
-
-		if (token.is_item()) {
-			//
-		} else if (token.is_start()) {
-			nest_level++;
-
-			if (token.is_start_object()) {
-				if (0 <= nest_level && nest_level <= max_nest_level) {
-					bool found = find_item(i, name, value, 0);
-					if (found) {
-						token_list_t object;
-
-						// copy this object
-						int nest = 0;
-						while(i != end) {
-							if (i->is_start_object()) nest++;
-							if (i->is_end_object())   nest--;
-
-							object.push_back(*i);
-
-							if (nest == 0) break;
-							i++;
-						}
-
-						object.normalize();
-
-						// append object to result
-						result.push_back(object);
-
-						nest_level--;
-					}
-				}
-			}
-		} else if (token.is_end()) {
-			nest_level--;
-		} else {
-			assert(false);
-		}
-
-		// leave loop if exit from start nest level
-		if (nest_level < 0) break;
-	}
-
-	return result;
 }
 
 

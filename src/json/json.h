@@ -276,15 +276,18 @@ public:
 class token_list_t {
 	std::vector<token_t> m_list;
 public:
-	token_list_t() {}
-	token_list_t(const std::vector<token_t>& list) : m_list(list) {}
-
 	// type
 	using iterator        = decltype(m_list)::iterator;
 	using const_iterator  = decltype(m_list)::const_iterator;
 	using size_type       = decltype(m_list)::size_type;
 	using reference       = decltype(m_list)::reference;
 	using const_reference = decltype(m_list)::const_reference;
+
+	token_list_t() {}
+	token_list_t(const std::vector<token_t>& list) : m_list(list) {}
+	token_list_t(const_iterator begin, const_iterator end) {
+		std::copy(begin, end, std::back_inserter(m_list));
+	}
 
 	// methods from m_list
 	// iterator
@@ -392,53 +395,30 @@ public:
 	// normalize remove empty object and array and set correct path and name
 	//
 	void set_path_name();
-	void normalize();
-
-	//
-	// get_object returns list of object that contains item.name() == name && item.value() == value within max_nest_level
-	//   if there is no such object, this method returns empty std::vector
-	//
-	std::vector<token_list_t> get_objects(const std::string& name, const std::string& value, int max_nest_level) const {
-		return get_objects(m_list.cbegin(), name, value, max_nest_level);
-	}
-	token_list_t get_object(const std::string& name, const std::string& value, int max_nest_level) const {
-		auto list = get_objects(name, value, max_nest_level);
-		if (list.size() == 1) {
-			return list.front();
-		} else {
-			const Logger logger = Logger::getLogger("json.h");
-			logger.error("%s  list %d", __func__, list.size());
-			ERROR();
-			return token_list_t();
-		}
+	void remove_empty_object_array();
+	void normalize() {
+		remove_empty_object_array();
+		set_path_name();
 	}
 
 	//
-	// get_item returns token_t contains item.name() == name within max_nest_level
-	//   if there is no such item, this method returns token_t.is_undefined() == true
+	// get_first_XXX
 	//
-	std::vector<token_t> get_items(const std::string& name, int max_nest_level) const {
-		return get_items(m_list.cbegin(), name, max_nest_level);
+	std::optional<token_list_t> get_first_object(const std::string& name, const std::string& value, int max_nest_level) const {
+		return get_first_object(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
 	}
-	bool find_item(const std::string& name, const std::string& value, int max_nest_level) const {
-		return find_item(m_list.cbegin(), name, value, max_nest_level);
+	bool                        find_first_item (const std::string& name, const std::string& value, int max_nest_level) const {
+		return find_first_item(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
 	}
-	token_t get_item(const std::string& name, int max_nest_level) const {
-		auto list = get_items(name, max_nest_level);
-		if (list.size() == 1) {
-			return list.front();
-		} else {
-			const Logger logger = Logger::getLogger("json.h");
-			logger.error("%s  list %d", __func__, list.size());
-			ERROR();
-			return token_t();
-		}
+	std::optional<token_t>      get_first_item  (const std::string& name, int max_nest_level) const {
+		return get_first_item(m_list.cbegin(), m_list.cend(), name, max_nest_level);
 	}
 
 private:
-	std::vector<token_list_t> get_objects(const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const;
-	std::vector<token_t>      get_items  (const_iterator begin, const std::string& name,                           int max_nest_level) const;
-	bool                      find_item  (const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const;
+	std::optional<token_list_t> get_first_object(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
+	bool                        find_first_item (const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
+	std::optional<token_t>      get_first_item  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const;
+
 };
 
 

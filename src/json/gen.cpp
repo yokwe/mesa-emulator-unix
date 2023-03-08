@@ -118,8 +118,8 @@ struct peek_consumer_t {
 			return;
 		}
 
-		std::string name     = list.get_first_item("name", 0).value().value();
-		std::string qualType = list.get_first_item("qualType", 1).value().value();
+		std::string name     = list.get_first_item("name", 0).value();
+		std::string qualType = list.get_first_item("qualType", 1).value();
 
 		if (m_context->m_qualType != qualType) {
 			m_context->m_qualType = qualType;
@@ -127,8 +127,8 @@ struct peek_consumer_t {
 		}
 		std::string value;
 		if (list.find_first_item("kind", "ConstantExpr", 9)) {
-			auto const_expr = list.get_first_object("kind", "ConstantExpr", 9).value();
-			value = const_expr.get_first_item("value", 0).value().value();
+			auto const_expr = list.get_first_object("kind", "ConstantExpr", 9);
+			value = const_expr.get_first_item("value", 0).value();
 			m_context->m_value = stoi(value);
 		} else {
 			value = std::to_string(m_context->m_value++);

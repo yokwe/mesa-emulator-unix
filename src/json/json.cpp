@@ -508,7 +508,7 @@ void token_list_t::remove_empty_object_array() {
 }
 
 
-std::optional<token_list_t> token_list_t::get_first_object(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const {
+std::optional<token_list_t> token_list_t::get_first_object_opt(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const {
 	// special case
 	if (begin == end) return std::nullopt;
 
@@ -547,13 +547,13 @@ std::optional<token_list_t> token_list_t::get_first_object(const_iterator begin,
 
 	if (max_nest_level == 0) return std::nullopt;
 	for(const auto& pair: children) {
-		auto result = get_first_object(pair.first, pair.second, name, value, max_nest_level - 1);
+		auto result = get_first_object_opt(pair.first, pair.second, name, value, max_nest_level - 1);
 		if (result.has_value()) return result;
 	}
 
 	return std::nullopt;
 }
-std::optional<token_t>      token_list_t::get_first_item  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const  {
+std::optional<token_t>      token_list_t::get_first_item_opt  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const  {
 	// special case
 	if (begin == end) return std::nullopt;
 
@@ -590,7 +590,7 @@ std::optional<token_t>      token_list_t::get_first_item  (const_iterator begin,
 
 	if (max_nest_level == 0) return std::nullopt;
 	for(const auto& pair: children) {
-		auto result = get_first_item(pair.first, pair.second, name, max_nest_level - 1);
+		auto result = get_first_item_opt(pair.first, pair.second, name, max_nest_level - 1);
 		if (result.has_value()) return result;
 	}
 

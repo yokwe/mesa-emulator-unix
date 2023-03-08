@@ -408,22 +408,22 @@ public:
 		return find_first_item(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
 	}
 	std::optional<token_list_t> get_first_object_opt(const std::string& name, const std::string& value, int max_nest_level) const {
-		return get_first_object(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
+		return get_first_object_opt(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
 	}
 	token_list_t                get_first_object(const std::string& name, const std::string& value, int max_nest_level) const {
 		return get_first_object_opt(name, value, max_nest_level).value();
 	}
 	std::optional<token_t>      get_first_item_opt  (const std::string& name, int max_nest_level) const {
-		return get_first_item(m_list.cbegin(), m_list.cend(), name, max_nest_level);
+		return get_first_item_opt(m_list.cbegin(), m_list.cend(), name, max_nest_level);
 	}
 	token_t                     get_first_item  (const std::string& name, int max_nest_level) const {
 		return get_first_item_opt(name, max_nest_level).value();
 	}
 
 private:
-	std::optional<token_list_t> get_first_object(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
-	bool                        find_first_item (const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
-	std::optional<token_t>      get_first_item  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const;
+	bool                        find_first_item     (const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
+	std::optional<token_list_t> get_first_object_opt(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
+	std::optional<token_t>      get_first_item_opt  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const;
 
 };
 

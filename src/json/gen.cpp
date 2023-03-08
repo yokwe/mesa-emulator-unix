@@ -112,7 +112,7 @@ struct peek_consumer_t {
 		}
 		assert(list.front().is_start_object());
 
-		if (!list.find_item("kind", "EnumConstantDecl", 99)) {
+		if (!list.find_item("kind", "EnumConstantDecl", 0)) {
 			logger.info("no EnumConstantDecl");
 			json::dump("##  ", list);
 			return;
@@ -126,8 +126,8 @@ struct peek_consumer_t {
 			m_context->m_value    = 0;
 		}
 		std::string value;
-		if (list.find_item("kind", "ConstantExpr", 99)) {
-			auto const_expr = list.get_object("kind", "ConstantExpr");
+		if (list.find_item("kind", "ConstantExpr", 9)) {
+			auto const_expr = list.get_object("kind", "ConstantExpr", 9);
 			value = const_expr.get_item("value", 0).value();
 			m_context->m_value = stoi(value);
 		} else {

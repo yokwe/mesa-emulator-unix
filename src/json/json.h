@@ -398,11 +398,11 @@ public:
 	// get_object returns list of object that contains item.name() == name && item.value() == value within max_nest_level
 	//   if there is no such object, this method returns empty std::vector
 	//
-	std::vector<token_list_t> get_objects(const std::string& name, const std::string& value) const {
-		return get_objects(m_list.cbegin(), name, value);
+	std::vector<token_list_t> get_objects(const std::string& name, const std::string& value, int max_nest_level) const {
+		return get_objects(m_list.cbegin(), name, value, max_nest_level);
 	}
-	token_list_t get_object(const std::string& name, const std::string& value) const {
-		auto list = get_objects(name, value);
+	token_list_t get_object(const std::string& name, const std::string& value, int max_nest_level) const {
+		auto list = get_objects(name, value, max_nest_level);
 		if (list.size() == 1) {
 			return list.front();
 		} else {
@@ -417,13 +417,13 @@ public:
 	// get_item returns token_t contains item.name() == name within max_nest_level
 	//   if there is no such item, this method returns token_t.is_undefined() == true
 	//
-	std::vector<token_t> get_items(const std::string& name, int max_nest_level = 0) const {
+	std::vector<token_t> get_items(const std::string& name, int max_nest_level) const {
 		return get_items(m_list.cbegin(), name, max_nest_level);
 	}
-	bool find_item(const std::string& name, const std::string& value, int max_nest_level = 0) const {
+	bool find_item(const std::string& name, const std::string& value, int max_nest_level) const {
 		return find_item(m_list.cbegin(), name, value, max_nest_level);
 	}
-	token_t get_item(const std::string& name, int max_nest_level = 0) const {
+	token_t get_item(const std::string& name, int max_nest_level) const {
 		auto list = get_items(name, max_nest_level);
 		if (list.size() == 1) {
 			return list.front();
@@ -436,9 +436,9 @@ public:
 	}
 
 private:
-	std::vector<token_list_t> get_objects(const_iterator begin, const std::string& name, const std::string& value) const;
-	std::vector<token_t>      get_items  (const_iterator begin, const std::string& name,                           int max_nest_level = 0) const;
-	bool                      find_item  (const_iterator begin, const std::string& name, const std::string& value, int max_nest_level = 0) const;
+	std::vector<token_list_t> get_objects(const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const;
+	std::vector<token_t>      get_items  (const_iterator begin, const std::string& name,                           int max_nest_level) const;
+	bool                      find_item  (const_iterator begin, const std::string& name, const std::string& value, int max_nest_level) const;
 };
 
 

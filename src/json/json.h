@@ -444,23 +444,20 @@ private:
 		}
 
 		std::vector<std::pair<const_iterator, const_iterator>> children;
-		for(auto i = begin + 1; i != end - 1; i++) {
-			const token_t& token = *i;
-			if (token.is_item()) {
-				if (token.name() == name && token.value() == value) return true;
-			} else if (token.is_start()) {
-				auto a = i;
-				int nest = 0;
-				while(i != end) {
-					if (i->is_start()) nest++;
-					if (i->is_end())   nest--;
-					if (nest == 0) break;
-					i++;
+		{
+			int nest = 0;
+			const_iterator a;
+			for(auto i = begin + 1; i != end - 1; i++) {
+				const token_t& token = *i;
+				if (token.is_start()) {
+					if (nest == 0) a = i;
+					nest++;
+				} else if (token.is_end()) {
+					nest--;
+					if (nest == 0) children.emplace_back(a, i + 1);
+				} else {
+					if (nest == 0 && token.name() == name && token.value() == value) return true;
 				}
-				auto b = i + 1;
-				children.emplace_back(a, b);
-			} else {
-				assert(false);
 			}
 		}
 
@@ -490,25 +487,20 @@ private:
 		}
 
 		std::vector<std::pair<const_iterator, const_iterator>> children;
-		for(auto i = begin + 1; i != end - 1; i++) {
-			const token_t& token = *i;
-			if (token.is_item()) {
-				if (token.name() == name && token.value() == value) {
-					return token_list_t(begin, end);
+		{
+			int nest = 0;
+			const_iterator a;
+			for(auto i = begin + 1; i != end - 1; i++) {
+				const token_t& token = *i;
+				if (token.is_start()) {
+					if (nest == 0) a = i;
+					nest++;
+				} else if (token.is_end()) {
+					nest--;
+					if (nest == 0) children.emplace_back(a, i + 1);
+				} else {
+					if (nest == 0 && token.name() == name && token.value() == value) return token_list_t(begin, end);
 				}
-			} else if (token.is_start()) {
-				auto a = i;
-				int nest = 0;
-				while(i != end) {
-					if (i->is_start()) nest++;
-					if (i->is_end())   nest--;
-					if (nest == 0) break;
-					i++;
-				}
-				auto b = i + 1;
-				children.emplace_back(a, b);
-			} else {
-				assert(false);
 			}
 		}
 
@@ -539,23 +531,20 @@ private:
 		}
 
 		std::vector<std::pair<const_iterator, const_iterator>> children;
-		for(auto i = begin + 1; i != end - 1; i++) {
-			const token_t& token = *i;
-			if (token.is_item()) {
-				if (token.name() == name) return token;
-			} else if (token.is_start()) {
-				auto a = i;
-				int nest = 0;
-				while(i != end) {
-					if (i->is_start()) nest++;
-					if (i->is_end())   nest--;
-					if (nest == 0) break;
-					i++;
+		{
+			int nest = 0;
+			const_iterator a;
+			for(auto i = begin + 1; i != end - 1; i++) {
+				const token_t& token = *i;
+				if (token.is_start()) {
+					if (nest == 0) a = i;
+					nest++;
+				} else if (token.is_end()) {
+					nest--;
+					if (nest == 0) children.emplace_back(a, i + 1);
+				} else {
+					if (nest == 0 && token.name() == name) return token;
 				}
-				auto b = i + 1;
-				children.emplace_back(a, b);
-			} else {
-				assert(false);
 			}
 		}
 

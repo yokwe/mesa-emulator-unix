@@ -404,29 +404,171 @@ public:
 	//
 	// get_first_XXX
 	//
-	bool         find_first_item (const std::string& name, const std::string& value, int max_nest_level) const {
-		return find_first_item(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
+	template<int N>
+	bool find_first_item (const std::string& name, const std::string& value) const {
+		return find_first_item<N>(m_list.cbegin(), m_list.cend(), name, value);
 	}
-	// without opt
-	token_list_t get_first_object(const std::string& name, const std::string& value, int max_nest_level) const {
-		return get_first_object_opt(name, value, max_nest_level).value();
+	// get_first_XXX_opt
+	template<int N>
+	std::optional<token_list_t> get_first_object_opt(const std::string& name, const std::string& value) const {
+		return get_first_object_opt<N>(m_list.cbegin(), m_list.cend(), name, value);
 	}
-	token_t      get_first_item  (const std::string& name, int max_nest_level) const {
-		return get_first_item_opt(name, max_nest_level).value();
+	template<int N>
+	std::optional<token_t> get_first_item_opt(const std::string& name) const {
+		return get_first_item_opt<N>(m_list.cbegin(), m_list.cend(), name);
 	}
-	// with opt
-	std::optional<token_list_t> get_first_object_opt(const std::string& name, const std::string& value, int max_nest_level) const {
-		return get_first_object_opt(m_list.cbegin(), m_list.cend(), name, value, max_nest_level);
+	// get_first_XXX
+	template<int N>
+	token_list_t get_first_object(const std::string& name, const std::string& value) const {
+		return get_first_object_opt<N>(name, value).value();
 	}
-	std::optional<token_t>      get_first_item_opt  (const std::string& name, int max_nest_level) const {
-		return get_first_item_opt(m_list.cbegin(), m_list.cend(), name, max_nest_level);
+	template<int N>
+	token_t get_first_item(const std::string& name) const {
+		return get_first_item_opt<N>(name).value();
 	}
 
 private:
-	bool                        find_first_item     (const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
-	std::optional<token_list_t> get_first_object_opt(const_iterator begin, const_iterator end, const std::string& name, const std::string& value, int max_nest_level) const;
-	std::optional<token_t>      get_first_item_opt  (const_iterator begin, const_iterator end, const std::string& name, int max_nest_level) const;
+	template<int N>
+	bool find_first_item (const_iterator begin, const_iterator end, const std::string& name, const std::string& value) const  {
+		// special case
+		if (begin == end) return false;
 
+		// sanity check
+		static_assert(0 <= N);
+		if (begin->is_start_object()) {
+			assert((end - 1)->is_end_object());
+		} else if (begin->is_start_array())	{
+			assert((end - 1)->is_end_array());
+		} else {
+			assert(false);
+		}
+
+		std::vector<std::pair<const_iterator, const_iterator>> children;
+		for(auto i = begin + 1; i != end - 1; i++) {
+			const token_t& token = *i;
+			if (token.is_item()) {
+				if (token.name() == name && token.value() == value) return true;
+			} else if (token.is_start()) {
+				auto a = i;
+				int nest = 0;
+				while(i != end) {
+					if (i->is_start()) nest++;
+					if (i->is_end())   nest--;
+					if (nest == 0) break;
+					i++;
+				}
+				auto b = i + 1;
+				children.emplace_back(a, b);
+			} else {
+				assert(false);
+			}
+		}
+
+		if constexpr (N == 0) {
+			return false;
+		} else {
+			for(const auto& pair: children) {
+				if (find_first_item<N - 1>(pair.first, pair.second, name, value)) return true;
+			}
+			return false;
+		}
+	}
+
+	template<int N>
+	std::optional<token_list_t> get_first_object_opt(const_iterator begin, const_iterator end, const std::string& name, const std::string& value) const {
+		// special case
+		if (begin == end) return std::nullopt;
+
+		// sanity check
+		static_assert(0 <= N);
+		if (begin->is_start_object()) {
+			assert((end - 1)->is_end_object());
+		} else if (begin->is_start_array())	{
+			assert((end - 1)->is_end_array());
+		} else {
+			assert(false);
+		}
+
+		std::vector<std::pair<const_iterator, const_iterator>> children;
+		for(auto i = begin + 1; i != end - 1; i++) {
+			const token_t& token = *i;
+			if (token.is_item()) {
+				if (token.name() == name && token.value() == value) {
+					return token_list_t(begin, end);
+				}
+			} else if (token.is_start()) {
+				auto a = i;
+				int nest = 0;
+				while(i != end) {
+					if (i->is_start()) nest++;
+					if (i->is_end())   nest--;
+					if (nest == 0) break;
+					i++;
+				}
+				auto b = i + 1;
+				children.emplace_back(a, b);
+			} else {
+				assert(false);
+			}
+		}
+
+		if constexpr (N == 0) {
+			return std::nullopt;
+		} else {
+			for(const auto& pair: children) {
+				auto result = get_first_object_opt<N - 1>(pair.first, pair.second, name, value);
+				if (result.has_value()) return result;
+			}
+			return std::nullopt;
+		}
+	}
+
+	template<int N>
+	std::optional<token_t> get_first_item_opt (const_iterator begin, const_iterator end, const std::string& name) const  {
+		// special case
+		if (begin == end) return std::nullopt;
+
+		// sanity check
+		static_assert(0 <= N);
+		if (begin->is_start_object()) {
+			assert((end - 1)->is_end_object());
+		} else if (begin->is_start_array())	{
+			assert((end - 1)->is_end_array());
+		} else {
+			assert(false);
+		}
+
+		std::vector<std::pair<const_iterator, const_iterator>> children;
+		for(auto i = begin + 1; i != end - 1; i++) {
+			const token_t& token = *i;
+			if (token.is_item()) {
+				if (token.name() == name) return token;
+			} else if (token.is_start()) {
+				auto a = i;
+				int nest = 0;
+				while(i != end) {
+					if (i->is_start()) nest++;
+					if (i->is_end())   nest--;
+					if (nest == 0) break;
+					i++;
+				}
+				auto b = i + 1;
+				children.emplace_back(a, b);
+			} else {
+				assert(false);
+			}
+		}
+
+		if constexpr (N == 0) {
+			return std::nullopt;
+		} else {
+			for(const auto& pair: children) {
+				auto result = get_first_item_opt<N - 1>(pair.first, pair.second, name);
+				if (result.has_value()) return result;
+			}
+			return std::nullopt;
+		}
+	}
 };
 
 

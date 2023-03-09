@@ -499,7 +499,11 @@ private:
 					nest--;
 					if (nest == 0) children.emplace_back(a, i + 1);
 				} else {
-					if (nest == 0 && token.name() == name && token.value() == value) return token_list_t(begin, end);
+					if (nest == 0 && token.name() == name && token.value() == value) {
+						token_list_t result(begin, end);
+						result.normalize();
+						return result;
+					}
 				}
 			}
 		}

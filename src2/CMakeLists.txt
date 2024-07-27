@@ -57,9 +57,6 @@ else()
   message(FATAL_ERROR "Unknown system ${HOST_SYSTEM}")
 endif()
 
-# common library
-link_libraries (log4cxx)
-
 # add subdirectory
 add_subdirectory (util	 ../build/util)
 add_subdirectory (mesa	 ../build/mesa)

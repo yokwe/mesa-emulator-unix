@@ -30,17 +30,17 @@
 
 #pragma once
 
-#include <stdint>
+#include <cstdint>
 
 namespace mesa {
 
-using INT8  = int8_t;
-using INT16 = int16_t;
-using INT32 = int32_t;
+using INT8  = std::int8_t;
+using INT16 = std::int16_t;
+using INT32 = std::int32_t;
 
-using CARD8  = uint8_t;
-using CARD16 = uint16_t;
-using CARD32 = uint32_t;
+using CARD8  = std::uint8_t;
+using CARD16 = std::uint16_t;
+using CARD32 = std::uint32_t;
 
 using POINTER       = CARD16;
 using LONG_POINTER  = CARD32;

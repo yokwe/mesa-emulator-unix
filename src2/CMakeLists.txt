@@ -62,4 +62,5 @@ link_libraries (log4cxx)
 
 # add subdirectory
 add_subdirectory (util	 ../build/util)
+add_subdirectory (mesa	 ../build/mesa)
 add_subdirectory (main   ../build/main)

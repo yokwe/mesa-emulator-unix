@@ -31,60 +31,29 @@
 
 #pragma once
 
+#include "../util/Util.h"
+
+#include "../mesa/Constant.h"
 #include "../mesa/Type.h"
 
 namespace mesa {
 
 class Memory {
 public:
-	 static CARD32 PAGE_SIZE = 256;
+	 Memory(): vpSize(0), rpSize(0), realMemory(0), memoryFlags(0) {}
 
-	 Memory(int vmBits, int rmBits, CARD16 ioRegionPage);
+	 void initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
 
-	 CARD16* getAddressk(CARD32 va) {
-		auto vp = va / PAGE_SIZE;
-		auto of = va % PAGE_SIZE;
-
-		auto flag = memoryFlags[vp];
-		if (flag.vacant) ERROR();
-
-		return realMemory + flag.offset() + of;
-	 }
+	 CARD16* getAddressk(CARD32 va);
+	 CARD16* fetch(CARD32 va);
+	 CARD16* store(CARD32 va);
 
 	 int isVacant(CARD32 va) {
-		 return memoryFlag[va / PAGE_SIZE].vacant;
+		 return memoryFlags[va / PageSize].vacant;
 	 }
 
-	 CARD16* fetch(CARD32 va) {
-		auto vp = va / PAGE_SIZE;
-		auto of = va % PAGE_SIZE;
-
-		Flags flag = memoryFlags[vp];
-		if (flag.vacant) PageFault(va);
-		if (!flag.fetch) {
-			flag.fetch = 1;
-			memoryFlags[vp] = flag;
-		}
-
-		return realMemory + flag.offset() + of;
-	 }
-	 CARD16* store(CARD32 va) {
-		const CARD32 vp = va / PAGE_SIZE;
-		const CARD32 of = va % PAGE_SIZE;
-
-		Flags flags = memoryFlags[vp];
-		if (flags.vacant) PageFault(va);
-		if (flags.protect) WriteProtectFault(va)
-		if (!flags.store) {
-			flag.store = 1;
-			memoryFlags[vp] = flags;
-		}
-
-		return realMemory + flag.offset() + of;
-	 }
-
-	 static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
-	 	return (ptrA / PAGE_SIZE) == (ptrB / PAGE_SIZE);
+	 static inline int isSamePage(CARD32 vaA, CARD32 vaB) {
+	 	return (vaA / PageSize) == (vaB / PageSize);
 	 }
 
 private:
@@ -113,7 +82,7 @@ private:
 	 	void clear() {
 	 		u0 = 0;
 	 	}
-	 	void vacant() {
+	 	void setVacant() {
 	 		clear();
 	 		vacant = 1;
 	 	}
@@ -128,8 +97,8 @@ private:
 	 int vpSize; // number of virtual page
 	 int rpSize; // number of real page
 
-	 CARD16[] realMemory;  // rpSize * PAGE_SIZE
-	 Flags[]  memoryFlags; // vpSize
+	 CARD16 *realMemory;  // rpSize * PageSize
+	 Flags  *memoryFlags; // vpSize
 };
 
 }

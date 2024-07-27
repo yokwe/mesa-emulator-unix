@@ -28,4 +28,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#pragma once
+#include "../mesa/Type.h"
+#include "../mesa/Constant.h"
+#include "../mesa/Function.h"
+
+#include "../mesa/Memory.h"
+
+#include "../util/Util.h"
+
+static const util::Logger logger(__FILE__);
+
+namespace mesa {
+
+mesa::CARD16* Memory::getAddressk(CARD32 va) {
+	auto vp = va / PageSize;
+	auto of = va % PageSize;
+
+	auto flag = memoryFlags[vp];
+	if (flag.vacant) ERROR();
+
+	return realMemory + flag.offset() + of;
+}
+
+CARD16* Memory::fetch(CARD32 va) {
+	auto vp = va / PageSize;
+	auto of = va % PageSize;
+
+	Flags flag = memoryFlags[vp];
+	if (flag.vacant) PageFault(va);
+	if (!flag.fetch) {
+		flag.fetch = 1;
+		memoryFlags[vp] = flag;
+	}
+
+	return realMemory + flag.offset() + of;
+}
+CARD16* Memory::store(CARD32 va) {
+	const CARD32 vp = va / PageSize;
+	const CARD32 of = va % PageSize;
+
+	Flags flags = memoryFlags[vp];
+	if (flags.vacant) PageFault(va);
+	if (flags.protect) WriteProtectFault(va);
+	if (!flags.store) {
+		flags.store = 1;
+		memoryFlags[vp] = flags;
+	}
+
+	return realMemory + flags.offset() + of;
+}
+
+}

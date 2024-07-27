@@ -33,10 +33,12 @@
 #include <string>
 #include <log4cxx/logger.h>
 
-namespace util {
 
 #define DEBUG_TRACE() logger.debug("****  TRACE  %-20s %5d %s", __FUNCTION__, __LINE__, __FILE__)
 
+#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); util::logBackTrace(); throw util::ErrorError(__FUNCTION__, __FILE__, __LINE__); }
+
+namespace util {
 
 template<typename T>
 auto std_sprintf_convert_(T&& value) {
@@ -50,6 +52,9 @@ auto std_sprintf_convert_(T&& value) {
 	}
 }
 
+//
+// helper template for Logger
+//
 template <typename ... Args>
 void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&& ... args) {
 	char buf[bufferSize];
@@ -80,10 +85,10 @@ public:
 	Logger(const Logger& that) : myLogger(that.myLogger) {}
 
 	enum class Level {
-		DEBUG, INFO, WARN, ERROR, FATAL,
+		DEBUG, INFO, WARN, ERROR, FATAL, OFF,
 	};
 
-	static void pushLevel(Level newValue);
+	static void pushLevel(Level newValue = Level::OFF);
 	static void popLevel();
 
 	// std::string
@@ -154,8 +159,6 @@ public:
 
 	ErrorError(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
 };
-
-#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw ErrorError(__FUNCTION__, __FILE__, __LINE__); }
 
 }
 

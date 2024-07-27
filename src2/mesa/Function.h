@@ -28,29 +28,59 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <string>
+#pragma once
 
-#include "../util/Util.h"
+#include "../mesa/Type.h"
 
-static const util::Logger logger(__FILE__);
+namespace mesa {
 
+// Block Transfer
 
-int main(int /*argc*/, char** /*argv*/) {
-	logger.info("START");
+// Control Transfer
 
-	util::setSignalHandler();
+// 9.3 Control Transfer Primitives
+// FIXME extern void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag);
 
-	DEBUG_TRACE();
+// 9.5.1 Trap Routines
+extern void BoundsTrap();
+extern void BreakTrap();
+// FIXME extern void CodeTrap(GFTHandle gfi);
+// FIXME sextern void ControlTrap(ShortControlLink src);
+extern void DivCheckTrap();
+extern void DivZeroTrap();
+extern void EscOpcodeTrap(CARD8 opcode);
+extern void InterruptError();
+extern void OpcodeTrap(CARD8 opcode);
+extern void PointerTrap();
+extern void ProcessTrap();
+extern void RescheduleError();
+extern void StackError();
+// FIXME extern void UnboundTrap(ControlLink dst);
+extern void HardwareError();
 
-	logger.debug("%3d", 3);
+// Process
 
-	util::logBackTrace();
+// 10.4.1 Scheduler
+extern void Reschedule(int preemption = 0);
 
-	logger.info("AAA");
-	util::Logger::pushLevel();
-	logger.info("BBB");
-	util::Logger::popLevel();
-	logger.info("CCC");
+// 10.4.2.1 Saving and Loading Process State
+extern void SaveProcess(int preemption);
+// FIXME extern LocalFrameHandle LoadProcess();
 
-	logger.info("STOP");
+// 10.4.2.2 State Vector Allocation
+extern int EmptyState(CARD16 pri);
+
+// 10.4.3 Faults
+// FIXME extern void FrameFault(FSIndex fsi);
+extern void PageFault(LONG_POINTER ptr);
+extern void WriteProtectFault(LONG_POINTER ptr);
+
+// 10.4.4.2 Interrupt Processing
+extern int ProcessInterrupt();
+extern int CheckForInterrupt();
+
+// 10.4.5 Timeouts
+extern int TimeoutScan();
+extern int CheckForTimeouts();
+
 }

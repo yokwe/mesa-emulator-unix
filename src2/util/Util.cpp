@@ -34,9 +34,16 @@
 //
 
 #include <filesystem>
+#include <stack>
+#include <map>
+#include <utility>
 
 #include <execinfo.h>
 #include <cxxabi.h>
+
+#include <log4cxx/logger.h>
+#include <log4cxx/level.h>
+
 
 #include "Util.h"
 
@@ -45,6 +52,42 @@ static const util::Logger logger(__FILE__);
 
 
 util::Logger::Logger(const char* name) : myLogger(log4cxx::Logger::getLogger(std::filesystem::path(name).stem().string())) {}
+
+// DEBUG, INFO, WARN, ERROR, FATAL
+static std::map<util::Logger::Level, log4cxx::LevelPtr> levelMap = {
+	{util::Logger::Level::DEBUG, log4cxx::Level::getDebug()},
+	{util::Logger::Level::INFO,  log4cxx::Level::getInfo()},
+	{util::Logger::Level::WARN,  log4cxx::Level::getWarn()},
+	{util::Logger::Level::ERROR, log4cxx::Level::getError()},
+	{util::Logger::Level::FATAL, log4cxx::Level::getFatal()},
+	{util::Logger::Level::OFF  , log4cxx::Level::getOff()},
+};
+static log4cxx::LevelPtr toLevelPtr(util::Logger::Level level) {
+	auto it = levelMap.find(level);
+	if (it != levelMap.end()) {
+		// found
+		return it->second;
+	} else {
+		logger.fatal("Unexpected");
+		ERROR();
+	}
+}
+
+static std::stack<log4cxx::LevelPtr> stack;
+
+void util::Logger::pushLevel(Level newLevel) {
+	auto rootLogger = log4cxx::Logger::getRootLogger();
+ 	stack.push(rootLogger->getLevel());
+	rootLogger->setLevel(toLevelPtr(newLevel));
+}
+void util::Logger::popLevel() {
+	if (stack.empty()) {
+		ERROR();
+	}
+	auto rootLogger = log4cxx::Logger::getRootLogger();
+	rootLogger->setLevel(stack.top());
+	stack.pop();
+}
 
 
 static std::string demangle(const char* mangled) {

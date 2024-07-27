@@ -31,28 +31,25 @@
 //#include <stdio.h>
 
 #include <string>
-#include <iostream>
 
-#include <log4cxx/log4cxx.h>
-#include <log4cxx/logger.h>
+#include "../util/Util.h"
 
 
+static const util::Logger logger(__FILE__);
 
-//static log4cxx::LoggerPtr logger(log4cxx::Logger::getRootLogger());
-static const log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("main"));
 
 int main(int /*argc*/, char** /*argv*/) {
-	logger->info("START");
+	logger.info("START");
 
-	logger->debug("aa");
+	util::setSignalHandler();
 
-	std::cout << "STARTX" << "\n";
+	DEBUG_TRACE();
 
-	const std::string abc = "AAA";
-	logger->debug(abc);
+	logger.debug("%3d", 3);
 
-//	logger->debug(abc);
-//	util::hello();
-//	printf("STOP\n");
-	logger->info("STOP");
+	util::logBackTrace();
+
+	DEBUG_TRACE();
+
+	logger.info("STOP");
 }

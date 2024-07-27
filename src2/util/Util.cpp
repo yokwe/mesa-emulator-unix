@@ -33,14 +33,77 @@
 // Util.cpp
 //
 
-#include <stdio.h>
+#include <filesystem>
 
-#include "../util/Util.h"
+#include <execinfo.h>
+#include <cxxabi.h>
 
-namespace util {
+#include "Util.h"
 
-void hello() {
-	printf("hello\n");
+
+static const util::Logger logger(__FILE__);
+
+
+util::Logger::Logger(const char* name) : myLogger(log4cxx::Logger::getLogger(std::filesystem::path(name).stem().string())) {}
+
+
+static std::string demangle(const char* mangled) {
+	char buffer[512];
+	size_t length(sizeof(buffer));
+	int status(0);
+
+	char* demangled = __cxxabiv1::__cxa_demangle(mangled, buffer, &length, &status);
+	if (status != 0) {
+		logger.warn("demange %d %s", status, mangled);
+	}
+
+	std::string ret(demangled);
+	return ret;
 }
 
+void util::logBackTrace() {
+	const int BUFFER_SIZE = 100;
+	void *buffer[BUFFER_SIZE];
+
+	// get void*'s for all entries on the stack
+	int size = backtrace(buffer, BUFFER_SIZE);
+
+	char **msg = backtrace_symbols(buffer, size);
+
+	// print out all the frames
+	for(int i = 0; i < size; i++) {
+		std::string line(msg[i]);
+		auto pos = line.find("_Z");
+		if (pos == std::string::npos) {
+			// contains no mangled name
+			logger.debug("%3d %s", i, msg[i]);
+		} else {
+			// contains mangled name
+			std::string left(line.substr(0, pos));
+			std::string middle;
+			for(; pos < line.size(); pos++) {
+				char c = line.at(pos);
+				if (std::isalnum(c) || c == '_') {
+					middle += c;
+					continue;
+				}
+				break;
+			}
+			std::string right(line.substr(pos));
+			middle = demangle(middle.c_str());
+			logger.debug("%3d %s%s%s", i, left, middle, right);
+		}
+	}
 }
+
+
+static void signalHandler(int signum) {
+	logger.fatal("Error: signal %d:\n", signum);
+	util::logBackTrace();
+	exit(1);
+}
+
+void util::setSignalHandler(int signum) {
+	signal(signum, signalHandler);
+}
+

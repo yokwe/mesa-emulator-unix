@@ -11,11 +11,11 @@ export HOSTNAME
 HOST_OS := $(shell uname -s)
 export HOST_OS
 
-BUILD_DIR := tmp/cmake/${HOSTNAME}
+BUILD_DIR := build
 export BUILD_DIR
 
-LOG_CONFIG := ${BUILD_DIR}/run/debug.properties
-export LOG_CONFIG
+LOG4CXX_CONFIGURATION := ${BUILD_DIR}/run/log4j-config.xml
+export LOG4CXX_CONFIGURATION
 
 # include common part
 include Makefile

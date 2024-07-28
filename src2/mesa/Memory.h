@@ -111,6 +111,7 @@ public:
 	}
 	CARD16* fetch(CARD32 va) {
 		auto vp   = getPage(va);
+		auto page = pageArray[vp];
 		auto flag = flagArray[vp];
 		// check flag
 		if (flag.vacant) PageFault(va);
@@ -120,14 +121,15 @@ public:
 			 flagArray[vp] = flag;
 		}
 
-		return getAddress(va);
+		return page + getOffset(va);
 	}
 	CARD16* store(CARD32 va) {
 		// maintain flags
 		auto vp   = getPage(va);
+		auto page = pageArray[vp];
 		auto flag = flagArray[vp];
 
-		if (flag.vacant) PageFault(va);
+		if (flag.vacant)  PageFault(va);
 		if (flag.protect) WriteProtectFault(va);
 		if (!flag.store) {
 			// maintain flag
@@ -135,11 +137,11 @@ public:
 			flagArray[vp] = flag;
 		}
 
-		return getAddress(va);
+		return page + getOffset(va);
 	}
 
 	int isVacant(CARD32 va) {
-		return flagArray[va / PageSize].vacant;
+		return flagArray[getPage(va)].vacant;
 	}
 
 	//

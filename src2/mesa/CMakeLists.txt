@@ -2,7 +2,7 @@
 # mesa
 #
 
-list(APPEND fileList Dummy.cpp Memory.cpp)
+list(APPEND fileList Dummy.cpp Memory.cpp PrincOps.cpp)
 
 add_library (mesa SHARED ${fileList})
 

@@ -33,51 +33,18 @@
 
 #include <utility>
 
-#include "../util/Util.h"
-
 #include "../mesa/Constant.h"
-#include "../mesa/Type.h"
 #include "../mesa/Function.h"
+
+#include "../mesa/PrincOps.h"
 
 namespace mesa {
 
-// 3.1.1 Virtual Memory Mapping
-//MapFlags: TYPE = MACHINE DEPENDENT RECORD (
-//  reserved (0:0..12) : UNSPEClFIED[0..17777B],
-//  protected (0:13..13) : BOOLEAN,
-//  dirty (0:14..14): BOOLEAN,
-//  referenced (0:15..15): BOOLEAN];
-union MapFlags {
-	CARD16 u0;
-	struct {
-		CARD16 referenced :  1;
-		CARD16 dirty      :  1;
-		CARD16 protect    :  1;
-		CARD16 reserved   : 13;
-	};
-
-	void clear() {
-		u0 = 0;
-	}
-	void setVacant() {
-		referenced = 0;
-		dirty      = 1;
-		protect    = 1;
-		reserved   = 0;
-	}
-	int isVacant() {
-		return !referenced && dirty && protect;
-	}
-};
-
-
-int vpSize; // number of virtual page
-int rpSize; // number of real page
 
 class Memory {
 public:
-	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = 4086; // RealMemoryImplGuam::largestArraySize * WordSize;
-	static const CARD16 DEFAULT_IO_REGION_PAGE   =  128; // See Agent::ioRegionPage
+	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize;
+	static const CARD16 DEFAULT_IO_REGION_PAGE   =  128; // FIXME See Agent::ioRegionPage
 
 	static const CARD32 VMBITS_MIN = 20;
 	static const CARD32 VMBITS_MAX = 25;
@@ -203,14 +170,14 @@ private:
 extern Memory memory;
 
 
-int isSamePage(CARD32 vaA, CARD32 vaB) {
+inline int isSamePage(CARD32 vaA, CARD32 vaB) {
 	return (vaA / PageSize) == (vaB / PageSize);
 }
 
-void WriteMap(CARD32 vp, MapFlags flag, CARD32 rp) {
+inline void WriteMap(CARD32 vp, MapFlags flag, CARD32 rp) {
 	memory.writeMap(vp, flag, rp);
 }
-std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
+inline std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
 	return memory.readMap(vp);
 }
 
@@ -218,13 +185,13 @@ std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
 //
 // Access Memory
 //
-CARD16* Fetch(CARD32 va) {
+inline CARD16* Fetch(CARD32 va) {
 	return memory.fetch(va);
 }
-CARD16* Store(CARD32 va) {
+inline CARD16* Store(CARD32 va) {
 	return memory.store(va);
 }
-CARD32 ReadDbl(CARD32 va) {
+inline CARD32 ReadDbl(CARD32 va) {
 	CARD16* p0 = memory.fetch(va + 0);
 	CARD16* p1 = (va & PageMask) == (PageSize - 1) ? memory.fetch(va + 1) : p0 + 1;
 	return (*p1 << WordSize) | *p0;
@@ -234,13 +201,13 @@ CARD32 ReadDbl(CARD32 va) {
 //
 // MDS
 //
-void setMDS(CARD32 va) {
+inline void setMDS(CARD32 va) {
 	memory.setMDS(va);
 }
-CARD32 getMDS() {
+inline CARD32 getMDS() {
 	return memory.getMDS();
 }
-CARD32 lengthenPointer(CARD16 ptr) {
+inline CARD32 lengthenPointer(CARD16 ptr) {
 	return memory.lengthenPointer(ptr);
 }
 
@@ -248,13 +215,13 @@ CARD32 lengthenPointer(CARD16 ptr) {
 // Access MDS memory
 // No need to maintain flags
 //
-CARD16* FetchMDS(CARD16 ptr) {
+inline CARD16* FetchMDS(CARD16 ptr) {
 	return memory.getAddressMDS(ptr);
 }
-CARD16* StoreMDS(CARD16 ptr) {
+inline CARD16* StoreMDS(CARD16 ptr) {
 	return memory.getAddressMDS(ptr);
 }
-CARD32 ReadDblMDS(CARD16 ptr) {
+inline CARD32 ReadDblMDS(CARD16 ptr) {
 	CARD16* p0 = memory.getAddressMDS(ptr + 0);
 	CARD16* p1 = (ptr & PageMask) == (PageSize - 1) ? memory.getAddressMDS(ptr + 1) : p0 + 1;
 	return (*p1 << WordSize) | *p0;

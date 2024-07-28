@@ -56,5 +56,15 @@ clear-log:
 	echo -n >${BUILD_DIR}/run/debug.log
 
 
-run-main: clear-log
+run-main: main clear-log
 	/usr/bin/time ${BUILD_DIR}/main/main
+
+run-test: test clear-log
+	${BUILD_DIR}/test/test
+
+main:
+	/usr/bin/time cmake --build build --target main
+	
+test:
+	/usr/bin/time cmake --build build --target test
+	

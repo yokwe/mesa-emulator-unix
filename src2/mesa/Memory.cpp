@@ -28,9 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "../mesa/Type.h"
 #include "../mesa/Constant.h"
 #include "../mesa/Function.h"
+#include "../mesa/PrincOps.h"
 
 #include "../mesa/Memory.h"
 
@@ -116,7 +116,7 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	 CARD16* page;
 	 Flag    flag;
 
-	 if (mapFlags.isVacant()) {
+	 if (Vacant(mapFlags)) {
 		 if (rp != 0) ERROR();
 		 page = 0;
 		 flag.setVacant();
@@ -143,10 +143,12 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	 if (page == 0) {
 		 if (!flag.vacant) ERROR();
 
-		 mapFlags.setVacant();
+		 mapFlags.dirty      = 1;
+		 mapFlags.protect    = 1;
+		 mapFlags.referenced = 0;
 		 rp = 0;
 	 } else {
-		 mapFlags.clear();
+		 mapFlags.u = 0;
 		 if (flag.protect)        mapFlags.protect    = 1;
 		 if (flag.isDirty())      mapFlags.dirty      = 1;
 		 if (flag.isReferenced()) mapFlags.referenced = 1;

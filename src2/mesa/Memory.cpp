@@ -55,26 +55,34 @@ Memory memory;
 //	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
 //	   5. Xfer[dest: Boot.pInitialLink].
 void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
+	// sanity check
+	if (vmBits < VMBITS_MIN) ERROR();
+	if (VMBITS_MAX < vmBits) ERROR();
+	if (rmBits < RMBITS_MIN) ERROR();
+	if (MRBITS_MAX < rmBits) ERROR();
+	if (vmBits < rmBits)     ERROR();
+	if (255 < ioRegionPage)  ERROR();
+
 	delete memoryArray;
 	delete flagArray;
 	delete pageArray;
 
-	vpSize = 1 << (vmBits - PageBits);
-	rpSize = 1 << std::min(rmBits - PageBits, MAX_REALMEMORY_PAGE_SIZE);
+	vpSize      = 1 << (vmBits - PageBits);
+	rpSize      = 1 << std::min(rmBits - PageBits, MAX_REALMEMORY_PAGE_SIZE);
 
-	if (vmBits < VMBITS_MIN) ERROR();
-	if (VMBITS_MAX < vmBits) ERROR();
-	if (vmBits < rmBits) ERROR();
+	auto memoryArraySize = rpSize * PageSize;
 
-	memoryArray = new CARD16[rpSize * PageSize];
+	memoryArray = new CARD16[memoryArraySize];
 	flagArray   = new Flag[vpSize];
 	pageArray   = new CARD16*[vpSize];
 	mds         = 0;
 
-	for(CARD32 i = 0; i < rpSize * PageSize; i++) memoryArray[i] = 0;
+	logger.info("vmBits  %2d  %4X", vmBits, vpSize - 1);
+	logger.info("rmBits  %2d  %4X", rmBits, rpSize - 1);
+
+	for(CARD32 i = 0; i < memoryArraySize; i++) memoryArray[i] = 0;
 	for(CARD32 i = 0; i < vpSize; i++) flagArray->clear();
 	for(CARD32 i = 0; i < vpSize; i++) pageArray[i] = 0;
-	for(CARD32 i = 0; i < (sizeof pageArrayMDS / sizeof pageArrayMDS[9]); i++) pageArrayMDS[i] = 0;
 
 	//const int VP_START = pageGerm + countGermVM;
 	CARD32 rp = 0;
@@ -99,9 +107,6 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 		flagArray[i].setVacant();
 		pageArray[i] = 0;
 	}
-
-	// update pageArrayMDS
-	updatePageArrayMDS();
 }
 
 
@@ -118,13 +123,9 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	 } else {
 		 page = pageArray[rp << PageBits];
 		 flag.clear();
-		 if (mapFlags.dirty) {
-			 flag.store = 1;
-		 }
-		 if (mapFlags.protect) flag.protect = 1;
-		 if (mapFlags.referenced) {
-			 flag.fetch = 1;
-		 }
+		 if (mapFlags.dirty)      flag.store   = 1;
+		 if (mapFlags.protect)    flag.protect = 1;
+		 if (mapFlags.referenced) flag.fetch   = 1;
 	 }
 	 pageArray[vp] = page;
 	 flagArray[vp] = flag;
@@ -146,8 +147,8 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 		 rp = 0;
 	 } else {
 		 mapFlags.clear();
-		 if (flag.protect)        mapFlags.protect = 1;
-		 if (flag.isDirty())      mapFlags.dirty = 1;
+		 if (flag.protect)        mapFlags.protect    = 1;
+		 if (flag.isDirty())      mapFlags.dirty      = 1;
 		 if (flag.isReferenced()) mapFlags.referenced = 1;
 
 		 CARD32 memoryOffset = page - memoryArray;
@@ -158,6 +159,5 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 
 	 return {mapFlags, rp};
  }
-
 
 }

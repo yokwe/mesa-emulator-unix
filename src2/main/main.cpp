@@ -75,5 +75,9 @@ int main(int /*argc*/, char** /*argv*/) {
 	util::Logger::popLevel();
 	logger.info("CCC");
 
+	mesa::CARD32 vmBits = 24;
+	mesa::CARD32 rmBits = 20;
+	mesa::memory.initialize(vmBits, rmBits);
+
 	logger.info("STOP");
 }

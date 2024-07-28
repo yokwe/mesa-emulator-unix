@@ -76,13 +76,14 @@ int rpSize; // number of real page
 
 class Memory {
 public:
-	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = 4096;
+	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = 4086; // RealMemoryImplGuam::largestArraySize * WordSize;
+	static const CARD16 DEFAULT_IO_REGION_PAGE   =  128; // See Agent::ioRegionPage
 
 	static const CARD32 VMBITS_MIN = 20;
 	static const CARD32 VMBITS_MAX = 25;
 
 	static const CARD32 RMBITS_MIN = 20;
-	static const CARD32 MRBITS_MAX = 25;
+	static const CARD32 MRBITS_MAX = 24;
 
 
 	Memory(): vpSize(0), rpSize(0), memoryArray(0), flagArray(0), pageArray(0), mds(0) {
@@ -90,6 +91,10 @@ public:
 	}
 
 	void initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage);
+
+	void initialize(CARD32 vmBits, CARD32 rmBits) {
+		initialize(vmBits, rmBits, DEFAULT_IO_REGION_PAGE);
+	}
 
 	CARD32 getPage(CARD32 va) {
 		return va / PageSize;
@@ -99,40 +104,38 @@ public:
 	}
 
 	CARD16* getAddress(CARD32 va) {
-		const CARD32 vp = getPage(va);
-		auto page = pageArray[vp];
+		auto page = pageArray[getPage(va)];
 		if (page == 0) PageFault(va);
 
 		return page + getOffset(va);
 	}
 	CARD16* fetch(CARD32 va) {
-		const CARD32 vp = getPage(va);
-
-		auto page = pageArray[vp];
-		if (page == 0) PageFault(va);
-
+		auto vp   = getPage(va);
 		auto flag = flagArray[vp];
+		// check flag
+		if (flag.vacant) PageFault(va);
 		if (!flag.fetch) {
+			// maintain flag
 			flag.fetch = 1;
 			 flagArray[vp] = flag;
 		}
 
-		return page + getOffset(va);
+		return getAddress(va);
 	}
 	CARD16* store(CARD32 va) {
-		const CARD32 vp = getPage(va);
-
-		auto page = pageArray[vp];
-		if (page == 0) PageFault(va);
-
+		// maintain flags
+		auto vp   = getPage(va);
 		auto flag = flagArray[vp];
+
+		if (flag.vacant) PageFault(va);
 		if (flag.protect) WriteProtectFault(va);
 		if (!flag.store) {
+			// maintain flag
 			flag.store = 1;
-			 flagArray[vp] = flag;
+			flagArray[vp] = flag;
 		}
 
-		return page + getOffset(va);
+		return getAddress(va);
 	}
 
 	int isVacant(CARD32 va) {
@@ -148,27 +151,19 @@ public:
 	//
 	//  MDS
 	//
-	void setMDS(CARD32 va) {
-	 mds = va;
-	 updatePageArrayMDS();
+	void setMDS(CARD32 newValue) {
+		mds = newValue;
 	}
 	CARD32 getMDS() {
-	 return mds;
+		return mds;
 	}
 	CARD32 lengthenPointer(CARD16 ptr) {
-	 return mds + ptr;
+		return mds + ptr;
 	}
-	CARD16* getMDSAddress(CARD16 ptr) {
-	 CARD16* page = pageArrayMDS[getPage(ptr)];
-	 if (page == 0) PageFault(lengthenPointer(ptr));
-	 return page + getOffset(ptr);
+	CARD16* getAddressMDS(CARD16 ptr) {
+		return getAddress(lengthenPointer(ptr));
 	}
-	void updatePageArrayMDS() {
-		CARD32 mdsPage = getPage(mds);
-		for(CARD32 i = 0; i < 256; i++) {
-			pageArrayMDS[i] = pageArray[mdsPage + i];
-		}
-	}
+
 private:
 	union Flag {
 		CARD8 u0;
@@ -201,7 +196,6 @@ private:
 	CARD16 **pageArray;    // vpSize;
 
 	CARD32  mds;
-	CARD16* pageArrayMDS[65536];
 };
 
 extern Memory memory;
@@ -219,6 +213,9 @@ std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
 }
 
 
+//
+// Access Memory
+//
 CARD16* Fetch(CARD32 va) {
 	return memory.fetch(va);
 }
@@ -226,16 +223,40 @@ CARD16* Store(CARD32 va) {
 	return memory.store(va);
 }
 CARD32 ReadDbl(CARD32 va) {
-	CARD16* p0 = Fetch(va + 0);
-	CARD16* p1 = (va & PageMask) == (PageSize - 1) ? Fetch(va + 1) : p0 + 1;
+	CARD16* p0 = memory.fetch(va + 0);
+	CARD16* p1 = (va & PageMask) == (PageSize - 1) ? memory.fetch(va + 1) : p0 + 1;
 	return (*p1 << WordSize) | *p0;
 }
 
+
+//
+// MDS
+//
+void setMDS(CARD32 va) {
+	memory.setMDS(va);
+}
+CARD32 getMDS() {
+	return memory.getMDS();
+}
+CARD32 lengthenPointer(CARD16 ptr) {
+	return memory.lengthenPointer(ptr);
+}
+
+//
+// Access MDS memory
+// No need to maintain flags
+//
 CARD16* FetchMDS(CARD16 ptr) {
-	return memory.getMDSAddress(ptr);
+	return memory.getAddressMDS(ptr);
 }
 CARD16* StoreMDS(CARD16 ptr) {
-	return memory.getMDSAddress(ptr);
+	return memory.getAddressMDS(ptr);
 }
+CARD32 ReadDblMDS(CARD16 ptr) {
+	CARD16* p0 = memory.getAddressMDS(ptr + 0);
+	CARD16* p1 = (ptr & PageMask) == (PageSize - 1) ? memory.getAddressMDS(ptr + 1) : p0 + 1;
+	return (*p1 << WordSize) | *p0;
+}
+
 
 }

@@ -28,18 +28,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+//
+// Memory.h
+//
 
 #pragma once
 
 #include <utility>
 
+#include "../mesa/Type.h"
 #include "../mesa/Constant.h"
+#include "../mesa/Variable.h"
 #include "../mesa/Function.h"
 
-#include "../mesa/PrincOps.h"
-
 namespace mesa {
-
 
 class Memory {
 public:
@@ -57,11 +59,7 @@ public:
 		 //
 	}
 
-	void initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage);
-
-	void initialize(CARD32 vmBits, CARD32 rmBits) {
-		initialize(vmBits, rmBits, DEFAULT_IO_REGION_PAGE);
-	}
+	void initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage = DEFAULT_IO_REGION_PAGE);
 
 	CARD32 getPage(CARD32 va) {
 		return va / PageSize;

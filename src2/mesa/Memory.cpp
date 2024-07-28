@@ -28,14 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "../mesa/Constant.h"
-#include "../mesa/Function.h"
-#include "../mesa/PrincOps.h"
+//
+// Memory.h
+//
 
 #include "../mesa/Memory.h"
 
 #include "../util/Util.h"
-
 static const util::Logger logger(__FILE__);
 
 namespace mesa {

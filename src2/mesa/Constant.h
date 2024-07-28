@@ -28,19 +28,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+//
+// Constant.h
+//
+
 #pragma once
 
 #include "../mesa/Type.h"
-#include "../mesa/Pilot.h"
 
 namespace mesa {
 
 // 2.1 Basic Data Types
-const CARD32 WordSize = Environment::bitsPerWord;
+//const CARD32 WordSize = Environment::bitsPerWord;
+const CARD32 WordSize = 16;
 const CARD32 WordMask = (1 << WordSize) - 1;
 
 // for compatibility
-const CARD32 PageBits = Environment::logWordsPerPage;
+//const CARD32 PageBits = Environment::logWordsPerPage;
+const CARD32 PageBits = 8;
 const CARD32 PageSize = 1 << PageBits;
 const CARD32 PageMask = PageSize - 1;
 

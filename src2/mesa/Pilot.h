@@ -35,6 +35,8 @@
 #pragma once
 
 #include "../mesa/Type.h"
+#include "../mesa/Constant.h"
+#include "../mesa/PrincOps.h"
 
 namespace mesa {
 
@@ -3058,7 +3060,7 @@ namespace LoadStateFormat {
 // From APilot/15.0.1/Pilot/Friends/CPSwapDefs.mesa
 //
 
-/*
+
 namespace CPSwapDefs {
 	//oldVersion: CARDINAL = 01054;
 	//currentVersion: CARDINAL = 01055;
@@ -3130,7 +3132,6 @@ namespace CPSwapDefs {
 		CARD16 spareB;
 	} __attribute__((packed));
 }
-*/
 
 
 ///////////////////////////////////////////////////////////////////////

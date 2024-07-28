@@ -28,12 +28,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+//
+// Main.cpp
+//
+
 #include <string>
 
-#include "../mesa/Constant.h"
 #include "../mesa/Type.h"
+#include "../mesa/Constant.h"
+#include "../mesa/Variable.h"
+#include "../mesa/Function.h"
+
 #include "../mesa/Memory.h"
-#include "../mesa/Pilot.h"
 
 #include "../util/Util.h"
 static const util::Logger logger(__FILE__);

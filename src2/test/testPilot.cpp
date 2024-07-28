@@ -186,8 +186,8 @@ class testPilot : public testBase {
 	CPPUNIT_TEST(testObject);
 
 	// CPSwapDefs
-//	CPPUNIT_TEST(testSwapInfo);
-//	CPPUNIT_TEST(testExternalStateVector);
+	CPPUNIT_TEST(testSwapInfo);
+	CPPUNIT_TEST(testExternalStateVector);
 
 	// PrincOpsExtras2
 	CPPUNIT_TEST(testGFTItem);
@@ -1968,7 +1968,7 @@ public:
 		CPPUNIT_ASSERT_EQUAL((CARD32) 6, OFFSET(LoadStateFormat::Object, moduleInfo));
 		CPPUNIT_ASSERT_EQUAL((CARD32) 7, OFFSET(LoadStateFormat::Object, bcdInfo));
 	}
-	/*
+
 	void testSwapInfo() {
 		//SwapInfo: TYPE = MACHINE DEPENDENT RECORD [
 		//  -- This is the actual usage of PSB.PDA.available.
@@ -1980,8 +1980,8 @@ public:
 		CPPUNIT_ASSERT_EQUAL((CARD32) 3, OFFSET(CPSwapDefs::SwapInfo, availableD));
 		CPPUNIT_ASSERT_EQUAL((CARD32) 4, OFFSET(CPSwapDefs::SwapInfo, availableE));
 	}
-	*/
-	/*
+
+
 	void testExternalStateVector() {
 		//ExternalStateVector: TYPE = MACHINE DEPENDENT RECORD [
 		//	-- Items describing the boot session in general:
@@ -2043,7 +2043,7 @@ public:
 		t.loadStateDirty = ~t.loadStateDirty;
 		CPPUNIT_ASSERT_EQUAL((CARD16)0x0001, t.u27);
 	}
-	*/
+
 
 	void testGFTItem() {
 		//  GFTItem: TYPE = MACHINE DEPENDENT RECORD [

@@ -31,74 +31,211 @@
 
 #pragma once
 
+#include <utility>
+
 #include "../util/Util.h"
 
 #include "../mesa/Constant.h"
 #include "../mesa/Type.h"
+#include "../mesa/Function.h"
 
 namespace mesa {
 
+// 3.1.1 Virtual Memory Mapping
+//MapFlags: TYPE = MACHINE DEPENDENT RECORD (
+//  reserved (0:0..12) : UNSPEClFIED[0..17777B],
+//  protected (0:13..13) : BOOLEAN,
+//  dirty (0:14..14): BOOLEAN,
+//  referenced (0:15..15): BOOLEAN];
+union MapFlags {
+	CARD16 u0;
+	struct {
+		CARD16 referenced :  1;
+		CARD16 dirty      :  1;
+		CARD16 protect    :  1;
+		CARD16 reserved   : 13;
+	};
+
+	void clear() {
+		u0 = 0;
+	}
+	void setVacant() {
+		referenced = 0;
+		dirty      = 1;
+		protect    = 1;
+		reserved   = 0;
+	}
+	int isVacant() {
+		return !referenced && dirty && protect;
+	}
+};
+
+
+int vpSize; // number of virtual page
+int rpSize; // number of real page
+
 class Memory {
 public:
-	 Memory(): vpSize(0), rpSize(0), realMemory(0), memoryFlags(0) {}
+	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = 4096;
 
-	 void initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
+	static const CARD32 VMBITS_MIN = 20;
+	static const CARD32 VMBITS_MAX = 25;
 
-	 CARD16* getAddressk(CARD32 va);
-	 CARD16* fetch(CARD32 va);
-	 CARD16* store(CARD32 va);
+	static const CARD32 RMBITS_MIN = 20;
+	static const CARD32 MRBITS_MAX = 25;
 
-	 int isVacant(CARD32 va) {
-		 return memoryFlags[va / PageSize].vacant;
-	 }
 
-	 static inline int isSamePage(CARD32 vaA, CARD32 vaB) {
-	 	return (vaA / PageSize) == (vaB / PageSize);
-	 }
+	Memory(): vpSize(0), rpSize(0), memoryArray(0), flagArray(0), pageArray(0), mds(0) {
+		 //
+	}
 
+	void initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage);
+
+	CARD32 getPage(CARD32 va) {
+		return va / PageSize;
+	}
+	CARD32 getOffset(CARD32 va) {
+		return va % PageSize;
+	}
+
+	CARD16* getAddress(CARD32 va) {
+		const CARD32 vp = getPage(va);
+		auto page = pageArray[vp];
+		if (page == 0) PageFault(va);
+
+		return page + getOffset(va);
+	}
+	CARD16* fetch(CARD32 va) {
+		const CARD32 vp = getPage(va);
+
+		auto page = pageArray[vp];
+		if (page == 0) PageFault(va);
+
+		auto flag = flagArray[vp];
+		if (!flag.fetch) {
+			flag.fetch = 1;
+			 flagArray[vp] = flag;
+		}
+
+		return page + getOffset(va);
+	}
+	CARD16* store(CARD32 va) {
+		const CARD32 vp = getPage(va);
+
+		auto page = pageArray[vp];
+		if (page == 0) PageFault(va);
+
+		auto flag = flagArray[vp];
+		if (flag.protect) WriteProtectFault(va);
+		if (!flag.store) {
+			flag.store = 1;
+			 flagArray[vp] = flag;
+		}
+
+		return page + getOffset(va);
+	}
+
+	int isVacant(CARD32 va) {
+		return flagArray[va / PageSize].vacant;
+	}
+
+	//
+	// map flag
+	//
+	void writeMap(CARD32 vp, MapFlags flag, CARD32 rp);
+	std::pair<MapFlags, CARD32> readMap(CARD32 vp);
+
+	//
+	//  MDS
+	//
+	void setMDS(CARD32 va) {
+	 mds = va;
+	 updatePageArrayMDS();
+	}
+	CARD32 getMDS() {
+	 return mds;
+	}
+	CARD32 lengthenPointer(CARD16 ptr) {
+	 return mds + ptr;
+	}
+	CARD16* getMDSAddress(CARD16 ptr) {
+	 CARD16* page = pageArrayMDS[getPage(ptr)];
+	 if (page == 0) PageFault(lengthenPointer(ptr));
+	 return page + getOffset(ptr);
+	}
+	void updatePageArrayMDS() {
+		CARD32 mdsPage = getPage(mds);
+		for(CARD32 i = 0; i < 256; i++) {
+			pageArrayMDS[i] = pageArray[mdsPage + i];
+		}
+	}
 private:
-	 // 3.1.1 Virtual Memory Mapping
-	 //MapFlags: TYPE = MACHINE DEPENDENT RECORD (
-	 //  reserved (0:0..12) : UNSPEClFIED[0..17777B],
-	 //  protected (0:13..13) : BOOLEAN,
-	 //  dirty (0:14..14): BOOLEAN,
-	 //  referenced (0:15..15): BOOLEAN];
-	 union Flags {
-	 	CARD32 u0;
-	 	struct {
-	 		CARD32 fetch      :  1;
-	 		CARD32 store      :  1;
-	 		CARD32 protect    :  1;
-	 		CARD32 vacant     :  1;
-	 		CARD32 reserved   :  4;
-	 		//
-	 		CARD32 realOffset : 16;
-	 		//
-	 		CARD32 reserved2  :  8;
-	 	 };
-	 	CARD32 offset() {
-	 		return u0 & 0x00FFFF00;
-	 	}
-	 	void clear() {
-	 		u0 = 0;
-	 	}
-	 	void setVacant() {
-	 		clear();
-	 		vacant = 1;
-	 	}
-	 	int isReferenced() {
-	 		return fetch | store;
-	 	}
-	 	int isDirty() {
-	 		return store;
-	 	}
-	  };
+	union Flag {
+		CARD8 u0;
+		struct {
+			CARD8 fetch      :  1;
+			CARD8 store      :  1;
+			CARD8 protect    :  1;
+			CARD8 vacant     :  1;
+		};
+		void clear() {
+			u0 = 0;
+		}
+		void setVacant() {
+			clear();
+			vacant = 1;
+		}
+		int isReferenced() {
+			return fetch | store;
+		}
+		int isDirty() {
+			return store;
+		}
+	};
 
-	 int vpSize; // number of virtual page
-	 int rpSize; // number of real page
+	CARD32 vpSize; // number of virtual page
+	CARD32 rpSize; // number of real page
 
-	 CARD16 *realMemory;  // rpSize * PageSize
-	 Flags  *memoryFlags; // vpSize
+	CARD16  *memoryArray;  // rpSize * PageSize
+	Flag    *flagArray;    // vpSize
+	CARD16 **pageArray;    // vpSize;
+
+	CARD32  mds;
+	CARD16* pageArrayMDS[65536];
 };
+
+extern Memory memory;
+
+
+int isSamePage(CARD32 vaA, CARD32 vaB) {
+	return (vaA / PageSize) == (vaB / PageSize);
+}
+
+void WriteMap(CARD32 vp, MapFlags flag, CARD32 rp) {
+	memory.writeMap(vp, flag, rp);
+}
+std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
+	return memory.readMap(vp);
+}
+
+
+CARD16* Fetch(CARD32 va) {
+	return memory.fetch(va);
+}
+CARD16* Store(CARD32 va) {
+	return memory.store(va);
+}
+CARD32 ReadDbl(CARD32 va) {
+	CARD16* p0 = Fetch(va + 0);
+	CARD16* p1 = (va & PageMask) == (PageSize - 1) ? Fetch(va + 1) : p0 + 1;
+	return (*p1 << WordSize) | *p0;
+}
+
+CARD16* FetchMDS(CARD16 ptr) {
+	return memory.getMDSAddress(ptr);
+}
+CARD16* StoreMDS(CARD16 ptr) {
+	return memory.getMDSAddress(ptr);
+}
 
 }

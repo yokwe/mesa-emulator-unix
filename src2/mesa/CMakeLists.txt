@@ -2,7 +2,10 @@
 # mesa
 #
 
-list(APPEND fileList Memory.cpp)
+list(APPEND fileList Dummy.cpp Memory.cpp)
 
+add_library (mesa SHARED ${fileList})
 
-add_library (mesa STATIC ${fileList})
+add_dependencies(mesa util)
+
+target_link_libraries (mesa util)

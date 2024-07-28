@@ -40,42 +40,124 @@ static const util::Logger logger(__FILE__);
 
 namespace mesa {
 
-mesa::CARD16* Memory::getAddressk(CARD32 va) {
-	auto vp = va / PageSize;
-	auto of = va % PageSize;
+Memory memory;
 
-	auto flag = memoryFlags[vp];
-	if (flag.vacant) ERROR();
+//  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
+//	The BOOTING ACTION defined by the Principles of Operation should include:
+//	   1. Put real memory behind any special processor pages (I/O pages);
+//        then put all remaining usable real memory behind other virtual memory pages beginning at virtual page 0,
+//        and working upward sequentially (skipping any already-mapped special processor pages).
+//	   2. Read consecutive pages of the Germ into virtual memory beginning at
+//        page Boot.pageGerm + Boot.mdsiGerm*Environment.MaxPagesInMDS (i.e page 1).
+//        At present, the way the initial microcode figures out the device and device address of the Germ,
+//        and the number of pages which comprise the Germ, is processor-dependent.
+//	   3. Set Boot.pRequest = to e.g. [Boot.currentRequestBasicVersion, Boot.bootPhysicalVolume, locationOfPhysicalVolume].
+//	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
+//	   5. Xfer[dest: Boot.pInitialLink].
+void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
+	delete memoryArray;
+	delete flagArray;
+	delete pageArray;
 
-	return realMemory + flag.offset() + of;
-}
+	vpSize = 1 << (vmBits - PageBits);
+	rpSize = 1 << std::min(rmBits - PageBits, MAX_REALMEMORY_PAGE_SIZE);
 
-CARD16* Memory::fetch(CARD32 va) {
-	auto vp = va / PageSize;
-	auto of = va % PageSize;
+	if (vmBits < VMBITS_MIN) ERROR();
+	if (VMBITS_MAX < vmBits) ERROR();
+	if (vmBits < rmBits) ERROR();
 
-	Flags flag = memoryFlags[vp];
-	if (flag.vacant) PageFault(va);
-	if (!flag.fetch) {
-		flag.fetch = 1;
-		memoryFlags[vp] = flag;
+	memoryArray = new CARD16[rpSize * PageSize];
+	flagArray   = new Flag[vpSize];
+	pageArray   = new CARD16*[vpSize];
+	mds         = 0;
+
+	for(CARD32 i = 0; i < rpSize * PageSize; i++) memoryArray[i] = 0;
+	for(CARD32 i = 0; i < vpSize; i++) flagArray->clear();
+	for(CARD32 i = 0; i < vpSize; i++) pageArray[i] = 0;
+	for(CARD32 i = 0; i < (sizeof pageArrayMDS / sizeof pageArrayMDS[9]); i++) pageArrayMDS[i] = 0;
+
+	//const int VP_START = pageGerm + countGermVM;
+	CARD32 rp = 0;
+	// vp:[ioRegionPage .. 256) <=> rp:[0..256-ioRegionPage)
+	for(CARD32 i = ioRegionPage; i < 256; i++) {
+		flagArray[i].clear();
+		pageArray[i] = memoryArray + PageSize * rp++;
+	}
+	// vp:[0..ioRegionPage) <=> rp: [256-ioRegionPage .. 256)
+	for(CARD32 i = 0; i < ioRegionPage; i++) {
+		flagArray[i].clear();
+		pageArray[i] = memoryArray + PageSize * rp++;
+	}
+	// vp: [256 .. rpSize)
+	for(CARD32 i = 256; i < rpSize; i++) {
+		flagArray[i].clear();
+		pageArray[i] = memoryArray + PageSize * rp++;
+	}
+	if (rp != rpSize) ERROR();
+	// vp: [rpSize .. vpSize)
+	for(CARD32 i = rpSize; i < vpSize; i++) {
+		flagArray[i].setVacant();
+		pageArray[i] = 0;
 	}
 
-	return realMemory + flag.offset() + of;
+	// update pageArrayMDS
+	updatePageArrayMDS();
 }
-CARD16* Memory::store(CARD32 va) {
-	const CARD32 vp = va / PageSize;
-	const CARD32 of = va % PageSize;
 
-	Flags flags = memoryFlags[vp];
-	if (flags.vacant) PageFault(va);
-	if (flags.protect) WriteProtectFault(va);
-	if (!flags.store) {
-		flags.store = 1;
-		memoryFlags[vp] = flags;
-	}
 
-	return realMemory + flags.offset() + of;
-}
+// WriteMap: PROCEDURE [virtual: VirtualPageNumber, flags: MapFlags, real: RealPageNumber];
+ void Memory::writeMap(CARD32 vp, MapFlags mapFlags, CARD32 rp) {
+	 if (vpSize <= vp) ERROR();
+	 CARD16* page;
+	 Flag    flag;
+
+	 if (mapFlags.isVacant()) {
+		 if (rp != 0) ERROR();
+		 page = 0;
+		 flag.setVacant();
+	 } else {
+		 page = pageArray[rp << PageBits];
+		 flag.clear();
+		 if (mapFlags.dirty) {
+			 flag.store = 1;
+		 }
+		 if (mapFlags.protect) flag.protect = 1;
+		 if (mapFlags.referenced) {
+			 flag.fetch = 1;
+		 }
+	 }
+	 pageArray[vp] = page;
+	 flagArray[vp] = flag;
+
+	 // FIXME update pageArrayMDS
+ }
+ std::pair<MapFlags, CARD32> Memory::readMap(CARD32 vp) {
+	 if (vpSize <= vp) ERROR();
+	 MapFlags mapFlags;
+	 CARD32   rp;
+
+	 auto page = pageArray[vp];
+	 auto flag = flagArray[vp];
+
+	 if (page == 0) {
+		 if (!flag.vacant) ERROR();
+
+		 mapFlags.setVacant();
+		 rp = 0;
+	 } else {
+		 mapFlags.clear();
+		 if (flag.protect)        mapFlags.protect = 1;
+		 if (flag.isDirty())      mapFlags.dirty = 1;
+		 if (flag.isReferenced()) mapFlags.referenced = 1;
+
+		 CARD32 memoryOffset = page - memoryArray;
+		 if (memoryOffset & PageMask) ERROR();
+
+		 rp = memoryOffset >> PageBits;
+	 }
+
+	 return {mapFlags, rp};
+ }
+
 
 }

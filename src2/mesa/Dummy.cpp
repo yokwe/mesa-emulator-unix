@@ -28,11 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <string>
-
-#include "../mesa/Constant.h"
-#include "../mesa/Type.h"
-#include "../mesa/Memory.h"
+#include "Constant.h"
+#include "Type.h"
+#include "Function.h"
 
 #include "../util/Util.h"
 
@@ -41,39 +39,11 @@ static const util::Logger logger(__FILE__);
 
 namespace mesa {
 
-/*
-CARD32 readDblA(CARD32 va) {
-	CARD16* p0 = Memory::fetch(va + 0);
-//	CARD16* p1 = Memory::isSamePage(va + 0, va + 1) ? (p0 + 1) : memory.fetch(va + 1);
-	CARD16* p1 = ((va & 0xFF) == 0xFF) ? Memory::fetch(va + 1) : (p0 + 1) ;
-	return (*p1 << WordSize) | *p0;
+void PageFault(LONG_POINTER) {
+	ERROR();
 }
-CARD32 readDblB(CARD32 va) {
-	CARD16* p0 = Memory::fetch(va + 0);
-	CARD16* p1 = Memory::isSamePage(va + 0, va + 1) ? (p0 + 1) : Memory::fetch(va + 1);
-//	CARD16* p1 = ((va & 0xFF) == 0xFF) ? fetch(va + 1) : (p0 + 1) ;
-	return (*p1 << WordSize) | *p0;
-}
-*/
-
+void WriteProtectFault(LONG_POINTER) {
+	ERROR();
 }
 
-int main(int /*argc*/, char** /*argv*/) {
-	logger.info("START");
-
-	util::setSignalHandler();
-
-	DEBUG_TRACE();
-
-	logger.debug("%3d", 3);
-
-	util::logBackTrace();
-
-	logger.info("AAA");
-	util::Logger::pushLevel();
-	logger.info("BBB");
-	util::Logger::popLevel();
-	logger.info("CCC");
-
-	logger.info("STOP");
 }

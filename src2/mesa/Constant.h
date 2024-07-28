@@ -34,9 +34,16 @@
 
 namespace mesa {
 
+// 2.1 Basic Data Types
+// const int WordSize = Environment::bitsPerWord;
+const CARD32 WordSize = 16;
+const CARD32 WordMask = (1 << WordSize) - 1;
+
 // for compatibility
 //const CARD16 PageSize = Environment::wordsPerPage;
-const CARD16 PageSize = 256;
+const CARD32 PageBits = 8;
+const CARD32 PageSize = 1 << PageBits;
+const CARD32 PageMask = PageSize - 1;
 
 const CARD16 cSS = 14;
 // cSV = SIZE[StateVector] + MAX[SIZE[ControlLink], SIZE[FSIndex], SIZE[LONG POINTER]]

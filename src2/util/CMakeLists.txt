@@ -2,8 +2,14 @@
 # util
 #
 
-list(APPEND fileList Util.cpp)
+add_library(util SHARED)
 
-add_library (util SHARED ${fileList})
+target_sources(
+	util
+	PUBLIC
+		Util.h
+	PRIVATE
+		Util.cpp
+)
 
 target_link_libraries(util log4cxx)

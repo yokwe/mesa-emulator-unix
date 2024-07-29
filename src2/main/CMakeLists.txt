@@ -1,11 +1,14 @@
 #
-# man
+# main
 #
 
-add_executable (
-  main
-  main.cpp
-  )
+add_executable(main)
+
+target_sources(
+	main
+	PRIVATE
+		main.cpp
+)
 
 add_dependencies(main util mesa)
 

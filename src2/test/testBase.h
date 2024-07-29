@@ -37,14 +37,12 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "../mesa/Constant.h"
 #include "../mesa/Type.h"
-#include "../mesa/Memory.h"
+#include "../mesa/Constant.h"
+#include "../mesa/Variable.h"
 #include "../mesa/Function.h"
 
-#include "../mesa/Pilot.h"
-
-using namespace mesa;
+#include "../mesa/Memory.h"
 
 class testBase : public CppUnit::TestFixture {
 protected:

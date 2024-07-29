@@ -32,6 +32,8 @@
 // Memory.h
 //
 
+#include <algorithm>
+
 #include "../mesa/Memory.h"
 
 #include "../util/Util.h"

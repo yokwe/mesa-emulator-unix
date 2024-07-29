@@ -32,11 +32,9 @@
 #include "../util/Util.h"
 static const util::Logger logger(__FILE__);
 
-#include "testBase.h"
+#include "../test/testBase.h"
 
-#include "../mesa/Type.h"
-#include "../mesa/Pilot.h"
-
+using namespace mesa;
 
 class testPilot : public testBase {
 

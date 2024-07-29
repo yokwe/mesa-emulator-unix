@@ -34,6 +34,8 @@ static const util::Logger logger(__FILE__);
 
 #include "../test/testBase.h"
 
+using namespace mesa;
+
 class testType : public testBase {
 
 	CPPUNIT_TEST_SUITE(testType);

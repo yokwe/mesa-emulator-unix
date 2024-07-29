@@ -8,8 +8,10 @@ target_sources(
 	mesa
 	PUBLIC
 		Constant.h
+		Debug.h
 		Function.h
 		Memory.h
+		Perf.h
 		Pilot.h
 		PrincOps.h
 		Type.h
@@ -17,7 +19,9 @@ target_sources(
 	PRIVATE
 		Dummy.cpp
 		Memory.cpp
+		Perf.cpp
 		PrincOps.cpp
+		Variable.cpp
 )
 
 add_dependencies(mesa util)

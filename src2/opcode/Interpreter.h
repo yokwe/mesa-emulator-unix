@@ -29,51 +29,69 @@
  *******************************************************************************/
 
 //
-// testBase.h
+// Interpreter.h
 //
 
 #pragma once
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "Opcode.h"
 
-#include "../mesa/Type.h"
-#include "../mesa/Constant.h"
-#include "../mesa/Variable.h"
-#include "../mesa/Function.h"
+#include "../mesa/Perf.h"
 
-#include "../mesa/Memory.h"
+namespace mesa {
 
-#include "../opcode/Opcode.h"
-#include "../opcode/Interpreter.h"
-
-class testBase : public CppUnit::TestFixture {
-protected:
-	void initRegister();
-	void initAV(mesa::CARD16 origin, mesa::CARD16 limit);
-	void initGFT();
-	void initSD();
-	void initETT();
-	void initPDA();
-
-	mesa::CARD16 *page_PDA;
-	mesa::CARD16 *page_GFT;
-	mesa::CARD16 *page_CB;
-	mesa::CARD16 *page_MDS;
-	mesa::CARD16 *page_AV;
-	mesa::CARD16 *page_SD;
-	mesa::CARD16 *page_ETT;
-	mesa::CARD16 *page_LF;
-	mesa::CARD16 *page_GF;
-
-	mesa::CARD16 GFI_GF;
-	mesa::CARD16 GFI_SD;
-	mesa::CARD16 GFI_ETT;
-	mesa::CARD16 GFI_EFC;
-
-	mesa::CARD16 pc_SD;
-	mesa::CARD16 pc_ETT;
-
+class Interpreter {
 public:
-	void setUp();
-	void tearDown();
+	static const int TABLE_SIZE = 256;
+
+	inline void dispatchEsc(CARD32 opcode) {
+		// ESC and ESCL
+		//logger.debug("dispatch ESC  %04X opcode = %03o", savedPC, opcode);
+		tableEsc[opcode].execute();
+		// increment stat counter after execution. We don't count ABORTED instruction.
+		if (DEBUG_SHOW_OPCODE_STATS) statEsc[opcode]++;
+	}
+
+	inline void dispatchMop(CARD32 opcode) {
+		PERF_COUNT(Dispatch)
+		tableMop[opcode].execute();
+		// increment stat counter after execution. We don't count ABORTED instruction.
+		if (DEBUG_SHOW_OPCODE_STATS) statMop[opcode]++;
+	}
+
+	inline void execute() {
+		savedPC = PC;
+		savedSP = SP;
+		dispatchMop(GetCodeByte());
+	}
+
+	// Implementation Specific
+	void initialize();
+
+	void stats();
+
+private:
+	Opcode    tableMop[TABLE_SIZE];
+	Opcode    tableEsc[TABLE_SIZE];
+	long long statMop [TABLE_SIZE];
+	long long statEsc [TABLE_SIZE];
+
+	void initRegisters();
+
+	void initTable();
+	void fillOpcodeTrap();
+
+	static void mopOpcodeTrap();
+	static void escOpcodeTrap();
+
+	void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
+	void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
 };
+
+extern Interpreter interpreter;
+
+static inline void Execute() {
+	interpreter.execute();
+}
+
+}

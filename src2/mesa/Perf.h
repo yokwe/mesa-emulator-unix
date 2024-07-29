@@ -29,52 +29,90 @@
  *******************************************************************************/
 
 //
-// Type.h
+// Perf.h
 //
 
 #pragma once
 
 #include <cstdint>
-#include <cstddef>
+
+#define PPCAT_NX(A, B) A ## B
+#define PPCAT(A, B) PPCAT_NX(A, B)
+
+#define PPSTR_NX(A) #A
+#define PPSTR(A) PPSTR_NX(A)
+
+#define PERF_NAME(name) PPCAT(perf_, name)
+
+#define PERF_DECLARE(name) extern std::uint64_t PERF_NAME(name);
+#define PERF_DEFFINE(name) std::uint64_t PERF_NAME(name) = 0;
+
+#define PERF_COUNT(name) { if (PERF_ENABLE) PERF_NAME(name)++; }
+
+#define PERF_DUMP(name) logger.info("%-22s = %10llu", PPSTR(PERF_NAME(name)), PERF_NAME(name));
+
 
 namespace mesa {
 
-using INT8  = std::int8_t;
-using INT16 = std::int16_t;
-using INT32 = std::int32_t;
+static const int PERF_ENABLE    = 1;
 
-using CARD8  = std::uint8_t;
-using CARD16 = std::uint16_t;
-using CARD32 = std::uint32_t;
+PERF_DECLARE(Dispatch)
+PERF_DECLARE(Fetch)
+PERF_DECLARE(Store)
+PERF_DECLARE(ReadDbl)
+PERF_DECLARE(FetchMds)
+PERF_DECLARE(StoreMds)
+PERF_DECLARE(ReadDblMds)
+PERF_DECLARE(GetCodeByte)
+PERF_DECLARE(GetCodeWord)
+PERF_DECLARE(FetchByte)
+PERF_DECLARE(StoreByte)
+PERF_DECLARE(ReadField)
+PERF_DECLARE(WriteField)
+PERF_DECLARE(WriteMap)
+PERF_DECLARE(GetAddress)
+PERF_DECLARE(FetchPda)
+PERF_DECLARE(StorePda)
+PERF_DECLARE(MemoryFetch)
+PERF_DECLARE(MemoryStore)
+// Fault
+PERF_DECLARE(FrameFault)
+PERF_DECLARE(PageFault)
+// Trap
+PERF_DECLARE(CodeTrap)
+PERF_DECLARE(EscOpcodeTrap)
+PERF_DECLARE(OpcodeTrap)
+PERF_DECLARE(UnboundTrap)
 
-using POINTER       = CARD16;
-using LONG_POINTER  = CARD32;
 
-using CARDINAL      = CARD16;
-using LONG_CARDIANL = CARD32;
-
-using UNSPEC        = CARD16;
-using LONG_UNSPEC   = CARD32;
-
-
-#define SIZE(t) ((CARD32)(sizeof(t) / sizeof(CARD16)))
-#define ELEMENTSOF(t) ((CARD32)(sizeof(t) / sizeof(t[0])))
-
-// OFFSET must returns CARD32 for CPPUNIT_ASSERT_EQUAL
-#define OFFSET(s,m)      (CARD32)(offsetof(s,m) / sizeof(CARD16))
-#define OFFSET3(s,m,n)   (CARD32)(OFFSET(s,m)    + ((offsetof(s,m[1])   - offsetof(s,m[0])) * n) / sizeof(CARD16))
-#define OFFSET4(s,m,n,p) (CARD32)(OFFSET3(s,m,n) + ((offsetof(s,m[0].p) - offsetof(s,m[0])))     / sizeof(CARD16))
-
-
-class Abort {
-public:
-	const char *func;
-	const char *file;
-	const int   line;
-
-	Abort(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
-};
-#define ERROR_Abort() throw Abort(__FUNCTION__, __FILE__, __LINE__)
-
+#define PERF_LOG() \
+if (PERF_ENABLE) { \
+	PERF_DUMP(Dispatch) \
+	PERF_DUMP(Fetch) \
+	PERF_DUMP(Store) \
+	PERF_DUMP(ReadDbl) \
+	PERF_DUMP(FetchMds) \
+	PERF_DUMP(StoreMds) \
+	PERF_DUMP(ReadDblMds) \
+	PERF_DUMP(GetCodeByte) \
+	PERF_DUMP(GetCodeWord) \
+	PERF_DUMP(FetchByte) \
+	PERF_DUMP(StoreByte) \
+	PERF_DUMP(ReadField) \
+	PERF_DUMP(WriteField) \
+	PERF_DUMP(WriteMap) \
+	PERF_DUMP(GetAddress) \
+	PERF_DUMP(FetchPda) \
+	PERF_DUMP(StorePda) \
+	PERF_DUMP(MemoryFetch) \
+	PERF_DUMP(MemoryStore) \
+	PERF_DUMP(FrameFault) \
+	PERF_DUMP(PageFault) \
+	PERF_DUMP(CodeTrap) \
+	PERF_DUMP(EscOpcodeTrap) \
+	PERF_DUMP(OpcodeTrap) \
+	PERF_DUMP(UnboundTrap) \
 }
 
+
+}

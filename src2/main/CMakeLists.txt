@@ -10,6 +10,6 @@ target_sources(
 		main.cpp
 )
 
-add_dependencies(main util mesa)
+add_dependencies(main opcode mesa util)
 
-target_link_libraries (main mesa util)
+target_link_libraries (main opcode mesa util)

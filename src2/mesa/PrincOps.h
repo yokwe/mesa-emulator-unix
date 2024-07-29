@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include "../mesa/Type.h"
-#include "../mesa/Constant.h"
+#include "Type.h"
+#include "Constant.h"
 
 namespace mesa {
 

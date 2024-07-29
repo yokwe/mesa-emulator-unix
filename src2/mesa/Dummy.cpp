@@ -39,10 +39,36 @@ static const util::Logger logger(__FILE__);
 
 namespace mesa {
 
-void PageFault(LONG_POINTER) {
+void PageFault(LONG_POINTER ptr) {
+	DEBUG_TRACE();
+	logger.fatal("ptr %X", ptr);
 	ERROR();
 }
-void WriteProtectFault(LONG_POINTER) {
+void WriteProtectFault(LONG_POINTER ptr) {
+	DEBUG_TRACE();
+	logger.fatal("ptr %X", ptr);
+	ERROR();
+}
+void BoundsTrap() {
+	DEBUG_TRACE();
+	ERROR();
+}
+void StackError() {
+	DEBUG_TRACE();
+	ERROR();
+}
+void BreakTrap() {
+	DEBUG_TRACE();
+	ERROR();
+}
+void OpcodeTrap(CARD8 opcode) {
+	DEBUG_TRACE();
+	logger.fatal("opcode %02X", opcode);
+	ERROR();
+}
+void EscOpcodeTrap(CARD8 opcode) {
+	DEBUG_TRACE();
+	logger.fatal("opcode %02X", opcode);
 	ERROR();
 }
 

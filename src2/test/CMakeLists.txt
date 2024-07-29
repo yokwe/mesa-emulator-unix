@@ -10,10 +10,11 @@ target_sources(
 		testBase.cpp
 		testBase.h
 		testMain.cpp
+		testOpcode_000.cpp
 		testPilot.cpp
 		testType.cpp
 )
 
-add_dependencies(test util mesa)
+add_dependencies(test util mesa opcode)
 
-target_link_libraries (test util mesa cppunit)
+target_link_libraries (test util mesa opcode cppunit)

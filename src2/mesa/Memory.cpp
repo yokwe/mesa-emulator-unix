@@ -34,7 +34,8 @@
 
 #include <algorithm>
 
-#include "../mesa/Memory.h"
+
+#include "Memory.h"
 
 #include "../util/Util.h"
 static const util::Logger logger(__FILE__);
@@ -78,8 +79,8 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	pageArray   = new CARD16*[vpSize];
 	mds         = 0;
 
-	logger.info("vmBits  %2d  %4X", vmBits, vpSize - 1);
-	logger.info("rmBits  %2d  %4X", rmBits, rpSize - 1);
+//	logger.info("vmBits  %2d  %4X", vmBits, vpSize - 1);
+//	logger.info("rmBits  %2d  %4X", rmBits, rpSize - 1);
 
 	for(CARD32 i = 0; i < memoryArraySize; i++) memoryArray[i] = 0;
 	for(CARD32 i = 0; i < vpSize; i++) flagArray->clear();

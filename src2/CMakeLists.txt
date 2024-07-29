@@ -60,5 +60,6 @@ endif()
 # add subdirectory
 add_subdirectory (util	 ../build/util)
 add_subdirectory (mesa	 ../build/mesa)
+add_subdirectory (opcode ../build/opcode)
 add_subdirectory (test   ../build/test)
 add_subdirectory (main   ../build/main)

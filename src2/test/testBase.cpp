@@ -34,14 +34,260 @@
 //
 
 #include "../mesa/Memory.h"
+#include "../opcode/Interpreter.h"
 
 #include "../util/Util.h"
 static const util::Logger logger(__FILE__);
 
-
 #include "testBase.h"
 
+using namespace mesa;
+
+void testBase::initAV(CARD16 origin, CARD16 limit) {
+	if ((sizeof(PrincOps::FrameSizeMap) / sizeof(PrincOps::FrameSizeMap[0])) != (PrincOps::LastAVHeapSlot + 1)) ERROR();
+	if ((sizeof(PilotBootmesa::FrameWeightMap) / sizeof(PilotBootmesa::FrameWeightMap[0])) != (PrincOps::LastAVHeapSlot + 1)) ERROR();
+
+	// fill with empty
+	for(int i = 0; i < FSIndex_SIZE; i++) {
+		page_AV[i] = (CARD16)AVItemType::empty;
+	}
+
+	// build AllocationVector
+	CARD16 p = origin;
+	for(CARD32 fsi = 0; fsi <= PrincOps::LastAVHeapSlot; fsi++) {
+		int size = PrincOps::FrameSizeMap[fsi];
+		int weight = PilotBootmesa::FrameWeightMap[fsi];
+		if (weight == 0) continue;
+
+		for(int j = 0; j < weight; j++) {
+			// align (p mod 4) == 0
+			p = (CARD16)((p + 3) & ~0x03);
+
+			// round up to next page boundary
+			if (((p + 8) % PageSize) < (p % PageSize)) {
+				p = (CARD16)((p + (PageSize - 1)) & ~0x00ff);
+			}
+
+			page_MDS[p + 0] = fsi; // word
+			page_MDS[p + 1] = 0;   // returnlink
+			page_MDS[p + 2] = 0;   // globallink
+			page_MDS[p + 3] = 0;   // pc
+			page_MDS[p + 4] = page_AV[fsi];
+			page_AV[fsi] = p + SIZE(LocalOverhead);
+
+			p = (CARD16)(p + size);
+		}
+	}
+	if (limit <= p) {
+		logger.debug("origin = %04X\n", origin);
+		logger.debug("limit  = %04X\n", limit);
+		logger.debug("p      = %04X\n", p);
+		ERROR();
+	}
+}
+
+void testBase::initGFT() {
+	// fill with empty
+	for(int i = 0; i < GFTIndex_SIZE; i++) {
+		page_GFT[i + 0] = 0;
+		page_GFT[i + 1] = 0;
+		page_GFT[i + 2] = 0;
+		page_GFT[i + 3] = 0;
+	}
+
+
+	GFTItem item;
+	item.globalFrame = GF;
+	item.codebase = CB;
+	// GFI_GF
+	page_GFT[GFI_GF + 0] = LowHalf(item.globalFrame);
+	page_GFT[GFI_GF + 1] = HighHalf(item.globalFrame);
+	page_GFT[GFI_GF + 2] = LowHalf(item.codebase);
+	page_GFT[GFI_GF + 3] = HighHalf(item.codebase);
+	// GFI_SD
+	page_GFT[GFI_SD + 0] = LowHalf(item.globalFrame);
+	page_GFT[GFI_SD + 1] = HighHalf(item.globalFrame);
+	page_GFT[GFI_SD + 2] = LowHalf(item.codebase);
+	page_GFT[GFI_SD + 3] = HighHalf(item.codebase);
+	// GFI_ETT
+	page_GFT[GFI_ETT + 0] = LowHalf(item.globalFrame);
+	page_GFT[GFI_ETT + 1] = HighHalf(item.globalFrame);
+	page_GFT[GFI_ETT + 2] = LowHalf(item.codebase);
+	page_GFT[GFI_ETT + 3] = HighHalf(item.codebase);
+	// GFI_EFC
+	page_GFT[GFI_EFC + 0] = LowHalf(item.globalFrame);
+	page_GFT[GFI_EFC + 1] = HighHalf(item.globalFrame);
+	page_GFT[GFI_EFC + 2] = LowHalf(item.codebase);
+	page_GFT[GFI_EFC + 3] = HighHalf(item.codebase);
+}
+
+void testBase::initSD() {
+	// fill with empty
+	for(int i = 0; i < 256; i++) {
+		ControlLink item = (CARD32)LinkType::newProcedure;
+		page_SD[i * 2 + 0] = LowHalf(item);
+		page_SD[i * 2 + 1] = HighHalf(item);
+	}
+
+	for(int i = 0; i < 256; i++) {
+		NewProcDesc item;
+		item.pc = pc_SD | i;
+		item.taggedGFI = (CARD16)(GFI_SD | (CARD32)LinkType::newProcedure);
+
+		page_SD[i * 2 + 0] = LowHalf(item.u);
+		page_SD[i * 2 + 1] = HighHalf(item.u);
+		page_CB[item.pc / 2] = (CARD16)0;
+	}
+}
+
+void testBase::initETT() {
+	//scTrapTable a;
+	// fill with empty
+	ControlLink item = (CARD32)LinkType::newProcedure;
+	for(int i = 0; i < 256; i++) {
+		page_ETT[i * 2 + 0] = LowHalf(item);
+		page_ETT[i * 2 + 1] = HighHalf(item);
+	}
+
+	for(int i = 0; i < 256; i++) {
+		NewProcDesc item;
+		item.pc = pc_ETT | i;
+		item.taggedGFI = (CARD16)(GFI_ETT | (CARD32)LinkType::newProcedure);
+
+		page_ETT[i * 2 + 0] = LowHalf(item.u);
+		page_ETT[i * 2 + 1] = HighHalf(item.u);
+		page_CB[item.pc / 2] = (CARD16)0;
+	}
+}
+
+void testBase::initPDA() {
+	page_PDA[0] = 0x0000; // ready: Queue
+	page_PDA[1] = 1024;   // count: CARDINAL  PsbIndex_SIZE
+	page_PDA[2] = 0x0000; // unused: UNSPEC
+	page_PDA[3] = 0x0000; // available[0]
+	page_PDA[4] = 0x0000; // available[1]
+	page_PDA[5] = 0x0000; // available[2]
+	page_PDA[6] = 0x0000; // available[3]
+	page_PDA[7] = 0x0000; // available[4]
+
+	// initialize state with StateVectorCountMap.
+	{
+		CARD16 q = SIZE(ProcessStateBlock) * PsbIndex_SIZE;
+		const int nElement = sizeof(PilotBootmesa::StateVectorCountMap) / sizeof(PilotBootmesa::StateVectorCountMap[0]);
+		for(int i = 0; i < nElement; i++) {
+			const int count = PilotBootmesa::StateVectorCountMap[i];
+			page_PDA[8 + i] = 0;
+			for(int j = 0; j < count; j++) {
+				page_PDA[q] = page_PDA[8 + i];
+				page_PDA[8 + i] = q;
+				q += SIZE(StateVector);
+			}
+		}
+	}
+
+	// initialize interrupt
+	{
+		CARD16 p = 8 + 8;
+		for(int i = 0; i < 16; i++) {
+			page_PDA[p++] = 0; // condition
+			page_PDA[p++] = 0; // available
+		}
+	}
+
+	// initialize fault
+	{
+		CARD16 p = 8 + 8 + 32;
+		for(int i = 0; i < 8; i++) {
+			page_PDA[p++] = 0; // queue
+			page_PDA[p++] = 0; // condition
+		}
+	}
+
+	// initialize block
+	{
+		CARD16 p = 8 + 8 + 32 + 16;
+		for(int i = 0; i < PsbIndex_SIZE; i++) {
+			page_PDA[p++] = 0; // link
+			page_PDA[p++] = 0; // flags
+			page_PDA[p++] = 0; // context
+			page_PDA[p++] = 0; // timeout
+			page_PDA[p++] = 0; // mds
+			page_PDA[p++] = 0; // available
+			page_PDA[p++] = 0; // sticky
+			page_PDA[p++] = 0; // sticky
+		}
+	}
+}
+
 void testBase::setUp() {
+	memory.initialize(22, 20, (CARD16)0x00a0);
+	interpreter.initialize();
+
+// FIXME	GuiOp::setContext(new NullGuiOp);
+
+	// mPDA = 0x0001000
+	// mGFT = 0x0002000
+	CB  = 0x00030080;
+	setMDS(0x00040000);
+	GF  = 0x00050080 + SIZE(GlobalOverhead);
+	PC  = 0x20;
+
+	{
+		CARD16 *p = memory.getAddress(0x00030000);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + i;
+	}
+	{
+		CARD16 *p = memory.getAddress(0x00030000 + 0x100);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x100 + i;
+	}
+	{
+		CARD16 *p = memory.getAddress(0x00030000 + 0x200);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x200 + i;
+	}
+	{
+		CARD16 *p = memory.getAddress(0x00040000);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x4000 + i;
+	}
+	{
+		CARD16 *p = memory.getAddress(0x00040000 + 0x1000);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x4100 + i;
+	}
+	{
+		CARD16 *p = memory.getAddress(0x00050000);
+		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x5000 + i;
+	}
+
+	page_PDA = memory.getAddress(mPDA);
+	page_GFT = memory.getAddress(mGFT);
+	page_CB  = memory.getAddress(CB);
+	page_MDS = memory.getAddressMDS(0);
+	page_AV  = memory.getAddressMDS(mAV);
+	page_SD  = memory.getAddressMDS(mSD);
+	page_ETT = memory.getAddressMDS(mETT);
+	page_GF  = memory.getAddress(GF);
+
+	GFI = 1;
+
+	GFI_GF  =  4; // 1
+	GFI_SD  =  8; // 2
+	GFI_ETT = 12; // 3
+	GFI_EFC = 16; // 4
+
+	pc_SD  = 0x1000;
+	pc_ETT = 0x2000;
+
+	initAV(0x0600, 0x1aff);
+	initSD();
+	initETT();
+	initGFT();
+	initPDA();
+
+	int fsi = 10;
+	LF = page_AV[fsi];
+	page_AV[fsi] = page_MDS[LF];
+	page_LF  = memory.getAddressMDS(LF);
+
+	PSB = 1;
 }
 
 void testBase::tearDown() {

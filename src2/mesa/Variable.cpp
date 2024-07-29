@@ -29,51 +29,42 @@
  *******************************************************************************/
 
 //
-// testBase.h
+// Variable.cpp
 //
 
-#pragma once
+#include "Type.h"
+#include "PrincOps.h"
+#include "Variable.h"
 
-#include <cppunit/extensions/HelperMacros.h>
+namespace mesa {
 
-#include "../mesa/Type.h"
-#include "../mesa/Constant.h"
-#include "../mesa/Variable.h"
-#include "../mesa/Function.h"
+// 3.3.1 Control Registers
+CARD16            PSB = 0; // PsbIndex - 10.1.1
+//MdsHandle         MDS = 0;
+LocalFrameHandle  LF  = 0;  // POINTER TO LocalVariables
+GlobalFrameHandle GF  = 0;  // LONG POINTER TO GlobalVarables
+CARD32            CB  = 0;  // LONG POINTER TO CodeSegment
+CARD16            PC  = 0;
+GFTHandle         GFI = 0;
 
-#include "../mesa/Memory.h"
+// 3.3.2 Evaluation Stack
+CARD16 stack[StackDepth];
+CARD16 SP = 0;
 
-#include "../opcode/Opcode.h"
-#include "../opcode/Interpreter.h"
+// 3.3.3 Data and Status Registers
+CARD16 PID[4] = {0, 0, 0, 0}; // Processor ID
+//CARD16 MP  = 0;    // Maintenance Panel
+//CARD32 IT  = 0;    // Interval Timer
+//CARD16 WM  = 0;    // Wakeup mask register - 10.4.4
+//CARD16 WP  = 0;    // Wakeup pending register - 10.4.4.1
+//CARD16 WDC = 0;    // Wakeup disable counter - 10.4.4.3
+//CARD16 PTC = 0;    // Process timeout counter - 10.4.5
+CARD16 XTS = 0;    // Xfer trap status - 9.5.5
 
-class testBase : public CppUnit::TestFixture {
-protected:
-	void initRegister();
-	void initAV(mesa::CARD16 origin, mesa::CARD16 limit);
-	void initGFT();
-	void initSD();
-	void initETT();
-	void initPDA();
 
-	mesa::CARD16 *page_PDA;
-	mesa::CARD16 *page_GFT;
-	mesa::CARD16 *page_CB;
-	mesa::CARD16 *page_MDS;
-	mesa::CARD16 *page_AV;
-	mesa::CARD16 *page_SD;
-	mesa::CARD16 *page_ETT;
-	mesa::CARD16 *page_LF;
-	mesa::CARD16 *page_GF;
+// 4.5 Instruction Execution
+CARD8  breakByte = 0;
+CARD16 savedPC = 0;
+CARD16 savedSP = 0;
 
-	mesa::CARD16 GFI_GF;
-	mesa::CARD16 GFI_SD;
-	mesa::CARD16 GFI_ETT;
-	mesa::CARD16 GFI_EFC;
-
-	mesa::CARD16 pc_SD;
-	mesa::CARD16 pc_ETT;
-
-public:
-	void setUp();
-	void tearDown();
-};
+}

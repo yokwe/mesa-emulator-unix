@@ -29,51 +29,39 @@
  *******************************************************************************/
 
 //
-// testBase.h
+// Perf.cpp
 //
 
-#pragma once
+#include "Perf.h"
 
-#include <cppunit/extensions/HelperMacros.h>
+namespace mesa {
 
-#include "../mesa/Type.h"
-#include "../mesa/Constant.h"
-#include "../mesa/Variable.h"
-#include "../mesa/Function.h"
+PERF_DEFFINE(Dispatch)
+PERF_DEFFINE(Fetch)
+PERF_DEFFINE(Store)
+PERF_DEFFINE(ReadDbl)
+PERF_DEFFINE(FetchMds)
+PERF_DEFFINE(StoreMds)
+PERF_DEFFINE(ReadDblMds)
+PERF_DEFFINE(GetCodeByte)
+PERF_DEFFINE(GetCodeWord)
+PERF_DEFFINE(FetchByte)
+PERF_DEFFINE(StoreByte)
+PERF_DEFFINE(ReadField)
+PERF_DEFFINE(WriteField)
+PERF_DEFFINE(WriteMap)
+PERF_DEFFINE(GetAddress)
+PERF_DEFFINE(FetchPda)
+PERF_DEFFINE(StorePda)
+PERF_DEFFINE(MemoryFetch)
+PERF_DEFFINE(MemoryStore)
+// Fault
+PERF_DEFFINE(FrameFault)
+PERF_DEFFINE(PageFault)
+// Trap
+PERF_DEFFINE(CodeTrap)
+PERF_DEFFINE(EscOpcodeTrap)
+PERF_DEFFINE(OpcodeTrap)
+PERF_DEFFINE(UnboundTrap)
 
-#include "../mesa/Memory.h"
-
-#include "../opcode/Opcode.h"
-#include "../opcode/Interpreter.h"
-
-class testBase : public CppUnit::TestFixture {
-protected:
-	void initRegister();
-	void initAV(mesa::CARD16 origin, mesa::CARD16 limit);
-	void initGFT();
-	void initSD();
-	void initETT();
-	void initPDA();
-
-	mesa::CARD16 *page_PDA;
-	mesa::CARD16 *page_GFT;
-	mesa::CARD16 *page_CB;
-	mesa::CARD16 *page_MDS;
-	mesa::CARD16 *page_AV;
-	mesa::CARD16 *page_SD;
-	mesa::CARD16 *page_ETT;
-	mesa::CARD16 *page_LF;
-	mesa::CARD16 *page_GF;
-
-	mesa::CARD16 GFI_GF;
-	mesa::CARD16 GFI_SD;
-	mesa::CARD16 GFI_ETT;
-	mesa::CARD16 GFI_EFC;
-
-	mesa::CARD16 pc_SD;
-	mesa::CARD16 pc_ETT;
-
-public:
-	void setUp();
-	void tearDown();
-};
+}

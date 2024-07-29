@@ -33,11 +33,10 @@
 // PrincOps.cpp
 //
 
-#include "../util/Util.h"
-static const util::Logger logger(__FILE__);
-
 #include "PrincOps.h"
 
+#include "../util/Util.h"
+static const util::Logger logger(__FILE__);
 
 namespace mesa {
 

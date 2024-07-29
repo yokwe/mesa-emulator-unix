@@ -10,6 +10,7 @@ target_sources(
 		testBase.cpp
 		testBase.h
 		testMain.cpp
+		testMemory.cpp
 		testOpcode_000.cpp
 		testPilot.cpp
 		testType.cpp

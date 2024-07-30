@@ -40,7 +40,7 @@ namespace mesa {
 
 // 3.3.1 Control Registers
 CARD16            PSB = 0; // PsbIndex - 10.1.1
-//MdsHandle         MDS = 0;
+MdsHandle         MDS = 0;
 LocalFrameHandle  LF  = 0;  // POINTER TO LocalVariables
 GlobalFrameHandle GF  = 0;  // LONG POINTER TO GlobalVarables
 CARD32            CB  = 0;  // LONG POINTER TO CodeSegment

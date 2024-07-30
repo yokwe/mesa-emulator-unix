@@ -83,7 +83,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
 	mesa::CARD32 vmBits = 24;
 	mesa::CARD32 rmBits = 20;
-	mesa::memory.initialize(vmBits, rmBits);
+	mesa::MemoryInit(vmBits, rmBits);
 
 	logger.info("STOP");
 }

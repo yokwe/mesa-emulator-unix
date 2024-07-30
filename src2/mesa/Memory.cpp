@@ -29,11 +29,15 @@
  *******************************************************************************/
 
 //
-// Memory.h
+// Memory.cpp
 //
 
-#include <algorithm>
+#include <utility>
 
+#include "Type.h"
+#include "Constant.h"
+#include "Variable.h"
+#include "Function.h"
 
 #include "Memory.h"
 
@@ -42,21 +46,51 @@ static const util::Logger logger(__FILE__);
 
 namespace mesa {
 
-Memory memory;
+static const CARD32 MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize;
 
-//  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
-//	The BOOTING ACTION defined by the Principles of Operation should include:
-//	   1. Put real memory behind any special processor pages (I/O pages);
-//        then put all remaining usable real memory behind other virtual memory pages beginning at virtual page 0,
-//        and working upward sequentially (skipping any already-mapped special processor pages).
-//	   2. Read consecutive pages of the Germ into virtual memory beginning at
-//        page Boot.pageGerm + Boot.mdsiGerm*Environment.MaxPagesInMDS (i.e page 1).
-//        At present, the way the initial microcode figures out the device and device address of the Germ,
-//        and the number of pages which comprise the Germ, is processor-dependent.
-//	   3. Set Boot.pRequest = to e.g. [Boot.currentRequestBasicVersion, Boot.bootPhysicalVolume, locationOfPhysicalVolume].
-//	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
-//	   5. Xfer[dest: Boot.pInitialLink].
-void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
+static const CARD32 VMBITS_MIN = 20;
+static const CARD32 VMBITS_MAX = 25;
+
+static const CARD32 RMBITS_MIN = 20;
+static const CARD32 MRBITS_MAX = 24;
+
+
+union Flag {
+	CARD32 u0;
+	struct {
+		CARD32 offset     : 24;
+		//
+		CARD32 fetch      :  1;
+		CARD32 store      :  1;
+		CARD32 protect    :  1;
+		CARD32 vacant     :  1;
+	};
+	void clear() {
+		u0 = 0;
+	}
+	void clear(CARD32 newValue) {
+		clear();
+		offset = newValue;
+	}
+	void setVacant() {
+		clear();
+		vacant = 1;
+	}
+	int isReferenced() {
+		return fetch | store;
+	}
+	int isDirty() {
+		return store;
+	}
+};
+
+static CARD32 vpSize = 0; // number of virtual page
+static CARD32 rpSize = 0; // number of real page
+
+static CARD16* memoryArray = 0;  // rpSize * PageSize
+static Flag*   flagArray   = 0;    // vpSize
+
+void MemoryInit(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	// sanity check
 	if (vmBits < VMBITS_MIN) ERROR();
 	if (VMBITS_MAX < vmBits) ERROR();
@@ -67,101 +101,127 @@ void Memory::initialize(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 
 	delete memoryArray;
 	delete flagArray;
-	delete pageArray;
 
 	vpSize      = 1 << (vmBits - PageBits);
-	rpSize      = 1 << std::min(rmBits - PageBits, MAX_REALMEMORY_PAGE_SIZE);
+	rpSize      = 1 << (rmBits - PageBits);
 
-	auto memoryArraySize = rpSize * PageSize;
+	if (MAX_REALMEMORY_PAGE_SIZE < rpSize) rpSize = MAX_REALMEMORY_PAGE_SIZE;
 
-	memoryArray = new CARD16[memoryArraySize];
+	memoryArray = new CARD16[rpSize * PageSize];
 	flagArray   = new Flag[vpSize];
-	pageArray   = new CARD16*[vpSize];
-	mds         = 0;
+	MDS         = 0;
 
-//	logger.info("vmBits  %2d  %4X", vmBits, vpSize - 1);
-//	logger.info("rmBits  %2d  %4X", rmBits, rpSize - 1);
+	for(CARD32 i = 0; i < rpSize * PageSize; i++) memoryArray[i] = 0;
+	for(CARD32 i = 0; i < vpSize; i++) flagArray[i].clear();
 
-	for(CARD32 i = 0; i < memoryArraySize; i++) memoryArray[i] = 0;
-	for(CARD32 i = 0; i < vpSize; i++) flagArray->clear();
-	for(CARD32 i = 0; i < vpSize; i++) pageArray[i] = 0;
+	//  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
+	//	The BOOTING ACTION defined by the Principles of Operation should include:
+	//	   1. Put real memory behind any special processor pages (I/O pages);
+	//        then put all remaining usable real memory behind other virtual memory pages beginning at virtual page 0,
+	//        and working upward sequentially (skipping any already-mapped special processor pages).
+	//	   2. Read consecutive pages of the Germ into virtual memory beginning at
+	//        page Boot.pageGerm + Boot.mdsiGerm*Environment.MaxPagesInMDS (i.e page 1).
+	//        At present, the way the initial microcode figures out the device and device address of the Germ,
+	//        and the number of pages which comprise the Germ, is processor-dependent.
+	//	   3. Set Boot.pRequest = to e.g. [Boot.currentRequestBasicVersion, Boot.bootPhysicalVolume, locationOfPhysicalVolume].
+	//	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
+	//	   5. Xfer[dest: Boot.pInitialLink].
 
 	//const int VP_START = pageGerm + countGermVM;
 	CARD32 rp = 0;
 	// vp:[ioRegionPage .. 256) <=> rp:[0..256-ioRegionPage)
 	for(CARD32 i = ioRegionPage; i < 256; i++) {
-		flagArray[i].clear();
-		pageArray[i] = memoryArray + PageSize * rp++;
+		CARD32 offset = PageSize * rp++;
+		flagArray[i].clear(offset);
 	}
 	// vp:[0..ioRegionPage) <=> rp: [256-ioRegionPage .. 256)
 	for(CARD32 i = 0; i < ioRegionPage; i++) {
-		flagArray[i].clear();
-		pageArray[i] = memoryArray + PageSize * rp++;
+		CARD32 offset = PageSize * rp++;
+		flagArray[i].clear(offset);
 	}
 	// vp: [256 .. rpSize)
 	for(CARD32 i = 256; i < rpSize; i++) {
-		flagArray[i].clear();
-		pageArray[i] = memoryArray + PageSize * rp++;
+		CARD32 offset = PageSize * rp++;
+		flagArray[i].clear(offset);
 	}
 	if (rp != rpSize) ERROR();
 	// vp: [rpSize .. vpSize)
 	for(CARD32 i = rpSize; i < vpSize; i++) {
 		flagArray[i].setVacant();
-		pageArray[i] = 0;
 	}
 }
 
-
-// WriteMap: PROCEDURE [virtual: VirtualPageNumber, flags: MapFlags, real: RealPageNumber];
- void Memory::writeMap(CARD32 vp, MapFlags mapFlags, CARD32 rp) {
+void WriteMap(CARD32 vp, MapFlags mapFlags, CARD32 rp) {
 	 if (vpSize <= vp) ERROR();
-	 CARD16* page;
 	 Flag    flag;
 
 	 if (Vacant(mapFlags)) {
 		 if (rp != 0) ERROR();
-		 page = 0;
 		 flag.setVacant();
 	 } else {
-		 page = pageArray[rp << PageBits];
 		 flag.clear();
 		 if (mapFlags.dirty)      flag.store   = 1;
 		 if (mapFlags.protect)    flag.protect = 1;
 		 if (mapFlags.referenced) flag.fetch   = 1;
+		 flag.offset = rp * PageSize;
 	 }
-	 pageArray[vp] = page;
 	 flagArray[vp] = flag;
-
-	 // FIXME update pageArrayMDS
- }
- std::pair<MapFlags, CARD32> Memory::readMap(CARD32 vp) {
+}
+std::pair<MapFlags, CARD32> ReadMap(CARD32 vp) {
 	 if (vpSize <= vp) ERROR();
 	 MapFlags mapFlags;
 	 CARD32   rp;
 
-	 auto page = pageArray[vp];
+	 mapFlags.u = 0;
 	 auto flag = flagArray[vp];
 
-	 if (page == 0) {
-		 if (!flag.vacant) ERROR();
-
+	 if (flag.vacant) {
 		 mapFlags.dirty      = 1;
 		 mapFlags.protect    = 1;
 		 mapFlags.referenced = 0;
 		 rp = 0;
 	 } else {
-		 mapFlags.u = 0;
 		 if (flag.protect)        mapFlags.protect    = 1;
 		 if (flag.isDirty())      mapFlags.dirty      = 1;
 		 if (flag.isReferenced()) mapFlags.referenced = 1;
 
-		 CARD32 memoryOffset = page - memoryArray;
-		 if (memoryOffset & PageMask) ERROR();
+		 CARD32 offset = flag.offset;
+		 if (offset & PageMask) ERROR();
 
-		 rp = memoryOffset >> PageBits;
+		 rp = flag.offset / PageSize;
 	 }
 
 	 return {mapFlags, rp};
- }
+}
+
+CARD16* GetAddress(CARD32 va) {
+	auto flag = flagArray[va / PageSize];
+	if (flag.vacant) PageFault(va);
+
+	return memoryArray + flag.offset + (va % PageSize);
+}
+CARD16* Fetch(CARD32 va) {
+	auto flag = flagArray[va / PageSize];
+	if (flag.vacant) PageFault(va);
+
+	if (!flag.fetch) {
+		flag.fetch = 1;
+		flagArray[va / PageSize] = flag;
+	}
+
+	return memoryArray + flag.offset + (va % PageSize);
+}
+CARD16* Store(CARD32 va) {
+	auto flag = flagArray[va / PageSize];
+	if (flag.vacant)  PageFault(va);
+	if (flag.protect) WriteProtectFault(va);
+
+	if (!flag.store) {
+		flag.store = 1;
+		flagArray[va / PageSize] = flag;
+	}
+
+	return memoryArray + flag.offset + (va % PageSize);
+}
 
 }

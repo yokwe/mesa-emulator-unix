@@ -92,8 +92,8 @@ void E_LLB() {
 __attribute__((always_inline)) static inline void E_LLD_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LLD %3d", savedPC, arg);
 	POINTER ptr = LF + arg;
-	CARD16* p0 = FetchMDS(ptr + 0);
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : FetchMDS(ptr + 1);
+	CARD16* p0 = FetchMDS(ptr);
+	CARD16* p1 = FetchMDSNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
 	Push(*p0);
 	Push(*p1);
@@ -169,8 +169,8 @@ void E_SLB() {
 __attribute__((always_inline)) static inline void E_SLD_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SLD %3d", savedPC, arg);
 	POINTER ptr = LF + arg;
-	CARD16* p0 = StoreMDS(ptr + 0);
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : StoreMDS(ptr + 1);
+	CARD16* p0 = StoreMDS(ptr);
+	CARD16* p1 = StoreMDSNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
 	*p1 = Pop();
 	*p0 = Pop();
@@ -225,8 +225,8 @@ void E_PLB() {
 __attribute__((always_inline)) static inline void E_PLD_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PLD %3d", savedPC, arg);
 	POINTER ptr = LF + arg;
-	CARD16* p0 = StoreMDS(ptr + 0);
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : StoreMDS(ptr + 1);
+	CARD16* p0 = StoreMDS(ptr);
+	CARD16* p1 = StoreMDSNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
 	*p1 = Pop();
 	*p0 = Pop();
@@ -268,8 +268,8 @@ void E_LGB() {
 __attribute__((always_inline)) static inline void E_LGD_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LGD %3d", savedPC, arg);
 	LONG_POINTER ptr = GF + arg;
-	CARD16* p0 = Fetch(ptr + 0);
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : Fetch(ptr + 1);
+	CARD16* p0 = Fetch(ptr);
+	CARD16* p1 = FetchNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
 	Push(*p0);
 	Push(*p1);

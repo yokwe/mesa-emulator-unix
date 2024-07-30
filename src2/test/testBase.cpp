@@ -220,7 +220,7 @@ void testBase::initPDA() {
 }
 
 void testBase::setUp() {
-	memory.initialize(22, 20, (CARD16)0x00a0);
+	MemoryInit(22, 20);
 	interpreter.initialize();
 
 // FIXME	GuiOp::setContext(new NullGuiOp);
@@ -228,43 +228,43 @@ void testBase::setUp() {
 	// mPDA = 0x0001000
 	// mGFT = 0x0002000
 	CB  = 0x00030080;
-	setMDS(0x00040000);
+	MDS = 0x00040000;
 	GF  = 0x00050080 + SIZE(GlobalOverhead);
 	PC  = 0x20;
 
 	{
-		CARD16 *p = memory.getAddress(0x00030000);
+		CARD16 *p = GetAddress(0x00030000);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + i;
 	}
 	{
-		CARD16 *p = memory.getAddress(0x00030000 + 0x100);
+		CARD16 *p = GetAddress(0x00030000 + 0x100);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x100 + i;
 	}
 	{
-		CARD16 *p = memory.getAddress(0x00030000 + 0x200);
+		CARD16 *p = GetAddress(0x00030000 + 0x200);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x200 + i;
 	}
 	{
-		CARD16 *p = memory.getAddress(0x00040000);
+		CARD16 *p = GetAddress(0x00040000);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x4000 + i;
 	}
 	{
-		CARD16 *p = memory.getAddress(0x00040000 + 0x1000);
+		CARD16 *p = GetAddress(0x00040000 + 0x1000);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x4100 + i;
 	}
 	{
-		CARD16 *p = memory.getAddress(0x00050000);
+		CARD16 *p = GetAddress(0x00050000);
 		for(CARD32 i = 0; i < PageSize; i++) p[i] = 0x5000 + i;
 	}
 
-	page_PDA = memory.getAddress(mPDA);
-	page_GFT = memory.getAddress(mGFT);
-	page_CB  = memory.getAddress(CB);
-	page_MDS = memory.getAddressMDS(0);
-	page_AV  = memory.getAddressMDS(mAV);
-	page_SD  = memory.getAddressMDS(mSD);
-	page_ETT = memory.getAddressMDS(mETT);
-	page_GF  = memory.getAddress(GF);
+	page_PDA = GetAddress(mPDA);
+	page_GFT = GetAddress(mGFT);
+	page_CB  = GetAddress(CB);
+	page_MDS = GetAddressMDS(0);
+	page_AV  = GetAddressMDS(mAV);
+	page_SD  = GetAddressMDS(mSD);
+	page_ETT = GetAddressMDS(mETT);
+	page_GF  = GetAddress(GF);
 
 	GFI = 1;
 
@@ -285,7 +285,7 @@ void testBase::setUp() {
 	int fsi = 10;
 	LF = page_AV[fsi];
 	page_AV[fsi] = page_MDS[LF];
-	page_LF  = memory.getAddressMDS(LF);
+	page_LF  = GetAddressMDS(LF);
 
 	PSB = 1;
 }

@@ -34,8 +34,6 @@
 
 #include "Perf.h"
 
-namespace mesa {
-
 PERF_DEFFINE(Dispatch)
 PERF_DEFFINE(Fetch)
 PERF_DEFFINE(Store)
@@ -63,5 +61,3 @@ PERF_DEFFINE(CodeTrap)
 PERF_DEFFINE(EscOpcodeTrap)
 PERF_DEFFINE(OpcodeTrap)
 PERF_DEFFINE(UnboundTrap)
-
-}

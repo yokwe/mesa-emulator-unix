@@ -34,9 +34,15 @@
 
 #pragma once
 
+#include "../mesa/Type.h"
+
 namespace mesa {
 
 void InterpreterInit();
+void InterpreterStats();
+
 void Execute();
 void Dispatch(CARD8 opcode);
+void DispatchEsc(CARD8 opcode);
+
 }

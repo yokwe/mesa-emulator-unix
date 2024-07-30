@@ -49,10 +49,7 @@
 
 #define PERF_COUNT(name) { if (PERF_ENABLE) PERF_NAME(name)++; }
 
-#define PERF_DUMP(name) logger.info("%-22s = %10llu", PPSTR(PERF_NAME(name)), PERF_NAME(name));
-
-
-namespace mesa {
+#define PERF_DUMP(name) {if (PERF_NAME(name)) logger.info("%-22s = %10llu", PPSTR(PERF_NAME(name)), PERF_NAME(name));}
 
 static const int PERF_ENABLE    = 1;
 
@@ -112,7 +109,4 @@ if (PERF_ENABLE) { \
 	PERF_DUMP(EscOpcodeTrap) \
 	PERF_DUMP(OpcodeTrap) \
 	PERF_DUMP(UnboundTrap) \
-}
-
-
 }

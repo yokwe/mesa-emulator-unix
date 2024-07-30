@@ -33,12 +33,12 @@
 //
 
 #include <cstdint>
-#include <iomanip>
-#include <iostream>
+#include <string>
 
-#include "Opcode.h"
 #include "../mesa/Debug.h"
 #include "../mesa/Perf.h"
+
+#include "Opcode.h"
 
 // FIXME #include "../mesa/InterruptThread.h"
 // FIXME #include "../mesa/ProcessorThread.h"
@@ -59,19 +59,19 @@ static std::uint64_t statMop [TABLE_SIZE];
 static std::uint64_t statEsc [TABLE_SIZE];
 
 
-//static void dispatchEsc(CARD32 opcode) {
-//	// ESC and ESCL
-//	//logger.debug("dispatch ESC  %04X opcode = %03o", savedPC, opcode);
-//	tableEsc[opcode].execute();
-//	// increment stat counter after execution. We don't count ABORTED instruction.
-//	if (DEBUG_SHOW_OPCODE_STATS) statEsc[opcode]++;
-//}
+void DispatchEsc(CARD8 opcode) {
+	// ESC and ESCL
+	//logger.debug("dispatch ESC  %04X opcode = %03o", savedPC, opcode);
+	tableEsc[opcode].execute();
+	// increment stat counter after execution. We don't count ABORTED instruction.
+	if (DEBUG_SHOW_OPCODE_STATS) statEsc[opcode]++;
+}
 
 void Dispatch(CARD8 opcode) {
 	PERF_COUNT(Dispatch)
 	tableMop[opcode].execute();
 	// increment stat counter after execution. We don't count ABORTED instruction.
-	if (DEBUG_SHOW_OPCODE_STATS) statMop[opcode]++;
+	statMop[opcode]++;
 }
 
 void Execute() {
@@ -79,7 +79,6 @@ void Execute() {
 	savedSP = SP;
 	Dispatch(GetCodeByte());
 }
-
 
 static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
@@ -133,33 +132,29 @@ static void escOpcodeTrap() {
 static void fillOpcodeTrap() {
 	for(CARD32 i = 0; i < TABLE_SIZE; i++) {
 		if (tableMop[i].isEmpty()) {
-			std::ostringstream oss;
-			oss << "MOP_" << std::setfill('0') << std::setw(3) << std::oct << i;
-			auto name = oss.str();
-			assignMop(mopOpcodeTrap, name, i, 1); // can be 1, 2 or 3
+			assignMop(mopOpcodeTrap, util::std_sprintf("MOP_%03o", i), i, 1); // can be 1, 2 or 3
 		}
 		if (tableEsc[i].isEmpty()) {
 			std::ostringstream oss;
-			oss << "ESC_" << std::setfill('0') << std::setw(3) << std::oct << i;
-			auto name = oss.str();
-			assignEsc(mopOpcodeTrap, name, i, 2); // can bw 2 or 3
+			assignEsc(mopOpcodeTrap, util::std_sprintf("ESC_%03o", i), i, 2); // can bw 2 or 3
 		}
 	}
 }
-
 
 void InterpreterStats() {
 	if (DEBUG_SHOW_OPCODE_STATS) {
 		long long total = 0;
 		logger.info("==== Interpreter stats  START");
 		for(int i = 0; i < TABLE_SIZE; i++) {
+			if (statMop[i] == 0) continue;
 			Opcode *op = tableMop + i;
-			if (statMop[i] == 0 && op->isEqual(mopOpcodeTrap)) continue;
-			logger.info("stats mop  %3o  %-16s  %10lld", op->getCode(), op->getName(), statMop[i]);
+			if (op->isEqual(mopOpcodeTrap)) continue;
+			logger.info("stats mop  %3o  %-16s  %d", op->getCode(), op->getName(), statMop[i]);
 			total += statMop[i];
 		}
 		for(int i = 0; i < TABLE_SIZE; i++) {
 			Opcode *op = tableEsc + i;
+			if (statEsc[i] == 0) continue;
 			if (statEsc[i] == 0 && op->isEqual(escOpcodeTrap)) continue;
 			logger.info("stats esc  %3o  %-16s  %10lld", op->getCode(), op->getName(), statEsc[i]);
 			total += statEsc[i];
@@ -168,6 +163,9 @@ void InterpreterStats() {
 		logger.info("==== Interpreter stats  STOP");
 	}
 }
+
+
+
 
 
 static void initRegisters();
@@ -179,8 +177,8 @@ void InterpreterInit() {
 	for(int i = 0; i < TABLE_SIZE; i++) {
 		tableMop[i].empty();
 		tableEsc[i].empty();
-		statMop[i] = 0;
-		statEsc[i] = 0;
+//		statMop[i] = 0;
+//		statEsc[i] = 0;
 	}
 
 	initTable();

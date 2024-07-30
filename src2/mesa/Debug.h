@@ -39,7 +39,7 @@ namespace mesa {
 // Opcode
 static const int DEBUG_SHOW_OPCODE       = 0;
 static const int DEBUG_SHOW_DUMMY_OPCODE = 0;
-static const int DEBUG_SHOW_OPCODE_STATS = 0;
+static const int DEBUG_SHOW_OPCODE_STATS = 1;
 
 // NetworkPacket
 static const int DEBUG_SHOW_NETWORK_PACKET_BYTES  = 0;

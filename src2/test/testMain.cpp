@@ -36,6 +36,9 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
+#include "../mesa/Perf.h"
+#include "../opcode/Interpreter.h"
+
 #include "../util/Util.h"
 static const util::Logger logger(__FILE__);
 
@@ -49,6 +52,10 @@ int main() {
 
 	logger.debug("START");
 	runner.run();
+	logger.debug("----");
+	PERF_LOG();
+	logger.debug("----");
+	mesa::InterpreterStats();
 	logger.debug("STOP");
 
 	return 0;

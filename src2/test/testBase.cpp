@@ -221,7 +221,7 @@ void testBase::initPDA() {
 
 void testBase::setUp() {
 	MemoryInit(22, 20);
-	interpreter.initialize();
+	InterpreterInit();
 
 // FIXME	GuiOp::setContext(new NullGuiOp);
 

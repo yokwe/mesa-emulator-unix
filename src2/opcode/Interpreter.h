@@ -34,64 +34,9 @@
 
 #pragma once
 
-#include "Opcode.h"
-
-#include "../mesa/Perf.h"
-
 namespace mesa {
 
-class Interpreter {
-public:
-	static const int TABLE_SIZE = 256;
-
-	inline void dispatchEsc(CARD32 opcode) {
-		// ESC and ESCL
-		//logger.debug("dispatch ESC  %04X opcode = %03o", savedPC, opcode);
-		tableEsc[opcode].execute();
-		// increment stat counter after execution. We don't count ABORTED instruction.
-		if (DEBUG_SHOW_OPCODE_STATS) statEsc[opcode]++;
-	}
-
-	inline void dispatchMop(CARD32 opcode) {
-		PERF_COUNT(Dispatch)
-		tableMop[opcode].execute();
-		// increment stat counter after execution. We don't count ABORTED instruction.
-		if (DEBUG_SHOW_OPCODE_STATS) statMop[opcode]++;
-	}
-
-	inline void execute() {
-		savedPC = PC;
-		savedSP = SP;
-		dispatchMop(GetCodeByte());
-	}
-
-	// Implementation Specific
-	void initialize();
-
-	void stats();
-
-private:
-	Opcode    tableMop[TABLE_SIZE];
-	Opcode    tableEsc[TABLE_SIZE];
-	long long statMop [TABLE_SIZE];
-	long long statEsc [TABLE_SIZE];
-
-	void initRegisters();
-
-	void initTable();
-	void fillOpcodeTrap();
-
-	static void mopOpcodeTrap();
-	static void escOpcodeTrap();
-
-	void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
-	void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
-};
-
-extern Interpreter interpreter;
-
-static inline void Execute() {
-	interpreter.execute();
-}
-
+void InterpreterInit();
+void Execute();
+void Dispatch(CARD8 opcode);
 }

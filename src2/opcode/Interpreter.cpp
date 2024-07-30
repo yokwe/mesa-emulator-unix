@@ -32,6 +32,11 @@
 // Interpreter.cpp
 //
 
+#include <cstdint>
+#include <iomanip>
+#include <iostream>
+
+#include "Opcode.h"
 #include "../mesa/Debug.h"
 #include "../mesa/Perf.h"
 
@@ -46,9 +51,37 @@ static const util::Logger logger(__FILE__);
 
 namespace mesa {
 
-Interpreter interpreter;
+static const int TABLE_SIZE = 256;
 
-void Interpreter::assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
+static Opcode        tableMop[TABLE_SIZE];
+static Opcode        tableEsc[TABLE_SIZE];
+static std::uint64_t statMop [TABLE_SIZE];
+static std::uint64_t statEsc [TABLE_SIZE];
+
+
+//static void dispatchEsc(CARD32 opcode) {
+//	// ESC and ESCL
+//	//logger.debug("dispatch ESC  %04X opcode = %03o", savedPC, opcode);
+//	tableEsc[opcode].execute();
+//	// increment stat counter after execution. We don't count ABORTED instruction.
+//	if (DEBUG_SHOW_OPCODE_STATS) statEsc[opcode]++;
+//}
+
+void Dispatch(CARD8 opcode) {
+	PERF_COUNT(Dispatch)
+	tableMop[opcode].execute();
+	// increment stat counter after execution. We don't count ABORTED instruction.
+	if (DEBUG_SHOW_OPCODE_STATS) statMop[opcode]++;
+}
+
+void Execute() {
+	savedPC = PC;
+	savedSP = SP;
+	Dispatch(GetCodeByte());
+}
+
+
+static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignMop exec_ == 0  code = %d", code_);
 		ERROR();
@@ -66,7 +99,8 @@ void Interpreter::assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 
 	Opcode opcode (exec_, name_, code_, size_);
 	tableMop[code_] = opcode;
 }
-void Interpreter::assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
+
+static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignEsc exec_ == 0  code = %d", code_);
 		ERROR();
@@ -85,26 +119,36 @@ void Interpreter::assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 
 	tableEsc[code_] = opcode;
 }
 
-void Interpreter::mopOpcodeTrap() {
+static void mopOpcodeTrap() {
 	Opcode* last = Opcode::getLast();
 	if (last == 0) ERROR();
 	OpcodeTrap((CARD8)last->getCode());
 }
-void Interpreter::escOpcodeTrap() {
+static void escOpcodeTrap() {
 	Opcode* last = Opcode::getLast();
 	if (last == 0) ERROR();
 	EscOpcodeTrap((CARD8)last->getCode());
 }
 
-void Interpreter::fillOpcodeTrap() {
+static void fillOpcodeTrap() {
 	for(CARD32 i = 0; i < TABLE_SIZE; i++) {
-		if (tableMop[i].isEmpty()) assignMop(mopOpcodeTrap, util::std_sprintf("MOP_%03o", i), i, 1); // can be 1, 2 or 3
-		if (tableEsc[i].isEmpty()) assignEsc(escOpcodeTrap, util::std_sprintf("ESC_%03o", i), i, 2); // can bw 2 or 3
+		if (tableMop[i].isEmpty()) {
+			std::ostringstream oss;
+			oss << "MOP_" << std::setfill('0') << std::setw(3) << std::oct << i;
+			auto name = oss.str();
+			assignMop(mopOpcodeTrap, name, i, 1); // can be 1, 2 or 3
+		}
+		if (tableEsc[i].isEmpty()) {
+			std::ostringstream oss;
+			oss << "ESC_" << std::setfill('0') << std::setw(3) << std::oct << i;
+			auto name = oss.str();
+			assignEsc(mopOpcodeTrap, name, i, 2); // can bw 2 or 3
+		}
 	}
 }
 
 
-void Interpreter::stats() {
+void InterpreterStats() {
 	if (DEBUG_SHOW_OPCODE_STATS) {
 		long long total = 0;
 		logger.info("==== Interpreter stats  START");
@@ -125,7 +169,11 @@ void Interpreter::stats() {
 	}
 }
 
-void Interpreter::initialize() {
+
+static void initRegisters();
+static void initTable();
+
+void InterpreterInit() {
 	initRegisters();
 
 	for(int i = 0; i < TABLE_SIZE; i++) {
@@ -139,7 +187,7 @@ void Interpreter::initialize() {
 	fillOpcodeTrap();
 }
 
-void Interpreter::initRegisters() {
+static void initRegisters() {
 	// Processor ID
 	PID[0] = 0x0000;
 	PID[1] = 0x0000;
@@ -182,10 +230,11 @@ void Interpreter::initRegisters() {
     // FIXME lastTimeoutTime = 0;
 }
 
-#define ASSIGN_MOP(prefix, name) interpreter.assignMop(E_##name, #name, prefix##name, L_##name);
-#define ASSIGN_ESC(prefix, name) interpreter.assignEsc(E_##name, #name, prefix##name, L_##name);
 
-void Interpreter::initTable() {
+#define ASSIGN_MOP(prefix, name) assignMop(E_##name, #name, prefix##name, L_##name);
+#define ASSIGN_ESC(prefix, name) assignEsc(E_##name, #name, prefix##name, L_##name);
+
+static void initTable() {
 	/* 00 */ ASSIGN_MOP(z, NOOP)
 	/* 01 */ ASSIGN_MOP(z, LL0)
 	/* 02 */ ASSIGN_MOP(z, LL1)

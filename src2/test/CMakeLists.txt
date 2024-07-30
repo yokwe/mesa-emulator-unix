@@ -12,6 +12,7 @@ target_sources(
 		testMain.cpp
 		testMemory.cpp
 		testOpcode_000.cpp
+		testOpcode_100.cpp
 		testPilot.cpp
 		testType.cpp
 )

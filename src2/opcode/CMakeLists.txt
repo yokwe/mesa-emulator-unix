@@ -13,6 +13,7 @@ target_sources(
 		Interpreter.cpp
 		Opcode.cpp
 		OpcodeMop0xx.cpp
+		OpcodeMop1xx.cpp
 )
 
 add_dependencies(opcode mesa util)

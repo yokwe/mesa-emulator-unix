@@ -198,4 +198,28 @@ static inline CARD16 GetCodeWord() {
 }
 
 
+//
+// Byte
+//
+
+// 7.4 String Instructions
+CARD8 FetchByte(CARD32 va, CARD32 offset);
+void StoreByte(LONG_POINTER ptr, CARD32 offset, CARD8 data);
+CARD16 FetchWord(LONG_POINTER ptr, CARD32 offset);
+
+
+//
+// Field
+//
+
+UNSPEC ReadField(UNSPEC source, CARD8 spec8) ;
+UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data);
+
+
+//
+// Link
+//
+// 9.4.2 External Function Calls
+CARD32 FetchLink(CARD32 offset);
+
 }

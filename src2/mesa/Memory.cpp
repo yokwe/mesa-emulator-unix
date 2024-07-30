@@ -34,6 +34,9 @@
 
 #include <utility>
 
+#include "Debug.h"
+#include "Perf.h"
+
 #include "Type.h"
 #include "Constant.h"
 #include "Variable.h"
@@ -222,6 +225,74 @@ CARD16* Store(CARD32 va) {
 	}
 
 	return memoryArray + flag.offset + (va % PageSize);
+}
+
+
+CARD8 FetchByte(CARD32 va, CARD32 offset) {
+	PERF_COUNT(FetchByte)
+	BytePair word = {*Fetch(va + (offset / 2))};
+	return ((offset % 2) == 0) ? (CARD8)word.left : (CARD8)word.right;
+}
+void StoreByte(LONG_POINTER ptr, CARD32 offset, CARD8 data) {
+	PERF_COUNT(StoreByte)
+	ptr += offset / 2;
+	CARD16* p = Store(ptr);
+	BytePair word = {*p};
+	if ((offset % 2) == 0) {
+		word.left = data;
+	} else {
+		word.right = data;
+	}
+	*p = word.u;
+}
+CARD16 FetchWord(LONG_POINTER ptr, CARD32 offset) {
+	BytePair ret;
+	ret.left  = FetchByte(ptr, offset + 0);
+	ret.right = FetchByte(ptr, offset + 1);
+	return ret.u;
+}
+
+// 7.5 Field Instruction
+//const UNSPEC Field_MaskTable[WordSize] = {
+//		0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f, 0x00ff,
+//		0x01ff, 0x03ff, 0x07ff, 0x0fff, 0x1fff, 0x3fff, 0x7fff, 0xffff
+//};
+static inline CARD16 Field_MaskTable(CARD8 n) {
+	return (CARD16)((1U << (n + 1)) - 1);
+}
+
+UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
+	PERF_COUNT(ReadField)
+	FieldSpec spec = {spec8};
+
+	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
+	int shift = WordSize - (spec.pos + spec.size + 1);
+	// shift is always positive
+	// return Shift(source, -shift) & MaskTable(spec.size);
+	return (source >> shift) & Field_MaskTable(spec.size);
+}
+UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
+	PERF_COUNT(WriteField)
+	FieldSpec spec = {spec8};
+
+	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
+	int shift = WordSize - (spec.pos + spec.size + 1);
+	// shift is always positive
+	//UNSPEC mask = Shift(MaskTable[spec.size], shift);
+	UNSPEC mask = Field_MaskTable(spec.size) << shift;
+	//return (dest & ~mask) | (Shift(data, shift) & mask);
+	return (dest & ~mask) | ((data << shift) & mask);
+}
+
+
+//
+// Link
+//
+CARD32 FetchLink(CARD32 offset) {
+	GlobalWord word = {*Fetch(GO_OFFSET(GF, word))};
+	//CARD32 pointer = word.codelinks ? (CB - (CARD32)((offset + 1) * 2)) : (GlobalBase(GF) - (CARD32)((offset + 1) * 2));
+	CARD32 pointer = (word.codelinks ? CB : GlobalBase(GF)) - (CARD32)((offset + 1) * 2);
+	return ReadDbl(pointer);
 }
 
 }

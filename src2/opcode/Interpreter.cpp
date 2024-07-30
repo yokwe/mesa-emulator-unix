@@ -103,7 +103,7 @@ void InterpreterStats() {
 			total += statMop[i];
 		}
 		for(int i = 0; i < TABLE_SIZE; i++) {
-			if (statMop[i] == 0) continue;
+			if (statEsc[i] == 0) continue;
 			Opcode *op = tableEsc + i;
 			if (op->isEqual(escOpcodeTrap)) continue;
 			logger.info("stats esc  %3o  %-16s  %10lld", op->getCode(), op->getName(), statEsc[i]);
@@ -255,7 +255,7 @@ static void initTable() {
 
 	/* 077 */ //ASSIGN_MOP(z, STC)
 
-#if 0
+
 	/* 0100 */ ASSIGN_MOP(z, R0)
 	/* 0101 */ ASSIGN_MOP(z, R1)
 	/* 0102 */ ASSIGN_MOP(z, RB)
@@ -328,7 +328,7 @@ static void initTable() {
 	/* 0176 */ //ASSIGN_MOP(z, RBP)
 	/* 0177 */ //ASSIGN_MOP(z, WBP)
 
-
+#if 0
 	/* 0200 */ ASSIGN_MOP(z, CATCH)
 	/* 0201 */ ASSIGN_MOP(z, J2)
 	/* 0202 */ ASSIGN_MOP(z, J3)

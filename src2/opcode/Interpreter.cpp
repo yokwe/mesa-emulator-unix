@@ -80,6 +80,41 @@ void Execute() {
 	Dispatch(GetCodeByte());
 }
 
+static void mopOpcodeTrap() {
+	Opcode* last = Opcode::getLast();
+	if (last == 0) ERROR();
+	OpcodeTrap((CARD8)last->getCode());
+}
+static void escOpcodeTrap() {
+	Opcode* last = Opcode::getLast();
+	if (last == 0) ERROR();
+	EscOpcodeTrap((CARD8)last->getCode());
+}
+
+void InterpreterStats() {
+	if (DEBUG_SHOW_OPCODE_STATS) {
+		long long total = 0;
+		logger.info("==== Interpreter stats  START");
+		for(int i = 0; i < TABLE_SIZE; i++) {
+			if (statMop[i] == 0) continue;
+			Opcode *op = tableMop + i;
+			if (op->isEqual(mopOpcodeTrap)) continue;
+			logger.info("stats mop  %3o  %-16s  %d", op->getCode(), op->getName(), statMop[i]);
+			total += statMop[i];
+		}
+		for(int i = 0; i < TABLE_SIZE; i++) {
+			if (statMop[i] == 0) continue;
+			Opcode *op = tableEsc + i;
+			if (op->isEqual(escOpcodeTrap)) continue;
+			logger.info("stats esc  %3o  %-16s  %10lld", op->getCode(), op->getName(), statEsc[i]);
+			total += statEsc[i];
+		}
+		logger.info("total = %lld", total);
+		logger.info("==== Interpreter stats  STOP");
+	}
+}
+
+
 static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignMop exec_ == 0  code = %d", code_);
@@ -118,17 +153,6 @@ static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_,
 	tableEsc[code_] = opcode;
 }
 
-static void mopOpcodeTrap() {
-	Opcode* last = Opcode::getLast();
-	if (last == 0) ERROR();
-	OpcodeTrap((CARD8)last->getCode());
-}
-static void escOpcodeTrap() {
-	Opcode* last = Opcode::getLast();
-	if (last == 0) ERROR();
-	EscOpcodeTrap((CARD8)last->getCode());
-}
-
 static void fillOpcodeTrap() {
 	for(CARD32 i = 0; i < TABLE_SIZE; i++) {
 		if (tableMop[i].isEmpty()) {
@@ -140,32 +164,6 @@ static void fillOpcodeTrap() {
 		}
 	}
 }
-
-void InterpreterStats() {
-	if (DEBUG_SHOW_OPCODE_STATS) {
-		long long total = 0;
-		logger.info("==== Interpreter stats  START");
-		for(int i = 0; i < TABLE_SIZE; i++) {
-			if (statMop[i] == 0) continue;
-			Opcode *op = tableMop + i;
-			if (op->isEqual(mopOpcodeTrap)) continue;
-			logger.info("stats mop  %3o  %-16s  %d", op->getCode(), op->getName(), statMop[i]);
-			total += statMop[i];
-		}
-		for(int i = 0; i < TABLE_SIZE; i++) {
-			Opcode *op = tableEsc + i;
-			if (statEsc[i] == 0) continue;
-			if (statEsc[i] == 0 && op->isEqual(escOpcodeTrap)) continue;
-			logger.info("stats esc  %3o  %-16s  %10lld", op->getCode(), op->getName(), statEsc[i]);
-			total += statEsc[i];
-		}
-		logger.info("total = %lld", total);
-		logger.info("==== Interpreter stats  STOP");
-	}
-}
-
-
-
 
 
 static void initRegisters();

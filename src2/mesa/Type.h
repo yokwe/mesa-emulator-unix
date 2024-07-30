@@ -50,12 +50,6 @@ using CARD32 = std::uint32_t;
 using POINTER       = CARD16;
 using LONG_POINTER  = CARD32;
 
-using CARDINAL      = CARD16;
-using LONG_CARDIANL = CARD32;
-
-using UNSPEC        = CARD16;
-using LONG_UNSPEC   = CARD32;
-
 
 #define SIZE(t) ((CARD32)(sizeof(t) / sizeof(CARD16)))
 #define ELEMENTSOF(t) ((CARD32)(sizeof(t) / sizeof(t[0])))

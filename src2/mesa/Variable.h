@@ -80,4 +80,5 @@ extern CARD16 savedSP;
 // Due to name conflict with time, rename to time_CheckForTimeouts
 //extern LONG_CARDINAL lastTimeoutTime;
 
+extern void VariableInit();
 }

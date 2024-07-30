@@ -110,6 +110,7 @@ static inline int IsSamePage(CARD32 vaA, CARD32 vaB) {
 	return (vaA / PageSize) == (vaB / PageSize);
 }
 
+CARD32 GetVPSize();
 
 //
 // Memory Map
@@ -212,8 +213,8 @@ CARD16 FetchWord(LONG_POINTER ptr, CARD32 offset);
 // Field
 //
 
-UNSPEC ReadField(UNSPEC source, CARD8 spec8) ;
-UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data);
+CARD16 ReadField(CARD16 source, CARD8 spec8) ;
+CARD16 WriteField(CARD16 dest, CARD8 spec8, CARD16 data);
 
 
 //

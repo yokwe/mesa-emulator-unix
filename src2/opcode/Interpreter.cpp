@@ -130,8 +130,7 @@ static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_,
 		ERROR();
 	}
 
-	Opcode opcode (exec_, name_, code_, size_);
-	tableMop[code_] = opcode;
+	tableMop[code_] = Opcode(exec_, name_, code_, size_);
 }
 
 static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
@@ -149,8 +148,7 @@ static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_,
 		ERROR();
 	}
 
-	Opcode opcode (exec_, name_, code_, size_);
-	tableEsc[code_] = opcode;
+	tableEsc[code_] = Opcode(exec_, name_, code_, size_);
 }
 
 static void fillOpcodeTrap() {
@@ -328,7 +326,6 @@ static void initTable() {
 	/* 0176 */ //ASSIGN_MOP(z, RBP)
 	/* 0177 */ //ASSIGN_MOP(z, WBP)
 
-#if 0
 	/* 0200 */ ASSIGN_MOP(z, CATCH)
 	/* 0201 */ ASSIGN_MOP(z, J2)
 	/* 0202 */ ASSIGN_MOP(z, J3)
@@ -401,6 +398,7 @@ static void initTable() {
 	/* 0276 */ ASSIGN_MOP(z, UDCMP)
 	/* 0277 */ ASSIGN_MOP(z, VMFIND)
 
+#if 0
 	/* 0300 */ ASSIGN_MOP(z, LI0)
 	/* 0301 */ ASSIGN_MOP(z, LI1)
 	/* 0302 */ ASSIGN_MOP(z, LI2)

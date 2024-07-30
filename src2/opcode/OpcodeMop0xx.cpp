@@ -303,8 +303,8 @@ void E_SGB() {
 // 074  ASSIGN_MOP(z, BNDCK)
 void E_BNDCK() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  BNDCK", savedPC);
-	CARDINAL range = Pop();
-	CARDINAL index = Pop();
+	CARD16 range = Pop();
+	CARD16 index = Pop();
 	SP++; // Push(index);
 	if (range <= index) BoundsTrap();
 }

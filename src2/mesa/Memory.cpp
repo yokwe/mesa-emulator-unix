@@ -154,6 +154,10 @@ void MemoryInit(CARD32 vmBits, CARD32 rmBits, CARD16 ioRegionPage) {
 	}
 }
 
+CARD32 GetVPSize() {
+	return vpSize;
+}
+
 void WriteMap(CARD32 vp, MapFlags mapFlags, CARD32 rp) {
 	 if (vpSize <= vp) ERROR();
 	 Flag    flag;
@@ -261,7 +265,7 @@ static inline CARD16 Field_MaskTable(CARD8 n) {
 	return (CARD16)((1U << (n + 1)) - 1);
 }
 
-UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
+CARD16 ReadField(CARD16 source, CARD8 spec8) {
 	PERF_COUNT(ReadField)
 	FieldSpec spec = {spec8};
 
@@ -271,7 +275,7 @@ UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
 	// return Shift(source, -shift) & MaskTable(spec.size);
 	return (source >> shift) & Field_MaskTable(spec.size);
 }
-UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
+CARD16 WriteField(CARD16 dest, CARD8 spec8, CARD16 data) {
 	PERF_COUNT(WriteField)
 	FieldSpec spec = {spec8};
 
@@ -279,7 +283,7 @@ UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
 	int shift = WordSize - (spec.pos + spec.size + 1);
 	// shift is always positive
 	//UNSPEC mask = Shift(MaskTable[spec.size], shift);
-	UNSPEC mask = Field_MaskTable(spec.size) << shift;
+	CARD16 mask = Field_MaskTable(spec.size) << shift;
 	//return (dest & ~mask) | (Shift(data, shift) & mask);
 	return (dest & ~mask) | ((data << shift) & mask);
 }

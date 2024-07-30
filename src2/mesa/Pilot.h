@@ -89,25 +89,25 @@ namespace Environment {
 	//  --  pre-empted for system purposes.
 
 	//  firstPageNumber: PageNumber = 0;
-	const int firstPageNumber = 0;
+	const CARD32 firstPageNumber = 0;
 
 	//  lastPageNumber: PageNumber = 16777214 --2**24-2--;
-	const int lastPageNumber = 16777214;
+	const CARD32 lastPageNumber = 16777214;
 
 
 	//PageOffset: TYPE = PageNumber;
 	//  firstPageOffset: PageOffset = firstPageNumber;
-	const int firstPageOffset = firstPageNumber;
+	const CARD32 firstPageOffset = firstPageNumber;
 
 	//  lastPageOffset: PageOffset = lastPageNumber;
-	const int lastPageOffset = lastPageNumber;
+	const CARD32 lastPageOffset = lastPageNumber;
 
 	//PageCount: TYPE = LONG CARDINAL --[0..2**24-1]--;
 	//  firstPageCount: PageCount = 0;
-	const int firstPageCount = 0;
+	const CARD32 firstPageCount = 0;
 
 	//  lastPageCount: PageCount = lastPageNumber+1;
-	const int lastPageCount = lastPageNumber + 1;
+	const CARD32 lastPageCount = lastPageNumber + 1;
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ namespace ColorBlt {
 	//  pixel: CARDINAL];
 	struct Address {
 		LONG_POINTER word;
-		CARDINAL     pixel;
+		CARD16       pixel;
 	} __attribute__((packed));
 
 	//PatternParm: TYPE = MACHINE DEPENDENT RECORD [

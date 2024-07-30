@@ -60,44 +60,44 @@ union BytePair {
 	};
 };
 
-inline CARD8 HighByte(UNSPEC u) {
+inline CARD8 HighByte(CARD16 u) {
 	BytePair t = {u};
 	return t.left;
 }
-inline CARD8 LowByte(UNSPEC u) {
+inline CARD8 LowByte(CARD16 u) {
 	BytePair t = {u};
 	return t.right;
 }
 
 // 2.1.3.1 Basic Logical Operators
-inline UNSPEC Not(UNSPEC u) {
+inline CARD16 Not(CARD16 u) {
 	return ~u;
 }
-inline int Odd(UNSPEC u) {
+inline int Odd(CARD16 u) {
 	return u & 0x01;
 }
 
-inline UNSPEC Shift(UNSPEC data, int count) {
+inline CARD16 Shift(CARD16 data, int count) {
 	if (0 < count) {
 		if (16 <= count) return 0;
-		return (UNSPEC)(data << count);
+		return (CARD16)(data << count);
 	}
 	if (count < 0) {
 		if (count <= -16) return 0;
-		return (UNSPEC)(data >> (-count));
+		return (CARD16)(data >> (-count));
 	}
 	return data;
 }
-inline UNSPEC Rotate(UNSPEC data, int count) {
+inline CARD16 Rotate(CARD16 data, int count) {
 	if (0 < count) {
 		if (16 <= count) count = count % 16;
 		int t = data << count;
-		return (UNSPEC)((t & (0xffff)) | ((t >> 16) & 0xffff));
+		return (CARD16)((t & (0xffff)) | ((t >> 16) & 0xffff));
 	}
 	if (count < 0) {
 		if (count <= -16) count = -(-count % 16);
 		int t = data << (16 + count);
-		return (UNSPEC)((t & (0xffff)) | ((t >> 16) & 0xffff));
+		return (CARD16)((t & (0xffff)) | ((t >> 16) & 0xffff));
 	}
 	return data;
 }
@@ -125,7 +125,7 @@ inline INT16 ArithShift(INT16 data, int count) {
 //         |15    31|0   15|
 // address  n        n+1    n+2
 
-// Long: TYPE = MACHINE DEPENDENT RECORD[low(0), high(1): UNSPECIFIED];
+// Long: TYPE = MACHINE DEPENDENT RECORD[low(0), high(1): CARD16IFIED];
 union Long {
 	CARD32 u;
 	struct {
@@ -134,25 +134,25 @@ union Long {
 	};
 };
 
-inline UNSPEC HighHalf(LONG_UNSPEC u) {
+inline CARD16 HighHalf(CARD32 u) {
 //	Long t = {u};
 //	return t.high;
-	return (UNSPEC)(u >> WordSize);
+	return (CARD16)(u >> WordSize);
 }
-inline UNSPEC LowHalf(LONG_UNSPEC u) {
+inline CARD16 LowHalf(CARD32 u) {
 //	Long t = {u};
 //	return t.low;
-	return (UNSPEC)u;
+	return (CARD16)u;
 }
 
-inline LONG_UNSPEC LongShift(LONG_UNSPEC data, int count) {
+inline CARD32 LongShift(CARD32 data, int count) {
 	if (0 < count) {
 		if (32 <= count) return 0;
-		return (LONG_UNSPEC)(data << count);
+		return (CARD32)(data << count);
 	}
 	if (count < 0) {
 		if (count <= -32) return 0;
-		return (LONG_UNSPEC)(data >> (-count));
+		return (CARD32)(data >> (-count));
 	}
 	return data;
 }
@@ -175,7 +175,7 @@ inline INT16 SignExtend(CARD8 z) {
 
 // 3.1.1 Virtual Memory Mapping
 //MapFlags: TYPE = MACHINE DEPENDENT RECORD (
-//  reserved (0:0..12) : UNSPEClFIED[0..17777B],
+//  reserved (0:0..12) : CARD16lFIED[0..17777B],
 //  protected (0:13..13) : BOOLEAN,
 //  dirty (0:14..14): BOOLEAN,
 //  referenced (0:15..15): BOOLEAN];
@@ -198,8 +198,8 @@ inline int Protect(MapFlags mf) {
 
 // 3.1.4.3 Code Segments
 struct CodeSegment {
-	UNSPEC available[4];
-	UNSPEC block[0];
+	CARD16 available[4];
+	CARD16 block[0];
 };
 
 // 3.2 Main Data Spaces
@@ -238,15 +238,15 @@ union GlobalWord {
 
 // In PrincOps 4.0
 //GlobalOverhead : TYPE =  MACHINE DEPENDENT RECORD (
-//  available (0): UNSPECIFIED,
+//  available (0): CARD16IFIED,
 //  word      (1): GlobalWord,
 //  codebase  (2): LONG_POINTER TO COdeSegment
 //  global    (4): GlobaiVariables];
 struct OldGlobalOverhead {
-	UNSPEC       available;
+	CARD16       available;
 	CARD16       word;
 	CARD32       codebase;
-	UNSPEC       global[0];
+	CARD16       global[0];
 }
 __attribute__((packed));
 
@@ -260,13 +260,13 @@ inline GlobalFrameBase OldBlobaseBase(GlobalFrameHandle frame) {
 
 // In Changed Chapter
 //GlobalOverhead : TYPE =  MACHINE DEPENDENT RECORD (
-//  available (0): UNSPECIFIED,
+//  available (0): CARD16IFIED,
 //  word      (1): GlobalWord,
 //  global    (2): GlobaiVariables];
 struct GlobalOverhead {
-	UNSPEC       available;
+	CARD16       available;
 	CARD16       word;
-	UNSPEC       global[0];
+	CARD16       global[0];
 };
 
 // GlobalBase: PROC[frame: GlobalFrameHandle] RETURNS [GlobalFrameBase]
@@ -327,14 +327,14 @@ typedef CARD16 LocalFrameBase;
 //  word (0):       LocalWord.
 //  returnlink(1) : ShortControlLink,
 //  globallink(2) : GFTHandle,
-//  pc(3):          CARDINAL,
+//  pc(3):          CARD16,
 //  local(4):       LocaiVariables];
 struct LocalOverhead {
 	CARD16    word;
-	UNSPEC    returnlink;
+	CARD16    returnlink;
 	GFTHandle globallink;
-	CARDINAL  pc;
-	UNSPEC    local[0];
+	CARD16  pc;
+	CARD16    local[0];
 };
 
 // LocalBase: PROC[frame: LocalFrameHandle] RETURNS[LocalFrameBase]
@@ -427,19 +427,19 @@ enum Direction { DI_forward = 0, DI_backward = 1 };
 //  dstBpl(3): INTEGER,
 //  src(4) BitAddress,
 //  srcBpl(7): INTEGER,
-//  width(8): CARDINAL,
-//  height(9): CARDINAL,
+//  width(8): CARD16,
+//  height(9): CARD16,
 //  flags(10): BitBltFlags,
-//  reserved(11): UNSPEC = 0];
+//  reserved(11): CARD16 = 0];
 struct BitBltArg {
 	BitAddress  dst;
 	INT16       dstBpl;
 	BitAddress  src;
 	INT16       srcBpl;
-	CARDINAL    width;
-	CARDINAL    height;
+	CARD16    width;
+	CARD16    height;
 	BitBltFlags flags;
-	UNSPEC      reserved;
+	CARD16      reserved;
 };
 
 //GrayParm: TYPE = MACHINE DEPENDENT RECORD[
@@ -473,17 +473,17 @@ static const int fontRecordAlignment = 16;
 //   printerWidths(4): PrinterWidths,
 //   flags(6): FlagsArray,
 //   rasterInfos(8): RasterInfos,
-//   height(10): CARDINAL];
+//   height(10): CARD16];
 struct FontRecord {
 	LONG_POINTER rasters;
 	LONG_POINTER spacingWidths;
 	LONG_POINTER printerWidths;
 	LONG_POINTER flags;
 	LONG_POINTER rasterInfos;
-	CARDINAL     height;
+	CARD16     height;
 } __attribute__((packed));
 
-// FontBitsPtr: TYPE = LONG BASE POINTER TO ARRAY[0..0) OF UNSPECIFIED;
+// FontBitsPtr: TYPE = LONG BASE POINTER TO ARRAY[0..0) OF CARD16IFIED;
 // FontRasters: TYPE = LONG BASE POINTER TO <<tasters>> ARRAY [0..0) OF WORD;
 
 // Byte: TYPE = [0..255)
@@ -494,7 +494,7 @@ struct SpacingWidthsRecord {
 } __attribute__((packed));
 
 // PrinterWidths: TYPE = LONG POINTER TO ARRAY Byte OF PrinterWidth;
-// PrinterWidth: TYPE = CARDINAL;
+// PrinterWidth: TYPE = CARD16;
 struct PrinterWidthsRecord {
 	CARD16 width[256];
 } __attribute__((packed));
@@ -524,8 +524,8 @@ struct RasterInfo {
 	};
 };
 
-// RasterOffsetDomain: = CARDINAL[0..37777B];
-// RasterOffset: TYPE = FontRasters RELATIVE POINTER [0..37777B] TO <<raster>> UNSPECIFIED;
+// RasterOffsetDomain: = CARD16[0..37777B];
+// RasterOffset: TYPE = FontRasters RELATIVE POINTER [0..37777B] TO <<raster>> CARD16IFIED;
 // RasterOffsetFromDomain: PROC[domain: RasterOffsetDomain] RETURNS[RAsterOffset] = INLINE {RETURN[LOOPHOLE[domain]]};
 // RasterDomainFromOffset: PROC{offset: RasterOffset] RETURNS[RasterOffsetDomain] = INLINE {RETURN[LOOPHOLE[offset]]};
 
@@ -537,14 +537,14 @@ static const CARD16 maxRightKern = 1;
 // TxtBltArg: TYPE = MACHINE DEPENDENT RECORD [
 //   reserved(0:0..13): [0.37777B] = 0,
 //   function(0:14..15): Function,
-//   last(1): CARDINAL,
+//   last(1): CARD16,
 //   text(2): LONG POINTER TO ARRAY CARDIANL Of BytePair,
 //   font(4): FontHandle,
 //   dst(6): LONG POINTER,
-//   dstBpl(8): CARDINAL,
-//   margin(9): CARDINAL,
+//   dstBpl(8): CARD16,
+//   margin(9): CARD16,
 //   space(10): INTEGER,
-//   coord(11): LONG POINTER TO ARRAY CARDINAL OF CARDINAL];
+//   coord(11): LONG POINTER TO ARRAY CARD16 OF CARD16];
 #pragma pack(push, 1)
 struct TxtBltArg {
 	union {
@@ -571,10 +571,10 @@ enum Result {R_normal, R_margin, R_stop, R_unused};
 
 // 9.1 Control Links
 
-// ControlLink: TYPE = LONG UNSPECIFIED;
+// ControlLink: TYPE = LONG CARD16IFIED;
 typedef CARD32 ControlLink;
 
-// ShortControlLink: TYPE = UNSPECIFIED;
+// ShortControlLink: TYPE = CARD16IFIED;
 typedef CARD16 ShortControlLink;
 
 // LinkType: TYPE  =  {frame, procedure, indirect};
@@ -583,7 +583,7 @@ enum class LinkType { frame = 0, oldProcedure = 1, indirect = 2, newProcedure = 
 //TaggedControl link: TYPE =  MACHINE DEPENDENT RECORD [
 //  data (0:  0..13): [0 .. 377778];
 //  tag  (0: 14..15): [0 .. 3],
-//  fill (1) :  UNSPECIFIED);
+//  fill (1) :  CARD16IFIED);
 union TaggedControlLink {
 	CARD32 u;
 	struct {
@@ -617,8 +617,8 @@ IndirectLink MakeIndirectLink(ControlLink link);
 
 // 9.1.3 Procedure Descriptor
 //ProcDesc: TYPE =  MACHINE DEPENDENT RECORD [
-//  taggedGF(0) :UNSPECIFIED,
-//  pc(1}: CARDINAL];
+//  taggedGF(0) :CARD16IFIED,
+//  pc(1}: CARD16];
 union ProcDesc {
 	CARD32 u;
 	struct {
@@ -632,8 +632,8 @@ CARD32 MakeProcDesc(ControlLink link);
 
 // 9.1.4 new Procedure Descriptor
 // NewProcDesc: TYPE = MACHINE DEPENDENT RECORD[
-//   taggedGFI(0): UNSPEC,
-//   pc(1): CARDINAL];
+//   taggedGFI(0): CARD16,
+//   pc(1): CARD16];
 union NewProcDesc {
 	CARD32 u;
 	struct {
@@ -693,11 +693,11 @@ typedef POINTER PortLink;
 
 // Port: TYPE = MACHINE DEPENDENT RECORD[
 //   inport(0):  FrameLink,
-//   unused(1):  UNSPECIFIED,
+//   unused(1):  CARD16IFIED,
 //   outport(2): ControlLink];
 struct Port {
 	FrameLink   inport;
-	UNSPEC      unused;
+	CARD16      unused;
 	ControlLink outport;
 };
 
@@ -748,12 +748,12 @@ union StateWord {
 };
 
 // StateVector: TYPE = MACHINE DEPENDENT RECORD [
-//   stack  (0) : ARRAY [0.. StackDepth) OF UNSPECIFIED,
+//   stack  (0) : ARRAY [0.. StackDepth) OF CARD16IFIED,
 //   word  (14) : StateWord,
 //   frame (15) : LocalFrameHandle,
 //   data  (16) : BLOCK];
 struct StateVector {
-	UNSPEC           stack[StackDepth];
+	CARD16           stack[StackDepth];
 	CARD16           word;
 	LocalFrameHandle frame;
 	CARD16           data[2]; // 2 words for LONG UNSEPC
@@ -761,11 +761,11 @@ struct StateVector {
 
 // TransferDescriptor: TYPE = MACHINE DEPENDENT RECORD[
 //   src(0): ShortControlLink,
-//   reserved(1): UNSPECIFIED = 0,
+//   reserved(1): CARD16IFIED = 0,
 //   CoontrolLink(2): dst];
 struct TransferDescriptor {
 	ShortControlLink src;
-	UNSPEC           reserved;
+	CARD16           reserved;
 	ControlLink      dst;
 };
 
@@ -905,7 +905,7 @@ typedef FaultQueue FaultVector[FaultIndex_SIZE];
 // InterruptLvel: TYPE = [0..WordSize);
 // InterruptItem: TYPE = MACHINE DPENEDENT RECORD[
 //   condition(0): Condition,
-//   available(1): UNSPECIFIED];
+//   available(1): CARD16IFIED];
 const int InterruptLevel_SIZE = WordSize;
 struct InterruptItem {
 		CARD16 condition;
@@ -922,8 +922,8 @@ struct InterruptVector {
 
 // 10.4.5 Timeouts
 
-// Ticks: TYPE = CARDINAL
-typedef CARDINAL Ticks;
+// Ticks: TYPE = CARD16
+typedef CARD16 Ticks;
 
 
 // 10.1.2 Process State Blocks
@@ -933,17 +933,17 @@ typedef CARDINAL Ticks;
 //   flags(1): PsbFlags,
 //   context(2): POINTER,
 //   timeout(3): Ticks,
-//   mds(4): CARDINAL,
-//   available(5): UNSPECIFIED,
-//   stickty(6): LONG UNSPECIFIED];
+//   mds(4): CARD16,
+//   available(5): CARD16IFIED,
+//   stickty(6): LONG CARD16IFIED];
 struct ProcessStateBlock {
 	CARD16      link;
 	CARD16      flags;
 	POINTER     context;
 	Ticks       timeout;
-	CARDINAL	mds;
-	UNSPEC      available;
-	LONG_UNSPEC sticky;
+	CARD16	mds;
+	CARD16      available;
+	CARD32 sticky;
 };
 
 // PsbHandle: TYPE = POINTER TO ProcessStateBlock;
@@ -966,9 +966,9 @@ const LONG_POINTER PDA = mPDA;
 //   SELECT OVERLAID * FROM
 //     header => [
 //       ready: Queue,
-//       count: CARDINAL,
-//       unused: UNSPECIFIED,
-//       available: ARRAY [0..5) OF UNSPECIFIED,
+//       count: CARD16,
+//       unused: CARD16IFIED,
+//       available: ARRAY [0..5) OF CARD16IFIED,
 //       state: StateAllocationTable,
 //       interrupt: InterruptVector,
 //       fault: FaultVector],
@@ -982,7 +982,7 @@ struct ProcessDataArea {
 		struct {
 			Queue ready;
 			CARD16 count;
-			UNSPEC unused;
+			CARD16 unused;
 			CARD16 available[5];
 			// StateAliocationTable: TYPE = ARRAY Priority OF POINTER TO StateVector;
 			PDA_POINTER state[Priority_SIZE];

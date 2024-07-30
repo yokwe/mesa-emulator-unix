@@ -88,8 +88,8 @@ static inline void E_RD_(CARD16 arg) {
 	CARD16* p0 = FetchMDS(ptr);
 	CARD16* p1 = FetchMDSNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
-	UNSPEC u = *p0;
-	UNSPEC v = *p1;
+	CARD16 u = *p0;
+	CARD16 v = *p1;
 	Push(u);
 	Push(v);
 }
@@ -109,8 +109,8 @@ static inline void E_RDL_(CARD16 arg) {
 	CARD16* p0 = Fetch(ptr);
 	CARD16* p1 = FetchNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
-	UNSPEC u = *p0;
-	UNSPEC v = *p1;
+	CARD16 u = *p0;
+	CARD16 v = *p1;
 	Push(u);
 	Push(v);
 }
@@ -143,7 +143,7 @@ void E_WB() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PS %3d", savedPC, arg);
-	UNSPEC u = Pop();
+	CARD16 u = Pop();
 	POINTER ptr = Pop();
 	CARD16* p = StoreMDS(ptr + arg);
 	// NO PAGE FAULT AFTER HERE
@@ -171,7 +171,7 @@ void E_WLB() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PSL_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PSL %3d", savedPC, arg);
-	UNSPEC u = Pop();
+	CARD16 u = Pop();
 	LONG_POINTER ptr = PopLong();
 	CARD16* p = Store(ptr + arg);
 	// NO PAGE FAULT AFTER HERE
@@ -202,8 +202,8 @@ void E_WDB() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PSD_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PSD %3d", savedPC, arg);
-	UNSPEC v = Pop();
-	UNSPEC u = Pop();
+	CARD16 v = Pop();
+	CARD16 u = Pop();
 	POINTER ptr = Pop() + arg;
 	CARD16* p0 = StoreMDS(ptr);
 	CARD16* p1 = StoreMDSNext(ptr, p0);
@@ -239,8 +239,8 @@ void E_WDLB() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PSDL_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PSDL %3d", savedPC, arg);
-	UNSPEC v = Pop();
-	UNSPEC u = Pop();
+	CARD16 v = Pop();
+	CARD16 u = Pop();
 	LONG_POINTER ptr = PopLong() + arg;
 	CARD16* p0 = Store(ptr);
 	CARD16* p1 = StoreNext(ptr, p0);
@@ -306,8 +306,8 @@ static inline void E_RLDI_(CARD16 arg0, CARD16 arg1) {
 	CARD16* p0 = FetchMDS(ptr);
 	CARD16* p1 = FetchMDSNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
-	UNSPEC u = *p0;
-	UNSPEC v = *p1;
+	CARD16 u = *p0;
+	CARD16 v = *p1;
 	Push(u);
 	Push(v);
 }
@@ -328,8 +328,8 @@ static inline void E_RLDIL_(CARD16 arg0, CARD16 arg1) {
 	CARD16* p0 = Fetch(ptr);
 	CARD16* p1 = FetchNext(ptr, p0);
 	// NO PAGE FAULT AFTER HERE
-	UNSPEC u = *p0;
-	UNSPEC v = *p1;
+	CARD16 u = *p0;
+	CARD16 v = *p1;
 	Push(u);
 	Push(v);
 }
@@ -415,7 +415,7 @@ void E_WLDILP() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_RS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RS %3d", savedPC, arg);
-	CARDINAL index = Pop();
+	CARD16 index = Pop();
 	LONG_POINTER ptr = LengthenPointer(Pop());
 	CARD16 t = FetchByte(ptr, arg + index);
 	// NO PAGE FAULT AFTER HERE
@@ -429,7 +429,7 @@ void E_RS() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_RLS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RLS %3d", savedPC, arg);
-	CARDINAL index = Pop();
+	CARD16 index = Pop();
 	LONG_POINTER ptr = PopLong();
 	CARD16 t = FetchByte(ptr, arg + index);
 	// NO PAGE FAULT AFTER HERE
@@ -443,7 +443,7 @@ void E_RLS() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_WS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WS %3d", savedPC, arg);
-	CARDINAL index = Pop();
+	CARD16 index = Pop();
 	LONG_POINTER ptr = LengthenPointer(Pop());
 	CARD8 data = LowByte(Pop());
 	StoreByte(ptr, arg + index, data);
@@ -456,7 +456,7 @@ void E_WS() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_WLS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WLS %3d", savedPC, arg);
-	CARDINAL index = Pop();
+	CARD16 index = Pop();
 	LONG_POINTER ptr = PopLong();
 	CARD8 data = LowByte(Pop());
 	StoreByte(ptr, arg + index, data);
@@ -541,7 +541,7 @@ void E_RLILPF() {
 static inline void E_WF_(CARD16 arg0, CARD16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WF %3d %3d", savedPC, arg0, arg1);
 	POINTER ptr = Pop() + arg0;
-	UNSPEC data = Pop();
+	CARD16 data = Pop();
 	CARD16* p = StoreMDS(ptr);
 	// NO PAGE FAULT AFTER HERE
 	*p = WriteField(*p, arg1, data);
@@ -559,7 +559,7 @@ void E_WF() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PSF_(CARD16 arg0, CARD16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PSF %3d %3d", savedPC, arg0, arg1);
-	UNSPEC data = Pop();
+	CARD16 data = Pop();
 	POINTER ptr = Pop() + arg0;
 	CARD16* p = StoreMDS(ptr);
 	// NO PAGE FAULT AFTER HERE
@@ -579,7 +579,7 @@ void E_PS0F() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_WSF_(CARD16 arg0, CARD16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WSF %3d %3d", savedPC, arg0, arg1);
-	UNSPEC data = Pop();
+	CARD16 data = Pop();
 	POINTER ptr = Pop() + arg0;
 	CARD16* p = StoreMDS(ptr);
 	// NO PAGE FAULT AFTER HERE
@@ -591,7 +591,7 @@ void E_WS0F() {
 }
 static inline void E_WLF_(CARD16 offset, CARD16 field) {
 	LONG_POINTER ptr = PopLong() + offset;
-	UNSPEC data = Pop();
+	CARD16 data = Pop();
 	CARD16* p = Store(ptr);
 	// NO PAGE FAULT AFTER HERE
 	*p = WriteField(*p, (CARD8)field, data);
@@ -609,7 +609,7 @@ void E_WLF() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_PSLF_(CARD16 offset, CARD16 field) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  PSLF %3d %3d", savedPC, offset, field);
-	UNSPEC data = Pop();
+	CARD16 data = Pop();
 	LONG_POINTER ptr = PopLong() + offset;
 	CARD16* p = Store(ptr);
 	// NO PAGE FAULT AFTER HERE
@@ -717,7 +717,7 @@ void E_LKB() {
 ///////////////////////////////////////////////////////////////////////////////
 static inline void E_SHIFT_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SHIFT %3d", savedPC, arg);
-	UNSPEC u = Pop();
+	CARD16 u = Pop();
 	Push(Shift(u, arg));
 }
 // 0173  ASSIGN_MOP(z, SHIFT)

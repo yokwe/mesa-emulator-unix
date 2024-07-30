@@ -951,7 +951,7 @@ class testOpcode_100 : public testBase {
 		spec.pos = 8;
 		spec.size = 3;
 		page_CB[PC / 2] = zW0F << 8 | spec.u;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		POINTER ptr = 0x40;
 		page_MDS[(ptr + 0)] = 0x1234;
 		stack[SP++] = data;
@@ -973,7 +973,7 @@ class testOpcode_100 : public testBase {
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zWF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		POINTER ptr = 0x40;
 		page_MDS[(ptr + desc.offset)] = 0x1234;
 		stack[SP++] = data;
@@ -996,7 +996,7 @@ class testOpcode_100 : public testBase {
 		page_CB[PC / 2] = zPSF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
 		POINTER ptr = 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr + desc.offset)] = 0x1234;
 		stack[SP++] = ptr;
 		stack[SP++] = data;
@@ -1015,7 +1015,7 @@ class testOpcode_100 : public testBase {
 		spec.size = 3;
 		page_CB[PC / 2] = zPS0F << 8 | spec.u;
 		POINTER ptr = 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr + 0)] = 0x1234;
 		stack[SP++] = ptr;
 		stack[SP++] = data;
@@ -1033,7 +1033,7 @@ class testOpcode_100 : public testBase {
 		spec.size = 3;
 		page_CB[PC / 2] = zWS0F << 8 | spec.u;
 		POINTER ptr = 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr + 0)] = 0x1234;
 		stack[SP++] = ptr;
 		stack[SP++] = data;
@@ -1051,7 +1051,7 @@ class testOpcode_100 : public testBase {
 		spec.size = 3;
 		page_CB[PC / 2] = zWL0F << 8 | spec.u;
 		LONG_POINTER ptr = MDS + 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr - MDS + 0)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
@@ -1074,7 +1074,7 @@ class testOpcode_100 : public testBase {
 		page_CB[PC / 2] = zWLF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
 		LONG_POINTER ptr = MDS + 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
@@ -1097,7 +1097,7 @@ class testOpcode_100 : public testBase {
 		page_CB[PC / 2] = zPSLF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
 		LONG_POINTER ptr = MDS + 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -1121,7 +1121,7 @@ class testOpcode_100 : public testBase {
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zWLFS << 8 | 0x00;
 		LONG_POINTER ptr = MDS + 0x40;
-		UNSPEC data = 0x0A;
+		CARD16 data = 0x0A;
 		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);

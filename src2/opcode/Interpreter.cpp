@@ -398,7 +398,6 @@ static void initTable() {
 	/* 0276 */ ASSIGN_MOP(z, UDCMP)
 	/* 0277 */ ASSIGN_MOP(z, VMFIND)
 
-#if 0
 	/* 0300 */ ASSIGN_MOP(z, LI0)
 	/* 0301 */ ASSIGN_MOP(z, LI1)
 	/* 0302 */ ASSIGN_MOP(z, LI2)
@@ -433,6 +432,8 @@ static void initTable() {
 	/* 0334 */ ASSIGN_MOP(z, GAB)
 	/* 0335 */ ASSIGN_MOP(z, GAW)
 	/* 0336 */ //ASSIGN_MOP(z, CAW)
+
+#if 0 // FIXME
 	/* 0337 */ ASSIGN_MOP(z, EFC0)
 
 	/* 0340 */ ASSIGN_MOP(z, EFC1)
@@ -460,6 +461,7 @@ static void initTable() {
 	/* 0364 */ ASSIGN_MOP(z, BLTL)
 	/* 0365 */ ASSIGN_MOP(z, BLTC)
 	/* 0366 */ ASSIGN_MOP(z, BLTCL)
+#endif
 	/* 0367 */ ASSIGN_MOP(z, LP)
 
 	/* 0370 */ ASSIGN_MOP(z, ESC)
@@ -471,6 +473,7 @@ static void initTable() {
 	// 0376
 	/* 0377 */ ASSIGN_MOP(z, RESRVD)
 
+#if 0
 	/* 00 */ //ASSIGN_ESC(a, 00)
 	/* 01 */ //ASSIGN_ESC(a, 01)
 	/* 02 */ ASSIGN_ESC(a, MW)

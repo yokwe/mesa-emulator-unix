@@ -14,6 +14,7 @@ target_sources(
 		testOpcode_000.cpp
 		testOpcode_100.cpp
 		testOpcode_200.cpp
+		testOpcode_300.cpp
 		testPilot.cpp
 		testType.cpp
 )

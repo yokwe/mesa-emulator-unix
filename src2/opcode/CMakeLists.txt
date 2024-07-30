@@ -15,6 +15,7 @@ target_sources(
 		OpcodeMop0xx.cpp
 		OpcodeMop1xx.cpp
 		OpcodeMop2xx.cpp
+		OpcodeMop3xx.cpp
 )
 
 add_dependencies(opcode mesa util)

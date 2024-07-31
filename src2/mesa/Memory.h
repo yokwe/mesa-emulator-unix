@@ -223,4 +223,27 @@ CARD16 WriteField(CARD16 dest, CARD8 spec8, CARD16 data);
 // 9.4.2 External Function Calls
 CARD32 FetchLink(CARD32 offset);
 
+
+// 9.5.3 Trap Handlers
+static inline void SaveStack(StateHandle state) {
+	for(int sp = 0; sp < StackDepth; sp++) {
+		*Store(state + OFFSET3(StateVector, stack, sp)) = stack[sp];
+	}
+	StateWord word;
+	word.breakByte = breakByte;
+	word.stkptr = SP;
+	*Store(state + OFFSET(StateVector, word)) = word.u;
+	SP = savedSP = 0;
+	breakByte = 0;
+}
+static inline void LoadStack(StateHandle state) {
+	StateWord word;
+	word.u = *Fetch(state + OFFSET(StateVector, word));
+	for(int sp = 0; sp < StackDepth; sp++) {
+		stack[sp] = *Fetch(state + OFFSET3(StateVector, stack, sp));
+	}
+	SP = savedSP = word.stkptr;
+	breakByte = word.breakByte;
+}
+
 }

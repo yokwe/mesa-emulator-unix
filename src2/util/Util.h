@@ -30,6 +30,7 @@
 
 #pragma once
 
+#include <alloca.h>
 #include <string>
 #include <log4cxx/logger.h>
 
@@ -57,7 +58,7 @@ auto std_sprintf_convert_(T&& value) {
 //
 template <typename ... Args>
 void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&& ... args) {
-	char buf[bufferSize];
+	char* buf = (char*)alloca(bufferSize);
 	int ret = std::snprintf(buf, bufferSize, format, args ...);
 	if (bufferSize <= ret) {
 		// failure

@@ -14,10 +14,12 @@ message(STATUS "NAME       ${HOST_NAME}")
 message(STATUS "SYSTEM     ${HOST_SYSTEM}")
 
 
+# output build/compile_commands.json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # default c++ language level
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_definitions("__cplusplus=201703L")
 
 # default compiler options
 set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")

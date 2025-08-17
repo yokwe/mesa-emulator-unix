@@ -15,7 +15,7 @@ HOST_OS := $(shell uname -s)
 
 BUILD_DIR := build
 
-SOURCE_DIR := src3
+SOURCE_DIR := src2
 
 LOG4CXX_CONFIGURATION := ${BUILD_DIR}/run/log4j-config.xml
 export LOG4CXX_CONFIGURATION

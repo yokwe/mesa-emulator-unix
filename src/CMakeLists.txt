@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.24.0)
 
-project(mesa-emulator-unix VERSION  LANGUAGES CXX)
+project(mesa-emulator-unix VERSION 2.0.0 LANGUAGES CXX)
 
 #
 # common setting

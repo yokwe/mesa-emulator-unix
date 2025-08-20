@@ -1,9 +1,8 @@
 /tmp/
 /data/Dawn/
-/data/GVWin*/
+/data/GVWin/
+/data/GVWin21/
 /data/floppy/
-/src/*/Makefile
-/src/*/.qmake.stash
 /build/
 /.cache/
 /.cproject

@@ -2,26 +2,17 @@
 # Makefile
 #
 
-#   SHELL       path of bash
-#   HOSTNAME    name of host
-#   BUILD_DIR   path of build
-#   LOG_CONFIG  path of logger configuration file
+BUILD_DIR  := build
+SOURCE_DIR := src
+DATA_DIR   := data
 
-SHELL := $(shell which bash)
-
-HOSTNAME := $(shell uname -n)
-
-HOST_OS := $(shell uname -s)
-
-BUILD_DIR := build
-
-SOURCE_DIR := src2
+export BUILD_DIR
 
 LOG4CXX_CONFIGURATION := ${BUILD_DIR}/run/log4j-config.xml
 export LOG4CXX_CONFIGURATION
 
 
-.PHONY: all clean cmake build distclean distclean-qmake fix-permission
+.PHONY: all clean cmake build distclean distclean-qmake
 
 all:
 	@echo "all"
@@ -50,6 +41,9 @@ main:
 test:
 	/usr/bin/time cmake --build build --target test
 
+guam-headless:
+	/usr/bin/time cmake --build build --target guam-headless
+	
 #
 # maintenance
 #
@@ -70,6 +64,9 @@ prepare-log:
 
 run-main: main prepare-log
 	/usr/bin/time ${BUILD_DIR}/main/main
+
+run-guam-headless: guam-headless prepare-log
+	/usr/bin/time ${BUILD_DIR}/guam-headless/guam-headless
 
 run-test: test prepare-log
 	${BUILD_DIR}/test/test

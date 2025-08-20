@@ -10,6 +10,6 @@ add_executable (
   testUtil.cpp
   )
 
-add_dependencies(test mesa opcode agent util trace)
+add_dependencies(test mesa opcode agent util)
 
-target_link_libraries (test mesa opcode agent util trace cppunit)
+target_link_libraries (test mesa opcode agent util cppunit)

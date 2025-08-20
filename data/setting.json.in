@@ -8,13 +8,13 @@
 			"file": {
 			    "floppy": "@CMAKE_BINARY_DIR@/run/floppy144",
 			    "disk":   "@CMAKE_BINARY_DIR@/run/GVWIN.DSK",
-			    "germ":   "data/GVWin/GVWIN.GRM",
-			    "boot":   "data/GVWin/NSINSTLR.DAT"},
+			    "germ":   "@CMAKE_BINARY_DIR@/run/GVWIN.GRM",
+			    "boot":   "@CMAKE_BINARY_DIR@/run/NSINSTLR.DAT"},
 			"boot": {
-				"switch": "Oy{|}\\346\\347\\350\\377",
+				"switch": "Oy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
-				"vmbits": 25,
+				"vmbits": 24,
 				"rmbits": 24},
 			"network": {
 				"interface": "ens192"}
@@ -27,13 +27,13 @@
 			"file": {
 			    "floppy": "@CMAKE_BINARY_DIR@/run/floppy144",
 			    "disk":   "@CMAKE_BINARY_DIR@/run/GVWIN21.DSK",
-			    "germ":   "data/GVWin21/GVWIN.GRM",
-			    "boot":   "data/GVWin21/NSINSTLR.DAT"},
+			    "germ":   "@CMAKE_BINARY_DIR@/run/GVWIN.GRM",
+			    "boot":   "@CMAKE_BINARY_DIR@/run/NSINSTLR.DAT"},
 			"boot": {
-				"switch": "Oy{|}\\346\\347\\350\\377",
+				"switch": "Oy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
-				"vmbits": 25,
+				"vmbits": 24,
 				"rmbits": 24},
 			"network": {
 				"interface": "ens192"}
@@ -46,10 +46,10 @@
 			"file": {
 			    "floppy": "@CMAKE_BINARY_DIR@/run/floppy144",
 			    "disk":   "@CMAKE_BINARY_DIR@/run/Dawn.dsk",
-			    "germ":   "data/Dawn/Dawn.germ",
-			    "boot":   "data/Dawn/NSINSTLR.DAT"},
+			    "germ":   "@CMAKE_BINARY_DIR@/run/Dawn.germ",
+			    "boot":   "@CMAKE_BINARY_DIR@/run/NSINSTLR.DAT"},
 			"boot": {
-				"switch": "8Wy{|}\\346\\347\\350\\377",
+				"switch": "8Wy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
 				"vmbits": 23,

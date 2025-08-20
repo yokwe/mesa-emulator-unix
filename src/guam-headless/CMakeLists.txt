@@ -7,6 +7,6 @@ add_executable (
   main.cpp
   )
 
-add_dependencies(guam-headless mesa opcode agent util trace)
+add_dependencies(guam-headless mesa opcode agent util)
 
-target_link_libraries (guam-headless mesa opcode agent util trace)
+target_link_libraries (guam-headless mesa opcode agent util)

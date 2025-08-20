@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("lt");
+static const util::Logger logger(__FILE__);
 
 #include "LTIndex.h"
 #include "BCDFile.h"
@@ -67,9 +67,9 @@ LTIndex* LTIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new LTIndex(symbols, index);
 }
-QString LTIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string LTIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const LTRecord& LTIndex::getValue() const {
 	LTRecord* ret = LTRecord::find(symbols, index);
@@ -110,7 +110,7 @@ LTRecord* LTRecord::find(Symbols* symbols, CARD16 index) {
 	return all.value(key, 0);
 }
 
-QString LTRecord::toString(Tag value) {
+std::string LTRecord::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(SHORT)
@@ -119,16 +119,16 @@ QString LTRecord::toString(Tag value) {
 	TO_STRING_EPILOGUE
 }
 
-QString LTRecord::Short::toString() const {
-	return QString("%1").arg(value);
+std::string LTRecord::Short::toString() const {
+	return std::string("%1").arg(value);
 }
 
-QString LTRecord::Long::toString() const {
-	QString values;
+std::string LTRecord::Long::toString() const {
+	std::string values;
 	for(CARD16 i = 0; i < length; i++) {
-		values.append(QString(i ? " %1" : "%1").arg(i));
+		values.append(std::string(i ? " %1" : "%1").arg(i));
 	}
-	return QString("%1 (%2)%3").arg(codeIndex).arg(length).arg(values);
+	return std::string("%1 (%2)%3").arg(codeIndex).arg(length).arg(values);
 }
 
 const LTRecord::Short&   LTRecord::getShort() const {
@@ -173,12 +173,12 @@ LTRecord* LTRecord::getInstance(Symbols* symbols, CARD16 index) {
     return new LTRecord(symbols, index, tag, tagValue);
 }
 
-QString LTRecord::toString() const {
+std::string LTRecord::toString() const {
 	switch(tag) {
 	case Tag::SHORT:
-		return QString("%1 %2").arg(toString(tag)).arg(getShort().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getShort().toString());
 	case Tag::LONG:
-		return QString("%1 %2").arg(toString(tag)).arg(getLong().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getLong().toString());
 	default:
 		ERROR();
 		return "???";
@@ -218,19 +218,19 @@ LitRecord* LitRecord::getInstance(Symbols* symbols, CARD16 u0) {
 	}
 	return new LitRecord(tag, tagValue);
 }
-QString LitRecord::toString() const {
+std::string LitRecord::toString() const {
 	switch(tag) {
 	case Tag::WORD:
-		return QString("%1 %2").arg(toString(tag)).arg(getWord().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getWord().toString());
 	case Tag::STRING:
-		return QString("%1 %2").arg(toString(tag)).arg(getString().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getString().toString());
 	default:
 		ERROR();
 		return "???";
 	}
 }
 
-QString LitRecord::toString(Tag value) {
+std::string LitRecord::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(WORD)
@@ -239,12 +239,12 @@ QString LitRecord::toString(Tag value) {
 	TO_STRING_EPILOGUE
 }
 
-QString LitRecord::Word::toString() const {
-	return QString("%1").arg(index->toString());
+std::string LitRecord::Word::toString() const {
+	return std::string("%1").arg(index->toString());
 }
 
-QString LitRecord::String::toString() const {
-	return QString("%1").arg(index);
+std::string LitRecord::String::toString() const {
+	return std::string("%1").arg(index);
 }
 
 const LitRecord::Word& LitRecord::getWord() const {

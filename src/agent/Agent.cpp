@@ -35,7 +35,7 @@
 
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("agent");
+static const util::Logger logger(__FILE__);
 
 
 #include "../mesa/Memory.h"

@@ -41,7 +41,7 @@ namespace XNS::Server {
 
 	class SPPListener : public Listener {
 	public:
-		SPPListener(const char* name, quint16 socket) : Listener(name, socket) {}
+		SPPListener(const char* name, uint16_t socket) : Listener(name, socket) {}
 		virtual ~SPPListener() {}
 
 		SPPListener() {}

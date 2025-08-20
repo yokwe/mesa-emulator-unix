@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-pex");
+static const util::Logger logger(__FILE__);
 
 #include "../xns/Time.h"
 

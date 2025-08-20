@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("wwc");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -52,16 +52,16 @@ StreamWWC::StreamWWC() : Stream("WWC", CoProcessorServerIDs::workspaceWindowCont
 	logger.info("%3d %-8s", serverID, name);
 }
 
-quint16 StreamWWC::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_completed;
 }
-quint16 StreamWWC::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamWWC::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", name, iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
 
 	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
@@ -74,15 +74,15 @@ quint16 StreamWWC::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, 
 	//return CoProcessorIOFaceGuam::R_completed;
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamWWC::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamWWC::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamWWC::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamWWC::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 	logger.info("mesaGet  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
@@ -106,7 +106,7 @@ quint16 StreamWWC::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoPro
 		ERROR();
 	}
 
-	quint16* buffer = (quint16*)Store(tr.buffer);
+	uint16_t* buffer = (uint16_t*)Store(tr.buffer);
 	for(int i = 0; i < 9; i++) buffer[i] = 0;
 
 	// TODO Need to figure out proper value to store buffer.

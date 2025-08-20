@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("bpf");
+static const util::Logger logger(__FILE__);
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -95,7 +95,7 @@ void BPF::open() {
 	path       = tempPath;
 	fd         = tempFD;
 	bufferSize = getBufferSize();
-	buffer     = new quint8[bufferSize];
+	buffer     = new uint8_t[bufferSize];
 }
 void BPF::close() {
 	if (0 <= fd) {
@@ -118,7 +118,7 @@ const QList<ByteBuffer>& BPF::read() {
 		struct bpf_hdr* p = (struct bpf_hdr*)(buffer + i);
 		int     caplen = (int)(p->bh_caplen);
 		int     hdrlen = (int)(p->bh_hdrlen);
-		quint8* data   = buffer + i;
+		uint8_t* data   = buffer + i;
 
 		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
@@ -136,7 +136,7 @@ void BPF::write(const Network::Packet& value) {
 
 // for Network::Driver
 // no error check
-int  BPF::select  (quint32 timeout, int& opErrno) {
+int  BPF::select  (uint32_t timeout, int& opErrno) {
 	(void)timeout;
 	opErrno = 0;
 	if (readData.isEmpty()) {
@@ -162,12 +162,12 @@ int  BPF::select  (quint32 timeout, int& opErrno) {
 		return readData.first().limit();
 	}
 }
-int  BPF::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
 	int ret;
 	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
-int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
+int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch) {
 	opErrno = 0;
 	// if readData is empty, fill readData
 	if (readData.isEmpty()) read();
@@ -175,7 +175,7 @@ int  BPF::receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinc
 	// Take first entry
 	ByteBuffer bb = readData.first();
 	int len = bb.limit() - bb.base();
-	if (dataLen < (quint32)len) {
+	if (dataLen < (uint32_t)len) {
 		logger.error("Unexpected");
 		logger.error("  dataLen %u", dataLen);
 		logger.error("  len     %d", len);
@@ -202,9 +202,9 @@ void BPF::discard() {
 
 // BIOCGBLEN
 //   Returns the required buffer length	for reads on bpf files
-quint32 BPF::getBufferSize() {
+uint32_t BPF::getBufferSize() {
 	int ret;
-	quint32 value;
+	uint32_t value;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGBLEN, &value))
 	return value;
 }
@@ -224,18 +224,18 @@ void BPF::flush() {
 
 // BIOCGETIF
 //   Returns the name of the hardware interface that the file is listening
-QString BPF::getInterface() {
+std::string BPF::getInterface() {
 	int ret;
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGETIF, &ifr))
-	QString value = ifr.ifr_name;
+	std::string value = ifr.ifr_name;
 	return value;
 }
 
 // BIOCSETIF
 //   Sets the hardware interface associate with the file.
-void BPF::setInterface(const QString& value) {
+void BPF::setInterface(const std::string& value) {
 	int ret;
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
@@ -263,7 +263,7 @@ void BPF::getReadTimeout(struct timeval& value) {
 //   Enables or	disables "immediate mode"
 //   When immediate more is enabled, reads return immediately upon packet reception
 //   When immediate mode is disabled, read will block until buffer become full or timeout.
-void BPF::setImmediate(quint32 value) {
+void BPF::setImmediate(uint32_t value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCIMMEDIATE, &value))
 }
@@ -277,9 +277,9 @@ void BPF::setReadFilter(const struct bpf_program* value) {
 
 // BIOCGRSIG
 //   Sets the status of	the "header complete" flag.
-quint32 BPF::getHeaderComplete() {
+uint32_t BPF::getHeaderComplete() {
 	int ret;
-	quint32 value;
+	uint32_t value;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGRSIG, &value))
 	return value;
 }
@@ -289,16 +289,16 @@ quint32 BPF::getHeaderComplete() {
 //   When value is 0, source address is filled automatically
 //   When value is 1, source address is not filled automatically
 //   Default value is 0
-void BPF::setHeaderComplete(quint32 value) {
+void BPF::setHeaderComplete(uint32_t value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRSIG, &value))
 }
 
 //// BIOCGDIRECTION
 ////   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-//quint32 BPF::getDirection() {
+//uint32_t BPF::getDirection() {
 //	int ret;
-//	quint32 value;
+//	uint32_t value;
 //	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGDIRECTION, &value))
 //	return value;
 //}
@@ -307,7 +307,7 @@ void BPF::setHeaderComplete(quint32 value) {
 ////   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
 ////   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
 ////   Default is BPF_D_INOUT
-//void BPF::setDirection(quint32 value) {
+//void BPF::setDirection(uint32_t value) {
 //	int ret;
 //	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSDIRECTION, &value))
 //}
@@ -317,9 +317,9 @@ void BPF::setHeaderComplete(quint32 value) {
 //   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
 //   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
 //   Set to zero to see only incoming packets on the interface.  Set to one to see packets
-quint32 BPF::getSeeSent() {
+uint32_t BPF::getSeeSent() {
 	int ret;
-	quint32 value;
+	uint32_t value;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGSEESENT, &value))
 	return value;
 }
@@ -331,7 +331,7 @@ quint32 BPF::getSeeSent() {
 //   Set to zero to see only incoming packets on the interface.
 //   Set to one to see packets originating locally and remotely on the interface.
 //   This flag is initialized to one by default.
-void BPF::setSeeSent(quint32 value) {
+void BPF::setSeeSent(uint32_t value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSSEESENT, &value))
 }

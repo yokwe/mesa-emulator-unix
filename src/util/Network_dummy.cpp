@@ -30,7 +30,7 @@
 
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("net-dummy");
+static const util::Logger logger(__FILE__);
 
 #include "Network.h"
 
@@ -45,27 +45,27 @@ QList<Network::Device> Network::getDeviceList() {
 
 class Dummy : public Network::Driver {
 public:
-	int select  (quint32 timeout, int& opErrno); // returns return value of of select().  default timeout is 1 second
-	int transmit(quint8* data, quint32 dataLen, int& opErrno);   // returns return value of send()
-	int receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch);   // returns return value of of recv()
+	int select  (uint32_t timeout, int& opErrno); // returns return value of of select().  default timeout is 1 second
+	int transmit(uint8_t* data, uint32_t dataLen, int& opErrno);   // returns return value of send()
+	int receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch);   // returns return value of of recv()
 
 	// discard received packet
 	void discard();
 
 	Dummy(const Network::Device& device) : Network::Driver(device) {}
 };
-int Dummy::select(quint32 timeout, int& opErrno) {
+int Dummy::select(uint32_t timeout, int& opErrno) {
 	(void)timeout;
 	opErrno = 0;
 	return 0;
 }
-int Dummy::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+int Dummy::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
 	(void)data;
 	(void)dataLen;
 	opErrno = ENETDOWN;
 	return 0;
 }
-int Dummy::receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
+int Dummy::receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch) {
 	(void)data;
 	(void)dataLen;
 	opErrno = ENETDOWN;

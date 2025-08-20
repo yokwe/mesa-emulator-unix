@@ -58,22 +58,22 @@ public:
 	// Number of thread used in QThreadPool
 	static const int MAX_THREAD = 20;
 
-	void setDiskPath(const QString& diskPath_) {
+	void setDiskPath(const std::string& diskPath_) {
 		diskPath = diskPath_;
 	}
-	void setGermPath(const QString& germPath_) {
+	void setGermPath(const std::string& germPath_) {
 		germPath = germPath_;
 	}
-	void setBootPath(const QString& bootPath_) {
+	void setBootPath(const std::string& bootPath_) {
 		bootPath = bootPath_;
 	}
-	void setFloppyPath(const QString& floppyPath_) {
+	void setFloppyPath(const std::string& floppyPath_) {
 		floppyPath = floppyPath_;
 	}
-	void setBootSwitch(const QString& bootSwitch_) {
+	void setBootSwitch(const std::string& bootSwitch_) {
 		bootSwitch = bootSwitch_;
 	}
-	void setBootDevice(const QString& bootDevice_) {
+	void setBootDevice(const std::string& bootDevice_) {
 		bootDevice = bootDevice_;
 	}
 	void setMemorySize(int vmBits_, int rmBits_) {
@@ -84,7 +84,7 @@ public:
 		displayWidth  = displayWidth_;
 		displayHeight = displayHeight_;
 	}
-	void setNetworkInterfaceName(const QString& networkInterfaceName_) {
+	void setNetworkInterfaceName(const std::string& networkInterfaceName_) {
 		networkInterfaceName = networkInterfaceName_;
 	}
 
@@ -103,17 +103,17 @@ public:
 	}
 
 private:
-	QString        diskPath;
-	QString        germPath;
-	QString        bootPath;
-	QString        floppyPath;
-	QString        bootSwitch;
-	QString        bootDevice;
+	std::string        diskPath;
+	std::string        germPath;
+	std::string        bootPath;
+	std::string        floppyPath;
+	std::string        bootSwitch;
+	std::string        bootDevice;
 	int            vmBits;
 	int            rmBits;
 	CARD16         displayWidth;
 	CARD16         displayHeight;
-	QString        networkInterfaceName;
+	std::string        networkInterfaceName;
 
 	//
 	QList<DiskFile*> diskFileList;
@@ -141,7 +141,7 @@ private:
 
 	QAtomicInt      running;
 
-	void loadGerm(QString& path);
+	void loadGerm(std::string& path);
 
 	void setRunning(int newValue);
 	int  getRunning();

@@ -44,7 +44,7 @@ public:
 		CursorPattern() {}
 		CursorPattern(const CursorPattern* that);
 
-		quint16 data[16];
+		uint16_t data[16];
 	};
 
 	class Rect {
@@ -69,7 +69,7 @@ public:
 
 	static void updateDisplay(Rect* rect);
 
-	static void setMP(quint16 newValue);
+	static void setMP(uint16_t newValue);
 
 	static void setContext(GuiOp *newValue) {
 		guiOp = newValue;
@@ -78,7 +78,7 @@ public:
 protected:
 	virtual void setCursorPatternImpl(CursorPattern* data) = 0;
 	virtual void updateDisplayImpl   (Rect* rect) = 0;
-	virtual void setMPImpl           (quint16 newValue) = 0;
+	virtual void setMPImpl           (uint16_t newValue) = 0;
 	//
 	virtual ~GuiOp() {}
 
@@ -89,5 +89,5 @@ private:
 class NullGuiOp : public GuiOp {
 	void setCursorPatternImpl(CursorPattern*) {}
 	void updateDisplayImpl   (Rect*) {}
-	void setMPImpl           (quint16) {}
+	void setMPImpl           (uint16_t) {}
 };

@@ -66,7 +66,7 @@ namespace Courier {
 		const char* name() const {
 			return myName;
 		}
-		quint16     procedure() const {
+		uint16_t     procedure() const {
 			return myProcedure;
 		}
 		bool        useBulk() const {
@@ -86,9 +86,9 @@ namespace Courier {
 			return *this;
 		}
 
-		Procedure(const char* name_, quint16 procedure_, bool useBulk_) : myName(name_), myProcedure(procedure_), myUseBulk(useBulk_) {}
+		Procedure(const char* name_, uint16_t procedure_, bool useBulk_) : myName(name_), myProcedure(procedure_), myUseBulk(useBulk_) {}
 
-		QString toString() const;
+		std::string toString() const;
 
 		// service is to access session
 		// result contains serialized Protocol3Body
@@ -97,16 +97,16 @@ namespace Courier {
 
 	protected:
 		const char* myName;
-		quint16     myProcedure;
+		uint16_t     myProcedure;
 		bool        myUseBulk;
 	};
 
 
 	class Session {
-		static const quint64 VALID_SESSION_PERIOD = 10 * 60; // 10 minutes
+		static const uint64_t VALID_SESSION_PERIOD = 10 * 60; // 10 minutes
 
 	public:
-		Session(quint16 transaction_) {
+		Session(uint16_t transaction_) {
 			myTimestamp = QDateTime::currentSecsSinceEpoch();
 			myTransaction = transaction_;
 		}
@@ -120,22 +120,22 @@ namespace Courier {
 			this->myTransaction = that.myTransaction;
 			return *this;
 		}
-		QString toString();
+		std::string toString();
 
-		quint16 transaction() {
+		uint16_t transaction() {
 			return myTransaction;
 		}
 		void update() {
 			myTimestamp = QDateTime::currentSecsSinceEpoch();
 		}
 		bool isTimeout() {
-			quint64 now = QDateTime::currentSecsSinceEpoch();
+			uint64_t now = QDateTime::currentSecsSinceEpoch();
 			return (myTimestamp + VALID_SESSION_PERIOD) < now;
 		}
 
 	protected:
-		quint64 myTimestamp;   // myTimestamp is for session timeout management
-		quint16 myTransaction;
+		uint64_t myTimestamp;   // myTimestamp is for session timeout management
+		uint16_t myTransaction;
 	};
 
 
@@ -145,10 +145,10 @@ namespace Courier {
 		const char* name() const {
 			return myName;
 		}
-		quint32     program() const {
+		uint32_t     program() const {
 			return myProgram;
 		}
-		quint16     version() const {
+		uint16_t     version() const {
 			return myVersion;
 		}
 
@@ -178,39 +178,39 @@ namespace Courier {
 			return *this;
 		}
 
-		Service(const char* name_, quint32 program_, quint16 version_) : myName(name_), myProgram(program_), myVersion(version_) {}
+		Service(const char* name_, uint32_t program_, uint16_t version_) : myName(name_), myProgram(program_), myVersion(version_) {}
 
-		QString toString() const;
+		std::string toString() const;
 
 		// procedure
 		void addProcedure(Procedure* procedure);
-		Procedure* getProcedure(const quint16 procedure) const;
+		Procedure* getProcedure(const uint16_t procedure) const;
 
 		// session
 		void addSesion(Session* session);
-		void removeSession(quint16 transaction);
+		void removeSession(uint16_t transaction);
 		// If three is no session for transaction, returns nullptr
-		Session* getSession(quint16 transaction);
+		Session* getSession(uint16_t transaction);
 
 	protected:
 		const char* myName;
-		quint32     myProgram;
-		quint16     myVersion;
+		uint32_t     myProgram;
+		uint16_t     myVersion;
 
-		QMap<quint16, Procedure*> procedureMap;
+		QMap<uint16_t, Procedure*> procedureMap;
 		//   procedure
-		QMap<quint16, Session*>   sessionMap;
+		QMap<uint16_t, Session*>   sessionMap;
 		//   transaction
 	};
 
 
 	class ProgramVersion {
 	public:
-		quint32 program;
-		quint16 version;
+		uint32_t program;
+		uint16_t version;
 
 		ProgramVersion(Service& service) : program(service.program()), version(service.version()) {}
-		ProgramVersion(quint32 program_, quint16 version_) : program(program_), version(version_) {}
+		ProgramVersion(uint32_t program_, uint16_t version_) : program(program_), version(version_) {}
 
 		ProgramVersion() : program(0), version(0) {}
 		ProgramVersion(const ProgramVersion& that) : program(that.program), version(that.version) {}
@@ -220,8 +220,8 @@ namespace Courier {
 			return *this;
 		}
 
-		QString toString() const {
-			return QString("%1-%2").arg(program).arg(version);
+		std::string toString() const {
+			return std::string("%1-%2").arg(program).arg(version);
 		}
 
 		bool operator == (const ProgramVersion& that) const {

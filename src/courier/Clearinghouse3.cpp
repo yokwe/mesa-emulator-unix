@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-ch3");
+static const util::Logger logger(__FILE__);
 
 #include "Clearinghouse3.h"
 

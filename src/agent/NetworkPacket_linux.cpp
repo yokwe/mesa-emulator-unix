@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("packet");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -51,14 +51,14 @@ static const Logger logger = Logger::getLogger("packet");
 
 #include <errno.h>
 
-void NetworkPacket::attach(const QString& name_) {
+void NetworkPacket::attach(const std::string& name_) {
 	name = name_;
     logger.info("NetworkPacket linux");
     logger.info("name     = %s", name.toLatin1().constData());
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 
-    quint16 proto   = (quint16)ETH_P_IDP;
-    quint16 protoBE = qToBigEndian(proto);
+    uint16_t proto   = (uint16_t)ETH_P_IDP;
+    uint16_t protoBE = qToBigEndian(proto);
 
 	// open socket
 	fd = socket(AF_PACKET, SOCK_RAW, protoBE);
@@ -90,7 +90,7 @@ void NetworkPacket::attach(const QString& name_) {
 		    logger.info("address  = %02X-%02X-%02X-%02X-%02X-%02X", address[0], address[1], address[2], address[3], address[4], address[5]);
 
 		    {
-		    	quint64 t = 0;
+		    	uint64_t t = 0;
 		    	for(int i = 0; i < ETH_ALEN; i++) {
 		    		t = (t << 8) | (address[i] & 0xFF);
 		    	}
@@ -150,10 +150,10 @@ void NetworkPacket::select(Result& result, CARD32 timeout) {
 
 void NetworkPacket::transmit(Result& result, Data& data) {
 	// Buffer for changing of byte order
-	quint8  buffer[ETH_FRAME_LEN];
+	uint8_t  buffer[ETH_FRAME_LEN];
 	{
-		quint16* src = (quint16*)data.data;
-		quint16* dst = (quint16*)buffer;
+		uint16_t* src = (uint16_t*)data.data;
+		uint16_t* dst = (uint16_t*)buffer;
 
 		Util::toBigEndian(src, dst, sizeof(buffer) / 2);
 	}
@@ -192,7 +192,7 @@ void NetworkPacket::transmit(Result& result, Data& data) {
 void NetworkPacket::receive(Result& result, Data& data) {
 	data.timeStamp = QDateTime::currentMSecsSinceEpoch();
 
-	quint8  buffer[ETH_FRAME_LEN];
+	uint8_t  buffer[ETH_FRAME_LEN];
 	result.returnValue = ::recv(fd, buffer, sizeof(buffer), 0);
 	result.errNo       = errno;
 

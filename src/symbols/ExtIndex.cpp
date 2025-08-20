@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("etx");
+static const util::Logger logger(__FILE__);
 
 #include "ExtIndex.h"
 #include "BCDFile.h"
@@ -68,9 +68,9 @@ ExtIndex* ExtIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new ExtIndex(symbols, index);
 }
-QString ExtIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string ExtIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const ExtRecord& ExtIndex::getValue() const {
 	ExtRecord* ret = ExtRecord::find(symbols, index);
@@ -127,7 +127,7 @@ ExtRecord* ExtRecord::getInstance(Symbols* symbols, CARD16 index) {
     return new ExtRecord(symbols, index, type, sei, tree);
 }
 
-QString ExtRecord::toString() const {
-	return QString("%1 %2 %3").arg(toString(type)).arg(sei->toString()).arg(tree->toString());
+std::string ExtRecord::toString() const {
+	return std::string("%1 %2 %3").arg(toString(type)).arg(sei->toString()).arg(tree->toString());
 }
 

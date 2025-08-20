@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-text");
+static const util::Logger logger(__FILE__);
 
 #include "TextStream.h"
 
@@ -43,6 +43,6 @@ static const Logger logger = Logger::getLogger("cr-text");
 Courier::Printf::Printf(const char* format, ...) {
     va_list argptr;
     va_start(argptr, format);
-    string = QString::vasprintf(format, argptr);
+    string = std::string::vasprintf(format, argptr);
     va_end(argptr);
 }

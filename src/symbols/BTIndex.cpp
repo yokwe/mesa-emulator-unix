@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("bt");
+static const util::Logger logger(__FILE__);
 
 #include "BTIndex.h"
 #include "BCDFile.h"
@@ -69,9 +69,9 @@ BTIndex* BTIndex::getInstance(Symbols* symbols_, CARD16 index_) {
 
 	return new BTIndex(symbols_, index_);
 }
-QString BTIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string BTIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const BTRecord& BTIndex::getValue() const {
 	BTRecord* ret = BTRecord::find(symbols, index);
@@ -189,7 +189,7 @@ const BTRecord::Callable::Catch& BTRecord::Callable::getCatch() const {
 	Catch* ret = (Catch*)tagValue;
 	return *ret;
 }
-QString BTRecord::Callable::toString(Tag value) {
+std::string BTRecord::Callable::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(OUTER)
@@ -198,24 +198,24 @@ QString BTRecord::Callable::toString(Tag value) {
 
 	TO_STRING_EPILOGUE
 }
-QString BTRecord::Callable::toString() const {
+std::string BTRecord::Callable::toString() const {
 	switch(tag) {
 	case Tag::OUTER:
-		return QString("%1 %2 %3 %4").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag));
+		return std::string("%1 %2 %3 %4").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag));
 	case Tag::INNER:
-		return QString("%1 %2 %3 %4 %5").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag)).arg(getInner().toString());
+		return std::string("%1 %2 %3 %4 %5").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag)).arg(getInner().toString());
 	case Tag::CATCH:
-		return QString("%1 %2 %3 %4 %5").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag)).arg(getCatch().toString());
+		return std::string("%1 %2 %3 %4 %5").arg(id->toString()).arg(ioType->toString()).arg(entryIndex).arg(toString(tag)).arg(getCatch().toString());
 	default:
 		ERROR();
 		return "???";
 	}
 }
-QString BTRecord::Callable::Inner::toString() const {
-	return QString("%1").arg(frameOffset);
+std::string BTRecord::Callable::Inner::toString() const {
+	return std::string("%1").arg(frameOffset);
 }
-QString BTRecord::Callable::Catch::toString() const {
-	return QString("%1").arg(index);
+std::string BTRecord::Callable::Catch::toString() const {
+	return std::string("%1").arg(index);
 }
 
 //    Other => [relOffset(8:1..15): [0..LAST[CARDINAL]/2]]
@@ -224,10 +224,10 @@ BTRecord::Other* BTRecord::Other::getInstance(Symbols* /*symbols*/, CARD16 u8) {
 
 	return new Other(realOffset);
 }
-QString BTRecord::Other::toString() const {
-	return QString("%1").arg(realOffset);
+std::string BTRecord::Other::toString() const {
+	return std::string("%1").arg(realOffset);
 }
-QString BTRecord::toString(Tag value) {
+std::string BTRecord::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(CALLABLE)
@@ -247,12 +247,12 @@ const BTRecord::Other& BTRecord::getOther() const {
 	Other* ret = (Other*)tagValue;
 	return *ret;
 }
-QString BTRecord::toString() const {
+std::string BTRecord::toString() const {
 	switch(tag) {
 	case Tag::CALLABLE:
-		return QString("%1 %2 %3 %4 %5 %6").arg(link->toString()).arg(type->toString()).arg(info->toString()).arg(level).arg(toString(tag)).arg(getCallable().toString());
+		return std::string("%1 %2 %3 %4 %5 %6").arg(link->toString()).arg(type->toString()).arg(info->toString()).arg(level).arg(toString(tag)).arg(getCallable().toString());
 	case Tag::OTHER:
-		return QString("%1 %2 %3 %4 %5 %6").arg(link->toString()).arg(type->toString()).arg(info->toString()).arg(level).arg(toString(tag)).arg(getOther().toString());
+		return std::string("%1 %2 %3 %4 %5 %6").arg(link->toString()).arg(type->toString()).arg(info->toString()).arg(level).arg(toString(tag)).arg(getOther().toString());
 	default:
 		ERROR();
 		return "???";
@@ -277,10 +277,10 @@ BTRecord::BodyLink* BTRecord::BodyLink::getInstance(Symbols* symbols) {
 
 	return new BodyLink(which, index);
 }
-QString BTRecord::BodyLink::toString() const {
-	return QString("%1 %2").arg(toString(which)).arg(index->toString());
+std::string BTRecord::BodyLink::toString() const {
+	return std::string("%1 %2").arg(toString(which)).arg(index->toString());
 }
-QString BTRecord::BodyLink::toString(Which value) {
+std::string BTRecord::BodyLink::toString(Which value) {
 	TO_STRING_PROLOGUE(Which)
 
 	MAP_ENTRY(SIBLING)
@@ -329,7 +329,7 @@ BTRecord::BodyInfo* BTRecord::BodyInfo::getInstance(Symbols* symbols) {
 
 	return new BodyInfo(tag, tagValue);
 }
-QString BTRecord::BodyInfo::toString(Tag value) {
+std::string BTRecord::BodyInfo::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(INTERNAL)
@@ -337,11 +337,11 @@ QString BTRecord::BodyInfo::toString(Tag value) {
 
 	TO_STRING_EPILOGUE
 }
-QString BTRecord::BodyInfo::Internal::toString() const {
-	return QString("%1 %2 %3").arg(bodyTree).arg(thread).arg(frameSize);
+std::string BTRecord::BodyInfo::Internal::toString() const {
+	return std::string("%1 %2 %3").arg(bodyTree).arg(thread).arg(frameSize);
 }
-QString BTRecord::BodyInfo::External::toString() const {
-	return QString("%1 %2 %3").arg(bytes).arg(startIndex).arg(indexLength);
+std::string BTRecord::BodyInfo::External::toString() const {
+	return std::string("%1 %2 %3").arg(bytes).arg(startIndex).arg(indexLength);
 }
 const BTRecord::BodyInfo::Internal&   BTRecord::BodyInfo::getInternal() const {
 	if (tag != Tag::INTERNAL) ERROR();
@@ -355,12 +355,12 @@ const BTRecord::BodyInfo::External&   BTRecord::BodyInfo::getExternal() const {
 	External* ret = (External*)tagValue;
 	return *ret;
 }
-QString BTRecord::BodyInfo::toString() const {
+std::string BTRecord::BodyInfo::toString() const {
 	switch(tag) {
 	case Tag::INTERNAL:
-		return QString("[%1 %2]").arg(toString(tag)).arg(getInternal().toString());
+		return std::string("[%1 %2]").arg(toString(tag)).arg(getInternal().toString());
 	case Tag::EXTERNAL:
-		return QString("[%1 %2]").arg(toString(tag)).arg(getExternal().toString());
+		return std::string("[%1 %2]").arg(toString(tag)).arg(getExternal().toString());
 	default:
 		ERROR();
 		return "???";

@@ -49,7 +49,7 @@ namespace XNS::PilotStream {
 		TIMEOUT       = 5
 	};
 
-	enum class SST : quint8 {
+	enum class SST : uint8_t {
 		// From Courier/Friends/CourierProtocol.mesa
 		DATA        = 0,   // Courier
 		// From Courier/Private/BulkData.mesa
@@ -75,11 +75,11 @@ namespace XNS::PilotStream {
 		virtual void setSST(SST  sst) = 0;
 		virtual void getSST(SST& sst) = 0;
 
-		virtual void sendAttention   (quint8  data) = 0;
-		virtual void waitForAttention(quint8& data) = 0;
+		virtual void sendAttention   (uint8_t  data) = 0;
+		virtual void waitForAttention(uint8_t& data) = 0;
 
-		virtual void setTimeout(quint16  msec) = 0;
-		virtual void getTimeout(quint16& msec) = 0;
+		virtual void setTimeout(uint16_t  msec) = 0;
+		virtual void getTimeout(uint16_t& msec) = 0;
 
 		virtual void close() = 0;
 	};

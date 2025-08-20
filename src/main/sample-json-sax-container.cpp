@@ -39,7 +39,7 @@
 using json = nlohmann::json;
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const util::Logger logger(__FILE__);
 
 
 class sax_value {

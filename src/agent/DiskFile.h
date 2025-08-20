@@ -61,7 +61,7 @@ public:
 		sectorsPerTrack   = 0;
 	}
 
-	void attach(const QString& path);
+	void attach(const std::string& path);
 	void detach();
 
 	void readPage(CARD32 block, CARD16 *buffer) {
@@ -85,7 +85,7 @@ public:
 		return size / Environment::bytesPerPage;
 	}
 
-	const QString& getPath() {
+	const std::string& getPath() {
 		return path;
 	}
 
@@ -109,7 +109,7 @@ public:
 	}
 
 private:
-	QString path;
+	std::string path;
 	Page  *page;
 	CARD32 size;
 	CARD32 maxBlock;

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("copyPaste");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -164,16 +164,16 @@ StreamCopyPaste::StreamCopyPaste() : Stream("CopyPaste", CoProcessorServerIDs::c
 	logger.info("%3d %-8s", serverID, name);
 }
 
-quint16 StreamCopyPaste::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_completed;
 }
-quint16 StreamCopyPaste::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamCopyPaste::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", name, iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
 
 	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
@@ -183,11 +183,11 @@ quint16 StreamCopyPaste::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*f
 //	return CoProcessorIOFaceGuam::R_completed;
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamCopyPaste::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamCopyPaste::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s read %d %d", name, fcb->headCommand, iocb->serverID);
 	{
 		CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaPut;
@@ -203,7 +203,7 @@ quint16 StreamCopyPaste::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb,
 	}
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamCopyPaste::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamCopyPaste::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 
 	GetBuffer buffer(iocb);

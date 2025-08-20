@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("mesaproc");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -64,7 +64,7 @@ void MesaProcessor::initialize() {
 
 	// AgentDisk use diskFile
 	for(int i = 1; i <= 999; i++) {
-		QString path;
+		std::string path;
 		if (diskPath.contains("%1", Qt::CaseSensitivity::CaseSensitive)) {
 			path = diskPath.arg(i, 3, 10, QLatin1Char('0'));
 		} else {
@@ -187,7 +187,7 @@ void MesaProcessor::wait() {
 	floppyFile.detach();
 }
 
-void MesaProcessor::loadGerm(QString& path) {
+void MesaProcessor::loadGerm(std::string& path) {
 	logger.info("germ  path    = %s", path.toStdString());
 
 	CARD32 mapSize = 0;

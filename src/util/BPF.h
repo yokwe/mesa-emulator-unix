@@ -49,9 +49,9 @@ public:
 	static const struct bpf_program* PROGRAM_XNS;
 
 	int     fd;
-	QString path;
+	std::string path;
 	int     bufferSize;
-	quint8* buffer;
+	uint8_t* buffer;
 
 	QList<ByteBuffer> readData;
 
@@ -81,15 +81,15 @@ public:
 
 	// for Network::Driver
 	// no error check
-	int  select  (quint32 timeout, int& opErrno);
-	int  transmit(quint8* data, quint32 dataLen, int& opErrno);
-	int  receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch = nullptr);
+	int  select  (uint32_t timeout, int& opErrno);
+	int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno);
+	int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch = nullptr);
 	void discard ();
 
 
 	// BIOCGBLEN
 	//   Returns the required buffer length	for reads on bpf files
-	quint32 getBufferSize();
+	uint32_t getBufferSize();
 
 	// BIOCSBLEN
 	//   Sets the buffer length for	reads on bpf files
@@ -113,17 +113,17 @@ public:
 
 	// BIOCGETIF
 	//   Returns the name of the hardware interface that the file is listening
-	QString getInterface();
+	std::string getInterface();
 
 	// BIOCSETIF
 	//   Sets the hardware interface associate with the file.
-	void setInterface(const QString& value);
+	void setInterface(const std::string& value);
 
 	// BIOCSRTIMEOUT
 	//   Sets the read timeout parameter
 	//   Default value is 0. Which means no timeout.
 	void setReadTimeout(const struct timeval& value);
-	void setReadTimeout(const quint32 seconds) {
+	void setReadTimeout(const uint32_t seconds) {
 		struct timeval time;
 		time.tv_sec   = seconds;
 		time.tv_usec = 0;
@@ -133,10 +133,10 @@ public:
 	// BIOCGRTIMEOUT
 	//   Gets the read timeout parameter
 	void getReadTimeout(struct timeval& value);
-	quint32 getReadTimeout() {
+	uint32_t getReadTimeout() {
 		struct timeval time;
 		getReadTimeout(time);
-		return (quint32)time.tv_sec;
+		return (uint32_t)time.tv_sec;
 	}
 
 	// BIOCGSTATS
@@ -146,7 +146,7 @@ public:
 	//   Enables or	disables "immediate mode"
 	//   When immediate more is enabled, reads return immediately upon packet reception
 	//   When immediate mode is disabled, read will block until buffer become full or timeout.
-	void setImmediate(quint32 value);
+	void setImmediate(uint32_t value);
 
 	// BIOCSETF
 	//   Sets the read filter program with BIOCFLUSH
@@ -163,31 +163,31 @@ public:
 
 	// BIOCGRSIG
 	//   Sets the status of	the "header complete" flag.
-	quint32 getHeaderComplete();
+	uint32_t getHeaderComplete();
 
 	// BIOCSRSIG
 	//   Gets the status of	the "header complete" flag.
 	//   When value is 0, source address is filled automatically
 	//   When value is 1, source address is not filled automatically
 	//   Default value is 0
-	void setHeaderComplete(quint32 value);
+	void setHeaderComplete(uint32_t value);
 
 //	// BIOCGDIRECTION
 //	//   Gets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
-//	quint32 getDirection();
+//	uint32_t getDirection();
 //
 //	// BIOCSDIRECTION
 //	//   Sets the setting determining whether incoming, outgoing, or all packets on the interface should be returned by BPF
 //	//   Vfalue must be BPF_D_IN, BPF_D_OUT or BPF_D_INOUT
 //	//   Default is BPF_D_INOUT
-//	void setDirection(quint32 value);
+//	void setDirection(uint32_t value);
 
 	// BIOCGSEESENT
 	//   These commands are obsolete but left for compatibility.
 	//   Use BIOCSDIRECTION and BIOCGDIRECTION instead.
 	//   Sets or gets the flag determining whether locally generated packets on the interface should be returned by BPF.
 	//   Set to zero to see only incoming packets on the interface.  Set to one to see packets
-	quint32 getSeeSent();
+	uint32_t getSeeSent();
 
 	// BIOCSSEESENT
 	// These commands are obsolete but left for compatibility.
@@ -196,7 +196,7 @@ public:
 	//   Set to zero to see only incoming packets on the interface.
 	//   Set to one to see packets originating locally and remotely on the interface.
 	//   This flag is initialized to one by default.
-	void setSeeSent(quint32 value);
+	void setSeeSent(uint32_t value);
 
 	// BIOCSTSTAMP
 	//   Set format and resolution of the time stamps returned by BPF

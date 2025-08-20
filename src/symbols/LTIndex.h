@@ -61,7 +61,7 @@ public:
 	bool isNull() const {
 		return index == LT_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const LTRecord& getValue() const;
 
 private:
@@ -93,7 +93,7 @@ public:
 	public:
 		const CARD16 value;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Short(CARD16 value_) : value(value_) {}
 	};
@@ -104,7 +104,7 @@ public:
 		const CARD16  length;
 		const CARD16* value;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Long(CARD16 codeIndex_, CARD16 length_, CARD16* value_) : codeIndex(codeIndex_), length(length_), value(value_) {}
 	};
@@ -113,7 +113,7 @@ public:
 	static LTRecord* find(Symbols* symbols, CARD16 index);
 
 	enum class Tag {SHORT, LONG};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	// const LTIndex* link
 	//   NOTE
@@ -125,7 +125,7 @@ public:
 	const Short& getShort() const;
 	const Long&  getLong() const;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;
@@ -150,13 +150,13 @@ private:
 class LitRecord {
 public:
 	enum class Tag {WORD, STRING};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	class Word {
 	public:
 		const LTIndex* index;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Word(LTIndex* index_) : index(index_) {}
 	};
@@ -165,7 +165,7 @@ public:
 	public:
 		const CARD16 index; // STIndex*
 
-		QString toString() const;
+		std::string toString() const;
 
 		String(CARD16 index_) : index(index_) {}
 	};
@@ -178,7 +178,7 @@ public:
 	const Word&   getWord()   const;
 	const String& getString() const;
 
-	QString toString() const;
+	std::string toString() const;
 
 	LitRecord(Tag tag_, void* tagValue_) : tag(tag_), tagValue(tagValue_) {}
 };

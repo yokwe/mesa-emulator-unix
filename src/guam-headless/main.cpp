@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Perf.h"
 
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 		logger.error("Unexpected argc %d", argc);
 		ERROR();
 	}
-	QString entryName = argv[1];
+	std::string entryName = argv[1];
 	logger.info("entryName = %s", qPrintable(entryName));
 
 	Setting setting = Setting::getInstance();
@@ -68,16 +68,16 @@ int main(int argc, char** argv) {
 	CARD32  displayWidth     = entry.display.width;
 	CARD32  displayHeight    = entry.display.height;
 
-	QString diskPath         = entry.file.disk;
-	QString germPath         = entry.file.germ;
-	QString bootPath         = entry.file.boot;
-	QString floppyPath       = entry.file.floppy;
-	QString bootSwitch       = entry.boot.switch_;
-	QString bootDevice       = entry.boot.device;
-	QString networkInterface = entry.network.interface;
+	std::string diskPath         = entry.file.disk;
+	std::string germPath         = entry.file.germ;
+	std::string bootPath         = entry.file.boot;
+	std::string floppyPath       = entry.file.floppy;
+	std::string bootSwitch       = entry.boot.switch_;
+	std::string bootDevice       = entry.boot.device;
+	std::string networkInterface = entry.network.interface;
 
-	quint32 vmBits           = entry.memory.vmbits;
-	quint32 rmBits           = entry.memory.rmbits;
+	uint32_t vmBits           = entry.memory.vmbits;
+	uint32_t rmBits           = entry.memory.rmbits;
 
 	// stop at MP 8000
 	ProcessorThread::stopAtMP( 915);
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 	elapsedTimer.start();
 	mesaProcessor.boot();
 	mesaProcessor.wait();
-	quint64 elapsedTime = elapsedTimer.nsecsElapsed();
+	uint64_t elapsedTime = elapsedTimer.nsecsElapsed();
 
 	Interpreter::stats();
 	PERF_LOG();

@@ -61,7 +61,7 @@ public:
 	bool isNull() const {
 		return index == HT_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 
 	const HTRecord& getValue() const;
 private:
@@ -89,9 +89,9 @@ public:
 	const bool    anyPublic;
 	const CARD16  link;
 	const CARD16  ssIndex;
-	const QString value;
+	const std::string value;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;
@@ -104,7 +104,7 @@ private:
 	typedef Symbols::Key Key;
 	static QMap<Key, HTRecord*> all;
 
-	HTRecord(Symbols* symbols, CARD16 index, bool anyInternal, bool anyPublic, CARD16 link, CARD16 ssIndex, QString value);
+	HTRecord(Symbols* symbols, CARD16 index, bool anyInternal, bool anyPublic, CARD16 link, CARD16 ssIndex, std::string value);
 };
 
 #endif

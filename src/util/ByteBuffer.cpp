@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("bytebuffer");
+static const util::Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
@@ -68,7 +68,7 @@ ByteBuffer& ByteBuffer::operator =(const ByteBuffer& that) {
 	return *this;
 }
 
-ByteBuffer::ByteBuffer(int capacity, quint8* data) {
+ByteBuffer::ByteBuffer(int capacity, uint8_t* data) {
 	this->myBase     = 0;
 	this->myPosition = 0;
 	this->myLimit    = capacity;
@@ -78,7 +78,7 @@ ByteBuffer::ByteBuffer(int capacity, quint8* data) {
 }
 
 
-void ByteBuffer::copyFrom(int len, const quint8* data) {
+void ByteBuffer::copyFrom(int len, const uint8_t* data) {
 	if (len < 0) {
 		logger.error("Too large len");
 		logger.error("  len      = %5d", len);
@@ -100,10 +100,10 @@ void ByteBuffer::copyFrom(int len, const quint8* data) {
 	myLimit    = myBase + len;
 }
 
-QString ByteBuffer::toString(int limit) const {
-	QString ret;
+std::string ByteBuffer::toString(int limit) const {
+	std::string ret;
 	for(int i = myBase; i < myLimit; i++) {
-		ret += QString::asprintf("%02X", myData[i]);
+		ret += std::string::asprintf("%02X", myData[i]);
 	}
 	return ret.left(limit);
 }
@@ -155,10 +155,10 @@ void ByteBuffer::reset() {
 //
 // ByteBuffer::read
 //
-void ByteBuffer::read8(const int index, quint8& value) const {
+void ByteBuffer::read8(const int index, uint8_t& value) const {
 	const int readSize = 1;
 	if ((index + readSize) <= myLimit) {
-		const quint8* data = myData + index;
+		const uint8_t* data = myData + index;
 		value = data[0];
 	} else {
 		logger.error("Exceed limit");
@@ -168,10 +168,10 @@ void ByteBuffer::read8(const int index, quint8& value) const {
 		ERROR();
 	}
 }
-void ByteBuffer::read16(const int index, quint16& value) const {
+void ByteBuffer::read16(const int index, uint16_t& value) const {
 	const int readSize = 2;
 	if ((index + readSize) <= myLimit) {
-		const quint8* data = myData + index;
+		const uint8_t* data = myData + index;
 		value = (data[0] << 8) | (data[1] << 0);
 	} else {
 		logger.error("Exceed limit");
@@ -181,10 +181,10 @@ void ByteBuffer::read16(const int index, quint16& value) const {
 		ERROR();
 	}
 }
-void ByteBuffer::read32(const int index, quint32& value) const {
+void ByteBuffer::read32(const int index, uint32_t& value) const {
 	const int readSize = 4;
 	if ((index + readSize) <= myLimit) {
-		const quint8* data = myData + index;
+		const uint8_t* data = myData + index;
 		value = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3] << 0);
 	} else {
 		logger.error("Exceed limit");
@@ -194,13 +194,13 @@ void ByteBuffer::read32(const int index, quint32& value) const {
 		ERROR();
 	}
 }
-void ByteBuffer::read48(const int index, quint64& value) const {
+void ByteBuffer::read48(const int index, uint64_t& value) const {
 	const int readSize = 6;
 	if ((index + readSize) <= myLimit) {
-		const quint8* data = myData + index;
-		value = ((quint64)data[0] << 40) | ((quint64)data[1] << 32) |
-				((quint64)data[2] << 24) | ((quint64)data[3] << 16) |
-				((quint64)data[4] <<  8) | ((quint64)data[5] <<  0);
+		const uint8_t* data = myData + index;
+		value = ((uint64_t)data[0] << 40) | ((uint64_t)data[1] << 32) |
+				((uint64_t)data[2] << 24) | ((uint64_t)data[3] << 16) |
+				((uint64_t)data[4] <<  8) | ((uint64_t)data[5] <<  0);
 	} else {
 		logger.error("Exceed limit");
 		logger.error("  index    = %5d", index);
@@ -209,9 +209,9 @@ void ByteBuffer::read48(const int index, quint64& value) const {
 		ERROR();
 	}
 }
-void ByteBuffer::read(const int index, const int readSize, quint8* value) const {
+void ByteBuffer::read(const int index, const int readSize, uint8_t* value) const {
 	if ((index + readSize) <= myLimit) {
-		const quint8* data = myData + index;
+		const uint8_t* data = myData + index;
 		memcpy(value, data, readSize);
 	} else {
 		logger.error("Exceed limit");
@@ -226,7 +226,7 @@ void ByteBuffer::read(const int index, const int readSize, quint8* value) const 
 //
 // ByteBuffer::write
 //
-void ByteBuffer::write8(const int index, quint8 value) {
+void ByteBuffer::write8(const int index, uint8_t value) {
 	const int writeSize = 1;
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
@@ -235,10 +235,10 @@ void ByteBuffer::write8(const int index, quint8 value) {
 		logger.error("  writeSize = %5d", writeSize);
 		ERROR();
 	}
-	quint8* data = myData + index;
+	uint8_t* data = myData + index;
 	data[0] = value;
 }
-void ByteBuffer::write16(const int index, quint16 value) {
+void ByteBuffer::write16(const int index, uint16_t value) {
 	const int writeSize = 2;
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
@@ -247,11 +247,11 @@ void ByteBuffer::write16(const int index, quint16 value) {
 		logger.error("  writeSize = %5d", writeSize);
 		ERROR();
 	}
-	quint8* data = myData + index;
-	data[0] = (quint8)(value >> 8);
-	data[1] = (quint8)(value);
+	uint8_t* data = myData + index;
+	data[0] = (uint8_t)(value >> 8);
+	data[1] = (uint8_t)(value);
 }
-void ByteBuffer::write32(const int index, quint32 value) {
+void ByteBuffer::write32(const int index, uint32_t value) {
 	const int writeSize = 4;
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
@@ -260,13 +260,13 @@ void ByteBuffer::write32(const int index, quint32 value) {
 		logger.error("  capacity = %5d", myCapacity);
 		ERROR();
 	}
-	quint8* data = myData + index;
-	data[0] = (quint8)(value >> 24);
-	data[1] = (quint8)(value >> 16);
-	data[2] = (quint8)(value >>  8);
-	data[3] = (quint8)(value >>  0);
+	uint8_t* data = myData + index;
+	data[0] = (uint8_t)(value >> 24);
+	data[1] = (uint8_t)(value >> 16);
+	data[2] = (uint8_t)(value >>  8);
+	data[3] = (uint8_t)(value >>  0);
 }
-void ByteBuffer::write48(const int index, quint64 value) {
+void ByteBuffer::write48(const int index, uint64_t value) {
 	const int writeSize = 6;
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
@@ -275,15 +275,15 @@ void ByteBuffer::write48(const int index, quint64 value) {
 		logger.error("  writeSize = %5d", writeSize);
 		ERROR();
 	}
-	quint8* data = myData + index;
-	data[0] = (quint8)(value >> 40);
-	data[1] = (quint8)(value >> 32);
-	data[2] = (quint8)(value >> 24);
-	data[3] = (quint8)(value >> 16);
-	data[4] = (quint8)(value >>  8);
-	data[5] = (quint8)(value >>  0);
+	uint8_t* data = myData + index;
+	data[0] = (uint8_t)(value >> 40);
+	data[1] = (uint8_t)(value >> 32);
+	data[2] = (uint8_t)(value >> 24);
+	data[3] = (uint8_t)(value >> 16);
+	data[4] = (uint8_t)(value >>  8);
+	data[5] = (uint8_t)(value >>  0);
 }
-void ByteBuffer::write(const int index, const int writeSize, const quint8* value) {
+void ByteBuffer::write(const int index, const int writeSize, const uint8_t* value) {
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
 		logger.error("  capacity  = %5d", myCapacity);
@@ -291,7 +291,7 @@ void ByteBuffer::write(const int index, const int writeSize, const quint8* value
 		logger.error("  writeSize = %5d", writeSize);
 		ERROR();
 	}
-	quint8* data = myData + index;
+	uint8_t* data = myData + index;
 	memcpy(data, value, writeSize);
 }
 

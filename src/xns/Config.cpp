@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-config");
+static const util::Logger logger(__FILE__);
 
 #include "XNS.h"
 
@@ -69,13 +69,13 @@ QJsonObject XNS::Config::Network::toJsonObject() const {
 
 // XNS::Config::Host::Entry
 void XNS::Config::Host::Entry::fromJsonObject(const QJsonObject& jsonObject) {
-	QString valueString;
+	std::string valueString;
 	GET_JSON_OBJECT(name);
 	GET_JSON_OBJECT2(value, valueString);
 	value = XNS::Host::fromString(valueString);
 }
 QJsonObject XNS::Config::Host::Entry::toJsonObject() const {
-	QString valueString = XNS::Host::toHexaDecimalString(value, ":");
+	std::string valueString = XNS::Host::toHexaDecimalString(value, ":");
 	QJsonObject jsonObject;
 	SET_JSON_OBJECT(name);
 	SET_JSON_OBJECT2(value, valueString);

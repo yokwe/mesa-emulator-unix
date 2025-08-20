@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-data");
+static const util::Logger logger(__FILE__);
 
 #include "DataStream.h"
 
@@ -83,7 +83,7 @@ void Courier::DataStream::setBase(int newValue) {
 }
 
 
-void Courier::DataStream::copyFrom(int len, const quint8* value) {
+void Courier::DataStream::copyFrom(int len, const uint8_t* value) {
 	QByteArray& data(*myData);
 
 	// copy from data to myData + myBase
@@ -100,7 +100,7 @@ void Courier::DataStream::copyFrom(int len, const quint8* value) {
 //
 // read
 //
-void Courier::DataStream::read8(const int index, quint8& value) const {
+void Courier::DataStream::read8(const int index, uint8_t& value) const {
 	const int readSize = 1;
 	if ((index + readSize) <= myLimit) {
 		QByteArray& data(*myData);
@@ -114,7 +114,7 @@ void Courier::DataStream::read8(const int index, quint8& value) const {
 		ERROR();
 	}
 }
-void Courier::DataStream::read16(const int index, quint16& value) const {
+void Courier::DataStream::read16(const int index, uint16_t& value) const {
 	const int readSize = 2;
 	if ((index + readSize) <= myLimit) {
 		QByteArray& data(*myData);
@@ -128,7 +128,7 @@ void Courier::DataStream::read16(const int index, quint16& value) const {
 		ERROR();
 	}
 }
-void Courier::DataStream::read32(const int index, quint32& value) const {
+void Courier::DataStream::read32(const int index, uint32_t& value) const {
 	const int readSize = 4;
 	if ((index + readSize) <= myLimit) {
 		QByteArray& data(*myData);
@@ -143,14 +143,14 @@ void Courier::DataStream::read32(const int index, quint32& value) const {
 		ERROR();
 	}
 }
-void Courier::DataStream::read48(const int index, quint64& value) const {
+void Courier::DataStream::read48(const int index, uint64_t& value) const {
 	const int readSize = 6;
 	if ((index + readSize) <= myLimit) {
 		QByteArray& data(*myData);
 
-		value = ((quint64)data[index + 0] << 40) | ((quint64)data[index + 1] << 32) |
-				((quint64)data[index + 2] << 24) | ((quint64)data[index + 3] << 16) |
-				((quint64)data[index + 4] <<  8) | ((quint64)data[index + 5] <<  0);
+		value = ((uint64_t)data[index + 0] << 40) | ((uint64_t)data[index + 1] << 32) |
+				((uint64_t)data[index + 2] << 24) | ((uint64_t)data[index + 3] << 16) |
+				((uint64_t)data[index + 4] <<  8) | ((uint64_t)data[index + 5] <<  0);
 	} else {
 		logger.error("Exceed limit");
 		logger.error("  index    = %5d", index);
@@ -159,7 +159,7 @@ void Courier::DataStream::read48(const int index, quint64& value) const {
 		ERROR();
 	}
 }
-void Courier::DataStream::read(const int index, const int readSize, quint8* value) const {
+void Courier::DataStream::read(const int index, const int readSize, uint8_t* value) const {
 	if ((index + readSize) <= myLimit) {
 		QByteArray& data(*myData);
 
@@ -179,36 +179,36 @@ void Courier::DataStream::read(const int index, const int readSize, quint8* valu
 //
 // write
 //
-void Courier::DataStream::write8(const int index, quint8 value) {
+void Courier::DataStream::write8(const int index, uint8_t value) {
 	QByteArray& data(*myData);
 
 	data[index + 0] = value;
 }
-void Courier::DataStream::write16(const int index, quint16 value) {
+void Courier::DataStream::write16(const int index, uint16_t value) {
 	QByteArray& data(*myData);
 
-	data[index + 0] = (quint8)(value >> 8);
-	data[index + 1] = (quint8)(value >> 0);
+	data[index + 0] = (uint8_t)(value >> 8);
+	data[index + 1] = (uint8_t)(value >> 0);
 }
-void Courier::DataStream::write32(const int index, quint32 value) {
+void Courier::DataStream::write32(const int index, uint32_t value) {
 	QByteArray& data(*myData);
 
-	data[index + 0] = (quint8)(value >> 24);
-	data[index + 1] = (quint8)(value >> 16);
-	data[index + 2] = (quint8)(value >>  8);
-	data[index + 3] = (quint8)(value >>  0);
+	data[index + 0] = (uint8_t)(value >> 24);
+	data[index + 1] = (uint8_t)(value >> 16);
+	data[index + 2] = (uint8_t)(value >>  8);
+	data[index + 3] = (uint8_t)(value >>  0);
 }
-void Courier::DataStream::write48(const int index, quint64 value) {
+void Courier::DataStream::write48(const int index, uint64_t value) {
 	QByteArray& data(*myData);
 
-	data[index + 0] = (quint8)(value >> 40);
-	data[index + 1] = (quint8)(value >> 32);
-	data[index + 2] = (quint8)(value >> 24);
-	data[index + 3] = (quint8)(value >> 16);
-	data[index + 4] = (quint8)(value >>  8);
-	data[index + 5] = (quint8)(value >>  0);
+	data[index + 0] = (uint8_t)(value >> 40);
+	data[index + 1] = (uint8_t)(value >> 32);
+	data[index + 2] = (uint8_t)(value >> 24);
+	data[index + 3] = (uint8_t)(value >> 16);
+	data[index + 4] = (uint8_t)(value >>  8);
+	data[index + 5] = (uint8_t)(value >>  0);
 }
-void Courier::DataStream::write(const int index, const int writeSize, const quint8* value) {
+void Courier::DataStream::write(const int index, const int writeSize, const uint8_t* value) {
 	QByteArray& data(*myData);
 
 	for(int i = 0; i < writeSize; i++) {

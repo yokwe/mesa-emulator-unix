@@ -46,8 +46,8 @@
 
 
 namespace Courier::Clearinghouse2 {
-	const quint32 PROGRAM = 2;
-	const quint16 VERSION = 2;
+	const uint32_t PROGRAM = 2;
+	const uint16_t VERSION = 2;
 
 	using XNS::Net;
 	using XNS::Host;
@@ -93,7 +93,7 @@ namespace Courier::Clearinghouse2 {
 		Organization organization;
 		Domain       domain;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -113,8 +113,8 @@ namespace Courier::Clearinghouse2 {
 		Domain       domain;
 		Object       object;
 
-		QString toString() const {
-			return QString("%1-%2-%3").arg(organization.toString()).arg(domain.toString()).arg(object.toString());
+		std::string toString() const {
+			return std::string("%1-%2-%3").arg(organization.toString()).arg(domain.toString()).arg(object.toString());
 		}
 
 		// Courier::Base
@@ -153,22 +153,22 @@ namespace Courier::Clearinghouse2 {
 	//	-- TYPES AND CONSTANTS DESCRIBING BULK PARAMETERS --
 	class StreamOfChoice : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			NEXT_SEGMENT = 0,
 			LAST_SEGMENT = 1,
 		};
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 	template <class T>
@@ -191,12 +191,12 @@ namespace Courier::Clearinghouse2 {
 		}
 
 
-		QString toString() const {
-			QStringList myList;
+		std::string toString() const {
+			std::stringList myList;
 			for(auto e: list) {
-				myList.append(QString("{%1}").arg(e.toString()));
+				myList.append(std::string("{%1}").arg(e.toString()));
 			}
-			return QString("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
+			return std::string("(%1) {%2}").arg(myList.length()).arg(myList.join(", "));
 		}
 
 		// Courier::Base
@@ -209,10 +209,10 @@ namespace Courier::Clearinghouse2 {
 				FROM_BYTE_BUFFER(bb, choice);
 				FROM_BYTE_BUFFER(bb, sequence);
 
-				if ((quint16)choice == StreamOfChoice::LAST_SEGMENT) break;
-				if ((quint16)choice == StreamOfChoice::NEXT_SEGMENT) continue;
+				if ((uint16_t)choice == StreamOfChoice::LAST_SEGMENT) break;
+				if ((uint16_t)choice == StreamOfChoice::NEXT_SEGMENT) continue;
 
-				logger.error("choice %d", (quint16)choice);
+				logger.error("choice %d", (uint16_t)choice);
 				ERROR();
 			}
 		}
@@ -280,10 +280,10 @@ namespace Courier::Clearinghouse2 {
 	typedef SEQUENCE<Property, 250> Properties;
 
 	//	all: Property = 0;
-	const quint32 ALL = 0;
+	const uint32_t ALL = 0;
 
 	//	nullProperty: Property = 37777777777B;
-	const quint32 NULL_PROPERTY = ~0;
+	const uint32_t NULL_PROPERTY = ~0;
 
 	//	-- The value associated with an item property. --
 	//	Item: TYPE = SEQUENCE 500 OF UNSPECIFIED;
@@ -303,8 +303,8 @@ namespace Courier::Clearinghouse2 {
 		Host   host;
 		Socket socket;
 
-		QString toString() const {
-			return QString("{%1-%2-%3}").arg(net.toString()).arg(host.toString()).arg(socket.toString());
+		std::string toString() const {
+			return std::string("{%1-%2-%3}").arg(net.toString()).arg(host.toString()).arg(socket.toString());
 		}
 
 		// Courier::Base
@@ -336,8 +336,8 @@ namespace Courier::Clearinghouse2 {
 		Auth::Credentials credentials;
 		Auth::Verifier    verifier;
 
-		QString toString() const {
-			return QString("(%1)-(%2)").arg(credentials.toString()).arg(verifier.toString());
+		std::string toString() const {
+			return std::string("(%1)-(%2)").arg(credentials.toString()).arg(verifier.toString());
 		}
 
 		// Courier::Base
@@ -540,7 +540,7 @@ namespace Courier::Clearinghouse2 {
 			NetworkAddressList address;
 
 			// Courier::Base
-			QString toString() const {
+			std::string toString() const {
 				return address.toString();
 			}
 			void fromByteBuffer(ByteBuffer& bb) {
@@ -563,8 +563,8 @@ namespace Courier::Clearinghouse2 {
 			Authenticator  agent;
 
 			// Courier::Base
-			QString toString() const {
-				return QString("(%1)-(%2)").arg(domains.toString()).arg(agent.toString());
+			std::string toString() const {
+				return std::string("(%1)-(%2)").arg(domains.toString()).arg(agent.toString());
 			}
 			void fromByteBuffer(ByteBuffer& bb) {
 				FROM_BYTE_BUFFER(bb, domains);
@@ -582,7 +582,7 @@ namespace Courier::Clearinghouse2 {
 			StreamOfDomainName value;
 
 			// Courier::Base
-			QString toString() const {
+			std::string toString() const {
 				return value.toString();
 			}
 			void fromByteBuffer(ByteBuffer& bb) {

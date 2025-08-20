@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-echo");
+static const util::Logger logger(__FILE__);
 
 #include "../util/JSONUtil.h"
 
@@ -44,14 +44,14 @@ static const Logger logger = Logger::getLogger("xns-echo");
 //
 // XNS::Echo::Type
 //
-NameMap::Map<quint16> XNS::Echo::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
+NameMap::Map<uint16_t> XNS::Echo::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {REPLY, "REPLY"}});
 
 
 //
 // XNS::Echo
 //
-QString XNS::Echo::toString() const {
-	return QString("%1 %2").arg(type.toString()).arg(block.toString());
+std::string XNS::Echo::toString() const {
+	return std::string("%1 %2").arg(type.toString()).arg(block.toString());
 }
 void XNS::Echo::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("showtype");
+static const util::Logger logger(__FILE__);
 
 #include "ShowType.h"
 
@@ -53,7 +53,7 @@ static const Logger logger = Logger::getLogger("showtype");
 //
 // ValFormat
 //
-QString ValFormat::toString(Tag value) {
+std::string ValFormat::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(SIGNED)
@@ -67,14 +67,14 @@ QString ValFormat::toString(Tag value) {
 
 	TO_STRING_EPILOGUE
 }
-QString ValFormat::Enum::toString() const {
-	return QString("%1").arg(esei->toString());
+std::string ValFormat::Enum::toString() const {
+	return std::string("%1").arg(esei->toString());
 }
-QString ValFormat::Array::toString() const {
-	return QString("%1").arg(componentType->toString());
+std::string ValFormat::Array::toString() const {
+	return std::string("%1").arg(componentType->toString());
 }
-QString ValFormat::Transfer::toString() const {
-	return QString("%1").arg(ValFormat::toString(mode));
+std::string ValFormat::Transfer::toString() const {
+	return std::string("%1").arg(ValFormat::toString(mode));
 }
 const ValFormat::Enum&     ValFormat::getEnum()     const {
 	if (tag != Tag::ENUM) ERROR();
@@ -94,20 +94,20 @@ const ValFormat::Transfer& ValFormat::getTransfer() const {
 	Transfer* ret = (Transfer*)tagValue;
 	return *ret;
 }
-QString ValFormat::toString() const {
+std::string ValFormat::toString() const {
 	switch(tag) {
 	case Tag::ENUM:
-		return QString("[%1 %2]").arg(toString(tag)).arg(getEnum().toString());
+		return std::string("[%1 %2]").arg(toString(tag)).arg(getEnum().toString());
 	case Tag::ARRAY:
-		return QString("[%1 %2]").arg(toString(tag)).arg(getArray().toString());
+		return std::string("[%1 %2]").arg(toString(tag)).arg(getArray().toString());
 	case Tag::TRANSFER:
-		return QString("[%1 %2]").arg(toString(tag)).arg(getTransfer().toString());
+		return std::string("[%1 %2]").arg(toString(tag)).arg(getTransfer().toString());
 	case Tag::SIGNED:
 	case Tag::UNSIGNED:
 	case Tag::CHAR:
 	case Tag::REF:
 	case Tag::OTHER:
-		return QString("[%1]").arg(toString(tag));
+		return std::string("[%1]").arg(toString(tag));
 	default:
 		ERROR();
 		return "???";
@@ -121,7 +121,7 @@ bool ShowType::showBits = true;
 //static std::function<void()> nosub = []{};
 
 //PrintSym: PROCEDURE [sei: Symbols.ISEIndex, colonstring: LONG STRING] =
-void ShowType::printSym(QTextStream& out, const SEIndex* sei, QString colonString) {
+void ShowType::printSym(QTextStream& out, const SEIndex* sei, std::string colonString) {
 //    BEGIN
 //    savePublic: BOOLEAN = defaultPublic;
 	bool savePublic = defaultPublic;
@@ -304,7 +304,7 @@ void ShowType::printTypedVal(QTextStream& out, CARD16 val, ValFormat vf) {
 //    char => {
 //      Format.Octal[out, val, cd]; PutChar['C]};
 	case ValFormat::Tag::CHAR:
-		out << QString("%1C").arg(val, 0, 8);
+		out << std::string("%1C").arg(val, 0, 8);
 		break;
 //    enum => PutEnum[val, esei];
 	case ValFormat::Tag::ENUM:
@@ -347,7 +347,7 @@ void ShowType::printTypedVal(QTextStream& out, CARD16 val, ValFormat vf) {
 //    String.AppendDecimal[bitspec, a.bd+s-1]};
 //  String.AppendString[bitspec, "): "L]
 //  END;
-void ShowType::getBitSpec(const SEIndex* isei, QString& bitspec) {
+void ShowType::getBitSpec(const SEIndex* isei, std::string& bitspec) {
 	CARD16 a = isei->getValue().getId().idValue;
 	CARD16 s = isei->getValue().getId().idInfo;
 
@@ -355,9 +355,9 @@ void ShowType::getBitSpec(const SEIndex* isei, QString& bitspec) {
 	CARD16 bd = a % 16;
 
 	bitspec.clear();
-	bitspec.append(QString(" (%1").arg(wd));
+	bitspec.append(std::string(" (%1").arg(wd));
 	if (s) {
-		bitspec.append(QString(":%1..%2").arg(bd).arg(bd + s - 1));
+		bitspec.append(std::string(":%1..%2").arg(bd).arg(bd + s - 1));
 	}
 	bitspec.append("): ");
 }
@@ -406,7 +406,7 @@ void ShowType::outArgType(QTextStream& out, const SEIndex* sei) {
 //  END;
 void ShowType::printFieldCtx(QTextStream& out, const CTXIndex* ctx, bool md) {
 	const SEIndex* isei = ctx->firstCtxSe();
-	QString bitspec;
+	std::string bitspec;
 	bool first = true;
 	if (!md) bitspec.append(": ");
 	if (!(isei->isNull()) && !(isei->getValue().getId().idCtx->equals(ctx))) {
@@ -883,7 +883,7 @@ noprint:;
 //    	        GetBitSpec[tagSei, bitspec]; out[bitspec, cd]}
 //    	      ELSE out[": "L, cd];
 				if (t.machineDep || showBits) {
-					QString bitspec;
+					std::string bitspec;
 					getBitSpec(t.tagSei, bitspec);
 					out << bitspec;
 				} else {
@@ -991,7 +991,7 @@ noprint:;
 //    	      IF machineDep OR showBits THEN {
 //    	        GetBitSpec[tagSei, bitspec]; out[bitspec, cd]}
 				if (t.machineDep || showBits) {
-					QString bitspec;
+					std::string bitspec;
 					getBitSpec(t.tagSei, bitspec);
 					out << bitspec;
 				}
@@ -1524,7 +1524,7 @@ void ShowType::putWordSeq(QTextStream& out, CARD16 length, const CARD16* value) 
 
 
 void ShowType::dump(Symbols* symbols) {
-	QString path = "tmp/showType.log";
+	std::string path = "tmp/showType.log";
 
 	QFile file(path);
 	if (!file.exists()) {
@@ -1545,7 +1545,7 @@ void ShowType::dump(Symbols* symbols) {
     out.flush();
     const SEIndex* sei = outerCtx->getValue().seList;
     for(;;) {
-    	out << QString("%1: ").arg(sei->toString());
+    	out << std::string("%1: ").arg(sei->toString());
         printSym(out, sei, ": ");
         out << Qt::endl;
 

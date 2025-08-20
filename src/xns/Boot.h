@@ -62,19 +62,19 @@ namespace XNS {
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		class SimpleRequest : public Base {
@@ -82,7 +82,7 @@ namespace XNS {
 			Host bootFileNumber; // XNS::HOST::BFN_GVWIN
 
 			// Courier::Base
-			QString toString() const;
+			std::string toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -97,7 +97,7 @@ namespace XNS {
 			}
 
 			// Courier::Base
-			QString toString() const;
+			std::string toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -107,7 +107,7 @@ namespace XNS {
 			UINT16 connectionID;
 
 			// Courier::Base
-			QString toString() const;
+			std::string toString() const;
 			void fromByteBuffer(ByteBuffer& bb);
 			void toByteBuffer  (ByteBuffer& bb) const;
 		};
@@ -133,7 +133,7 @@ namespace XNS {
 		}
 
 		// Courier::Base
-		QString toString() const;
+		std::string toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

@@ -63,7 +63,7 @@ public:
 	void run();
 private:
 	static CARD16         PTC;
-	static qint64         lastTimeoutTime;
+	static int64_t         lastTimeoutTime;
 	static int            stopThread;
 	static QMutex         mutexTimer;
 	static QWaitCondition cvTimer;

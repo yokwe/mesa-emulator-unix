@@ -63,7 +63,7 @@ public:
 	bool isNull() const {
 		return index == EXT_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const ExtRecord& getValue() const;
 
 private:
@@ -91,7 +91,7 @@ public:
 
 
 	typedef Symbols::ExtensionType ExtensionType;
-	static QString toString(ExtensionType value) {
+	static std::string toString(ExtensionType value) {
 		return Symbols::toString(value);
 	}
 
@@ -99,7 +99,7 @@ public:
 	const SEIndex*      sei;
 	const TreeLink*     tree;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;

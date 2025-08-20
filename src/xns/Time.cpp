@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-time");
+static const util::Logger logger(__FILE__);
 
 #include "Time.h"
 
@@ -42,8 +42,8 @@ static const Logger logger = Logger::getLogger("xns-time");
 //
 // XNS::Time::XNSTime
 //
-QString XNS::Time::XNSTime::toString() const {
-	qint64 unixTime = toUnixTime(value());
+std::string XNS::Time::XNSTime::toString() const {
+	int64_t unixTime = toUnixTime(value());
 //	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(unixTime, Qt::UTC);
 	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(unixTime);
 	return dateTime.toString("yyyy-MM-dd hh:mm:ss");
@@ -53,15 +53,15 @@ QString XNS::Time::XNSTime::toString() const {
 //
 // XNS::Time::Version
 //
-QString XNS::Time::Version::toString() const {
-	return QString::asprintf("%d", value());
+std::string XNS::Time::Version::toString() const {
+	return std::string::asprintf("%d", value());
 }
 
 
 //
 // XNS::Time::Type
 //
-NameMap::Map<quint16> XNS::Time::Type::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::Time::Type::nameMap(NameMap::toString16u, {
 	{REQUEST,  "REQUEST"},
 	{RESPONSE, "RESPONSE"},
 });
@@ -70,7 +70,7 @@ NameMap::Map<quint16> XNS::Time::Type::nameMap(NameMap::toString16u, {
 //
 // XNS::Time::Direction
 //
-NameMap::Map<quint16> XNS::Time::Direction::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::Time::Direction::nameMap(NameMap::toString16u, {
 	{WEST, "WEST"},
 	{EAST, "EAST"},
 });
@@ -79,7 +79,7 @@ NameMap::Map<quint16> XNS::Time::Direction::nameMap(NameMap::toString16u, {
 //
 // XNS::Time::Tolerance
 //
-NameMap::Map<quint16> XNS::Time::Tolerance::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::Time::Tolerance::nameMap(NameMap::toString16u, {
 	{UNKNOWN, "UNKNOWN"},
 	{MILLI,   "MILLI"},
 });
@@ -88,8 +88,8 @@ NameMap::Map<quint16> XNS::Time::Tolerance::nameMap(NameMap::toString16u, {
 //
 // XNS::Time::Response
 //
-QString XNS::Time::Response::toString() const {
-	return QString("%1  %2-%3-%4  %5-%6 %7-%8").
+std::string XNS::Time::Response::toString() const {
+	return std::string("%1  %2-%3-%4  %5-%6 %7-%8").
 		arg(time.toString()).
 		arg(offsetDirection.toString()).arg(offsetHours.value()).arg(offsetMinutes.value()).
 		arg(dstStart.value()).arg(dstEnd.value()).
@@ -140,16 +140,16 @@ void XNS::Time::get(Response& newValue) const {
 	}
 }
 
-QString XNS::Time::toString() const {
+std::string XNS::Time::toString() const {
 	if (version.isCurrent()) {
 		if (type == Type::REQUEST) {
-//			return QString("%1 %2").arg(version.toString()).arg(type.toString());
-			return QString("%1").arg(type.toString());
+//			return std::string("%1 %2").arg(version.toString()).arg(type.toString());
+			return std::string("%1").arg(type.toString());
 		} else if (type == Type::RESPONSE) {
 			Response response;
 			get(response);
-//			return QString("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(response.toString());
-			return QString("%1 %2").arg(type.toString()).arg(response.toString());
+//			return std::string("%1 %2 %3").arg(version.toString()).arg(type.toString()).arg(response.toString());
+			return std::string("%1 %2").arg(type.toString()).arg(response.toString());
 		} else {
 			logger.error("Unexpected");
 			logger.error("  type %s", type.toString());

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-service");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Network.h"
 
@@ -54,12 +54,12 @@ using Courier::Protocol3Body;
 //
 // Courier::Service
 //
-QString Courier::Service::toString() const {
-	return QString::asprintf("%d-%d %s", myProgram, myVersion, myName);
+std::string Courier::Service::toString() const {
+	return std::string::asprintf("%d-%d %s", myProgram, myVersion, myName);
 }
 
 void Courier::Service::addProcedure(Procedure* procedure) {
-	quint16 key = procedure->procedure();
+	uint16_t key = procedure->procedure();
 	if (procedureMap.contains(key)) {
 		logger.error("Unexpected");
 		logger.error("  service   %u-%u %s", program(), version(), name());
@@ -70,7 +70,7 @@ void Courier::Service::addProcedure(Procedure* procedure) {
 		procedureMap[key] = procedure;
 	}
 }
-Courier::Procedure* Courier::Service::getProcedure(const quint16 procedure) const {
+Courier::Procedure* Courier::Service::getProcedure(const uint16_t procedure) const {
 	if (procedureMap.contains(procedure)) {
 		return procedureMap[procedure];
 	} else {
@@ -78,7 +78,7 @@ Courier::Procedure* Courier::Service::getProcedure(const quint16 procedure) cons
 	}
 }
 void Courier::Service::addSesion(Session* session) {
-	quint16 key = session->transaction();
+	uint16_t key = session->transaction();
 	if (sessionMap.contains(key)) {
 		logger.error("Unexpected");
 		logger.error("  new %s", session->toString());
@@ -88,7 +88,7 @@ void Courier::Service::addSesion(Session* session) {
 		sessionMap[key] = session;
 	}
 }
-void Courier::Service::removeSession(quint16 transaction) {
+void Courier::Service::removeSession(uint16_t transaction) {
 	if (sessionMap.contains(transaction)) {
 		Session* session = sessionMap[transaction];
 		delete session;
@@ -99,7 +99,7 @@ void Courier::Service::removeSession(quint16 transaction) {
 	}
 }
 // If three is no session for transaction, returns nullptr
-Courier::Session* Courier::Service::getSession(quint16 transaction) {
+Courier::Session* Courier::Service::getSession(uint16_t transaction) {
 	if (sessionMap.contains(transaction)) {
 		return sessionMap[transaction];
 	} else {
@@ -170,16 +170,16 @@ void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result, bool
 	Protocol3Body::CallBody callBody;
 	body.get(callBody);
 
-	ProgramVersion programVersion((quint32)callBody.program, (quint16)callBody.version);
+	ProgramVersion programVersion((uint32_t)callBody.program, (uint16_t)callBody.version);
 	Service* service = server->getServices()->getService(programVersion);
 	if (service == nullptr) {
 		logger.warn("NO SERVICE  %s", programVersion.toString());
 		return;
 	}
 
-	Procedure* procedure = service->getProcedure((quint16)callBody.procedure);
+	Procedure* procedure = service->getProcedure((uint16_t)callBody.procedure);
 	if (procedure == nullptr) {
-		logger.warn("NO PROCEDURE  %s  %u", service->toString(), (quint16)callBody.procedure);
+		logger.warn("NO PROCEDURE  %s  %u", service->toString(), (uint16_t)callBody.procedure);
 		return;
 	}
 
@@ -194,15 +194,15 @@ void Courier::Services::call(const Protocol3Body& body, ByteBuffer& result, bool
 //
 // Courier::Procedure
 //
-QString Courier::Procedure::toString() const {
-	return QString::asprintf("%d %s", myProcedure, myName);
+std::string Courier::Procedure::toString() const {
+	return std::string::asprintf("%d %s", myProcedure, myName);
 }
 
 
 //
 // Courier::Session
 //
-QString Courier::Session::toString() {
-	QString timeStampString = QDateTime::fromSecsSinceEpoch(myTimestamp).toString("yyyy-MM-dd hh:mm:ss");
-	return QString("%1-%2").arg(timeStampString).arg(myTransaction, 4, 16, QChar('0')).toUpper();
+std::string Courier::Session::toString() {
+	std::string timeStampString = QDateTime::fromSecsSinceEpoch(myTimestamp).toString("yyyy-MM-dd hh:mm:ss");
+	return std::string("%1-%2").arg(timeStampString).arg(myTransaction, 4, 16, QChar('0')).toUpper();
 }

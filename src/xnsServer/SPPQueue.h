@@ -83,14 +83,14 @@ namespace XNS::Server {
 		class Context {
 		public:
 			QByteArray newName;
-			quint64    time;
+			uint64_t    time;
 
-			quint64    remoteHost;
-			quint16    remoteSocket;
-			quint16    remoteID;
+			uint64_t    remoteHost;
+			uint16_t    remoteSocket;
+			uint16_t    remoteID;
 
-			quint16    localSocket;
-			quint16    localID;
+			uint16_t    localSocket;
+			uint16_t    localID;
 
 			Context() : time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0) {}
 		};
@@ -113,7 +113,7 @@ namespace XNS::Server {
 
 	class SPPQueue : public SPPListener {
 	public:
-		SPPQueue(const char* name, quint16 socket);
+		SPPQueue(const char* name, uint16_t socket);
 		SPPQueue(const SPPQueue& that);
 
 		virtual ~SPPQueue() {}
@@ -185,7 +185,7 @@ namespace XNS::Server {
 		public:
 			class Entry {
 			public:
-				quint16    seq;
+				uint16_t    seq;
 				QueueData *myData;
 
 				Entry() : seq(0), myData(nullptr) {}
@@ -199,19 +199,19 @@ namespace XNS::Server {
 					return *this;
 				}
 
-				Entry(quint16 seq_) : seq(seq_), myData(nullptr) {}
+				Entry(uint16_t seq_) : seq(seq_), myData(nullptr) {}
 
 				bool inUse() {
 					return myData != nullptr;
 				}
-				QString toString();
+				std::string toString();
 			};
 
 			~Buffer();
 			// ger return nullptr if entry is not found
-			Entry* get  (quint16 seq);
-			Entry* alloc(quint16 seq);
-			void   free (quint16 seq);
+			Entry* get  (uint16_t seq);
+			Entry* alloc(uint16_t seq);
+			void   free (uint16_t seq);
 
 			void   clear();
 			int    countFree();
@@ -219,13 +219,13 @@ namespace XNS::Server {
 				return map.isEmpty();
 			}
 
-			QString toString();
+			std::string toString();
 		private:
-			QMap<quint16, Entry*> map;
+			QMap<uint16_t, Entry*> map;
 			//   seq
 		};
 
-		void allocNext(quint16 seq);
+		void allocNext(uint16_t seq);
 
 		void runThread();
 		void sendThread();
@@ -256,7 +256,7 @@ namespace XNS::Server {
 		//
 		// variables for recvList
 		//
-		quint16           recvListSeq;
+		uint16_t           recvListSeq;
 		QList<QueueData*> recvList;
 		QMutex            recvListMutex;
 		QWaitCondition    recvListCV;
@@ -278,26 +278,26 @@ namespace XNS::Server {
 		// variables for recv/send
 		//
 		QByteArray newName;
-		quint64    time;
-		quint64    remoteHost;
-		quint16    remoteSocket;
-		quint16    remoteID;
-		quint16    localSocket;
-		quint16    localID;
+		uint64_t    time;
+		uint64_t    remoteHost;
+		uint16_t    remoteSocket;
+		uint16_t    remoteID;
+		uint16_t    localSocket;
+		uint16_t    localID;
 
 		// sendSeq is used as spp.seq in transmit
 		// The Sequence Number counts data packets sent on the connection.
-		QAtomicInteger<quint16> sendSeq;
+		QAtomicInteger<uint16_t> sendSeq;
 		// recvSeq is used as spp.ack in transmit
 		// Acknowledge Number indicates the sequence number of the next data packet.
-		QAtomicInteger<quint16> recvSeq;
+		QAtomicInteger<uint16_t> recvSeq;
 
 		//
 		// variables for transmit packet
 		//
 		Driver* driver;
-		quint32 localNet;
-		quint64 localHost;
+		uint32_t localNet;
+		uint64_t localHost;
 
 	};
 

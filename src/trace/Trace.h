@@ -81,13 +81,13 @@ namespace Trace {
 			return ret;
 		}
 
-		QString toString() const;
+		std::string toString() const;
 
-		static void addName(CARD16 gfi, const QString& moduleName);
-		static void addName(const QString& moduleName, const QString& funcName, const CARD16 pc);
+		static void addName(CARD16 gfi, const std::string& moduleName);
+		static void addName(const std::string& moduleName, const std::string& funcName, const CARD16 pc);
 
-		static void readLoadmapFile(const QString& path);
-		static void readMapFile(const QString& path);
+		static void readLoadmapFile(const std::string& path);
+		static void readMapFile(const std::string& path);
 	private:
 		static QSet<Func> all;
 
@@ -124,8 +124,8 @@ namespace Trace {
 			}
 		}
 
-		QString toString() const {
-			return QString::asprintf("%d+%04X", mds, lf);
+		std::string toString() const {
+			return std::string::asprintf("%d+%04X", mds, lf);
 		}
 
 		static Frame getInstance(CARD32 mds, CARD16 lf) {
@@ -182,7 +182,7 @@ namespace Trace {
 			return *this;
 		}
 
-		QString toString() const;
+		std::string toString() const;
 
 		void setXFER(
 			ControlLink dst, CARD16 src, XferType xferType, int freeFlag,

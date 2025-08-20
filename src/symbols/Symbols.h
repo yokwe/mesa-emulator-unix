@@ -130,13 +130,13 @@ public:
         OPAQUE, ZONE, ANY, NIL, BITS,
         FIXED_SEQUENCE
 	};
-	static QString toString(TypeClass value);
+	static std::string toString(TypeClass value);
 
 	//TransferMode: TYPE = {proc, port, signal, error, process, program, none};
 	enum class TransferMode {
 		PROC, PORT, SIGNAL, ERROR, PROCESS, PROGRAM, NONE
 	};
-	static QString toString(TransferMode value);
+	static std::string toString(TransferMode value);
 
 	//-- the following two values are guaranteed by the compiler
 	//typeTYPE: CSEIndex = FIRST[CSEIndex] + SIZE[nil cons SERecord];
@@ -165,16 +165,16 @@ public:
 	//
 	//ExtensionType: TYPE = {value, form, default, none};
 	enum class ExtensionType {VALUE, FORM, DEFAULT, NONE};
-	static QString toString(ExtensionType value);
+	static std::string toString(ExtensionType value);
 
 	//Linkage: TYPE = {val, ref, type, manifest, none};	-- for import/export
 	enum class Linkage {VAL, REF, TYPE, MANIFEST, NONE};
-	static QString toString(Linkage value);
+	static std::string toString(Linkage value);
 
 	//
 	//RefClass: TYPE = {none, simple, composite};
 	enum class RefClass {NONE, SIMPLE, COMPOSITE};
-	static QString toString(RefClass value);
+	static std::string toString(RefClass value);
 
 
 	//ContextLevel: TYPE = [0..7];
@@ -187,15 +187,15 @@ public:
 	//
 	//Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
 	enum class Closure {NONE, UNIT, RC, FULL};
-	static QString toString(Closure value);
+	static std::string toString(Closure value);
 
 	//LinkTag: TYPE = {variable, procedure, type};
 	enum class LinkTag {VARIABLE, PROCEDURE, TYPE};
-	static QString toString(LinkTag value);
+	static std::string toString(LinkTag value);
 
 	//VarTag: TYPE = MACHINE DEPENDENT {var(0), proc0(1), type(2), proc1(3)};
 	enum class VarTag {VAR, PROC0, TYPE, PROC1};
-	static QString toString(VarTag value);
+	static std::string toString(VarTag value);
 
 
 
@@ -214,7 +214,7 @@ public:
 	    const CARD16 offset;
 	    const CARD16 size;
 
-	    QString toString() const;
+	    std::string toString() const;
 	private:
 	    BlockDescriptor(CARD16 offset_, CARD16 size_) : offset(offset_), size(size_) {}
 	};
@@ -279,7 +279,7 @@ public:
 	CARD16           fgRelPgBase;
 	CARD16           fgPgCount;
 	//
-	QString                   ss;
+	std::string                   ss;
 	QMap<CARD16, CTXRecord*>  ctx;
 	QMap<CARD16, HTRecord*>   ht;
 	QMap<CARD16, MDRecord*>   md;

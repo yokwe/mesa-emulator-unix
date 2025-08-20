@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("ctx");
+static const util::Logger logger(__FILE__);
 
 #include "CTXIndex.h"
 #include "BCDFile.h"
@@ -68,9 +68,9 @@ CTXIndex* CTXIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new CTXIndex(symbols, index);
 }
-QString CTXIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string CTXIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const CTXRecord& CTXIndex::getValue() const {
 	CTXRecord* ret = CTXRecord::find(symbols, index);
@@ -191,7 +191,7 @@ const CTXRecord::Imported& CTXRecord::getImported() const {
 }
 
 
-QString CTXRecord::toString(Tag value) {
+std::string CTXRecord::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(SIMPLE)
@@ -202,27 +202,27 @@ QString CTXRecord::toString(Tag value) {
 	TO_STRING_EPILOGUE
 }
 
-QString CTXRecord::Simple::toString() const {
-	return QString("%1").arg(this->ctxNew->toString());
+std::string CTXRecord::Simple::toString() const {
+	return std::string("%1").arg(this->ctxNew->toString());
 }
-QString CTXRecord::Included::toString() const {
-	return QString("%1 %2 %3").arg(Symbols::toString(copied)).arg(module->toString()).arg(map->toString());
+std::string CTXRecord::Included::toString() const {
+	return std::string("%1 %2 %3").arg(Symbols::toString(copied)).arg(module->toString()).arg(map->toString());
 }
-QString CTXRecord::Imported::toString() const {
-	return QString("%1").arg(this->includeLink->toString());
+std::string CTXRecord::Imported::toString() const {
+	return std::string("%1").arg(this->includeLink->toString());
 }
-QString CTXRecord::toString() const {
+std::string CTXRecord::toString() const {
 	switch(tag) {
 	case Tag::SIMPLE:
-		return QString("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getSimple().toString());
+		return std::string("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getSimple().toString());
 		break;
 	case Tag::INCLUDED:
-		return QString("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getIncluded().toString());
+		return std::string("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getIncluded().toString());
 		break;
 	case Tag::IMPORTED:
-		return QString("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getImported().toString());
+		return std::string("%1 %2 %3 [%4]").arg(seList->toString()).arg(level).arg(toString(tag)).arg(getImported().toString());
 	case Tag::NIL:
-		return QString("%1 %2 %3").arg(seList->toString()).arg(level).arg(toString(tag));
+		return std::string("%1 %2 %3").arg(seList->toString()).arg(level).arg(toString(tag));
 	default:
 		ERROR();
 		return "???";

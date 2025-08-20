@@ -44,7 +44,7 @@
 
 class SPPCourier : public XNS::Server::SPPServerImpl {
 public:
-	SPPCourier() : SPPServerImpl("SPPCourier", (quint16)XNS::Socket::COURIER) {}
+	SPPCourier() : SPPServerImpl("SPPCourier", (uint16_t)XNS::Socket::COURIER) {}
 	SPPCourier(const SPPCourier& that) : SPPServerImpl(that) {}
 	SPPCourier& operator = (const SPPCourier& that) {
 		SPPServerImpl::operator =(that);

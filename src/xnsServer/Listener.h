@@ -84,14 +84,14 @@ namespace XNS::Server {
 
 		Listener() : myName(nullptr), mySocket(0), myAutoDelete(false), myState(State::NEW) {}
 
-		Listener(const char* name_, quint16 socket_) : myName(name_), mySocket(socket_), myAutoDelete(false), myState(State::NEW) {}
+		Listener(const char* name_, uint16_t socket_) : myName(name_), mySocket(socket_), myAutoDelete(false), myState(State::NEW) {}
 
-		QString toString();
+		std::string toString();
 
 		const char* name  () const {
 			return myName;
 		}
-		quint16     socket() const {
+		uint16_t     socket() const {
 			return mySocket;
 		}
 		bool        autoDelete() const {
@@ -103,7 +103,7 @@ namespace XNS::Server {
 		void name(const char* newValue) {
 			myName = newValue;
 		}
-		void socket(quint16 newValue) {
+		void socket(uint16_t newValue) {
 			mySocket = newValue;
 		}
 		void autoDelete(bool newValue) {
@@ -119,7 +119,7 @@ namespace XNS::Server {
 
 	protected:
 		const char* myName;
-		quint16     mySocket;
+		uint16_t     mySocket;
 		bool        myAutoDelete;
 		State       myState;
 
@@ -128,10 +128,10 @@ namespace XNS::Server {
 		virtual void stop  ()               = 0;
 
 		// Transmit idp data with padding and set checksum
-		static void transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp);
+		static void transmit(Driver* driver, uint64_t dst, uint64_t src, const IDP& idp);
 
 		// for RIP broadcast
-		static void transmit(const Context* context, quint64 dst, const IDP& idp) {
+		static void transmit(const Context* context, uint64_t dst, const IDP& idp) {
 			transmit(context->driver, dst, context->address, idp);
 		}
 
@@ -141,7 +141,7 @@ namespace XNS::Server {
 		}
 
 		// initialize idp for transmit
-		static void setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp);
+		static void setIDP(const Data& data, uint8_t type, BLOCK& block, IDP& idp);
 	};
 
 
@@ -160,25 +160,25 @@ namespace XNS::Server {
 		// Add listener to map
 		// call listener.init()
 		// If listeners is running, call listener.start()
-		void add(quint16 socket, Listener* listener);
+		void add(uint16_t socket, Listener* listener);
 		void add(Listener* listener) {
 			add(listener->socket(), listener);
 		}
 		// Remove listener from map
 		// If listeners is running, call listener.stop().
 		// If listener is autoDelete, delete listener.
-		void remove(quint16 socket);
-		Listener* getListener(quint16 socket);
+		void remove(uint16_t socket);
+		Listener* getListener(uint16_t socket);
 
 		// Well-known socket numbers range from 1 to 3000 decimal
-		quint16 getUnusedSocket() const;
+		uint16_t getUnusedSocket() const;
 
 	protected:
 		Server* server;
 		bool    started;
 
 		// FIXME delete inactive socket - session timeout
-		QMap<quint16, Listener*> map;
+		QMap<uint16_t, Listener*> map;
 		//   socket
 		mutable QMutex                   mapMutex;
 	};

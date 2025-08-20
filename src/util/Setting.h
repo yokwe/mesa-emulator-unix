@@ -57,10 +57,10 @@ public:
 
 		class File : public JSONBase {
 		public:
-			QString disk;
-			QString germ;
-			QString boot;
-			QString floppy;
+			std::string disk;
+			std::string germ;
+			std::string boot;
+			std::string floppy;
 
 			File() : disk(""), germ(""), boot(""), floppy("") {}
 			File(const File& that) : disk(that.disk), germ(that.germ), boot(that.boot), floppy(that.floppy) {}
@@ -78,8 +78,8 @@ public:
 
 		class Boot : public JSONBase {
 		public:
-			QString switch_; // To avoid using keyword as variable name, append underscore
-			QString device;
+			std::string switch_; // To avoid using keyword as variable name, append underscore
+			std::string device;
 
 			Boot() : switch_(""), device("") {}
 			Boot(const Boot& that) : switch_(that.switch_), device(that.device) {}
@@ -112,7 +112,7 @@ public:
 
 		class Network : public JSONBase {
 		public:
-			QString interface;
+			std::string interface;
 
 			Network() : interface("") {}
 			Network(const Network& that) : interface(that.interface) {}
@@ -126,7 +126,7 @@ public:
 		};
 
 
-		QString name;
+		std::string name;
 		Display display;
 		File    file;
 		Boot    boot;
@@ -152,7 +152,7 @@ public:
 
 	class LevelVKeys : public JSONBase {
 	public:
-		QString name;
+		std::string name;
 		int     keyName;
 
 		LevelVKeys() : name(""), keyName(0) {}
@@ -170,7 +170,7 @@ public:
 
 	class Keyboard : public JSONBase {
 	public:
-		QString name;
+		std::string name;
 		int     scanCode;
 
 		Keyboard() : name(""), scanCode(0) {}
@@ -188,8 +188,8 @@ public:
 
 	class KeyMap : public JSONBase {
 	public:
-		QString levelVKeys;
-		QString keyboard;
+		std::string levelVKeys;
+		std::string keyboard;
 
 		KeyMap() : levelVKeys(""), keyboard("") {}
 		KeyMap(const KeyMap& that) : levelVKeys(that.levelVKeys), keyboard(that.keyboard) {}
@@ -206,7 +206,7 @@ public:
 
 	class Mouse : public JSONBase {
 	public:
-		QString name;
+		std::string name;
 		int     bitMask;
 
 		Mouse() : name(""), bitMask(0) {}
@@ -224,8 +224,8 @@ public:
 
 	class ButtonMap : public JSONBase {
 	public:
-		QString levelVKeys;
-		QString button;
+		std::string levelVKeys;
+		std::string button;
 
 		ButtonMap() : levelVKeys(""), button("") {}
 		ButtonMap(const ButtonMap& that) : levelVKeys(that.levelVKeys), button(that.button) {}
@@ -266,11 +266,11 @@ public:
 
 	static Setting getInstance();
 	
-	Entry getEntry(QString name);
+	Entry getEntry(std::string name);
 
-	static QHash<quint32,         quint32>        keyMap;
+	static QHash<uint32_t,         uint32_t>        keyMap;
 	//           scanCode         bitPosition
-	static QHash<Qt::MouseButton, quint32>        buttonMap;
+	static QHash<Qt::MouseButton, uint32_t>        buttonMap;
 	//           Qt::MouseButton  bitPosition
 	static void initMap(const Setting& setting);
 };

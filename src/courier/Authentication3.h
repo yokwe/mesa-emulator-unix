@@ -40,8 +40,8 @@
 #include "Type.h"
 
 namespace Courier::Authentication3 {
-	const quint32 PROGRAM = 14;
-	const quint16 VERSION = 3;
+	const uint32_t PROGRAM = 14;
+	const uint16_t VERSION = 3;
 
 	//  Authentication: PROGRAM 14 VERSION 3
 	//  DEPENDS UPON Time(15) VERSION 2,

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("bcdfile");
+static const util::Logger logger(__FILE__);
 
 #include "BCDFile.h"
 
@@ -85,7 +85,7 @@ bool BCDFile::isSymbolsFile() {
 
 class BCDFileFile : public BCDFile {
 public:
-	BCDFileFile(QString path_) : path(path_), file(path_) {
+	BCDFileFile(std::string path_) : path(path_), file(path_) {
 		if (!file.exists()) {
 			logger.fatal("File does not exist. path = %s", path);
 			ERROR();
@@ -102,7 +102,7 @@ public:
 		if (file.isOpen()) file.close();
 	}
 
-	QString getPath() {
+	std::string getPath() {
 		return path;
 	}
 
@@ -117,7 +117,7 @@ public:
 	}
 	CARD8 getCARD8() {
 		char data;
-		quint32 nRead = (quint32)file.read(&data, 1);
+		uint32_t nRead = (uint32_t)file.read(&data, 1);
 		if (nRead != 1) {
 			logger.fatal("nRead %d", nRead);
 			ERROR();
@@ -129,11 +129,11 @@ public:
 	}
 
 private:
-	QString path;
+	std::string path;
 	QFile   file;
-	qint64  capacity;
+	int64_t  capacity;
 };
 
-BCDFile* BCDFile::getInstance(QString path) {
+BCDFile* BCDFile::getInstance(std::string path) {
 	return new BCDFileFile(path);
 }

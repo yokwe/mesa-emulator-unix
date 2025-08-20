@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("agentflop");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"

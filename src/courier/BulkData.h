@@ -77,7 +77,7 @@ namespace Courier::BulkData {
 			return *this;
 		}
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -96,18 +96,18 @@ namespace Courier::BulkData {
 	public:
 		class Choice : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				NULL_     = 0,
 				IMMEDIATE = 1,
 				PASSIVE   = 2,
 				ACTIVE    = 3,
 			};
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
 			private:
-				static NameMap::Map<quint16> nameMap;
+				static NameMap::Map<uint16_t> nameMap;
 		};
 		class NetworkIdentifier : public Base {
 		public:
@@ -128,8 +128,8 @@ namespace Courier::BulkData {
 				return *this;
 			}
 
-			QString toString() const {
-				return QString("%1-%2-%3").arg(net.toString()).arg(host.toString()).arg(identifier.toString());
+			std::string toString() const {
+				return std::string("%1-%2-%3").arg(net.toString()).arg(host.toString()).arg(identifier.toString());
 			}
 
 			// Courier::Base
@@ -153,7 +153,7 @@ namespace Courier::BulkData {
 
 
 		// Courier::Base
-		QString toString() const;
+		std::string toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

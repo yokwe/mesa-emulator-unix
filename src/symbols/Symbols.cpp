@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("symbols");
+static const util::Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
@@ -51,7 +51,7 @@ static const Logger logger = Logger::getLogger("symbols");
 #include "Tree.h"
 
 
-QString Symbols::toString(TypeClass value) {
+std::string Symbols::toString(TypeClass value) {
 	TO_STRING_PROLOGUE(TypeClass)
 
 	MAP_ENTRY(MODE)
@@ -84,7 +84,7 @@ QString Symbols::toString(TypeClass value) {
 }
 
 
-QString Symbols::toString(TransferMode value) {
+std::string Symbols::toString(TransferMode value) {
 	TO_STRING_PROLOGUE(TransferMode)
 
 	MAP_ENTRY(PROC)
@@ -99,7 +99,7 @@ QString Symbols::toString(TransferMode value) {
 }
 
 
-QString Symbols::toString(ExtensionType value) {
+std::string Symbols::toString(ExtensionType value) {
 	TO_STRING_PROLOGUE(ExtensionType)
 
 	MAP_ENTRY(VALUE)
@@ -111,7 +111,7 @@ QString Symbols::toString(ExtensionType value) {
 }
 
 
-QString Symbols::toString(Linkage value) {
+std::string Symbols::toString(Linkage value) {
 	TO_STRING_PROLOGUE(Linkage)
 
 	MAP_ENTRY(VAL)
@@ -124,7 +124,7 @@ QString Symbols::toString(Linkage value) {
 }
 
 
-QString Symbols::toString(RefClass value) {
+std::string Symbols::toString(RefClass value) {
 	TO_STRING_PROLOGUE(RefClass)
 
 	MAP_ENTRY(NONE)
@@ -135,7 +135,7 @@ QString Symbols::toString(RefClass value) {
 }
 
 
-QString Symbols::toString(Closure value) {
+std::string Symbols::toString(Closure value) {
 	TO_STRING_PROLOGUE(Closure)
 
 	MAP_ENTRY(NONE)
@@ -147,7 +147,7 @@ QString Symbols::toString(Closure value) {
 }
 
 
-QString Symbols::toString(LinkTag value) {
+std::string Symbols::toString(LinkTag value) {
 	TO_STRING_PROLOGUE(LinkTag)
 
 	MAP_ENTRY(VARIABLE)
@@ -158,7 +158,7 @@ QString Symbols::toString(LinkTag value) {
 }
 
 
-QString Symbols::toString(VarTag value) {
+std::string Symbols::toString(VarTag value) {
 	TO_STRING_PROLOGUE(VarTag)
 
 	MAP_ENTRY(VAR)
@@ -182,8 +182,8 @@ Symbols::BlockDescriptor* Symbols::BlockDescriptor::getInstance(BCD* bcd) {
 	return new BlockDescriptor(offset, size);
 }
 
-QString Symbols::BlockDescriptor::toString() const {
-	return QString("[%1 %2]").arg(offset, 5).arg(size, 5);
+std::string Symbols::BlockDescriptor::toString() const {
+	return std::string("[%1 %2]").arg(offset, 5).arg(size, 5);
 }
 
 bool Symbols::isSymbolsSegment(BCD* bcd, int symbolBase) {

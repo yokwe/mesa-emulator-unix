@@ -64,7 +64,7 @@ public:
 	bool isNull() const {
 		return index == MD_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const MDRecord& getValue() const;
 
 private:
@@ -102,7 +102,7 @@ public:
 	const CTXIndex*  defaultImport;
 	const CARD16     file;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-bulk");
+static const util::Logger logger(__FILE__);
 
 #include "BulkData.h"
 
@@ -42,8 +42,8 @@ static const Logger logger = Logger::getLogger("cr-bulk");
 //
 // Courier::BulkData::Identifier
 //
-QString Courier::BulkData::Identifier::toString() const {
-	return QString("%1-%2").arg(host.toString()).arg(QString("%1").arg(hostRelativeIdentifier, 8, 16, QChar('0').toUpper()));
+std::string Courier::BulkData::Identifier::toString() const {
+	return std::string("%1-%2").arg(host.toString()).arg(std::string("%1").arg(hostRelativeIdentifier, 8, 16, QChar('0').toUpper()));
 }
 
 // Courier::Base
@@ -60,7 +60,7 @@ void Courier::BulkData::Identifier::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::BulkData::Descriptor::Choice
 //
-NameMap::Map<quint16> Courier::BulkData::Descriptor::Choice::nameMap(NameMap::toString16X04, {
+NameMap::Map<uint16_t> Courier::BulkData::Descriptor::Choice::nameMap(NameMap::toString16X04, {
 	{NULL_,     "NULL"},
 	{IMMEDIATE, "IMMEDIATE"},
 	{PASSIVE,   "PASSIVE"},
@@ -89,11 +89,11 @@ void Courier::BulkData::Descriptor::set(const NetworkIdentifier&  newValue) {
 		ERROR();
 	}
 }
-QString Courier::BulkData::Descriptor::toString() const {
+std::string Courier::BulkData::Descriptor::toString() const {
 	if (choice == Choice::PASSIVE || choice == Choice::ACTIVE) {
 		NetworkIdentifier networkIdentifier = std::get<NetworkIdentifier>(body);
 
-		return QString("%1-%2").arg(choice.toString()).arg(networkIdentifier.toString());
+		return std::string("%1-%2").arg(choice.toString()).arg(networkIdentifier.toString());
 	} else {
 		return choice.toString();
 	}

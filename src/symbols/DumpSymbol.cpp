@@ -33,7 +33,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("dumpSymbol");
+static const util::Logger logger(__FILE__);
 
 #include "DumpSymbol.h"
 
@@ -57,11 +57,11 @@ void DumpSymbol::unnest() {
 	indentLevel--;
 	if (indentLevel < 0) ERROR();
 }
-QString DumpSymbol::indent() {
-	return QString("%1").arg("", indentWidth * indentLevel);
+std::string DumpSymbol::indent() {
+	return std::string("%1").arg("", indentWidth * indentLevel);
 }
 
-void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
+void DumpSymbol::dumpSymbol(std::string filePath, std::string outDirPath) {
 	// Check existence of file
 	if (!QFile::exists(filePath)) {
 		logger.fatal("File does not exist. pathFile = %s", filePath);
@@ -101,7 +101,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 	Symbols symbols(&bcd, symbolBase);
 
 	// Prepare output file
-	QString outFilePath;
+	std::string outFilePath;
 	{
 		QDir outDir(outDirPath);
 		if (!outDir.exists()) {
@@ -109,7 +109,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 			ERROR();
 		}
 
-		QString fileName(QFileInfo(filePath).baseName() + ".symbol");
+		std::string fileName(QFileInfo(filePath).baseName() + ".symbol");
 		outFilePath = outDir.absoluteFilePath(fileName);
 		logger.info("outFilePath = %s", outFilePath);
 	}
@@ -132,8 +132,8 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 		QFileInfo info(filePath);
 
 		out << "--" << Qt::endl;
-		out << QString("-- File   %1 %2").arg(self->stamp->toString()).arg(self->fileId->getValue().value) << Qt::endl;
-		if (!bcd.sourceFile->isNull()) out << QString("-- Source %1 %2").arg(bcd.sourceFile->version->toString()).arg(bcd.sourceFile->name) << Qt::endl;
+		out << std::string("-- File   %1 %2").arg(self->stamp->toString()).arg(self->fileId->getValue().value) << Qt::endl;
+		if (!bcd.sourceFile->isNull()) out << std::string("-- Source %1 %2").arg(bcd.sourceFile->version->toString()).arg(bcd.sourceFile->name) << Qt::endl;
 		out << "--" << Qt::endl;
 		out << Qt::endl;
 	}
@@ -153,7 +153,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
 					if (index == MDIndex::MD_OWN) continue;
 	                MDRecord* e = symbols.md[index];
 
-	                out << indent() << QString("%1 %2%3").arg(e->moduleId->getValue().value, -30).arg(e->stamp->toString()).arg(i.hasNext() ? "," : ";") << Qt::endl;
+	                out << indent() << std::string("%1 %2%3").arg(e->moduleId->getValue().value, -30).arg(e->stamp->toString()).arg(i.hasNext() ? "," : ";") << Qt::endl;
 				}
 			}
 			unnest();
@@ -165,7 +165,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
     {
 		MDRecord* self = symbols.md[MDIndex::MD_OWN];
 
-		out << indent() << QString("%1 %2 = BEGIN").arg(self->moduleId->getValue().value).arg(self->stamp->toString()) << Qt::endl;
+		out << indent() << std::string("%1 %2 = BEGIN").arg(self->moduleId->getValue().value).arg(self->stamp->toString()) << Qt::endl;
     }
     nest();
 
@@ -182,7 +182,7 @@ void DumpSymbol::dumpSymbol(QString filePath, QString outDirPath) {
     out << "END." << Qt::endl;
 }
 
-void DumpSymbol::printSym(QTextStream& out, const SEIndex* sei, QString colonString) {
+void DumpSymbol::printSym(QTextStream& out, const SEIndex* sei, std::string colonString) {
 	const SERecord::Id& id = sei->getValue().getId();
 	if (!id.hash->isNull()) {
 		out << id.hash->getValue().value << colonString;
@@ -254,7 +254,7 @@ void DumpSymbol::printSym(QTextStream& out, const SEIndex* sei, QString colonStr
 }
 
 
-QString DumpSymbol::getBitSpec(const SEIndex* isei) {
+std::string DumpSymbol::getBitSpec(const SEIndex* isei) {
 	const SERecord::Id& t(isei->getValue().getId());
 
 	int a = t.idValue;
@@ -262,7 +262,7 @@ QString DumpSymbol::getBitSpec(const SEIndex* isei) {
 	int bd = bitField(a, 12, 15);
 	int s = t.idInfo;
 
-	return QString(" (%1%2): ").arg(wd).arg(s ? QString(":%1..%2").arg(bd).arg(bd + s - 1) : "");
+	return std::string(" (%1%2): ").arg(wd).arg(s ? std::string(":%1..%2").arg(bd).arg(bd + s - 1) : "");
 }
 
 
@@ -353,7 +353,7 @@ ValFormat DumpSymbol::printType(QTextStream& out, const SEIndex* tsei, std::func
                 const HTIndex* hti = isei->getValue().getId().hash;
                 if (!hti->isNull()) out << hti->getValue().value;
                 int sv = isei->getValue().getId().idValue;
-                out << QString("(%1)").arg(sv);
+                out << std::string("(%1)").arg(sv);
             }
             out << "}";
             unnest();

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-ch2");
+static const util::Logger logger(__FILE__);
 
 #include "Clearinghouse2.h"
 
@@ -42,8 +42,8 @@ static const Logger logger = Logger::getLogger("cr-ch2");
 //
 // Courier::Clearinghouse2::TwoPartName
 //
-QString Courier::Clearinghouse2::TwoPartName::toString() const {
-	return QString("%1-%2").arg(organization.toString()).arg(domain.toString());
+std::string Courier::Clearinghouse2::TwoPartName::toString() const {
+	return std::string("%1-%2").arg(organization.toString()).arg(domain.toString());
 }
 
 // Courier::Base
@@ -60,7 +60,7 @@ void Courier::Clearinghouse2::TwoPartName::toByteBuffer  (ByteBuffer& bb) const 
 //
 // Courier::Clearinghouse2::StreamOfChoice
 //
-NameMap::Map<quint16> Courier::Clearinghouse2::StreamOfChoice::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> Courier::Clearinghouse2::StreamOfChoice::nameMap(NameMap::toString16u, {
 	{NEXT_SEGMENT, "NEXT_SEGMENT"},
 	{LAST_SEGMENT, "LAST_SEGMENT"},
 });

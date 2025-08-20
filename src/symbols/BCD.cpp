@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("bcd");
+static const util::Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
@@ -49,15 +49,15 @@ Stamp* Stamp::getInstance(BCD* bcd) {
 	//	logger.info("VersionStamp  %02X %02X %08X", net, host, time);
 
 	QDateTime dateTime = QDateTime::fromSecsSinceEpoch(Util::toUnixTime(time));
-	QString   value = (net == 0 && host == 0 && time == 0) ? "#NULL#" : QString("%1#%2#%3#%4").arg(dateTime.toString("yyyyMMdd")).arg(dateTime.toString("HHmmss")).arg(net, 3, 10, QChar('0')).arg(host, 3, 10, QChar('0'));
+	std::string   value = (net == 0 && host == 0 && time == 0) ? "#NULL#" : std::string("%1#%2#%3#%4").arg(dateTime.toString("yyyyMMdd")).arg(dateTime.toString("HHmmss")).arg(net, 3, 10, QChar('0')).arg(host, 3, 10, QChar('0'));
 	return new Stamp(net, host, time, dateTime, value);
 }
 Stamp* Stamp::getNull() {
 	return new Stamp(0, 0, 0, QDateTime(), 0);
 }
 
-QString NameRecord::toString() {
-	static QString null("#NULL#");
+std::string NameRecord::toString() {
+	static std::string null("#NULL#");
 	if (index == NullName) return null;
 	return name;
 }
@@ -67,22 +67,22 @@ FTRecord* FTRecord::getInstance(BCD* bcd, CARD16 index_) {
 	Stamp*  version    = Stamp::getInstance(bcd) ;
 
 	CARD16  index   = index_;
-	QString name    = bcd->getName(nameRecord);
+	std::string name    = bcd->getName(nameRecord);
 	return new FTRecord(index, name, version);
 }
 FTRecord* FTRecord::getNull() {
 	static FTRecord ret(FT_NULL, "#NULL", 0);
 	return &ret;
 }
-QString FTRecord::toString() const {
+std::string FTRecord::toString() const {
 	if (index == FT_NULL) return "#NULL#";
 	if (index == FT_SELF) return "#SELF#";
-	return QString("[%1 %2]").arg(this->version->toString()).arg(name);
+	return std::string("[%1 %2]").arg(this->version->toString()).arg(name);
 }
 
 
-QString SGRecord::toString(SegClass value) {
-	static QMap<SGRecord::SegClass, QString> map {
+std::string SGRecord::toString(SegClass value) {
+	static QMap<SGRecord::SegClass, std::string> map {
 		{SegClass::CODE,    "CODE"},
 		{SegClass::SYMBOLS, "SYMBOLS"},
 		{SegClass::AC_MAP,  "AC_MAP"},
@@ -114,9 +114,9 @@ SGRecord* SGRecord::getInstance(BCD* bcd, CARD16 index_) {
 SGRecord* SGRecord::getNull() {
 	return new SGRecord(SG_NULL, 0, 0, 0, 0, 0, (SegClass)0);
 }
-QString SGRecord::toString() const {
+std::string SGRecord::toString() const {
 	if (index == SG_NULL) return "#NULL#";
-	return QString("[%1+%2+%3 %4 %5]").arg(base, 4).arg(pages, 4).arg(extraPages, 4).arg(toString(segClass), -7).arg(file->toString());
+	return std::string("[%1+%2+%3 %4 %5]").arg(base, 4).arg(pages, 4).arg(extraPages, 4).arg(toString(segClass), -7).arg(file->toString());
 }
 
 
@@ -134,14 +134,14 @@ ENRecord* ENRecord::getNull() {
 	QVector<CARD16> initialPC_(0);
 	return new ENRecord(EN_NULL, initialPC_);
 }
-QString ENRecord::toString() const {
+std::string ENRecord::toString() const {
 	if (index == EN_NULL) return "#NULL#";
 
-	QString ret;
-	ret.append(QString("(%1)[").arg(initialPC.size()));
+	std::string ret;
+	ret.append(std::string("(%1)[").arg(initialPC.size()));
 	for(CARD16 i = 0; i < initialPC.size(); i++) {
 		if (0 < i) ret.append(", ");
-		ret.append(QString("%1").arg(initialPC[i]));
+		ret.append(std::string("%1").arg(initialPC[i]));
 	}
 	ret.append(']');
 
@@ -157,15 +157,15 @@ CodeDesc* CodeDesc::getInstance(BCD* bcd) {
 
 	return new CodeDesc(sgi, offset, length);
 }
-QString CodeDesc::toString() const {
-	return QString("[%1 %2+ %3]").arg(sgi->toString()).arg(offset, 5).arg(length, 5);
+std::string CodeDesc::toString() const {
+	return std::string("[%1 %2+ %3]").arg(sgi->toString()).arg(offset, 5).arg(length, 5);
 }
 
 
 MTRecord* MTRecord::getInstance(BCD* bcd, CARD16 index_) {
 	CARD16    index        = index_;
 	CARD16    nameIndex    = bcd->file->getCARD16();
-	QString   name         = bcd->getName(nameIndex);
+	std::string   name         = bcd->getName(nameIndex);
 	CARD16    fileIndex    = bcd->file->getCARD16();
 	FTRecord* file         = bcd->getFTRecord(fileIndex);
 	CARD16    config       = bcd->file->getCARD16();
@@ -187,9 +187,9 @@ MTRecord* MTRecord::getNull() {
 	QVector<CARD16> initialPC_(0);
 	return new MTRecord(MT_NULL, "", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 }
-QString MTRecord::toString() const {
+std::string MTRecord::toString() const {
 	if (index == MT_NULL) return "#NULL#";
-	return QString("[%1 %2 %3 %4 %5 %6 %7]").arg(index, 4).arg(name).arg(file->toString()).arg(code->toString()).arg(sseg->toString()).arg(framesize).arg(entries->toString());
+	return std::string("[%1 %2 %3 %4 %5 %6 %7]").arg(index, 4).arg(name).arg(file->toString()).arg(code->toString()).arg(sseg->toString()).arg(framesize).arg(entries->toString());
 }
 
 
@@ -293,7 +293,7 @@ bool BCD::isBCDFile() {
 bool BCD::isSymbolsFile() {
 	return file->isSymbolsFile();
 }
-QString BCD::getPath() {
+std::string BCD::getPath() {
 	return file->getPath();
 }
 
@@ -339,7 +339,7 @@ MTRecord*   BCD::getMTRecord(CARD16 index) {
 //		if ((offset + limit) <= pos) break; // position exceed limit
 //
 //		int length = file->getCARD8();
-//		QString value;
+//		std::string value;
 //		for(int i = 0; i < length; i++) {
 //	     	char data = file->getCARD8();
 //	    	QChar c(data);
@@ -356,7 +356,7 @@ MTRecord*   BCD::getMTRecord(CARD16 index) {
 //	// Add special
 //	ss[NameRecord::NullName] = new NameRecord();
 //}
-QString BCD::getName(CARD16 index) {
+std::string BCD::getName(CARD16 index) {
 	int oldBytePosition = file->bytePosition();
 
 	int offset = ssOffset;
@@ -372,7 +372,7 @@ QString BCD::getName(CARD16 index) {
 		ERROR();
 	}
 
-	QString value;
+	std::string value;
 	try {
 		int length = file->getCARD8();
 		for(int i = 0; i < length; i++) {
@@ -382,7 +382,7 @@ QString BCD::getName(CARD16 index) {
 		}
 	} catch(Abort &e) {
 		logger.warn("BCD::getName failed %5d", index);
-		value.append(QString("#NAME-%1#").arg(index));
+		value.append(std::string("#NAME-%1#").arg(index));
 	}
 
 	file->bytePosition(oldBytePosition);

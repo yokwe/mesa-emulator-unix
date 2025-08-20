@@ -43,8 +43,8 @@
 
 
 namespace Courier::Clearinghouse3 {
-	const quint32 PROGRAM = 2;
-	const quint16 VERSION = 3;
+	const uint32_t PROGRAM = 2;
+	const uint16_t VERSION = 3;
 
 	//  Clearinghouse: PROGRAM 2 VERSION 3
 	//	DEPENDS UPON

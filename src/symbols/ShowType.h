@@ -63,18 +63,18 @@
 class ValFormat {
 public:
 	typedef Symbols::TransferMode TransferMode;
-	static QString toString(TransferMode value) {
+	static std::string toString(TransferMode value) {
 		return Symbols::toString(value);
 	}
 
 	enum class Tag {SIGNED, UNSIGNED, CHAR, ENUM, ARRAY, TRANSFER, REF, OTHER};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	class Enum {
 	public:
 		const SEIndex* esei;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Enum(const SEIndex* esei_) : esei(esei_) {}
 	};
@@ -83,7 +83,7 @@ public:
 	public:
 		const SEIndex* componentType;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Array(const SEIndex* componentType_) : componentType(componentType_) {}
 	};
@@ -92,7 +92,7 @@ public:
 	public:
 		const TransferMode mode;;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Transfer(const TransferMode mode_) : mode(mode_) {}
 	};
@@ -146,7 +146,7 @@ public:
 	const Array&    getArray()    const;
 	const Transfer& getTransfer() const;
 
-	QString toString() const;
+	std::string toString() const;
 private:
 	ValFormat(Tag tag_, void* tagValue_) : tag(tag_), tagValue(tagValue_) {}
 };
@@ -154,13 +154,13 @@ private:
 class ShowType {
 public:
     //PrintSym: PROCEDURE [sei: Symbols.ISEIndex, colonstring: LONG STRING] =
-    static void printSym(QTextStream& out, const SEIndex* sei, QString colonString);
+    static void printSym(QTextStream& out, const SEIndex* sei, std::string colonString);
 
     //PrintTypedVal: PROCEDURE [val: UNSPECIFIED, vf: ValFormat] =
     static void printTypedVal(QTextStream& out, CARD16 val, ValFormat vf);
 
     //GetBitSpec: PROCEDURE [isei: Symbols.ISEIndex, bitspec: LONG STRING] =
-    static void getBitSpec(const SEIndex* isei, QString& bitspec);
+    static void getBitSpec(const SEIndex* isei, std::string& bitspec);
 
     //OutArgType: PROCEDURE [sei: Symbols.CSEIndex] = {
     static void outArgType(QTextStream& out, const SEIndex* sei);
@@ -200,7 +200,7 @@ public:
 
     // for debug
     static void dump(Symbols* symbols);
-    static void dumpSymbol(QString filePath, QString outDirPath);
+    static void dumpSymbol(std::string filePath, std::string outDirPath);
 
 private:
     //defaultPublic: BOOLEAN � TRUE;     --outer RECORD is public or private?

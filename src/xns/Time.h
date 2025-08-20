@@ -52,53 +52,53 @@ namespace XNS {
 			// XNSTime represents time between 1968-01-01 00:00:00 and 2104-02-06 06:28:23.
 			// The value of XNSTime is seconds from 1901-01-01 00:00:00.
 			// XNSTime that represents earliest time has value 2114294400.
-			static const quint32 EARLIEST_TIME = 2114294400;
+			static const uint32_t EARLIEST_TIME = 2114294400;
 			// ((1968 - 1901) * 365 days + 16 leap days) * 24 hours * 60 minutes * 60 seconds = 2114294400
 
 			// Unix Time Epoch  1970-01-01 00:00:00
 			// XNS  Time Epoch  1968-01-01 00:00:00
 			//   Difference between above 2 dates are 366 + 365 = 731 days.
-			static const quint32 EPOCH_DIFF = (quint32)EARLIEST_TIME + (quint32)(731 * 60 * 60 * 24);
+			static const uint32_t EPOCH_DIFF = (uint32_t)EARLIEST_TIME + (uint32_t)(731 * 60 * 60 * 24);
 
-			// unix use qint64 as seconds since epoch
-			static quint32 toXNSTime(qint64 unixTime) {
-				return (quint32)(unixTime + EPOCH_DIFF);
+			// unix use int64_t as seconds since epoch
+			static uint32_t toXNSTime(int64_t unixTime) {
+				return (uint32_t)(unixTime + EPOCH_DIFF);
 			}
-			static qint64 toUnixTime(quint32 xnsTime) {
-				return (qint64)xnsTime - (qint64)EPOCH_DIFF;
+			static int64_t toUnixTime(uint32_t xnsTime) {
+				return (int64_t)xnsTime - (int64_t)EPOCH_DIFF;
 			}
 
 			XNSTime() {
 				value(EPOCH_DIFF);
 			}
 			// define operator = take unix time and set value as xns time
-			quint32 operator =(const quint32& unixTime) const {
+			uint32_t operator =(const uint32_t& unixTime) const {
 				value(toXNSTime(unixTime));
 				return unixTime;
 			}
-			qint64 operator =(const qint64& unixTime) const {
+			int64_t operator =(const int64_t& unixTime) const {
 				value(toXNSTime(unixTime));
 				return unixTime;
 			}
-			// operator quint32() get value and returns as unix time
-			operator quint32() {
-				return (quint32)toUnixTime(value());
+			// operator uint32_t() get value and returns as unix time
+			operator uint32_t() {
+				return (uint32_t)toUnixTime(value());
 			}
-			operator qint64() {
+			operator int64_t() {
 				return toUnixTime(value());
 			}
 
-			QString toString() const;
+			std::string toString() const;
 		};
 
 		class Version : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				CURRENT = 2,
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
@@ -107,73 +107,73 @@ namespace XNS {
 				return value() == CURRENT;
 			}
 
-			QString toString() const;
+			std::string toString() const;
 		};
 
 		class Type : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				REQUEST = 1, RESPONSE = 2,
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		class Direction : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				WEST = 0, EAST = 1,
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		class Tolerance : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				UNKNOWN = 0, MILLI = 1,
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		class Response : public Base {
@@ -187,7 +187,7 @@ namespace XNS {
 			Tolerance tolerance;
 			UINT32    toleranceValue;   // supposed time error in unit of tolerance
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -201,7 +201,7 @@ namespace XNS {
 		void set(const Response& newValue);
 		void get(Response& newValue) const;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);

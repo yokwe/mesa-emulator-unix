@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-rip");
+static const util::Logger logger(__FILE__);
 
 #include "../util/JSONUtil.h"
 
@@ -44,14 +44,14 @@ static const Logger logger = Logger::getLogger("xns-rip");
 //
 // XNS::RIP::Type
 //
-NameMap::Map<quint16> XNS::RIP::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
+NameMap::Map<uint16_t> XNS::RIP::Type::nameMap(NameMap::toString16u, {{REQUEST, "REQUEST"}, {RESPONSE, "RESPONSE"}});
 
 
 //
 // XNS::RIP::Entry
 //
-QString XNS::RIP::Entry::toString() const {
-	return QString("{%1 %2}").arg(net.toString()).arg((quint16)hop);
+std::string XNS::RIP::Entry::toString() const {
+	return std::string("{%1 %2}").arg(net.toString()).arg((uint16_t)hop);
 }
 void XNS::RIP::Entry::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, net);
@@ -66,12 +66,12 @@ void XNS::RIP::Entry::toByteBuffer  (ByteBuffer& bb) const {
 //
 // XNS::RIP
 //
-QString XNS::RIP::toString() const {
-	QStringList list;
+std::string XNS::RIP::toString() const {
+	std::stringList list;
 	for(auto e: entryList) {
 		list += e.toString();
 	}
-	return QString("%1 %2").arg(type.toString()).arg(list.join(" "));
+	return std::string("%1 %2").arg(type.toString()).arg(list.join(" "));
 }
 void XNS::RIP::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);

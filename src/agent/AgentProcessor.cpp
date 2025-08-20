@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("agentproc");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -46,7 +46,7 @@ static const Logger logger = Logger::getLogger("agentproc");
 #include "Agent.h"
 #include "AgentProcessor.h"
 
-static quint32 getMesaTime() {
+static uint32_t getMesaTime() {
 	return Util::toMesaTime(Util::getUnixTime());
 }
 

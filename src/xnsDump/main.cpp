@@ -35,7 +35,7 @@
 
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsDump");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Network.h"
 
@@ -81,7 +81,7 @@ void xnsDump() {
 	using Courier::ExpeditedCourier;
 
 	const char* buildDir = getBuildDir();
-	QString path = QString("%1/run/xns-config.json").arg(buildDir);
+	std::string path = std::string("%1/run/xns-config.json").arg(buildDir);
 	logger.info("path = %s", qPrintable(path));
 
 	Config  config  = XNS::loadConfig(path);
@@ -107,7 +107,7 @@ void xnsDump() {
 			}
 
 			// receive one data
-			qint64 msecsSinceEpoch;
+			int64_t msecsSinceEpoch;
 			{
 				ret = context.driver->receive(level0.data(), level0.capacity(), opErrno, &msecsSinceEpoch);
 				if (ret < 0) {
@@ -119,7 +119,7 @@ void xnsDump() {
 				level0.limit(ret);
 			}
 
-			QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
+			std::string timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
 
 
 			Ethernet ethernet;
@@ -133,14 +133,14 @@ void xnsDump() {
 			FROM_BYTE_BUFFER(level1, idp);
 			ByteBuffer level2 = idp.block.toBuffer();
 
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
+			std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 			// check idp checksum
 			{
 				ByteBuffer start = ethernet.block.toBuffer();
-				quint16 checksum = XNS::IDP::getChecksum(start);
+				uint16_t checksum = XNS::IDP::getChecksum(start);
 				if (checksum != XNS::Checksum::NOCHECK) {
-					quint16 newValue = XNS::IDP::computeChecksum(start);
+					uint16_t newValue = XNS::IDP::computeChecksum(start);
 					if (checksum != newValue) {
 						// checksum error
 						logger.warn("%s  BAD CHECKSUM", header);

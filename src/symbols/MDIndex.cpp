@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("md");
+static const util::Logger logger(__FILE__);
 
 #include "MDIndex.h"
 #include "BCDFile.h"
@@ -68,9 +68,9 @@ MDIndex* MDIndex::getInstance(Symbols* symbols_, CARD16 index_) {
 
 	return new MDIndex(symbols_, index_);
 }
-QString MDIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string MDIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const MDRecord& MDIndex::getValue() const {
 	MDRecord* ret = MDRecord::find(symbols, index);
@@ -115,11 +115,11 @@ MDRecord* MDRecord::getInstance(Symbols* symbols, CARD16 index) {
 
     return new MDRecord(symbols, index, stamp, moduleId, fileId, shared, exported, ctx, defaultImport, file);
 }
-QString MDRecord::toString() const {
-//	return QString("%1 %2 %3 %4 %5 %6 %7 %8").
+std::string MDRecord::toString() const {
+//	return std::string("%1 %2 %3 %4 %5 %6 %7 %8").
 //			arg(index, 4).arg(stamp->toString()).arg(moduleId->getValue()).arg(fileId->getValue()).
 //			arg(shared ? "S" : " ").arg(exported ? "E" : " ").arg(ctx->toString()).arg(defaultImport->toString());
-	return QString("%1 %2 %3 %4 %5 %6 %7").
+	return std::string("%1 %2 %3 %4 %5 %6 %7").
 			arg(index, 4).arg(stamp->toString()).arg(moduleId->getValue().value, -20).
 			arg(shared ? "S" : " ").arg(exported ? "E" : " ").arg(ctx->toString()).arg(defaultImport->toString());
 }

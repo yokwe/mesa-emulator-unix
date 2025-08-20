@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-type");
+static const util::Logger logger(__FILE__);
 
 #include "Type.h"
 
@@ -42,24 +42,24 @@ static const Logger logger = Logger::getLogger("cr-type");
 //
 // Courier::STRING
 //
-QString Courier::STRING::operator =(const QString& newValue) const {
+std::string Courier::STRING::operator =(const std::string& newValue) const {
 	byteArray = newValue.toUtf8().constData();
 	return newValue;
 }
 
 void Courier::STRING::fromByteBuffer(ByteBuffer& bb) {
-	quint16 length;
+	uint16_t length;
 	bb.read16(length);
 	byteArray.clear();
 
-	for(quint16 i = 0; i < length; i++) {
-		quint8 newValue;
+	for(uint16_t i = 0; i < length; i++) {
+		uint8_t newValue;
 		bb.read8(newValue);
 		byteArray.append((char)newValue);
 	}
 	// read padding
 	if (length % 2) {
-		quint8 newValue;
+		uint8_t newValue;
 		bb.read8(newValue);
 		(void)newValue;
 	}
@@ -72,9 +72,9 @@ void Courier::STRING::toByteBuffer  (ByteBuffer& bb) const {
 		logger.error("  length     = %d", length);
 		ERROR();
 	}
-	bb.write16((quint16)length);
+	bb.write16((uint16_t)length);
 	for(int i = 0; i < length; i++) {
-		bb.write8((quint8)byteArray[i]);
+		bb.write8((uint8_t)byteArray[i]);
 	}
 	// write padding
 	if (length % 2) {

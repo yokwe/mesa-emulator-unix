@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("se");
+static const util::Logger logger(__FILE__);
 
 #include "SEIndex.h"
 #include "BCDFile.h"
@@ -68,9 +68,9 @@ SEIndex* SEIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new SEIndex(symbols, index);
 }
-QString SEIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string SEIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const SERecord& SEIndex::getValue() const {
 	SERecord* ret = SERecord::find(symbols, index);
@@ -187,19 +187,19 @@ SERecord* SERecord::find(Symbols* symbols, CARD16 index) {
 }
 
 
-QString SERecord::toString() const {
+std::string SERecord::toString() const {
 	switch(tag) {
 	case Tag::ID:
-		return QString("%1 %2").arg(toString(tag)).arg(getId().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getId().toString());
 	case Tag::CONS:
-		return QString("%1 %2").arg(toString(tag)).arg(getCons().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getCons().toString());
 	default:
 		ERROR();
 		return "???";
 	}
 }
 
-QString SERecord::toString(Tag value) {
+std::string SERecord::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(ID)
@@ -207,7 +207,7 @@ QString SERecord::toString(Tag value) {
 
 	TO_STRING_EPILOGUE
 }
-QString SERecord::Id::toString(Tag value) {
+std::string SERecord::Id::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(TERMINAL)
@@ -235,18 +235,18 @@ const SERecord::Id::Linked&   SERecord::Id::getLinked() const {
 	Linked* ret = (Linked*)tagValue;
 	return *ret;
 }
-QString SERecord::Id::Linked::toString() const {
-	return QString("%1").arg(this->linked->toString());
+std::string SERecord::Id::Linked::toString() const {
+	return std::string("%1").arg(this->linked->toString());
 }
 
-QString SERecord::Id::toString() const {
+std::string SERecord::Id::toString() const {
 	switch(tag) {
 	case Tag::TERMINAL:
 	case Tag::SEQUENTIAL:
-		return QString("%1 %2 %3 %4 %5 %6").arg(idCtx->toString()).arg(idType->toString()).
+		return std::string("%1 %2 %3 %4 %5 %6").arg(idCtx->toString()).arg(idType->toString()).
 				arg(idInfo).arg(idValue).arg(hash->getValue().value).arg(toString(tag));
 	case Tag::LINKED:
-		return QString("%1 %2 %3 %4 %5 %6 %7").arg(idCtx->toString()).arg(idType->toString()).
+		return std::string("%1 %2 %3 %4 %5 %6 %7").arg(idCtx->toString()).arg(idType->toString()).
 				arg(idInfo).arg(idValue).arg(hash->getValue().value).arg(toString(tag)).arg(getLinked().toString());
 		break;
 	default:
@@ -365,72 +365,72 @@ const SERecord::Cons::Record::Linked&   SERecord::Cons::Record::getLinked() cons
 }
 
 
-QString SERecord::Cons::toString() const {
+std::string SERecord::Cons::toString() const {
 	switch(tag) {
 	case Tag::MODE:
-		return QString("%1").arg(toString(tag));
+		return std::string("%1").arg(toString(tag));
 	case Tag::BASIC:
-		return QString("%1 %2").arg(toString(tag)).arg(getBasic().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getBasic().toString());
 	case Tag::ENUMERATED:
-		return QString("%1 %2").arg(toString(tag)).arg(getEnumerated().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getEnumerated().toString());
 	case Tag::RECORD:
-		return QString("%1 %2").arg(toString(tag)).arg(getRecord().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getRecord().toString());
 	case Tag::REF:
-		return QString("%1 %2").arg(toString(tag)).arg(getRef().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getRef().toString());
 	case Tag::ARRAY:
-		return QString("%1 %2").arg(toString(tag)).arg(getArray().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getArray().toString());
 	case Tag::ARRAYDESC:
-		return QString("%1 %2").arg(toString(tag)).arg(getArrayDesc().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getArrayDesc().toString());
 	case Tag::TRANSFER:
-		return QString("%1 %2").arg(toString(tag)).arg(getTransfer().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getTransfer().toString());
 	case Tag::DEFINITION:
-		return QString("%1 %2").arg(toString(tag)).arg(getDefinition().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getDefinition().toString());
 	case Tag::UNION:
-		return QString("%1 %2").arg(toString(tag)).arg(getUnion().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getUnion().toString());
 	case Tag::SEQUENCE:
-		return QString("%1 %2").arg(toString(tag)).arg(getSequence().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getSequence().toString());
 	case Tag::RELATIVE:
-		return QString("%1 %2").arg(toString(tag)).arg(getRelative().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getRelative().toString());
 	case Tag::SUBRANGE:
-		return QString("%1 %2").arg(toString(tag)).arg(getSubrange().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getSubrange().toString());
 	case Tag::LONG:
-		return QString("%1 %2").arg(toString(tag)).arg(getLong().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getLong().toString());
 	case Tag::REAL:
-		return QString("%1 %2").arg(toString(tag)).arg(getReal().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getReal().toString());
 	case Tag::OPAQUE:
-		return QString("%1 %2").arg(toString(tag)).arg(getOpaque().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getOpaque().toString());
 	case Tag::ZONE:
-		return QString("%1 %2").arg(toString(tag)).arg(getZone().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getZone().toString());
 	case Tag::ANY:
-		return QString("%1").arg(toString(tag));
+		return std::string("%1").arg(toString(tag));
 	case Tag::NIL:
-		return QString("%1").arg(toString(tag));
+		return std::string("%1").arg(toString(tag));
 	case Tag::BITS:
-		return QString("%1 %2").arg(toString(tag)).arg(getBits().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getBits().toString());
 	case Tag::FIXED_SEQUENCE:
-		return QString("%1").arg(toString(tag));
+		return std::string("%1").arg(toString(tag));
 	default:
 		ERROR();
 		return "???";
 	}
 }
 
-QString SERecord::Cons::Basic::toString() const {
+std::string SERecord::Cons::Basic::toString() const {
 	//          ordered(0:8..8): BOOLEAN,
 	//          code(0:9..15): [0..16),
 	//          length(1:0..15): BitLength],
-	return QString("%1 %2 %3").arg(ordered ? "ordered" : "").arg(code).arg(length);
+	return std::string("%1 %2 %3").arg(ordered ? "ordered" : "").arg(code).arg(length);
 }
-QString SERecord::Cons::Enumerated::toString() const {
+std::string SERecord::Cons::Enumerated::toString() const {
 	//          ordered(0:8..8), machineDep(0:9..9): BOOLEAN,
 	//          unpainted(0:10..10): BOOLEAN,     -- un- for backward compatiblity
 	//          sparse(0:11..15): BOOLEAN,
 	//          valueCtx(1:0..15): CTXIndex,
 	//          nValues(2:0..15): CARDINAL],
-	return QString("%1 %2 %3 %4 %5 %6").arg(ordered ? "ordered" : "").arg(machineDep ? "machineDep" : "").arg(unpainted ? "unpainted" : "").
+	return std::string("%1 %2 %3 %4 %5 %6").arg(ordered ? "ordered" : "").arg(machineDep ? "machineDep" : "").arg(unpainted ? "unpainted" : "").
 		arg(sparse ? "sparse" : "").arg(valueCtx->toString()).arg(nValues);
 }
-QString SERecord::Cons::Record::toString() const {
+std::string SERecord::Cons::Record::toString() const {
 	//        record => [
 	//          hints(0:8..15): RECORD [
 	//            comparable(0:0..0), assignable(0:1..1): BOOLEAN,
@@ -446,93 +446,93 @@ QString SERecord::Cons::Record::toString() const {
 	//            ENDCASE],
 	switch(tag) {
 	case Tag::NOT_LINKED:
-		return QString("%1 %2 %3 %4 %5 %6 %7").arg(length).arg(argument ? "argument" : "").arg(monitored ? "monitored" : "").arg(machineDep ? "machineDep" : "").
+		return std::string("%1 %2 %3 %4 %5 %6 %7").arg(length).arg(argument ? "argument" : "").arg(monitored ? "monitored" : "").arg(machineDep ? "machineDep" : "").
 			arg(painted ? "painted" : "").arg(fieldCtx->toString()).arg(toString(tag));
 	case Tag::LINKED:
-		return QString("%1 %2 %3 %4 %5 %6 %7 %8").arg(length).arg(argument ? "argument" : "").arg(monitored ? "monitored" : "").arg(machineDep ? "machineDep" : "").
+		return std::string("%1 %2 %3 %4 %5 %6 %7 %8").arg(length).arg(argument ? "argument" : "").arg(monitored ? "monitored" : "").arg(machineDep ? "machineDep" : "").
 			arg(painted ? "painted" : "").arg(fieldCtx->toString()).arg(toString(tag)).arg(getLinked().toString());
 	default:
 		ERROR();
 		return "???";
 	}
 }
-QString SERecord::Cons::Ref::toString() const {
+std::string SERecord::Cons::Ref::toString() const {
 	//          counted(0:8..8), ordered(0:9..9), readOnly(0:10..10), list(0:11..11), var(0:12..12), basing(0:13..15): BOOLEAN,
 	//          refType(1:0..15): SEIndex],
-	return QString("%1 %2 %3 %4 %5 %6 %7").arg(counted ? "counted" : "").arg(ordered ? "ordered" : "").arg(readOnly ? "readOnly" : "").
+	return std::string("%1 %2 %3 %4 %5 %6 %7").arg(counted ? "counted" : "").arg(ordered ? "ordered" : "").arg(readOnly ? "readOnly" : "").
 		arg(list ? "list" : "").arg(var ? "var" : "").arg(basing ? "basing" : "").arg(refType->toString());
 }
-QString SERecord::Cons::Array::toString() const {
+std::string SERecord::Cons::Array::toString() const {
 	//          packed(0:8..15): BOOLEAN,
 	//          indexType(1:0..15): SEIndex,
 	//          componentType(2:0..15): SEIndex],
-	return QString("%1 %2 %3").arg(packed ? "packed" : "").arg(indexType->toString()).arg(componentType->toString());
+	return std::string("%1 %2 %3").arg(packed ? "packed" : "").arg(indexType->toString()).arg(componentType->toString());
 }
-QString SERecord::Cons::ArrayDesc::toString() const {
+std::string SERecord::Cons::ArrayDesc::toString() const {
 	//          var(0:8..8), readOnly(0::9..15): BOOLEAN,
 	//          describedType(1:0..15): SEIndex],
-	return QString("%1 %2 %3").arg(var ? "var" : "").arg(readOnly ? "readOnly" : "").arg(describedType->toString());
+	return std::string("%1 %2 %3").arg(var ? "var" : "").arg(readOnly ? "readOnly" : "").arg(describedType->toString());
 }
-QString SERecord::Cons::Transfer::toString() const {
+std::string SERecord::Cons::Transfer::toString() const {
 	//          safe(0:8..8): BOOLEAN,
 	//          mode(0:9..15): TransferMode,
 	//          typeIn(1:0..15), typeOut(2:0..15): CSEIndex],
-	return QString("%1 %2 %3 %4").arg(safe ? "safe" : "").arg(toString(mode)).arg(typeIn->toString()).arg(typeOut->toString());
+	return std::string("%1 %2 %3 %4").arg(safe ? "safe" : "").arg(toString(mode)).arg(typeIn->toString()).arg(typeOut->toString());
 }
-QString SERecord::Cons::Definition::toString() const {
+std::string SERecord::Cons::Definition::toString() const {
 	//          named(0:8..15): BOOLEAN,
 	//          defCtx(1:0..15): CTXIndex],
-	return QString("%1 %2").arg(named ? "named" : "").arg(defCtx->toString());
+	return std::string("%1 %2").arg(named ? "named" : "").arg(defCtx->toString());
 }
-QString SERecord::Cons::Union::toString() const {
+std::string SERecord::Cons::Union::toString() const {
 	//          overlaid(0:12..12), controlled(0:13..13), machineDep(0:14..15): BOOLEAN,
 	//          caseCtx(1:0..15): CTXIndex,
 	//          tagSei(2:0..15): ISEIndex],
-	return QString("%1 %2 %3 %4 %5").arg(overlaid ? "overlaid" : ""). arg(controlled ? "controlled" : "").arg(machineDep ? "machineDep" : "").
+	return std::string("%1 %2 %3 %4 %5").arg(overlaid ? "overlaid" : ""). arg(controlled ? "controlled" : "").arg(machineDep ? "machineDep" : "").
 			arg(caseCtx->toString()).arg(tagSei->toString());
 }
-QString SERecord::Cons::Sequence::toString() const {
+std::string SERecord::Cons::Sequence::toString() const {
 	//          packed(0:8..8): BOOLEAN,
 	//          controlled(0:9..9), machineDep(0:10..15): BOOLEAN,
 	//          tagSei(1:0..15): ISEIndex,
 	//          componentType(2:0..15): SEIndex],
-	return QString("%1 %2 %3 %4 %5").arg(packed ? "packed" : "").arg(controlled ? "controlled" : "").arg(machineDep ? "machineDep" : "").
+	return std::string("%1 %2 %3 %4 %5").arg(packed ? "packed" : "").arg(controlled ? "controlled" : "").arg(machineDep ? "machineDep" : "").
 			arg(tagSei->toString()).arg(componentType->toString());
 }
-QString SERecord::Cons::Relative::toString() const {
+std::string SERecord::Cons::Relative::toString() const {
 	//          baseType(1:0..15): SEIndex,
 	//          offsetType(2:0..15): SEIndex,
 	//          resultType(3:0..15): SEIndex],
-	return QString("%1 %2 %3").arg(baseType->toString()).arg(offsetType->toString()).arg(resultType->toString());
+	return std::string("%1 %2 %3").arg(baseType->toString()).arg(offsetType->toString()).arg(resultType->toString());
 }
-QString SERecord::Cons::Subrange::toString() const {
+std::string SERecord::Cons::Subrange::toString() const {
 	//          filled(0:8..8), empty(0:9..15): BOOLEAN,
 	//          rangeType(1:0..15): SEIndex,
 	//          origin(2:0..15): INTEGER,
 	//          range(3:0..15): CARDINAL],
-	return QString("%1 %2 %3 %4 %5").arg(filled ? "filled" : "").arg(empty ? "empty" : "").arg(rangeType->toString()).arg(origin).arg(range);
+	return std::string("%1 %2 %3 %4 %5").arg(filled ? "filled" : "").arg(empty ? "empty" : "").arg(rangeType->toString()).arg(origin).arg(range);
 }
-QString SERecord::Cons::Long::toString() const {
-	return QString("%1").arg(rangeType->toString());
+std::string SERecord::Cons::Long::toString() const {
+	return std::string("%1").arg(rangeType->toString());
 }
-QString SERecord::Cons::Real::toString() const {
-	return QString("%1").arg(rangeType->toString());
+std::string SERecord::Cons::Real::toString() const {
+	return std::string("%1").arg(rangeType->toString());
 }
-QString SERecord::Cons::Opaque::toString() const {
-	return QString("%1 %2 %3").arg(lengthKnown ? "known" : "").arg(length).arg(id->toString());
+std::string SERecord::Cons::Opaque::toString() const {
+	return std::string("%1 %2 %3").arg(lengthKnown ? "known" : "").arg(length).arg(id->toString());
 }
-QString SERecord::Cons::Zone::toString() const {
-	return QString("%1%2").arg(counted ? "counted" : " ").arg(mds ? "mds" : " ");
+std::string SERecord::Cons::Zone::toString() const {
+	return std::string("%1%2").arg(counted ? "counted" : " ").arg(mds ? "mds" : " ");
 }
-QString SERecord::Cons::Bits::toString() const {
-	return QString("%1").arg(length);
-}
-
-QString SERecord::Cons::Record::Linked::toString() const {
-	return QString("%1").arg(this->linkType->toString());
+std::string SERecord::Cons::Bits::toString() const {
+	return std::string("%1").arg(length);
 }
 
-QString SERecord::Cons::Record::toString(Tag value) {
+std::string SERecord::Cons::Record::Linked::toString() const {
+	return std::string("%1").arg(this->linkType->toString());
+}
+
+std::string SERecord::Cons::Record::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(NOT_LINKED)

@@ -68,7 +68,7 @@ public:
 	bool isNull() const {
 		return index == TREE_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 
 	const TreeNode& getValue() const;
 private:
@@ -182,7 +182,7 @@ public:
 		MERGECONS
 	};
 
-	static QString toString(NodeName value);
+	static std::string toString(NodeName value);
 
 //	const bool       free;
 	const NodeName   name;
@@ -194,7 +194,7 @@ public:
 	const CARD16     info;
 	TreeLink** const son;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;
@@ -221,13 +221,13 @@ private:
 class TreeLink {
 public:
 	enum class Tag {SUBTREE, HASH, SYMBOL, LITERAL};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	class Subtree {
 	public:
 		const TreeIndex* index;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Subtree(TreeIndex* index_) : index(index_) {}
 	};
@@ -236,7 +236,7 @@ public:
 	public:
 		const HTIndex* index;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Hash(HTIndex* index_) : index(index_) {}
 	};
@@ -245,7 +245,7 @@ public:
 	public:
 		const SEIndex* index; // ISEIndex
 
-		QString toString() const;
+		std::string toString() const;
 
 		Symbol(SEIndex* index_) : index(index_) {}
 	};
@@ -254,7 +254,7 @@ public:
 	public:
 		const LitRecord* info;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Literal(LitRecord* info_) : info(info_) {}
 	};
@@ -275,7 +275,7 @@ public:
 		return tag == Tag::SUBTREE && getSubtree().index->isNull();
 	}
 
-	QString toString() const;
+	std::string toString() const;
 
 	TreeLink(Tag tag_, void* tagValue_) : tag(tag_), tagValue(tagValue_) {}
 };

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("svc-chs");
+static const util::Logger logger(__FILE__);
 
 #include "../util/ByteBuffer.h"
 #include "../util/Network.h"
@@ -67,7 +67,7 @@ using Courier::Clearinghouse2::DomainName;
 
 class RetrieveAddresses : public Procedure {
 	static constexpr const char*   NAME      = "RetrieveAddresses";
-	static constexpr quint16       PROCEDURE = 0;
+	static constexpr uint16_t       PROCEDURE = 0;
 	static constexpr bool          USE_BULK  = false;
 public:
 	RetrieveAddresses() : Procedure(NAME, PROCEDURE, USE_BULK) {}
@@ -108,7 +108,7 @@ RetrieveAddresses retrieveAddress;
 
 class ListDomainServed : public Procedure {
 	static constexpr const char*   NAME      = "ListDomainServed";
-	static constexpr quint16       PROCEDURE = 1;
+	static constexpr uint16_t       PROCEDURE = 1;
 	static constexpr bool          USE_BULK  = true;
 public:
 	ListDomainServed() : Procedure(NAME, PROCEDURE, USE_BULK) {}

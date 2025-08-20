@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("agentnet");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -107,7 +107,7 @@ void AgentNetwork::TransmitThread::reset() {
 
 
 int AgentNetwork::ReceiveThread::stopThread;
-quint64 AgentNetwork::ReceiveThread::getSec() {
+uint64_t AgentNetwork::ReceiveThread::getSec() {
 	return QDateTime::currentMSecsSinceEpoch() / 1000;
 }
 
@@ -115,7 +115,7 @@ void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* 
 	QMutexLocker locker(&receiveMutex);
 
 	// convert form milliseconds to seconds
-	qint64 sec = getSec();
+	int64_t sec = getSec();
 
 	// TODO Is this correct?
 	// Remove item which has same data
@@ -165,7 +165,7 @@ void AgentNetwork::ReceiveThread::run() {
 				// data is not ready
 				// do queue maintenance
 				if (!receiveQueue.empty()) {
-					qint64 sec = getSec();
+					int64_t sec = getSec();
 					for(auto i = receiveQueue.begin(); i != receiveQueue.end(); i++) {
 						Item& item = *i;
 						if ((item.sec + MAX_WAIT_SEC) < sec) {

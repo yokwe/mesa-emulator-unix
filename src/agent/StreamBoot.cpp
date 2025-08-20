@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("boot");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -48,25 +48,25 @@ static const Logger logger = Logger::getLogger("boot");
 #include "StreamBoot.h"
 
 
-StreamBoot::StreamBoot(QString path_) : Stream("BOOT", CoProcessorServerIDs::bootAgentID) {
+StreamBoot::StreamBoot(std::string path_) : Stream("BOOT", CoProcessorServerIDs::bootAgentID) {
 	path = path_;
-	map  = (quint16*)Util::mapFile(path, mapSize);
+	map  = (uint16_t*)Util::mapFile(path, mapSize);
 	mapSize /= Environment::bytesPerWord;
 	pos = 0;
 	logger.info("%3d %-8s %s", serverID, name, path.toStdString());
 }
 
-quint16 StreamBoot::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamBoot::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamBoot::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s connect  state mesa = %d  pc = %d", name, iocb->mesaConnectionState, iocb->pcConnectionState);
 	iocb->pcConnectionState = CoProcessorIOFaceGuam::S_connected;
 	// Need to assign non-zero to mesaGet.hTaskactually. See CoProcessorFace.Get
@@ -75,16 +75,16 @@ quint16 StreamBoot::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/,
 	pos = 0;
 	return CoProcessorIOFaceGuam::R_completed;
 }
-quint16 StreamBoot::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamBoot::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s read %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 	if (DEBUG_SHOW_STREAM_BOOT) logger.info("%-8s write %8X+%d", name, pos, tr.bufferSize);
 	if (tr.writeLockedByMesa) {
@@ -108,10 +108,10 @@ quint16 StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoPr
 		ERROR();
 	}
 
-	quint16* buffer = (quint16*)Store(tr.buffer);
-	quint32  size   = tr.bufferSize / Environment::bytesPerWord;
+	uint16_t* buffer = (uint16_t*)Store(tr.buffer);
+	uint32_t  size   = tr.bufferSize / Environment::bytesPerWord;
 	if (mapSize < (pos + size)) size = mapSize - pos;
-	quint32  nextPos = pos + size;
+	uint32_t  nextPos = pos + size;
 	if (DEBUG_SHOW_STREAM_BOOT) logger.info("DATA %4X => %4X", pos * Environment::bytesPerWord, nextPos * Environment::bytesPerWord);
 
 	Util::fromBigEndian(map + pos, buffer, size);

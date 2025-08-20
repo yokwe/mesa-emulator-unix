@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listener");
+static const util::Logger logger(__FILE__);
 
 #include "Server.h"
 #include "Listener.h"
@@ -45,7 +45,7 @@ using XNS::Server::Listeners;
 //
 // XNS::Server::Listeners
 //
-void Listeners::add(quint16 socket, Listener* listener) {
+void Listeners::add(uint16_t socket, Listener* listener) {
 	// sanity check
 	if (server == nullptr) {
 		ERROR();
@@ -63,7 +63,7 @@ void Listeners::add(quint16 socket, Listener* listener) {
 		listener->initListener(server);
 	}
 }
-void Listeners::remove(quint16 socket) {
+void Listeners::remove(uint16_t socket) {
 	QMutexLocker mutexLocker(&mapMutex);
 	if (map.contains(socket)) {
 		map.remove(socket);
@@ -73,7 +73,7 @@ void Listeners::remove(quint16 socket) {
 		ERROR();
 	}
 }
-Listener* Listeners::getListener(quint16 socket) {
+Listener* Listeners::getListener(uint16_t socket) {
 	QMutexLocker mutexLocker(&mapMutex);
 	if (map.contains(socket)) {
 		return map[socket];
@@ -82,11 +82,11 @@ Listener* Listeners::getListener(quint16 socket) {
 	}
 }
 
-quint16 Listeners::getUnusedSocket() const {
+uint16_t Listeners::getUnusedSocket() const {
 	QMutexLocker mutexLocker(&mapMutex);
-	quint16 socket;
+	uint16_t socket;
 	for(;;) {
-		socket = (quint16)QDateTime::currentMSecsSinceEpoch();
+		socket = (uint16_t)QDateTime::currentMSecsSinceEpoch();
 		if (socket <= Socket::MAX_WELLKNOWN_SOCKET) continue;
 		if (map.contains(socket)) continue;
 		break;
@@ -179,10 +179,10 @@ void Listener::stopListener  () {
 		ERROR();
 	}
 }
-QString Listener::toString() {
-	return QString::asprintf("%s-%s-%s", TO_CSTRING(Socket::toString(socket())), name(), toString(myState));
+std::string Listener::toString() {
+	return std::string::asprintf("%s-%s-%s", TO_CSTRING(Socket::toString(socket())), name(), toString(myState));
 }
-void Listener::transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp) {
+void Listener::transmit(Driver* driver, uint64_t dst, uint64_t src, const IDP& idp) {
 	Packet packet;
 	packet.write48(dst);
 	packet.write48(src);
@@ -201,9 +201,9 @@ void Listener::transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp
 		// actual idp data length base on start
 		int length = start.limit() - start.base();
 		// set length in start
-		IDP::setLength(start, (quint16)length);
+		IDP::setLength(start, (uint16_t)length);
 		// update length for later use
-		idp.length = (quint16)length;
+		idp.length = (uint16_t)length;
 		// padding for short length packet
 		if (length < IDP::MININUM_PACKET_LENGTH) {
 			padding += IDP::MININUM_PACKET_LENGTH - length;
@@ -225,7 +225,7 @@ void Listener::transmit(Driver* driver, quint64 dst, quint64 src, const IDP& idp
 
 	// update checksum if necessary
 	if (!idp.checksum_.isNoCheck()) {
-		quint16 newValue = IDP::computeChecksum(start);
+		uint16_t newValue = IDP::computeChecksum(start);
 		IDP::setChecksum(start, newValue);
 		// update checksum for later use
 		idp.checksum_ = newValue;
@@ -303,10 +303,10 @@ void Listener::transmit(const Data& data, const Boot&  boot) {
 
 	transmit(data, idp);
 }
-void Listener::setIDP(const Data& data, quint8 type, BLOCK& block, IDP& idp) {
+void Listener::setIDP(const Data& data, uint8_t type, BLOCK& block, IDP& idp) {
 	idp.checksum_ = data.idp.checksum_;
-	idp.length    = (quint16)0;
-	idp.control   = (quint8)0;
+	idp.length    = (uint16_t)0;
+	idp.control   = (uint8_t)0;
 	idp.type      = type;
 	idp.dstNet    = data.idp.srcNet;
 	idp.dstHost   = data.idp.srcHost;

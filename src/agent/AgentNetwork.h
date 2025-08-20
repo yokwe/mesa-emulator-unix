@@ -69,7 +69,7 @@ public:
 		void run();
 		void reset();
 
-		quint64 getSec();
+		uint64_t getSec();
 
 	private:
 		class Item {
@@ -116,16 +116,16 @@ public:
 		void run();
 		void reset();
 
-		quint64 getSec();
+		uint64_t getSec();
 
 	private:
 		class Item {
 		public:
 			// queued time in second
-			qint64                                sec;
+			int64_t                                sec;
 			EthernetIOFaceGuam::EthernetIOCBType* iocb;
 
-			Item(qint64 sec_, EthernetIOFaceGuam::EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
+			Item(int64_t sec_, EthernetIOFaceGuam::EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
 			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
 		};
 

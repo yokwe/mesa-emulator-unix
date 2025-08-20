@@ -82,7 +82,7 @@ public:
 	Symbols* getSymbols() const {
 		return symbols;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const SERecord& getValue() const;
 
 	SEIndex* find(CARD16 index) const;
@@ -211,13 +211,13 @@ public:
 		public:
 			const SEIndex* linked;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Linked(SEIndex* linked_) : linked(linked_) {}
 		};
 
 		enum class Tag {TERMINAL, SEQUENTIAL, LINKED};
-		static QString toString(Tag value);
+		static std::string toString(Tag value);
 
 		static Id* getInstance(Symbols* symbols, CARD16 u0);
 
@@ -237,7 +237,7 @@ public:
 
 		const Linked& getLinked() const;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Id(bool extended_, bool public__, CTXIndex* idCtx_, bool immutable_, bool constant_,
 			SEIndex* idType_, CARD16 idInfo_, CARD16 idValue_, HTIndex* hash_, bool linkSpace_, Tag tag_, void* tagValue_) :
@@ -255,7 +255,7 @@ public:
 			const CARD16 code;
 			const CARD16 length; // BitLength
 
-			QString toString() const;
+			std::string toString() const;
 
 			Basic(bool ordered_, CARD16 code_, CARD16 length_) : ordered(ordered_), code(code_), length(length_) {}
 		};
@@ -271,7 +271,7 @@ public:
 			const CTXIndex* valueCtx;
 			const CARD16    nValues;
 
-			QString toString() const;
+			std::string toString() const;
 			Enumerated(bool ordered_, bool machineDep_, bool unpainted_, bool sparse_, CTXIndex* valueCtx_, CARD16 nValues_) :
 				ordered(ordered_), machineDep(machineDep_), unpainted(unpainted_), sparse(sparse_), valueCtx(valueCtx_), nValues(nValues_) {}
 		};
@@ -282,7 +282,7 @@ public:
 			public:
 				const SEIndex* linkType;
 
-				QString toString() const;
+				std::string toString() const;
 
 				Linked(SEIndex* linkType_) : linkType(linkType_) {}
 			};
@@ -291,7 +291,7 @@ public:
 			//            unifield(0:2..2), variant(0:3..3), privateFields(0:4..4): BOOLEAN,
 			//            refField(0:5..5), default(0:6..6), voidable(0:7..7): BOOLEAN],
 			enum class Tag {NOT_LINKED, LINKED};
-			static QString toString(Tag value);
+			static std::string toString(Tag value);
 
 			static Record* getInstance(Symbols* symbols, CARD16 u0);
 
@@ -308,7 +308,7 @@ public:
 
 			const Linked& getLinked() const;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Record(bool privateFields_, CARD16 length_, bool argument_, bool monitored_, bool machineDep_,
 				bool painted_, CTXIndex* fieldCtx_, Tag tag_, void* tagValue_) :
@@ -328,7 +328,7 @@ public:
 			const bool     basing;
 			const SEIndex* refType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Ref(bool counted_, bool ordered_, bool readOnly_, bool list_, bool var_, bool basing, SEIndex* refType_) :
 				counted(counted_), ordered(ordered_), readOnly(readOnly_), list(list_), var(var_), basing(basing), refType(refType_) {}
@@ -342,7 +342,7 @@ public:
 			const SEIndex* indexType;
 			const SEIndex* componentType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Array(bool packed_, SEIndex* indexType_, SEIndex* componentType_) : packed(packed_), indexType(indexType_), componentType(componentType_) {}
 		};
@@ -355,7 +355,7 @@ public:
 			const bool     readOnly;
 			const SEIndex* describedType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			ArrayDesc(bool var_, bool readOnly_, SEIndex* describedType_) : var(var_), readOnly(readOnly_), describedType(describedType_) {}
 		};
@@ -363,7 +363,7 @@ public:
 		class Transfer {
 		public:
 			typedef Symbols::TransferMode TransferMode;
-			static QString toString(TransferMode value) {
+			static std::string toString(TransferMode value) {
 				return Symbols::toString(value);
 			}
 			static Transfer* getInstance(Symbols* symbols, CARD16 u0);
@@ -373,7 +373,7 @@ public:
 			const SEIndex*     typeIn;  // CSEIndex
 			const SEIndex*     typeOut; // CSEIndex
 
-			QString toString() const;
+			std::string toString() const;
 
 			Transfer(bool safe_, TransferMode mode_, SEIndex* typeIn_, SEIndex* typeOut_) : safe(safe_), mode(mode_), typeIn(typeIn_), typeOut(typeOut_) {}
 		};
@@ -385,7 +385,7 @@ public:
 			const bool      named;
 			const CTXIndex* defCtx;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Definition(bool named_, CTXIndex* defCtx_) : named(named_), defCtx(defCtx_) {}
 		};
@@ -403,7 +403,7 @@ public:
 			const CTXIndex* caseCtx;
 			const SEIndex*  tagSei; // ISEIndex
 
-			QString toString() const;
+			std::string toString() const;
 
 			Union(bool overlaid_, bool controlled_, bool machineDep_, CTXIndex* caseCtx_, SEIndex* tagSei_) :
 				overlaid(overlaid_), controlled(controlled_), machineDep(machineDep_), caseCtx(caseCtx_), tagSei(tagSei_) {}
@@ -419,7 +419,7 @@ public:
 			const SEIndex* tagSei; // ISEIndex
 			const SEIndex* componentType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Sequence(bool packed_, bool controlled_, bool machineDep_, SEIndex* tagSei_, SEIndex* componentType_) :
 				packed(packed_), controlled(controlled_), machineDep(machineDep_), tagSei(tagSei_), componentType(componentType_) {}
@@ -433,7 +433,7 @@ public:
 			const SEIndex* offsetType;
 			const SEIndex* resultType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Relative(SEIndex* baseType_, SEIndex* offsetType_, SEIndex* resultType_) :
 				baseType(baseType_), offsetType(offsetType_), resultType(resultType_) {}
@@ -449,7 +449,7 @@ public:
 			const INT16    origin;
 			const CARD16   range;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Subrange(bool filled_, bool empty_, SEIndex* rangeType_, INT16 origin_, CARD16 range_) :
 				filled(filled_), empty(empty_), rangeType(rangeType_), origin(origin_), range(range_) {}
@@ -461,7 +461,7 @@ public:
 
 			const SEIndex* rangeType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Long(SEIndex* rangeType_) : rangeType(rangeType_) {}
 		};
@@ -472,7 +472,7 @@ public:
 
 			const SEIndex* rangeType;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Real(SEIndex* rangeType_) : rangeType(rangeType_) {}
 		};
@@ -485,7 +485,7 @@ public:
 			const CARD16   length; // BitLength
 			const SEIndex* id;     // ISEIndex
 
-			QString toString() const;
+			std::string toString() const;
 
 			Opaque(bool lengthKnown_, CARD16 length_, SEIndex* id_) : lengthKnown(lengthKnown_), length(length_), id(id_) {}
 		};
@@ -497,7 +497,7 @@ public:
 			const bool counted;
 			const bool mds;
 
-			QString toString() const;
+			std::string toString() const;
 
 			Zone(bool counted_, bool mds_) : counted(counted_), mds(mds_) {}
 		};
@@ -508,13 +508,13 @@ public:
 
 			const CARD32 length; // BitCount
 
-			QString toString() const;
+			std::string toString() const;
 
 			Bits(CARD32 length_) : length(length_) {}
 		};
 
 		typedef Symbols::TypeClass Tag;
-		static QString toString(Tag value) {
+		static std::string toString(Tag value) {
 			return Symbols::toString(value);
 		}
 
@@ -541,7 +541,7 @@ public:
 		const Zone&       getZone()       const;
 		const Bits&       getBits()       const;
 
-		QString toString() const;
+		std::string toString() const;
 
 		Cons(Tag tag_, void* tagValue_) : tag(tag_), tagValue(tagValue_) {}
 	};
@@ -552,7 +552,7 @@ public:
 	static SERecord* find(Symbols* symbols, CARD16 index);
 
 	enum class Tag {ID, CONS};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	const Tag   tag;
 	const void* tagValue;
@@ -560,7 +560,7 @@ public:
 	const Id&   getId() const;
 	const Cons& getCons() const;
 
-	QString toString() const;
+	std::string toString() const;
 
 	const Symbols* getSymbols() const {
 		return symbols;

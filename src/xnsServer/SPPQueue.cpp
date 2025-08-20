@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("spp-queue");
+static const util::Logger logger(__FILE__);
 
 #include "../courier/Type.h"
 
@@ -57,7 +57,7 @@ using XNS::Server::SPPQueueServer;
 //
 // SPPQueue
 //
-SPPQueue::SPPQueue(const char* name, quint16 socket) : SPPListener(name, socket) {
+SPPQueue::SPPQueue(const char* name, uint16_t socket) : SPPListener(name, socket) {
 	myServer     = nullptr;
 	recvListSeq  = 0;
 	time         = 0;
@@ -155,8 +155,8 @@ void SPPQueue::stop() {
 //
 void SPPQueue::handle(const Data& data, const SPP& spp) {
 	{
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  SPP   %s  HANDLE  %s!", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(spp.block.toString()));
 	}
 
@@ -165,12 +165,12 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 		// something goes wrong
 		logger.error("Unexpected");
 		logger.error("  expect  %04X  %s-%s", remoteID,           TO_CSTRING(Host::toString(remoteHost)),  TO_CSTRING(Socket::toString(remoteSocket)));
-		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()), TO_CSTRING(data.idp.srcSocket.toString()));
+		logger.error("  actual  %04X  %s-%s", (uint16_t)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()), TO_CSTRING(data.idp.srcSocket.toString()));
 		ERROR();
 	}
 
 	logger.info("recvBuffer %s", recvBuffer.toString());
-	logger.info("recvSeq %3d  sendSeq %3d", (quint16)recvSeq, (quint16)sendSeq);
+	logger.info("recvSeq %3d  sendSeq %3d", (uint16_t)recvSeq, (uint16_t)sendSeq);
 
 	// maintain myState
 	//   if accept this packet, increment recvSeq
@@ -261,7 +261,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 
 	// update sendSeq
 	{
-		quint16 nextSendSeq = sendSeq + 1;
+		uint16_t nextSendSeq = sendSeq + 1;
 		if (spp.alloc == nextSendSeq) {
 			// other end acknowledge sendSeq, increment sendSeq
 			// free current
@@ -283,7 +283,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 //
 void SPPQueue::sendThread() {
 	// retransmit data in sendBuffer in every WAIT_TIME
-	quint32 WAIT_TIME = 500; // unit is msec
+	uint32_t WAIT_TIME = 500; // unit is msec
 
 	QMutexLocker mutexLocker(&sendBufferMutex);
 	for(;;) {
@@ -295,7 +295,7 @@ void SPPQueue::sendThread() {
 		if (sendBuffer.isEmpty()) {
 			continue;
 		} else {
-			quint16 seq = sendSeq;
+			uint16_t seq = sendSeq;
 			for(;;) {
 				Buffer::Entry* entry = sendBuffer.get(seq);
 				if (entry == nullptr) break;
@@ -332,7 +332,7 @@ void SPPQueue::transmit(QueueData* myData) {
 	transmitListCV.wakeOne();
 }
 void SPPQueue::transmitThread() {
-	quint32 WAIT_TIME = 1000; // unit is msec
+	uint32_t WAIT_TIME = 1000; // unit is msec
 	QMutexLocker mutexLocker(&transmitListMutex);
 
 	for(;;) {
@@ -356,8 +356,8 @@ void SPPQueue::transmitThread() {
 
 				IDP idp;
 				idp.checksum_ = data.idp.checksum_;
-				idp.length    = (quint16)0;
-				idp.control   = (quint8)0;
+				idp.length    = (uint16_t)0;
+				idp.control   = (uint8_t)0;
 				idp.type      = IDP::Type::SPP;
 				idp.dstNet    = data.idp.srcNet;
 				idp.dstHost   = remoteHost;
@@ -408,7 +408,7 @@ delete_this:
 }
 
 SPPQueue::QueueData* SPPQueue::recv() {
-	quint32 WAIT_TIME = 1000; // unit is msec
+	uint32_t WAIT_TIME = 1000; // unit is msec
 
 	QMutexLocker mutexLocker(&recvListMutex);
 	if (recvList.isEmpty()) {
@@ -453,7 +453,7 @@ XNS::Server::Listeners* SPPQueue::getListeners() {
 XNS::Server::Services* SPPQueue::getServices() {
 	return myServer->getServices();
 }
-void SPPQueue::allocNext(quint16 seq) {
+void SPPQueue::allocNext(uint16_t seq) {
 	for(;;) {
 		Buffer::Entry* p = recvBuffer.get(seq);
 		if (p == nullptr) {
@@ -502,8 +502,8 @@ SPPQueue::QueueData::QueueData(const Data& data_, const SPP& spp_) {
 //
 // SPPQueue::Buffer::Entry
 //
-QString SPPQueue::Buffer::Entry::toString() {
-	return QString("(%1 %2)").arg(seq).arg(myData == nullptr ? "notInUse" : "inUse");
+std::string SPPQueue::Buffer::Entry::toString() {
+	return std::string("(%1 %2)").arg(seq).arg(myData == nullptr ? "notInUse" : "inUse");
 }
 //
 // SPPQueue::Buffer
@@ -511,10 +511,10 @@ QString SPPQueue::Buffer::Entry::toString() {
 SPPQueue::Buffer::~Buffer() {
 	clear();
 }
-SPPQueue::Buffer::Entry* SPPQueue::Buffer::get(quint16 seq) {
+SPPQueue::Buffer::Entry* SPPQueue::Buffer::get(uint16_t seq) {
 	return map.contains(seq) ? map[seq] : nullptr;
 }
-SPPQueue::Buffer::Entry* SPPQueue::Buffer::alloc(quint16 seq) {
+SPPQueue::Buffer::Entry* SPPQueue::Buffer::alloc(uint16_t seq) {
 	if (map.contains(seq)) {
 		logger.error("Unexpected");
 		logger.error("  seq    %d", seq);
@@ -526,7 +526,7 @@ SPPQueue::Buffer::Entry* SPPQueue::Buffer::alloc(quint16 seq) {
 		return ret;
 	}
 }
-void SPPQueue::Buffer::free(quint16 seq) {
+void SPPQueue::Buffer::free(uint16_t seq) {
 	auto i = map.find(seq);
 	if (i == map.end()) {
 		logger.error("Unexpected");
@@ -551,12 +551,12 @@ int SPPQueue::Buffer::countFree() {
 	}
 	return ret;
 }
-QString SPPQueue::Buffer::toString() {
-	QStringList list;
+std::string SPPQueue::Buffer::toString() {
+	std::stringList list;
 	for(auto e: map.values()) {
 		list += e->toString();
 	}
-	return QString("(%1)").arg(list.join(", "));
+	return std::string("(%1)").arg(list.join(", "));
 }
 void SPPQueue::set(const SPPQueueServer::Context& context) {
 	newName      = context.newName;
@@ -578,8 +578,8 @@ void SPPQueueServer::start() {
 	if (myServer == nullptr) ERROR();
 }
 void SPPQueueServer::handle(const Data& data, const SPP& spp) {
-	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPQueueServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 
 	if (spp.control.isSystem() && spp.control.isSendAck()) {
@@ -588,13 +588,13 @@ void SPPQueueServer::handle(const Data& data, const SPP& spp) {
 		// build state
 		Context context;
 		{
-			QString tempName = QString("%1-client").arg(name());
+			std::string tempName = std::string("%1-client").arg(name());
 
 			context.newName      = tempName.toUtf8().constData();
 			context.time         = data.timeStamp;
 
 			context.remoteHost   = data.idp.srcHost;
-			context.remoteSocket = (quint16)data.idp.srcSocket;
+			context.remoteSocket = (uint16_t)data.idp.srcSocket;
 			context.remoteID     = spp.idSrc;
 
 			context.localSocket  = listeners->getUnusedSocket();

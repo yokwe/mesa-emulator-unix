@@ -30,7 +30,7 @@
 
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("net-bpf");
+static const util::Logger logger(__FILE__);
 
 #include <net/bpf.h>
 #include <net/if.h>
@@ -63,7 +63,7 @@ QList<Network::Device> Network::getDeviceList() {
 	static QList<Network::Device> list = Network::BPF::getDeviceList();
 	return list;
 }
-Network::Device Network::getDevice(const QString& name) {
+Network::Device Network::getDevice(const std::string& name) {
 	auto list = getDeviceList();
 	for(auto e: list) {
 		if (e.name == name) {
@@ -101,7 +101,7 @@ QList<Network::Device> Network::BPF::getDeviceList() {
 		if (p->sa_family == AF_LINK) {
 			struct sockaddr_dl *sdl = (struct sockaddr_dl *) ifap->ifa_addr;
 			if (sdl->sdl_alen != 0) {
-				quint8* data = (quint8*)sdl->sdl_data;
+				uint8_t* data = (uint8_t*)sdl->sdl_data;
 
 				// build device
 				Network::Device device;
@@ -154,13 +154,13 @@ Network::BPF::Driver::~Driver() {
 	bpf.close();
 }
 
-int Network::BPF::Driver::select  (quint32 timeout, int& opErrno) {
+int Network::BPF::Driver::select  (uint32_t timeout, int& opErrno) {
 	return bpf.select(timeout, opErrno);
 }
-int Network::BPF::Driver::transmit(quint8* data, quint32 dataLen, int& opErrno) {
+int Network::BPF::Driver::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
 	return bpf.transmit(data, dataLen, opErrno);
 }
-int Network::BPF::Driver::receive(quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch) {
+int Network::BPF::Driver::receive(uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch) {
 	return bpf.receive(data, dataLen, opErrno, msecSinceEpoch);
 }
 void Network::BPF::Driver::discard() {

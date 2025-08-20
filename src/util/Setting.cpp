@@ -30,7 +30,7 @@
 
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("setting");
+static const util::Logger logger(__FILE__);
 
 #include "Setting.h"
 
@@ -198,7 +198,7 @@ QJsonObject Setting::toJsonObject() const {
 }
 
 Setting Setting::getInstance() {
-	QString path = QString("%1/run/setting.json").arg(getBuildDir());
+	std::string path = std::string("%1/run/setting.json").arg(getBuildDir());
 	logger.info("path       %s", qPrintable(path));
 
 	// sanity check
@@ -228,7 +228,7 @@ Setting Setting::getInstance() {
 	return setting;
 }
 
-Setting::Entry Setting::getEntry(QString name) {
+Setting::Entry Setting::getEntry(std::string name) {
 	for(Setting::Entry e: entryList) {
 		if (e.name == name) {
 			return e;
@@ -240,9 +240,9 @@ Setting::Entry Setting::getEntry(QString name) {
 }
 
 
-QHash<quint32,         quint32>        Setting::keyMap;
+QHash<uint32_t,         uint32_t>        Setting::keyMap;
 //    scanCode         keyName
-QHash<Qt::MouseButton, quint32>        Setting::buttonMap;
+QHash<Qt::MouseButton, uint32_t>        Setting::buttonMap;
 //    Qt::MouseButton  keyName
 
 void Setting::initMap(const Setting& setting) {
@@ -253,7 +253,7 @@ void Setting::initMap(const Setting& setting) {
 		// levelVKeys
 		{
 			// check duplicate of levelVKeys keyname
-			QMap<int, QString> map;
+			QMap<int, std::string> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.keyName)) {
 					logger.error("levelVkeys duplicate keyName %3d  %s  %s", e.keyName, e.name.toStdString(), map[e.keyName].toStdString());
@@ -265,7 +265,7 @@ void Setting::initMap(const Setting& setting) {
 		}
 		{
 			// check duplicate of levelVKeys name
-			QMap<QString, int> map;
+			QMap<std::string, int> map;
 			for(auto e: setting.levelVKeysList) {
 				if (map.contains(e.name)) {
 					logger.error("levelVkeys duplicate name %s  %3d  %3d", e.name.toStdString(), e.keyName, map[e.name]);
@@ -279,7 +279,7 @@ void Setting::initMap(const Setting& setting) {
 		// keyboard
 		{
 			// check duplicate of keyboard scanCode
-			QMap<int, QString> map;
+			QMap<int, std::string> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.scanCode)) {
 					logger.error("keyboard duplicate scanCode %3d  %s  %s", e.scanCode, e.name.toStdString(), map[e.scanCode].toStdString());
@@ -291,7 +291,7 @@ void Setting::initMap(const Setting& setting) {
 		}
 		{
 			// check duplicate of keyboard name
-			QMap<QString, int> map;
+			QMap<std::string, int> map;
 			for(auto e: setting.keyboardList) {
 				if (map.contains(e.name)) {
 					logger.error("keyboard duplicate name %s  %3d  %3d", e.name.toStdString(), e.scanCode, map[e.name]);
@@ -305,7 +305,7 @@ void Setting::initMap(const Setting& setting) {
 		// keyMap
 		{
 			// check duplicate of keyMap keyboard
-			QMap<QString, QString> map;
+			QMap<std::string, std::string> map;
 			for(auto e: setting.keyMapList) {
 				if (e.keyboard.isEmpty()) continue;
 
@@ -319,7 +319,7 @@ void Setting::initMap(const Setting& setting) {
 		}
 		{
 			// check duplicate of keyMap levelVKeys
-			QMap<QString, QString> map;
+			QMap<std::string, std::string> map;
 			for(auto e: setting.keyMapList) {
 				if (e.keyboard.isEmpty()) continue;
 
@@ -343,11 +343,11 @@ void Setting::initMap(const Setting& setting) {
 		buttonMap.clear();
 
 		// build Setting::keyMap
-		QMap<QString, quint32> nameToScanCode;
+		QMap<std::string, uint32_t> nameToScanCode;
 		for(auto e: setting.keyboardList) {
 			nameToScanCode[e.name] = e.scanCode;
 		}
-		QMap<QString, quint32> nameToKeyName;
+		QMap<std::string, uint32_t> nameToKeyName;
 		for(auto e: setting.levelVKeysList) {
 			nameToKeyName[e.name] = e.keyName;
 		}
@@ -355,8 +355,8 @@ void Setting::initMap(const Setting& setting) {
 		for(auto e: setting.keyMapList) {
 			if (e.keyboard.isEmpty()) continue;
 
-			quint32 scanCode = nameToScanCode[e.keyboard];
-			quint32 keyName  = nameToKeyName[e.levelVKeys];
+			uint32_t scanCode = nameToScanCode[e.keyboard];
+			uint32_t keyName  = nameToKeyName[e.levelVKeys];
 
 			Setting::keyMap[scanCode] = keyName;
 
@@ -364,14 +364,14 @@ void Setting::initMap(const Setting& setting) {
 		}
 
 		// build Setting::buttonMap
-		QMap<QString, quint32> nameToBitmask;
+		QMap<std::string, uint32_t> nameToBitmask;
 		for(auto e: setting.mouseList) {
 			nameToBitmask[e.name] = e.bitMask;
 		}
 
 		for(auto e: setting.buttonMapList) {
 			Qt::MouseButton bitMask = (Qt::MouseButton)nameToBitmask[e.button];
-			quint32         keyName = nameToKeyName[e.levelVKeys];
+			uint32_t         keyName = nameToKeyName[e.levelVKeys];
 
 			Setting::buttonMap[bitMask] = keyName;
 

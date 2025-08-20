@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("guicon");
+static const util::Logger logger(__FILE__);
 
 #include "GuiOp.h"
 
@@ -50,7 +50,7 @@ void GuiOp::updateDisplay(Rect* rect) {
 	guiOp->updateDisplayImpl(rect);
 }
 
-void GuiOp::setMP(quint16 newValue) {
+void GuiOp::setMP(uint16_t newValue) {
 	if (guiOp == 0) ERROR();
 	guiOp->setMPImpl(newValue);
 }

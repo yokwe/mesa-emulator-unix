@@ -64,7 +64,7 @@ public:
 	bool equals(const CTXIndex* that) const {
 		return this->symbols == that->symbols && this->index == that->index;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const CTXRecord& getValue() const;
 
     //FirstCtxSe: PROC [h: Handle, ctx: CTXIndex] RETURNS [ISEIndex] = {
@@ -120,7 +120,7 @@ public:
 	public:
 		const CTXIndex* ctxNew;
 
-		QString toString() const;
+		std::string toString() const;
 		Simple(CTXIndex* ctxNew_) : ctxNew(ctxNew_) {}
 	};
 	class Included {
@@ -134,7 +134,7 @@ public:
 		const bool      restricted;
 		const bool      reset;
 
-		QString toString() const;
+		std::string toString() const;
 		Included(CTXIndex* chain_, Closure copied_, MDIndex* module_, CTXIndex* map_, bool closed_, bool complete_, bool restricted_, bool reset_) :
 			chain(chain_), copied(copied_), module(module_), map(map_), closed(closed_), complete(complete_), restricted(restricted_), reset(reset_) {}
 	};
@@ -142,7 +142,7 @@ public:
 	public:
 		const CTXIndex* includeLink; // IncludedCTXIndex
 
-		QString toString() const;
+		std::string toString() const;
 		Imported(CTXIndex* includeLink_) : includeLink(includeLink_) {}
 	};
 
@@ -150,7 +150,7 @@ public:
 	static CTXRecord* find(Symbols* symbols, CARD16 index);
 
 	enum class Tag {SIMPLE, INCLUDED, IMPORTED, NIL};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 //	bool   mark;
 //	bool   varUpdated;
@@ -164,7 +164,7 @@ public:
 	const Included& getIncluded() const;
 	const Imported& getImported() const;
 
-	QString toString() const;
+	std::string toString() const;
 
 	CARD16 getIndex() const {
 		return index;

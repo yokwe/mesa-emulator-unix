@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("packet");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -45,7 +45,7 @@ static const Logger logger = Logger::getLogger("packet");
 
 #include <errno.h>
 
-void NetworkPacket::attach(const QString& name_) {
+void NetworkPacket::attach(const std::string& name_) {
 	name = name_;
     logger.info("NetworkPacket dummy");
     logger.info("name     = %s", name.toStdString());

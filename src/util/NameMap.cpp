@@ -35,32 +35,32 @@
 
 #include "NameMap.h"
 
-QString NameMap::toString8u(quint8 value) {
-	return QString::asprintf("%u", value);
+std::string NameMap::toString8u(uint8_t value) {
+	return std::string::asprintf("%u", value);
 }
-QString NameMap::toString16u(quint16 value) {
-	return QString::asprintf("%u", value);
+std::string NameMap::toString16u(uint16_t value) {
+	return std::string::asprintf("%u", value);
 }
-QString NameMap::toString32u(quint32 value) {
-	return QString::asprintf("%u", value);
+std::string NameMap::toString32u(uint32_t value) {
+	return std::string::asprintf("%u", value);
 }
-QString NameMap::toString64u(quint64 value) {
-	return QString::asprintf("%llu", value);
-}
-
-QString NameMap::toString8X(quint8 value) {
-	return QString::asprintf("%X", value);
-}
-QString NameMap::toString16X(quint16 value) {
-	return QString::asprintf("%X", value);
-}
-QString NameMap::toString32X(quint32 value) {
-	return QString::asprintf("%X", value);
-}
-QString NameMap::toString64X(quint64 value) {
-	return QString::asprintf("%llX", value);
+std::string NameMap::toString64u(uint64_t value) {
+	return std::string::asprintf("%llu", value);
 }
 
-QString NameMap::toString16X04(quint16 value) {
-	return QString::asprintf("%04X", value);
+std::string NameMap::toString8X(uint8_t value) {
+	return std::string::asprintf("%X", value);
+}
+std::string NameMap::toString16X(uint16_t value) {
+	return std::string::asprintf("%X", value);
+}
+std::string NameMap::toString32X(uint32_t value) {
+	return std::string::asprintf("%X", value);
+}
+std::string NameMap::toString64X(uint64_t value) {
+	return std::string::asprintf("%llX", value);
+}
+
+std::string NameMap::toString16X04(uint16_t value) {
+	return std::string::asprintf("%04X", value);
 }

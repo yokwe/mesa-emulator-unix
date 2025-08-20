@@ -89,15 +89,15 @@ std::string demangle(const char* mangled);
 template<typename T>
 auto std_sprintf_convert_(T&& value) {
 	constexpr auto is_std_string = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-	constexpr auto is_qstring = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, QString>::value;
+	constexpr auto is_std::string = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
 
-	// comment out line below to detect QString
-#ifdef STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_QSTRING
-	static_assert(!is_qstring, "value is QString");
+	// comment out line below to detect std::string
+#ifdef STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_std::string
+	static_assert(!is_std::string, "value is std::string");
 #endif
 	if constexpr (is_std_string) {
 		return (value).c_str();
-	} else if constexpr (is_qstring) {
+	} else if constexpr (is_std::string) {
 		return (value).toUtf8().constData();
 	} else {
 		return std::forward<T>(value);
@@ -195,13 +195,13 @@ private:
 	Logger(log4cpp::Category* category_) : category(category_) {}
 };
 
-int toIntMesaNumber(const QString& string);
+int toIntMesaNumber(const std::string& string);
 int toIntMesaNumber(const std::string& string);
 
 bool startsWith(const std::string_view& string, const std::string_view& literal);
 bool endsWith  (const std::string_view& string, const std::string_view& literal);
 
-QString toHexString(int size, const quint8* data);
+std::string toHexString(int size, const uint8_t* data);
 
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()
@@ -217,7 +217,7 @@ QString toHexString(int size, const quint8* data);
 // Helper macro to make toString for enum class
 #define TO_STRING_PROLOGUE(e) \
 	typedef e ENUM; \
-	static QMap<ENUM, QString> map({
+	static QMap<ENUM, std::string> map({
 #define MAP_ENTRY(m) {ENUM::m, #m},
 #define TO_STRING_EPILOGUE \
 	}); \
@@ -226,12 +226,12 @@ QString toHexString(int size, const quint8* data);
 	} else { \
 		logger.error("Unknown value = %d", (int)value); \
 		ERROR(); \
-		return QString("%1").arg((int)value); \
+		return std::string("%1").arg((int)value); \
 	}
 
 // bitFiled is used in symbols
-quint16 bitField(quint16 word, int startBit, int stopBit);
-__attribute__((always_inline)) static inline quint16 bitField(quint16 word, int startBit) {
+uint16_t bitField(uint16_t word, int startBit, int stopBit);
+__attribute__((always_inline)) static inline uint16_t bitField(uint16_t word, int startBit) {
 	return bitField(word, startBit, startBit);
 }
 
@@ -244,15 +244,15 @@ const char* getBuildDir();
 class Util {
 public:
 	// misc functions
-	static quint32 getMicroTime();
-	static void    msleep(quint32 milliSeconds);
-	static quint32 getUnixTime();
+	static uint32_t getMicroTime();
+	static void    msleep(uint32_t milliSeconds);
+	static uint32_t getUnixTime();
 
-	static void*   mapFile  (const QString& path, quint32& mapSize);
+	static void*   mapFile  (const std::string& path, uint32_t& mapSize);
 	static void    unmapFile(void* page);
 
-	static void    toBigEndian  (quint16* source, quint16* dest, int size);
-	static void    fromBigEndian(quint16* source, quint16* dest, int size);
+	static void    toBigEndian  (uint16_t* source, uint16_t* dest, int size);
+	static void    fromBigEndian(uint16_t* source, uint16_t* dest, int size);
 
 	//From System.mesa
 	//-- Time of day
@@ -274,12 +274,12 @@ public:
 	// Unix Time Epoch  1970-01-01 00:00:00
 	// Mesa Time Epoch  1968-01-01 00:00:00
 	//   Difference between above 2 date is 731 days.
-	static const quint32 EPOCH_DIFF = (quint32)2114294400 + (quint32)(731 * 60 * 60 * 24);
+	static const uint32_t EPOCH_DIFF = (uint32_t)2114294400 + (uint32_t)(731 * 60 * 60 * 24);
 
-	static quint32 toMesaTime(quint32 unixTime) {
+	static uint32_t toMesaTime(uint32_t unixTime) {
 		return unixTime + EPOCH_DIFF;
 	}
-	static quint32 toUnixTime(quint32 mesaTime) {
+	static uint32_t toUnixTime(uint32_t mesaTime) {
 		return mesaTime - EPOCH_DIFF;
 	}
 };

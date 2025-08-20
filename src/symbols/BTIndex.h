@@ -63,7 +63,7 @@ public:
 	bool isNull() const {
 		return index == BT_NULL;
 	}
-	QString toString() const;
+	std::string toString() const;
 	const BTRecord& getValue() const;
 
 private:
@@ -126,7 +126,7 @@ public:
 		public:
 			const CARD16 frameOffset;
 
-			QString toString() const;
+			std::string toString() const;
 			Inner(CARD16 frameOffset_) : frameOffset(frameOffset_) {}
 		};
 
@@ -134,14 +134,14 @@ public:
 		public:
 			const CARD16 index;
 
-			QString toString() const;
+			std::string toString() const;
 			Catch(CARD16 index_) : index(index_) {}
 		};
 
 		static Callable* getInstance(Symbols* symbols, CARD16 u0);
 
 		enum class Tag {OUTER, INNER, CATCH};
-		static QString toString(Tag value);
+		static std::string toString(Tag value);
 
 		const bool     inline_;
 		const SEIndex* id;
@@ -165,7 +165,7 @@ public:
 		const Inner&   getInner() const;
 		const Catch&   getCatch() const;
 
-		QString toString() const;
+		std::string toString() const;
 		Callable(bool inline__, SEIndex* id_, SEIndex* ioType_, bool monitored_, bool noXfers_,
 				bool resident_, bool entry_, bool internal_, CARD16 entryIndex_, Tag tag_, void* tagValue_) :
 			inline_(inline__), id(id_), ioType(ioType_), monitored(monitored_), noXfers(noXfers_),
@@ -177,21 +177,21 @@ public:
 
 		const CARD16 realOffset;
 
-		QString toString() const;
+		std::string toString() const;
 		Other(CARD16 realOffset_) : realOffset(realOffset_) {}
 	};
 
 	class BodyLink {
 	public:
 		enum class Which {SIBLING, PARENT};
-		static QString toString(Which);
+		static std::string toString(Which);
 
 		static BodyLink* getInstance(Symbols* symbols);
 
 		const Which    which;
 		const BTIndex* index;
 
-		QString toString() const;
+		std::string toString() const;
 		BodyLink(Which which_, BTIndex* index_) : which(which_), index(index_) {}
 	};
 
@@ -203,7 +203,7 @@ public:
 			const CARD16 thread;   // Tree.Index
 			const CARD16 frameSize;
 
-			QString toString() const;
+			std::string toString() const;
 			Internal(CARD16 bodyTree_, CARD16 thread_, CARD16 frameSize_) : bodyTree(bodyTree_), thread(thread_), frameSize(frameSize_) {}
 		};
 
@@ -213,14 +213,14 @@ public:
 			const CARD16 startIndex;
 			const CARD16 indexLength;
 
-			QString toString() const;
+			std::string toString() const;
 			External(CARD16 bytes_, CARD16 startIndex_, CARD16 indexLength_) : bytes(bytes_), startIndex(startIndex_), indexLength(indexLength_) {}
 		};
 
 		static BodyInfo* getInstance(Symbols* symbols);
 
 		enum class Tag {INTERNAL, EXTERNAL};
-		static QString toString(Tag);
+		static std::string toString(Tag);
 
 		const Tag   tag;
 		const void* tagValue;
@@ -228,7 +228,7 @@ public:
 		const Internal&   getInternal() const;
 		const External&   getExternal() const;
 
-		QString toString() const;
+		std::string toString() const;
 		BodyInfo(Tag tag_, void* tagValue_) : tag(tag_), tagValue(tagValue_) {}
 	};
 
@@ -236,7 +236,7 @@ public:
 	static BTRecord* find(Symbols* symbols, CARD16 index);
 
 	enum class Tag {CALLABLE, OTHER};
-	static QString toString(Tag value);
+	static std::string toString(Tag value);
 
 	const BodyLink* link;
 	const BTIndex*  firstSon;
@@ -251,7 +251,7 @@ public:
 	const Callable& getCallable() const;
 	const Other   & getOther() const;
 
-	QString toString() const;
+	std::string toString() const;
 
 private:
 	typedef Symbols::Key Key;

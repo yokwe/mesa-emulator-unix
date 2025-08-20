@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("agentstream");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -49,12 +49,12 @@ class StreamDummy : public AgentStream::Stream {
 public:
 	StreamDummy(CARD32 serverID);
 
-	quint16 idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
-	quint16 accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
-	quint16 connect(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
-	quint16 destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
-	quint16 read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
-	quint16 write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t connect(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
+	uint16_t write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb);
 
 private:
 };
@@ -63,27 +63,27 @@ StreamDummy::StreamDummy(CARD32 serverID) : Stream(std_sprintf("DUMMY-%d", serve
 	//
 }
 
-quint16 StreamDummy::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 //	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamDummy::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 //	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamDummy::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /*fcb*/, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s connect  state mesa = %d  pc = %d", name, iocb->mesaConnectionState, iocb->pcConnectionState);
 //	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamDummy::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	//	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamDummy::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s read %d %d", name, fcb->headCommand, iocb->serverID);
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaPut;
 	logger.info("mesaPut  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
@@ -92,7 +92,7 @@ quint16 StreamDummy::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoP
 	//	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamDummy::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamDummy::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 	logger.info("mesaGet  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",
@@ -115,7 +115,7 @@ quint16 StreamDummy::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoP
 //		}
 
 void AgentStream::addStream(Stream* stream) {
-	quint32 serverID = stream->serverID;
+	uint32_t serverID = stream->serverID;
 	if (map.contains(serverID)) {
 		logger.error("Duplicate serverID = %d", stream->serverID);
 		ERROR();
@@ -176,8 +176,8 @@ void AgentStream::Call() {
 			iocb->serverID, iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState, iocb->nextIOCB);
 	}
 
-	quint32 serverID = iocb->serverID;
-	quint16 command = fcb->headCommand;
+	uint32_t serverID = iocb->serverID;
+	uint16_t command = fcb->headCommand;
 
 	if (!map.contains(serverID)) {
 		Stream* dummy = new StreamDummy(serverID);
@@ -185,7 +185,7 @@ void AgentStream::Call() {
 		map[serverID] = dummy;
 	}
 	Stream* stream = map[serverID];
-	quint16 result = CoProcessorIOFaceGuam::R_error;
+	uint16_t result = CoProcessorIOFaceGuam::R_error;
 
 	switch(command) {
 	case CoProcessorIOFaceGuam::C_idle:

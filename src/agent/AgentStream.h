@@ -45,18 +45,18 @@ public:
 	class Stream {
 	public:
 		const std::string name;
-		const quint32     serverID;
+		const uint32_t     serverID;
 
-		Stream(const std::string name_, const quint32 serverID_) : name(name_), serverID(serverID_) {}
+		Stream(const std::string name_, const uint32_t serverID_) : name(name_), serverID(serverID_) {}
 		virtual ~Stream() {}
 
 		// provide method for each headCommand that returns headResult
-		virtual quint16 idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
-		virtual quint16 accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
-		virtual quint16 connect(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
-		virtual quint16 destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
-		virtual quint16 read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
-		virtual quint16 write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t connect(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
+		virtual uint16_t write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) = 0;
 	};
 
 
@@ -75,7 +75,7 @@ public:
 
 private:
 	CoProcessorIOFaceGuam::CoProcessorFCBType *fcb;
-	QMap<quint32, Stream*> map;
+	QMap<uint32_t, Stream*> map;
 };
 
 #endif

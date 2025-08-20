@@ -44,7 +44,7 @@ namespace XNS {
 		public:
 			class Entry : public JSONBase {
 			public:
-				QString name;
+				std::string name;
 				int     net;
 				int     hop;
 
@@ -52,7 +52,7 @@ namespace XNS {
 				QJsonObject toJsonObject() const;
 			};
 
-			QString      interface;
+			std::string      interface;
 			QList<Entry> list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);
@@ -63,8 +63,8 @@ namespace XNS {
 		public:
 			class Entry : public JSONBase {
 			public:
-				QString name;
-				quint64 value;
+				std::string name;
+				uint64_t value;
 
 				void fromJsonObject(const QJsonObject& jsonObject);
 				QJsonObject toJsonObject() const;
@@ -90,8 +90,8 @@ namespace XNS {
 
 		class Local {
 		public:
-			quint32 net;
-			quint64 host;
+			uint32_t net;
+			uint64_t host;
 		};
 
 		Network network;

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("listen-rip");
+static const util::Logger logger(__FILE__);
 
 #include "../xnsServer/Server.h"
 
@@ -54,7 +54,7 @@ using XNS::Server::Listener;
 using Courier::Services;
 using Courier::BLOCK;
 
-RIP::Entry RIPListener::find(quint32 net) {
+RIP::Entry RIPListener::find(uint32_t net) {
 	for(auto e: list) {
 		if (e.net == net) return e;
 	}
@@ -103,9 +103,9 @@ void RIPListener::run() {
 			BLOCK block(level2);
 
 			IDP idp;
-			idp.checksum_ = (quint16)0;
-			idp.length    = (quint16)0;
-			idp.control   = (quint8)0;
+			idp.checksum_ = (uint16_t)0;
+			idp.length    = (uint16_t)0;
+			idp.control   = (uint8_t)0;
 			idp.type      = IDP::Type::RIP;
 			idp.dstNet    = config->local.net;
 			idp.dstHost   = Host::ALL;
@@ -127,8 +127,8 @@ void RIPListener::handle(const Data& data) {
 		RIP rip;
 		FROM_BYTE_BUFFER(level2, rip);
 
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+		std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 		logger.info("%s  RIP   %s", TO_CSTRING(header), TO_CSTRING(rip.toString()));
 
 		if (rip.type == RIP::Type::REQUEST) {

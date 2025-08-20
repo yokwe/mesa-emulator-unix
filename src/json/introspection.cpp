@@ -13,7 +13,7 @@
 #include "../mesa/Pilot.h"
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("introspection");
+static const util::Logger logger(__FILE__);
 
 
 namespace introspection {

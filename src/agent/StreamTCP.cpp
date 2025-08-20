@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("tcp");
+static const util::Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -51,16 +51,16 @@ StreamTCP::StreamTCP() : Stream("TCP", CoProcessorServerIDs::tcpService) {
 	logger.info("%3d %-8s", serverID, name);
 }
 
-quint16 StreamTCP::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s idle %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_completed;
 }
-quint16 StreamTCP::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::accept (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s accept %d %d", name, fcb->headCommand, iocb->serverID);
 	ERROR();
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamTCP::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /* fcb */, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /* fcb */, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s connect  mesaIsServer = %d  state mesa = %d  pc = %d", name, iocb->mesaIsServer, iocb->mesaConnectionState, iocb->pcConnectionState);
 	return CoProcessorIOFaceGuam::R_error;
 
@@ -70,15 +70,15 @@ quint16 StreamTCP::connect(CoProcessorIOFaceGuam::CoProcessorFCBType * /* fcb */
 //
 //	return CoProcessorIOFaceGuam::R_completed;
 }
-quint16 StreamTCP::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::destroy(CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.info("%-8s destroy %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamTCP::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::read   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 	return CoProcessorIOFaceGuam::R_error;
 }
-quint16 StreamTCP::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
+uint16_t StreamTCP::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
 	logger.error("%-8s write %d %d", name, fcb->headCommand, iocb->serverID);
 	CoProcessorIOFaceGuam::TransferRec& tr = iocb->mesaGet;
 	logger.info("mesaGet  sst: %d  end [Stream: %d  Record: %d  SST: %d]  written: %3d  read: %3d  hTask: %d  int: %d  buffer: %4X  bufferSize: %3d  lock: %d",

@@ -40,8 +40,8 @@
 #include "Type.h"
 
 namespace Courier::Authentication1 {
-	const quint32 PROGRAM = 14;
-	const quint16 VERSION = 1;
+	const uint32_t PROGRAM = 14;
+	const uint16_t VERSION = 1;
 
 	//  Authentication: PROGRAM 14 VERSION 1
 	//  DEPENDS UPON Clearinghouse(2) VERSION 2
@@ -51,16 +51,16 @@ namespace Courier::Authentication1 {
 	//    CredentialsType: TYPE = {simple(0), strong(1)};
 	class CredentialsType : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			SIMPLE = 0,
 			STRONG = 1,
 		};
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 	//	Credentials: TYPE = RECORD[
@@ -71,7 +71,7 @@ namespace Courier::Authentication1 {
 		CredentialsType  type;
 		SEQUENCE<UINT16> value;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);

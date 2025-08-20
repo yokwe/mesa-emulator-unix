@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-boot");
+static const util::Logger logger(__FILE__);
 
 #include "Boot.h"
 
@@ -42,7 +42,7 @@ static const Logger logger = Logger::getLogger("xns-boot");
 //
 // XNS::Boot::Type
 //
-NameMap::Map<quint16> XNS::Boot::Type::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::Boot::Type::nameMap(NameMap::toString16u, {
 	{SIMPLE_REQUEST, "SIMPLE_REQUEST"},
 	{SIMPLE_DATA,    "SIMPLE_DATA"},
 	{SPP_REQUEST,    "SPP_REQUEST"},
@@ -52,7 +52,7 @@ NameMap::Map<quint16> XNS::Boot::Type::nameMap(NameMap::toString16u, {
 //
 // XNS::Boot::SimpleRequest
 //
-QString XNS::Boot::SimpleRequest::toString() const {
+std::string XNS::Boot::SimpleRequest::toString() const {
 	return bootFileNumber.toHexaDecimalString();
 }
 void XNS::Boot::SimpleRequest::fromByteBuffer(ByteBuffer& bb) {
@@ -66,8 +66,8 @@ void XNS::Boot::SimpleRequest::toByteBuffer  (ByteBuffer& bb) const {
 //
 // XNS::Boot::SimpleData
 //
-QString XNS::Boot::SimpleData::toString() const {
-	return QString("%1 %2 %3").arg(bootFileNumber.toHexaDecimalString()).arg(packetNumber).arg(block.toString());
+std::string XNS::Boot::SimpleData::toString() const {
+	return std::string("%1 %2 %3").arg(bootFileNumber.toHexaDecimalString()).arg(packetNumber).arg(block.toString());
 }
 void XNS::Boot::SimpleData::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, bootFileNumber);
@@ -84,8 +84,8 @@ void XNS::Boot::SimpleData::toByteBuffer  (ByteBuffer& bb) const {
 //
 // XNS::Boot::SPPRequest
 //
-QString XNS::Boot::SPPRequest::toString() const {
-	return QString("%1 %2").arg(bootFileNumber.toHexaDecimalString()).arg(connectionID, 4, 16, QChar('0'));
+std::string XNS::Boot::SPPRequest::toString() const {
+	return std::string("%1 %2").arg(bootFileNumber.toHexaDecimalString()).arg(connectionID, 4, 16, QChar('0'));
 }
 void XNS::Boot::SPPRequest::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, bootFileNumber);
@@ -151,19 +151,19 @@ void XNS::Boot::set(const SPPRequest&    newValue) {
 		ERROR();
 	}
 }
-QString XNS::Boot::toString() const {
+std::string XNS::Boot::toString() const {
 	if (type == Type::SIMPLE_REQUEST) {
 		SimpleRequest newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == Type::SIMPLE_DATA) {
 		SimpleData newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == Type::SPP_REQUEST) {
 		SPPRequest newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else {
 		logger.error("Unexpected");
 		logger.error("  type %s", type.toString());

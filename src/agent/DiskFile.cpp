@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("diskfile");
+static const util::Logger logger(__FILE__);
 
 #include "DiskFile.h"
 
@@ -67,7 +67,7 @@ int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
 	return memcmp(page + block, buffer, sizeof(Page));
 }
 
-void DiskFile::attach(const QString& path_) {
+void DiskFile::attach(const std::string& path_) {
 	path = path_;
 	logger.info("DiskFile::attach %s", path.toStdString());
 

@@ -8,7 +8,7 @@
 
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("json");
+static const util::Logger logger(__FILE__);
 
 #include "json.h"
 

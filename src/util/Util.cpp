@@ -37,7 +37,7 @@
 #include <execinfo.h>
 
 #include "./Util.h"
-static const Logger logger = Logger::getLogger("util");
+static const util::Logger logger(__FILE__);
 
 void logBackTrace() {
 	const int BUFFER_SIZE = 100;
@@ -101,8 +101,8 @@ std::string demangle(const char* mangled) {
 
 
 // Logger
-static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& qString) {
-	std::string string = qString.toStdString();
+static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const std::string& std::string) {
+	std::string string = std::string.toStdString();
 
 	if (context.line == 0) {
 		switch(type) {
@@ -187,9 +187,9 @@ void Logger::popPriority() {
 }
 
 
-int toIntMesaNumber(const QString& string) {
+int toIntMesaNumber(const std::string& string) {
 	bool ok;
-	quint32 ret;
+	uint32_t ret;
 
 	if (string.startsWith("0x") || string.startsWith("0X")) {
 		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
@@ -289,17 +289,17 @@ int toIntMesaNumber(const std::string& string) {
 	}
 }
 
-QString toHexString(int size, const quint8* data) {
-	QString ret;
+std::string toHexString(int size, const uint8_t* data) {
+	std::string ret;
 
 	for(int i = 0; i < size; i++) {
-		ret += QString::asprintf("%02X", data[i]);
+		ret += std::string::asprintf("%02X", data[i]);
 	}
 	return ret;
 }
 
 
-quint16 bitField(quint16 word, int startBit, int stopBit) {
+uint16_t bitField(uint16_t word, int startBit, int stopBit) {
 	const int MAX_BIT = 15;
 
 	if (startBit < 0)        ERROR();
@@ -311,7 +311,7 @@ quint16 bitField(quint16 word, int startBit, int stopBit) {
 	int shift  = MAX_BIT - stopBit;
 	int mask   = ((int)(1L << (stopBit - startBit + 1)) - 1) << shift;
 
-	return (quint16)((word & mask) >> shift);
+	return (uint16_t)((word & mask) >> shift);
 }
 
 
@@ -319,17 +319,17 @@ class MapInfo {
 public:
 	int     id;
 	QFile   file;
-	quint64 size;
+	uint64_t size;
 	void*   page;
 
-	MapInfo(QString path) : id(count++), file(path), size(0), page(0) {}
+	MapInfo(std::string path) : id(count++), file(path), size(0), page(0) {}
 
 	static int count;
 };
 static QMap<void*, MapInfo*>allMap;
 int MapInfo::count = 0;
 
-void* Util::mapFile  (const QString& path, quint32& mapSize) {
+void* Util::mapFile  (const std::string& path, uint32_t& mapSize) {
 	MapInfo* mapInfo = new MapInfo(path);
 
 	if (!mapInfo->file.exists()) {
@@ -337,7 +337,7 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 		ERROR();
 	}
 	mapInfo->size = mapInfo->file.size();
-	mapSize = (quint32)mapInfo->size;
+	mapSize = (uint32_t)mapInfo->size;
 
 	bool ok = mapInfo->file.open(QIODevice::ReadWrite);
 	if (!ok) {
@@ -351,7 +351,7 @@ void* Util::mapFile  (const QString& path, quint32& mapSize) {
 	}
 
 	allMap[mapInfo->page] = mapInfo;
-	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, mapInfo->file.fileName().toStdString());
+	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo->id, (uint32_t)mapInfo->size, mapInfo->file.fileName().toStdString());
 
 	return mapInfo->page;
 }
@@ -362,7 +362,7 @@ void  Util::unmapFile(void* page) {
 	}
 	MapInfo* mapInfo = allMap[page];
 
-	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo->id, (quint32)mapInfo->size, mapInfo->file.fileName().toStdString());
+	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo->id, (uint32_t)mapInfo->size, mapInfo->file.fileName().toStdString());
 
 	if (!mapInfo->file.unmap((uchar*)(mapInfo->page))) {
 		logger.fatal("file.unmap returns false.  error = %s", mapInfo->file.errorString().toStdString());
@@ -380,7 +380,7 @@ void  Util::unmapFile(void* page) {
 namespace {
 	class QThreadWrpper : public QThread {
 	public:
-		static void msleep(quint32 msec) {
+		static void msleep(uint32_t msec) {
 			QThread::msleep(msec);
 		}
 	};
@@ -388,28 +388,28 @@ namespace {
 
 static int elapsedTimer_needStart = 1;
 static QElapsedTimer elapsedTimer;
-quint32 Util::getMicroTime() {
+uint32_t Util::getMicroTime() {
 	if (elapsedTimer_needStart) {
 		elapsedTimer.start();
 		elapsedTimer_needStart = 0;
 	}
-	quint64 time = elapsedTimer.nsecsElapsed();
+	uint64_t time = elapsedTimer.nsecsElapsed();
 	// convert from nanoseconds to microseconds
-	return (quint32)(time / 1000);
+	return (uint32_t)(time / 1000);
 }
 
-quint32 Util::getUnixTime() {
+uint32_t Util::getUnixTime() {
 	return QDateTime::currentSecsSinceEpoch();
 }
-void Util::msleep(quint32 milliSeconds) {
+void Util::msleep(uint32_t milliSeconds) {
 	QThreadWrpper::msleep(milliSeconds);
 }
 
-void Util::toBigEndian(quint16* source, quint16* dest, int size) {
-	qToBigEndian<quint16>(source, size, dest);
+void Util::toBigEndian(uint16_t* source, uint16_t* dest, int size) {
+	qToBigEndian<uint16_t>(source, size, dest);
 }
-void Util::fromBigEndian(quint16* source, quint16* dest, int size) {
-	qFromBigEndian<quint16>(source, size, dest);
+void Util::fromBigEndian(uint16_t* source, uint16_t* dest, int size) {
+	qFromBigEndian<uint16_t>(source, size, dest);
 }
 
 // get build directory from Environment variable BUILD_DIR

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-auth1");
+static const util::Logger logger(__FILE__);
 
 #include "Authentication1.h"
 
@@ -42,7 +42,7 @@ static const Logger logger = Logger::getLogger("cr-auth1");
 //
 // Courier::Authentication1::CredentialsType
 //
-NameMap::Map<quint16> Courier::Authentication1::CredentialsType::nameMap(NameMap::toString16X04, {
+NameMap::Map<uint16_t> Courier::Authentication1::CredentialsType::nameMap(NameMap::toString16X04, {
 	{SIMPLE, "SIMPLE"},
 	{STRONG, "STRONG"}
 });
@@ -51,8 +51,8 @@ NameMap::Map<quint16> Courier::Authentication1::CredentialsType::nameMap(NameMap
 //
 // Courier::Authentication1::Credentials
 //
-QString Courier::Authentication1::Credentials::toString() const {
-	return QString("%1-(%2)").arg(type.toString()).arg(value.toString());
+std::string Courier::Authentication1::Credentials::toString() const {
+	return std::string("%1-(%2)").arg(type.toString()).arg(value.toString());
 }
 
 // Courier::Base

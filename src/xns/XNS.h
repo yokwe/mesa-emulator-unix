@@ -59,42 +59,42 @@ namespace XNS {
 	class Host : public UINT48 {
 	public:
 		static constexpr int     SIZE      = 6;
-		static constexpr quint64 ALL       = 0xFFFF'FFFF'FFFFULL;
-		static constexpr quint64 UNKNOWN   = 0;
-		static constexpr quint64 BFN_GVWIN = 0x0000'aa00'0e60ULL; // Boot File Number of GVWin
+		static constexpr uint64_t ALL       = 0xFFFF'FFFF'FFFFULL;
+		static constexpr uint64_t UNKNOWN   = 0;
+		static constexpr uint64_t BFN_GVWIN = 0x0000'aa00'0e60ULL; // Boot File Number of GVWin
 
 		// define operator =
-		quint64 operator =(const quint64& newValue) const {
+		uint64_t operator =(const uint64_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		static QString toOctalString(quint64 value);
-		static QString toDecimalString(quint64 value);
-		static QString toHexaDecimalString(quint64 value, QString sep = "");
-		static quint64 fromString(QString string);
+		static std::string toOctalString(uint64_t value);
+		static std::string toDecimalString(uint64_t value);
+		static std::string toHexaDecimalString(uint64_t value, std::string sep = "");
+		static uint64_t fromString(std::string string);
 
-		QString toOctalString() const {
+		std::string toOctalString() const {
 			return toOctalString(value());
 		}
-		QString toDecimalString() const {
+		std::string toDecimalString() const {
 			return toDecimalString(value());
 		}
-		QString toHexaDecimalString(QString sep = "") const {
+		std::string toHexaDecimalString(std::string sep = "") const {
 			return toHexaDecimalString(value(), sep);
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return toString(value());
 		}
-		static QString toString(quint64 value) {
+		static std::string toString(uint64_t value) {
 			return nameMap.toString(value);
 		}
-		static void addNameMap(quint64 value, QString name) {
+		static void addNameMap(uint64_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint64> nameMap;
+		static NameMap::Map<uint64_t> nameMap;
 	};
 
 
@@ -102,24 +102,24 @@ namespace XNS {
 	public:
 		class Type : public UINT16 {
 		public:
-			enum Value : quint16 {
+			enum Value : uint16_t {
 				XNS = 0x600, IP = 0x800,
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		static const int MINIMUM_PACKET_LENGTH = 60;
@@ -135,7 +135,7 @@ namespace XNS {
 		}
 
 		// Courier::Base
-		QString toString() const;
+		std::string toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};
@@ -143,7 +143,7 @@ namespace XNS {
 
 	class Checksum : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			NOCHECK = 0xFFFF,
 		};
 
@@ -152,55 +152,55 @@ namespace XNS {
 		}
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
-		static void addNameMap(quint16 value, QString name) {
+		static void addNameMap(uint16_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 
 	class Net : public UINT32 {
 	public:
-		enum Value : quint32 {
+		enum Value : uint32_t {
 			ALL     = 0xFFFFFFFF,
 			UNKNOWN = 0,
 		};
 
 		// define operator =
-		quint32 operator =(const quint32& newValue) const {
+		uint32_t operator =(const uint32_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return toString(value());
 		}
-		static QString toString(quint32 value) {
+		static std::string toString(uint32_t value) {
 			return nameMap.toString(value);
 		}
-		static void addNameMap(quint32 value, QString name) {
+		static void addNameMap(uint32_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint32> nameMap;
+		static NameMap::Map<uint32_t> nameMap;
 	};
 
 
 	class Socket : public UINT16 {
 	public:
 		// Well-known socket numbers range from 1 to 3000 decimal
-		static const quint16 MAX_WELLKNOWN_SOCKET = 3000;
+		static const uint16_t MAX_WELLKNOWN_SOCKET = 3000;
 
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			RIP = 1, ECHO = 2, ERROR_ = 3, ENVOY = 4, COURIER = 5, CHS_OLD = 7, TIME = 8,
 			BOOT = 10, DIAG = 19,
 			CHS = 20, AUTH = 21, MAIL = 22, NETEXEC = 23, WSINFO = 24, BINDING = 28,
@@ -209,22 +209,22 @@ namespace XNS {
 		};
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return toString(value());
 		}
-		static QString toString(quint16 newValue) {
+		static std::string toString(uint16_t newValue) {
 			return nameMap.toString(newValue);
 		}
-		static void addNameMap(quint16 value, QString name) {
+		static void addNameMap(uint16_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 
@@ -235,24 +235,24 @@ namespace XNS {
 	public:
 		class Type : public UINT8 {
 		public:
-			enum Value : quint8 {
+			enum Value : uint8_t {
 				RIP = 1, ECHO = 2, ERROR_ = 3, PEX = 4, SPP = 5, BOOT = 9,
 			};
 
 			// define operator =
-			quint8 operator =(const quint8& newValue) const {
+			uint8_t operator =(const uint8_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint8 value, QString name) {
+			static void addNameMap(uint8_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint8> nameMap;
+			static NameMap::Map<uint8_t> nameMap;
 		};
 
 		// MPL is estimated to be 60 seconds by observing that in the worst case.
@@ -275,17 +275,17 @@ namespace XNS {
 
 		// Set length field of IDP in ByteBuffer
 		// bb.base() must point to head of IDP packet
-		static quint16 getLength(const ByteBuffer& bb);
-		static void    setLength(ByteBuffer& bb, quint16 newValue);
+		static uint16_t getLength(const ByteBuffer& bb);
+		static void    setLength(ByteBuffer& bb, uint16_t newValue);
 
 		// Set length field of IDP in ByteBuffer
 		// bb.base() must point to head of IDP packet
-		static quint16 getChecksum(const ByteBuffer& bb);
-		static void    setChecksum(ByteBuffer& bb, quint16 newValue);
+		static uint16_t getChecksum(const ByteBuffer& bb);
+		static void    setChecksum(ByteBuffer& bb, uint16_t newValue);
 
 		// Compute checksum of IDP using length field
 		// bb.base() must point to head of IDP packet
-		static quint16 computeChecksum(const ByteBuffer& bb);
+		static uint16_t computeChecksum(const ByteBuffer& bb);
 
 
 		Checksum checksum_;
@@ -308,7 +308,7 @@ namespace XNS {
 		}
 
 		// Courier::Base
-		QString toString() const;
+		std::string toString() const;
 		// fromByteBuffer will set limit of bb from length field
 		void fromByteBuffer(ByteBuffer& bb);
 		// toByteBuffer will add padding for odd and short length, update checksum field
@@ -317,11 +317,11 @@ namespace XNS {
 
 
 	// Load config file
-	Config loadConfig(const QString& path);
+	Config loadConfig(const std::string& path);
 
 	class Context {
 	public:
-		quint64 address;
+		uint64_t address;
 
 		Driver* driver;
 
@@ -336,7 +336,7 @@ namespace XNS {
 		void fixBlock();
 	public:
 		// creation time in milliseconds since unix time epoch, used to remove old entry
-		qint64   timeStamp;
+		int64_t   timeStamp;
 		Config*  config;
 		Context* context;
 
@@ -351,7 +351,7 @@ namespace XNS {
 		Data(const Data& that);
 		Data& operator = (const Data& that);
 
-		Data(qint64 timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_);
+		Data(int64_t timeStamp_, Config* config_, Context* context_, Packet& packet_, Ethernet ethernet_, IDP idp_);
 	};
 
 }

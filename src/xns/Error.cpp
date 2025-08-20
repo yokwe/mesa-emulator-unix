@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-error");
+static const util::Logger logger(__FILE__);
 
 #include "../util/JSONUtil.h"
 
@@ -44,7 +44,7 @@ static const Logger logger = Logger::getLogger("xns-error");
 //
 // XNS::Error::Type
 //
-NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::Error::Type::nameMap(NameMap::toString16u, {
 	{UNSPEC,                "UNSPEC"},
 	{BAD_CHECKSUM,          "BAD_CHECKSUM"},
 	{NO_SOCKET,             "NO_SOCKET"},
@@ -66,8 +66,8 @@ NameMap::Map<quint16> XNS::Error::Type::nameMap(NameMap::toString16u, {
 //
 // XNS::Error
 //
-QString XNS::Error::toString() const {
-	return QString("%1 %2 %3").arg(type.toString()).arg(QString("%1").arg((quint16)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
+std::string XNS::Error::toString() const {
+	return std::string("%1 %2 %3").arg(type.toString()).arg(std::string("%1").arg((uint16_t)param, 4, 16, QChar('0')).toUpper()).arg(block.toString());
 }
 void XNS::Error::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, type);

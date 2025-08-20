@@ -42,9 +42,9 @@ namespace XNS::Server {
 
 	class SPPPacket : public SPPQueue {
 	public:
-		SPPPacket() : SPPQueue("SPPPacket", (quint16)Socket::COURIER) {}
+		SPPPacket() : SPPQueue("SPPPacket", (uint16_t)Socket::COURIER) {}
 
-		SPPPacket(const char* name, quint16 socket) : SPPQueue(name, socket) {}
+		SPPPacket(const char* name, uint16_t socket) : SPPQueue(name, socket) {}
 		SPPPacket(const SPPPacket& that)            : SPPQueue(that) {}
 
 		// life cycle method

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xnsServer");
+static const util::Logger logger(__FILE__);
 
 #include "../xnsServerImpl/TimeListener.h"
 #include "../xnsServerImpl/EchoListener.h"
@@ -88,7 +88,7 @@ int main(int, char**) {
 	// init server
 	logger.info("server.init");
 	const char* buildDir = getBuildDir();
-	QString path = QString("%1/run/xns-config.json").arg(buildDir);
+	std::string path = std::string("%1/run/xns-config.json").arg(buildDir);
 	logger.info("path = %s", qPrintable(path));
 	server.init(path);
 

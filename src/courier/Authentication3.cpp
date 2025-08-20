@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-auth3");
+static const util::Logger logger(__FILE__);
 
 #include "Authentication3.h"
 

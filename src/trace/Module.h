@@ -48,7 +48,7 @@ namespace Module {
 		//			    Frame      Code (* = code links)
 		//  GermOpsImpl               0AB0H    1209H     1CH
 
-		QString module;
+		std::string module;
 		int     gf;
 		int     cb;
 		int     gfi;
@@ -63,25 +63,25 @@ namespace Module {
 			return *this;
 		}
 
-		LoadmapFile(QString module_, int gf_, int cb_, int gfi_) : module(module_), gf(gf_), cb(cb_), gfi(gfi_) {}
+		LoadmapFile(std::string module_, int gf_, int cb_, int gfi_) : module(module_), gf(gf_), cb(cb_), gfi(gfi_) {}
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;
 
 		// load/save json file
-		static QList<LoadmapFile> load(const QString& path);
-		static void save(const QString& path, QList<LoadmapFile> list);
+		static QList<LoadmapFile> load(const std::string& path);
+		static void save(const std::string& path, QList<LoadmapFile> list);
 
 		// read Guam.loadmap files
-		static QList<LoadmapFile> loadLoadmapFile(const QString& path);
+		static QList<LoadmapFile> loadLoadmapFile(const std::string& path);
 	};
 
 	class MapFile : JSONBase {
 	public:
 		// Bytes   EVI  Offset    IPC   Module               Procedure
 		//    42B   13   1030B     20B  ProcessorHeadGuam    GetNextAvailableVM
-		QString module;
-		QString proc;
+		std::string module;
+		std::string proc;
 		int     bytes;
 		int     evi;
 		int     pc;
@@ -97,18 +97,18 @@ namespace Module {
 			return *this;
 		}
 
-		MapFile(QString module_, QString proc_, int bytes_, int evi_, int pc_) : module(module_), proc(proc_), bytes(bytes_), evi(evi_), pc(pc_) {}
+		MapFile(std::string module_, std::string proc_, int bytes_, int evi_, int pc_) : module(module_), proc(proc_), bytes(bytes_), evi(evi_), pc(pc_) {}
 
 
 		void fromJsonObject(const QJsonObject& jsonObject);
 		QJsonObject toJsonObject() const;
 
 		// load/save json file
-		static QList<MapFile> load(const QString& path);
-		static void save(const QString& path, QList<MapFile> list);
+		static QList<MapFile> load(const std::string& path);
+		static void save(const std::string& path, QList<MapFile> list);
 
 		// read *.map and returns QList<Map>
-		static QList<MapFile> loadMapFile(const QString& path);
+		static QList<MapFile> loadMapFile(const std::string& path);
 	};
 
 };

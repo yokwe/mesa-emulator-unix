@@ -63,18 +63,18 @@ namespace Network {
 			::swab(myPacketData, myPacketData, SIZE);
 		}
 
-		QString toString(int limit = 65535) const;
+		std::string toString(int limit = 65535) const;
 
-		quint8* packetData();
+		uint8_t* packetData();
 
 	private:
-		quint8  myPacketData[SIZE];
+		uint8_t  myPacketData[SIZE];
 	};
 
 	class Device {
 	public:
-		QString name;
-		quint64 address;
+		std::string name;
+		uint64_t address;
 
 		Device() : address(0) {}
 		Device(const Device& that) : name(that.name), address(that.address) {}
@@ -87,24 +87,24 @@ namespace Network {
 		bool isNull() {
 			return address == 0;
 		}
-		QString toString() const;
+		std::string toString() const;
 	};
 
 	class Driver {
 	public:
 		// no error checking
-		virtual int  select  (quint32 timeout, int& opErrno) = 0;
-		virtual int  transmit(quint8* data, quint32 dataLen, int& opErrno) = 0;
-		virtual int  receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch = nullptr) = 0;
+		virtual int  select  (uint32_t timeout, int& opErrno) = 0;
+		virtual int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno) = 0;
+		virtual int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch = nullptr) = 0;
 		virtual void discard() = 0;
 
 		Driver(const Device& device_) : device(device_) {}
 		virtual ~Driver() {}
 
-		QString getName() {
+		std::string getName() {
 			return device.name;
 		}
-		quint64 getAddress() {
+		uint64_t getAddress() {
 			return device.address;
 		}
 
@@ -117,6 +117,6 @@ namespace Network {
 	//
 
 	QList<Device> getDeviceList();
-	Device        getDevice(const QString& name);
+	Device        getDevice(const std::string& name);
 	Driver*       getDriver(const Device& device);
 }

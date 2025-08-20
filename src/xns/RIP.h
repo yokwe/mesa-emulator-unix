@@ -57,19 +57,19 @@ namespace XNS {
 			};
 
 			// define operator =
-			quint16 operator =(const quint16& newValue) const {
+			uint16_t operator =(const uint16_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 
 		class Entry : public Base {
@@ -78,12 +78,12 @@ namespace XNS {
 			UINT16 hop;
 
 			Entry() {}
-			Entry(quint32 net_, quint16 hop_) {
+			Entry(uint32_t net_, uint16_t hop_) {
 				net = net_;
 				hop = hop_;
 			}
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -91,12 +91,12 @@ namespace XNS {
 		};
 
 		static const int     BROADCAST_INTERVAL = 30; // 30 seconds
-		static const quint16 HOP_INFINITY       = 16;
+		static const uint16_t HOP_INFINITY       = 16;
 
 		Type         type;
 		QList<Entry> entryList;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);

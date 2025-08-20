@@ -11,7 +11,7 @@
 #include <cstdio>
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("stream_json");
+static const util::Logger logger(__FILE__);
 
 #include "stream_util.h"
 #include "stream_json.h"

@@ -29,7 +29,7 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const util::Logger logger(__FILE__);
 
 //#include "../mesa/Type.h"
 //#include "../trace/Trace.h"

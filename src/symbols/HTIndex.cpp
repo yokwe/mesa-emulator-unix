@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("ht");
+static const util::Logger logger(__FILE__);
 
 #include "HTIndex.h"
 #include "BCDFile.h"
@@ -66,9 +66,9 @@ HTIndex* HTIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new HTIndex(symbols, index);
 }
-QString HTIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string HTIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const HTRecord& HTIndex::getValue() const {
 	HTRecord* ret = HTRecord::find(symbols, index);
@@ -84,7 +84,7 @@ const HTRecord& HTIndex::getValue() const {
 // HTRecord
 //
 QMap<HTRecord::Key, HTRecord*> HTRecord::all;
-HTRecord::HTRecord(Symbols* symbols_, CARD16 index_, bool anyInternal_, bool anyPublic_, CARD16 link_, CARD16 ssIndex_, QString value_) :
+HTRecord::HTRecord(Symbols* symbols_, CARD16 index_, bool anyInternal_, bool anyPublic_, CARD16 link_, CARD16 ssIndex_, std::string value_) :
 	symbols(symbols_), index(index_), anyInternal(anyInternal_), anyPublic(anyPublic_), link(link_), ssIndex(ssIndex_), value(value_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -105,10 +105,10 @@ HTRecord* HTRecord::getInstance(Symbols* symbols, CARD16 index, CARD16 lastSSInd
     // 1
     CARD16 ssIndex     = symbols->file->getCARD16();
     // ss.substring(lastSSIndex, data.ssIndex);
-    QString value       = symbols->ss.mid(lastSSIndex, ssIndex - lastSSIndex);
+    std::string value       = symbols->ss.mid(lastSSIndex, ssIndex - lastSSIndex);
 
     return new HTRecord(symbols, index, anyInternal, anyPublic, link, ssIndex, value);
 }
-QString HTRecord::toString() const {
-	return QString("%1 %2%3 %4").arg(index, 4).arg(anyInternal ? "I" : " ").arg(anyPublic ? "P" : " ").arg(value);
+std::string HTRecord::toString() const {
+	return std::string("%1 %2%3 %4").arg(index, 4).arg(anyInternal ? "I" : " ").arg(anyPublic ? "P" : " ").arg(value);
 }

@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("testByteBuffer");
+static const util::Logger logger(__FILE__);
 
 #include "testBase.h"
 
@@ -50,8 +50,8 @@ class testByteBuffer : public testBase {
 
 public:
 	void testCapacity() {
-		quint8 data[100];
-		quint32 size = sizeof(data);
+		uint8_t data[100];
+		uint32_t size = sizeof(data);
 
 		{
 			BigEndianByteBuffer bb(data, size);
@@ -69,8 +69,8 @@ public:
 	}
 
 	void testGet() {
-		quint8 data[100];
-		quint32 size = sizeof(data);
+		uint8_t data[100];
+		uint32_t size = sizeof(data);
 
 		{
 			BigEndianByteBuffer bb(data, size);
@@ -79,54 +79,54 @@ public:
 			// get with no position
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint8 val = 0xA5;
+				uint32_t pos = 16;
+				uint8_t val = 0xA5;
 				data[pos] = val;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get8(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get8());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint16 val = 0x1122;
+				uint32_t pos = 16;
+				uint16_t val = 0x1122;
 				data[16] = 0x11;
 				data[17] = 0x22;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get16(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get16());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint32 val = 0x11223344;
+				uint32_t pos = 16;
+				uint32_t val = 0x11223344;
 				data[16] = 0x33;
 				data[17] = 0x44;
 				data[18] = 0x11;
 				data[19] = 0x22;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get32(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get32());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 		}
 
@@ -137,99 +137,99 @@ public:
 			// get with no position
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint8 val = 0x11;
+				uint32_t pos = 16;
+				uint8_t val = 0x11;
 				data[17] = 0x11;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get8(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get8());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint16 val = 0x1122;
+				uint32_t pos = 16;
+				uint16_t val = 0x1122;
 				data[17] = 0x11;
 				data[16] = 0x22;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get16(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get16());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 
 			{
 				bb.setPos(0);
-				for(quint32 i = 0; i < size; i++) data[i] = 0;
+				for(uint32_t i = 0; i < size; i++) data[i] = 0;
 
-				quint32 pos = 16;
-				quint32 val = 0x11223344;
+				uint32_t pos = 16;
+				uint32_t val = 0x11223344;
 				data[17] = 0x33;
 				data[16] = 0x44;
 				data[19] = 0x11;
 				data[18] = 0x22;
 
 				CPPUNIT_ASSERT_EQUAL(val, bb.get32(pos));
-				CPPUNIT_ASSERT_EQUAL((quint32)0, bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)0, bb.getPos());
 
 				bb.setPos(pos);
 				CPPUNIT_ASSERT_EQUAL(val, bb.get32());
-				CPPUNIT_ASSERT_EQUAL(quint32(pos + sizeof(val)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL(uint32_t(pos + sizeof(val)), bb.getPos());
 			}
 		}
 	}
 
 	// TODO write from here
 	void testSet() {
-		quint8 data[100];
-		quint32 size = sizeof(data);
+		uint8_t data[100];
+		uint32_t size = sizeof(data);
 
 		{
 			BigEndianByteBuffer bb(data, size);
-			quint32 pos = 70;
+			uint32_t pos = 70;
 			bb.setPos(pos);
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint8  setVal = 0x11;
+				uint32_t setPos = 16;
+				uint8_t  setVal = 0x11;
 				bb.set8(setPos, setVal);
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[16]));
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint16 setVal = 0x1122;
+				uint32_t setPos = 16;
+				uint16_t setVal = 0x1122;
 				bb.set16(setPos, setVal);
 				// Big Endian => 11 22
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[16]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x22), (quint32)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x22), (uint32_t)(data[17]));
 				//
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint32 setVal = 0x11223344;
+				uint32_t setPos = 16;
+				uint32_t setVal = 0x11223344;
 				bb.set32(setPos, setVal);
 				// Big Endian => 33 44 11 22
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x33), data[16]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x44), data[17]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x11), data[18]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x22), data[19]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x33), data[16]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x44), data[17]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x11), data[18]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x22), data[19]);
 				//
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
@@ -237,40 +237,40 @@ public:
 
 		{
 			LittleEndianByteBuffer bb(data, size);
-			quint32 pos = 70;
+			uint32_t pos = 70;
 			bb.setPos(pos);
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint8  setVal = 0x11;
+				uint32_t setPos = 16;
+				uint8_t  setVal = 0x11;
 				bb.set8(setPos, setVal);
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[17]));
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint16 setVal = 0x1122;
+				uint32_t setPos = 16;
+				uint16_t setVal = 0x1122;
 				bb.set16(setPos, setVal);
 				// Little Endian => 22 11
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[17]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x22), (quint32)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x22), (uint32_t)(data[16]));
 				//
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint32 setVal = 0x11223344;
+				uint32_t setPos = 16;
+				uint32_t setVal = 0x11223344;
 				bb.set32(setPos, setVal);
 				// Little Endian => 44 33 22 11
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x33), data[17]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x44), data[16]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x11), data[19]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x22), data[18]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x33), data[17]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x44), data[16]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x11), data[19]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x22), data[18]);
 				//
 				CPPUNIT_ASSERT_EQUAL(pos, bb.getPos());
 			}
@@ -278,88 +278,88 @@ public:
 	}
 
 	void testPut() {
-		quint8 data[100];
-		quint32 size = sizeof(data);
+		uint8_t data[100];
+		uint32_t size = sizeof(data);
 
 		{
 			BigEndianByteBuffer bb(data, size);
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint8  setVal = 0x11;
+				uint32_t setPos = 16;
+				uint8_t  setVal = 0x11;
 				bb.setPos(setPos);
 				bb.put8(setVal);
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[16]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint16 setVal = 0x1122;
+				uint32_t setPos = 16;
+				uint16_t setVal = 0x1122;
 				bb.setPos(setPos);
 				bb.put16(setVal);
 				// Big Endian => 11 22
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[16]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x22), (quint32)(data[17]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x22), (uint32_t)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint32 setVal = 0x11223344;
+				uint32_t setPos = 16;
+				uint32_t setVal = 0x11223344;
 				bb.setPos(setPos);
 				bb.put32(setVal);
 				// Big Endian => 33 44 11 22
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x33), data[16]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x44), data[17]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x11), data[18]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x22), data[19]);
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x33), data[16]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x44), data[17]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x11), data[18]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x22), data[19]);
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 		}
 
 		{
 			LittleEndianByteBuffer bb(data, size);
-			quint32 pos = 70;
+			uint32_t pos = 70;
 			bb.setPos(pos);
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint8  setVal = 0x11;
+				uint32_t setPos = 16;
+				uint8_t  setVal = 0x11;
 				bb.setPos(setPos);
 				bb.put8(setVal);
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[17]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint16 setVal = 0x1122;
+				uint32_t setPos = 16;
+				uint16_t setVal = 0x1122;
 				bb.setPos(setPos);
 				bb.put16(setVal);
 				// Little Endian => 22 11
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x11), (quint32)(data[17]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(0x22), (quint32)(data[16]));
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x11), (uint32_t)(data[17]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(0x22), (uint32_t)(data[16]));
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 			{
-				for(quint32 i = 0; i < size; i++) data[i] = (quint8)0;
+				for(uint32_t i = 0; i < size; i++) data[i] = (uint8_t)0;
 
-				quint32 setPos = 16;
-				quint32 setVal = 0x11223344;
+				uint32_t setPos = 16;
+				uint32_t setVal = 0x11223344;
 				bb.setPos(setPos);
 				bb.put32(setVal);
 				// Little Endian => 44 33 22 11
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x33), data[17]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x44), data[16]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x11), data[19]);
-				CPPUNIT_ASSERT_EQUAL((quint8)(0x22), data[18]);
-				CPPUNIT_ASSERT_EQUAL((quint32)(setPos + sizeof(setVal)), bb.getPos());
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x33), data[17]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x44), data[16]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x11), data[19]);
+				CPPUNIT_ASSERT_EQUAL((uint8_t)(0x22), data[18]);
+				CPPUNIT_ASSERT_EQUAL((uint32_t)(setPos + sizeof(setVal)), bb.getPos());
 			}
 		}
 	}

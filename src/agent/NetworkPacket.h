@@ -69,9 +69,9 @@ public:
 
 	class Data {
 	public:
-		quint64 timeStamp; // received time in millisecond
+		uint64_t timeStamp; // received time in millisecond
 		int     dataLen;   // number of valid data in byte
-		quint8* data;      // pointer to data (data is layout as mesa endian)
+		uint8_t* data;      // pointer to data (data is layout as mesa endian)
 
 		Data() : timeStamp(0), dataLen(0), data(0) {}
 		Data(const Data* that) : timeStamp(that->timeStamp), dataLen(that->dataLen), data(that->data) {}
@@ -92,7 +92,7 @@ public:
 		return fd;
 	}
 
-	void attach(const QString& name_);
+	void attach(const std::string& name_);
 	void detach();
 
 	void select  (Result& result, CARD32 timeout);
@@ -114,7 +114,7 @@ public:
 	int receive (CARD8* data, CARD32 dataLen, int& opErrno);
 
 private:
-	QString name;
+	std::string name;
 	int     fd;
 	CARD8   address[ETH_ALEN];
 };

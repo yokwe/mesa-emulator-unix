@@ -40,9 +40,9 @@
 namespace XNS::Server {
 	class PEXListener : public Listener {
 		// pex type
-		quint16 myType;
+		uint16_t myType;
 	public:
-		PEXListener(const char* name, quint16 socket, quint16 type) : Listener(name, socket), myType(type) {}
+		PEXListener(const char* name, uint16_t socket, uint16_t type) : Listener(name, socket), myType(type) {}
 		~PEXListener() {}
 
 		void handle(const Data& data);

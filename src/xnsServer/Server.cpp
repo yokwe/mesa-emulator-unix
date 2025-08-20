@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("server");
+static const util::Logger logger(__FILE__);
 
 #include "../xnsServer/Server.h"
 
@@ -43,7 +43,7 @@ using XNS::Server::Server;
 //
 // XNS::Server::Server
 //
-void Server::init(const QString& path) {
+void Server::init(const std::string& path) {
 	config = XNS::loadConfig(path);
 	context = Context(config);
 
@@ -85,7 +85,7 @@ void Server::run() {
 		}
 
 		// receive one data
-		qint64 msecsSinceEpoch;
+		int64_t msecsSinceEpoch;
 		{
 			ret = context.driver->receive(level0.data(), level0.capacity(), opErrno, &msecsSinceEpoch);
 			if (ret < 0) {
@@ -113,15 +113,15 @@ void Server::run() {
 		FROM_BYTE_BUFFER(level1, idp);
 
 		// build header
-		QString timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
-		QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
+		std::string timeStamp = QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString("yyyy-MM-dd hh:mm:ss.zzz");
+		std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(ethernet.toString()), TO_CSTRING(idp.toString()));
 
 		// check idp checksum
 		{
 			ByteBuffer start = ethernet.block.toBuffer();
-			quint16 checksum = XNS::IDP::getChecksum(start);
+			uint16_t checksum = XNS::IDP::getChecksum(start);
 			if (checksum != XNS::Checksum::NOCHECK) {
-				quint16 newValue = XNS::IDP::computeChecksum(start);
+				uint16_t newValue = XNS::IDP::computeChecksum(start);
 				if (checksum != newValue) {
 					// checksum error
 					logger.warn("%s  BAD CHECKSUM", header);
@@ -130,7 +130,7 @@ void Server::run() {
 			}
 		}
 
-		quint16 socket = (quint16)idp.dstSocket;
+		uint16_t socket = (uint16_t)idp.dstSocket;
 		Listener* listener = listeners.getListener(socket);
 		if (listener == nullptr) {
 			logger.warn("%s  NO HANDLER", header);

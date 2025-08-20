@@ -65,30 +65,30 @@ namespace XNS {
 			};
 
 			// define operator =
-			quint8 operator =(const quint8& newValue) const {
+			uint8_t operator =(const uint8_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
 
-			QString toString() const {
+			std::string toString() const {
 				return nameMap.toString(value());
 			}
-			static void addNameMap(quint16 value, QString name) {
+			static void addNameMap(uint16_t value, std::string name) {
 				nameMap.add(value, name);
 			}
 		private:
-			static NameMap::Map<quint16> nameMap;
+			static NameMap::Map<uint16_t> nameMap;
 		};
 		class Control : public UINT8 {
 		public:
-			static const quint8 BIT_SYSTEM         = 0x80; // System Packet
-			static const quint8 BIT_SEND_ACK       = 0x40; // Send Acknowledgment
-			static const quint8 BIT_ATTENTION      = 0x20; // Attention
-			static const quint8 BIT_END_OF_MESSAGE = 0x10; // End of Message
-			static const quint8 BIT_UNUSED         = 0x0F;
+			static const uint8_t BIT_SYSTEM         = 0x80; // System Packet
+			static const uint8_t BIT_SEND_ACK       = 0x40; // Send Acknowledgment
+			static const uint8_t BIT_ATTENTION      = 0x20; // Attention
+			static const uint8_t BIT_END_OF_MESSAGE = 0x10; // End of Message
+			static const uint8_t BIT_UNUSED         = 0x0F;
 
 			// define operator =
-			quint8 operator =(const quint8& newValue) const {
+			uint8_t operator =(const uint8_t& newValue) const {
 				value(newValue);
 				return newValue;
 			}
@@ -110,7 +110,7 @@ namespace XNS {
 				return !isSystem();
 			}
 
-			QString toString() const;
+			std::string toString() const;
 		};
 
 		Control control; // Control Bit
@@ -127,7 +127,7 @@ namespace XNS {
 		}
 
 		// Courier::Base
-		QString toString() const;
+		std::string toString() const;
 		void fromByteBuffer(ByteBuffer& bb);
 		void toByteBuffer  (ByteBuffer& bb) const;
 	};

@@ -34,7 +34,7 @@
 #include "json.h"
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("gen");
+static const util::Logger logger(__FILE__);
 
 #include "stream.h"
 #include "stream_util.h"

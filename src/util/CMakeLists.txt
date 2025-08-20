@@ -2,14 +2,23 @@
 # util
 #
 
-list(APPEND fileList Util.cpp Perf.cpp GuiOp.cpp JSONUtil.cpp Setting.cpp ByteBuffer.cpp Network.cpp NameMap.cpp)
+add_library(util SHARED)
 
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL FreeBSD)
-  list(APPEND fileList BPF.cpp Network_bpf.cpp)
-elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Darwin)
-  list(APPEND fileList BPF.cpp Network_bpf.cpp)
-else()
-  list(APPEND fileList Network_dummy.cpp)
-endif()
+target_sources(
+	util
+	PUBLIC
+#    ByteBuffer.h
+#    Debug.h
+#    GuiOP.h
+#    Perf.h
+#    Setting.h
+    Util.h
+	PRIVATE
+#    ByteBuffer.cpp
+#    GuiOp.cpp
+#    Perf.cpp
+#    Setting.cpp
+		Util.cpp
+)
 
-add_library (util STATIC ${fileList})
+target_link_libraries(util log4cxx)

@@ -62,9 +62,9 @@ public:
 	const CARD16    host;
 	const CARD32    time;
 	const QDateTime dateTime;
-	const QString   value;
+	const std::string   value;
 
-	QString toString() const {
+	std::string toString() const {
 		return value;
 	}
 	bool isNull() const {
@@ -81,7 +81,7 @@ public:
     }
 
 private:
-	Stamp(CARD16 net_, CARD16 host_, CARD32 time_, QDateTime dateTime_, QString value_) :
+	Stamp(CARD16 net_, CARD16 host_, CARD32 time_, QDateTime dateTime_, std::string value_) :
 		net(net_), host(host_), time(time_), dateTime(dateTime_), value(value_) {}
 };
 
@@ -92,12 +92,12 @@ public:
 	static constexpr CARD16 NullName = 1;
 
 	const CARD16  index;
-	const QString name;
+	const std::string name;
 
-	NameRecord(CARD16 index_, QString name_) : index(index_), name(name_) {}
+	NameRecord(CARD16 index_, std::string name_) : index(index_), name(name_) {}
 	NameRecord() : index(NullName), name("#NULL#") {}
 
-	QString toString();
+	std::string toString();
 };
 
 
@@ -114,10 +114,10 @@ public:
 	static FTRecord* getNull();
 
 	const CARD16  index;
-	const QString name;
+	const std::string name;
 	const Stamp*  version;
 
-	FTRecord(CARD16 index_, QString name_, Stamp* version_) : index(index_), name(name_), version(version_) {}
+	FTRecord(CARD16 index_, std::string name_, Stamp* version_) : index(index_), name(name_), version(version_) {}
 
 	bool isNull() const {
 		return index == FT_NULL;
@@ -126,9 +126,9 @@ public:
 		return index == FT_SELF;
 	}
 	static bool equals(const FTRecord* a, const FTRecord* b) {
-		return QString::compare(a->name, b->name) == 0 && Stamp::equals(a->version, b->version);
+		return std::string::compare(a->name, b->name) == 0 && Stamp::equals(a->version, b->version);
 	}
-	QString toString() const;
+	std::string toString() const;
 
 private:
 	FTRecord() : index(FT_NULL), name(), version(0) {}
@@ -149,7 +149,7 @@ public:
 	enum class SegClass {
 		CODE, SYMBOLS, AC_MAP, OTHER,
 	};
-	static QString toString(SegClass value);
+	static std::string toString(SegClass value);
 
 	static SGRecord* getInstance(BCD* bcd, CARD16 index);
 	static SGRecord* getNull();
@@ -162,7 +162,7 @@ public:
 	const CARD16    extraPages;
 	const SegClass  segClass;
 
-	QString toString() const;
+	std::string toString() const;
 	bool isNull() const {
 		return index == SG_NULL;
 	}
@@ -189,7 +189,7 @@ public:
 	const CARD16          index;
 	const QVector<CARD16> initialPC;
 
-	QString toString() const;
+	std::string toString() const;
 	bool isNull() const {
 		return index == EN_NULL;
 	}
@@ -208,7 +208,7 @@ public:
 	const CARD16    offset;
 	const CARD16    length;
 
-	QString toString() const;
+	std::string toString() const;
 private:
 	CodeDesc(SGRecord* sgi_, CARD16 offset_, CARD16 length_) : sgi(sgi_), offset(offset_), length(length_) {}
 };
@@ -218,7 +218,7 @@ private:
 //enum class LinkLocation {
 //	FRAME, CODE, DONTCARE,
 //};
-//QString toString(LinkLocation value);
+//std::string toString(LinkLocation value);
 
 
 //MTRecord: TYPE = --MACHINE DEPENDENT-- RECORD [
@@ -248,7 +248,7 @@ public:
 	static MTRecord* getNull();
 
 	const CARD16    index;
-	const QString   name;
+	const std::string   name;
 	const FTRecord* file;
 	const CARD16    config;
 	const CodeDesc* code;
@@ -273,13 +273,13 @@ public:
 	const ENRecord* entries;
 	const CARD16    atoms;
 
-	QString toString() const;
+	std::string toString() const;
 	bool isNull() const {
 		return index == MT_NULL;
 	}
 private:
 	MTRecord(
-		CARD16 index_, QString name_, FTRecord* file_, CARD16 config_,
+		CARD16 index_, std::string name_, FTRecord* file_, CARD16 config_,
 		CodeDesc* code_, SGRecord* sseg_, CARD16 links_,
 //		CARD16 linkLoc_,
 //		bool namedInstance_, bool initial_, bool boundsChecks_, bool nilChecks_,
@@ -305,7 +305,7 @@ public:
 	//VersionID: CARDINAL = 6103
 	static constexpr CARD16 VersionID = 6103;
 
-	BCD(QString path) : BCD(BCDFile::getInstance(path)) {}
+	BCD(std::string path) : BCD(BCDFile::getInstance(path)) {}
 
 	~BCD();
 
@@ -425,11 +425,11 @@ public:
 	ENRecord*   getENRecord(CARD16 index);
 	MTRecord*   getMTRecord(CARD16 index);
 
-	QString getName(CARD16 index);
+	std::string getName(CARD16 index);
 
 	bool    isBCDFile();
 	bool    isSymbolsFile();
-	QString getPath();
+	std::string getPath();
 
 private:
 	BCD(BCDFile* bcdFile);

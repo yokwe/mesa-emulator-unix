@@ -34,13 +34,13 @@
 //
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("jsonutil");
+static const util::Logger logger(__FILE__);
 
 #include "JSONUtil.h"
 
 
-QString JSONUtil::toJsonString(QJsonDocument jsonDocument) {
-	return QString::fromUtf8(jsonDocument.toJson(QJsonDocument::JsonFormat::Indented));
+std::string JSONUtil::toJsonString(QJsonDocument jsonDocument) {
+	return std::string::fromUtf8(jsonDocument.toJson(QJsonDocument::JsonFormat::Indented));
 }
 
 QJsonDocument JSONUtil::fromJsonString(const QByteArray &byteArray) {
@@ -58,7 +58,7 @@ QJsonDocument JSONUtil::fromJsonString(const QByteArray &byteArray) {
 }
 
 
-QJsonDocument JSONUtil::load(const QString& path) {
+QJsonDocument JSONUtil::load(const std::string& path) {
 	QByteArray byteArray;
 	{
 		QFile file(path);
@@ -73,7 +73,7 @@ QJsonDocument JSONUtil::load(const QString& path) {
 	return jsonDocument;
 }
 
-void JSONUtil::save(const QString& path, const QJsonDocument& jsonDocument) {
+void JSONUtil::save(const std::string& path, const QJsonDocument& jsonDocument) {
 	QByteArray byteArray = jsonDocument.toJson(QJsonDocument::JsonFormat::Indented);
 	{
 		QFile file(path);
@@ -88,7 +88,7 @@ void JSONUtil::save(const QString& path, const QJsonDocument& jsonDocument) {
 
 
 
-QJsonObject JSONUtil::loadObject(const QString& path) {
+QJsonObject JSONUtil::loadObject(const std::string& path) {
 	QJsonDocument jsonDocument = load(path);
 	if (jsonDocument.isObject()) {
 		return jsonDocument.object();
@@ -101,7 +101,7 @@ QJsonObject JSONUtil::loadObject(const QString& path) {
 		ERROR();
 	}
 }
-QJsonArray  JSONUtil::loadArray (const QString& path) {
+QJsonArray  JSONUtil::loadArray (const std::string& path) {
 	QJsonDocument jsonDocument = load(path);
 	if (jsonDocument.isObject()) {
 		logger.fatal("jsonDocument is Object");
@@ -117,7 +117,7 @@ QJsonArray  JSONUtil::loadArray (const QString& path) {
 }
 
 
-QJsonValue JSONUtil::toJsonValue(const QString&     value) {
+QJsonValue JSONUtil::toJsonValue(const std::string&     value) {
 	return QJsonValue(value);
 }
 QJsonValue JSONUtil::toJsonValue(const qint32&      value) {
@@ -133,7 +133,7 @@ QJsonValue JSONUtil::toJsonValue(const QJsonArray & value) {
 	return QJsonValue(value);
 }
 
-QString     JSONUtil::toString(const QJsonValue& jsonValue) {
+std::string     JSONUtil::toString(const QJsonValue& jsonValue) {
 	if (jsonValue.isString()) {
 		return jsonValue.toString();
 	} else {
@@ -191,13 +191,13 @@ QJsonArray  JSONUtil::toArray (const QJsonValue& jsonValue) {
 	}
 }
 
-QJsonValueRef JSONUtil::toJsonValueRef(QJsonObject& jsonObject, const QString& key) {
+QJsonValueRef JSONUtil::toJsonValueRef(QJsonObject& jsonObject, const std::string& key) {
 	if (!jsonObject.contains(key)) {
 		jsonObject[key] = QJsonValue();
 	}
 	return jsonObject[key];
 }
-const QJsonValue    JSONUtil::toJsonValue(const QJsonObject& jsonObject, const QString& key) {
+const QJsonValue    JSONUtil::toJsonValue(const QJsonObject& jsonObject, const std::string& key) {
 	if (jsonObject.contains(key)) {
 		return jsonObject[key];
 	} else {

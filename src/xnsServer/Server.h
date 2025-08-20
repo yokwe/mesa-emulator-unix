@@ -69,7 +69,7 @@ namespace XNS::Server {
 		bool          stopFuture;
 		QFuture<void> future;
 
-		QMap<quint16, const char*> socketMap;
+		QMap<uint16_t, const char*> socketMap;
 
 	public:
 		void add(Listener* listener) {
@@ -80,7 +80,7 @@ namespace XNS::Server {
 		}
 
 		// life cycle management
-		void init(const QString& path);
+		void init(const std::string& path);
 		void start();
 		void stop();
 

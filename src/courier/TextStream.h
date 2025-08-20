@@ -40,12 +40,12 @@
 namespace Courier {
 
 	class TextStream {
-		QString result;
+		std::string result;
 	public:
-		QString& toString() {
+		std::string& toString() {
 			return result;
 		}
-		TextStream& operator << (const QString& value) {
+		TextStream& operator << (const std::string& value) {
 			result += value;
 			return *this;
 		}
@@ -56,7 +56,7 @@ namespace Courier {
 	        return self(that);
 	    }
 
-	    QString string;
+	    std::string string;
 	public:
 	    Printf(const char* format, ...);
 	private:

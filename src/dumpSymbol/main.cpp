@@ -30,7 +30,7 @@ OF SUCH DAMAGE.
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("main");
+static const util::Logger logger(__FILE__);
 
 #include "../symbols/BCD.h"
 #include "../symbols/Symbols.h"
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 
 	setSignalHandler();
 
-	QString outDirPath("tmp/dumpSymbol/symbol");
+	std::string outDirPath("tmp/dumpSymbol/symbol");
 	logger.info("outDirPath %s", outDirPath.toLocal8Bit().constData());
 	if (!QFile::exists(outDirPath)) {
 		logger.fatal("outDirPath does not exist. outDirPath = %s", outDirPath.toLocal8Bit().constData());
@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
 	}
 
 	for(int i = 1; i < argc; i++) {
-		QString filePath = argv[i];
+		std::string filePath = argv[i];
 		logger.info("path = %s", filePath.toLocal8Bit().constData());
 
 		DumpSymbol::dumpSymbol(filePath, outDirPath);

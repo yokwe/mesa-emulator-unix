@@ -36,7 +36,7 @@
 #include "Module.h"
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("module");
+static const util::Logger logger(__FILE__);
 
 
 void Module::LoadmapFile::fromJsonObject(const QJsonObject& jsonObject) {
@@ -71,7 +71,7 @@ QJsonObject Module::MapFile::toJsonObject() const {
 	return jsonObject;
 }
 
-static QString readFile(const QString& path) {
+static std::string readFile(const std::string& path) {
 	QByteArray byteArray;
 	{
 		QFile file(path);
@@ -83,37 +83,37 @@ static QString readFile(const QString& path) {
 		byteArray = file.readAll();
 		file.close();
 	}
-	return QString::fromUtf8(byteArray);
+	return std::string::fromUtf8(byteArray);
 }
 
 
-QList<Module::LoadmapFile> Module::LoadmapFile::load(const QString& path) {
+QList<Module::LoadmapFile> Module::LoadmapFile::load(const std::string& path) {
 	QList<Module::LoadmapFile> list;
 	QJsonArray jsonArray = JSONUtil::loadArray(path);
 	JSONUtil::getJsonArray(jsonArray, list);
 	return list;
 }
-void Module::LoadmapFile::save(const QString& path, QList<Module::LoadmapFile> list) {
+void Module::LoadmapFile::save(const std::string& path, QList<Module::LoadmapFile> list) {
 	QJsonArray jsonArray;
 	JSONUtil::setJsonArray(jsonArray, list);
 	JSONUtil::save(path, jsonArray);
 }
 
 
-QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const QString& path) {
-	QString string = readFile(path);
+QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const std::string& path) {
+	std::string string = readFile(path);
 
 	// GermOpsImpl 0AB0H 1209H 1CH
 	QRegularExpression re("[A-Za-z0-9]+ [0-9A-FH]+ [0-9A-FH]+ [0-9A-FH]+");
 
 	QList<Module::LoadmapFile> ret;
 	for(auto e: string.split(QChar('\r'))) {
-		QString simplified = e.simplified();
+		std::string simplified = e.simplified();
 		auto m = re.match(simplified);
 		if (m.hasMatch()) {
-			QStringList token = simplified.split(" ");
+			std::stringList token = simplified.split(" ");
 			// GermOpsImpl               0AB0H    1209H     1CH
-			QString module = token[0];
+			std::string module = token[0];
 			int     gf     = toIntMesaNumber(token[1]);
 			int     cb     = toIntMesaNumber(token[2]);
 			int     gfi    = toIntMesaNumber(token[3]);
@@ -126,21 +126,21 @@ QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const QString& p
 }
 
 
-QList<Module::MapFile> Module::MapFile::load(const QString& path) {
+QList<Module::MapFile> Module::MapFile::load(const std::string& path) {
 	QList<Module::MapFile> list;
 	QJsonArray jsonArray = JSONUtil::loadArray(path);
 	JSONUtil::getJsonArray(jsonArray, list);
 	return list;
 }
-void Module::MapFile::save(const QString& path, QList<Module::MapFile> list) {
+void Module::MapFile::save(const std::string& path, QList<Module::MapFile> list) {
 	QJsonArray jsonArray;
 	JSONUtil::setJsonArray(jsonArray, list);
 	JSONUtil::save(path, jsonArray);
 }
 
 
-QList<Module::MapFile> Module::MapFile::loadMapFile(const QString& path) {
-	QString string = readFile(path);
+QList<Module::MapFile> Module::MapFile::loadMapFile(const std::string& path) {
+	std::string string = readFile(path);
 
 	// Bytes   EVI  Offset    IPC   Module               Procedure
 	//    42B   13   1030B     20B  ProcessorHeadGuam    GetNextAvailableVM
@@ -149,16 +149,16 @@ QList<Module::MapFile> Module::MapFile::loadMapFile(const QString& path) {
 
 	QList<Module::MapFile> ret;
 	for(auto e: string.split(QChar('\r'))) {
-		QString simplified = e.simplified();
+		std::string simplified = e.simplified();
 		auto m = re.match(simplified);
 		if (m.hasMatch()) {
-			QStringList token = simplified.split(" ");
+			std::stringList token = simplified.split(" ");
 			int     bytes  = toIntMesaNumber(token[0]);
 			int     evi    = toIntMesaNumber(token[1]);
 //			int     offset = toIntMesaNumber(token[2]);
 			int     ipc    = toIntMesaNumber(token[3]);
-			QString module = token[4];
-			QString proc   = token[5];
+			std::string module = token[4];
+			std::string proc   = token[5];
 
 			Module::MapFile element(module, proc, bytes, evi, ipc);
 			ret += element;

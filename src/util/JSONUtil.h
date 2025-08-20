@@ -48,48 +48,48 @@ public:
 };
 
 namespace JSONUtil {
-	QString toJsonString(QJsonDocument jsonDocument);
-	inline QString toJsonString(QJsonObject   jsonObject) {
+	std::string toJsonString(QJsonDocument jsonDocument);
+	inline std::string toJsonString(QJsonObject   jsonObject) {
 		QJsonDocument jsonDocument(jsonObject);
 		return toJsonString(jsonDocument);
 	}
-	inline QString toJsonString(QJsonArray jsonArray) {
+	inline std::string toJsonString(QJsonArray jsonArray) {
 		QJsonDocument jsonDocument(jsonArray);
 		return toJsonString(jsonDocument);
 	}
-	inline QString toJsonString(QJsonValue jsonValue) {
+	inline std::string toJsonString(QJsonValue jsonValue) {
 		QJsonObject jsonObject;
 		jsonObject["jsonValue"] = jsonValue;
 		return toJsonString(jsonObject);
 	}
 
 	QJsonDocument fromJsonString(const QByteArray &byteArray);
-	inline QJsonDocument fromJsonString(QString string) {
+	inline QJsonDocument fromJsonString(std::string string) {
 		return fromJsonString(string.toUtf8());
 	}
 
-	QJsonDocument load(const QString& path);
-	QJsonObject   loadObject(const QString& path);
-	QJsonArray    loadArray (const QString& path);
+	QJsonDocument load(const std::string& path);
+	QJsonObject   loadObject(const std::string& path);
+	QJsonArray    loadArray (const std::string& path);
 
-	void save(const QString& path, const QJsonDocument& jsonDocument);
-	inline void save(const QString& path, const QJsonObject& jsonObject) {
+	void save(const std::string& path, const QJsonDocument& jsonDocument);
+	inline void save(const std::string& path, const QJsonObject& jsonObject) {
 		QJsonDocument jsonDocument(jsonObject);
 		save(path, jsonDocument);
 	}
-	inline void save(const QString& path, const QJsonArray&  jsonArray) {
+	inline void save(const std::string& path, const QJsonArray&  jsonArray) {
 		QJsonDocument jsonDocument(jsonArray);
 		save(path, jsonDocument);
 	}
 
 
-	QJsonValue toJsonValue(const QString&     value);
+	QJsonValue toJsonValue(const std::string&     value);
 	QJsonValue toJsonValue(const qint32&      value);
 	QJsonValue toJsonValue(const bool&        value);
 	QJsonValue toJsonValue(const QJsonObject& value);
 	QJsonValue toJsonValue(const QJsonArray & value);
 
-	QString     toString(const QJsonValue& jsonValue);
+	std::string     toString(const QJsonValue& jsonValue);
 	qint32      toInt   (const QJsonValue& jsonValue);
 	bool        toBool  (const QJsonValue& jsonValue);
 	QJsonObject toObject(const QJsonValue& jsonValue);
@@ -97,10 +97,10 @@ namespace JSONUtil {
 
 
 	// Reference of jsonObject[key] at LHS
-	QJsonValueRef    toJsonValueRef(QJsonObject& jsonObject, const QString& key);
+	QJsonValueRef    toJsonValueRef(QJsonObject& jsonObject, const std::string& key);
 	// Reference of jsonObject[key] at RHS
 	// Add const to function return to prevent use at LHS of expression
-	const QJsonValue toJsonValue(const QJsonObject& jsonObject, const QString& key);
+	const QJsonValue toJsonValue(const QJsonObject& jsonObject, const std::string& key);
 
 	// helper macro to invoke setJsonObject / getJsonObject
 #define SET_JSON_OBJECT(name) SET_JSON_OBJECT2(name, name)
@@ -110,30 +110,30 @@ namespace JSONUtil {
 #define GET_JSON_OBJECT2(key, field) JSONUtil::getJsonObject(jsonObject, #key, field);
 
 	// jsonObject[key] = value
-	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const T& value) {
+	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const T& value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value.toJsonObject());
 	}
-	void inline setJsonObject(QJsonObject& jsonObject, const QString& key, const QString& value) {
+	void inline setJsonObject(QJsonObject& jsonObject, const std::string& key, const std::string& value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const  qint32  value) {
+	inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const  qint32  value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const bool     value) {
+	inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const bool     value) {
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(value);
 	}
 
 	// value = jsonObject[key]
-	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, T& value) {
+	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, T& value) {
 		value.fromJsonObject(JSONUtil::toObject(JSONUtil::toJsonValue(jsonObject, key)));
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QString& value) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, std::string& value) {
 		value = JSONUtil::toString(JSONUtil::toJsonValue(jsonObject, key));
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, qint32&  value) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, qint32&  value) {
 		value = JSONUtil::toInt(JSONUtil::toJsonValue(jsonObject, key));
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, bool&    value) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, bool&    value) {
 		value = JSONUtil::toBool(JSONUtil::toJsonValue(jsonObject, key));
 	}
 
@@ -143,7 +143,7 @@ namespace JSONUtil {
 			jsonArray.append(JSONUtil::toJsonValue(e.toJsonObject()));
 		}
 	}
-	inline void setJsonArray(QJsonArray& jsonArray, const QList<QString>& list) {
+	inline void setJsonArray(QJsonArray& jsonArray, const QList<std::string>& list) {
 		for(auto e: list) {
 			jsonArray.append(JSONUtil::toJsonValue(e));
 		}
@@ -160,22 +160,22 @@ namespace JSONUtil {
 	}
 
 	// jsonObject[key] = list
-	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<T>& list) {
+	template <class T> inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const QList<T>& list) {
 		QJsonArray jsonArray;
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<QString>& list) {
+	inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const QList<std::string>& list) {
 		QJsonArray jsonArray;
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<qint32>&  list) {
+	inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const QList<qint32>&  list) {
 		QJsonArray jsonArray;
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
 	}
-	inline void setJsonObject(QJsonObject& jsonObject, const QString& key, const QList<bool>&    list) {
+	inline void setJsonObject(QJsonObject& jsonObject, const std::string& key, const QList<bool>&    list) {
 		QJsonArray jsonArray;
 		setJsonArray(jsonArray, list);
 		JSONUtil::toJsonValueRef(jsonObject, key) = JSONUtil::toJsonValue(jsonArray);
@@ -189,9 +189,9 @@ namespace JSONUtil {
 			list.append(element);
 		}
 	}
-	inline void getJsonArray(const QJsonArray& jsonArray, QList<QString>& list) {
+	inline void getJsonArray(const QJsonArray& jsonArray, QList<std::string>& list) {
 		for(auto e: jsonArray) {
-			QString element = JSONUtil::toString(e);
+			std::string element = JSONUtil::toString(e);
 			list.append(element);
 		}
 	}
@@ -209,16 +209,16 @@ namespace JSONUtil {
 	}
 
 	// list = jsonObject[key]
-	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<T>& list) {
+	template <class T> inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, QList<T>& list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<QString>& list) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, QList<std::string>& list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<qint32>&  list) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, QList<qint32>&  list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
-	inline void getJsonObject(const QJsonObject& jsonObject, const QString& key, QList<bool>&    list) {
+	inline void getJsonObject(const QJsonObject& jsonObject, const std::string& key, QList<bool>&    list) {
 		getJsonArray(JSONUtil::toArray(JSONUtil::toJsonValue(jsonObject, key)), list);
 	}
 

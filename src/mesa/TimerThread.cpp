@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("timerthread");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -45,7 +45,7 @@ static const Logger logger = Logger::getLogger("timerthread");
 
 
 CARD16         TimerThread::PTC;
-qint64         TimerThread::lastTimeoutTime;
+int64_t         TimerThread::lastTimeoutTime;
 int            TimerThread::stopThread;
 QMutex         TimerThread::mutexTimer;
 QWaitCondition TimerThread::cvTimer;
@@ -69,9 +69,9 @@ void TimerThread::run() {
 	for (;;) {
 		if (stopThread) break;
 		timerCount++;
-		qint64 currentTime = QDateTime::currentMSecsSinceEpoch();
+		int64_t currentTime = QDateTime::currentMSecsSinceEpoch();
 		// I will wait until TIMER_INTERVAL is elapsed since preveiousTime.
-		qint64 waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
+		int64_t waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
 		if (waitTime < 0) {
 			// already elapsed
 			if (-waitTime < TIMER_INTERVAL) {
@@ -79,11 +79,11 @@ void TimerThread::run() {
 			} else {
 				// Time difference is significant. Assign value to lastTimeoutTime.
 				lastTimeoutTime = currentTime;
-				logger.warn("Timer lost.  lost = %d ms",(quint32) (-waitTime));
+				logger.warn("Timer lost.  lost = %d ms",(uint32_t) (-waitTime));
 			}
 		} else {
 			// need to wait until TIMER_INTERVAL is elapsed since preveiousTime.
-			Util::msleep((quint32) waitTime);
+			Util::msleep((uint32_t) waitTime);
 		}
 
 		{

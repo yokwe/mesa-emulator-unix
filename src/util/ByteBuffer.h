@@ -47,7 +47,7 @@ protected:
 	int     myPosition;
 	int     myLimit;
 	int     myCapacity;
-	quint8 *myData;
+	uint8_t *myData;
 	int     myMarkPos;
 
 	void copyFrom(const ByteBuffer& that);
@@ -58,7 +58,7 @@ public:
 	ByteBuffer(const ByteBuffer& that);
 	ByteBuffer& operator =(const ByteBuffer& that);
 
-	ByteBuffer(int capacity, quint8* data);
+	ByteBuffer(int capacity, uint8_t* data);
 
 	bool isNull() {
 		return myData == nullptr;
@@ -80,9 +80,9 @@ public:
 	}
 
 	// copy from data to ByteBuffer
-	void copyFrom(int len, const quint8* data);
+	void copyFrom(int len, const uint8_t* data);
 
-	QString toString(int limit = 65536) const;
+	std::string toString(int limit = 65536) const;
 
 	int base() const {
 		return myBase;
@@ -96,7 +96,7 @@ public:
 	int capacity() const {
 		return myCapacity;
 	}
-	quint8* data() const {
+	uint8_t* data() const {
 		return myData;
 	}
 
@@ -123,7 +123,7 @@ public:
 	}
 
 	// set data
-	void data(quint8* data) {
+	void data(uint8_t* data) {
 		myData = data;
 	}
 	// set limit
@@ -138,58 +138,58 @@ public:
 
 
 	// read from ByteBuffer
-	void read8 (quint8&  value) {
+	void read8 (uint8_t&  value) {
 		read8(myPosition, value);
 		myPosition += 1;
 	}
-	void read16(quint16& value) {
+	void read16(uint16_t& value) {
 		read16(myPosition, value);
 		myPosition += 2;
 	}
-	void read32(quint32& value) {
+	void read32(uint32_t& value) {
 		read32(myPosition, value);
 		myPosition += 4;
 	}
-	void read48(quint64& value) {
+	void read48(uint64_t& value) {
 		read48(myPosition, value);
 		myPosition += 6;
 	}
-	void read  (const int readSize, quint8* value) {
+	void read  (const int readSize, uint8_t* value) {
 		read(myPosition, readSize, value);
 		myPosition += readSize;
 	}
 
-	void read8 (const int index, quint8&  value) const;
-	void read16(const int index, quint16& value) const;
-	void read32(const int index, quint32& value) const;
-	void read48(const int index, quint64& value) const;
-	void read  (const int index, const int readSize, quint8* value) const;
+	void read8 (const int index, uint8_t&  value) const;
+	void read16(const int index, uint16_t& value) const;
+	void read32(const int index, uint32_t& value) const;
+	void read48(const int index, uint64_t& value) const;
+	void read  (const int index, const int readSize, uint8_t* value) const;
 
 	// write to ByteBuffer
-	void write8 (quint8  value) {
+	void write8 (uint8_t  value) {
 		write8(myPosition, value);
 		myLimit = myPosition += 1;
 	}
-	void write16(quint16 value) {
+	void write16(uint16_t value) {
 		write16(myPosition, value);
 		myLimit = myPosition += 2;
 	}
-	void write32(quint32 value) {
+	void write32(uint32_t value) {
 		write32(myPosition, value);
 		myLimit = myPosition += 4;
 	}
-	void write48(quint64 value) {
+	void write48(uint64_t value) {
 		write48(myPosition, value);
 		myLimit = myPosition += 6;
 	}
-	void write  (const int writeSize, const quint8* value) {
+	void write  (const int writeSize, const uint8_t* value) {
 		write(myPosition, writeSize, value);
 		myLimit = myPosition += writeSize;
 	}
 
-	void write8 (const int index, quint8  value);
-	void write16(const int index, quint16 value);
-	void write32(const int index, quint32 value);
-	void write48(const int index, quint64 value);
-	void write  (const int index, const int writeSize, const quint8* value);
+	void write8 (const int index, uint8_t  value);
+	void write16(const int index, uint16_t value);
+	void write32(const int index, uint32_t value);
+	void write48(const int index, uint64_t value);
+	void write  (const int index, const int writeSize, const uint8_t* value);
 };

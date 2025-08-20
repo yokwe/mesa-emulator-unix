@@ -50,16 +50,16 @@ namespace XNS::Server {
 		public:
 			const char* name;
 
-			quint64 time;
+			uint64_t time;
 
-			quint64 remoteHost;
-			quint16 remoteSocket;
-			quint16 remoteID;
+			uint64_t remoteHost;
+			uint16_t remoteSocket;
+			uint16_t remoteID;
 
-			quint16 localSocket;
-			quint16 localID;
+			uint16_t localSocket;
+			uint16_t localID;
 
-			quint16 sst;
+			uint16_t sst;
 
 			// Packets with the Attention bit set must have only one byte of data.
 
@@ -74,13 +74,13 @@ namespace XNS::Server {
 			// The Sequence Number counts packets sent on the connection.
 			// The first packet is assigned number zero, and the count proceeds from there.
 			// If the count overflows the 16-bit field, the overflow is ignored and the count proceeds from zero again.
-			quint16 seq;
+			uint16_t seq;
 			// The Acknowledge Number field specifies the sequence number of the first packet which has not yet been seen traveling in the reverse direction.
 			// Acknowledge Number indicates the sequence number of the next expected packet.
-			quint16 ack;
+			uint16_t ack;
 			// The Allocation Number specifies the sequence number up to and including which packets will be accepted from the other end.
 			// One plus the difference between the Allocation Number and the Acknowledge Number indicates the number of packets that may be outstanding in the reverse direction
-			quint16 alloc;
+			uint16_t alloc;
 
 			State() : name(nullptr), time(0), remoteHost(0), remoteSocket(0), remoteID(0), localSocket(0), localID(0), sst(0), seq(0), ack(0), alloc(0) {}
 			State(const State& that) {
@@ -130,7 +130,7 @@ namespace XNS::Server {
 			myState = state_;
 		}
 
-		SPPServerImpl(const char* name, quint16 socket) : SPPListener(name, socket), myServer(nullptr) {}
+		SPPServerImpl(const char* name, uint16_t socket) : SPPListener(name, socket), myServer(nullptr) {}
 		SPPServerImpl(const State& state_) : SPPListener(state_.name, state_.localSocket), myState(state_), myServer(nullptr) {}
 
 		void handle(const XNS::Data& data, const XNS::SPP& spp);

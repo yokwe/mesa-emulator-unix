@@ -48,17 +48,17 @@ class DumpSymbol {
 public:
 	static void nest();
 	static void unnest();
-	static QString indent();
+	static std::string indent();
 
-	static void dumpSymbol(QString filePath, QString outDirPath);
+	static void dumpSymbol(std::string filePath, std::string outDirPath);
 
-    static void printSym(QTextStream& out, const SEIndex* sei, QString colonString);
+    static void printSym(QTextStream& out, const SEIndex* sei, std::string colonString);
 
     static ValFormat printType(QTextStream& out, const SEIndex* tsei, std::function<void()> dosub);
 
     static void printFieldCtx(QTextStream& out, const CTXIndex* ctx);
 
-    static QString getBitSpec(const SEIndex* isei);
+    static std::string getBitSpec(const SEIndex* isei);
 
     static void printDefaultValue(QTextStream& out, const SEIndex* sei, ValFormat vf);
 

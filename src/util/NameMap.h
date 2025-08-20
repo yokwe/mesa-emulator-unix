@@ -41,39 +41,39 @@ namespace NameMap {
 	template <typename T>
 	class Map {
 	public:
-		Map(std::function<QString(quint16)> func, std::initializer_list<std::pair<T, QString>> list) {
+		Map(std::function<std::string(uint16_t)> func, std::initializer_list<std::pair<T, std::string>> list) {
 			toStringDefault = func;
 			map = list;
 		}
 
-		void add(T value, QString name) {
+		void add(T value, std::string name) {
 			map[value] = name;
 		}
-		QString toString(T value) const {
+		std::string toString(T value) const {
 			if (map.contains(value)) {
 				return map[value];
 			} else {
-				return toStringDefault((quint16)value);
+				return toStringDefault((uint16_t)value);
 			}
 		}
 
 	protected:
-		std::function<QString(quint16)> toStringDefault;
+		std::function<std::string(uint16_t)> toStringDefault;
 
 	private:
-		QMap<T, QString> map;
+		QMap<T, std::string> map;
 	};
 
-	// predefined function of std::function<QString(quint16)>
-	QString toString8u(quint8 value);
-	QString toString16u(quint16 value);
-	QString toString32u(quint32 value);
-	QString toString64u(quint64 value);
+	// predefined function of std::function<std::string(uint16_t)>
+	std::string toString8u(uint8_t value);
+	std::string toString16u(uint16_t value);
+	std::string toString32u(uint32_t value);
+	std::string toString64u(uint64_t value);
 
-	QString toString8X(quint8 value);
-	QString toString16X(quint16 value);
-	QString toString32X(quint32 value);
-	QString toString64X(quint64 value);
+	std::string toString8X(uint8_t value);
+	std::string toString16X(uint16_t value);
+	std::string toString32X(uint32_t value);
+	std::string toString64X(uint64_t value);
 
-	QString toString16X04(quint16 value);
+	std::string toString16X04(uint16_t value);
 }

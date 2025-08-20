@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("cr-protocol");
+static const util::Logger logger(__FILE__);
 
 #include "Protocol.h"
 
@@ -42,7 +42,7 @@ static const Logger logger = Logger::getLogger("cr-protocol");
 //
 // Courier::ProtocolType
 //
-NameMap::Map<quint16> Courier::ProtocolType::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> Courier::ProtocolType::nameMap(NameMap::toString16u, {
 	{PROTOCOL2,  "PROTOCOL2"},
 	{PROTOCOL3,  "PROTOCOL3"},
 });
@@ -51,7 +51,7 @@ NameMap::Map<quint16> Courier::ProtocolType::nameMap(NameMap::toString16u, {
 //
 // Courier::MessageType
 //
-NameMap::Map<quint16> Courier::MessageType::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> Courier::MessageType::nameMap(NameMap::toString16u, {
 	{CALL,   "CALL"},
 	{REJECT, "REJECT"},
 	{RETURN, "RETURN"},
@@ -62,7 +62,7 @@ NameMap::Map<quint16> Courier::MessageType::nameMap(NameMap::toString16u, {
 //
 // Courier::RejectCode
 //
-NameMap::Map<quint16> Courier::RejectCode::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> Courier::RejectCode::nameMap(NameMap::toString16u, {
 	{NO_SUCH_PROGRAM,   "NO_SUCH_PROGRAM"},
 	{NO_SUCH_VERSION,   "NO_SUCH_VERSION"},
 	{NO_SUCH_PROCEDURE, "NO_SUCH_PROCEDURE"},
@@ -73,8 +73,8 @@ NameMap::Map<quint16> Courier::RejectCode::nameMap(NameMap::toString16u, {
 //
 // Courier::ProtocolRange
 //
-QString Courier::ProtocolRange::toString() const {
-	return QString("%1-%2").arg(low.toString()).arg(high.toString());
+std::string Courier::ProtocolRange::toString() const {
+	return std::string("%1-%2").arg(low.toString()).arg(high.toString());
 }
 void Courier::ProtocolRange::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, low);
@@ -89,8 +89,8 @@ void Courier::ProtocolRange::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::VersionRange
 //
-QString Courier::VersionRange::toString() const {
-	return QString("%1-%2").arg((quint16)low).arg((quint16)high);
+std::string Courier::VersionRange::toString() const {
+	return std::string("%1-%2").arg((uint16_t)low).arg((uint16_t)high);
 }
 void Courier::VersionRange::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, low);
@@ -105,8 +105,8 @@ void Courier::VersionRange::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol2Body::CallBody
 //
-QString Courier::Protocol2Body::CallBody::toString() const {
-	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
+std::string Courier::Protocol2Body::CallBody::toString() const {
+	return std::string("%1 %2-%3-%4").arg((uint16_t)transaction, 4, 16, QChar('0')).arg((uint16_t)program).arg((uint16_t)version).arg((uint16_t)procedure);
 }
 void Courier::Protocol2Body::CallBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -127,8 +127,8 @@ void Courier::Protocol2Body::CallBody::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol2Body::RejectBody
 //
-QString Courier::Protocol2Body::RejectBody::toString() const {
-	return QString("%1-%2").arg((quint16)transaction).arg(reject.toString());
+std::string Courier::Protocol2Body::RejectBody::toString() const {
+	return std::string("%1-%2").arg((uint16_t)transaction).arg(reject.toString());
 }
 void Courier::Protocol2Body::RejectBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -143,8 +143,8 @@ void Courier::Protocol2Body::RejectBody::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol2Body::ReturnBody
 //
-QString Courier::Protocol2Body::ReturnBody::toString() const {
-	return QString("%1").arg((quint16)transaction);
+std::string Courier::Protocol2Body::ReturnBody::toString() const {
+	return std::string("%1").arg((uint16_t)transaction);
 }
 void Courier::Protocol2Body::ReturnBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -159,8 +159,8 @@ void Courier::Protocol2Body::ReturnBody::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol2Body::AbortBody
 //
-QString Courier::Protocol2Body::AbortBody::toString() const {
-	return QString("%1-%2").arg((quint16)transaction).arg((quint16)abort);
+std::string Courier::Protocol2Body::AbortBody::toString() const {
+	return std::string("%1-%2").arg((uint16_t)transaction).arg((uint16_t)abort);
 }
 void Courier::Protocol2Body::AbortBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -251,23 +251,23 @@ void Courier::Protocol2Body::set(const AbortBody&  newValue) {
 	}
 }
 
-QString Courier::Protocol2Body::toString() const {
+std::string Courier::Protocol2Body::toString() const {
 	if (type == MessageType::CALL) {
 		CallBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::REJECT) {
 		RejectBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::RETURN) {
 		ReturnBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::ABORT) {
 		AbortBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else {
 		logger.error("Unexpected");
 		logger.error("  type %s", type.toString());
@@ -294,7 +294,7 @@ void Courier::Protocol2Body::fromByteBuffer(ByteBuffer& bb) {
 		set(newValue);
 	} else {
 		logger.error("Unexpected");
-		logger.error("  type %d", (quint16)type);
+		logger.error("  type %d", (uint16_t)type);
 		ERROR();
 	}
 }
@@ -318,7 +318,7 @@ void Courier::Protocol2Body::toByteBuffer  (ByteBuffer& bb) const {
 		TO_BYTE_BUFFER(bb, newValue);
 	} else {
 		logger.error("Unexpected");
-		logger.error("  type %d", (quint16)type);
+		logger.error("  type %d", (uint16_t)type);
 		ERROR();
 	}
 }
@@ -327,8 +327,8 @@ void Courier::Protocol2Body::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol3Body::CallBody
 //
-QString Courier::Protocol3Body::CallBody::toString() const {
-	return QString("%1 %2-%3-%4").arg((quint16)transaction, 4, 16, QChar('0')).arg((quint16)program).arg((quint16)version).arg((quint16)procedure);
+std::string Courier::Protocol3Body::CallBody::toString() const {
+	return std::string("%1 %2-%3-%4").arg((uint16_t)transaction, 4, 16, QChar('0')).arg((uint16_t)program).arg((uint16_t)version).arg((uint16_t)procedure);
 }
 void Courier::Protocol3Body::CallBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -367,17 +367,17 @@ void Courier::Protocol3Body::RejectBody::set(const VersionRange&   newValue) {
 		ERROR();
 	}
 }
-QString Courier::Protocol3Body::RejectBody::toString() const {
+std::string Courier::Protocol3Body::RejectBody::toString() const {
 	if (code == RejectCode::NO_SUCH_PROGRAM) {
-		return QString("%1").arg(code.toString());
+		return std::string("%1").arg(code.toString());
 	} else if (code == RejectCode::NO_SUCH_VERSION) {
 		VersionRange newValue;
 		get(newValue);
-		return QString("%1-%2").arg(code.toString()).arg(newValue.toString());
+		return std::string("%1-%2").arg(code.toString()).arg(newValue.toString());
 	} else if (code == RejectCode::NO_SUCH_PROCEDURE) {
-		return QString("%1").arg(code.toString());
+		return std::string("%1").arg(code.toString());
 	} else if (code == RejectCode::INVALID_ARGUMENTS) {
-		return QString("%1").arg(code.toString());
+		return std::string("%1").arg(code.toString());
 	} else {
 		logger.error("Unexpected");
 		logger.error("  code %s", code.toString());
@@ -429,8 +429,8 @@ void Courier::Protocol3Body::RejectBody::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol3Body::ReturnBody
 //
-QString Courier::Protocol3Body::ReturnBody::toString() const {
-	return QString("%1").arg((quint16)transaction, 4, 16, QChar('0').toUpper());
+std::string Courier::Protocol3Body::ReturnBody::toString() const {
+	return std::string("%1").arg((uint16_t)transaction, 4, 16, QChar('0').toUpper());
 }
 void Courier::Protocol3Body::ReturnBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -445,8 +445,8 @@ void Courier::Protocol3Body::ReturnBody::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::Protocol3Body::AbortBody
 //
-QString Courier::Protocol3Body::AbortBody::toString() const {
-	return QString("%1-%2").arg((quint16)transaction).arg((quint16)abort);
+std::string Courier::Protocol3Body::AbortBody::toString() const {
+	return std::string("%1-%2").arg((uint16_t)transaction).arg((uint16_t)abort);
 }
 void Courier::Protocol3Body::AbortBody::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, transaction);
@@ -537,23 +537,23 @@ void Courier::Protocol3Body::set(const AbortBody&  newValue) {
 	}
 }
 
-QString Courier::Protocol3Body::toString() const {
+std::string Courier::Protocol3Body::toString() const {
 	if (type == MessageType::CALL) {
 		CallBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::REJECT) {
 		RejectBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::RETURN) {
 		ReturnBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else if (type == MessageType::ABORT) {
 		AbortBody newValue;
 		get(newValue);
-		return QString("%1 %2").arg(type.toString()).arg(newValue.toString());
+		return std::string("%1 %2").arg(type.toString()).arg(newValue.toString());
 	} else {
 		logger.error("Unexpected");
 		logger.error("  type %s", type.toString());
@@ -580,7 +580,7 @@ void Courier::Protocol3Body::fromByteBuffer(ByteBuffer& bb) {
 		set(newValue);
 	} else {
 		logger.error("Unexpected");
-		logger.error("  type %d", (quint16)type);
+		logger.error("  type %d", (uint16_t)type);
 		ERROR();
 	}
 }
@@ -604,7 +604,7 @@ void Courier::Protocol3Body::toByteBuffer  (ByteBuffer& bb) const {
 		TO_BYTE_BUFFER(bb, newValue);
 	} else {
 		logger.error("Unexpected");
-		logger.error("  type %d", (quint16)type);
+		logger.error("  type %d", (uint16_t)type);
 		ERROR();
 	}
 }
@@ -613,8 +613,8 @@ void Courier::Protocol3Body::toByteBuffer  (ByteBuffer& bb) const {
 //
 // Courier::ExpeditedCourier
 //
-QString Courier::ExpeditedCourier::toString() const {
-	return QString("%1 %2").arg(range.toString()).arg(body.toString());
+std::string Courier::ExpeditedCourier::toString() const {
+	return std::string("%1 %2").arg(range.toString()).arg(body.toString());
 }
 void Courier::ExpeditedCourier::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, range);

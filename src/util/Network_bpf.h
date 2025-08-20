@@ -51,9 +51,9 @@ namespace Network::BPF {
 	class Driver : public Network::Driver {
 	public:
 		// no error checking
-		int  select  (quint32 timeout, int& opErrno);
-		int  transmit(quint8* data, quint32 dataLen, int& opErrno);
-		int  receive (quint8* data, quint32 dataLen, int& opErrno, qint64* msecSinceEpoch = nullptr);
+		int  select  (uint32_t timeout, int& opErrno);
+		int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno);
+		int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch = nullptr);
 		void discard();
 
 		Driver(const Network::Device& device_);

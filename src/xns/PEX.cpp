@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-pex");
+static const util::Logger logger(__FILE__);
 
 #include "../util/JSONUtil.h"
 
@@ -44,7 +44,7 @@ static const Logger logger = Logger::getLogger("xns-pex");
 //
 // XNS::PEX::Type
 //
-NameMap::Map<quint16> XNS::PEX::Type::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::PEX::Type::nameMap(NameMap::toString16u, {
 	{UNSPEC,    "UNSPEC"},
 	{TIME,      "TIME"},
 	{CHS,       "CHS"},
@@ -55,8 +55,8 @@ NameMap::Map<quint16> XNS::PEX::Type::nameMap(NameMap::toString16u, {
 //
 // XNS::PEX
 //
-QString XNS::PEX::toString() const {
-	return QString("%1 %2").arg(QString("%1").arg((quint32)id, 8, 16, QChar('0')).toUpper()).arg(type.toString(), -4);
+std::string XNS::PEX::toString() const {
+	return std::string("%1 %2").arg(std::string("%1").arg((uint32_t)id, 8, 16, QChar('0')).toUpper()).arg(type.toString(), -4);
 }
 void XNS::PEX::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, id);

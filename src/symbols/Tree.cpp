@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("tree");
+static const util::Logger logger(__FILE__);
 
 #include "Tree.h"
 #include "BCDFile.h"
@@ -70,9 +70,9 @@ TreeIndex* TreeIndex::getInstance(Symbols* symbols, CARD16 index) {
 
 	return new TreeIndex(symbols, index);
 }
-QString TreeIndex::toString() const {
-	if (isNull()) return QString("%1-NULL").arg(PREFIX);
-	return QString("%1-%2").arg(PREFIX).arg(index);
+std::string TreeIndex::toString() const {
+	if (isNull()) return std::string("%1-NULL").arg(PREFIX);
+	return std::string("%1-%2").arg(PREFIX).arg(index);
 }
 const TreeNode& TreeIndex::getValue() const {
 	TreeNode* ret = TreeNode::find(symbols, index);
@@ -112,7 +112,7 @@ TreeNode* TreeNode::find(Symbols* symbols, CARD16 index) {
 	return all.value(key, 0);
 }
 
-QString TreeNode::toString(NodeName value) {
+std::string TreeNode::toString(NodeName value) {
 	TO_STRING_PROLOGUE(NodeName)
 
 	// -- general tree constructors
@@ -200,12 +200,12 @@ QString TreeNode::toString(NodeName value) {
 	TO_STRING_EPILOGUE
 }
 
-QString TreeNode::toString() const {
-	QString values;
+std::string TreeNode::toString() const {
+	std::string values;
 	for(CARD16 i = 0; i < nSons; i++) {
-		values.append(QString(i ? " %1" : "%1").arg(son[i]->toString()));
+		values.append(std::string(i ? " %1" : "%1").arg(son[i]->toString()));
 	}
-	return QString("%1 %2 (%3)%4").arg(toString(name)).arg(info).arg(nSons).arg(values);
+	return std::string("%1 %2 (%3)%4").arg(toString(name)).arg(info).arg(nSons).arg(values);
 }
 
 
@@ -228,7 +228,7 @@ TreeNode* TreeNode::getInstance(Symbols* symbols, CARD16 index) {
 //
 // TreeLink
 //
-QString TreeLink::toString(Tag value) {
+std::string TreeLink::toString(Tag value) {
 	TO_STRING_PROLOGUE(Tag)
 
 	MAP_ENTRY(SUBTREE)
@@ -262,32 +262,32 @@ const TreeLink::Literal& TreeLink::getLiteral() const {
 	Literal* ret = (Literal*)tagValue;
 	return *ret;
 }
-QString TreeLink::toString() const {
+std::string TreeLink::toString() const {
 	switch(tag) {
 	case Tag::SUBTREE:
-		return QString("%1 %2").arg(toString(tag)).arg(getSubtree().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getSubtree().toString());
 	case Tag::HASH:
-		return QString("%1 %2").arg(toString(tag)).arg(getHash().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getHash().toString());
 	case Tag::SYMBOL:
-		return QString("%1 %2").arg(toString(tag)).arg(getSymbol().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getSymbol().toString());
 	case Tag::LITERAL:
-		return QString("%1 %2").arg(toString(tag)).arg(getLiteral().toString());
+		return std::string("%1 %2").arg(toString(tag)).arg(getLiteral().toString());
 	default:
 		ERROR();
 		return "???";
 	}
 }
-QString TreeLink::Subtree::toString() const {
-	return QString("%1").arg(index->toString());
+std::string TreeLink::Subtree::toString() const {
+	return std::string("%1").arg(index->toString());
 }
-QString TreeLink::Hash::toString() const {
-	return QString("%1").arg(index->toString());
+std::string TreeLink::Hash::toString() const {
+	return std::string("%1").arg(index->toString());
 }
-QString TreeLink::Symbol::toString() const {
-	return QString("%1").arg(index->toString());
+std::string TreeLink::Symbol::toString() const {
+	return std::string("%1").arg(index->toString());
 }
-QString TreeLink::Literal::toString() const {
-	return QString("%1").arg(this->info->toString());
+std::string TreeLink::Literal::toString() const {
+	return std::string("%1").arg(this->info->toString());
 }
 
 //Link: TYPE = RECORD [

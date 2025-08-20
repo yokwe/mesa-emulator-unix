@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("spp-server");
+static const util::Logger logger(__FILE__);
 
 #include <QtCore>
 
@@ -52,15 +52,15 @@ using XNS::Server::SPPServer;
 using XNS::Server::SPPServerImpl;
 
 void SPPServerImpl::handle(const Data& data, const SPP& spp) {
-	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPServerImpl", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 
 	if (myState.remoteHost != data.idp.srcHost || myState.remoteSocket != data.idp.srcSocket || myState.remoteID != spp.idSrc) {
 		// something goes wrong
 		logger.error("Unexpected");
 		logger.error("  expect  %04X  %s-%s", myState.remoteID,   TO_CSTRING(Host::toString(myState.remoteHost)), TO_CSTRING(Socket::toString(myState.remoteSocket)));
-		logger.error("  actual  %04X  %s-%s", (quint16)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),        TO_CSTRING(data.idp.srcSocket.toString()));
+		logger.error("  actual  %04X  %s-%s", (uint16_t)spp.idSrc, TO_CSTRING(data.idp.srcHost.toString()),        TO_CSTRING(data.idp.srcSocket.toString()));
 		ERROR();
 	}
 
@@ -118,8 +118,8 @@ void SPPServerImpl::handle(const Data& data, const SPP& spp) {
 			ExpeditedCourier exp;
 			FROM_BYTE_BUFFER(level3, exp);
 
-			QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-			QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+			std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+			std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 			logger.info("%s  SPP   %s  %s", TO_CSTRING(header), TO_CSTRING(spp.toString()), TO_CSTRING(exp.body.toString()));
 
 			Packet result;
@@ -139,8 +139,8 @@ void SPPServerImpl::handle(const Data& data, const SPP& spp) {
 
 
 void SPPServer::handle(const Data& data, const SPP& spp) {
-	QString timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
-	QString header = QString::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
+	std::string timeStamp = QDateTime::fromMSecsSinceEpoch(data.timeStamp).toString("yyyy-MM-dd hh:mm:ss.zzz");
+	std::string header = std::string::asprintf("%s %-18s  %s", TO_CSTRING(timeStamp), TO_CSTRING(data.ethernet.toString()), TO_CSTRING(data.idp.toString()));
 	logger.info("%s  SPP   %s  SPPServer", TO_CSTRING(header), TO_CSTRING(spp.toString()));
 
 	if (spp.control.isSystem() && spp.control.isSendAck()) {
@@ -150,14 +150,14 @@ void SPPServer::handle(const Data& data, const SPP& spp) {
 
 		// build state
 		{
-			QString newName = QString("%1-client").arg(name());
+			std::string newName = std::string("%1-client").arg(name());
 
 			state.name = strdup(newName.toUtf8().constData());
 
 			state.time = data.timeStamp;
 
 			state.remoteHost   = data.idp.srcHost;
-			state.remoteSocket = (quint16)data.idp.srcSocket;
+			state.remoteSocket = (uint16_t)data.idp.srcSocket;
 			state.remoteID     = spp.idSrc;
 
 			state.localSocket  = listeners->getUnusedSocket();

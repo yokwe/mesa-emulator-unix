@@ -47,7 +47,7 @@ class RIPListener : public XNS::Server::Listener {
 	QFuture<void>          future;
 	XNS::Server::Server*   myServer;
 
-	XNS::RIP::Entry find(quint32 net);
+	XNS::RIP::Entry find(uint32_t net);
 public:
 	RIPListener() : XNS::Server::Listener("RIPListener", XNS::Socket::RIP), stopFuture(false), myServer(nullptr) {}
 

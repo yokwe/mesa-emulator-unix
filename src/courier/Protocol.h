@@ -44,51 +44,51 @@
 namespace Courier {
 	class ProtocolType : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			PROTOCOL2 = 2, PROTOCOL3 = 3,
 		};
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
-		static void addNameMap(quint16 value, QString name) {
+		static void addNameMap(uint16_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 	class MessageType : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			CALL = 0, REJECT = 1, RETURN = 2, ABORT = 3,s
 		};
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
-		static void addNameMap(quint16 value, QString name) {
+		static void addNameMap(uint16_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 	class RejectCode : public UINT16 {
 	public:
-		enum Value : quint16 {
+		enum Value : uint16_t {
 			NO_SUCH_PROGRAM   = 0,
 			NO_SUCH_VERSION   = 1,
 			NO_SUCH_PROCEDURE = 2,
@@ -96,19 +96,19 @@ namespace Courier {
 		};
 
 		// define operator =
-		quint16 operator =(const quint16& newValue) const {
+		uint16_t operator =(const uint16_t& newValue) const {
 			value(newValue);
 			return newValue;
 		}
 
-		QString toString() const {
+		std::string toString() const {
 			return nameMap.toString(value());
 		}
-		static void addNameMap(quint16 value, QString name) {
+		static void addNameMap(uint16_t value, std::string name) {
 			nameMap.add(value, name);
 		}
 	private:
-		static NameMap::Map<quint16> nameMap;
+		static NameMap::Map<uint16_t> nameMap;
 	};
 
 	// ProtocolRange: TYPE = RECORD [low, high: ProtocolType];
@@ -117,7 +117,7 @@ namespace Courier {
 		ProtocolType low;
 		ProtocolType high;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -130,7 +130,7 @@ namespace Courier {
 		UINT16 low;
 		UINT16 high;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -152,7 +152,7 @@ namespace Courier {
 			UINT16     procedure;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -163,7 +163,7 @@ namespace Courier {
 			UINT16     transaction;
 			RejectCode reject;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -174,7 +174,7 @@ namespace Courier {
 			UINT16     transaction;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -186,7 +186,7 @@ namespace Courier {
 			UINT16     abort;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -206,7 +206,7 @@ namespace Courier {
 		void set(const ReturnBody& newValue);
 		void set(const AbortBody&  newValue);
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -234,7 +234,7 @@ namespace Courier {
 			UINT16     procedure;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -249,7 +249,7 @@ namespace Courier {
 			void get(VersionRange&  newValue)  const;
 			void set(const VersionRange&   newValue);
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -260,7 +260,7 @@ namespace Courier {
 			UINT16     transaction;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -272,7 +272,7 @@ namespace Courier {
 			UINT16     abort;
 			BLOCK      block;
 
-			QString toString() const;
+			std::string toString() const;
 
 			// Courier::Base
 			void fromByteBuffer(ByteBuffer& bb);
@@ -292,7 +292,7 @@ namespace Courier {
 		void set(const ReturnBody& newValue);
 		void set(const AbortBody&  newValue);
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -316,7 +316,7 @@ namespace Courier {
 		void set(const Protocol2Body& newValue);
 		void set(const Protocol3Body& newValue);
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);
@@ -331,7 +331,7 @@ namespace Courier {
 		ProtocolRange range;
 		Protocol3Body body;
 
-		QString toString() const;
+		std::string toString() const;
 
 		// Courier::Base
 		void fromByteBuffer(ByteBuffer& bb);

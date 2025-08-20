@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("xns-spp");
+static const util::Logger logger(__FILE__);
 
 #include "../util/JSONUtil.h"
 
@@ -44,7 +44,7 @@ static const Logger logger = Logger::getLogger("xns-spp");
 //
 // XNS::SPP::SST
 //
-NameMap::Map<quint16> XNS::SPP::SST::nameMap(NameMap::toString16u, {
+NameMap::Map<uint16_t> XNS::SPP::SST::nameMap(NameMap::toString16u, {
 	{DATA,         "DATA"},
 	{BULK,         "BULK"},
 	{CLOSE,        "CLOSE"},
@@ -55,28 +55,28 @@ NameMap::Map<quint16> XNS::SPP::SST::nameMap(NameMap::toString16u, {
 //
 // XNS::SPP::Control
 //
-QString XNS::SPP::Control::toString() const {
-	QStringList list;
+std::string XNS::SPP::Control::toString() const {
+	std::stringList list;
 	if (isSystem())         list += "SYS";
 	if (isSendAck())        list += "SEND_ACK";
 	if (isAttention())      list += "ATT";
 	if (isEndOfMessage())   list += "EOM";
-	if (value() & BIT_UNUSED) list += QString::asprintf("UNUSED_%1X", value() & BIT_UNUSED);
+	if (value() & BIT_UNUSED) list += std::string::asprintf("UNUSED_%1X", value() & BIT_UNUSED);
 
-	return QString("{%1}").arg(list.join(" "));
+	return std::string("{%1}").arg(list.join(" "));
 }
 
 
 //
 // XNS::SPP
 //
-QString XNS::SPP::toString() const {
-	return QString("%1 %2  %3 %4  %5-%6-%7").
+std::string XNS::SPP::toString() const {
+	return std::string("%1 %2  %3 %4  %5-%6-%7").
 		arg(control.toString()).
 		arg(sst.toString()).
-		arg(QString("%1").arg((quint16)idSrc, 4, 16, QChar('0')).toUpper()).
-		arg(QString("%1").arg((quint16)idDst, 4, 16, QChar('0')).toUpper()).
-		arg((quint16)seq).arg((quint16)ack).arg((quint16)alloc);
+		arg(std::string("%1").arg((uint16_t)idSrc, 4, 16, QChar('0')).toUpper()).
+		arg(std::string("%1").arg((uint16_t)idDst, 4, 16, QChar('0')).toUpper()).
+		arg((uint16_t)seq).arg((uint16_t)ack).arg((uint16_t)alloc);
 }
 void XNS::SPP::fromByteBuffer(ByteBuffer& bb) {
 	FROM_BYTE_BUFFER(bb, control);

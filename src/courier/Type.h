@@ -50,8 +50,8 @@ namespace Courier {
 	public:
 		virtual ~Base() {}
 
-		// QString <= this
-		virtual QString toString() const = 0;
+		// std::string <= this
+		virtual std::string toString() const = 0;
 
 		// this <= ByteBuffer
 		virtual void fromByteBuffer(ByteBuffer& bb) = 0;
@@ -61,7 +61,7 @@ namespace Courier {
 	};
 
 
-	class UINT8 : public Base , public OpaqueType<quint8> {
+	class UINT8 : public Base , public OpaqueType<uint8_t> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
@@ -80,9 +80,9 @@ namespace Courier {
 			return *this;
 		}
 
-		// with quint8
-		explicit UINT8(const quint8& newValue) : OpaqueType(newValue) {}
-		quint8 operator =(const quint8& newValue) const {
+		// with uint8_t
+		explicit UINT8(const uint8_t& newValue) : OpaqueType(newValue) {}
+		uint8_t operator =(const uint8_t& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
 
@@ -90,11 +90,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%u", value());
+		std::string toString() const {
+			return std::string::asprintf("%u", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint8 newValue;
+			uint8_t newValue;
 			bb.read8(newValue);
 			value(newValue);
 		}
@@ -104,7 +104,7 @@ namespace Courier {
 	};
 
 
-	class UINT16 : public Base, public OpaqueType<quint16> {
+	class UINT16 : public Base, public OpaqueType<uint16_t> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
@@ -124,8 +124,8 @@ namespace Courier {
 		}
 
 		// with qunt16
-		explicit UINT16(const quint16& newValue) : OpaqueType(newValue) {}
-		quint16 operator =(const quint16& newValue) const {
+		explicit UINT16(const uint16_t& newValue) : OpaqueType(newValue) {}
+		uint16_t operator =(const uint16_t& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
 
@@ -133,11 +133,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%u", value());
+		std::string toString() const {
+			return std::string::asprintf("%u", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint16 newValue;
+			uint16_t newValue;
 			bb.read16(newValue);
 			value(newValue);
 		}
@@ -176,11 +176,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%d", value());
+		std::string toString() const {
+			return std::string::asprintf("%d", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint16 newValue;
+			uint16_t newValue;
 			bb.read16(newValue);
 			value((qint16)newValue);
 		}
@@ -190,7 +190,7 @@ namespace Courier {
 	};
 
 
-	class UINT32 : public Base, public OpaqueType<quint32> {
+	class UINT32 : public Base, public OpaqueType<uint32_t> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
@@ -209,8 +209,8 @@ namespace Courier {
 		}
 
 		// with qunt32
-		explicit UINT32(const quint32& newValue) : OpaqueType(newValue) {}
-		quint32 operator =(const quint32& newValue) const {
+		explicit UINT32(const uint32_t& newValue) : OpaqueType(newValue) {}
+		uint32_t operator =(const uint32_t& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
 
@@ -218,11 +218,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%u", value());
+		std::string toString() const {
+			return std::string::asprintf("%u", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint32 newValue;
+			uint32_t newValue;
 			bb.read32(newValue);
 			value(newValue);
 		}
@@ -260,11 +260,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%d", value());
+		std::string toString() const {
+			return std::string::asprintf("%d", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint32 newValue;
+			uint32_t newValue;
 			bb.read32(newValue);
 			value((qint32)newValue);
 		}
@@ -274,7 +274,7 @@ namespace Courier {
 	};
 
 
-	class UINT48 : public Base, public OpaqueType<quint64> {
+	class UINT48 : public Base, public OpaqueType<uint64_t> {
 	public:
 		//
 		// essential constructor, destructor and copy assignment operator
@@ -292,9 +292,9 @@ namespace Courier {
 			return *this;
 		}
 
-		// with quint64
-		explicit UINT48(const quint64& newValue) : OpaqueType(newValue) {}
-		quint64 operator =(const quint64& newValue) const {
+		// with uint64_t
+		explicit UINT48(const uint64_t& newValue) : OpaqueType(newValue) {}
+		uint64_t operator =(const uint64_t& newValue) const {
 			return OpaqueType::operator =(newValue);
 		}
 
@@ -302,11 +302,11 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
-			return QString::asprintf("%llX", value());
+		std::string toString() const {
+			return std::string::asprintf("%llX", value());
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint64 newValue;
+			uint64_t newValue;
 			bb.read48(newValue);
 			value(newValue);
 		}
@@ -345,7 +345,7 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
+		std::string toString() const {
 			return buffer.toString();
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
@@ -353,13 +353,13 @@ namespace Courier {
 		}
 		void toByteBuffer  (ByteBuffer& bb) const {
 			int size = buffer.limit() - buffer.base();
-			quint8* data = buffer.data() + buffer.base();
+			uint8_t* data = buffer.data() + buffer.base();
 			bb.write(size, data);
 		}
 	};
 
 
-	class BOOLEAN : public Base, public OpaqueType<quint16> {
+	class BOOLEAN : public Base, public OpaqueType<uint16_t> {
 	public:
 		BOOLEAN() : OpaqueType() {}
 
@@ -377,7 +377,7 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
+		std::string toString() const {
 			return value() ? "true" : "false";
 		}
 		void fromByteBuffer(ByteBuffer& bb);
@@ -391,7 +391,7 @@ namespace Courier {
 
 	public:
 		// define operator =
-		QString operator =(const QString& newValue) const;
+		std::string operator =(const std::string& newValue) const;
 
 		// cast to const char*
 		operator const char* () {
@@ -401,7 +401,7 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
+		std::string toString() const {
 			return byteArray.constData();
 		}
 		void fromByteBuffer(ByteBuffer& bb);
@@ -457,15 +457,15 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
+		std::string toString() const {
 			if (list.isEmpty()) {
 				return "{}";
 			} else {
-				QStringList myList;
+				std::stringList myList;
 				for(auto e: list) {
-					myList.append(QString("{%1}").arg(e.toString()));
+					myList.append(std::string("{%1}").arg(e.toString()));
 				}
-				return QString("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
+				return std::string("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
 			}
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
@@ -487,7 +487,7 @@ namespace Courier {
 	template <typename T, unsigned short int N = 65535>
 	class SEQUENCE : public Base {
 		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
-		quint16  maxLength = N;
+		uint16_t  maxLength = N;
 		mutable QList<T> list;
 
 	public:
@@ -532,19 +532,19 @@ namespace Courier {
 		//
 		// Base
 		//
-		QString toString() const {
+		std::string toString() const {
 			if (list.isEmpty()) {
 				return "{}";
 			} else {
-				QStringList myList;
+				std::stringList myList;
 				for(auto e: list) {
-					myList.append(QString("{%1}").arg(e.toString()));
+					myList.append(std::string("{%1}").arg(e.toString()));
 				}
-				return QString("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
+				return std::string("(%1)-{%2}").arg(myList.length()).arg(myList.join(", "));
 			}
 		}
 		void fromByteBuffer(ByteBuffer& bb) {
-			quint16 length;
+			uint16_t length;
 			bb.read16(length);
 			if (maxLength < length) {
 				logger.error("Unexpected");
@@ -553,14 +553,14 @@ namespace Courier {
 				ERROR();
 			}
 			list.clear();
-			for(quint16 i = 0; i < length; i++) {
+			for(uint16_t i = 0; i < length; i++) {
 				T newValue;
 				newValue.fromByteBuffer(bb);
 				list.append(newValue);
 			}
 		}
 		void toByteBuffer  (ByteBuffer& bb) const {
-			bb.write16((quint16)list.length());
+			bb.write16((uint16_t)list.length());
 			for(auto e: list) {
 				e.toByteBuffer(bb);
 			}
@@ -589,22 +589,22 @@ namespace Courier {
 	// Define specialized operator << for unsigned primitive type
 	//
 	template <>
-	inline ByteBuffer& operator << (ByteBuffer &bb, const quint8 &value) {
+	inline ByteBuffer& operator << (ByteBuffer &bb, const uint8_t &value) {
 		bb.write8(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator <<(ByteBuffer &bb, const quint16 &value) {
+	inline ByteBuffer& operator <<(ByteBuffer &bb, const uint16_t &value) {
 		bb.write16(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator <<(ByteBuffer &bb, const quint32 &value) {
+	inline ByteBuffer& operator <<(ByteBuffer &bb, const uint32_t &value) {
 		bb.write32(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator <<(ByteBuffer &bb, const quint64 &value) {
+	inline ByteBuffer& operator <<(ByteBuffer &bb, const uint64_t &value) {
 		bb.write48(value);
 		return bb;
 	}
@@ -614,17 +614,17 @@ namespace Courier {
 	//
 	template <>
 	inline ByteBuffer& operator <<(ByteBuffer &bb, const qint8 &value) {
-		bb.write8((quint8)value);
+		bb.write8((uint8_t)value);
 		return bb;
 	}
 	template <>
 	inline ByteBuffer& operator <<(ByteBuffer &bb, const qint16 &value) {
-		bb.write16((quint16)value);
+		bb.write16((uint16_t)value);
 		return bb;
 	}
 	template <>
 	inline ByteBuffer& operator <<(ByteBuffer &bb, const qint32 &value) {
-		bb.write32((quint32)value);
+		bb.write32((uint32_t)value);
 		return bb;
 	}
 
@@ -634,7 +634,7 @@ namespace Courier {
 	template <>
 	inline ByteBuffer& operator <<(ByteBuffer &bb, const ByteBuffer &value) {
 		int size = value.limit() - value.base();
-		quint8* data = value.data() + value.base();
+		uint8_t* data = value.data() + value.base();
 		bb.write(size, data);
 		return bb;
 	}
@@ -643,22 +643,22 @@ namespace Courier {
 	// Define specialized operator >> for unsigned primitive type
 	//
 	template <>
-	inline ByteBuffer& operator >>(ByteBuffer &bb, quint8 &value) {
+	inline ByteBuffer& operator >>(ByteBuffer &bb, uint8_t &value) {
 		bb.read8(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator >>(ByteBuffer &bb, quint16 &value) {
+	inline ByteBuffer& operator >>(ByteBuffer &bb, uint16_t &value) {
 		bb.read16(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator >>(ByteBuffer &bb, quint32 &value) {
+	inline ByteBuffer& operator >>(ByteBuffer &bb, uint32_t &value) {
 		bb.read32(value);
 		return bb;
 	}
 	template <>
-	inline ByteBuffer& operator >>(ByteBuffer &bb, quint64 &value) {
+	inline ByteBuffer& operator >>(ByteBuffer &bb, uint64_t &value) {
 		bb.read48(value);
 		return bb;
 	}
@@ -668,21 +668,21 @@ namespace Courier {
 	//
 	template <>
 	inline ByteBuffer& operator >>(ByteBuffer &bb, qint8 &value) {
-		quint8 newValue;
+		uint8_t newValue;
 		bb.read8(newValue);
 		value = (qint8)newValue;
 		return bb;
 	}
 	template <>
 	inline ByteBuffer& operator >>(ByteBuffer &bb, qint16 &value) {
-		quint16 newValue;
+		uint16_t newValue;
 		bb.read16(newValue);
 		value = (qint16)newValue;
 		return bb;
 	}
 	template <>
 	inline ByteBuffer& operator >>(ByteBuffer &bb, qint32 &value) {
-		quint32 newValue;
+		uint32_t newValue;
 		bb.read32(newValue);
 		value = (qint32)newValue;
 		return bb;

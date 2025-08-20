@@ -46,7 +46,7 @@ public:
 	static const int BYTES_PER_WORD = Environment::bytesPerWord;
 
 	// File file
-	static BCDFile* getInstance(QString path);
+	static BCDFile* getInstance(std::string path);
 
 	// To make call destructor of child class, define virtual desturctor of parent
     virtual ~BCDFile() {}
@@ -67,7 +67,7 @@ public:
 		setPosition(0);
 	}
 
-	virtual QString getPath()                    = 0;
+	virtual std::string getPath()                    = 0;
 	virtual int     getPosition()                = 0;
 	virtual void    setPosition(int newPosition) = 0;
 	virtual CARD8   getCARD8()                   = 0;

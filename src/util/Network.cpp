@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const Logger logger = Logger::getLogger("net");
+static const util::Logger logger(__FILE__);
 
 #include "Network.h"
 
@@ -84,27 +84,27 @@ Network::Packet& Network::Packet::operator =(const ByteBuffer& that) {
 	return *this;
 }
 
-QString Network::Packet::toString(int limit) const {
+std::string Network::Packet::toString(int limit) const {
 	ByteBuffer bb(*this);
 	bb.rewind();
 
-	QString ret = QString::asprintf("(%4d) ", bb.limit());
+	std::string ret = std::string::asprintf("(%4d) ", bb.limit());
 
-	quint64 dst;
-	quint64 src;
-	quint16 type;
+	uint64_t dst;
+	uint64_t src;
+	uint16_t type;
 
 	bb.read48(dst);
 	bb.read48(src);
 	bb.read16(type);
 
-	ret += QString::asprintf("%12llX  %12llX  %04X ", dst, src, type);
+	ret += std::string::asprintf("%12llX  %12llX  %04X ", dst, src, type);
 	ret += toHexString(bb.remaining(), data() + bb.position()).left(limit);
 
 	return ret;
 }
 
-quint8* Network::Packet::packetData() {
+uint8_t* Network::Packet::packetData() {
 	return myPacketData;
 }
 
@@ -112,6 +112,6 @@ quint8* Network::Packet::packetData() {
 //
 // Network::Device
 //
-QString Network::Device::toString() const {
-	return QString("{%1 %2}").arg(name).arg(QString("%1").arg(address, 0, 16).toUpper());
+std::string Network::Device::toString() const {
+	return std::string("{%1 %2}").arg(name).arg(std::string("%1").arg(address, 0, 16).toUpper());
 }

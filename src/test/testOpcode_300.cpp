@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("test300");
+static const util::Logger logger(__FILE__);
 
 #include "testBase.h"
 

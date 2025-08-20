@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const Logger logger = Logger::getLogger("process");
+static const util::Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"

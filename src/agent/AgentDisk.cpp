@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,12 @@
 // AgentDisk.cpp
 //
 
+#include <mutex>
+#include <condition_variable>
+
+
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -51,19 +55,21 @@ static const util::Logger logger(__FILE__);
 
 static const CARD32 DEBUG_DONT_USE_THREAD = 0;
 
-int AgentDisk::IOThread::stopThread = 0;
-
 static int readCount = 0;
 static int writeCount = 0;
 static int verifyCount = 0;
 
+int AgentDisk::IOThread::stopThread = 0;
+void AgentDisk::IOThread::stop() {
+	logger.info("AgentDisk::IOThread::stop");
+	stopThread = 1;
+}
 void AgentDisk::IOThread::run() {
 	logger.info("AgentDisk::IOThread::run START");
 
 	stopThread = 0;
 	int processCount = 0;
-	QThread::currentThread()->setPriority(PRIORITY);
-
+	
 	try {
 		for(;;) {
 			if (stopThread) break;
@@ -71,12 +77,14 @@ void AgentDisk::IOThread::run() {
 			DiskIOFaceGuam::DiskIOCBType* iocb     = 0;
 			DiskFile*                     diskFile = 0;
 			{
-				QMutexLocker locker(&ioMutex);
+				std::unique_lock<std::mutex> locker(ioMutex);
 				if (ioQueue.empty()) {
+					// if there is no requst, wait
 					for(;;) {
-						bool ret = ioCV.wait(&ioMutex, WAIT_INTERVAL);
-						if (ret) break;
+						ioCV.wait_for(locker, Util::ONE_SECOND);
 						if (stopThread) goto exitLoop;
+						if (ioQueue.empty()) continue;
+						break;
 					}
 				}
 
@@ -102,7 +110,7 @@ exitLoop:
 	logger.info("AgentDisk::IOThread::run STOP");
 }
 void AgentDisk::IOThread::reset() {
-	QMutexLocker locker(&ioMutex);
+	std::unique_lock<std::mutex> locker(ioMutex);
 	ioQueue.clear();
 }
 
@@ -111,11 +119,11 @@ void AgentDisk::IOThread::setInterruptSelector(CARD16 interruptSelector) {
 }
 
 void AgentDisk::IOThread::enqueue(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile) {
-	QMutexLocker locker(&ioMutex);
+	std::unique_lock<std::mutex> locker(ioMutex);
 	Item item(iocb, diskFile);
 
 	ioQueue.push_back(item);
-	if (ioQueue.size() == 1) ioCV.wakeOne();
+	ioCV.notify_all();
 }
 
 void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile) {
@@ -202,10 +210,8 @@ void AgentDisk::Initialize() {
 	for(int i = 0; i < fcb->numberOfDCBs; i++) {
 		DiskFile* diskFile = diskFileList[i];
 		diskFile->setDiskDCBType(dcb + i);
-		logger.info("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath().toStdString());
+		logger.info("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath());
 	}
-
-	ioThread.setAutoDelete(false);
 }
 
 void AgentDisk::Call() {
@@ -327,5 +333,5 @@ void AgentDisk::Call() {
 }
 
 void AgentDisk::addDiskFile(DiskFile* diskFile) {
-	diskFileList.append(diskFile);
+	diskFileList.push_back(diskFile);
 }

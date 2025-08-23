@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -109,7 +109,7 @@ void AgentFloppy::Initialize() {
 	for(int i = 0; i < fcb->numberOfDCBs; i++) {
 		DiskFile* diskFile = diskFileList[i];
 		diskFile->setFloppyDCBType(fcb->dcbs + i);
-		logger.debug("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath().toStdString());
+		logger.debug("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath());
 	}
 }
 
@@ -179,7 +179,7 @@ void AgentFloppy::Call() {
 					// sector starts from one. so need to minus one to use with diskFile
 					diskFile->readPage(sector - 1, page.word, iocb->sectorLength);
 					// Assume cpu is big endian
-					Util::fromBigEndian(page.word, buffer, iocb->sectorLength);
+					Util::byteswap(page.word, buffer, iocb->sectorLength);
 				}
 				if (iocb->operation.incrementDataPointer) {
 					iocb->operation.dataPtr += iocb->sectorLength;
@@ -213,7 +213,7 @@ void AgentFloppy::Call() {
 				} else {
 					DiskFile::Page page;
 					// Assume CPU is big endian
-					Util::toBigEndian(buffer, page.word, iocb->sectorLength);
+					Util::byteswap(buffer, page.word, iocb->sectorLength);
 					// sector starts from one. so need to minus one to use with diskFile
 					diskFile->writePage(sector - 1, page.word, iocb->sectorLength);
 				}
@@ -265,5 +265,5 @@ void AgentFloppy::Call() {
 }
 
 void AgentFloppy::addDiskFile(DiskFile *diskFile) {
-	this->diskFileList.append(diskFile);
+	this->diskFileList.push_back(diskFile);
 }

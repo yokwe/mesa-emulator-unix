@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,12 @@
 
 #pragma once
 
-#include <log4cpp/Category.hh>
-
-#include <signal.h>
-#include <cxxabi.h>
-#include <type_traits>
-#include <tuple>
 #include <string>
-#include <functional>
+#include <cstdint>
 
-#include <QtCore>
-#include <QtGlobal>
+#include <alloca.h>
+
+#include <log4cxx/logger.h>
 
 
 #define DEBUG_TRACE() logger.debug("****  TRACE  %-20s %5d %s", __FUNCTION__, __LINE__, __FILE__)
@@ -88,25 +83,22 @@ std::string demangle(const char* mangled);
 
 template<typename T>
 auto std_sprintf_convert_(T&& value) {
-	constexpr auto is_std_string = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-	constexpr auto is_std::string = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
+	constexpr auto is_std_string     = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
 
-	// comment out line below to detect std::string
-#ifdef STD_SPRINTF_STOP_COMPILE_IF_VALUE_IS_std::string
-	static_assert(!is_std::string, "value is std::string");
-#endif
+	// handle std::string properly
 	if constexpr (is_std_string) {
 		return (value).c_str();
-	} else if constexpr (is_std::string) {
-		return (value).toUtf8().constData();
 	} else {
 		return std::forward<T>(value);
 	}
 }
 
+//
+// helper template for Logger
+//
 template <typename ... Args>
 void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&& ... args) {
-	char buf[bufferSize];
+	char* buf = (char*)alloca(bufferSize);
 	int ret = std::snprintf(buf, bufferSize, format, args ...);
 	if (bufferSize <= ret) {
 		// failure
@@ -119,6 +111,7 @@ void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&
 }
 
 #define STD_SPRINTF_DEFAULT_BUFFER_SIZE 512
+
 template<typename ... Args>
 std::string std_sprintf(const char* format, Args&& ... args) {
 	std::string result;
@@ -128,78 +121,72 @@ std::string std_sprintf(const char* format, Args&& ... args) {
 
 class Logger {
 public:
-	static Logger getLogger(const char *name);
+	Logger(const char* name);
+	Logger(const Logger& that) : myLogger(that.myLogger) {}
 
-	static void pushPriority(log4cpp::Priority::Value newValue);
-	static void popPriority();
+	enum class Level {
+		DEBUG, INFO, WARN, ERROR, FATAL, OFF,
+	};
 
-	// To redirect qDebug() qInfo() and qWarning() to log4cpp, call installQtMessageHandler
-	static QtMessageHandler getQtMessageHandler();
-	static void installQtMessageHandler() {
-		qInstallMessageHandler(getQtMessageHandler());
-	}
+	static void pushLevel(Level newValue = Level::OFF);
+	static void popLevel();
 
 	// std::string
 	void debug(const std::string& string) const {
-		category->debug(string);
+		myLogger->debug(string);
 	}
 	void info(const std::string& string) const {
-		category->info(string);
+		myLogger->info(string);
 	}
 	void warn(const std::string& string) const{
-		category->warn(string);
+		myLogger->warn(string);
 	}
 	void error(const std::string& string) const {
-		category->error(string);
+		myLogger->error(string);
 	}
 	void fatal(const std::string& string) const {
-		category->fatal(string);
+		myLogger->fatal(string);
 	}
 
 	// const char*
 	void debug(const char* string) const {
-		category->debug(std::string(string));
+		myLogger->debug(std::string(string));
 	}
 	void info(const char* string) const {
-		category->info(std::string(string));
+		myLogger->info(std::string(string));
 	}
 	void warn(const char* string) const {
-		category->warn(std::string(string));
+		myLogger->warn(std::string(string));
 	}
 	void error(const char* string) const {
-		category->error(std::string(string));
+		myLogger->error(std::string(string));
 	}
 	void fatal(const char* string) const {
-		category->fatal(std::string(string));
+		myLogger->fatal(std::string(string));
 	}
 
 
     template<typename... Args> void debug(const char* format, Args&& ... args) const {
-    	category->debug(std_sprintf(format, args...));
+    	myLogger->debug(std_sprintf(format, args...));
     }
     template<typename... Args> void info(const char* format, Args&& ... args) const {
-     	category->info(std_sprintf(format, args...));
+    	myLogger->info(std_sprintf(format, args...));
      }
     template<typename... Args> void warn(const char* format, Args&& ... args) const {
-     	category->warn(std_sprintf(format, args...));
+    	myLogger->warn(std_sprintf(format, args...));
      }
     template<typename... Args> void error(const char* format, Args&& ... args) const {
-    	category->error(std_sprintf(format, args...));
+    	myLogger->error(std_sprintf(format, args...));
     }
     template<typename... Args> void fatal(const char* format, Args&& ... args) const {
-    	category->fatal(std_sprintf(format, args...));
+    	myLogger->fatal(std_sprintf(format, args...));
     }
 
 private:
-	log4cpp::Category* category;
-	Logger(log4cpp::Category* category_) : category(category_) {}
+    log4cxx::LoggerPtr myLogger;
 };
 
-int toIntMesaNumber(const std::string& string);
-int toIntMesaNumber(const std::string& string);
-
-bool startsWith(const std::string_view& string, const std::string_view& literal);
-bool endsWith  (const std::string_view& string, const std::string_view& literal);
+int32_t toIntMesaNumber(const std::string& string);
 
 std::string toHexString(int size, const uint8_t* data);
 
@@ -217,7 +204,7 @@ std::string toHexString(int size, const uint8_t* data);
 // Helper macro to make toString for enum class
 #define TO_STRING_PROLOGUE(e) \
 	typedef e ENUM; \
-	static QMap<ENUM, std::string> map({
+	static std::map<ENUM, std::string> map({
 #define MAP_ENTRY(m) {ENUM::m, #m},
 #define TO_STRING_EPILOGUE \
 	}); \
@@ -243,16 +230,25 @@ const char* getBuildDir();
 
 class Util {
 public:
+	// Time duraion for one second
+	static constexpr std::chrono::milliseconds ONE_SECOND = std::chrono::seconds(1);
+
 	// misc functions
-	static uint32_t getMicroTime();
-	static void    msleep(uint32_t milliSeconds);
-	static uint32_t getUnixTime();
+	static uint64_t getSecondsFromEpoch();
+	static uint64_t getMilliSecondsFromEpoch();
+	static uint64_t getMicroSecondsFromEpoch();
+
+	static uint32_t getMicroTime() {
+		return (uint32_t)getMicroSecondsFromEpoch();
+	}
+	static uint32_t getUnixTime() {
+		return (uint32_t)getSecondsFromEpoch();
+	}
 
 	static void*   mapFile  (const std::string& path, uint32_t& mapSize);
 	static void    unmapFile(void* page);
 
-	static void    toBigEndian  (uint16_t* source, uint16_t* dest, int size);
-	static void    fromBigEndian(uint16_t* source, uint16_t* dest, int size);
+	static void    byteswap  (uint16_t* source, uint16_t* dest, int size);
 
 	//From System.mesa
 	//-- Time of day
@@ -283,41 +279,3 @@ public:
 		return mesaTime - EPOCH_DIFF;
 	}
 };
-
-
-//
-// trait_function
-//
-template <typename T>
-struct trait_function : trait_function<decltype(&T::operator())> {};
-template <typename C, typename R, typename... A>
-struct trait_function<R(C::*)(A...) const> {
-	enum {type = 100};
-
-	// use enum to define type not constant
-	enum {arity = sizeof...(A)};
-	// return type
-	using ret_type = R;
-	// argument type as std::tuple<>
-	using arg_type = std::tuple<A...>;
-};
-template <typename R, typename... A>
-struct trait_function<R(*)(A...)> {
-	enum {type = 200};
-
-	// use enum to define type not constant
-	enum {arity = sizeof...(A)};
-	// return type
-	using ret_type = R;
-	// argument type as std::tuple<>
-	using arg_type = std::tuple<A...>;
-};
-#if 0
-using trait = trait_function<T>;
-logger.info("trait    %s", demangle(typeid(trait)));
-logger.info("type     %d", trait::type);
-logger.info("arity    %d", trait::arity);
-logger.info("ret_type %s", demangle(typeid(typename trait::ret_type)));
-using args0 = typename std::tuple_element<0, typename trait::arg_type>;
-logger.info("arg0     %s", demangle(typeid(typename args0::type)));
-#endif

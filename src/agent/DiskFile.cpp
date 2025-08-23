@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "DiskFile.h"
 
@@ -69,14 +69,14 @@ int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
 
 void DiskFile::attach(const std::string& path_) {
 	path = path_;
-	logger.info("DiskFile::attach %s", path.toStdString());
+	logger.info("DiskFile::attach %s", path);
 
 	page = (Page*)Util::mapFile(path, size);
 	maxBlock = getBlockSize();
 }
 
 void DiskFile::detach() {
-	logger.info("DiskFile::detach %s", path.toStdString());
+	logger.info("DiskFile::detach %s", path);
 
 	Util::unmapFile(page);
 	page              = 0;

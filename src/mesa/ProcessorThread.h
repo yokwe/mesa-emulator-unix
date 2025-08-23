@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,28 +36,26 @@
 #ifndef PROCESSOR_THREAD_H__
 #define PROCESSOR_THREAD_H__
 
+
+#include <atomic>
+#include <set>
+
 #include "MesaBasic.h"
 #include "Constant.h"
 
-#include <QtCore>
 
 #include "../util/Util.h"
 
 #include "InterruptThread.h"
 
 
-class ProcessorThread : public QRunnable {
+class ProcessorThread {
 public:
-	static const QThread::Priority PRIORITY = QThread::LowPriority;
-
-	// Wait interval in milliseconds for QWaitCondition::wait
-	static const int WAIT_INTERVAL = 1000;
-
 	// Use this condition variable to wake and wait processor
-	static QWaitCondition cvRunning;
+	static std::condition_variable cvRunning;
 
 	static int getRunning() {
-		return running.loadAcquire();
+		return running.load();
 	}
 	static void startRunning(); // running = 1
 	static void stopRunning();  // running = 0
@@ -73,7 +71,7 @@ public:
 	static void requestRescheduleInterrupt();
 
 	static int getRequestReschedule() {
-		return requestReschedule.loadAcquire();
+		return requestReschedule.load();
 	}
 
 	static void checkRequestReschedule() {
@@ -90,7 +88,7 @@ public:
 	void run();
 
 private:
-	static QAtomicInt running;
+	static std::atomic_uint running;
 
 	static int stopThread;
 
@@ -103,15 +101,15 @@ private:
 	//
 	static const int  REQUESET_RESCHEDULE_TIMER     = 0x01;
 	static const int  REQUSEST_RESCHEDULE_INTERRUPT = 0x02;
-	static QAtomicInt requestReschedule;
-	static QMutex     mutexRequestReschedule;
+	static std::atomic_uint requestReschedule;
+	static std::mutex    mutexRequestReschedule;
 
-	static QSet<CARD16> stopAtMPSet;
-	static QSet<CARD16> stopMessageUntilMPSet;
+	static std::set<CARD16> stopAtMPSet;
+	static std::set<CARD16> stopMessageUntilMPSet;
 	static CARD16       mp;
 
 	static void setRequestReschedule(int newValue) {
-		requestReschedule.storeRelease(newValue);
+		requestReschedule.store(newValue);
 	}
 };
 

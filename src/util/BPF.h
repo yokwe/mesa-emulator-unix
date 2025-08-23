@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,6 @@
 #include <sys/time.h>
 #include <net/bpf.h>
 
-#include <QtCore>
 
 #include "Network.h"
 
@@ -53,7 +52,7 @@ public:
 	int     bufferSize;
 	uint8_t* buffer;
 
-	QList<ByteBuffer> readData;
+	std::vector<ByteBuffer> readData;
 
 	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
 	~BPF() { close(); }
@@ -65,7 +64,7 @@ public:
 	// For Packet and ByteBuffer
 	void write(const Network::Packet& value);
 
-	// read() returns QList<ByteBuffer> readData.
+	// read() returns std::vector<ByteBuffer> readData.
 	// Backing store of ByteBuffer is member variable buffer.
 	//
 	// IMPORTANT
@@ -76,7 +75,7 @@ public:
 	// Buffer.limit() returns bh_hdrlen + bh_caplen
 	// So actual received data is stored between base() and limit()
 	// You can get address of struct timeval from data()
-	const QList<ByteBuffer>& read();
+	const std::vector<ByteBuffer>& read();
 
 
 	// for Network::Driver

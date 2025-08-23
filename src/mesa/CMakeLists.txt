@@ -2,6 +2,30 @@
 # mesa
 #
 
-list(APPEND fileList Memory.cpp MesaProcessor.cpp Pilot.cpp Type.cpp InterruptThread.cpp ProcessorThread.cpp TimerThread.cpp)
+add_library(mesa STATIC)
 
-add_library (mesa STATIC ${fileList})
+target_sources(
+	mesa
+	PUBLIC
+        Constant.h
+        Function.h
+        InterruptThread.h
+        Memory.h
+        MesaBasic.h
+        MesaProcessor.h
+        Pilot.h
+        ProcessorThread.h
+        TimerThread.h
+        Type.h
+        Variable.h
+    PRIVATE
+        InterruptThread.cpp
+        Memory.cpp
+        MesaProcessor.cpp
+        Pilot.cpp
+        ProcessorThread.cpp
+        TimerThread.cpp
+        Type.cpp
+)
+
+add_dependencies(mesa util)

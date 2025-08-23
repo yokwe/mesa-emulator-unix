@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,65 +36,65 @@
 #pragma once
 
 // Opcode
-static const int DEBUG_SHOW_OPCODE       = 0;
-static const int DEBUG_SHOW_DUMMY_OPCODE = 0;
-static const int DEBUG_SHOW_OPCODE_STATS = 0;
+constexpr int DEBUG_SHOW_OPCODE       = 0;
+constexpr int DEBUG_SHOW_DUMMY_OPCODE = 0;
+constexpr int DEBUG_SHOW_OPCODE_STATS = 0;
 
 // NetworkPacket
-static const int DEBUG_SHOW_NETWORK_PACKET_BYTES  = 0;
-static const int DEBUG_SHOW_NETWORK_PACKET_PACKET = 0;
+constexpr int DEBUG_SHOW_NETWORK_PACKET_BYTES  = 0;
+constexpr int DEBUG_SHOW_NETWORK_PACKET_PACKET = 0;
 
 // Keyboard and Mouse
-static const int DEBUG_SHOW_EVENT_KEY   = 0;
-static const int DEBUG_SHOW_EVENT_MOUSE = 0;
+constexpr int DEBUG_SHOW_EVENT_KEY   = 0;
+constexpr int DEBUG_SHOW_EVENT_MOUSE = 0;
 
 // Reschedule
-static const int DEBUG_SHOW_RUNNING = 0;
+constexpr int DEBUG_SHOW_RUNNING = 0;
 
 // Fault
-static const int DEBUG_SHOW_FRAME_FAULT         = 0;
-static const int DEBUG_SHOW_PAGE_FAULT          = 0;
-static const int DEBUG_SHOW_WRITE_PROTECT_FAULT = 1;
+constexpr int DEBUG_SHOW_FRAME_FAULT         = 0;
+constexpr int DEBUG_SHOW_PAGE_FAULT          = 0;
+constexpr int DEBUG_SHOW_WRITE_PROTECT_FAULT = 1;
 
 // Trap
-static const int DEBUG_SHOW_BOUNDS_TRAP     = 0;
-static const int DEBUG_SHOW_BREAK_TRAP      = 0;
-static const int DEBUG_SHOW_CODE_TRAP       = 0;
-static const int DEBUG_SHOW_CONTROL_TRAP    = 0;
-static const int DEBUG_SHOW_DIV_CHECK_TRAP  = 1;
-static const int DEBUG_SHOW_DIV_ZERO_TRAP   = 1;
-static const int DEBUG_SHOW_ESC_OPCODE_TRAP = 0;
-static const int DEBUG_SHOW_INTERRUPT_ERROR = 1;
-static const int DEBUG_SHOW_OPCODE_TRAP     = 0;
-static const int DEBUG_SHOW_POINTER_TRAP    = 1;
-static const int DEBUG_SHOW_PROCESS_TRAP    = 1;
-static const int DEBUG_SHOW_RESCHEDULE_TRAP = 1;
-static const int DEBUG_SHOW_STACK_ERROR     = 1;
-static const int DEBUG_SHOW_UNBOUND_TRAP    = 1;
-static const int DEBUG_SHOW_HARDWARE_ERROR  = 1;
-static const int DEBUG_SHOW_XFER_TRAP       = 1;
+constexpr int DEBUG_SHOW_BOUNDS_TRAP     = 0;
+constexpr int DEBUG_SHOW_BREAK_TRAP      = 0;
+constexpr int DEBUG_SHOW_CODE_TRAP       = 0;
+constexpr int DEBUG_SHOW_CONTROL_TRAP    = 0;
+constexpr int DEBUG_SHOW_DIV_CHECK_TRAP  = 1;
+constexpr int DEBUG_SHOW_DIV_ZERO_TRAP   = 1;
+constexpr int DEBUG_SHOW_ESC_OPCODE_TRAP = 0;
+constexpr int DEBUG_SHOW_INTERRUPT_ERROR = 1;
+constexpr int DEBUG_SHOW_OPCODE_TRAP     = 0;
+constexpr int DEBUG_SHOW_POINTER_TRAP    = 1;
+constexpr int DEBUG_SHOW_PROCESS_TRAP    = 1;
+constexpr int DEBUG_SHOW_RESCHEDULE_TRAP = 1;
+constexpr int DEBUG_SHOW_STACK_ERROR     = 1;
+constexpr int DEBUG_SHOW_UNBOUND_TRAP    = 1;
+constexpr int DEBUG_SHOW_HARDWARE_ERROR  = 1;
+constexpr int DEBUG_SHOW_XFER_TRAP       = 1;
 
 // Agent
-static const int DEBUG_SHOW_AGENT_BEEP      = 0;
-static const int DEBUG_SHOW_AGENT_DISK      = 0;
-static const int DEBUG_SHOW_AGENT_DISPLAY   = 0;
-static const int DEBUG_SHOW_AGENT_FLOPPY    = 0;
-static const int DEBUG_SHOW_AGENT_MOUSE     = 0;
-static const int DEBUG_SHOW_AGENT_NETWORK   = 0;
-static const int DEBUG_SHOW_AGENT_PROCESSOR = 0;
-static const int DEBUG_SHOW_AGENT_STREAM    = 0;
+constexpr int DEBUG_SHOW_AGENT_BEEP      = 0;
+constexpr int DEBUG_SHOW_AGENT_DISK      = 0;
+constexpr int DEBUG_SHOW_AGENT_DISPLAY   = 0;
+constexpr int DEBUG_SHOW_AGENT_FLOPPY    = 0;
+constexpr int DEBUG_SHOW_AGENT_MOUSE     = 0;
+constexpr int DEBUG_SHOW_AGENT_NETWORK   = 0;
+constexpr int DEBUG_SHOW_AGENT_PROCESSOR = 0;
+constexpr int DEBUG_SHOW_AGENT_STREAM    = 0;
 
 // Stream
-static const int DEBUG_SHOW_STREAM_BOOT     = 1;
-static const int DEBUG_SHOW_STREAM_COPYPASTE= 0;
-static const int DEBUG_SHOW_STREAM_PCFA     = 0;
-static const int DEBUG_SHOW_STREAM_TCP      = 0;
-static const int DEBUG_SHOW_STREAM_WWC      = 0;
+constexpr int DEBUG_SHOW_STREAM_BOOT     = 1;
+constexpr int DEBUG_SHOW_STREAM_COPYPASTE= 0;
+constexpr int DEBUG_SHOW_STREAM_PCFA     = 0;
+constexpr int DEBUG_SHOW_STREAM_TCP      = 0;
+constexpr int DEBUG_SHOW_STREAM_WWC      = 0;
 
 // Stop emulator at
-static const int DEBUG_STOP_AT_CONTROL_TRAP = 1;
-static const int DEBUG_STOP_AT_UNBOUND_TRAP = 0;
-static const int DEBUG_STOP_AT_OPCODE_TRAP  = 0;
-static const int DEBUG_STOP_AT_PAGE_FAULT   = 0;
-static const int DEBUG_STOP_AT_STACK_ERROR  = 1;
-static const int DEBUG_STOP_AT_NOT_RUNNING  = 0;
+constexpr int DEBUG_STOP_AT_CONTROL_TRAP = 1;
+constexpr int DEBUG_STOP_AT_UNBOUND_TRAP = 0;
+constexpr int DEBUG_STOP_AT_OPCODE_TRAP  = 0;
+constexpr int DEBUG_STOP_AT_PAGE_FAULT   = 0;
+constexpr int DEBUG_STOP_AT_STACK_ERROR  = 1;
+constexpr int DEBUG_STOP_AT_NOT_RUNNING  = 0;

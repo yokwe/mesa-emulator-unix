@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <QtCore>
 
 namespace NameMap {
 	template <typename T>
@@ -61,7 +60,7 @@ namespace NameMap {
 		std::function<std::string(uint16_t)> toStringDefault;
 
 	private:
-		QMap<T, std::string> map;
+		std::map<T, std::string> map;
 	};
 
 	// predefined function of std::function<std::string(uint16_t)>

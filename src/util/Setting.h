@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,26 @@
 
 #pragma once
 
-#include "JSONUtil.h"
+#include <string>
+#include <map>
+#include <deque>
 
-#include <QtCore>
+#include <stdint.h>
 
-class Setting : public JSONBase {
+
+class Setting {
 public:
-	class Entry : public JSONBase {
+	class Entry {
 	public:
-		class Display : public JSONBase {
+		class Display {
 		public:
 			int width;
 			int height;
 
 			Display() : width(0), height(0) {}
-			Display(const Display& that) : width(that.width), height(that.height) {}
-			Display& operator= (const Display& that) {
-				this->width  = that.width;
-				this->height = that.height;
-				return *this;
-			}
-
-			void fromJsonObject(const QJsonObject& jsonObject);
-			QJsonObject toJsonObject() const;
 		};
 
-		class File : public JSONBase {
+		class File {
 		public:
 			std::string disk;
 			std::string germ;
@@ -63,66 +57,29 @@ public:
 			std::string floppy;
 
 			File() : disk(""), germ(""), boot(""), floppy("") {}
-			File(const File& that) : disk(that.disk), germ(that.germ), boot(that.boot), floppy(that.floppy) {}
-			File& operator= (const File& that) {
-				this->disk   = that.disk;
-				this->germ   = that.germ;
-				this->boot   = that.boot;
-				this->floppy = that.floppy;
-				return *this;
-			}
-
-			void fromJsonObject(const QJsonObject& jsonObject);
-			QJsonObject toJsonObject() const;
 		};
 
-		class Boot : public JSONBase {
+		class Boot {
 		public:
 			std::string switch_; // To avoid using keyword as variable name, append underscore
 			std::string device;
 
 			Boot() : switch_(""), device("") {}
-			Boot(const Boot& that) : switch_(that.switch_), device(that.device) {}
-			Boot& operator= (const Boot& that) {
-				this->switch_ = that.switch_;
-				this->device  = that.device;
-				return *this;
-			}
-
-			void fromJsonObject(const QJsonObject& jsonObject);
-			QJsonObject toJsonObject() const;
 		};
 
-		class Memory : public JSONBase {
+		class Memory {
 		public:
 			int vmbits;
 			int rmbits;
 
 			Memory() : vmbits(0), rmbits(0) {}
-			Memory(const Memory& that) : vmbits(that.vmbits), rmbits(that.rmbits) {}
-			Memory& operator= (const Memory& that) {
-				this->vmbits = that.vmbits;
-				this->rmbits = that.rmbits;
-				return *this;
-			}
-
-			void fromJsonObject(const QJsonObject& jsonObject);
-			QJsonObject toJsonObject() const;
 		};
 
-		class Network : public JSONBase {
+		class Network {
 		public:
 			std::string interface;
 
 			Network() : interface("") {}
-			Network(const Network& that) : interface(that.interface) {}
-			Network& operator= (const Network& that) {
-				this->interface = that.interface;
-				return *this;
-			}
-
-			void fromJsonObject(const QJsonObject& jsonObject);
-			QJsonObject toJsonObject() const;
 		};
 
 
@@ -134,143 +91,66 @@ public:
 		Network network;
 
 		Entry() : name(""), display(), file(), boot(), memory(), network() {}
-		Entry(const Entry& that) : name(that.name), display(that.display), file(that.file), boot(that.boot), memory(that.memory), network(that.network) {}
-		Entry& operator= (const Entry& that) {
-			this->name    = that.name;
-			this->display = that.display;
-			this->file    = that.file;
-			this->boot    = that.boot;
-			this->memory  = that.memory;
-			this->network = that.network;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
-
-	class LevelVKeys : public JSONBase {
+	class LevelVKeys {
 	public:
 		std::string name;
 		int     keyName;
 
 		LevelVKeys() : name(""), keyName(0) {}
-		LevelVKeys(const LevelVKeys& that) : name(that.name), keyName(that.keyName) {}
-		LevelVKeys& operator= (const LevelVKeys& that) {
-			this->name    = that.name;
-			this->keyName = that.keyName;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
-
-	class Keyboard : public JSONBase {
+	class Keyboard {
 	public:
 		std::string name;
 		int     scanCode;
 
 		Keyboard() : name(""), scanCode(0) {}
-		Keyboard(const Keyboard& that) : name(that.name), scanCode(that.scanCode) {}
-		Keyboard& operator= (const Keyboard& that) {
-			this->name     = that.name;
-			this->scanCode = that.scanCode;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
-
-	class KeyMap : public JSONBase {
+	class KeyMap {
 	public:
 		std::string levelVKeys;
 		std::string keyboard;
 
 		KeyMap() : levelVKeys(""), keyboard("") {}
-		KeyMap(const KeyMap& that) : levelVKeys(that.levelVKeys), keyboard(that.keyboard) {}
-		KeyMap& operator= (const KeyMap& that) {
-			this->levelVKeys = that.levelVKeys;
-			this->keyboard   = that.keyboard;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
-
-	class Mouse : public JSONBase {
+	class Mouse {
 	public:
 		std::string name;
 		int     bitMask;
 
 		Mouse() : name(""), bitMask(0) {}
-		Mouse(const Mouse& that) : name(that.name), bitMask(that.bitMask) {}
-		Mouse& operator= (const Mouse& that) {
-			this->name    = that.name;
-			this->bitMask = that.bitMask;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
 
-	class ButtonMap : public JSONBase {
+	class ButtonMap {
 	public:
 		std::string levelVKeys;
 		std::string button;
 
 		ButtonMap() : levelVKeys(""), button("") {}
-		ButtonMap(const ButtonMap& that) : levelVKeys(that.levelVKeys), button(that.button) {}
-		ButtonMap& operator= (const ButtonMap& that) {
-			this->levelVKeys  = that.levelVKeys;
-			this->button = that.button;
-			return *this;
-		}
-
-		void fromJsonObject(const QJsonObject& jsonObject);
-		QJsonObject toJsonObject() const;
 	};
 
 
-	QList<Setting::Entry>      entryList;
-	QList<Setting::LevelVKeys> levelVKeysList;
-	QList<Setting::Keyboard>   keyboardList;
-	QList<Setting::KeyMap>     keyMapList;
-	QList<Setting::Mouse>      mouseList;
-	QList<Setting::ButtonMap>  buttonMapList;
+	std::deque<Setting::Entry>      entryList;
+	std::deque<Setting::LevelVKeys> levelVKeysList;
+	std::deque<Setting::Keyboard>   keyboardList;
+	std::deque<Setting::KeyMap>     keyMapList;
+	std::deque<Setting::Mouse>      mouseList;
+	std::deque<Setting::ButtonMap>  buttonMapList;
 
 	Setting() {}
 	Setting(const Setting& that) :
 		entryList(that.entryList), levelVKeysList(that.levelVKeysList), keyboardList(that.keyboardList),
 		keyMapList(that.keyMapList), mouseList(that.mouseList), buttonMapList(that.buttonMapList) {}
-	Setting& operator= (const Setting& that) {
-		this->entryList      = that.entryList;
-		this->levelVKeysList = that.levelVKeysList;
-		this->keyboardList   = that.keyboardList;
-		this->keyMapList     = that.keyMapList;
-		this->mouseList      = that.mouseList;
-		this->buttonMapList  = that.buttonMapList;
-		return *this;
+
+	static Setting getInstance() {
+		return getInstance(BUILD_DIR "/run/setting.json");
 	}
-
-	void fromJsonObject(const QJsonObject& jsonObject);
-	QJsonObject toJsonObject() const;
-
-	static Setting getInstance();
+	static Setting getInstance(const std::string& path);
 	
-	Entry getEntry(std::string name);
-
-	static QHash<uint32_t,         uint32_t>        keyMap;
-	//           scanCode         bitPosition
-	static QHash<Qt::MouseButton, uint32_t>        buttonMap;
-	//           Qt::MouseButton  bitPosition
-	static void initMap(const Setting& setting);
+	Entry getEntry(const std::string& name);
 };

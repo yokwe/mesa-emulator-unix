@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <chrono>
+#include <thread>
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -47,8 +49,8 @@ static const util::Logger logger(__FILE__);
 CARD16         TimerThread::PTC;
 int64_t         TimerThread::lastTimeoutTime;
 int            TimerThread::stopThread;
-QMutex         TimerThread::mutexTimer;
-QWaitCondition TimerThread::cvTimer;
+std::mutex        TimerThread::mutexTimer;
+std::condition_variable TimerThread::cvTimer;
 int            TimerThread::timerCount = 0;
 
 void TimerThread::stop() {
@@ -57,19 +59,19 @@ void TimerThread::stop() {
 }
 void TimerThread::setPTC(CARD16 newValue) {
 	PTC = newValue;
-	lastTimeoutTime = QDateTime::currentMSecsSinceEpoch();
+	lastTimeoutTime = Util::getMilliSecondsFromEpoch();
 }
+
 void TimerThread::run() {
 	logger.info("TimerThread::run START");
-	QThread::currentThread()->setPriority(PRIORITY);
 
-	lastTimeoutTime = QDateTime::currentMSecsSinceEpoch();
+	lastTimeoutTime = Util::getMilliSecondsFromEpoch();
 	stopThread = 0;
-	QMutexLocker locker(&mutexTimer);
+	std::unique_lock<std::mutex> locker(mutexTimer);
 	for (;;) {
 		if (stopThread) break;
 		timerCount++;
-		int64_t currentTime = QDateTime::currentMSecsSinceEpoch();
+		int64_t currentTime = Util::getMilliSecondsFromEpoch();
 		// I will wait until TIMER_INTERVAL is elapsed since preveiousTime.
 		int64_t waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
 		if (waitTime < 0) {
@@ -83,15 +85,15 @@ void TimerThread::run() {
 			}
 		} else {
 			// need to wait until TIMER_INTERVAL is elapsed since preveiousTime.
-			Util::msleep((uint32_t) waitTime);
+			std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
 		}
 
 		{
 			ProcessorThread::requestRescheduleTimer();
 			// wait procesTimeout is invoked
 			for(;;) {
-				bool ret = cvTimer.wait(&mutexTimer, WAIT_INTERVAL);
-				if (ret) break;
+				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
+				if (status == std::cv_status::no_timeout) break;
 				if (stopThread) goto exitLoop;
 			}
 		}
@@ -102,7 +104,7 @@ exitLoop:
 }
 
 int TimerThread::processTimeout() {
-	QMutexLocker locker(&mutexTimer);
+	std::unique_lock<std::mutex> locker(mutexTimer);
 	//logger.debug("processTimeout START");
 	// Don't update lastTimeoutTimer, until actual process is performed
 	lastTimeoutTime += TIMER_INTERVAL;
@@ -111,7 +113,7 @@ int TimerThread::processTimeout() {
 	if (PTC == 0) PTC = PTC + 1;
 
 	int ret = TimeoutScan();
-	cvTimer.wakeOne();
+	cvTimer.notify_one();
 	//logger.debug("processTimeout FINISH");
 	return ret;
 }

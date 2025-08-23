@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -107,7 +107,7 @@ void BPF::close() {
 	buffer = 0;
 }
 
-const QList<ByteBuffer>& BPF::read() {
+const std::vector<ByteBuffer>& BPF::read() {
 	int validBufferLen;
 	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 

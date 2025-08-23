@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,8 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <thread>
+static const Logger logger(__FILE__);
 
 //#include "../mesa/Type.h"
 //#include "../trace/Trace.h"
@@ -47,6 +48,7 @@ static const util::Logger logger(__FILE__);
 // To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
 //	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
 
+#include "../util/Setting.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -54,10 +56,6 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 	setSignalHandler(SIGILL);
 	setSignalHandler(SIGABRT);
-
-	Logger::installQtMessageHandler();
-
-	DEBUG_TRACE();
 
 	{
 		// write code here.

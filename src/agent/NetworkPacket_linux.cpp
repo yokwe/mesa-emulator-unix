@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -58,7 +58,7 @@ void NetworkPacket::attach(const std::string& name_) {
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 
     uint16_t proto   = (uint16_t)ETH_P_IDP;
-    uint16_t protoBE = qToBigEndian(proto);
+    uint16_t protoBE = swapbyte(proto);
 
 	// open socket
 	fd = socket(AF_PACKET, SOCK_RAW, protoBE);
@@ -155,7 +155,7 @@ void NetworkPacket::transmit(Result& result, Data& data) {
 		uint16_t* src = (uint16_t*)data.data;
 		uint16_t* dst = (uint16_t*)buffer;
 
-		Util::toBigEndian(src, dst, sizeof(buffer) / 2);
+		Util::byteswap(src, dst, sizeof(buffer) / 2);
 	}
 
 	if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
@@ -207,7 +207,7 @@ void NetworkPacket::receive(Result& result, Data& data) {
 		CARD16* src = (CARD16*)buffer;
 		CARD16* dst = (CARD16*)data.data;
 
-		Util::toBigEndian(src, dst, data.dataLen / 2);
+		Util::byteswap(src, dst, data.dataLen / 2);
 
 		if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {
 			logger.debug("RECV     ret = %d", result.returnValue);
@@ -307,7 +307,7 @@ int NetworkPacket::transmit(CARD8* data, CARD32 dataLen, int& opErrno) {
 			logger.fatal("dataLen = %d", dataLen);
 			ERROR();
 		}
-		Util::toBigEndian(p, q, dataLen / 2);
+		Util::byteswap(p, q, dataLen / 2);
 	}
 
 
@@ -395,7 +395,7 @@ int NetworkPacket::receive(CARD8* data, CARD32 dataLen, int& opErrno) {
 				logger.fatal("dataLen = %d", dataLen);
 				ERROR();
 			}
-			Util::fromBigEndian(p, q, dataLen / 2);
+			Util::byteswap(p, q, dataLen / 2);
 		}
 
 		if (DEBUG_SHOW_NETWORK_PACKET_BYTES) {

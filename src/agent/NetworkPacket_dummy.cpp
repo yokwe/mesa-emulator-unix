@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -48,7 +48,7 @@ static const util::Logger logger(__FILE__);
 void NetworkPacket::attach(const std::string& name_) {
 	name = name_;
     logger.info("NetworkPacket dummy");
-    logger.info("name     = %s", name.toStdString());
+    logger.info("name     = %s", name);
     logger.info("protocol = 0x%04X", ETH_P_IDP);
 
     fd = 0;

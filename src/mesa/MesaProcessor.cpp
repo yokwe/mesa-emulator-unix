@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,16 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include "InterruptThread.h"
+#include "ProcessorThread.h"
+#include <chrono>
+#include <deque>
+#include <string>
+#include <thread>
+#include <utility>
+static const Logger logger(__FILE__);
 
+#include <bit>
 
 #include "../util/Debug.h"
 
@@ -53,8 +61,6 @@ static const util::Logger logger(__FILE__);
 void MesaProcessor::initialize() {
 	setSignalHandler();
 
-	QThreadPool::globalInstance()->setMaxThreadCount(MAX_THREAD);
-
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
 	Memory::initialize(vmBits, rmBits, Agent::ioRegionPage);
 	Interpreter::initialize();
@@ -63,32 +69,20 @@ void MesaProcessor::initialize() {
 	Memory::reserveDisplayPage(displayWidth, displayHeight);
 
 	// AgentDisk use diskFile
-	for(int i = 1; i <= 999; i++) {
-		std::string path;
-		if (diskPath.contains("%1", Qt::CaseSensitivity::CaseSensitive)) {
-			path = diskPath.arg(i, 3, 10, QLatin1Char('0'));
-		} else {
-			path = diskPath;
-		}
-		if (!QFile::exists(path)) break;
-
-		logger.info("Disk  %s", path.toStdString());
-
+	{
+		logger.info("Disk  %s", diskPath);
 		DiskFile* diskFile = new DiskFile;
-		diskFile->attach(path);
-		diskFileList.append(diskFile);
+		diskFile->attach(diskPath);
+		diskFileList.push_back(diskFile);
 		disk.addDiskFile(diskFile);
-
-		// Handle Dawn.dsk properly
-		if (path == diskPath) break;
 	}
 
-	logger.info("Floppy %s", floppyPath.toStdString());
+	logger.info("Floppy %s", floppyPath);
 	floppyFile.attach(floppyPath);
 	floppy.addDiskFile(&floppyFile);
 
 	// AgentNetwork use networkPacket
-	logger.info("networkInterfaceName = %s", networkInterfaceName.toStdString());
+	logger.info("networkInterfaceName = %s", networkInterfaceName);
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
 
@@ -105,7 +99,7 @@ void MesaProcessor::initialize() {
 	Agent::InitializeAgent();
 	logger.info("Agent FCB  %04X %04X", Agent::ioRegionPage * PageSize, Agent::getIORegion());
 
-	logger.info("Boot  %s", bootPath.toStdString());
+	logger.info("Boot  %s", bootPath);
 
 	// Initialization of Stream handler
 	AgentStream* agentStream = (AgentStream*)Agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
@@ -130,7 +124,7 @@ void MesaProcessor::initialize() {
 		// clear boot request
 		::memset(request, 0, sizeof(*request));
 
-		logger.info("bootDevice %s", bootDevice.toStdString());
+		logger.info("bootDevice %s", bootDevice);
 		if (bootDevice == "DISK") {
 			setBootRequestPV(request);
 		} else if (bootDevice == "ETHER") {
@@ -142,28 +136,36 @@ void MesaProcessor::initialize() {
 			ERROR()
 		}
 
-		logger.info("bootSwitch = %s", bootSwitch.toStdString());
-		setSwitches(request->switches, TO_CSTRING(bootSwitch));
+		logger.info("bootSwitch = %s", bootSwitch);
+		setSwitches(request->switches, bootSwitch.c_str());
 	}
 
-	// setAutoDelete(false) for interruptThread, timerThread and processorThread.
-	interruptThread.setAutoDelete(false);
-	timerThread.setAutoDelete(false);
-	processorThread.setAutoDelete(false);
-	//
-	setRunning(0);
+	timeStart = timeStop = 0;
 }
 
+static std::deque<std::pair<std::string, std::thread>> threadList;
+#define START_THREAD(type,var) { \
+	std::string name(#var); \
+	std::thread thread(&type::run, &var); \
+	threadList.push_back(std::make_pair(name, std::move(thread))); \
+}
+
+
 void MesaProcessor::boot() {
-	setRunning(1);
-	//
 	logger.info("MesaProcessor::boot START");
-	QThreadPool::globalInstance()->start(&interruptThread);
-	QThreadPool::globalInstance()->start(&timerThread);
-	QThreadPool::globalInstance()->start(&network.receiveThread);
-	QThreadPool::globalInstance()->start(&network.transmitThread);
-	QThreadPool::globalInstance()->start(&disk.ioThread);
-	QThreadPool::globalInstance()->start(&processorThread);
+	timeStart = Util::getMilliSecondsFromEpoch();
+
+	START_THREAD(InterruptThread, interruptThread)
+	START_THREAD(TimerThread, timerThread)
+	START_THREAD(AgentNetwork::ReceiveThread, network.receiveThread)
+	START_THREAD(AgentNetwork::TransmitThread, network.transmitThread)
+	START_THREAD(AgentDisk::IOThread, disk.ioThread)
+	START_THREAD(ProcessorThread, processorThread)
+	
+	for(auto& e: threadList) {
+		logger.info("thread  %s", e.first);
+	}
+
 	logger.info("MesaProcessor::boot STOP");
 }
 
@@ -176,10 +178,17 @@ void MesaProcessor::stop() {
 void MesaProcessor::wait() {
 	logger.info("MesaProcessor::wait START");
 	logger.info("wait for all threads");
-	QThreadPool::globalInstance()->waitForDone();
+
+	for(auto i = threadList.rbegin(); i != threadList.rend(); i++) {
+		logger.info("MesaProcessor::wait joining  %s", i->first);
+		i->second.join();
+	}
+
 	logger.info("MesaProcessor::wait STOP");
 	//
-	setRunning(0);
+	timeStop = Util::getMilliSecondsFromEpoch();
+
+
 	// Properly detach DiskFile
 	for(DiskFile* diskFile: diskFileList) {
 		diskFile->detach();
@@ -188,7 +197,7 @@ void MesaProcessor::wait() {
 }
 
 void MesaProcessor::loadGerm(std::string& path) {
-	logger.info("germ  path    = %s", path.toStdString());
+	logger.info("germ  path    = %s", path);
 
 	CARD32 mapSize = 0;
 	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);
@@ -204,7 +213,7 @@ void MesaProcessor::loadGerm(std::string& path) {
 		}
 
 		for(int j = 0; j < PageSize; j++) {
-			p[j] = qFromBigEndian(map[i].word[j]);
+			p[j] = std::byteswap(map[i].word[j]);
 		}
 
 		p = Memory::getAddress(((i + 1) * PageSize));
@@ -282,12 +291,3 @@ void MesaProcessor::setBootRequestStream(Boot::Request* request) {
 	request->location.deviceType    = Device::T_simpleDataStream;
 	request->location.deviceOrdinal = 0;
 }
-
-void MesaProcessor::setRunning(int newValue) {
-	running.storeRelease(newValue);
-}
-
-int MesaProcessor::getRunning() {
-	return running.loadAcquire();
-}
-

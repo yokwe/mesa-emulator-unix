@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,12 @@
 #ifndef AGENTSTREAM_H__
 #define AGENTSTREAM_H__
 
+#include <cstdint>
+#include <string>
+#include <map>
+
+
 #include "Agent.h"
-#include <QtCore>
 
 
 class AgentStream : public Agent {
@@ -75,7 +79,7 @@ public:
 
 private:
 	CoProcessorIOFaceGuam::CoProcessorFCBType *fcb;
-	QMap<uint32_t, Stream*> map;
+	std::map<uint32_t, Stream*> map;
 };
 
 #endif

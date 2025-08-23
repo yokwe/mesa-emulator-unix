@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -53,7 +53,7 @@ StreamBoot::StreamBoot(std::string path_) : Stream("BOOT", CoProcessorServerIDs:
 	map  = (uint16_t*)Util::mapFile(path, mapSize);
 	mapSize /= Environment::bytesPerWord;
 	pos = 0;
-	logger.info("%3d %-8s %s", serverID, name, path.toStdString());
+	logger.info("%3d %-8s %s", serverID, name, path);
 }
 
 uint16_t StreamBoot::idle   (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) {
@@ -114,7 +114,7 @@ uint16_t StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoP
 	uint32_t  nextPos = pos + size;
 	if (DEBUG_SHOW_STREAM_BOOT) logger.info("DATA %4X => %4X", pos * Environment::bytesPerWord, nextPos * Environment::bytesPerWord);
 
-	Util::fromBigEndian(map + pos, buffer, size);
+	Util::byteswap(map + pos, buffer, size);
 	pos = nextPos;
 	tr.bytesWritten = size * Environment::bytesPerWord;
 

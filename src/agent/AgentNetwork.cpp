@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,8 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <condition_variable>
+static const Logger logger(__FILE__);
 
 
 #include "../util/Debug.h"
@@ -49,12 +50,17 @@ static const util::Logger logger(__FILE__);
 
 
 int AgentNetwork::TransmitThread::stopThread;
+void AgentNetwork::TransmitThread::stop() {
+	logger.info("AgentNetwork::TransmitThread::stop");
+	stopThread = 1;
+}
+
 void AgentNetwork::TransmitThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
-	QMutexLocker locker(&transmitMutex);
+	std::unique_lock<std::mutex> locker(transmitMutex);
 
 	Item item(iocb);
 	transmitQueue.push_back(item);
-	if (transmitQueue.size() == 1) transmitCV.wakeOne();
+	transmitCV.notify_one();
 
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("TransmitThread receiveQueue.size = %d", transmitQueue.size());
 }
@@ -65,7 +71,6 @@ void AgentNetwork::TransmitThread::run() {
 
 	int transmitCount = 0;
 	stopThread = 0;
-	QThread::currentThread()->setPriority(PRIORITY);
 
 	try {
 		for(;;) {
@@ -75,12 +80,13 @@ void AgentNetwork::TransmitThread::run() {
 
 			// minimize critical section
 			{
-				QMutexLocker locker(&transmitMutex);
+				std::unique_lock<std::mutex> locker(transmitMutex);
 				if (transmitQueue.empty()) {
 					for(;;) {
-						bool ret = transmitCV.wait(&transmitMutex, WAIT_INTERVAL);
-						if (ret) break;
+						transmitCV.wait_for(locker, Util::ONE_SECOND);
 						if (stopThread) goto exitLoop;
+						if (transmitQueue.empty()) continue;
+						break;
 					}
 				}
 				Item item = transmitQueue.front();
@@ -101,32 +107,42 @@ exitLoop:
 	logger.info("AgentNetwork::TransmitThread::run STOP");
 }
 void AgentNetwork::TransmitThread::reset() {
-	QMutexLocker locker(&transmitMutex);
+	std::unique_lock<std::mutex> locker(transmitMutex);
 	transmitQueue.clear();
 }
 
 
 int AgentNetwork::ReceiveThread::stopThread;
-uint64_t AgentNetwork::ReceiveThread::getSec() {
-	return QDateTime::currentMSecsSinceEpoch() / 1000;
+void AgentNetwork::ReceiveThread::stop() {
+	logger.info("AgentNetwork::ReceiveThread::stop");
+	stopThread = 1;
 }
 
 void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
-	QMutexLocker locker(&receiveMutex);
+	std::unique_lock<std::mutex> locker(receiveMutex);
 
-	// convert form milliseconds to seconds
-	int64_t sec = getSec();
+	int64_t sec = Util::getSecondsFromEpoch();
 
 	// TODO Is this correct?
 	// Remove item which has same data
 	// Remove item that is waiting more than MAX_WAIT_SEC.
 	{
-		CARD32 myBufferAddress = iocb->bufferAddress;
 
+		// remove too old entry
+		for(;;) {
+			if (receiveQueue.empty()) break;
+			auto& item = receiveQueue.front();
+			if ((item.sec + MAX_WAIT_SEC) < sec) {
+				receiveQueue.pop_front();
+				continue;
+			}
+			break;
+		}
+
+		CARD32 myBufferAddress = iocb->bufferAddress;
 		for(auto i = receiveQueue.begin(); i != receiveQueue.end(); i++) {
-			Item& item = *i;
+			const Item& item = *i;
 			if (item.iocb->bufferAddress == myBufferAddress) receiveQueue.erase(i);
-			if ((item.sec + MAX_WAIT_SEC) < sec) receiveQueue.erase(i);
 		}
 	}
 	Item item(sec, iocb);
@@ -141,8 +157,7 @@ void AgentNetwork::ReceiveThread::run() {
 
 	int receiveCount = 0;
 	stopThread = 0;
-	QThread::currentThread()->setPriority(PRIORITY);
-
+	
 	reset();
 	for(;;) {
 		if (stopThread) break;
@@ -159,39 +174,25 @@ void AgentNetwork::ReceiveThread::run() {
 			ERROR();
 		}
 
-		{
-			QMutexLocker locker(&receiveMutex);
-			if (ret == 0) {
-				// data is not ready
-				// do queue maintenance
-				if (!receiveQueue.empty()) {
-					int64_t sec = getSec();
-					for(auto i = receiveQueue.begin(); i != receiveQueue.end(); i++) {
-						Item& item = *i;
-						if ((item.sec + MAX_WAIT_SEC) < sec) {
-							receiveQueue.erase(i);
-							if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("remove old item.  receiveQueue.size = %d", receiveQueue.size());
-						}
-					}
-				}
-				continue;
-			} else {
-				// data is ready
-				if (receiveQueue.empty()) {
-					// there is no item in queue, discard packet
-					networkPacket->discardOnePacket();
-				} else {
-					// there is item in queue
-					// remove one item from queue
-					Item& item = receiveQueue.front();
-					EthernetIOFaceGuam::EthernetIOCBType* iocb = item.iocb;
-					receiveQueue.pop_front();
+		if (ret == 0) continue;
 
-					// use this iocb to receive packet
-					networkPacket->receive(iocb);
-					InterruptThread::notifyInterrupt(interruptSelector);
-					receiveCount++;
-				}
+		{
+			std::unique_lock<std::mutex> locker(receiveMutex);
+			// data is ready
+			if (receiveQueue.empty()) {
+				// there is no item in queue, discard packet
+				networkPacket->discardOnePacket();
+			} else {
+				// there is item in queue
+				// remove one item from queue
+				Item& item = receiveQueue.front();
+				EthernetIOFaceGuam::EthernetIOCBType* iocb = item.iocb;
+				receiveQueue.pop_front();
+
+				// use this iocb to receive packet
+				networkPacket->receive(iocb);
+				InterruptThread::notifyInterrupt(interruptSelector);
+				receiveCount++;
 			}
 		}
 	}
@@ -199,7 +200,7 @@ void AgentNetwork::ReceiveThread::run() {
 	logger.info("AgentNetwork::ReceiveThread::run STOP");
 }
 void AgentNetwork::ReceiveThread::reset() {
-	QMutexLocker locker(&receiveMutex);
+	std::unique_lock<std::mutex> locker(receiveMutex);
 	receiveQueue.clear();
 	networkPacket->discardRecievedPacket();
 }
@@ -232,10 +233,7 @@ void AgentNetwork::Initialize() {
 	fcb->agentBlockSize            = 0;
 
 	receiveThread.setNetworkPacket(networkPacket);
-	receiveThread.setAutoDelete(false);
-
 	transmitThread.setNetworkPacket(networkPacket);
-	transmitThread.setAutoDelete(false);
 }
 
 void AgentNetwork::Call() {

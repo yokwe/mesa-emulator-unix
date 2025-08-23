@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,20 +36,18 @@
 #ifndef AGENTNETWORK_H__
 #define AGENTNETWORK_H__
 
+#include <mutex>
+#include <condition_variable>
+#include <deque>
+
 #include "Agent.h"
 #include "NetworkPacket.h"
 
 class AgentNetwork : public Agent {
 public:
-	class TransmitThread: public QRunnable {
+	class TransmitThread {
 	public:
-		// Wait interval in milliseconds for QWaitCondition::wait
-		static const int WAIT_INTERVAL = 1000;
-		static const QThread::Priority PRIORITY = QThread::HighPriority;
-
-		static void stop() {
-			stopThread = 1;
-		}
+		static void stop();
 
 		TransmitThread() {
 			stopThread        = 0;
@@ -69,8 +67,6 @@ public:
 		void run();
 		void reset();
 
-		uint64_t getSec();
-
 	private:
 		class Item {
 		public:
@@ -85,18 +81,15 @@ public:
 		CARD16            interruptSelector;
 		NetworkPacket*    networkPacket;
 
-		QMutex            transmitMutex;
-		QWaitCondition    transmitCV;
-		std::list<Item> transmitQueue;
+		std::mutex           transmitMutex;
+		std::condition_variable    transmitCV;
+		std::deque<Item> transmitQueue;
 	};
-	class ReceiveThread: public QRunnable {
+	class ReceiveThread {
 	public:
 		static const CARD32 MAX_WAIT_SEC = 40;
-		static const QThread::Priority PRIORITY = QThread::HighPriority;
 
-		static void stop() {
-			stopThread = 1;
-		}
+		static void stop();
 
 		ReceiveThread() {
 			stopThread        = 0;
@@ -126,7 +119,7 @@ public:
 			EthernetIOFaceGuam::EthernetIOCBType* iocb;
 
 			Item(int64_t sec_, EthernetIOFaceGuam::EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
-			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
+//			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
 		};
 
 		static int        stopThread;
@@ -134,8 +127,8 @@ public:
 		CARD16            interruptSelector;
 		NetworkPacket*    networkPacket;
 
-		QMutex            receiveMutex;
-		std::list<Item> receiveQueue;
+		std::mutex       receiveMutex;
+		std::deque<Item> receiveQueue;
 	};
 
 	ReceiveThread  receiveThread;

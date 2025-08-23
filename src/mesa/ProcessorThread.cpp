@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,8 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <chrono>
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -51,8 +52,8 @@ static const util::Logger logger(__FILE__);
 //
 // ProcessorThread
 //
-QWaitCondition ProcessorThread::cvRunning;
-QAtomicInt     ProcessorThread::running;
+std::condition_variable ProcessorThread::cvRunning;
+std::atomic_uint     ProcessorThread::running;
 int            ProcessorThread::stopThread;
 
 int            ProcessorThread::rescheduleRequestCount = 0;
@@ -61,34 +62,37 @@ int            ProcessorThread::stopRunningCount       = 0;
 int            ProcessorThread::abortCount             = 0;
 int            ProcessorThread::rescheduleCount        = 0;
 
-QAtomicInt     ProcessorThread::requestReschedule;
-QMutex         ProcessorThread::mutexRequestReschedule;
+std::atomic_uint     ProcessorThread::requestReschedule;
+std::mutex        ProcessorThread::mutexRequestReschedule;
 
 void ProcessorThread::startRunning() {
-	if (running.testAndSetOrdered(0, 1)) {
+	auto oldValue = running.exchange(1);
+	if (oldValue == 0) {
 		startRunningCount++;
 		return;
 	}
-	logger.error("startRunning testAndSetOrdered returns false  running = %d", getRunning());
+	logger.error("startRunning oldValue is not ZERO");
 }
 void ProcessorThread::stopRunning() {
-	if (running.testAndSetOrdered(1, 0)) {
+	auto oldValue = running.exchange(0);
+	if (oldValue == 1) {
 		stopRunningCount++;
 		return;
 	}
-	logger.error("stopRunning testAndSetOrdered returns false  running = %d", getRunning());
+	logger.error("startRunning oldValue is ZERO");
 }
 void ProcessorThread::stop() {
 	logger.info("ProcessorThread::stop");
 	stopThread = 1;
 }
+
 void ProcessorThread::run() {
 	logger.info("ProcessorThread::run START");
-	QThread::currentThread()->setPriority(PRIORITY);
+
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 
 	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data + 0, bootLink.tag + 0, bootLink.fill, bootLink.u);
-	if (!stopMessageUntilMPSet.isEmpty()) Logger::pushPriority(QtFatalMsg);
+	if (!stopMessageUntilMPSet.empty()) Logger::pushLevel(Logger::Level::FATAL);
 
 	XFER(bootLink.u, 0, XferType::call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
@@ -105,7 +109,7 @@ void ProcessorThread::run() {
 			} catch(RequestReschedule& e) {
 				rescheduleCount++;
 				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
-				QMutexLocker locker(&mutexRequestReschedule);
+				std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 				for(;;) {
 					// break if OP_STOPEMULATOR is called
 					if (stopThread) goto exitLoop;
@@ -114,8 +118,8 @@ void ProcessorThread::run() {
 					if (!getRunning()) {
 						//logger.debug("waitRunning START");
 						for(;;) {
-							bool ret = cvRunning.wait(&mutexRequestReschedule, WAIT_INTERVAL);
-							if (ret) break;
+							auto status = cvRunning.wait_for(locker, Util::ONE_SECOND);
+							if (status == std::cv_status::no_timeout) break;
 							if (stopThread) goto exitLoop;
 							//logger.debug("waitRunning WAITING");
 						}
@@ -172,23 +176,23 @@ exitLoop:
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {
-	QMutexLocker locker(&mutexRequestReschedule);
+	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUESET_RESCHEDULE_TIMER);
-	if (!getRunning()) cvRunning.wakeOne();
+	if (!getRunning()) cvRunning.notify_one();
 }
 void ProcessorThread::requestRescheduleInterrupt() {
-	QMutexLocker locker(&mutexRequestReschedule);
+	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUSEST_RESCHEDULE_INTERRUPT);
-	if (!getRunning()) cvRunning.wakeOne();
+	if (!getRunning()) cvRunning.notify_one();
 }
 
 
-QSet<CARD16> ProcessorThread::stopAtMPSet;
-QSet<CARD16> ProcessorThread::stopMessageUntilMPSet;
+std::set<CARD16> ProcessorThread::stopAtMPSet;
+std::set<CARD16> ProcessorThread::stopMessageUntilMPSet;
 CARD16       ProcessorThread::mp = 0;
 
 void ProcessorThread::stopAtMP(CARD16 newValue) {
-	stopAtMPSet += newValue;
+	stopAtMPSet.insert(newValue);
 	logger.info("stopAtMP %4d", newValue);
 }
 CARD16 ProcessorThread::getMP() {
@@ -197,7 +201,7 @@ CARD16 ProcessorThread::getMP() {
 void ProcessorThread::setMP(CARD16 newValue) {
 	mp = newValue;
 	if (stopMessageUntilMPSet.contains(mp)) {
-		Logger::popPriority();
+		Logger::popLevel();
 		logger.info("show message at MP %4d", mp);
 		// clear stopMessageUntilMPSet to prevent call twice
 		stopMessageUntilMPSet.clear();
@@ -208,7 +212,6 @@ void ProcessorThread::setMP(CARD16 newValue) {
 	}
 }
 void ProcessorThread::stopMessageUntilMP(CARD16 newValue) {
-	stopMessageUntilMPSet += newValue;
+	stopMessageUntilMPSet.insert(newValue);
 	logger.info("stopMessageUntilMP %4d", newValue);
-
 }

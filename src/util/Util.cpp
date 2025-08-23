@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,27 @@
 // Util.cpp
 //
 
-#include <log4cpp/PropertyConfigurator.hh>
-#include <execinfo.h>
+#include <filesystem>
+#include <stack>
+#include <map>
+#include <utility>
+#include <chrono>
+#include <iostream>
+#include <bit>
 
-#include "./Util.h"
-static const util::Logger logger(__FILE__);
+#include <execinfo.h>
+#include <cxxabi.h>
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+#include <log4cxx/logger.h>
+#include <log4cxx/level.h>
+
+
+#include "Util.h"
+static const Logger logger(__FILE__);
 
 void logBackTrace() {
 	const int BUFFER_SIZE = 100;
@@ -101,158 +117,62 @@ std::string demangle(const char* mangled) {
 
 
 // Logger
-static void qtMessageHandler(QtMsgType type, const QMessageLogContext& context, const std::string& std::string) {
-	std::string string = std::string.toStdString();
+Logger::Logger(const char* name) : myLogger(log4cxx::Logger::getLogger(std::filesystem::path(name).stem().string())) {}
 
-	if (context.line == 0) {
-		switch(type) {
-		case QtDebugMsg:
-			logger.debug(string);
-			break;
-		case QtInfoMsg:
-			logger.info(string);
-			break;
-		case QtWarningMsg:
-			logger.warn(string);
-			break;
-		case QtCriticalMsg:
-			logger.error(string);
-			break;
-		case QtFatalMsg:
-			logger.fatal(string);
-			break;
-		default:
-			ERROR();
-		}
+// DEBUG, INFO, WARN, ERROR, FATAL
+static std::map<Logger::Level, log4cxx::LevelPtr> levelMap = {
+	{Logger::Level::DEBUG, log4cxx::Level::getDebug()},
+	{Logger::Level::INFO,  log4cxx::Level::getInfo()},
+	{Logger::Level::WARN,  log4cxx::Level::getWarn()},
+	{Logger::Level::ERROR, log4cxx::Level::getError()},
+	{Logger::Level::FATAL, log4cxx::Level::getFatal()},
+	{Logger::Level::OFF  , log4cxx::Level::getOff()},
+};
+static log4cxx::LevelPtr toLevelPtr(Logger::Level level) {
+	auto it = levelMap.find(level);
+	if (it != levelMap.end()) {
+		// found
+		return it->second;
 	} else {
-		switch(type) {
-		case QtDebugMsg:
-			logger.debug("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
-			break;
-		case QtInfoMsg:
-			logger.info("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
-			break;
-		case QtWarningMsg:
-			logger.warn("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
-			break;
-		case QtCriticalMsg:
-			logger.error("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
-			break;
-		case QtFatalMsg:
-			logger.fatal("%s %d %s  %s  %s", context.file, context.line, context.function, context.category, string.c_str());
-			break;
-		default:
-			ERROR();
-		}
-	}
-}
-QtMessageHandler Logger::getQtMessageHandler() {
-	return qtMessageHandler;
-}
-
-Logger Logger::getLogger(const char *name) {
-	static char *fileName = getenv("LOG_CONFIG");
-	if (fileName == nullptr) {
-		log4cpp::Category::getRoot().fatal("LOG_CONFIG is nullptr");
-		exit(1);
-	}
-
-	if (fileName) log4cpp::PropertyConfigurator::configure(fileName);
-	if (log4cpp::Category::exists(name)) {
-		log4cpp::Category::getRoot().fatal("Duplicate logger name = %s", name);
-		exit(1);
-	}
-
-	(void)log4cpp::Category::getInstance(name);
-	Logger logger(log4cpp::Category::exists(name));
-	return logger;
-}
-
-static void setLoggerPriority(log4cpp::Priority::Value newValue) {
-	for(auto i: *log4cpp::Category::getCurrentCategories()) {
-		i->setPriority(newValue);
-	}
-}
-
-static QStack<log4cpp::Priority::Value> loggerPriorityStack;
-void Logger::pushPriority(log4cpp::Priority::Value newValue) {
-	loggerPriorityStack.push(log4cpp::Category::getRootPriority());
-	setLoggerPriority(newValue);
-}
-void Logger::popPriority() {
-	if (loggerPriorityStack.empty()) return;
-
-	log4cpp::Priority::Value newValue = loggerPriorityStack.pop();
-	setLoggerPriority(newValue);
-}
-
-
-int toIntMesaNumber(const std::string& string) {
-	bool ok;
-	uint32_t ret;
-
-	if (string.startsWith("0x") || string.startsWith("0X")) {
-		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
-	} else if (string.endsWith("B")) {
-		// MESA style octal number
-		ret = string.left(string.length() - 1).toInt(&ok, 8);
-	} else if (string.endsWith("H")) {
-		// MESA style hexadecimal number
-		ret = string.left(string.length() - 1).toInt(&ok, 16);
-	} else {
-		ret = string.toInt(&ok, 0); // to handle string starts with 0x, use 0 for base
-	}
-
-	if (!ok) {
-		logger.error("Unexpected");
-		logger.error("  string %s!", string.toStdString());
+		logger.fatal("Unexpected");
 		ERROR();
 	}
-
-	return ret;
 }
 
-bool startsWith(const std::string_view& string, const std::string_view& literal) {
-	const size_t string_size(string.size());
-	const size_t literal_size(literal.size());
-	assert(0 < literal_size);
+static std::stack<log4cxx::LevelPtr> stack;
 
-	if (string_size < literal_size) {
-		return false;
-	} else {
-		std::string_view string_view(string.data(), literal_size);
-		return string_view == literal;
+void Logger::pushLevel(Level newLevel) {
+	auto rootLogger = log4cxx::Logger::getRootLogger();
+ 	stack.push(rootLogger->getLevel());
+	rootLogger->setLevel(toLevelPtr(newLevel));
+}
+void Logger::popLevel() {
+	if (stack.empty()) {
+		ERROR();
 	}
+	auto rootLogger = log4cxx::Logger::getRootLogger();
+	rootLogger->setLevel(stack.top());
+	stack.pop();
 }
-bool endsWith(const std::string_view& string, const std::string_view& literal) {
-	const size_t string_size(string.size());
-	const size_t literal_size(literal.size());
-	assert(0 < literal_size);
 
-	if (string_size < literal_size) {
-		return false;
-	} else {
-		std::string_view string_view(string.data() + (string_size - literal_size), literal_size);
-		return string_view == literal;
-	}
-}
-int toIntMesaNumber(const std::string& string) {
+int32_t toIntMesaNumber(const std::string& string) {
 	int radix = 0;
 	std::string numberString;
-
-	if (startsWith(string, "0x") || startsWith(string, "0X")) {
+	if (string == "0") return 0;
+	
+	if (string.starts_with("0x") || string.starts_with("0X")) {
 		// c style hexadecimal
 		radix = 16;
 		numberString = string.substr(2, string.length() - 2);
-	} else if (startsWith(string, "0")) {
+	} else if (string.starts_with("0")) {
 		// c style octal
 		radix = 8;
 		numberString = string.substr(1, string.length() - 1);
-	} else if (endsWith(string, "H")) {
+	} else if (string.ends_with("H")) {
 		// mesa style hexadecimal
 		radix = 16;
 		numberString = string.substr(0, string.length() - 1);
-	} else if (endsWith(string, "B")) {
+	} else if (string.ends_with("B")) {
 		// mesa style octal
 		radix = 8;
 		numberString = string.substr(0, string.length() - 1);
@@ -264,7 +184,7 @@ int toIntMesaNumber(const std::string& string) {
 
 	try {
 		size_t idx;
-		int ret = std::stoi(numberString,  &idx, radix);
+		uint32_t ret = std::stoul(numberString,  &idx, radix);
 		if (numberString.length() != idx) {
 			logger.error("Unexpect");
 			logger.error("  end          = %d", numberString.length());
@@ -273,7 +193,7 @@ int toIntMesaNumber(const std::string& string) {
 			logger.error("  numberString = %d \"%s\"", numberString.length(), numberString.c_str());
 			ERROR();
 		}
-		return ret;
+		return (int32_t)ret;
 	} catch (const std::invalid_argument& e) {
 		logger.error("exception");
 		logger.error("  name   = %s!", typeid(e).name());
@@ -290,12 +210,14 @@ int toIntMesaNumber(const std::string& string) {
 }
 
 std::string toHexString(int size, const uint8_t* data) {
-	std::string ret;
+	std::stringstream ss;
+    ss << std::hex;
 
-	for(int i = 0; i < size; i++) {
-		ret += std::string::asprintf("%02X", data[i]);
-	}
-	return ret;
+     for(int i = 0; i < size; i++) {
+         ss << std::setw(2) << std::setfill('0') << (int)data[i];
+	 }
+
+     return ss.str();
 }
 
 
@@ -317,104 +239,80 @@ uint16_t bitField(uint16_t word, int startBit, int stopBit) {
 
 class MapInfo {
 public:
-	int     id;
-	QFile   file;
+	int      id;
+	std::string path;
+	int   	 fd;
 	uint64_t size;
-	void*   page;
+	void*    page;
 
-	MapInfo(std::string path) : id(count++), file(path), size(0), page(0) {}
+	MapInfo() : id(count++), path(""), fd(0), size(0), page(0) {}
 
 	static int count;
 };
-static QMap<void*, MapInfo*>allMap;
+static std::map<void*, MapInfo>mapInfoMap;
 int MapInfo::count = 0;
 
 void* Util::mapFile  (const std::string& path, uint32_t& mapSize) {
-	MapInfo* mapInfo = new MapInfo(path);
-
-	if (!mapInfo->file.exists()) {
-		logger.fatal("%s  file.exists returns false.  path = %s", __FUNCTION__, path.toStdString());
-		ERROR();
-	}
-	mapInfo->size = mapInfo->file.size();
-	mapSize = (uint32_t)mapInfo->size;
-
-	bool ok = mapInfo->file.open(QIODevice::ReadWrite);
-	if (!ok) {
-		logger.fatal("file.open returns false.  error = %s", mapInfo->file.errorString().toStdString());
-		ERROR();
-	}
-	mapInfo->page = (void*)mapInfo->file.map(0, mapInfo->size);
-	if (mapInfo->page == 0) {
-		logger.fatal("file.map returns 0.  error  = %s", mapInfo->file.errorString().toStdString());
+	// sanity check
+	if (!std::filesystem::exists(path)) {
+		logger.error("unexpected path");
+		logger.error("  path  {}", path);
 		ERROR();
 	}
 
-	allMap[mapInfo->page] = mapInfo;
-	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo->id, (uint32_t)mapInfo->size, mapInfo->file.fileName().toStdString());
+	MapInfo mapInfo;
+	mapInfo.path = path;
 
-	return mapInfo->page;
+	CHECK_SYSCALL(mapInfo.fd, open(path.c_str(), O_RDWR))
+	mapInfo.size = std::filesystem::file_size(path);
+	mapInfo.page = mmap(nullptr, mapInfo.size, PROT_READ | PROT_WRITE, MAP_SHARED, mapInfo.fd, 0);
+	if (mapInfo.page == MAP_FAILED) ERROR()
+	
+	mapInfoMap.insert({mapInfo.page, mapInfo});
+	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo.id, (uint32_t)mapInfo.size, mapInfo.path);
+
+	mapSize = mapInfo.size;
+	return mapInfo.page;
 }
 void  Util::unmapFile(void* page) {
-	if (!allMap.contains(page)) {
-		logger.fatal("%s page = %p", __FUNCTION__, page);
-		ERROR();
+	if (!mapInfoMap.contains(page)) {
+		logger.error("unexpected page");
+		logger.error("  page  %p", page);
+		ERROR()
 	}
-	MapInfo* mapInfo = allMap[page];
+	const MapInfo& mapInfo = mapInfoMap[page];
 
-	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo->id, (uint32_t)mapInfo->size, mapInfo->file.fileName().toStdString());
+	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo.id, (uint32_t)mapInfo.size, mapInfo.path);
 
-	if (!mapInfo->file.unmap((uchar*)(mapInfo->page))) {
-		logger.fatal("file.unmap returns false.  error = %s", mapInfo->file.errorString().toStdString());
-		ERROR();
-	}
+	int ret;
+	CHECK_SYSCALL(ret, munmap(mapInfo.page, mapInfo.size))
+	CHECK_SYSCALL(ret, close(mapInfo.fd))	
 
-	mapInfo->file.close();
-
-	delete mapInfo;
-
-	allMap.remove(page);
+	mapInfoMap.erase(mapInfo.page);
 }
 
 // Time stuff
-namespace {
-	class QThreadWrpper : public QThread {
-	public:
-		static void msleep(uint32_t msec) {
-			QThread::msleep(msec);
-		}
-	};
+uint64_t Util::getSecondsFromEpoch() {
+	auto duration = std::chrono::system_clock::now().time_since_epoch();
+	return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+}
+uint64_t Util::getMilliSecondsFromEpoch() {
+	auto duration = std::chrono::system_clock::now().time_since_epoch();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+}
+uint64_t Util::getMicroSecondsFromEpoch() {
+	auto duration = std::chrono::system_clock::now().time_since_epoch();
+	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }
 
-static int elapsedTimer_needStart = 1;
-static QElapsedTimer elapsedTimer;
-uint32_t Util::getMicroTime() {
-	if (elapsedTimer_needStart) {
-		elapsedTimer.start();
-		elapsedTimer_needStart = 0;
+void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
+	for(int i = 0; i < size; i++) {
+		dest[i] = std::byteswap(source[i]);
 	}
-	uint64_t time = elapsedTimer.nsecsElapsed();
-	// convert from nanoseconds to microseconds
-	return (uint32_t)(time / 1000);
-}
-
-uint32_t Util::getUnixTime() {
-	return QDateTime::currentSecsSinceEpoch();
-}
-void Util::msleep(uint32_t milliSeconds) {
-	QThreadWrpper::msleep(milliSeconds);
-}
-
-void Util::toBigEndian(uint16_t* source, uint16_t* dest, int size) {
-	qToBigEndian<uint16_t>(source, size, dest);
-}
-void Util::fromBigEndian(uint16_t* source, uint16_t* dest, int size) {
-	qFromBigEndian<uint16_t>(source, size, dest);
 }
 
 // get build directory from Environment variable BUILD_DIR
 const char* getBuildDir() {
-	char *buildDir = getenv("BUILD_DIR");
-	return buildDir == nullptr ? "." : buildDir;
+	return BUILD_DIR;
 }
 

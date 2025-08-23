@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"
@@ -45,7 +45,7 @@ static const util::Logger logger(__FILE__);
 #include "../mesa/Function.h"
 #include "../mesa/InterruptThread.h"
 
-#include "../trace/Trace.h"
+//#include "../trace/Trace.h"
 
 #include "Opcode.h"
 
@@ -226,8 +226,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	}
 
 	LinkType linkType = ControlLinkType(nDst);
-	Trace::Context context;
-	context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LF);
+	//Trace::Context context;
+	//context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LF);
 
 	switch (linkType) {
 	case LinkType::oldProcedure : {
@@ -297,8 +297,8 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		break;
 	}
 
-	context.setContext(nGFI, nPC - 1, Memory::MDS(), nLF);
-	context.process();
+//	context.setContext(nGFI, nPC - 1, Memory::MDS(), nLF);
+//	context.process();
 
 	if (push) {
 		Push((CARD16)dst);
@@ -366,8 +366,8 @@ void E_EFCB() {
 }
 // zLFC - 0355
 void  E_LFC() {
-	Trace::Context context;
-	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LF);
+//	Trace::Context context;
+//	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LF);
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
@@ -382,8 +382,8 @@ void  E_LFC() {
 	LF = nLF;
 	PC = nPC;
 
-	context.setContext(GFI, nPC - 1, Memory::MDS(), nLF);
-	context.process();
+//	context.setContext(GFI, nPC - 1, Memory::MDS(), nLF);
+//	context.process();
 
 	ProcDesc dst;
 	dst.taggedGF = GFI | 1;

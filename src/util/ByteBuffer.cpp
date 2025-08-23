@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
@@ -101,11 +101,7 @@ void ByteBuffer::copyFrom(int len, const uint8_t* data) {
 }
 
 std::string ByteBuffer::toString(int limit) const {
-	std::string ret;
-	for(int i = myBase; i < myLimit; i++) {
-		ret += std::string::asprintf("%02X", myData[i]);
-	}
-	return ret.left(limit);
+	return toHexString(limit <= myLimit ? limit : myLimit, myData);
 }
 
 void ByteBuffer::limit(int newValue) {

@@ -2,17 +2,46 @@
 # agent
 #
 
-list(APPEND
-  fileList
-  Agent.cpp AgentBeep.cpp AgentDisk.cpp AgentDisplay.cpp AgentFloppy.cpp AgentKeyboard.cpp
-  AgentMouse.cpp AgentNetwork.cpp AgentProcessor.cpp AgentStream.cpp DiskFile.cpp
-  StreamBoot.cpp StreamCopyPaste.cpp StreamPCFA.cpp StreamTCP.cpp StreamWWC.cpp
-  )
+add_library(agent STATIC)
 
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-  list(APPEND fileList NetworkPacket_linux.cpp)
-else()
-  list(APPEND fileList NetworkPacket_dummy.cpp)
-endif()
+target_sources(
+	agent
+	PUBLIC
+    Agent.h
+    AgentBeep.h
+    AgentDisk.h
+    AgentDisplay.h
+    AgentFloppy.h
+    AgentKeyboard.h
+    AgentMouse.h
+    AgentNetwork.h
+    AgentProcessor.h
+    AgentStream.h
+    DiskFile.h
+    NetworkPacket.h
+    StreamBoot.h
+    StreamCopyPaste.h
+    StreamPCFA.h
+    StreamTCP.h
+    StreamWWC.h
+  PRIVATE
+    Agent.cpp
+    AgentBeep.cpp
+    AgentDisk.cpp
+    AgentDisplay.cpp
+    AgentFloppy.cpp
+    AgentKeyboard.cpp
+    AgentMouse.cpp
+    AgentNetwork.cpp
+    AgentProcessor.cpp
+    AgentStream.cpp
+    DiskFile.cpp
+    NetworkPacket_dummy.cpp
+    StreamBoot.cpp
+    StreamCopyPaste.cpp
+    StreamPCFA.cpp
+    StreamTCP.cpp
+    StreamWWC.cpp
+)
 
-add_library (agent STATIC ${fileList})
+add_dependencies(agent util)

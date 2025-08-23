@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <QtCore>
 
 #include "../util/ByteBuffer.h"
 #include "../util/BPF.h"
@@ -63,5 +62,5 @@ namespace Network::BPF {
 		class BPF bpf;
 	};
 
-	QList<Network::Device> getDeviceList();
+	std::vector<Network::Device> getDeviceList();
 }

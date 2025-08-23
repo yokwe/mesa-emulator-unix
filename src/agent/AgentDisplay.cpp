@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,11 @@
 // AgentDisplay.cpp
 //
 
-#include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <bit>
 
+
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -138,7 +140,7 @@ void AgentDisplay::Call() {
 		{
 			GuiOp::CursorPattern data;
 			for(CARD32 i = 0; i < ELEMENTSOF(data.data); i++) {
-				data.data[i] = qFromBigEndian(fcb->cursorPattern.word[i]);
+				data.data[i] = std::byteswap(fcb->cursorPattern.word[i]);
 			}
 			GuiOp::setCursorPattern(&data);
 		}

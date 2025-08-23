@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,9 @@
 #ifndef NETWORK_PACKET_H__
 #define NETWORK_PACKET_H__
 
+#include <cstdint>
+#include <string>
+
 #include "../mesa/MesaBasic.h"
 #include "../mesa/Pilot.h"
 
@@ -51,7 +54,6 @@
 #define ETH_FCS_LEN     4               /* Octets in the FCS             */
 #endif
 
-#include <QtCore>
 
 
 class NetworkPacket {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,11 @@
 #ifndef AGENTFLOPPY_H__
 #define AGENTFLOPPY_H__
 
+#include <deque>
+
 #include "Agent.h"
 #include "DiskFile.h"
 
-#include <QtCore>
 
 class AgentFloppy : public Agent {
 public:
@@ -62,7 +63,7 @@ public:
 private:
 	FloppyIOFaceGuam::FloppyFCBType *fcb;
 	FloppyIOFaceGuam::FloppyDCBType *dcb;
-	QList<DiskFile*>                 diskFileList;
+	std::deque<DiskFile*>            diskFileList;
 };
 
 #endif

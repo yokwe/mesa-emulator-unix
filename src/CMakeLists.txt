@@ -28,7 +28,18 @@ set(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 configure_file(../data/log4j-config.xml.in run/log4j-config.xml @ONLY)
 configure_file(../data/setting.json.in     run/setting.json     @ONLY)
 
+configure_file(../data/Dawn/Dawn.dsk       run/Dawn.dsk     COPYONLY)
+configure_file(../data/Dawn/Dawn.germ      run/Dawn.germ    COPYONLY)
+configure_file(../data/floppy/floppy144    run/floppy144    COPYONLY)
+configure_file(../data/GVWin/GVWIN.DSK     run/GVWIN.DSK    COPYONLY)
+configure_file(../data/GVWin/GVWIN.GRM     run/GVWIN.GRM    COPYONLY)
+configure_file(../data/GVWin/NSINSTLR.DAT  run/NSINSTLR.DAT COPYONLY)
+configure_file(../data/GVWin21/GVWIN21.DSK run/GVWIN21.DSK  COPYONLY)
+configure_file(../data/GVWin21/GVWIN21.GRM run/GVWIN21.GRM  COPYONLY)
+
+
 # compile definition
+add_definitions(-DBUILD_DIR="${CMAKE_BINARY_DIR}")
 
 #
 # platform dependant setting

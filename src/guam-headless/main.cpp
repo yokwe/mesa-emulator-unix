@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <chrono>
+#include <thread>
+static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
 
@@ -47,20 +49,20 @@ static const util::Logger logger(__FILE__);
 
 #include "../opcode/Interpreter.h"
 
-#include <QtCore>
 
-int main(int argc, char** argv) {
+int main(int /* argc */, char** /* argv */) {
 	logger.info("START");
 
 	GuiOp::setContext(new NullGuiOp);
 
 	// sanity check
-	if (argc != 2) {
-		logger.error("Unexpected argc %d", argc);
-		ERROR();
-	}
-	std::string entryName = argv[1];
-	logger.info("entryName = %s", qPrintable(entryName));
+	// if (argc != 2) {
+	// 	logger.error("Unexpected argc %d", argc);
+	// 	ERROR();
+	// }
+	// std::string entryName = argv[1];
+	std::string entryName = "GVWin";
+	logger.info("entryName = %s", entryName);
 
 	Setting setting = Setting::getInstance();
 	Setting::Entry entry = setting.getEntry(entryName);
@@ -101,11 +103,9 @@ int main(int argc, char** argv) {
 	mesaProcessor.initialize();
 
 	// measure elapsed time between boot and MP8000
-	QElapsedTimer elapsedTimer;
-	elapsedTimer.start();
 	mesaProcessor.boot();
+	std::this_thread::sleep_for(Util::ONE_SECOND);
 	mesaProcessor.wait();
-	uint64_t elapsedTime = elapsedTimer.nsecsElapsed();
 
 	Interpreter::stats();
 	PERF_LOG();
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 	//extern void MonoBlt_stats();
 	//MonoBlt_stats();
 
-	logger.info("elapsedTime = %lld msec", elapsedTime / (1000 * 1000)); // display as milliseconds
+	logger.info("elapsedTime = %lld msec", mesaProcessor.elapsedTime());
 
 	logger.info("STOP");
 	return 0;

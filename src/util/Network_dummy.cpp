@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,16 @@
 
 
 #include "Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "Network.h"
 
-static QList<Network::Device> getDeviceList_() {
-	QList<Network::Device> list;
+static std::vector<Network::Device> getDeviceList_() {
+	std::vector<Network::Device> list;
 	return list;
 }
-QList<Network::Device> Network::getDeviceList() {
-	static QList<Network::Device> list = getDeviceList_();
+std::vector<Network::Device> Network::getDeviceList() {
+	static std::vector<Network::Device> list = getDeviceList_();
 	return list;
 }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,14 @@
 #ifndef TIMER_THREAD_H__
 #define TIMER_THREAD_H__
 
+#include <mutex>
+#include <condition_variable>
+
 #include "MesaBasic.h"
 #include "Constant.h"
 
-#include <QtCore>
-
-class TimerThread : public QRunnable {
+class TimerThread {
 public:
-	static const QThread::Priority PRIORITY = QThread::NormalPriority;
-
-	// Wait interval in milliseconds for QWaitCondition::wait
-	static const int WAIT_INTERVAL = 1000;
-
 	// Timer interval in milliseconds
 	static const int TIMER_INTERVAL = cTick;
 
@@ -65,8 +61,8 @@ private:
 	static CARD16         PTC;
 	static int64_t         lastTimeoutTime;
 	static int            stopThread;
-	static QMutex         mutexTimer;
-	static QWaitCondition cvTimer;
+	static std::mutex        mutexTimer;
+	static std::condition_variable cvTimer;
 
 	static int            timerCount;
 };

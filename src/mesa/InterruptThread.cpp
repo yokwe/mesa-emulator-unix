@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <chrono>
+#include <condition_variable>
+static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
@@ -44,8 +46,8 @@ static const util::Logger logger(__FILE__);
 
 CARD16         InterruptThread::WP;
 CARD16         InterruptThread::WDC;
-QMutex         InterruptThread::mutexWP;
-QWaitCondition InterruptThread::cvWP;
+std::mutex        InterruptThread::mutexWP;
+std::condition_variable InterruptThread::cvWP;
 int            InterruptThread::stopThread;
 
 int            InterruptThread::interruptCount    = 0;
@@ -60,18 +62,18 @@ CARD16 InterruptThread::getWP() {
 	return WP;
 }
 void InterruptThread::setWP(CARD16 newValue) {
-	QMutexLocker locker(&mutexWP);
+	std::unique_lock<std::mutex> locker(mutexWP);
 	CARD16 oldValue = WP;
 	WP = newValue;
 	if (oldValue && !newValue) {
 		// become no interrupt
 	} else if (!oldValue && newValue) {
 		// start interrupt, wake waiting thread
-		cvWP.wakeOne();
+		cvWP.notify_one();
 	}
 }
 void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	QMutexLocker locker(&mutexWP);
+	std::unique_lock<std::mutex> locker(mutexWP);
 	notifyCount++;
 	CARD16 newValue = (WP | interruptSelector);
 	//
@@ -81,7 +83,7 @@ void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
 		// become no interrupt
 	} else if (!oldValue && newValue) {
 		// start interrupt, wake waiting thread
-		cvWP.wakeOne();
+		cvWP.notify_one();
 		notifyWakeupCount++;
 	}
 }
@@ -91,18 +93,17 @@ void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
 
 void InterruptThread::run() {
 	logger.info("InterruptThread::run START");
-	QThread::currentThread()->setPriority(PRIORITY);
 
 	stopThread = 0;
-	QMutexLocker locker(&mutexWP);
+	std::unique_lock<std::mutex> locker(mutexWP);
 	for (;;) {
 		if (stopThread) break;
 		interruptCount++;
 
 		// wait until interrupt is arrived
 		for(;;) {
-			bool ret = cvWP.wait(&mutexWP, WAIT_INTERVAL);
-			if (ret) break;
+			auto status = cvWP.wait_for(locker, Util::ONE_SECOND);
+			if (status == std::cv_status::no_timeout) break;
 			if (stopThread) goto exitLoop;
 		}
 

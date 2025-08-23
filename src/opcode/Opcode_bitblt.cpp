@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,9 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
+
+#include <bit>
 
 #include "../util/Debug.h"
 #include "../util/GuiOp.h"
@@ -244,21 +246,21 @@ protected:
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 word = cache.read(address.word);
 		if (word && unpacked) word = 0xffff;
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 		return (word >> shift) & 1;
 	}
 	inline CARD16 ReadPixel_bit(MemoryCache& cache, ColorBlt::Address address, int offset, CARD16 type) {
 		Bump(address, offset);
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 word = cache.read(address.word);
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 		return (word >> shift) & 1;
 	}
 	inline void WritePixel(MemoryCache& cache, ColorBlt::Address address, int offset, CARD16 bit, CARD16 type) {
 		Bump(address, offset);
 
 		CARD16 word = cache.write(address.word);
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 mask = 1 << shift;
@@ -267,49 +269,49 @@ protected:
 		CARD16 result = (word & ~mask) | ((bit << shift) & mask);
 
 		//logger.debug("%s  data  %d  %2d   %04X  %04X", __FUNCTION__, bit, offset, word, result);
-		if (type == ColorBlt::PT_display) result = qFromBigEndian(result); // i386 is little endian
+		if (type == ColorBlt::PT_display) result = std::byteswap(result); // i386 is little endian
 		cache.write(address.word, result);
 	}
 	inline void WritePixel_zero(MemoryCache& cache, ColorBlt::Address address, int offset, CARD16 type) {
 		Bump(address, offset);
 
 		CARD16 word = cache.write(address.word);
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 mask = ~(1 << shift);
 		CARD16 result = word & mask;
 
 		//logger.debug("%s  data  %d  %2d   %04X  %04X", __FUNCTION__, bit, offset, word, result);
-		if (type == ColorBlt::PT_display) result = qFromBigEndian(result); // i386 is little endian
+		if (type == ColorBlt::PT_display) result = std::byteswap(result); // i386 is little endian
 		cache.write(address.word, result);
 	}
 	inline void WritePixel_one(MemoryCache& cache, ColorBlt::Address address, int offset, CARD16 type) {
 		Bump(address, offset);
 
 		CARD16 word = cache.write(address.word);
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 mask = 1 << shift;
 		CARD16 result = word | mask;
 
 		//logger.debug("%s  data  %d  %2d   %04X  %04X", __FUNCTION__, bit, offset, word, result);
-		if (type == ColorBlt::PT_display) result = qFromBigEndian(result); // i386 is little endian
+		if (type == ColorBlt::PT_display) result = std::byteswap(result); // i386 is little endian
 		cache.write(address.word, result);
 	}
 	inline void WritePixel_not(MemoryCache& cache, ColorBlt::Address address, int offset, CARD16 type) {
 		Bump(address, offset);
 
 		CARD16 word = cache.write(address.word);
-		if (type == ColorBlt::PT_display) word = qToBigEndian(word); // mesa is big endian
+		if (type == ColorBlt::PT_display) word = std::byteswap(word); // mesa is big endian
 
 		int shift = WordSize - (address.pixel + 1);
 		CARD16 mask = 1 << shift;
 		CARD16 result = word ^ mask;
 
 		//logger.debug("%s  data  %d  %2d   %04X  %04X", __FUNCTION__, bit, offset, word, result);
-		if (type == ColorBlt::PT_display) result = qFromBigEndian(result); // i386 is little endian
+		if (type == ColorBlt::PT_display) result = std::byteswap(result); // i386 is little endian
 		cache.write(address.word, result);
 	}
 };

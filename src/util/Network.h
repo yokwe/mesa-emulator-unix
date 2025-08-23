@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <QtCore>
 
 #include "../util/ByteBuffer.h"
 
@@ -116,7 +115,7 @@ namespace Network {
 	// OS dependent part of network implementation
 	//
 
-	QList<Device> getDeviceList();
+	std::vector<Device> getDeviceList();
 	Device        getDevice(const std::string& name);
 	Driver*       getDriver(const Device& device);
 }

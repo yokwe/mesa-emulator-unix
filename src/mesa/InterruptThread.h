@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,14 @@
 #ifndef INTERRUPT_THREAD_H__
 #define INTERRUPT_THREAD_H__
 
+#include <mutex>
+#include <condition_variable>
+
 #include "MesaBasic.h"
 #include "Constant.h"
 
-#include <QtCore>
-
-class InterruptThread : public QRunnable {
+class InterruptThread {
 public:
-	static const QThread::Priority PRIORITY = QThread::NormalPriority;
-
-	// Wait interval in milliseconds for QWaitCondition::wait
-	static const int WAIT_INTERVAL = 1000;
-
 	static CARD16 getWP();
 	static void   setWP(CARD16 newValue);
 
@@ -75,8 +71,8 @@ public:
 private:
 	static CARD16         WP;
 	static CARD16         WDC;
-	static QMutex         mutexWP;
-	static QWaitCondition cvWP;
+	static std::mutex        mutexWP;
+	static std::condition_variable cvWP;
 	static int            stopThread;
 
 	static int interruptCount;

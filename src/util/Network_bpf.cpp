@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 
 
 #include "Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include <net/bpf.h>
 #include <net/if.h>
@@ -39,7 +39,6 @@ static const util::Logger logger(__FILE__);
 #include <ifaddrs.h>
 #include <unistd.h>
 
-#include <QtCore>
 
 #include "Network.h"
 #include "Network_bpf.h"
@@ -59,8 +58,8 @@ static const util::Logger logger(__FILE__);
 //   sysctl net.link.bridge.pfil_onlyip=0
 
 
-QList<Network::Device> Network::getDeviceList() {
-	static QList<Network::Device> list = Network::BPF::getDeviceList();
+std::vector<Network::Device> Network::getDeviceList() {
+	static std::vector<Network::Device> list = Network::BPF::getDeviceList();
 	return list;
 }
 Network::Device Network::getDevice(const std::string& name) {
@@ -88,8 +87,8 @@ Network::Driver*       Network::getDriver(const Network::Device& device) {
 //
 // Network::BPF::getDeviceList
 //
-QList<Network::Device> Network::BPF::getDeviceList() {
-	QList<Network::Device> list;
+std::vector<Network::Device> Network::BPF::getDeviceList() {
+	std::vector<Network::Device> list;
 
 	struct ifaddrs *ifap;
 	int ret;
@@ -131,7 +130,7 @@ QList<Network::Device> Network::BPF::getDeviceList() {
 Network::BPF::Driver::Driver(const Network::Device& device_) : Network::Driver(device_) {
 	bpf.open();
 	logger.info("bpf.fd         = %d", bpf.fd);
-	logger.info("bpf.path       = %s", bpf.path.toStdString());
+	logger.info("bpf.path       = %s", bpf.path);
 	logger.info("bpf.bufferSize = %d", bpf.bufferSize);
 
 	bpf.setInterface(device.name);
@@ -144,7 +143,7 @@ Network::BPF::Driver::Driver(const Network::Device& device_) : Network::Driver(d
 	logger.info("bufferSize     = %d", bpf.getBufferSize());
 	logger.info("seeSent        = %d", bpf.getSeeSent());
 	logger.info("headerComplete = %d", bpf.getHeaderComplete());
-	logger.info("interface      = %s", bpf.getInterface().toStdString());
+	logger.info("interface      = %s", bpf.getInterface());
 	logger.info("nbrb           = %d", bpf.getNonBlockingReadBytes());
 	logger.info("timeout        = %d", bpf.getReadTimeout());
 	logger.info("buffer         = %p", bpf.buffer);

@@ -12,10 +12,11 @@ LOG4CXX_CONFIGURATION := ${BUILD_DIR}/run/log4j-config.xml
 export LOG4CXX_CONFIGURATION
 
 
-.PHONY: all clean cmake build distclean distclean-qmake
+.PHONY: all clean help cmake build distclean distclean-cmake distclean-macos
+.PHONY: main test guam-headless
+.PHONY: run-main run-test run-guamheadless
 
 all:
-	@echo "all"
 	@echo "BUILD_DIR             ${BUILD_DIR}"
 	@echo "SOURCE_DIR            ${SOURCE_DIR}"
 	@echo "LOG4CXX_CONFIGURATION ${LOG4CXX_CONFIGURATION}"
@@ -35,6 +36,14 @@ cmake: distclean-cmake
 build:
 	/usr/bin/time cmake --build ${BUILD_DIR}
 
+distclean: distclean-cmake distclean-macos
+
+distclean-cmake:
+	rm -rf ${BUILD_DIR}
+
+distclean-macos:
+	find . -type f -name '._*' -print -delete
+
 main:
 	/usr/bin/time cmake --build build --target main
 	
@@ -44,17 +53,6 @@ test:
 guam-headless:
 	/usr/bin/time cmake --build build --target guam-headless
 	
-#
-# maintenance
-#
-distclean: distclean-cmake distclean-macos
-
-distclean-cmake:
-	rm -rf ${BUILD_DIR}
-
-distclean-macos:
-	find . -type f -name '._*' -print -delete
-
 #
 # run-XXX
 #

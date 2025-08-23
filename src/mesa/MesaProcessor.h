@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,7 @@
 // MesaProcessor.h
 //
 
-#ifndef MESAPROCESSOR_H__
-#define MESAPROCESSOR_H__
-
-#include <QtCore>
+#pragma once
 
 #include "../agent/Agent.h"
 #include "../agent/AgentBeep.h"
@@ -98,8 +95,9 @@ public:
 	void boot();
 	void stop();
 	void wait();
-	int  isRunning() {
-		return getRunning();
+
+	int64_t elapsedTime() {
+		return timeStop - timeStart;
 	}
 
 private:
@@ -116,7 +114,7 @@ private:
 	std::string        networkInterfaceName;
 
 	//
-	QList<DiskFile*> diskFileList;
+	std::vector<DiskFile*> diskFileList;
 	DiskFile         floppyFile;
 	NetworkPacket    networkPacket;
 
@@ -139,11 +137,8 @@ private:
 	InterruptThread interruptThread;
 	TimerThread     timerThread;
 
-	QAtomicInt      running;
+	int64_t timeStart;
+	int64_t timeStop;
 
 	void loadGerm(std::string& path);
-
-	void setRunning(int newValue);
-	int  getRunning();
 };
-#endif

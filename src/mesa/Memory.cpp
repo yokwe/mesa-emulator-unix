@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "Memory.h"
 
@@ -104,8 +104,8 @@ void Memory::initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 
 	if (MAX_REALMEMORY_PAGE_SIZE < rpSize) rpSize = MAX_REALMEMORY_PAGE_SIZE;
 
-	logger.info("vmBist = %d  vpSize = %6d  %4X", vmBits, vpSize, vpSize);
-	logger.info("rmBist = %d  rpSize = %6d  %4X", rmBits, rpSize, rpSize);
+//	logger.info("vmBist = %d  vpSize = %6d  %4X", vmBits, vpSize, vpSize);
+//	logger.info("rmBist = %d  rpSize = %6d  %4X", rmBits, rpSize, rpSize);
 
 	// allocate pages.
 	pages = new CARD16[rpSize * PageSize];
@@ -326,7 +326,12 @@ Memory::Map Memory::ReadMap(CARD32 vp) {
 	return map;
 }
 void Memory::WriteMap(CARD32 vp, Map map) {
-	if (vpSize <= vp) ERROR();
+	if (vpSize <= vp) {
+		logger.error("vpSize  %d", vpSize);
+		logger.error("vp      %d", vp);
+		logger.error("map     %02X", map);
+		ERROR();
+	}
 	if (rpSize <= map.rp) ERROR();
 
 	if (Vacant(map.mf)) map.rp = 0;

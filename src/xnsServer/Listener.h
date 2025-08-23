@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,9 +178,9 @@ namespace XNS::Server {
 		bool    started;
 
 		// FIXME delete inactive socket - session timeout
-		QMap<uint16_t, Listener*> map;
+		std::map<uint16_t, Listener*> map;
 		//   socket
-		mutable QMutex                   mapMutex;
+		mutable std::mutex                  mapMutex;
 	};
 
 }

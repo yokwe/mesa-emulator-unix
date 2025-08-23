@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -197,9 +197,9 @@ namespace Courier {
 		uint32_t     myProgram;
 		uint16_t     myVersion;
 
-		QMap<uint16_t, Procedure*> procedureMap;
+		std::map<uint16_t, Procedure*> procedureMap;
 		//   procedure
-		QMap<uint16_t, Session*>   sessionMap;
+		std::map<uint16_t, Session*>   sessionMap;
 		//   transaction
 	};
 
@@ -262,7 +262,7 @@ namespace Courier {
 		Server* server;
 		bool    started;
 
-		QMap<ProgramVersion, Service*> map;
+		std::map<ProgramVersion, Service*> map;
 	};
 }
 

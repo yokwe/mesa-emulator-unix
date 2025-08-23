@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, BTIndex*> all;
+	static std::map<Key, BTIndex*> all;
 
 	BTIndex(Symbols* symbols, CARD16 index);
 };
@@ -255,7 +255,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, BTRecord*> all;
+	static std::map<Key, BTRecord*> all;
 
 	BTRecord(Symbols* symbols, CARD16 index, BodyLink* link, BTIndex* firstSon,SEIndex* type,
 			CTXIndex* localCtx, CARD16 level, CARD16 sourceIndex, BodyInfo* info, Tag tag, void* tagValue);

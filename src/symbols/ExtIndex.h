@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, ExtIndex*> all;
+	static std::map<Key, ExtIndex*> all;
 
 	ExtIndex(Symbols* symbols, CARD16 index_);
 };
@@ -110,7 +110,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, ExtRecord*> all;
+	static std::map<Key, ExtRecord*> all;
 
 	ExtRecord(Symbols* symbols, CARD16 index, ExtensionType type, SEIndex* sei, TreeLink* tree);
 };

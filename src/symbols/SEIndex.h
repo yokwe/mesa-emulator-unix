@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,13 +92,13 @@ public:
 	const SEIndex* nextSe() const;
 	const SEIndex* typeLink() const;
 
-	QList<BTRecord*> getBTRecordList() const {
+	std::vector<BTRecord*> getBTRecordList() const {
 		return symbols->bt.values();
 	}
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, SEIndex*> all;
+	static std::map<Key, SEIndex*> all;
 
 	SEIndex(Symbols* symbols, CARD16 index);
 };
@@ -571,7 +571,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, SERecord*> all;
+	static std::map<Key, SERecord*> all;
 
 	SERecord(Symbols* symbols, CARD16 index, Tag tag, void* tagValue);
 };

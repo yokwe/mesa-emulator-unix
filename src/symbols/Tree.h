@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ public:
 	const TreeNode& getValue() const;
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, TreeIndex*> all;
+	static std::map<Key, TreeIndex*> all;
 
 	TreeIndex(Symbols* symbols, CARD16 index);
 };
@@ -205,7 +205,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, TreeNode*> all;
+	static std::map<Key, TreeNode*> all;
 
 	TreeNode(Symbols* symbols, CARD16 index, NodeName name, bool shared, CARD16 nSons, CARD16 info, TreeLink** son);
 };

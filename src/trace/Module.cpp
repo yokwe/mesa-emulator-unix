@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include "Module.h"
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 
 void Module::LoadmapFile::fromJsonObject(const QJsonObject& jsonObject) {
@@ -76,8 +76,8 @@ static std::string readFile(const std::string& path) {
 	{
 		QFile file(path);
 		if (!file.open(QIODevice::OpenModeFlag::ReadOnly)) {
-			logger.fatal("File open error %s", file.errorString().toStdString());
-			logger.fatal("  path = %s!", path.toStdString());
+			logger.fatal("File open error %s", file.errorString());
+			logger.fatal("  path = %s!", path);
 			ERROR();
 		}
 		byteArray = file.readAll();
@@ -87,26 +87,26 @@ static std::string readFile(const std::string& path) {
 }
 
 
-QList<Module::LoadmapFile> Module::LoadmapFile::load(const std::string& path) {
-	QList<Module::LoadmapFile> list;
+std::vector<Module::LoadmapFile> Module::LoadmapFile::load(const std::string& path) {
+	std::vector<Module::LoadmapFile> list;
 	QJsonArray jsonArray = JSONUtil::loadArray(path);
 	JSONUtil::getJsonArray(jsonArray, list);
 	return list;
 }
-void Module::LoadmapFile::save(const std::string& path, QList<Module::LoadmapFile> list) {
+void Module::LoadmapFile::save(const std::string& path, std::vector<Module::LoadmapFile> list) {
 	QJsonArray jsonArray;
 	JSONUtil::setJsonArray(jsonArray, list);
 	JSONUtil::save(path, jsonArray);
 }
 
 
-QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const std::string& path) {
+std::vector<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const std::string& path) {
 	std::string string = readFile(path);
 
 	// GermOpsImpl 0AB0H 1209H 1CH
 	QRegularExpression re("[A-Za-z0-9]+ [0-9A-FH]+ [0-9A-FH]+ [0-9A-FH]+");
 
-	QList<Module::LoadmapFile> ret;
+	std::vector<Module::LoadmapFile> ret;
 	for(auto e: string.split(QChar('\r'))) {
 		std::string simplified = e.simplified();
 		auto m = re.match(simplified);
@@ -126,20 +126,20 @@ QList<Module::LoadmapFile> Module::LoadmapFile::loadLoadmapFile(const std::strin
 }
 
 
-QList<Module::MapFile> Module::MapFile::load(const std::string& path) {
-	QList<Module::MapFile> list;
+std::vector<Module::MapFile> Module::MapFile::load(const std::string& path) {
+	std::vector<Module::MapFile> list;
 	QJsonArray jsonArray = JSONUtil::loadArray(path);
 	JSONUtil::getJsonArray(jsonArray, list);
 	return list;
 }
-void Module::MapFile::save(const std::string& path, QList<Module::MapFile> list) {
+void Module::MapFile::save(const std::string& path, std::vector<Module::MapFile> list) {
 	QJsonArray jsonArray;
 	JSONUtil::setJsonArray(jsonArray, list);
 	JSONUtil::save(path, jsonArray);
 }
 
 
-QList<Module::MapFile> Module::MapFile::loadMapFile(const std::string& path) {
+std::vector<Module::MapFile> Module::MapFile::loadMapFile(const std::string& path) {
 	std::string string = readFile(path);
 
 	// Bytes   EVI  Offset    IPC   Module               Procedure
@@ -147,7 +147,7 @@ QList<Module::MapFile> Module::MapFile::loadMapFile(const std::string& path) {
 	QRegularExpression re("[0-7]+B? [0-9]+ [0-7]+B? [0-7]+B? [A-Za-z0-9]+ [A-Za-z0-9]+");
 	//                     0        1      2        3        4            5
 
-	QList<Module::MapFile> ret;
+	std::vector<Module::MapFile> ret;
 	for(auto e: string.split(QChar('\r'))) {
 		std::string simplified = e.simplified();
 		auto m = re.match(simplified);

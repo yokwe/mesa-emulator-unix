@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -409,15 +409,15 @@ public:
 	CARD16    apOffset; // atom printname table
 	CARD16    apLimit;
 
-//	QMap<CARD16, NameRecord*> ss;
-	QMap<CARD16, FTRecord*>   ft;
-//	QMap<CARD16, CTRecord*>   ct;
-	QMap<CARD16, SGRecord*>   sg;
-//	QMap<CARD16, TYPRecord*>  typ;
-//	QMap<CARD16, LinkFrag*>   lf;
-	QMap<CARD16, ENRecord*>   en;
-//	QMap<CARD16, ATRecord*>   at;
-	QMap<CARD16, MTRecord*>   mt;
+//	std::map<CARD16, NameRecord*> ss;
+	std::map<CARD16, FTRecord*>   ft;
+//	std::map<CARD16, CTRecord*>   ct;
+	std::map<CARD16, SGRecord*>   sg;
+//	std::map<CARD16, TYPRecord*>  typ;
+//	std::map<CARD16, LinkFrag*>   lf;
+	std::map<CARD16, ENRecord*>   en;
+//	std::map<CARD16, ATRecord*>   at;
+	std::map<CARD16, MTRecord*>   mt;
 
 //	NameRecord* getNameRecord(CARD16 index);
 	FTRecord*   getFTRecord(CARD16 index);

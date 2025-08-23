@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,8 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+#include <chrono>
+static const Logger logger(__FILE__);
 
 #include "../courier/Type.h"
 
@@ -238,7 +239,7 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 			// increment recvListSeqs
 			recvListSeq++;
 		}
-		if (needsToWakeOne) recvListCV.wakeOne();
+		if (needsToWakeOne) recvListCV.notify_one();
 	}
 
 	//
@@ -284,13 +285,13 @@ void SPPQueue::handle(const Data& data, const SPP& spp) {
 void SPPQueue::sendThread() {
 	// retransmit data in sendBuffer in every WAIT_TIME
 	uint32_t WAIT_TIME = 500; // unit is msec
-
+	auto timeWait = std::chrono::milliseconds(WAIT_TIME);
 	QMutexLocker mutexLocker(&sendBufferMutex);
 	for(;;) {
 		if (stopFuture) break;
 		if (sendBuffer.isEmpty()) {
 			// wait until notified
-			(void)sendBufferCV.wait(&sendBufferMutex, WAIT_TIME);
+			(void)sendBufferCV.wait_for(&sendBufferMutex, timeWait);
 		}
 		if (sendBuffer.isEmpty()) {
 			continue;
@@ -329,10 +330,10 @@ void SPPQueue::transmit(QueueData* myData) {
 	transmitListMutex.lock();
 	transmitList.append(myData);
 	transmitListMutex.unlock();
-	transmitListCV.wakeOne();
+	transmitListCV.notify_one();
 }
 void SPPQueue::transmitThread() {
-	uint32_t WAIT_TIME = 1000; // unit is msec
+	auto WAIT_TIME = std::chrono::milliseconds(1000);
 	QMutexLocker mutexLocker(&transmitListMutex);
 
 	for(;;) {
@@ -340,7 +341,7 @@ void SPPQueue::transmitThread() {
 
 		if (transmitList.isEmpty()) {
 			// wait until notified
-			(void)transmitListCV.wait(&transmitListMutex, WAIT_TIME);
+			(void)transmitListCV.wait_for(&transmitListMutex, WAIT_TIME);
 		}
 		if (transmitList.isEmpty()) {
 			continue;
@@ -408,12 +409,12 @@ delete_this:
 }
 
 SPPQueue::QueueData* SPPQueue::recv() {
-	uint32_t WAIT_TIME = 1000; // unit is msec
+	auto WAIT_TIME = std::chrono::milliseconds(1000);
 
 	QMutexLocker mutexLocker(&recvListMutex);
 	if (recvList.isEmpty()) {
 		// wait until notified
-		(void)recvListCV.wait(&recvListMutex, WAIT_TIME);
+		(void)recvListCV.wait_for(&recvListMutex, WAIT_TIME);
 	}
 	if (recvList.isEmpty()) {
 		return nullptr;
@@ -429,7 +430,7 @@ void SPPQueue::send(const Data& data, const SPP& spp) {
 	entry->myData = myData;
 	sendBufferMutex.unlock();
 
-	sendBufferCV.wakeOne();
+	sendBufferCV.notify_one();
 }
 void SPPQueue::close() {
 	logger.info("SPPQueue::close  remove listener %s", toString());

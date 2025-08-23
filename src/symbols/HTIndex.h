@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ public:
 	const HTRecord& getValue() const;
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, HTIndex*> all;
+	static std::map<Key, HTIndex*> all;
 
 	HTIndex(Symbols* symbols, CARD16 index);
 };
@@ -102,7 +102,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, HTRecord*> all;
+	static std::map<Key, HTRecord*> all;
 
 	HTRecord(Symbols* symbols, CARD16 index, bool anyInternal, bool anyPublic, CARD16 link, CARD16 ssIndex, std::string value);
 };

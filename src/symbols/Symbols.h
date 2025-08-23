@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -280,14 +280,14 @@ public:
 	CARD16           fgPgCount;
 	//
 	std::string                   ss;
-	QMap<CARD16, CTXRecord*>  ctx;
-	QMap<CARD16, HTRecord*>   ht;
-	QMap<CARD16, MDRecord*>   md;
-	QMap<CARD16, SERecord*>   se;
-    QMap<CARD16, BTRecord*>   bt;
-    QMap<CARD16, ExtRecord*>  ext;
-    QMap<CARD16, LTRecord*>   lt;
-    QMap<CARD16, TreeNode*>   tree;
+	std::map<CARD16, CTXRecord*>  ctx;
+	std::map<CARD16, HTRecord*>   ht;
+	std::map<CARD16, MDRecord*>   md;
+	std::map<CARD16, SERecord*>   se;
+    std::map<CARD16, BTRecord*>   bt;
+    std::map<CARD16, ExtRecord*>  ext;
+    std::map<CARD16, LTRecord*>   lt;
+    std::map<CARD16, TreeNode*>   tree;
 
     Symbols(BCD* bcd, int symbolBase);
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "DumpSymbol.h"
 
@@ -144,7 +144,7 @@ void DumpSymbol::dumpSymbol(std::string filePath, std::string outDirPath) {
 		if (1 < mdSize) {
 			out << "DIRECTORY" << Qt::endl;
 			nest();
-			QListIterator<CARD16> i(symbols.md.keys());
+			std::vectorIterator<CARD16> i(symbols.md.keys());
 			for(;;) {
 				if (!i.hasNext()) {
 					break;

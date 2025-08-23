@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "SEIndex.h"
 #include "BCDFile.h"
@@ -45,7 +45,7 @@ static const util::Logger logger(__FILE__);
 //
 // SEIndex
 //
-QMap<SEIndex::Key, SEIndex*> SEIndex::all;
+std::map<SEIndex::Key, SEIndex*> SEIndex::all;
 SEIndex::SEIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols, index_);
 	all[key] = this;
@@ -174,7 +174,7 @@ const SEIndex* SEIndex::typeLink() const {
 //
 // SERecord
 //
-QMap<SERecord::Key, SERecord*> SERecord::all;
+std::map<SERecord::Key, SERecord*> SERecord::all;
 SERecord::SERecord(Symbols* symbols_, CARD16 index_, Tag tag_, void* tagValue_) : symbols(symbols_), index(index_), tag(tag_), tagValue(tagValue_) {
 	Key key(symbols_, index_);
 	all[key] = this;

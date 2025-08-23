@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "BTIndex.h"
 #include "BCDFile.h"
@@ -46,7 +46,7 @@ static const util::Logger logger(__FILE__);
 //
 // BTIndex
 //
-QMap<BTIndex::Key, BTIndex*> BTIndex::all;
+std::map<BTIndex::Key, BTIndex*> BTIndex::all;
 BTIndex::BTIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -86,7 +86,7 @@ const BTRecord& BTIndex::getValue() const {
 //
 // BTRecord
 //
-QMap<BTRecord::Key, BTRecord*> BTRecord::all;
+std::map<BTRecord::Key, BTRecord*> BTRecord::all;
 BTRecord::BTRecord(Symbols* symbols_, CARD16 index_, BodyLink* link_, BTIndex* firstSon_,SEIndex* type_,
 		CTXIndex* localCtx_, CARD16 level_, CARD16 sourceIndex_, BodyInfo* info_, Tag tag_, void* tagValue_) :
 	symbols(symbols_), index(index_), link(link_), firstSon(firstSon_), type(type_),

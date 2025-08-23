@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ namespace XNS::Server {
 		bool          stopFuture;
 		QFuture<void> future;
 
-		QMap<uint16_t, const char*> socketMap;
+		std::map<uint16_t, const char*> socketMap;
 
 	public:
 		void add(Listener* listener) {

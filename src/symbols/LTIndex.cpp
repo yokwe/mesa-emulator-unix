@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "LTIndex.h"
 #include "BCDFile.h"
@@ -44,7 +44,7 @@ static const util::Logger logger(__FILE__);
 //
 // LTIndex
 //
-QMap<LTIndex::Key, LTIndex*> LTIndex::all;
+std::map<LTIndex::Key, LTIndex*> LTIndex::all;
 LTIndex::LTIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -97,7 +97,7 @@ const LTRecord& LTIndex::getValue() const {
 //      value(3): WordSequence]
 //    ENDCASE];
 
-QMap<LTRecord::Key, LTRecord*> LTRecord::all;
+std::map<LTRecord::Key, LTRecord*> LTRecord::all;
 LTRecord::LTRecord(Symbols* symbols_, CARD16 index_, Tag tag_, void* tagValue_) :
 	symbols(symbols_), index(index_), tag(tag_), tagValue(tagValue_) {
 	Key key(symbols_, index_);

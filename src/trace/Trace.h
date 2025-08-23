@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,8 +75,8 @@ namespace Trace {
 			return ret;
 		}
 
-		static QList<Func> toList() {
-			QList<Func> ret = all.values();
+		static std::vector<Func> toList() {
+			std::vector<Func> ret = all.values();
 			std::sort(ret.begin(), ret.end());
 			return ret;
 		}
@@ -89,7 +89,7 @@ namespace Trace {
 		static void readLoadmapFile(const std::string& path);
 		static void readMapFile(const std::string& path);
 	private:
-		static QSet<Func> all;
+		static std::set<Func> all;
 
 		Func(CARD16 gfi_, CARD16 pc_) : gfi(gfi_), pc(pc_) {}
 	};

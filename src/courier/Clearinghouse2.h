@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,9 +173,9 @@ namespace Courier::Clearinghouse2 {
 
 	template <class T>
 	class StreamOf : public Base {
-		QList<T> list;
+		std::vector<T> list;
 	public:
-		StreamOf& operator = (const QList<T>& that) {
+		StreamOf& operator = (const std::vector<T>& that) {
 			list.clear();
 			list.append(that);
 			return *this;

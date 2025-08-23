@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 
 
 class RIPListener : public XNS::Server::Listener {
-	QList<XNS::RIP::Entry> list;
+	std::vector<XNS::RIP::Entry> list;
 
 	bool                   stopFuture;
 	QFuture<void>          future;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "MDIndex.h"
 #include "BCDFile.h"
@@ -45,7 +45,7 @@ static const util::Logger logger(__FILE__);
 //
 // MDIndex
 //
-QMap<MDIndex::Key, MDIndex*> MDIndex::all;
+std::map<MDIndex::Key, MDIndex*> MDIndex::all;
 MDIndex::MDIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -85,7 +85,7 @@ const MDRecord& MDIndex::getValue() const {
 //
 // MDRecord
 //
-QMap<MDRecord::Key, MDRecord*> MDRecord::all;
+std::map<MDRecord::Key, MDRecord*> MDRecord::all;
 MDRecord::MDRecord(Symbols* symbols_, CARD16 index_, Stamp* stamp_, HTIndex* moduleId_, HTIndex* fileId_,
 		bool shared_, bool exported_, CTXIndex* ctx_, CTXIndex* defaultImport_, CARD16 file_) :
 	symbols(symbols_), index(index_), stamp(stamp_), moduleId(moduleId_), fileId(fileId_),

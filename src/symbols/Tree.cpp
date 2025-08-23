@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "Tree.h"
 #include "BCDFile.h"
@@ -47,7 +47,7 @@ static const util::Logger logger(__FILE__);
 //
 // TreeIndex
 //
-QMap<TreeIndex::Key, TreeIndex*> TreeIndex::all;
+std::map<TreeIndex::Key, TreeIndex*> TreeIndex::all;
 TreeIndex::TreeIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -99,7 +99,7 @@ const TreeNode& TreeIndex::getValue() const {
 //  info (1): Info,
 //  son (2): ARRAY [1..1) OF Link];
 
-QMap<TreeNode::Key, TreeNode*> TreeNode::all;
+std::map<TreeNode::Key, TreeNode*> TreeNode::all;
 TreeNode::TreeNode(Symbols* symbols_, CARD16 index_, NodeName name_, bool shared_, CARD16 nSons_, CARD16 info_, TreeLink** son_) :
 	symbols(symbols_), index(index_), name(name_), shared(shared_), nSons(nSons_), info(info_), son(son_) {
 	Key key(symbols_, index_);

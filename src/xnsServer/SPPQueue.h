@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -221,7 +221,7 @@ namespace XNS::Server {
 
 			std::string toString();
 		private:
-			QMap<uint16_t, Entry*> map;
+			std::map<uint16_t, Entry*> map;
 			//   seq
 		};
 
@@ -241,9 +241,9 @@ namespace XNS::Server {
 		//
 		// variables for future
 		//
-		QAtomicInt    stopFuture;
-		QAtomicInt    stopIsCalled;
-		QAtomicInt    closeIsCalled;
+		std::atomic_uint    stopFuture;
+		std::atomic_uint    stopIsCalled;
+		std::atomic_uint    closeIsCalled;
 		QFuture<void> futureRun;
 		QFuture<void> futureSend;
 		QFuture<void> futureTransmit;
@@ -257,22 +257,22 @@ namespace XNS::Server {
 		// variables for recvList
 		//
 		uint16_t           recvListSeq;
-		QList<QueueData*> recvList;
-		QMutex            recvListMutex;
-		QWaitCondition    recvListCV;
+		std::vector<QueueData*> recvList;
+		std::mutex           recvListMutex;
+		std::condition_variable    recvListCV;
 
 		//
 		// variable for temporary sending data
 		//
 		Buffer         sendBuffer;
-		QMutex         sendBufferMutex;
-		QWaitCondition sendBufferCV;
+		std::mutex        sendBufferMutex;
+		std::condition_variable sendBufferCV;
 
 		//
 		// variable for transmitList
-		QList<QueueData*> transmitList;
-		QMutex            transmitListMutex;
-		QWaitCondition    transmitListCV;
+		std::vector<QueueData*> transmitList;
+		std::mutex           transmitListMutex;
+		std::condition_variable    transmitListCV;
 
 		//
 		// variables for recv/send
@@ -287,10 +287,10 @@ namespace XNS::Server {
 
 		// sendSeq is used as spp.seq in transmit
 		// The Sequence Number counts data packets sent on the connection.
-		QAtomicInteger<uint16_t> sendSeq;
+		std::atomic_uinteger<uint16_t> sendSeq;
 		// recvSeq is used as spp.ack in transmit
 		// Acknowledge Number indicates the sequence number of the next data packet.
-		QAtomicInteger<uint16_t> recvSeq;
+		std::atomic_uinteger<uint16_t> recvSeq;
 
 		//
 		// variables for transmit packet

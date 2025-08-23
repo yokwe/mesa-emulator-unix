@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -413,12 +413,12 @@ namespace Courier {
 	class ARRAY : public Base {
 		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		int length = N;
-		mutable QList<T> list;
+		mutable std::vector<T> list;
 
 	public:
 		ARRAY() {}
 
-		ARRAY(const QList<T>& that) {
+		ARRAY(const std::vector<T>& that) {
 			if (length != that.length()) {
 				logger.error("Unexpected");
 				logger.error("  length %d", length);
@@ -427,7 +427,7 @@ namespace Courier {
 			}
 			list = that;
 		};
-		ARRAY& operator = (const QList<T>& that) const {
+		ARRAY& operator = (const std::vector<T>& that) const {
 			if (length != that.length()) {
 				logger.error("Unexpected");
 				logger.error("  length %d", length);
@@ -447,7 +447,7 @@ namespace Courier {
 		void append(T& newValue) {
 			list.append(newValue);
 		}
-		void append(QList<T> newValue) {
+		void append(std::vector<T> newValue) {
 			for(auto e: newValue) {
 				list.append(e);
 			}
@@ -488,12 +488,12 @@ namespace Courier {
 	class SEQUENCE : public Base {
 		static_assert(std::is_base_of<Base, T>::value, "T is not derived from Courier::Base");
 		uint16_t  maxLength = N;
-		mutable QList<T> list;
+		mutable std::vector<T> list;
 
 	public:
 		SEQUENCE() {}
 
-		SEQUENCE(const QList<T>& that) {
+		SEQUENCE(const std::vector<T>& that) {
 			if (maxLength < that.length()) {
 				logger.error("Unexpected");
 				logger.error("  maxLength %d", maxLength);
@@ -502,7 +502,7 @@ namespace Courier {
 			}
 			list = that;
 		};
-		SEQUENCE& operator = (const QList<T>& that) const {
+		SEQUENCE& operator = (const std::vector<T>& that) const {
 			if (maxLength < that.length()) {
 				logger.error("Unexpected");
 				logger.error("  maxLength %d", maxLength);
@@ -522,7 +522,7 @@ namespace Courier {
 		void append(T& newValue) {
 			list.append(newValue);
 		}
-		void append(QList<T> newValue) {
+		void append(std::vector<T> newValue) {
 			for(auto e: newValue) {
 				list.append(e);
 			}

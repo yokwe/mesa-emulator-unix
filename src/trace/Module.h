@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,11 +69,11 @@ namespace Module {
 		QJsonObject toJsonObject() const;
 
 		// load/save json file
-		static QList<LoadmapFile> load(const std::string& path);
-		static void save(const std::string& path, QList<LoadmapFile> list);
+		static std::vector<LoadmapFile> load(const std::string& path);
+		static void save(const std::string& path, std::vector<LoadmapFile> list);
 
 		// read Guam.loadmap files
-		static QList<LoadmapFile> loadLoadmapFile(const std::string& path);
+		static std::vector<LoadmapFile> loadLoadmapFile(const std::string& path);
 	};
 
 	class MapFile : JSONBase {
@@ -104,11 +104,11 @@ namespace Module {
 		QJsonObject toJsonObject() const;
 
 		// load/save json file
-		static QList<MapFile> load(const std::string& path);
-		static void save(const std::string& path, QList<MapFile> list);
+		static std::vector<MapFile> load(const std::string& path);
+		static void save(const std::string& path, std::vector<MapFile> list);
 
-		// read *.map and returns QList<Map>
-		static QList<MapFile> loadMapFile(const std::string& path);
+		// read *.map and returns std::vector<Map>
+		static std::vector<MapFile> loadMapFile(const std::string& path);
 	};
 
 };

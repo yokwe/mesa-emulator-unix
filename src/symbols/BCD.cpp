@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
@@ -82,7 +82,7 @@ std::string FTRecord::toString() const {
 
 
 std::string SGRecord::toString(SegClass value) {
-	static QMap<SGRecord::SegClass, std::string> map {
+	static std::map<SGRecord::SegClass, std::string> map {
 		{SegClass::CODE,    "CODE"},
 		{SegClass::SYMBOLS, "SYMBOLS"},
 		{SegClass::AC_MAP,  "AC_MAP"},

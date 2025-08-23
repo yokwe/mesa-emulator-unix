@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,15 @@
 
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
 #include "Trace.h"
 #include "Module.h"
 
-#include <QtCore>
 
-static QMap<LinkType, const char*> linkTypeMap {
+static std::map<LinkType, const char*> linkTypeMap {
 	{LinkType::newProcedure, "NEWPROC"},
 	{LinkType::oldProcedure, "OLDPROC"},
 	{LinkType::frame,        "FRAME"},
@@ -54,7 +53,7 @@ const char* Trace::getLinkType(LinkType type) {
 	}
 }
 
-static QMap<XferType, const char*> xferTypeMap {
+static std::map<XferType, const char*> xferTypeMap {
 	{XferType::return_,       "RET"},
 	{XferType::call,          "CALL"},
 	{XferType::localCall,     "LOCAL"},
@@ -73,7 +72,7 @@ const char* Trace::getXferType(XferType type) {
 }
 
 static const char* ettName[256];
-static QMap<CARD16, QSet<CARD16>> entryMap;
+static std::map<CARD16, std::set<CARD16>> entryMap;
 //          GFI          PC
 
 static void initEttName() {
@@ -120,9 +119,9 @@ static void message(const Trace::Context& context, const std::string& extraMessa
 	std::string string = context.toString();
 
 	if (extraMessage.isEmpty()) {
-		logger.info("%s", string.trimmed().toStdString());
+		logger.info("%s", string.trimmed());
 	} else {
-		logger.info("%s  %s", string.toStdString(), extraMessage.toStdString());
+		logger.info("%s  %s", string, extraMessage);
 	}
 }
 static void message(const Trace::Context& context) {
@@ -148,10 +147,10 @@ void Trace::Context::process_() {
 }
 
 
-QSet<Trace::Func> Trace::Func::all;
-static QMap<CARD16, std::string> moduleNameMap;
+std::set<Trace::Func> Trace::Func::all;
+static std::map<CARD16, std::string> moduleNameMap;
 //          gfi     moduleName
-static QMap<std::string, QMap<CARD16, std::string>> funcNameMap;
+static std::map<std::string, std::map<CARD16, std::string>> funcNameMap;
 //          moduleName    pc      funcName
 
 void initMap() {
@@ -165,7 +164,7 @@ std::string Trace::Func::toString() const {
 	if (moduleNameMap.contains(gfi)) {
 		const std::string& moduleName = moduleNameMap[gfi];
 		if (funcNameMap.contains(moduleName)) {
-			const QMap<CARD16, std::string>& map = funcNameMap[moduleName];
+			const std::map<CARD16, std::string>& map = funcNameMap[moduleName];
 			//         pc      funcName
 			if (map.contains(pc)) {
 				const std::string& funcName = map[pc];
@@ -185,8 +184,8 @@ void Trace::Func::addName(CARD16 gfi, const std::string& moduleName) {
 	if (moduleNameMap.contains(gfi)) {
 		logger.fatal("Unexpeted");
 		logger.fatal("  gfi = %4X", gfi);
-		logger.fatal("  new = %s!", moduleName.toStdString());
-		logger.fatal("  old = %s!", moduleNameMap[gfi].toStdString());
+		logger.fatal("  new = %s!", moduleName);
+		logger.fatal("  old = %s!", moduleNameMap[gfi]);
 		ERROR();
 	} else {
 		moduleNameMap[gfi] = moduleName;
@@ -195,17 +194,17 @@ void Trace::Func::addName(CARD16 gfi, const std::string& moduleName) {
 }
 void Trace::Func::addName(const std::string& moduleName, const std::string& funcName, CARD16 pc) {
 	if (!funcNameMap.contains(moduleName)) {
-		QMap<CARD16, std::string> entry;
+		std::map<CARD16, std::string> entry;
 		funcNameMap[moduleName] = entry;
 	}
-	QMap<CARD16, std::string>& map = funcNameMap[moduleName];
+	std::map<CARD16, std::string>& map = funcNameMap[moduleName];
 	//   pc      funcName
 	if (map.contains(pc)) {
 		logger.fatal("Unexpeted");
-		logger.fatal("  moduleName = %s!", moduleName.toStdString());
-		logger.fatal("  funcName   = %s!", funcName.toStdString());
+		logger.fatal("  moduleName = %s!", moduleName);
+		logger.fatal("  funcName   = %s!", funcName);
 		logger.fatal("  pc         = %d  0%oB", pc, pc);
-		logger.fatal("  old        = %s!", map[pc].toStdString());
+		logger.fatal("  old        = %s!", map[pc]);
 		ERROR();
 	} else {
 		map[pc] = funcName;
@@ -214,14 +213,14 @@ void Trace::Func::addName(const std::string& moduleName, const std::string& func
 }
 
 void Trace::Func::readLoadmapFile(const std::string& path) {
-	QList<Module::LoadmapFile> list = Module::LoadmapFile::loadLoadmapFile(path);
+	std::vector<Module::LoadmapFile> list = Module::LoadmapFile::loadLoadmapFile(path);
 	for(auto e: list) {
 		addName(e.gfi, e.module);
 	}
 }
 
 void Trace::Func::readMapFile(const std::string& path) {
-	QList<Module::MapFile> list = Module::MapFile::loadMapFile(path);
+	std::vector<Module::MapFile> list = Module::MapFile::loadMapFile(path);
 	for(auto e: list) {
 		addName(e.module, e.proc, e.pc);
 	}

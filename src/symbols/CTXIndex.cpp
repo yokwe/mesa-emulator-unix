@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "CTXIndex.h"
 #include "BCDFile.h"
@@ -45,7 +45,7 @@ static const util::Logger logger(__FILE__);
 //
 // CTXIndex
 //
-QMap<CTXIndex::Key, CTXIndex*> CTXIndex::all;
+std::map<CTXIndex::Key, CTXIndex*> CTXIndex::all;
 CTXIndex::CTXIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -110,7 +110,7 @@ const SEIndex* CTXIndex::firstCtxSe() const {
 //    nil => []
 //    ENDCASE];
 
-QMap<CTXRecord::Key, CTXRecord*> CTXRecord::all;
+std::map<CTXRecord::Key, CTXRecord*> CTXRecord::all;
 CTXRecord::CTXRecord(Symbols* symbols_, CARD16 index_, SEIndex* seList_, CARD16 level_, Tag tag_, void* tagValue_) :
 	symbols(symbols_), index(index_), seList(seList_), level(level_), tag(tag_), tagValue(tagValue_) {
 	Key key(symbols, index);

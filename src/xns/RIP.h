@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <QtCore>
 
 #include "../util/Network.h"
 #include "../util/ByteBuffer.h"
@@ -94,7 +93,7 @@ namespace XNS {
 		static const uint16_t HOP_INFINITY       = 16;
 
 		Type         type;
-		QList<Entry> entryList;
+		std::vector<Entry> entryList;
 
 		std::string toString() const;
 

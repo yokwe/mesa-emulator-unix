@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "ExtIndex.h"
 #include "BCDFile.h"
@@ -45,7 +45,7 @@ static const util::Logger logger(__FILE__);
 //
 // ExtIndex
 //
-QMap<ExtIndex::Key, ExtIndex*> ExtIndex::all;
+std::map<ExtIndex::Key, ExtIndex*> ExtIndex::all;
 ExtIndex::ExtIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -91,7 +91,7 @@ const ExtRecord& ExtIndex::getValue() const {
 //  sei (0:2..15): Symbols.ISEIndex,
 //  tree (1:0..15): Tree.Link]
 
-QMap<ExtRecord::Key, ExtRecord*> ExtRecord::all;
+std::map<ExtRecord::Key, ExtRecord*> ExtRecord::all;
 ExtRecord::ExtRecord(Symbols* symbols_, CARD16 index_, ExtensionType type_, SEIndex* sei_, TreeLink* tree_) :
 	symbols(symbols_), index(index_), type(type_), sei(sei_), tree(tree_) {
 	Key key(symbols_, index_);

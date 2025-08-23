@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, MDIndex*> all;
+	static std::map<Key, MDIndex*> all;
 
 	MDIndex(Symbols* symbols, CARD16 index);
 };
@@ -113,7 +113,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, MDRecord*> all;
+	static std::map<Key, MDRecord*> all;
 
 	MDRecord(Symbols* symbols, CARD16 index, Stamp* stamp, HTIndex* moduleId, HTIndex* fileId,
 			bool shared, bool exported, CTXIndex* ctx, CTXIndex* defaultImport, CARD16 file);

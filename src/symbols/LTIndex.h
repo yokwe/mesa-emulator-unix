@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, LTIndex*> all;
+	static std::map<Key, LTIndex*> all;
 
 	LTIndex(Symbols* symbols, CARD16 index);
 };
@@ -136,7 +136,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, LTRecord*> all;
+	static std::map<Key, LTRecord*> all;
 
 	LTRecord(Symbols* symbols, CARD16 index, Tag tag, void* tagValue);
 };

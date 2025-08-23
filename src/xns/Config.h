@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ namespace XNS {
 			};
 
 			std::string      interface;
-			QList<Entry> list;
+			std::vector<Entry> list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);
 			QJsonObject toJsonObject() const;
@@ -70,7 +70,7 @@ namespace XNS {
 				QJsonObject toJsonObject() const;
 			};
 
-			QList<Entry>  list;
+			std::vector<Entry>  list;
 
 			void fromJsonObject(const QJsonObject& jsonObject);
 			QJsonObject toJsonObject() const;

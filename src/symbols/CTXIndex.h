@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, CTXIndex*> all;
+	static std::map<Key, CTXIndex*> all;
 	CTXIndex(Symbols* symbols, CARD16 index);
 };
 
@@ -172,7 +172,7 @@ public:
 
 private:
 	typedef Symbols::Key Key;
-	static QMap<Key, CTXRecord*> all;
+	static std::map<Key, CTXRecord*> all;
 
 	CTXRecord(Symbols* symbols, CARD16 index, SEIndex* seList, CARD16 level, Tag tag, void* tagValue);
 };

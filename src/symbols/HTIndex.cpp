@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, Yasuhiro Hasegawa
+ * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 //
 
 #include "../util/Util.h"
-static const util::Logger logger(__FILE__);
+static const Logger logger(__FILE__);
 
 #include "HTIndex.h"
 #include "BCDFile.h"
@@ -43,7 +43,7 @@ static const util::Logger logger(__FILE__);
 //
 // HTIndex
 //
-QMap<HTIndex::Key, HTIndex*> HTIndex::all;
+std::map<HTIndex::Key, HTIndex*> HTIndex::all;
 HTIndex::HTIndex(Symbols* symbols_, CARD16 index_) : symbols(symbols_), index(index_) {
 	Key key(symbols_, index_);
 	all[key] = this;
@@ -83,7 +83,7 @@ const HTRecord& HTIndex::getValue() const {
 //
 // HTRecord
 //
-QMap<HTRecord::Key, HTRecord*> HTRecord::all;
+std::map<HTRecord::Key, HTRecord*> HTRecord::all;
 HTRecord::HTRecord(Symbols* symbols_, CARD16 index_, bool anyInternal_, bool anyPublic_, CARD16 link_, CARD16 ssIndex_, std::string value_) :
 	symbols(symbols_), index(index_), anyInternal(anyInternal_), anyPublic(anyPublic_), link(link_), ssIndex(ssIndex_), value(value_) {
 	Key key(symbols_, index_);

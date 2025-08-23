@@ -14,7 +14,7 @@ export LOG4CXX_CONFIGURATION
 
 .PHONY: all clean help cmake build distclean distclean-cmake distclean-macos
 .PHONY: main test guam-headless
-.PHONY: run-main run-test run-guamheadless
+.PHONY: run-main run-test run-guam-headless
 
 all:
 	@echo "BUILD_DIR             ${BUILD_DIR}"

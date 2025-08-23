@@ -52,9 +52,6 @@
 
 class MesaProcessor {
 public:
-	// Number of thread used in QThreadPool
-	static const int MAX_THREAD = 20;
-
 	void setDiskPath(const std::string& diskPath_) {
 		diskPath = diskPath_;
 	}
@@ -92,26 +89,24 @@ public:
 	void setSwitches(System::Switches& switches, const char *string);
 
 	void initialize();
-	void boot();
-	void stop();
-	void wait();
+	void boot(); // don't return until all child thread stopped
 
 	int64_t elapsedTime() {
 		return timeStop - timeStart;
 	}
 
 private:
-	std::string        diskPath;
-	std::string        germPath;
-	std::string        bootPath;
-	std::string        floppyPath;
-	std::string        bootSwitch;
-	std::string        bootDevice;
+	std::string    diskPath;
+	std::string    germPath;
+	std::string    bootPath;
+	std::string    floppyPath;
+	std::string    bootSwitch;
+	std::string    bootDevice;
 	int            vmBits;
 	int            rmBits;
 	CARD16         displayWidth;
 	CARD16         displayHeight;
-	std::string        networkInterfaceName;
+	std::string    networkInterfaceName;
 
 	//
 	std::vector<DiskFile*> diskFileList;
@@ -133,6 +128,7 @@ private:
 	AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
+	// for child thread
 	ProcessorThread processorThread;
 	InterruptThread interruptThread;
 	TimerThread     timerThread;

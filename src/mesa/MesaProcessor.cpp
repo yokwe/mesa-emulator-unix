@@ -143,51 +143,56 @@ void MesaProcessor::initialize() {
 	timeStart = timeStop = 0;
 }
 
-static std::deque<std::pair<std::string, std::thread>> threadList;
-#define START_THREAD(type,var) { \
-	std::string name(#var); \
-	std::thread thread(&type::run, &var); \
-	threadList.push_back(std::make_pair(name, std::move(thread))); \
-}
-
+template <typename T>
+class ThreadControl {
+public:
+	std::string name;
+	T* pointer;
+	std::thread thread;
+	ThreadControl(T* pointer_) {
+		name = demangle(typeid(T).name());
+		pointer = pointer_;
+	}
+	void start() {
+		logger.info("thread start   %s", name);
+		thread = std::thread(&T::run, pointer);
+	}
+	void stop() {
+		logger.info("thread joining %s", name);
+		thread.join();
+		logger.info("thread joined  %s", name);
+	}
+};
 
 void MesaProcessor::boot() {
-	logger.info("MesaProcessor::boot START");
+	logger.info("MesaProcessor::bootAndWait START");
+
+	ThreadControl t1(&interruptThread);
+	ThreadControl t2(&timerThread);
+	ThreadControl t3(&network.receiveThread);
+	ThreadControl t4(&network.transmitThread);
+	ThreadControl t5(&disk.ioThread);
+	ThreadControl t6(&processorThread);
+
 	timeStart = Util::getMilliSecondsFromEpoch();
+	t1.start();
+	t2.start();
+	t3.start();
+	t4.start();
+	t5.start();
+	t6.start();
 
-	START_THREAD(InterruptThread, interruptThread)
-	START_THREAD(TimerThread, timerThread)
-	START_THREAD(AgentNetwork::ReceiveThread, network.receiveThread)
-	START_THREAD(AgentNetwork::TransmitThread, network.transmitThread)
-	START_THREAD(AgentDisk::IOThread, disk.ioThread)
-	START_THREAD(ProcessorThread, processorThread)
+	std::this_thread::yield();
 	
-	for(auto& e: threadList) {
-		logger.info("thread  %s", e.first);
-	}
+	t1.stop();
+	t2.stop();
+	t3.stop();
+	t4.stop();
+	t5.stop();
+	t6.stop();
 
-	logger.info("MesaProcessor::boot STOP");
-}
-
-void MesaProcessor::stop() {
-	logger.info("MesaProcessor::stop START");
-	processorThread.stop();
-	logger.info("MesaProcessor::stop STOP");
-}
-
-void MesaProcessor::wait() {
-	logger.info("MesaProcessor::wait START");
-	logger.info("wait for all threads");
-
-	for(auto i = threadList.rbegin(); i != threadList.rend(); i++) {
-		logger.info("MesaProcessor::wait joining  %s", i->first);
-		i->second.join();
-	}
-
-	logger.info("MesaProcessor::wait STOP");
-	//
 	timeStop = Util::getMilliSecondsFromEpoch();
-
+	logger.info("MesaProcessor::bootAndWait STOP");
 
 	// Properly detach DiskFile
 	for(DiskFile* diskFile: diskFileList) {
@@ -195,6 +200,7 @@ void MesaProcessor::wait() {
 	}
 	floppyFile.detach();
 }
+
 
 void MesaProcessor::loadGerm(std::string& path) {
 	logger.info("germ  path    = %s", path);

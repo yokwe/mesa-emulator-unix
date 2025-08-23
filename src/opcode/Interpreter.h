@@ -33,8 +33,13 @@
 // Interpreter.h
 //
 
-#ifndef INTERPRETER_H__
-#define INTERPRETER_H__
+#pragma once
+
+#include "../util/Debug.h"
+#include "../util/Perf.h"
+
+#include "../mesa/Variable.h"
+#include "../mesa/Memory.h"
 
 #include "Opcode.h"
 
@@ -91,8 +96,6 @@ private:
 	static void initTable();
 	static void fillOpcodeTrap();
 
-	static void assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
-	static void assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_);
+	static void assignMop(Opcode::EXEC exec_, const char* name_, CARD32 code_, CARD32 size_);
+	static void assignEsc(Opcode::EXEC exec_, const char* name_, CARD32 code_, CARD32 size_);
 };
-
-#endif

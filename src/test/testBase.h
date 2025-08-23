@@ -33,23 +33,11 @@
 // testBase.h
 //
 
-#ifndef TESTBASE_H__
-#define TESTBASE_H__
+#pragma once
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "../mesa/Constant.h"
-#include "../mesa/Type.h"
-#include "../mesa/Memory.h"
-#include "../mesa/Function.h"
-#include "../mesa/InterruptThread.h"
-#include "../mesa/TimerThread.h"
-#include "../mesa/ProcessorThread.h"
-
-#include "../mesa/Pilot.h"
-
-#include "../opcode/Interpreter.h"
-
+#include "../mesa/MesaBasic.h"
 
 class testBase : public CppUnit::TestFixture {
 protected:
@@ -82,5 +70,3 @@ public:
 	void setUp();
 	void tearDown();
 };
-
-#endif

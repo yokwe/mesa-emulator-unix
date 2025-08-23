@@ -35,18 +35,15 @@
 
 #include <bit>
 
-
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include "../util/Debug.h"
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
 
 #include "../util/GuiOp.h"
 
-#include "Agent.h"
 #include "AgentDisplay.h"
 
 // TODO Implements colorType == DisplayIOFaceGuam::T_monochrome and DisplayIOFaceGuam::T_byteColor

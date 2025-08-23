@@ -33,8 +33,7 @@
 // Agent.h
 //
 
-#ifndef AGENT_H__
-#define AGENT_H__
+#pragma once
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Constant.h"
@@ -114,5 +113,3 @@ protected:
 //		ERROR();
 //	}
 //};
-
-#endif

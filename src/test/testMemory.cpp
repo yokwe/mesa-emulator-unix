@@ -38,6 +38,8 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
+#include "../mesa/Memory.h"
+
 class testMemory : public testBase {
 
 	CPPUNIT_TEST_SUITE(testMemory);

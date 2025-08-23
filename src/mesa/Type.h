@@ -33,8 +33,7 @@
 // Types.h
 //
 
-#ifndef TYPE_H__
-#define TYPE_H__
+#pragma once
 
 #include "MesaBasic.h"
 #include "Constant.h"
@@ -998,6 +997,3 @@ struct ProcessDataArea {
 // StartPsb: PsbIndex = (SIZE[ProcessDataArea] + SIZE[ProcessStateBlock] - 1) / SIZE[ProcessStateBlock];
 // StartPsb <= (64 + 7) / 8 = 8
 const CARD32 StartPsb = (SIZE(ProcessDataArea) + SIZE(ProcessStateBlock) - 1) / SIZE(ProcessStateBlock);
-
-
-#endif

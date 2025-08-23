@@ -34,6 +34,8 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
+#include "../mesa/Type.h"
+
 class testType : public testBase {
 
 	CPPUNIT_TEST_SUITE(testType);

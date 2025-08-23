@@ -40,6 +40,11 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
+#include "../mesa/Pilot.h"
+#include "../mesa/Memory.h"
+#include "../mesa/ProcessorThread.h"
+#include "../opcode/Interpreter.h"
+
 void testBase::initAV(CARD16 origin, CARD16 limit) {
 	if ((sizeof(PrincOps::FrameSizeMap) / sizeof(PrincOps::FrameSizeMap[0])) != (PrincOps::LastAVHeapSlot + 1)) ERROR();
 	if ((sizeof(PilotBootmesa::FrameWeightMap) / sizeof(PilotBootmesa::FrameWeightMap[0])) != (PrincOps::LastAVHeapSlot + 1)) ERROR();

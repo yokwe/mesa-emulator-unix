@@ -33,8 +33,7 @@
 // Pilot.h
 //
 
-#ifndef PILOT_H__
-#define PILOT_H__
+#pragma once
 
 #include "MesaBasic.h"
 
@@ -472,7 +471,7 @@ namespace PrincOps {
 	//FrameVec, frameSizeMap: ARRAY FrameSizeIndex OF [0..MaxFrameSize] = [
 	// 8, 12, 16, 20, 24, 28, 32, 40, 48, 56, 68, 80, 96, 112, 128, 148, 168, 192,
 	// 224, 252, 508, 764, 1020, 1276, 1532, 1788, 2044, 2556, 3068, 3580, 4092];
-	const int FrameSizeMap[LastAVHeapSlot + 1] = {
+	constexpr int FrameSizeMap[LastAVHeapSlot + 1] = {
 		   8,   12,   16,   20,   24,
 		  28,   32,   40,   48,   56,
 		  68,   80,   96,  112,  128,
@@ -1193,7 +1192,7 @@ namespace PilotBootmesa {
 	//STATEVECTORCOUNT: 5, 1;  -- Faultable real time devices
 	//STATEVECTORCOUNT: 6, 3;  -- Real Time Processes + 1 for SA800Requester.
 	//STATEVECTORCOUNT: 7, 1;  -- FrameFaultProcess.
-	const int StateVectorCountMap[8] = {
+	constexpr int StateVectorCountMap[8] = {
 		 // 0  1  2  3  4  5  6  7 - priority level
 			1, 3, 2, 2, 4, 1, 3, 1
 	};
@@ -1230,7 +1229,7 @@ namespace PilotBootmesa {
 	//FRAMEWEIGHT: 28, 0;
 	//FRAMEWEIGHT: 29, 0;
 	//FRAMEWEIGHT: 30, 0;  -- "30" = PrincOps.LastAVSlot.
-	const int FrameWeightMap[PrincOps::AVHeapSize - 1] = {
+	constexpr int FrameWeightMap[PrincOps::AVHeapSize - 1] = {
 		20, 26, 15, 16, 16,
 		12,  8,  8,  5,  5,
 		 7,  2,  2,  1,  1,
@@ -3195,5 +3194,3 @@ namespace PrincOpsExtras2 {
 //  GFTHandleToIndex: PROCEDURE [gfh: GFTHandle] RETURNS [GFTIndex] = INLINE {
 //	RETURN[ LOOPHOLE[gfh] / SIZE[GFTItem] ] };
 }
-
-#endif

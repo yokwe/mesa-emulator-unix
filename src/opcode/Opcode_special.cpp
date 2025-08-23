@@ -38,12 +38,8 @@ static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
-#include "../mesa/Constant.h"
-#include "../mesa/Type.h"
 #include "../mesa/Memory.h"
-#include "../mesa/Function.h"
 #include "../mesa/ProcessorThread.h"
-
 #include "../agent/Agent.h"
 
 #include "Opcode.h"

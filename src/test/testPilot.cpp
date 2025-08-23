@@ -34,7 +34,6 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
-#include "../mesa/Type.h"
 #include "../mesa/Pilot.h"
 
 

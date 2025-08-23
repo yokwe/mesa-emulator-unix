@@ -35,8 +35,7 @@
 
 // PCFA stands for PC File Access
 
-#ifndef STREAMPCFA_H__
-#define STREAMPCFA_H__
+#pragma once
 
 #include <cstdint>
 
@@ -57,5 +56,3 @@ public:
 
 private:
 };
-
-#endif

@@ -33,14 +33,12 @@
 // InterruptThread.h
 //
 
-#ifndef INTERRUPT_THREAD_H__
-#define INTERRUPT_THREAD_H__
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
 
 #include "MesaBasic.h"
-#include "Constant.h"
 
 class InterruptThread {
 public:
@@ -79,5 +77,3 @@ private:
 	static int notifyCount;
 	static int notifyWakeupCount;
 };
-
-#endif

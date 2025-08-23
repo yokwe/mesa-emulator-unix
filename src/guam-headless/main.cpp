@@ -34,14 +34,10 @@
 //
 
 #include "../util/Util.h"
-#include <chrono>
-#include <thread>
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
-
 #include "../util/Setting.h"
-
 #include "../util/GuiOp.h"
 
 #include "../mesa/MesaProcessor.h"
@@ -67,8 +63,8 @@ int main(int /* argc */, char** /* argv */) {
 	Setting setting = Setting::getInstance();
 	Setting::Entry entry = setting.getEntry(entryName);
 
-	CARD32  displayWidth     = entry.display.width;
-	CARD32  displayHeight    = entry.display.height;
+	CARD32      displayWidth     = entry.display.width;
+	CARD32      displayHeight    = entry.display.height;
 
 	std::string diskPath         = entry.file.disk;
 	std::string germPath         = entry.file.germ;
@@ -78,8 +74,8 @@ int main(int /* argc */, char** /* argv */) {
 	std::string bootDevice       = entry.boot.device;
 	std::string networkInterface = entry.network.interface;
 
-	uint32_t vmBits           = entry.memory.vmbits;
-	uint32_t rmBits           = entry.memory.rmbits;
+	uint32_t    vmBits           = entry.memory.vmbits;
+	uint32_t    rmBits           = entry.memory.rmbits;
 
 	// stop at MP 8000
 	ProcessorThread::stopAtMP( 915);

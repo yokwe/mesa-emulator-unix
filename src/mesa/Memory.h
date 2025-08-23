@@ -28,12 +28,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-
-#ifndef MEMORY_H__
-#define MEMORY_H__
+#pragma once
 
 #include "../util/Util.h"
-#include "../util/Perf.h"
 
 #include "Constant.h"
 #include "Type.h"
@@ -41,6 +38,8 @@
 
 #include "Variable.h"
 #include "Function.h"
+
+#include "../util/Perf.h"
 
 #define STACK_ERROR() { \
 	logger.fatal("STACK_ERROR  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
@@ -459,5 +458,3 @@ static inline void LoadStack(StateHandle state) {
 __attribute__((always_inline)) static inline int ValidContext() {
 	return (SIZE(CodeSegment) * 2) <= PC;
 }
-
-#endif /* MEMORY_H_ */

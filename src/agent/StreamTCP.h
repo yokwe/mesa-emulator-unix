@@ -34,8 +34,7 @@
 //
 
 
-#ifndef STREAMTCP_H__
-#define STREAMTCP_H__
+#pragma once
 
 #include "../mesa/Pilot.h"
 
@@ -54,5 +53,3 @@ public:
 
 private:
 };
-
-#endif

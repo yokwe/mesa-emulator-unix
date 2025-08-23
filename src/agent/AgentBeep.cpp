@@ -33,16 +33,13 @@
 // AgentBeep.cpp
 //
 
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-
-#include "../util/Debug.h"
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
 
-#include "Agent.h"
 #include "AgentBeep.h"
 
 void AgentBeep::Initialize() {

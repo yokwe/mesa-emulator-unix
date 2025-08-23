@@ -38,6 +38,10 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
+#include "../opcode/Interpreter.h"
+#include "../mesa/InterruptThread.h"
+#include "../mesa/ProcessorThread.h"
+
 class testOpcode_esc : public testBase {
 	CPPUNIT_TEST_SUITE(testOpcode_esc);
 

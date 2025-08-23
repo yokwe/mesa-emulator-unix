@@ -38,12 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
-#include "../mesa/Memory.h"
-
 #include "NetworkPacket.h"
-
-
-#include <errno.h>
 
 void NetworkPacket::attach(const std::string& name_) {
 	name = name_;

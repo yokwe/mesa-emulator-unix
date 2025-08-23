@@ -36,13 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-
-#include "../util/Debug.h"
-
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
 
-#include "Agent.h"
 #include "AgentStream.h"
 #include "StreamTCP.h"
 

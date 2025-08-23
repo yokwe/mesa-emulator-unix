@@ -33,8 +33,7 @@
 // Variable.h
 //
 
-#ifndef VARIABLE_H__
-#define VARIABLE_H__
+#pragma once
 
 #include "MesaBasic.h"
 #include "Type.h"
@@ -78,5 +77,3 @@ extern CARD16 savedSP;
 // time: LONG CARDINAL
 // Due to name conflict with time, rename to time_CheckForTimeouts
 //extern LONG_CARDINAL lastTimeoutTime;
-
-#endif

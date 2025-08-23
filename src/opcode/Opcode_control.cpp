@@ -33,10 +33,10 @@
 // Opcode_control.cpp
 //
 
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/Debug.h"
 #include "../util/Perf.h"
 
 #include "../mesa/Constant.h"

@@ -35,7 +35,8 @@
 
 #pragma once
 
-#include <string.h>
+#include <vector>
+
 #include <stdlib.h>
 
 

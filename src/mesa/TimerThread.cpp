@@ -33,15 +33,13 @@
 // TimerThread.cpp
 //
 
-#include "../util/Util.h"
 #include <chrono>
 #include <thread>
+
+#include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/Debug.h"
-
 #include "Function.h"
-
 #include "TimerThread.h"
 #include "ProcessorThread.h"
 

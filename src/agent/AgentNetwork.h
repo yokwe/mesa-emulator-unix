@@ -33,8 +33,7 @@
 // AgentNetwork.h
 //
 
-#ifndef AGENTNETWORK_H__
-#define AGENTNETWORK_H__
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -156,5 +155,3 @@ private:
 	EthernetIOFaceGuam::EthernetFCBType* fcb;
 	NetworkPacket*                       networkPacket;
 };
-
-#endif

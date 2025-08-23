@@ -38,14 +38,14 @@ static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 #include "../util/GuiOp.h"
-#include "../util/Perf.h"
+
+#include "../mesa/Memory.h"
 
 #include "../mesa/InterruptThread.h"
 #include "../mesa/TimerThread.h"
 #include "../mesa/ProcessorThread.h"
 
 #include "Opcode.h"
-#include "Interpreter.h"
 
 
 ///////////////////////////////////////////////////////////////////////////////

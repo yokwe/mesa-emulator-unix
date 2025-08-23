@@ -33,9 +33,6 @@
 // Pilot.cpp
 //
 
-#include "../util/Util.h"
-//static const Logger logger(__FILE__);
-
 //#include "Pilot.h"
 //
 //const int PrincOps::FrameSizeMap[PrincOps::AVHeapSize - 1] = {

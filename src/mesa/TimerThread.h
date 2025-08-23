@@ -33,8 +33,7 @@
 // TimerThread.h
 //
 
-#ifndef TIMER_THREAD_H__
-#define TIMER_THREAD_H__
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -66,5 +65,3 @@ private:
 
 	static int            timerCount;
 };
-
-#endif

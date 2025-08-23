@@ -33,8 +33,7 @@
 // StreamCopyPaste.cpp
 //
 
-#ifndef STREAMCOPYPASTE_H__
-#define STREAMCOPYPASTE_H__
+#pragma once
 
 #include "../mesa/Pilot.h"
 
@@ -118,5 +117,3 @@ private:
 		CARD8* data;
 	};
 };
-
-#endif

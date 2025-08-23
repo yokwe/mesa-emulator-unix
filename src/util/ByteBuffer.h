@@ -36,8 +36,8 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
-#include "Util.h"
 
 class ByteBuffer {
 protected:

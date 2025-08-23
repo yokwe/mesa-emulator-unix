@@ -33,11 +33,9 @@
 // Interpreter.cpp
 //
 
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include "../util/Debug.h"
-#include "../util/Perf.h"
 
 #include "../mesa/InterruptThread.h"
 #include "../mesa/ProcessorThread.h"
@@ -51,13 +49,13 @@ long long Interpreter::statMop [Interpreter::TABLE_SIZE];
 long long Interpreter::statEsc [Interpreter::TABLE_SIZE];
 
 
-void Interpreter::assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
+void Interpreter::assignMop(Opcode::EXEC exec_, const char* name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignMop exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_.empty()) {
-		logger.fatal("assignMop name_.isEmpty()  code = %d", code_);
+	if (name_ == 0) {
+		logger.fatal("assignMop name_ is null  code = %d", code_);
 		ERROR();
 	}
 
@@ -69,13 +67,13 @@ void Interpreter::assignMop(Opcode::EXEC exec_, const std::string name_, CARD32 
 	Opcode opcode (exec_, name_, code_, size_);
 	tableMop[code_] = opcode;
 }
-void Interpreter::assignEsc(Opcode::EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) {
+void Interpreter::assignEsc(Opcode::EXEC exec_, const char* name_, CARD32 code_, CARD32 size_) {
 	if (exec_ == 0) {
 		logger.fatal("assignEsc exec_ == 0  code = %d", code_);
 		ERROR();
 	}
-	if (name_.empty()) {
-		logger.fatal("assignEsc name_.isEmpty()  code = %d", code_);
+	if (name_ == 0) {
+		logger.fatal("assignEsc name_ is null  code = %d", code_);
 		ERROR();
 	}
 
@@ -101,8 +99,14 @@ static void escOpcodeTrap() {
 
 void Interpreter::fillOpcodeTrap() {
 	for(CARD32 i = 0; i < TABLE_SIZE; i++) {
-		if (tableMop[i].isEmpty()) assignMop(mopOpcodeTrap, std_sprintf("MOP_%03o", i), i, 1); // can be 1, 2 or 3
-		if (tableEsc[i].isEmpty()) assignEsc(escOpcodeTrap, std_sprintf("ESC_%03o", i), i, 2); // can bw 2 or 3
+		if (tableMop[i].isEmpty()) {
+			auto name = std_sprintf("MOP_%03o", i);
+			assignMop(mopOpcodeTrap, strdup(name.c_str()), i, 1); // can be 1, 2 or 3
+		}
+		if (tableEsc[i].isEmpty()) {
+			auto name = std_sprintf("ESC_%03o", i);
+			assignEsc(escOpcodeTrap, strdup(name.c_str()), i, 2); // can bw 2 or 3
+		}
 	}
 }
 

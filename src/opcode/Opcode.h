@@ -33,14 +33,9 @@
 // Opcode.h
 //
 
-#ifndef OPCODE_H__
-#define OPCODE_H__
-
-#include "../util/Debug.h"
+#pragma once
 
 #include "../mesa/MesaBasic.h"
-#include "../mesa/Memory.h"
-
 
 class Opcode {
 public:
@@ -49,7 +44,7 @@ public:
 	Opcode() : exec(0), name(""), flag(0) {}
 	Opcode(const Opcode& that) :
 		exec(that.exec), name(that.name), flag(that.flag) {}
-	Opcode(EXEC exec_, const std::string name_, CARD32 code_, CARD32 size_) :
+	Opcode(EXEC exec_, const char* name_, CARD32 code_, CARD32 size_) :
 		exec(exec_), name(name_), code(code_), size(size_) {}
 
 	Opcode& operator=(const Opcode& that) {
@@ -71,7 +66,7 @@ public:
 	}
 
 	const char* getName() const {
-		return name.c_str();
+		return name;
 	}
 	CARD32 getCode() const {
 		return code;
@@ -94,7 +89,7 @@ protected:
 	static Opcode* last;
 
 	EXEC        exec;
-	std::string name;
+	const char* name;
 	union {
 		CARD32 flag;
 		struct {
@@ -475,5 +470,3 @@ static const CARD32 L_##name = (len);
 /* 0300 */ DECL_E(2, COLORBLT)
 /* 0304 */ DECL_E(2, 305)
 /* 0306 */ DECL_E(2, 306)
-
-#endif /* OPCODE_H_ */

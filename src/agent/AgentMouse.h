@@ -33,8 +33,7 @@
 // AgentMouse.h
 //
 
-#ifndef AGENTMOUSE_H__
-#define AGENTMOUSE_H__
+#pragma once
 
 #include "Agent.h"
 
@@ -59,5 +58,3 @@ public:
 private:
 	MouseIOFaceGuam::MouseFCBType *fcb;
 };
-
-#endif

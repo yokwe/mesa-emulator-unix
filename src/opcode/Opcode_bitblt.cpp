@@ -33,10 +33,10 @@
 // Opcode_bitblt.cpp
 //
 
+#include <bit>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include <bit>
 
 #include "../util/Debug.h"
 #include "../util/GuiOp.h"
@@ -46,8 +46,6 @@ static const Logger logger(__FILE__);
 #include "../mesa/Memory.h"
 
 #include "Opcode.h"
-
-//#include <memory>
 
 class MonoBlt {
 public:

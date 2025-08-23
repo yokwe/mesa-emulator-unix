@@ -33,8 +33,7 @@
 // AgentDisplay.h
 //
 
-#ifndef AGENTDISPLAY_H__
-#define AGENTDISPLAY_H__
+#pragma once
 
 #include "Agent.h"
 
@@ -66,5 +65,3 @@ private:
 	CARD16 displayWidth;
 	CARD16 displayHeight;
 };
-
-#endif

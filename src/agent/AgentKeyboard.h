@@ -33,8 +33,7 @@
 // AgentKeyboard.h
 //
 
-#ifndef AGENTKEYBOARD_H__
-#define AGENTKEYBOARD_H__
+#pragma once
 
 #include "Agent.h"
 
@@ -56,5 +55,3 @@ public:
 private:
 	KeyboardIOFaceGuam::KeyboardFCBType *fcb;
 };
-
-#endif

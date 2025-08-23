@@ -36,13 +36,9 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-
-#include "../util/Debug.h"
-
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
 
-#include "Agent.h"
 #include "AgentStream.h"
 #include "StreamCopyPaste.h"
 
@@ -220,17 +216,17 @@ uint16_t StreamCopyPaste::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb
 		logger.info("get  %d  %d  %d", msgID, len, status);
 
 		switch(msgID) {
-		case M_putData: {
-			//
-			logger.info("putData %d -- %d", len, status);
-			return CoProcessorIOFaceGuam::R_error;
-		}
-			break;
-		default: {
-			//
-			logger.info("Unknown msgID %d", msgID);
-			return CoProcessorIOFaceGuam::R_error;
-		}
+			case M_putData: {
+				//
+				logger.info("putData %d -- %d", len, status);
+				return CoProcessorIOFaceGuam::R_error;
+			}
+				break;
+			default: {
+				//
+				logger.info("Unknown msgID %d", msgID);
+				return CoProcessorIOFaceGuam::R_error;
+			}
 		}
 	}
 }

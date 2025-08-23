@@ -33,8 +33,7 @@
 // AgentFloppy.h
 //
 
-#ifndef AGENTFLOPPY_H__
-#define AGENTFLOPPY_H__
+#pragma once
 
 #include <deque>
 
@@ -65,5 +64,3 @@ private:
 	FloppyIOFaceGuam::FloppyDCBType *dcb;
 	std::deque<DiskFile*>            diskFileList;
 };
-
-#endif

@@ -33,27 +33,20 @@
 // MesaProcessor.cpp
 //
 
-#include "../util/Util.h"
-#include "InterruptThread.h"
-#include "ProcessorThread.h"
-#include <chrono>
-#include <deque>
+#include <bit>
 #include <string>
 #include <thread>
-#include <utility>
+
+#include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include <bit>
-
-#include "../util/Debug.h"
-
-#include "../opcode/Interpreter.h"
 
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
 #include "../agent/StreamPCFA.h"
 #include "../agent/StreamTCP.h"
 #include "../agent/StreamWWC.h"
+
+#include "../opcode/Interpreter.h"
 
 #include "MesaProcessor.h"
 

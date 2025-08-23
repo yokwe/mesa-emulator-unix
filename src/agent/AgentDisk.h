@@ -33,8 +33,7 @@
 // AgentDisk.h
 //
 
-#ifndef AGENTDISK_H__
-#define AGENTDISK_H__
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -98,5 +97,3 @@ private:
 	DiskIOFaceGuam::DiskDCBType* dcb;
 	std::deque<DiskFile*>        diskFileList;
 };
-
-#endif

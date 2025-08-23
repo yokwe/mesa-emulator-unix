@@ -31,11 +31,7 @@
 #pragma once
 
 #include <string>
-#include <map>
 #include <deque>
-
-#include <stdint.h>
-
 
 class Setting {
 public:

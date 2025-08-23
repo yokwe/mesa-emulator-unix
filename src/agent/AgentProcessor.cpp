@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025, Yasuhiro Hasegawa
+ * Copyright (c) 2021, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,14 @@
 // AgentProcessor.cpp
 //
 
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-
-#include "../util/Debug.h"
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
 #include "../mesa/Constant.h"
 
-#include "Agent.h"
 #include "AgentProcessor.h"
 
 static uint32_t getMesaTime() {

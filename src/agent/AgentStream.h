@@ -33,16 +33,13 @@
 // AgentStream.h
 //
 
-#ifndef AGENTSTREAM_H__
-#define AGENTSTREAM_H__
+#pragma once
 
 #include <cstdint>
 #include <string>
 #include <map>
 
-
 #include "Agent.h"
-
 
 class AgentStream : public Agent {
 public:
@@ -81,5 +78,3 @@ private:
 	CoProcessorIOFaceGuam::CoProcessorFCBType *fcb;
 	std::map<uint32_t, Stream*> map;
 };
-
-#endif

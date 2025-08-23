@@ -38,6 +38,8 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
+#include "../opcode/Interpreter.h"
+
 class testOpcode_200 : public testBase {
 	CPPUNIT_TEST_SUITE(testOpcode_200);
 

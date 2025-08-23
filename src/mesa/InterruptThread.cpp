@@ -33,12 +33,10 @@
 // InterruptThread.cpp
 //
 
-#include "../util/Util.h"
-#include <chrono>
 #include <condition_variable>
-static const Logger logger(__FILE__);
 
-#include "../util/Debug.h"
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
 #include "InterruptThread.h"
 #include "ProcessorThread.h"

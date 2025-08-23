@@ -33,12 +33,9 @@
 // Function
 //
 
-#ifndef FUNCTIONE_H__
-#define FUNCTIONE_H__
+#pragma once
 
 #include "Type.h"
-#include "Variable.h"
-
 
 // Block Transfer
 
@@ -88,5 +85,3 @@ extern int CheckForInterrupt();
 // 10.4.5 Timeouts
 extern int TimeoutScan();
 extern int CheckForTimeouts();
-
-#endif

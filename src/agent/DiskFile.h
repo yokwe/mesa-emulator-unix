@@ -33,8 +33,9 @@
 // DiskFile.h
 //
 
-#ifndef DISKFILE_H__
-#define DISKFILE_H__
+#pragma once
+
+#include <string>
 
 #include "../mesa/Constant.h"
 #include "../mesa/Pilot.h"
@@ -117,5 +118,3 @@ private:
 	CARD32 numberOfHeads;
 	CARD32 sectorsPerTrack;
 };
-
-#endif

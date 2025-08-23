@@ -33,14 +33,11 @@
 // StreamBoot.cpp
 //
 
-
-#ifndef STREAMBOOT_H__
-#define STREAMBOOT_H__
+#pragma once
 
 #include "../mesa/Pilot.h"
 
 #include "AgentStream.h"
-
 
 class StreamBoot : public AgentStream::Stream {
 public:
@@ -59,5 +56,3 @@ private:
 	uint32_t  mapSize;
 	uint32_t  pos;
 };
-
-#endif

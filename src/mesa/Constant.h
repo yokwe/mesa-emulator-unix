@@ -30,11 +30,10 @@
 
 
 //
-// Constants.h
+// Constant.h
 //
 
-#ifndef CONSTANT_H__
-#define CONSTANT_H__
+#pragma once
 
 #include "MesaBasic.h"
 
@@ -526,5 +525,3 @@ const CARD8 a214          = 0214;
 const CARD8 aCOLORBLT     = 0300;
 const CARD8 a305          = 0305;
 const CARD8 a306          = 0306;
-
-#endif

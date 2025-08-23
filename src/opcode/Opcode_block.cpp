@@ -33,14 +33,12 @@
 // Opcode_block.cpp
 //
 
+#include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/Debug.h"
-
 #include "../mesa/MesaBasic.h"
 #include "../mesa/Memory.h"
-#include "../mesa/Function.h"
 
 #include "Opcode.h"
 

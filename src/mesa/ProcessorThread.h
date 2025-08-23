@@ -33,21 +33,15 @@
 // ProcessorThread.h
 //
 
-#ifndef PROCESSOR_THREAD_H__
-#define PROCESSOR_THREAD_H__
-
+#pragma once
 
 #include <atomic>
 #include <set>
 
-#include "MesaBasic.h"
-#include "Constant.h"
-
-
 #include "../util/Util.h"
 
+#include "MesaBasic.h"
 #include "InterruptThread.h"
-
 
 class ProcessorThread {
 public:
@@ -112,5 +106,3 @@ private:
 		requestReschedule.store(newValue);
 	}
 };
-
-#endif

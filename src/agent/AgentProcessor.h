@@ -33,11 +33,9 @@
 // AgentProcessor.h
 //
 
-#ifndef AGENTPROCESSOR_H__
-#define AGENTPROCESSOR_H__
+#pragma once
 
 #include "Agent.h"
-
 
 class AgentProcessor : public Agent {
 public:
@@ -65,5 +63,3 @@ private:
 	CARD16 processorID1;
 	CARD16 processorID2;
 };
-
-#endif

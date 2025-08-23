@@ -33,27 +33,15 @@
 // NetworkPacket.h
 //
 
-#ifndef NETWORK_PACKET_H__
-#define NETWORK_PACKET_H__
+#pragma once
 
 #include <cstdint>
 #include <string>
 
+#include <net/ethernet.h>
+
 #include "../mesa/MesaBasic.h"
 #include "../mesa/Pilot.h"
-
-#ifdef __linux__
-#include <linux/if_ether.h>
-#else
-// We assume this is for WIN32
-#define ETH_ALEN        6               /* Octets in one ethernet addr   */
-#define ETH_HLEN        14              /* Total octets in header.       */
-#define ETH_ZLEN        60              /* Min. octets in frame sans FCS */
-#define ETH_DATA_LEN    1500            /* Max. octets in payload        */
-#define ETH_FRAME_LEN   1514            /* Max. octets in frame sans FCS */
-#define ETH_FCS_LEN     4               /* Octets in the FCS             */
-#endif
-
 
 
 class NetworkPacket {
@@ -81,7 +69,7 @@ public:
 
 	NetworkPacket() {
 		fd = 0;
-		for(int i = 0; i < ETH_ALEN; i++) address[i] = 0;
+		for(uint i = 0; i < sizeof(name); i++) address[i] = 0;
 	}
 
 	void getAddress(CARD16& pid1, CARD16& pid2, CARD16& pid3) {
@@ -118,7 +106,5 @@ public:
 private:
 	std::string name;
 	int     fd;
-	CARD8   address[ETH_ALEN];
+	CARD8   address[ETHER_ADDR_LEN];
 };
-
-#endif

@@ -33,16 +33,17 @@
 // MesaBasic.h
 //
 
-#ifndef MESABASIC_H__
-#define MESABASIC_H__
+#pragma once
 
-typedef unsigned char  CARD8;
-typedef unsigned short CARD16;
-typedef unsigned int   CARD32;
+#include <cstdint>
 
-typedef signed char    INT8;
-typedef signed short   INT16;
-typedef signed int     INT32;
+typedef uint8_t  CARD8;
+typedef uint16_t CARD16;
+typedef uint32_t CARD32;
+
+typedef int8_t    INT8;
+typedef int16_t   INT16;
+typedef int32_t   INT32;
 
 
 typedef CARD8 BYTE;
@@ -69,5 +70,3 @@ typedef CARD32 LONG_CARDINAL;
 #define OFFSET4(s,m,n,p) (CARD32)(OFFSET3(s,m,n) + ((offsetof(s,m[0].p) - offsetof(s,m[0])))     / sizeof(CARD16))
 
 #define ELEMENTSOF(t) ((CARD32)(sizeof(t) / sizeof(t[0])))
-
-#endif

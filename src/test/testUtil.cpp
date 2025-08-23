@@ -34,8 +34,6 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
-#include "../util/Util.h"
-
 class testUtil : public testBase {
 
 	CPPUNIT_TEST_SUITE(testUtil);

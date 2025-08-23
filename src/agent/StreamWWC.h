@@ -35,13 +35,9 @@
 
 // WWC stands for Workstation Window Control
 
-#ifndef STREAMWWC_H__
-#define STREAMWWC_H__
-
 #include "../mesa/Pilot.h"
 
 #include "AgentStream.h"
-
 
 class StreamWWC : public AgentStream::Stream {
 public:
@@ -55,5 +51,3 @@ public:
 
 private:
 };
-
-#endif

@@ -101,12 +101,6 @@ int main(int /* argc */, char** /* argv */) {
 	mesaProcessor.setNetworkInterfaceName(networkInterface);
 
 	mesaProcessor.initialize();
-
-	// measure elapsed time between boot and MP8000
-	// mesaProcessor.boot();
-	// std::this_thread::sleep_for(Util::ONE_SECOND);
-	// mesaProcessor.wait();
-
 	mesaProcessor.boot();
 
 	Interpreter::stats();

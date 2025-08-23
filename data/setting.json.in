@@ -14,7 +14,7 @@
 				"switch": "Oy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
-				"vmbits": 24,
+				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
 				"interface": "ens192"}
@@ -33,7 +33,7 @@
 				"switch": "Oy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
-				"vmbits": 24,
+				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
 				"interface": "ens192"}
@@ -52,8 +52,8 @@
 				"switch": "8Wy{|}\\200\\346\\347\\350\\377",
 				"device": "DISK"},
 			"memory": {
-				"vmbits": 23,
-				"rmbits": 22},
+				"vmbits": 25,
+				"rmbits": 24},
 			"network": {
 				"interface": "ens192"}
 		}

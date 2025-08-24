@@ -34,6 +34,8 @@
 //
 
 #include "../util/Util.h"
+#include <chrono>
+#include <thread>
 static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
@@ -76,7 +78,9 @@ int NetworkPacket::receive(CARD8* /* data */, CARD32 /* dataLen */, int& opErrno
 	return ret;
 }
 
-int NetworkPacket::select(CARD32 /*timeout*/, int& opErrno) {
+int NetworkPacket::select(CARD32 timeout, int& opErrno) {
 	opErrno = 0;
+	// wait timeout seconds
+	std::this_thread::sleep_for(std::chrono::seconds(timeout == 0 ? 1 : timeout));
 	return 0;
 }

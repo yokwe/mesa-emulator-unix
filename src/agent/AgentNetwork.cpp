@@ -67,6 +67,7 @@ void AgentNetwork::TransmitThread::run() {
 	logger.info("AgentNetwork::TransmitThread::run START");
 	if (networkPacket == 0) ERROR();
 
+	int wait_forCount = 0;
 	int transmitCount = 0;
 	stopThread = 0;
 
@@ -81,6 +82,7 @@ void AgentNetwork::TransmitThread::run() {
 				std::unique_lock<std::mutex> locker(transmitMutex);
 				if (transmitQueue.empty()) {
 					for(;;) {
+						wait_forCount++;
 						transmitCV.wait_for(locker, Util::ONE_SECOND);
 						if (stopThread) goto exitLoop;
 						if (transmitQueue.empty()) continue;
@@ -102,6 +104,7 @@ void AgentNetwork::TransmitThread::run() {
 	}
 exitLoop:
 	logger.info("transmitCount          = %8u", transmitCount);
+	logger.info("wait_forCount          = %8u", wait_forCount);
 	logger.info("AgentNetwork::TransmitThread::run STOP");
 }
 void AgentNetwork::TransmitThread::reset() {
@@ -154,6 +157,7 @@ void AgentNetwork::ReceiveThread::run() {
 	if (networkPacket == 0) ERROR();
 
 	int receiveCount = 0;
+	int selectCount  = 0;
 	stopThread = 0;
 	
 	reset();
@@ -162,6 +166,7 @@ void AgentNetwork::ReceiveThread::run() {
 
 		int opErrno = 0;
 		// Below "1" means 1 second
+		selectCount++;
 		int ret = networkPacket->select(1, opErrno);
 		if (ret == -1) {
 			logger.fatal("%s  %d  select returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
@@ -195,6 +200,7 @@ void AgentNetwork::ReceiveThread::run() {
 		}
 	}
 	logger.info("receiveCount           = %8u", receiveCount);
+	logger.info("selectCount            = %8u", selectCount);
 	logger.info("AgentNetwork::ReceiveThread::run STOP");
 }
 void AgentNetwork::ReceiveThread::reset() {

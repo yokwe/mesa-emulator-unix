@@ -29,7 +29,6 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-#include <thread>
 static const Logger logger(__FILE__);
 
 //#include "../mesa/Type.h"

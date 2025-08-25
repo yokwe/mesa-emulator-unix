@@ -158,7 +158,7 @@ public:
 };
 
 void MesaProcessor::boot() {
-	logger.info("MesaProcessor::bootAndWait START");
+	logger.info("MesaProcessor::boot START");
 
 	ThreadControl t1(&interruptThread);
 	ThreadControl t2(&timerThread);
@@ -185,7 +185,7 @@ void MesaProcessor::boot() {
 	t6.stop();
 
 	timeStop = Util::getMilliSecondsFromEpoch();
-	logger.info("MesaProcessor::bootAndWait STOP");
+	logger.info("MesaProcessor::boot STOP");
 
 	// Properly detach DiskFile
 	for(DiskFile* diskFile: diskFileList) {

@@ -42,6 +42,10 @@
 const CARD16 PageSize = 256;
 
 const CARD16 cSS = 14;
+// 3.3.2 Evaluation Stack
+const int StackDepth = cSS;
+
+
 // cSV = SIZE[StateVector] + MAX[SIZE[ControlLink], SIZE[FSIndex], SIZE[LONG POINTER]]
 // SIZE[StateVector] = 16 and SIZE[LONG POINTER] = 2. So cSV should be 16 + 2 = 18
 const CARD16 cSV = 18;

@@ -344,9 +344,6 @@ inline LocalFrameBase LocalBase(LocalFrameHandle frame) {
 #define LO_OFFSET(p,m) (CARD16)(LocalBase(p) + OFFSET(LocalOverhead, m))
 
 
-// 3.3.2 Evaluation Stack
-const int StackDepth = cSS;
-
 //// 7.5 Field Instruction
 //FieldSpec: TYPE = MACHINE DEPENDENT RECORD [
 // pos (0:0..3):  NIBBLE,

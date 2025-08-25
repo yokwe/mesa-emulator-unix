@@ -37,7 +37,6 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
-#include "../util/GuiOp.h"
 
 #include "../mesa/Memory.h"
 
@@ -387,106 +386,7 @@ void E_WRXTS() {
 void E_WRMP() {
 	CARD16 newValue = Pop();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRMP   %4d", savedPC, newValue);
-	GuiOp::setMP(newValue);
-	ProcessorThread::setMP(newValue);
-
-	switch(newValue) {
-	case 900:
-		//  cGerm: Code = 900;  -- Germ entered
-		logger.info("MP  900 cGerm");
-		break;
-	case 910:
-		//  cGermAction: Code = 910;  -- Germ action running (e.g. inLoad, outLoad)
-		logger.info("MP  910 cGermAction");
-		break;
-	case 911:
-		// cGermBadPhysicalVolume: Code = 911;  -- Germ and physical volume have incompatible version numbers
-		logger.info("MP  911 cGermBadPhysicalVolume");
-		break;
-	case 912:
-		// cGermBadBootFileVersion: Code = 912;  -- Germ and boot file have incompatible version numbers
-		logger.info("MP  912 cGermBadBootFileVersion");
-		break;
-	case 917:
-		// cRespondingToEtherDebugger: Code = 917;  -- talking to ethernet debugger
-		logger.info("MP  917 cRespondingToEtherDebugger");
-		break;
-	case 915:
-		// cWaitingForEtherDebugger: Code = 915;  -- waiting for ethernet debugger to begin debugging me
-		logger.info("MP  915 cWaitingForEtherDebugger");
-		break;
-	case 919:
-		//  cGermFinished: Code = 919;  -- Germ transferred control back to caller (who has hung)
-		logger.info("MP  919 cGermFinished");
-		break;
-	case 920:
-		//  cGermDriver: Code = 920;  -- Germ driver running (e.g. disk, ether, floppy)
-		logger.info("MP  920 cGermDriver");
-		break;
-	case 921:
-		//  cGermDeviceError: Code = 921;  -- hard error on device being booted
-		logger.info("MP  921 cGermDeviceError");
-		break;
-	case 922:
-		//  cGermTimeout: Code = 922;  -- operation on boot device no completed in expected time
-		logger.info("MP  922 cGermTimeout");
-		break;
-	case 924:
-		//  cGermNoServer: Code = 924;  -- no response to Germ's request for ether boot file
-		logger.info("MP  924 cGermNoServer");
-		break;
-	case 925:
-		//  cGermFunnyPacket: Code = 925;  -- e.g. unexpected sequence number or size
-		logger.info("MP  925 cGermFunnyPacket");
-		break;
-	case 927:
-		//  cGermShortBootFile: Code = 927;  -- boot file ends before it should (try reinstalling)
-		logger.info("MP  927 cGermShortBootFile");
-		break;
-	case 928:
-		//  cWaitingForBootServer: Code = 928;  -- waiting for any boot server to respond
-		logger.info("MP  928 cWaitingForBootServer");
-		break;
-	case 930:
-		//  cControl: Code = 930;  -- Pilot Control and MesaRuntime components being initialized
-		logger.info("MP  930 cControl");
-		break;
-	case 937:
-		// cTimeNotAvailable: Code = 937;  -- trying to get the time from either hardware clock or ethernet
-		logger.info("MP  937 cTimeNotAvailable");
-		break;
-	case 938:
-		// cCleanup: Code = 938;  -- running cleanup procedures, e.g. before going to debugger
-		logger.info("MP  938 cCleanup");
-		break;
-	case 939:
-		// cPowerOff: Code = 939;  -- ProcessorFace.PowerOff called but no power control relay
-		logger.info("MP  939 cPowerOff");
-		break;
-	case 940:
-		// cStorage: Code = 940;  -- Pilot Store component being initialized
-		logger.info("MP  940 cStorage");
-		break;
-	case 960:
-		// cDeleteTemps: Code = 960;  -- temporary files from previous run being deleted
-		logger.info("MP  960 cDeleteTemps");
-		break;
-	case 970:
-		// cMap: Code = 970;  -- client and other non-bootloaded code being mapped
-		logger.info("MP  970 cMap");
-		break;
-	case 980:
-		// cCommunication: Code = 980;  -- Pilot Communication component being initialized
-		logger.info("MP  980 cCommunication");
-		break;
-	case 990:
-		// cClient: Code = 990;  -- PilotClient.Run called
-		logger.info("MP  990 cClient");
-		break;
-	default:
-		logger.info("MP %04d", newValue);
-		break;
-	}
+	MP = newValue;
 }
 // 0170  ASSIGN_ESC(a, RRPSB)
 void E_RRPSB() {

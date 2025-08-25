@@ -56,10 +56,8 @@ public:
 
 	static void stop();
 
-	static void   stopAtMP(CARD16 newValue);
-	static CARD16 getMP();
-	static void   setMP(CARD16 newValue);
-	static void   stopMessageUntilMP(CARD16 newValue);
+	static void stopAtMP(CARD16 mp);
+	static void mp_observer(CARD16 mp);
 
 	static void requestRescheduleTimer();
 	static void requestRescheduleInterrupt();
@@ -99,8 +97,6 @@ private:
 	static std::mutex    mutexRequestReschedule;
 
 	static std::set<CARD16> stopAtMPSet;
-	static std::set<CARD16> stopMessageUntilMPSet;
-	static CARD16       mp;
 
 	static void setRequestReschedule(int newValue) {
 		requestReschedule.store(newValue);

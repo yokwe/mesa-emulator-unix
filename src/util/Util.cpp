@@ -155,6 +155,16 @@ void Logger::popLevel() {
 	stack.pop();
 }
 
+std::set<uint16_t> Logger::stopMessageUntilMPSet;
+void Logger::mp_observer(uint16_t mp) {
+	if (stopMessageUntilMPSet.contains(mp)) {
+		Logger::popLevel();
+		logger.info("show message at MP %4d", mp);
+		// clear stopMessageUntilMPSet to prevent call twice
+		stopMessageUntilMPSet.clear();
+	}
+}
+
 int32_t toIntMesaNumber(const std::string& string) {
 	int radix = 0;
 	std::string numberString;
@@ -315,4 +325,3 @@ void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 const char* getBuildDir() {
 	return BUILD_DIR;
 }
-

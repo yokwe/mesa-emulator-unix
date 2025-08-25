@@ -26,6 +26,7 @@ target_sources(
         ProcessorThread.cpp
         TimerThread.cpp
         Type.cpp
+        Variable.cpp
 )
 
 add_dependencies(mesa util)

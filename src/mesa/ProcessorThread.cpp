@@ -89,7 +89,6 @@ void ProcessorThread::run() {
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 
 	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data + 0, bootLink.tag + 0, bootLink.fill, bootLink.u);
-	if (!stopMessageUntilMPSet.empty()) Logger::pushLevel(Logger::Level::FATAL);
 
 	XFER(bootLink.u, 0, XferType::call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
@@ -185,30 +184,14 @@ void ProcessorThread::requestRescheduleInterrupt() {
 
 
 std::set<CARD16> ProcessorThread::stopAtMPSet;
-std::set<CARD16> ProcessorThread::stopMessageUntilMPSet;
-CARD16       ProcessorThread::mp = 0;
 
-void ProcessorThread::stopAtMP(CARD16 newValue) {
-	stopAtMPSet.insert(newValue);
-	logger.info("stopAtMP %4d", newValue);
+void ProcessorThread::stopAtMP(CARD16 mp) {
+	stopAtMPSet.insert(mp);
+	logger.info("stopAtMP %4d", mp);
 }
-CARD16 ProcessorThread::getMP() {
-	return mp;
-}
-void ProcessorThread::setMP(CARD16 newValue) {
-	mp = newValue;
-	if (stopMessageUntilMPSet.contains(mp)) {
-		Logger::popLevel();
-		logger.info("show message at MP %4d", mp);
-		// clear stopMessageUntilMPSet to prevent call twice
-		stopMessageUntilMPSet.clear();
-	}
+void ProcessorThread::mp_observer(CARD16 mp) {
 	if (stopAtMPSet.contains(mp)) {
 		logger.info("stop at MP %4d", mp);
 		stop();
 	}
-}
-void ProcessorThread::stopMessageUntilMP(CARD16 newValue) {
-	stopMessageUntilMPSet.insert(newValue);
-	logger.info("stopMessageUntilMP %4d", newValue);
 }

@@ -36,6 +36,7 @@
 
 #include <string>
 #include <cstdint>
+#include <set>
 
 #include <alloca.h>
 
@@ -182,8 +183,14 @@ public:
     	myLogger->fatal(std_sprintf(format, args...));
     }
 
+	static void stopMessageUntilMP(uint16_t newValue) {
+		stopMessageUntilMPSet.insert(newValue);
+		Logger::pushLevel(Logger::Level::FATAL);
+	}
+	static void mp_observer(uint16_t mp);
 private:
     log4cxx::LoggerPtr myLogger;
+	static std::set<uint16_t> stopMessageUntilMPSet;
 };
 
 int32_t toIntMesaNumber(const std::string& string);

@@ -35,8 +35,116 @@
 
 #pragma once
 
+#include <vector>
+#include <functional>
+#include <atomic>
+
 #include "MesaBasic.h"
 #include "Type.h"
+
+
+template<typename T>
+class VariableBase {
+public:
+    class Observer {
+        std::vector<std::function<void(T)>> observerList;
+    public:
+        void add(std::function<void(T)> observer) {
+            observerList.push_back(observer);
+        }
+        void notify(T value) {
+            for(auto e: observerList) e(value);
+        }
+    };
+private:
+    Observer setObserver;
+    Observer getObserver;
+protected:
+    virtual void setValue(T newValue) = 0;
+    virtual T getValue() = 0;
+
+    void addSetObserver(const std::function<void(T)>& newObserver) {
+        setObserver.add((newObserver));
+    }
+    void addGetObserver(const std::function<void(T)>& newObserver) {
+        getObserver.add((newObserver));
+    }
+    virtual void addObserver() = 0;
+
+    virtual ~VariableBase() {}
+
+public:
+
+    T operator=(const T& newValue) {
+        T temp(newValue);
+        setValue(temp);
+        setObserver.notify(temp);
+        return temp;
+    }
+    operator T() {
+        T temp = getValue();
+        getObserver.notify(temp);
+        return temp;
+    }
+ };
+
+template<typename T>
+class VariableSimple : public VariableBase<T> {
+private:
+    T storage;
+protected:
+    void setValue(T newValue) override {
+        storage = newValue;
+    }
+    T getValue() override {
+        return storage;
+    }
+    VariableSimple(T newValue) {
+        setValue(newValue);
+    }
+public:
+    T operator=(const T newValue) {
+        return VariableBase<T>::operator=(newValue);
+    }
+};
+template<typename T>
+class VariableAtomic : public VariableBase<T> {
+private:
+    std::atomic<T> atomicStorage;
+protected:
+    void setValue(T newValue) override {
+        atomicStorage.store(newValue);
+    }
+    T getValue() override {
+        return atomicStorage.load();
+    }
+    VariableAtomic(T newValue) {
+        setValue(newValue);
+    }
+public:
+    T operator=(const T newValue) {
+        return VariableBase<T>::operator=(newValue);
+    }
+};
+
+
+class VariableMP final : public VariableSimple<CARD16> {
+    void addObserver() override;
+public:
+    VariableMP() : VariableSimple(0) {
+        addObserver();
+    }
+
+    void clear() {
+        VariableSimple<CARD16>::setValue(0);
+    }
+    // prohibit assignment from int
+    CARD16 operator=(const int newValue) = delete;
+
+    CARD16 operator=(const CARD16 newValue) {
+        return VariableBase<CARD16>::operator=(newValue);
+    }
+};
 
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];
@@ -44,6 +152,7 @@ extern CARD16 SP;
 
 // 3.3.3 Data and Status Registers
 extern CARD16 PID[4]; // Processor ID
+extern VariableMP MP;
 //extern CARD16 MP;     // Maintenance Panel
 //extern CARD32 IT;     // Interval Timer
 //extern CARD16 WM;     // Wakeup mask register - 10.4.4

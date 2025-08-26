@@ -39,8 +39,9 @@ static const Logger logger(__FILE__);
 #include "testBase.h"
 
 #include "../opcode/Interpreter.h"
+
 #include "../mesa/InterruptThread.h"
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/Variable.h"
 
 class testOpcode_esc : public testBase {
 	CPPUNIT_TEST_SUITE(testOpcode_esc);
@@ -416,20 +417,20 @@ class testOpcode_esc : public testBase {
 
 	void testDI() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aDI;
-		InterruptThread::setWDC(0);
+		WDC = (CARD16)0;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
-		CPPUNIT_ASSERT_EQUAL((CARD16)1, InterruptThread::getWDC());
+		CPPUNIT_ASSERT_EQUAL((CARD16)1, (CARD16)WDC);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, SP);
 	}
 	void testEI() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aEI;
-		InterruptThread::setWDC(1);
+		WDC = (CARD16)1;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0, InterruptThread::getWDC());
+		CPPUNIT_ASSERT_EQUAL((CARD16)0, (CARD16)WDC);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, SP);
 	}
 
@@ -742,13 +743,13 @@ class testOpcode_esc : public testBase {
 		page_LF[alpha + 2] = LowHalf(dst.u);
 		page_LF[alpha + 3] = HighHalf(dst.u);
 		page_CB[dst.pc / 2] = 0; // set fsi = 0
-		InterruptThread::setWDC(1);
+		WDC = (CARD16)1;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL((CARD16)(savedPC + 3), page_LF[-1]);
 		CPPUNIT_ASSERT_EQUAL(GFI_EFC, GFI);
 		CPPUNIT_ASSERT_EQUAL((CARD16)(dst.pc + 1), PC);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0, InterruptThread::getWDC());
+		CPPUNIT_ASSERT_EQUAL((CARD16)0, (CARD16)WDC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 	}
 
@@ -773,7 +774,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(GFI_EFC, GFI);
 		CPPUNIT_ASSERT_EQUAL((CARD16)(dst.pc + 1), PC);
-		CPPUNIT_ASSERT_EQUAL((CARD16)1, InterruptThread::getWDC());
+		CPPUNIT_ASSERT_EQUAL((CARD16)1, (CARD16)WDC);
 		CPPUNIT_ASSERT_EQUAL(page_AV[0], oLF);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 	}
@@ -1450,7 +1451,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(n, InterruptThread::getWDC());
+		CPPUNIT_ASSERT_EQUAL(n, (CARD16)WDC);
 	}
 //	void testWRPTC() {
 //		page_CB[(PC / 2) + 0] = zESC << 8 | aWRPTC;
@@ -1526,12 +1527,12 @@ class testOpcode_esc : public testBase {
 	}
 	void testRRWDC() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRWDC;
-		InterruptThread::setWDC(0x1234);
+		WDC = (CARD16)0x1234;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(InterruptThread::getWDC(), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)WDC, stack[0]);
 	}
 //	void testRRPTC() {
 //		page_CB[(PC / 2) + 0] = zESC << 8 | aRRPTC;

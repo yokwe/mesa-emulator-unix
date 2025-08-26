@@ -43,6 +43,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/InterruptThread.h"
 #include "../mesa/TimerThread.h"
 #include "../mesa/ProcessorThread.h"
+#include "../mesa/Variable.h"
 
 #include "Opcode.h"
 
@@ -99,15 +100,15 @@ void E_GMF() {
 // 017  ASSIGN_ESC(a, SPP)
 // 020  ASSIGN_ESC(a, DI)
 void E_DI() {
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DI  %3d", savedPC, InterruptThread::getWDC());
-	if (InterruptThread::getWDC() == cWDC) InterruptError();
-	InterruptThread::disable();
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DI  %3d", savedPC, (CARD16)WDC);
+	if ((CARD16)WDC == cWDC) InterruptError();
+	WDC.disable();
 }
 // 021  ASSIGN_ESC(a, EI)
 void E_EI() {
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  EI  %3d", savedPC, InterruptThread::getWDC());
-	if (InterruptThread::getWDC() == 0) InterruptError();
-	InterruptThread::enable();
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  EI  %3d", savedPC, (CARD16)WDC);
+	if ((CARD16)WDC == 0) InterruptError();
+	WDC.enable();
 	// ProcessorThread::checkRequestReschedule must be placed at very end of implementation of opcode.
 	ProcessorThread::checkRequestReschedule();
 }
@@ -362,8 +363,8 @@ void E_WRWP() {
 }
 // 0163  ASSIGN_ESC(a, WRWDC)
 void E_WRWDC() {
-	InterruptThread::setWDC(Pop());
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRWDC  %04X", savedPC, InterruptThread::getWDC());
+	WDC = Pop();
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRWDC  %04X", savedPC, (CARD16)WDC);
 }
 // 0164  ASSIGN_ESC(a, WRPTC)
 void E_WRPTC() {
@@ -406,8 +407,8 @@ void E_RRWP() {
 }
 // 0173  ASSIGN_ESC(a, RRWDC)
 void E_RRWDC() {
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRWDC  %04X", savedPC, InterruptThread::getWDC());
-	Push(InterruptThread::getWDC());
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRWDC  %04X", savedPC, (CARD16)WDC);
+	Push((CARD16)WDC);
 }
 // 0174  ASSIGN_ESC(a, RRPTC)
 void E_RRPTC() {

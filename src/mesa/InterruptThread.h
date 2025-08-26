@@ -45,22 +45,6 @@ public:
 	static CARD16 getWP();
 	static void   setWP(CARD16 newValue);
 
-	// WDC is changed from processor thread only, so there is no race condition.
-	static inline CARD16 getWDC() {
-		return WDC;
-	}
-	static inline void   setWDC(CARD16 newValue) {
-		WDC = newValue;
-	}
-	static inline void enable() {
-		setWDC(WDC - 1);
-	}
-	static inline void disable() {
-		setWDC(WDC + 1);
-	}
-	static inline int isEnabled() {
-		return WDC == 0;
-	}
 //	static int  isPending();
 	static void notifyInterrupt(CARD16 interruptSelector);
 	static void stop();

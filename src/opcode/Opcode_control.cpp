@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Type.h"
 #include "../mesa/Memory.h"
 #include "../mesa/Function.h"
-#include "../mesa/InterruptThread.h"
+#include "../mesa/Variable.h"
 
 //#include "../trace/Trace.h"
 
@@ -267,7 +267,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		if (nPC == 0) UnboundTrap(dst);
 		if (type == XferType::trap) {
 			*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
-			InterruptThread::disable();
+			WDC.disable();
 		}
 	}
 		break;
@@ -463,8 +463,8 @@ void E_XE() {
 		ShortControlLink src = *FetchMds (LF + ptr + OFFSET(TransferDescriptor, src));
 		XFER(dst, src, XferType::xfer, 0);
 
-		if (InterruptThread::getWDC() == 0) InterruptError();
-		InterruptThread::enable();
+		if ((CARD16)WDC == 0) InterruptError();
+		WDC.enable();
 	} catch(Abort &abort) {
 		ERROR();
 	}

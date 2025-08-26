@@ -146,18 +146,53 @@ public:
     }
 };
 
+
+class VariableWDC  {
+    std::atomic<CARD16> value;
+public:
+    VariableWDC() {
+        value.store(0);
+    }
+
+    // prohibit assignment from int
+    CARD16 operator=(const int newValue) = delete;
+
+    CARD16 operator=(const CARD16 newValue) {
+        value.store(newValue);
+        return newValue;
+    }
+    operator CARD16() {
+        return value.load();
+    }
+
+    void enable() {
+        value.fetch_sub(1);
+    }
+    void disable() {
+        value.fetch_add(1);
+    }
+    bool isEnabled() {
+        return value.load() == 0;
+    }
+};
+
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];
 extern CARD16 SP;
 
 // 3.3.3 Data and Status Registers
 extern CARD16 PID[4]; // Processor ID
-extern VariableMP MP;
+
 //extern CARD16 MP;     // Maintenance Panel
+extern VariableMP MP;
+
 //extern CARD32 IT;     // Interval Timer
 //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
 //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
+extern VariableWDC WDC;
+
+
 //extern CARD16 PTC;    // Process timeout counter - 10.4.5
 extern CARD16 XTS;    // Xfer trap status - 9.5.5
 

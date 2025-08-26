@@ -33,7 +33,7 @@
 // Variable.cpp
 //
 
-#include <map>
+//#include <map>
 
 #include "Variable.h"
 
@@ -43,6 +43,10 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+
+//
+// MP
+//
 
 VariableMP MP;
 
@@ -117,3 +121,9 @@ void VariableMP::addObserver() {
     addSetObserver(Logger::mp_observer);
     addSetObserver(ProcessorThread::mp_observer);
 }
+
+
+//
+// WDC
+//
+VariableWDC WDC;

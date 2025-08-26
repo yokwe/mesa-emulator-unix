@@ -41,7 +41,7 @@
 #include "../util/Util.h"
 
 #include "MesaBasic.h"
-#include "InterruptThread.h"
+#include "Variable.h"
 
 class ProcessorThread {
 public:
@@ -67,7 +67,7 @@ public:
 	}
 
 	static void checkRequestReschedule() {
-		if (InterruptThread::isEnabled() && getRequestReschedule()) {
+		if (WDC.isEnabled() && getRequestReschedule()) {
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
 		}

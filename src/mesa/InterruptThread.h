@@ -52,7 +52,6 @@ public:
 	void run();
 private:
 	static CARD16         WP;
-	static CARD16         WDC;
 	static std::mutex        mutexWP;
 	static std::condition_variable cvWP;
 	static int            stopThread;

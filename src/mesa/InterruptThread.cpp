@@ -43,7 +43,6 @@ static const Logger logger(__FILE__);
 
 
 CARD16         InterruptThread::WP;
-CARD16         InterruptThread::WDC;
 std::mutex        InterruptThread::mutexWP;
 std::condition_variable InterruptThread::cvWP;
 int            InterruptThread::stopThread;

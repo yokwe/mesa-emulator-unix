@@ -39,142 +39,70 @@
 #include <functional>
 #include <atomic>
 
+#include "Function.h"
 #include "MesaBasic.h"
 #include "Type.h"
 
 
-template<typename T>
-class VariableBase {
+class VariableMP {
+    CARD16 storage;
+
+    std::vector<std::function<void(CARD16)>> observerList;
+    void initialize();
 public:
-    class Observer {
-        std::vector<std::function<void(T)>> observerList;
-    public:
-        void add(std::function<void(T)> observer) {
-            observerList.push_back(observer);
-        }
-        void notify(T value) {
-            for(auto e: observerList) e(value);
-        }
-    };
-private:
-    Observer setObserver;
-    Observer getObserver;
-protected:
-    virtual void setValue(T newValue) = 0;
-    virtual T getValue() = 0;
-
-    void addSetObserver(const std::function<void(T)>& newObserver) {
-        setObserver.add((newObserver));
-    }
-    void addGetObserver(const std::function<void(T)>& newObserver) {
-        getObserver.add((newObserver));
-    }
-    virtual void addObserver() = 0;
-
-    virtual ~VariableBase() {}
-
-public:
-
-    T operator=(const T& newValue) {
-        T temp(newValue);
-        setValue(temp);
-        setObserver.notify(temp);
-        return temp;
-    }
-    operator T() {
-        T temp = getValue();
-        getObserver.notify(temp);
-        return temp;
-    }
- };
-
-template<typename T>
-class VariableSimple : public VariableBase<T> {
-private:
-    T storage;
-protected:
-    void setValue(T newValue) override {
-        storage = newValue;
-    }
-    T getValue() override {
-        return storage;
-    }
-    VariableSimple(T newValue) {
-        setValue(newValue);
-    }
-public:
-    T operator=(const T newValue) {
-        return VariableBase<T>::operator=(newValue);
-    }
-};
-template<typename T>
-class VariableAtomic : public VariableBase<T> {
-private:
-    std::atomic<T> atomicStorage;
-protected:
-    void setValue(T newValue) override {
-        atomicStorage.store(newValue);
-    }
-    T getValue() override {
-        return atomicStorage.load();
-    }
-    VariableAtomic(T newValue) {
-        setValue(newValue);
-    }
-public:
-    T operator=(const T newValue) {
-        return VariableBase<T>::operator=(newValue);
-    }
-};
-
-
-class VariableMP final : public VariableSimple<CARD16> {
-    void addObserver() override;
-public:
-    VariableMP() : VariableSimple(0) {
-        addObserver();
+    VariableMP() {
+        storage = 0;
+        initialize();
     }
 
     void clear() {
-        VariableSimple<CARD16>::setValue(0);
+        storage = 0;
     }
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
 
     CARD16 operator=(const CARD16 newValue) {
-        return VariableBase<CARD16>::operator=(newValue);
-    }
-};
-
-
-class VariableWDC  {
-    std::atomic<CARD16> value;
-public:
-    VariableWDC() {
-        value.store(0);
-    }
-
-    // prohibit assignment from int
-    CARD16 operator=(const int newValue) = delete;
-
-    CARD16 operator=(const CARD16 newValue) {
-        value.store(newValue);
+        storage = newValue;
+        for(auto observer: observerList) observer(newValue);
         return newValue;
     }
     operator CARD16() {
-        return value.load();
+        return storage;
+    }
+};
+
+
+class VariableWDC {
+    std::atomic<CARD16> storage;
+public:
+    VariableWDC() {
+        storage.store(0);
+    }
+
+    // prohibit assignment from int
+    CARD16 operator=(const int newValue) = delete;
+
+    CARD16 operator=(const CARD16 newValue) {
+        storage.store(newValue);
+        return newValue;
+    }
+    operator CARD16() {
+        return storage.load();
     }
 
     void enable() {
-        value.fetch_sub(1);
+        if (storage.load() == 0) InterruptError();
+        storage.fetch_sub(1);
     }
     void disable() {
-        value.fetch_add(1);
+        if (storage.load() == cWDC) InterruptError();
+        storage.fetch_add(1);
     }
     bool isEnabled() {
-        return value.load() == 0;
+        return storage.load() == 0;
     }
 };
+
 
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];

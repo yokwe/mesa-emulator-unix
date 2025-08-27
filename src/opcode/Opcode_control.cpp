@@ -463,7 +463,6 @@ void E_XE() {
 		ShortControlLink src = *FetchMds (LF + ptr + OFFSET(TransferDescriptor, src));
 		XFER(dst, src, XferType::xfer, 0);
 
-		if ((CARD16)WDC == 0) InterruptError();
 		WDC.enable();
 	} catch(Abort &abort) {
 		ERROR();

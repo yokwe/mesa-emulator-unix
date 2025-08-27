@@ -127,3 +127,9 @@ void VariableMP::initialize() {
 // WDC
 //
 VariableWDC WDC;
+
+
+//
+// WP
+//
+VariableWP WP;

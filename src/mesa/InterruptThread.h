@@ -42,16 +42,12 @@
 
 class InterruptThread {
 public:
-	static CARD16 getWP();
-	static void   setWP(CARD16 newValue);
-
 //	static int  isPending();
 	static void notifyInterrupt(CARD16 interruptSelector);
 	static void stop();
 
 	void run();
 private:
-	static CARD16         WP;
 	static std::mutex        mutexWP;
 	static std::condition_variable cvWP;
 	static int            stopThread;

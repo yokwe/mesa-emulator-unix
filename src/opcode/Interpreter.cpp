@@ -141,11 +141,11 @@ void Interpreter::initRegisters() {
 	PID[2] = 0x0000;
 	PID[3] = 0x0000;
 //	MP  = 0;    // Maintenance Panel
-	MP.clear();
+	MP = (CARD16)0;
 //	IT  = 0;    // Interval Timer
 //	WM  = 0;    // Wakeup mask register - 10.4.4
 //	WP  = 0;    // Wakeup pending register - 10.4.4.1
-	InterruptThread::setWP(0);
+	WP = (CARD16)0;
 //	WDC = 1;    // Wakeup disable counter - 10.4.4.3
 //	InterruptThread::setWDC(1);
 	WDC = (CARD16)1;

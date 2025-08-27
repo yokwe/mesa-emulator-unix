@@ -38,11 +38,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "InterruptThread.h"
+#include "Variable.h"
 #include "ProcessorThread.h"
+#include "InterruptThread.h"
 
 
-CARD16         InterruptThread::WP;
 std::mutex        InterruptThread::mutexWP;
 std::condition_variable InterruptThread::cvWP;
 int            InterruptThread::stopThread;
@@ -55,30 +55,13 @@ void InterruptThread::stop() {
 	logger.info("InterruptThread::stop");
 	stopThread = 1;
 }
-CARD16 InterruptThread::getWP() {
-	return WP;
-}
-void InterruptThread::setWP(CARD16 newValue) {
-	std::unique_lock<std::mutex> locker(mutexWP);
-	CARD16 oldValue = WP;
-	WP = newValue;
-	if (oldValue && !newValue) {
-		// become no interrupt
-	} else if (!oldValue && newValue) {
-		// start interrupt, wake waiting thread
-		cvWP.notify_one();
-	}
-}
 void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
 	std::unique_lock<std::mutex> locker(mutexWP);
 	notifyCount++;
-	CARD16 newValue = (WP | interruptSelector);
-	//
-	CARD16 oldValue = WP;
-	WP = newValue;
-	if (oldValue && !newValue) {
-		// become no interrupt
-	} else if (!oldValue && newValue) {
+
+	auto oldValue = WP.fetch_or(interruptSelector);
+
+	if ((oldValue & interruptSelector) == 0) {
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
 		notifyWakeupCount++;

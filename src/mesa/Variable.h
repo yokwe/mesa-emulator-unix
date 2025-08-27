@@ -55,9 +55,6 @@ public:
         initialize();
     }
 
-    void clear() {
-        storage = 0;
-    }
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
 
@@ -104,6 +101,33 @@ public:
 };
 
 
+class VariableWP {
+    std::atomic<CARD16> storage;
+public:
+    VariableWP() {
+        storage.store(0);
+    }
+
+    // prohibit assignment from int
+    CARD16 operator=(const int newValue) = delete;
+
+    CARD16 operator=(const CARD16 newValue) {
+        storage.store(newValue);
+        return newValue;
+    }
+    operator CARD16() {
+        return storage.load();
+    }
+
+    CARD16 exchange(CARD16 value) {
+        return storage.exchange(value);
+    }
+    CARD16 fetch_or(CARD16 value) {
+        return storage.fetch_or(value);
+    }
+};
+
+
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];
 extern CARD16 SP;
@@ -117,9 +141,10 @@ extern VariableMP MP;
 //extern CARD32 IT;     // Interval Timer
 //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
+extern VariableWP WP;
+
 //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
 extern VariableWDC WDC;
-
 
 //extern CARD16 PTC;    // Process timeout counter - 10.4.5
 extern CARD16 XTS;    // Xfer trap status - 9.5.5

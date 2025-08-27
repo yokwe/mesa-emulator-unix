@@ -360,8 +360,7 @@ static int NotifyWakeup(LONG_POINTER c) {
 int ProcessInterrupt() {
 	UNSPEC mask = 1;
 	int requeue = 0;
-	UNSPEC wakeups = InterruptThread::getWP();
-	InterruptThread::setWP(0);
+	UNSPEC wakeups = WP.exchange(0);
 	for(int level = InterruptLevel_SIZE - 1; 0 <= level; level--) {
 		if (wakeups & mask) requeue = NotifyWakeup(PDA + OFFSET_PDA3(interrupt, level, condition)) || requeue;
 		mask = Shift(mask, 1);

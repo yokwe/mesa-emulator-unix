@@ -1441,7 +1441,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(n, InterruptThread::getWP());
+		CPPUNIT_ASSERT_EQUAL(n, (CARD16)WP);
 	}
 	void testWRWDC() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aWRWDC;
@@ -1518,12 +1518,12 @@ class testOpcode_esc : public testBase {
 	}
 	void testRRWP() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRWP;
-		InterruptThread::setWP(0x1234);
+		WP = (CARD16)0x1234;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(InterruptThread::getWP(), stack[0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)WP, stack[0]);
 	}
 	void testRRWDC() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRWDC;

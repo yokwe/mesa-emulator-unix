@@ -356,7 +356,7 @@ void E_WRMDS() {
 // 0162  ASSIGN_ESC(a, WRWP)
 void E_WRWP() {
 	CARD16 newValue = Pop();
-	InterruptThread::setWP(newValue);
+	WP = newValue;
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRWP   %04X", savedPC, newValue);
 }
 // 0163  ASSIGN_ESC(a, WRWDC)
@@ -399,7 +399,7 @@ void E_RRMDS() {
 }
 // 0172  ASSIGN_ESC(a, RRWP)
 void E_RRWP() {
-	CARD16 value = InterruptThread::getWP();
+	CARD16 value = WP;
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRWP   %04X", savedPC, value);
 	Push(value);
 }

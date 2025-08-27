@@ -96,7 +96,7 @@ void AgentDisk::IOThread::run() {
 			processCount++;
 		}
 	} catch(Abort& e) {
-		logger.fatal("Unexpected Abort %s %d %s", e.file, e.line, e.func);
+		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
 		ProcessorThread::stop();
 	}
 exitLoop:

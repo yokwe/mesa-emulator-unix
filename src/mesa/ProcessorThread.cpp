@@ -151,7 +151,7 @@ void ProcessorThread::run() {
 			}
 		}
 	} catch (ErrorError& e) {
-		logger.fatal("Error %-20s %4d %s", e.func, e.line, e.file);
+		LogSourceLocation::fatal(logger, e.location, "Error  ");
 		// Output for postmortem  examination
 		logger.fatal("GFI %4X  CB %8X  PC %d", GFI, CB, PC);
 	}

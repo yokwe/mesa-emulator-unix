@@ -35,64 +35,15 @@
 #pragma once
 
 #include <string>
+#include <cstring>
 #include <cstdint>
 #include <set>
+#include <source_location>
 
 #include <alloca.h>
 
 #include <log4cxx/logger.h>
 
-
-#define DEBUG_TRACE() logger.debug("****  TRACE  %-20s %5d %s", __FUNCTION__, __LINE__, __FILE__)
-
-class ErrorError {
-public:
-	const char *func;
-	const char *file;
-	const int   line;
-
-	ErrorError(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
-};
-
-#define ERROR() { logger.fatal("ERROR %s %d %s", __FILE__, __LINE__, __FUNCTION__); logBackTrace(); throw ErrorError(__FUNCTION__, __FILE__, __LINE__); }
-
-class Abort {
-public:
-	const char *func;
-	const char *file;
-	const int   line;
-
-	Abort(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
-};
-#define ERROR_Abort() throw Abort(__FUNCTION__, __FILE__, __LINE__)
-
-class RequestReschedule {
-public:
-	const char *func;
-	const char *file;
-	const int line;
-
-	RequestReschedule(const char *func_, const char *file_, const int line_) : func(func_), file(file_), line(line_) {}
-};
-#define ERROR_RequestReschedule() throw RequestReschedule(__FUNCTION__, __FILE__, __LINE__)
-
-void logBackTrace();
-void setSignalHandler(int signum = SIGSEGV);
-
-std::string demangle(const char* mangled);
-
-
-template<typename T>
-auto std_sprintf_convert_(T&& value) {
-	constexpr auto is_std_string     = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-
-	// handle std::string properly
-	if constexpr (is_std_string) {
-		return (value).c_str();
-	} else {
-		return std::forward<T>(value);
-	}
-}
 
 //
 // helper template for Logger
@@ -108,6 +59,17 @@ void std_sprintf_(std::string& result, int bufferSize, const char* format, Args&
 	} else {
 		// success
 		result += buf;
+	}
+}
+template<typename T>
+auto std_sprintf_convert_(T&& value) {
+	constexpr auto is_std_string = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
+
+	// handle std::string properly
+	if constexpr (is_std_string) {
+		return (value).c_str();
+	} else {
+		return std::forward<T>(value);
 	}
 }
 
@@ -192,6 +154,68 @@ private:
     log4cxx::LoggerPtr myLogger;
 	static std::set<uint16_t> stopMessageUntilMPSet;
 };
+
+class LogSourceLocation {
+private:
+	static const char* to_simple_path(const char* path) {
+		auto pos = strstr(path, "/src");
+		return (pos == NULL) ? path : pos + 1;
+	}
+	static std::string log_message(std::source_location location, const char* prefix) {
+		return std_sprintf("%s%5d  %s  --  %s", prefix, location.line(), to_simple_path(location.file_name()), location.function_name());
+	}
+public:
+	static void debug(const Logger& logger, std::source_location location, const char* prefix = "") {
+		logger.debug(log_message(location, prefix));
+	}
+	static void info(const Logger& logger, std::source_location location, const char* prefix = "") {
+		logger.info(log_message(location, prefix));
+	}
+	static void warn(const Logger& logger, std::source_location location, const char* prefix = "") {
+		logger.warn(log_message(location, prefix));
+	}
+	static void error(const Logger& logger, std::source_location location, const char* prefix = "") {
+		logger.error(log_message(location, prefix));
+	}
+	static void fatal(const Logger& logger, std::source_location location, const char* prefix = "") {
+		logger.fatal(log_message(location, prefix));
+	}
+
+	static void trace(const Logger& logger, std::source_location location = std::source_location::current()) {
+		debug(logger, location, "**** TRACE ");
+	}
+};
+
+
+#define DEBUG_TRACE() { LogSourceLocation::trace(logger); }
+
+
+struct ErrorError {
+	const std::source_location location;
+	ErrorError(std::source_location location_ = std::source_location::current()) : location(location_) {}
+};
+
+#define ERROR() { ErrorError errorError; LogSourceLocation::fatal(logger, errorError.location, "ERROR  "); throw errorError; }
+
+class Abort {
+public:
+	const std::source_location location;
+	Abort(std::source_location location_ = std::source_location::current()) : location(location_) {}
+};
+#define ERROR_Abort() { throw Abort(); }
+
+class RequestReschedule {
+public:
+	const std::source_location location;
+	RequestReschedule(std::source_location location_ = std::source_location::current()) : location(location_) {}
+};
+#define ERROR_RequestReschedule() { throw RequestReschedule(); }
+
+
+void logBackTrace();
+void setSignalHandler(int signum = SIGSEGV);
+
+std::string demangle(const char* mangled);
 
 int32_t toIntMesaNumber(const std::string& string);
 

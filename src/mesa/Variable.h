@@ -66,6 +66,10 @@ public:
     operator CARD16() {
         return storage;
     }
+
+    void clear() {
+        storage = 0;
+    }
 };
 
 

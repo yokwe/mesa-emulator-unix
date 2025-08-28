@@ -133,3 +133,9 @@ VariableWDC WDC;
 // WP
 //
 VariableWP WP;
+
+
+//
+// IT
+//
+VariableIT IT;

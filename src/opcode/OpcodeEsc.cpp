@@ -416,7 +416,7 @@ void E_RRPTC() {
 }
 // 0175  ASSIGN_ESC(a, RRIT)
 void E_RRIT() {
-	CARD32 time = Util::getMicroTime();
+	CARD32 time = IT;
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRIT   %08X", savedPC, time);
 	PushLong(time);
 }

@@ -43,6 +43,8 @@
 #include "MesaBasic.h"
 #include "Type.h"
 
+#include "../util/Util.h"
+
 
 class VariableMP {
     CARD16 storage;
@@ -132,6 +134,14 @@ public:
 };
 
 
+class VariableIT {
+public:
+    operator CARD32() {
+        return (CARD32)Util::getMilliSecondsFromEpoch();
+    }
+};
+
+
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];
 extern CARD16 SP;
@@ -143,6 +153,8 @@ extern CARD16 PID[4]; // Processor ID
 extern VariableMP MP;
 
 //extern CARD32 IT;     // Interval Timer
+extern VariableIT IT;
+
 //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
 extern VariableWP WP;

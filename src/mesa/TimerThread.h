@@ -58,9 +58,9 @@ public:
 	void run();
 private:
 	static CARD16         PTC;
-	static int64_t         lastTimeoutTime;
+	static CARD32         lastTimeoutTime;
 	static int            stopThread;
-	static std::mutex        mutexTimer;
+	static std::mutex     mutexTimer;
 	static std::condition_variable cvTimer;
 
 	static int            timerCount;

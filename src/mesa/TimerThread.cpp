@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 
 
 CARD16         TimerThread::PTC;
-int64_t         TimerThread::lastTimeoutTime;
+CARD32         TimerThread::lastTimeoutTime;
 int            TimerThread::stopThread;
 std::mutex        TimerThread::mutexTimer;
 std::condition_variable TimerThread::cvTimer;
@@ -57,19 +57,19 @@ void TimerThread::stop() {
 }
 void TimerThread::setPTC(CARD16 newValue) {
 	PTC = newValue;
-	lastTimeoutTime = Util::getMilliSecondsFromEpoch();
+	lastTimeoutTime = IT;
 }
 
 void TimerThread::run() {
 	logger.info("TimerThread::run START");
 
-	lastTimeoutTime = Util::getMilliSecondsFromEpoch();
+	lastTimeoutTime = IT;
 	stopThread = 0;
 	std::unique_lock<std::mutex> locker(mutexTimer);
 	for (;;) {
 		if (stopThread) break;
 		timerCount++;
-		int64_t currentTime = Util::getMilliSecondsFromEpoch();
+		CARD32 currentTime = IT;
 		// I will wait until TIMER_INTERVAL is elapsed since preveiousTime.
 		int64_t waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
 		if (waitTime < 0) {
@@ -106,6 +106,8 @@ int TimerThread::processTimeout() {
 	//logger.debug("processTimeout START");
 	// Don't update lastTimeoutTimer, until actual process is performed
 	lastTimeoutTime += TIMER_INTERVAL;
+
+	// FIXME PTC update only interrupt is enabled.  See CheckForTimeouts
 
 	PTC = PTC + 1;
 	if (PTC == 0) PTC = PTC + 1;

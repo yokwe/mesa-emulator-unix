@@ -54,8 +54,10 @@ std::condition_variable ProcessorThread::cvRunning;
 int ProcessorThread::stopThread             = 0;
 int ProcessorThread::rescheduleRequestCount = 0;
 
-std::atomic_uint     ProcessorThread::requestReschedule;
 std::mutex        ProcessorThread::mutexRequestReschedule;
+std::atomic_flag  ProcessorThread::rescheduleInterruptFlag;
+std::atomic_flag  ProcessorThread::rescheduleTimerFlag;
+
 
 void ProcessorThread::stop() {
 	logger.info("ProcessorThread::stop");
@@ -75,6 +77,9 @@ void ProcessorThread::run() {
 
 	int abortCount             = 0;
 	int rescheduleCount        = 0;
+
+	rescheduleInterruptFlag.clear();
+	rescheduleTimerFlag.clear();
 
 	stopThread = 0;
 	try {
@@ -107,20 +112,20 @@ void ProcessorThread::run() {
 					{
 						//logger.debug("reschedule START");
 						// to avoid race condition of update of rescheduleFlag, guard with mutexReschedule
-						int needReschedule = 0;
-						const int request = getRequestReschedule();
-						if (request & REQUSEST_RESCHEDULE_INTERRUPT) {
+						bool needReschedule = false;
+						if (rescheduleInterruptFlag.test()) {
 							//logger.debug("reschedule INTERRUPT");
 							// process interrupt
-							if (ProcessInterrupt()) needReschedule = 1;
+							if (ProcessInterrupt()) needReschedule = true;
 						}
-						if (request & REQUESET_RESCHEDULE_TIMER) {
+						if (rescheduleTimerFlag.test()) {
 							//logger.debug("reschedule TIMER");
 							// process timeout
-							if (TimerThread::processTimeout()) needReschedule = 1;
+							if (TimerThread::processTimeout()) needReschedule = true;
 						}
 						if (needReschedule) Reschedule(1);
-						setRequestReschedule(0);
+						rescheduleInterruptFlag.clear();
+						rescheduleTimerFlag.clear();
 						//logger.debug("reschedule FINISH");
 					}
 					// It still not running, continue loop again
@@ -152,14 +157,18 @@ exitLoop:
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {
-	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-	setRequestReschedule(getRequestReschedule() | REQUESET_RESCHEDULE_TIMER);
-	if (!running) cvRunning.notify_one();
+	rescheduleTimerFlag.test_and_set();
+	if (!running) {
+		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
+		cvRunning.notify_one();
+	}
 }
 void ProcessorThread::requestRescheduleInterrupt() {
-	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-	setRequestReschedule(getRequestReschedule() | REQUSEST_RESCHEDULE_INTERRUPT);
-	if (!running) cvRunning.notify_one();
+	rescheduleInterruptFlag.test_and_set();
+	if (!running) {
+		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
+		cvRunning.notify_one();
+	}
 }
 
 

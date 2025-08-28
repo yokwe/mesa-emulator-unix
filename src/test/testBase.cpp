@@ -296,9 +296,5 @@ void testBase::setUp() {
 void testBase::tearDown() {
 	Memory::finalize();
 	page_PDA = page_GFT = page_CB = page_AV = page_SD = page_ETT = page_LF = page_GF = 0;
-
-	if (ProcessorThread::getRunning()) {
-		ProcessorThread::stopRunning();
-	}
 }
 

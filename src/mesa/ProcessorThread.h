@@ -56,12 +56,8 @@ public:
 	static void requestRescheduleTimer();
 	static void requestRescheduleInterrupt();
 
-	static int getRequestReschedule() {
-		return requestReschedule.load();
-	}
-
 	static void checkRequestReschedule() {
-		if (WDC.isEnabled() && getRequestReschedule()) {
+		if (WDC.isEnabled() && (rescheduleTimerFlag.test() || rescheduleInterruptFlag.test())) {
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
 		}
@@ -78,14 +74,9 @@ private:
 	static int rescheduleRequestCount;
 
 	//
-	static const int  REQUESET_RESCHEDULE_TIMER     = 0x01;
-	static const int  REQUSEST_RESCHEDULE_INTERRUPT = 0x02;
-	static std::atomic_uint requestReschedule;
 	static std::mutex       mutexRequestReschedule;
+	static std::atomic_flag rescheduleTimerFlag;
+	static std::atomic_flag rescheduleInterruptFlag;
 
 	static std::set<CARD16> stopAtMPSet;
-
-	static void setRequestReschedule(int newValue) {
-		requestReschedule.store(newValue);
-	}
 };

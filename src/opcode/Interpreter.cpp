@@ -173,7 +173,7 @@ void Interpreter::initRegisters() {
 
 	// 10.4.1 Scheduler
 	//running = 1;
-	ProcessorThread::startRunning();
+	running = true;
 
 	// 10.4.5 Timeouts
     //lastTimeoutTime = 0;

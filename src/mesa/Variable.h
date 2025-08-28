@@ -142,6 +142,36 @@ public:
 };
 
 
+class VariableRunning {
+    bool storage;
+    int  countStart = 0;
+    int  countStop  = 0;
+public:
+    // prohibit assignment from int
+    CARD16 operator=(const int newValue) = delete;
+
+    CARD16 operator=(const bool newValue) {
+        storage = newValue;
+        if (newValue) {
+            countStart++;
+        } else {
+            countStop++;
+        }
+
+        return newValue;
+    }
+    operator bool() {
+        return storage;
+    }
+
+    void clear() {
+        storage = false;
+    }
+
+    void stats(const Logger& logger);
+};
+
+
 // 3.3.2 Evaluation Stack
 extern CARD16 stack[StackDepth];
 extern CARD16 SP;
@@ -180,7 +210,7 @@ extern CARD16 savedPC;
 extern CARD16 savedSP;
 
 // 10.4.1 Scheduler
-//extern int running;
+extern VariableRunning running;
 
 // 10.4.5 Timeouts
 // TimeOutInterval:LONG CARDINAL;

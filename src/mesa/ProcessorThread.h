@@ -48,12 +48,6 @@ public:
 	// Use this condition variable to wake and wait processor
 	static std::condition_variable cvRunning;
 
-	static int getRunning() {
-		return running.load();
-	}
-	static void startRunning(); // running = 1
-	static void stopRunning();  // running = 0
-
 	static void stop();
 
 	static void stopAtMP(CARD16 mp);
@@ -80,12 +74,7 @@ public:
 	void run();
 
 private:
-	static std::atomic_uint running;
-
 	static int stopThread;
-
-	static int startRunningCount;
-	static int stopRunningCount;
 	static int rescheduleRequestCount;
 
 	//

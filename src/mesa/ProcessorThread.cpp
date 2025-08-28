@@ -50,32 +50,13 @@ static const Logger logger(__FILE__);
 // ProcessorThread
 //
 std::condition_variable ProcessorThread::cvRunning;
-std::atomic_uint        ProcessorThread::running;
 
 int ProcessorThread::stopThread             = 0;
-int ProcessorThread::startRunningCount      = 0;
-int ProcessorThread::stopRunningCount       = 0;
 int ProcessorThread::rescheduleRequestCount = 0;
 
 std::atomic_uint     ProcessorThread::requestReschedule;
 std::mutex        ProcessorThread::mutexRequestReschedule;
 
-void ProcessorThread::startRunning() {
-	auto oldValue = running.exchange(1);
-	if (oldValue == 0) {
-		startRunningCount++;
-		return;
-	}
-	logger.error("startRunning oldValue is not ZERO");
-}
-void ProcessorThread::stopRunning() {
-	auto oldValue = running.exchange(0);
-	if (oldValue == 1) {
-		stopRunningCount++;
-		return;
-	}
-	logger.error("startRunning oldValue is ZERO");
-}
 void ProcessorThread::stop() {
 	logger.info("ProcessorThread::stop");
 	stopThread = 1;
@@ -100,7 +81,7 @@ void ProcessorThread::run() {
 		for(;;) {
 			try {
 				if (DEBUG_STOP_AT_NOT_RUNNING) {
-					if (!getRunning()) ERROR();
+					if (!running) ERROR();
 				}
 				Interpreter::execute();
 			} catch(RequestReschedule& e) {
@@ -112,7 +93,7 @@ void ProcessorThread::run() {
 					if (stopThread) goto exitLoop;
 
 					// If not running, wait someone wake me up.
-					if (!getRunning()) {
+					if (!running) {
 						//logger.debug("waitRunning START");
 						for(;;) {
 							auto status = cvRunning.wait_for(locker, Util::ONE_SECOND);
@@ -143,7 +124,7 @@ void ProcessorThread::run() {
 						//logger.debug("reschedule FINISH");
 					}
 					// It still not running, continue loop again
-					if (!getRunning()) continue;
+					if (!running) continue;
 					break;
 				}
 			} catch(Abort& e) {
@@ -168,19 +149,17 @@ exitLoop:
 	logger.info("abortCount             = %8u", abortCount);
 	logger.info("rescheduleCount        = %8u", rescheduleCount);
 	logger.info("rescheduleRequestCount = %8u", rescheduleRequestCount);
-	logger.info("startRunningCount      = %8u", startRunningCount);
-	logger.info("stopRunningCount       = %8u", stopRunningCount);
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {
 	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUESET_RESCHEDULE_TIMER);
-	if (!getRunning()) cvRunning.notify_one();
+	if (!running) cvRunning.notify_one();
 }
 void ProcessorThread::requestRescheduleInterrupt() {
 	std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 	setRequestReschedule(getRequestReschedule() | REQUSEST_RESCHEDULE_INTERRUPT);
-	if (!getRunning()) cvRunning.notify_one();
+	if (!running) cvRunning.notify_one();
 }
 
 

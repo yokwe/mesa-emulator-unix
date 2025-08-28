@@ -223,7 +223,7 @@ void Reschedule(int preemption) {
 	CARD16 oldLF  = LF;
 #endif
 
-	if (ProcessorThread::getRunning()) SaveProcess(preemption);
+	if (running) SaveProcess(preemption);
 	Queue queue = {*FetchPda(OFFSET_PDA(ready))};
 	if (queue.tail == PsbNull) goto BusyWait;
 	link.u = *FetchPda(OFFSET_PDA3(block, queue.tail, link));
@@ -236,9 +236,9 @@ void Reschedule(int preemption) {
 	PSB = psb;
 	PC = savedPC = 0;
 	LF = LoadProcess();
-	if (!ProcessorThread::getRunning()) {
+	if (!running) {
 		if (DEBUG_SHOW_RUNNING) logger.debug("start running");
-		ProcessorThread::startRunning();
+		running = true;
 	}
 
 #ifdef  TRACE_RESCHEDULE
@@ -252,9 +252,9 @@ void Reschedule(int preemption) {
 	return;
 BusyWait:
 	if (!WDC.isEnabled()) RescheduleError();
-	if (ProcessorThread::getRunning()) {
+	if (running) {
 		if (DEBUG_SHOW_RUNNING) logger.debug("stop  running");
-		ProcessorThread::stopRunning();
+		running = false;
 		ERROR_RequestReschedule();
 	}
 //	running = 0;

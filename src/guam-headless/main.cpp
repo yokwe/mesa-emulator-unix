@@ -99,6 +99,8 @@ int main(int /* argc */, char** /* argv */) {
 	mesaProcessor.initialize();
 	mesaProcessor.boot();
 
+	running.stats(logger);
+	
 	Interpreter::stats();
 	PERF_LOG();
 	PageCache::stats();

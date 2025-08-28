@@ -43,10 +43,6 @@ static const Logger logger(__FILE__);
 
 #include "AgentProcessor.h"
 
-static uint32_t getMesaTime() {
-	return Util::toMesaTime(Util::getUnixTime());
-}
-
 void AgentProcessor::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
@@ -59,7 +55,7 @@ void AgentProcessor::Initialize() {
 	fcb->alignmentFiller              = 0;
 	fcb->realMemoryPageCount          = Memory::getRPSize();
 	fcb->virtualMemoryPageCount       = Memory::getVPSize();
-	fcb->gmt                          = getMesaTime();
+	fcb->gmt                          = Util::getMesaTime();
 	fcb->command                      = ProcessorIOFaceGuam::C_noop;
 	fcb->status                       = ProcessorIOFaceGuam::S_success;
 }
@@ -73,11 +69,11 @@ void AgentProcessor::Call() {
 		break;
 	case ProcessorIOFaceGuam::C_readGMT:
 		if (DEBUG_SHOW_AGENT_PROCESSOR) logger.debug("AGENT %s readGMT", name);
-		fcb->gmt = getMesaTime() + gmtDifference;
+		fcb->gmt = Util::getMesaTime() + gmtDifference;
 		fcb->status = ProcessorIOFaceGuam::S_success;
 		break;
 	case ProcessorIOFaceGuam::C_writeGMT:
-		gmtDifference = fcb->gmt - getMesaTime();
+		gmtDifference = fcb->gmt - Util::getMesaTime();
 		if (DEBUG_SHOW_AGENT_PROCESSOR) logger.debug("AGENT %s writeGMT  %5d", name, gmtDifference);
 		break;
 	default:

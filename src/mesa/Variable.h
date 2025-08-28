@@ -131,6 +131,9 @@ public:
     CARD16 fetch_or(CARD16 value) {
         return storage.fetch_or(value);
     }
+    bool pending() {
+        return storage.load() != 0;
+    }
 };
 
 

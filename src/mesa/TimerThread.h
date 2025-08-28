@@ -62,6 +62,4 @@ private:
 	static int            stopThread;
 	static std::mutex     mutexTimer;
 	static std::condition_variable cvTimer;
-
-	static int            timerCount;
 };

@@ -43,13 +43,12 @@ static const Logger logger(__FILE__);
 #include "InterruptThread.h"
 
 
-std::mutex        InterruptThread::mutexWP;
+std::mutex              InterruptThread::mutexWP;
 std::condition_variable InterruptThread::cvWP;
-int            InterruptThread::stopThread;
 
-int            InterruptThread::interruptCount    = 0;
-int            InterruptThread::notifyCount       = 0;
-int            InterruptThread::notifyWakeupCount = 0;
+int InterruptThread::stopThread        = 0;
+int InterruptThread::notifyCount       = 0;
+int InterruptThread::notifyWakeupCount = 0;
 
 void InterruptThread::stop() {
 	logger.info("InterruptThread::stop");
@@ -75,6 +74,7 @@ void InterruptThread::run() {
 	logger.info("InterruptThread::run START");
 
 	stopThread = 0;
+	int interruptCount = 0;
 	std::unique_lock<std::mutex> locker(mutexWP);
 	for (;;) {
 		if (stopThread) break;

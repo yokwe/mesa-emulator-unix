@@ -50,14 +50,12 @@ static const Logger logger(__FILE__);
 // ProcessorThread
 //
 std::condition_variable ProcessorThread::cvRunning;
-std::atomic_uint     ProcessorThread::running;
-int            ProcessorThread::stopThread;
+std::atomic_uint        ProcessorThread::running;
 
-int            ProcessorThread::rescheduleRequestCount = 0;
-int            ProcessorThread::startRunningCount      = 0;
-int            ProcessorThread::stopRunningCount       = 0;
-int            ProcessorThread::abortCount             = 0;
-int            ProcessorThread::rescheduleCount        = 0;
+int ProcessorThread::stopThread             = 0;
+int ProcessorThread::startRunningCount      = 0;
+int ProcessorThread::stopRunningCount       = 0;
+int ProcessorThread::rescheduleRequestCount = 0;
 
 std::atomic_uint     ProcessorThread::requestReschedule;
 std::mutex        ProcessorThread::mutexRequestReschedule;
@@ -93,6 +91,9 @@ void ProcessorThread::run() {
 	XFER(bootLink.u, 0, XferType::call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, Memory::MDS());
+
+	int abortCount             = 0;
+	int rescheduleCount        = 0;
 
 	stopThread = 0;
 	try {

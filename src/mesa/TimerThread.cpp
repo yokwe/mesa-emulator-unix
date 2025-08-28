@@ -44,12 +44,12 @@ static const Logger logger(__FILE__);
 #include "ProcessorThread.h"
 
 
-CARD16         TimerThread::PTC;
-CARD32         TimerThread::lastTimeoutTime;
-int            TimerThread::stopThread;
-std::mutex        TimerThread::mutexTimer;
+std::mutex              TimerThread::mutexTimer;
 std::condition_variable TimerThread::cvTimer;
-int            TimerThread::timerCount = 0;
+
+int    TimerThread::stopThread;
+CARD16 TimerThread::PTC;
+CARD32 TimerThread::lastTimeoutTime;
 
 void TimerThread::stop() {
 	logger.info("TimerThread::stop");
@@ -63,6 +63,7 @@ void TimerThread::setPTC(CARD16 newValue) {
 void TimerThread::run() {
 	logger.info("TimerThread::run START");
 
+	int timerCount = 0;
 	lastTimeoutTime = IT;
 	stopThread = 0;
 	std::unique_lock<std::mutex> locker(mutexTimer);

@@ -48,11 +48,10 @@ public:
 
 	void run();
 private:
-	static std::mutex        mutexWP;
+	static std::mutex              mutexWP;
 	static std::condition_variable cvWP;
-	static int            stopThread;
-
-	static int interruptCount;
+	
+	static int stopThread;
 	static int notifyCount;
 	static int notifyWakeupCount;
 };

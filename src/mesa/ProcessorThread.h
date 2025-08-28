@@ -84,17 +84,15 @@ private:
 
 	static int stopThread;
 
-	static int rescheduleRequestCount;
 	static int startRunningCount;
 	static int stopRunningCount;
-	static int abortCount;
-	static int rescheduleCount;
+	static int rescheduleRequestCount;
 
 	//
 	static const int  REQUESET_RESCHEDULE_TIMER     = 0x01;
 	static const int  REQUSEST_RESCHEDULE_INTERRUPT = 0x02;
 	static std::atomic_uint requestReschedule;
-	static std::mutex    mutexRequestReschedule;
+	static std::mutex       mutexRequestReschedule;
 
 	static std::set<CARD16> stopAtMPSet;
 

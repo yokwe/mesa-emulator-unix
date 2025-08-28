@@ -55,12 +55,12 @@ void InterruptThread::stop() {
 	stopThread = 1;
 }
 void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	std::unique_lock<std::mutex> locker(mutexWP);
 	notifyCount++;
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
-	if ((oldValue & interruptSelector) == 0) {
+	if (interruptSelector && (oldValue & interruptSelector) == 0) {
+		std::unique_lock<std::mutex> locker(mutexWP);
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
 		notifyWakeupCount++;
@@ -75,6 +75,7 @@ void InterruptThread::run() {
 
 	stopThread = 0;
 	int interruptCount = 0;
+	int requestCount   = 0;
 	std::unique_lock<std::mutex> locker(mutexWP);
 	for (;;) {
 		if (stopThread) break;
@@ -82,16 +83,17 @@ void InterruptThread::run() {
 
 		// wait until interrupt is arrived
 		for(;;) {
-			auto status = cvWP.wait_for(locker, Util::ONE_SECOND);
-			if (status == std::cv_status::no_timeout) break;
+			cvWP.wait_for(locker, Util::ONE_SECOND);
 			if (stopThread) goto exitLoop;
+			if (WP.pending()) break;
 		}
-
+		requestCount++;
 		ProcessorThread::requestRescheduleInterrupt();
 	}
 exitLoop:
-	logger.info("interruptCount         = %8u", interruptCount);
 	logger.info("notifyCount            = %8u", notifyCount);
 	logger.info("notifyWakeupCount      = %8u", notifyWakeupCount);
+	logger.info("interruptCount         = %8u", interruptCount);
+	logger.info("requestCount           = %8u", requestCount);
 	logger.info("InterruptThread::run STOP");
 }

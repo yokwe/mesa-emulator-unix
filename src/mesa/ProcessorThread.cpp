@@ -54,9 +54,9 @@ std::condition_variable ProcessorThread::cvRunning;
 int ProcessorThread::stopThread             = 0;
 int ProcessorThread::rescheduleRequestCount = 0;
 
-std::mutex        ProcessorThread::mutexRequestReschedule;
-std::atomic_flag  ProcessorThread::rescheduleInterruptFlag;
-std::atomic_flag  ProcessorThread::rescheduleTimerFlag;
+std::mutex         ProcessorThread::mutexRequestReschedule;
+VariableAtomicFlag ProcessorThread::rescheduleInterruptFlag;
+VariableAtomicFlag ProcessorThread::rescheduleTimerFlag;
 
 
 void ProcessorThread::stop() {
@@ -113,12 +113,12 @@ void ProcessorThread::run() {
 						//logger.debug("reschedule START");
 						// to avoid race condition of update of rescheduleFlag, guard with mutexReschedule
 						bool needReschedule = false;
-						if (rescheduleInterruptFlag.test()) {
+						if (rescheduleInterruptFlag) {
 							//logger.debug("reschedule INTERRUPT");
 							// process interrupt
 							if (ProcessInterrupt()) needReschedule = true;
 						}
-						if (rescheduleTimerFlag.test()) {
+						if (rescheduleTimerFlag) {
 							//logger.debug("reschedule TIMER");
 							// process timeout
 							if (TimerThread::processTimeout()) needReschedule = true;
@@ -157,14 +157,14 @@ exitLoop:
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {
-	rescheduleTimerFlag.test_and_set();
+	rescheduleTimerFlag.set();
 	if (!running) {
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 		cvRunning.notify_one();
 	}
 }
 void ProcessorThread::requestRescheduleInterrupt() {
-	rescheduleInterruptFlag.test_and_set();
+	rescheduleInterruptFlag.set();
 	if (!running) {
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 		cvRunning.notify_one();

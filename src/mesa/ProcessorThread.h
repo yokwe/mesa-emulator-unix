@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <atomic>
 #include <set>
 
 #include "../util/Util.h"
@@ -57,7 +56,7 @@ public:
 	static void requestRescheduleInterrupt();
 
 	static void checkRequestReschedule() {
-		if (WDC.isEnabled() && (rescheduleTimerFlag.test() || rescheduleInterruptFlag.test())) {
+		if (WDC.isEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
 		}
@@ -74,9 +73,9 @@ private:
 	static int rescheduleRequestCount;
 
 	//
-	static std::mutex       mutexRequestReschedule;
-	static std::atomic_flag rescheduleTimerFlag;
-	static std::atomic_flag rescheduleInterruptFlag;
+	static std::mutex         mutexRequestReschedule;
+	static VariableAtomicFlag rescheduleTimerFlag;
+	static VariableAtomicFlag rescheduleInterruptFlag;
 
 	static std::set<CARD16> stopAtMPSet;
 };

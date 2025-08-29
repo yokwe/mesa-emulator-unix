@@ -43,9 +43,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Type.h"
 #include "../mesa/Memory.h"
 #include "../mesa/Function.h"
-#include "../mesa/InterruptThread.h"
 #include "../mesa/TimerThread.h"
-#include "../mesa/ProcessorThread.h"
 
 #include "Opcode.h"
 

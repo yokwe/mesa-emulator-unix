@@ -37,8 +37,6 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../mesa/InterruptThread.h"
-#include "../mesa/ProcessorThread.h"
 #include "../mesa/TimerThread.h"
 #include "../mesa/Variable.h"
 

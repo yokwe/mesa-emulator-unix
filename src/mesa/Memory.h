@@ -37,61 +37,8 @@
 #include "Pilot.h"
 
 #include "Variable.h"
-#include "Function.h"
 
 #include "../util/Perf.h"
-
-#define STACK_ERROR() { \
-	logger.fatal("STACK_ERROR  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
-	StackError(); \
-}
-// 3.3.2 Evaluation Stack
-static inline CARD32 StackCount() {
-	return SP;
-}
-__attribute__((always_inline)) static inline void Push(CARD16 data) {
-	if (SP == StackDepth) STACK_ERROR();
-	stack[SP++] = data;
-}
-__attribute__((always_inline)) static inline CARD16 Pop() {
-	if (SP == 0) STACK_ERROR();
-	return stack[--SP];
-}
-// Note that double-word quantities are placed on the stack so that
-// the least significant word is at the lower-numbered stack index.
-__attribute__((always_inline)) static inline void PushLong(CARD32 data) {
-//	Long t = {data};
-//	Push(t.low);
-//	Push(t.high);
-	Push((CARD16)data);
-	Push((CARD16)(data >> WordSize));
-}
-__attribute__((always_inline)) static inline CARD32 PopLong() {
-//	Long t;
-//	t.high = Pop();
-//	t.low = Pop();
-//	return t.u;
-	CARD32 ret = Pop() << WordSize;
-	return ret | Pop();
-}
-//static inline void MinimalStack() {
-//	if (SP != 0) STACK_ERROR();
-//}
-#define MINIMAL_STACK() { \
-	if (SP != 0) { \
-		logger.fatal("MINIMAL_STACK  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
-		STACK_ERROR(); \
-	} \
-}
-
-__attribute__((always_inline)) static inline void Recover() {
-	if (SP == StackDepth) STACK_ERROR();
-	SP++;
-}
-__attribute__((always_inline)) static inline void Discard() {
-	if (SP == 0) STACK_ERROR();
-	SP--;
-}
 
 
 // 3.1 Virtual Memory

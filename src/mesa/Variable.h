@@ -39,11 +39,24 @@
 #include <functional>
 #include <atomic>
 
+#include "Constant.h"
 #include "Function.h"
 #include "MesaBasic.h"
 #include "Type.h"
 
 #include "../util/Util.h"
+
+
+#define STACK_ERROR() { \
+	logger.fatal("STACK_ERROR  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
+	StackError(); \
+}
+#define MINIMAL_STACK() { \
+    if (SP != 0) { \
+        logger.fatal("MINIMAL_STACK  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
+        STACK_ERROR(); \
+    } \
+}
 
 
 class VariableMP {
@@ -211,9 +224,75 @@ public:
 };
 
 
-// 3.3.2 Evaluation Stack
-extern CARD16 stack[StackDepth];
 extern CARD16 SP;
+class VariableStack {
+    CARD16 storage[StackDepth];
+public:
+    void recover() {
+        if (StackDepth == SP) StackError();
+        SP++;
+    }
+    void discard() {
+        if (SP == 0) StackError();
+        SP--;
+    }
+    void clear() {
+        for(int i = 0; i < StackDepth; i++) {
+            storage[i] = 0;
+        }
+    }
+    void push(CARD16 value) {
+        if (StackDepth == SP) StackError();
+	    storage[SP++] = value;
+    }
+    CARD16 pop() {
+        if (SP == 0) StackError();
+	    return storage[--SP];
+    }
+    void pushLong(CARD32 value) {
+        if ((StackDepth - 1) <= SP) StackError();
+        storage[SP++] = (CARD16)value;
+        storage[SP++] = (CARD16)(value >> WordSize);
+    }
+    CARD32 popLong() {
+        if (SP <= 1) StackError();
+        CARD32 ret = storage[--SP] << WordSize;
+        return ret | storage[--SP];
+    }
+
+    CARD16 operator[](int n) const {
+        if (n < 0 || StackDepth <= n) StackError();
+        return storage[n];
+    }
+    CARD16& operator[](int n) {
+        if (n < 0 || StackDepth <= n) StackError();
+        return storage[n];
+    }
+};
+
+// 3.3.2 Evaluation Stack
+//extern CARD16 stack[StackDepth];
+extern VariableStack stack;
+extern CARD16 SP;
+
+inline void Recover() {
+    stack.recover();
+}
+inline void Discard() {
+    stack.discard();
+}
+inline void Push(CARD16 value) {
+    stack.push(value);
+};
+inline CARD16 Pop() {
+    return stack.pop();
+}
+inline void PushLong(CARD32 value) {
+    stack.pushLong(value);
+}
+inline CARD32 PopLong() {
+    return stack.popLong();
+}
 
 // 3.3.3 Data and Status Registers
 extern CARD16 PID[4]; // Processor ID
@@ -244,7 +323,7 @@ extern CARD16            PC;
 extern GFTHandle         GFI;
 
 // 4.5 Instruction Execution
-extern CARD8 breakByte;
+extern CARD8  breakByte;
 extern CARD16 savedPC;
 extern CARD16 savedSP;
 

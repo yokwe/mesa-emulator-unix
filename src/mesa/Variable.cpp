@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 
 
 // 3.3.2 Evaluation Stack
-CARD16 stack[StackDepth];
+VariableStack stack;
 CARD16 SP;
 
 // 3.3.3 Data and Status Registers

@@ -44,77 +44,62 @@
 static const Logger logger(__FILE__);
 
 
-//
-// MP
-//
+// 3.3.2 Evaluation Stack
+CARD16 stack[StackDepth];
+CARD16 SP;
 
+// 3.3.3 Data and Status Registers
+CARD16 PID[4]; // Processor ID
+
+//extern CARD16 MP;     // Maintenance Panel
 VariableMP MP;
 
-// static std::map<CARD16, const char*> mp_message_map = {
-//     {900, "Germ entered"},
-//     {901, "Germ out of frames (Pilot bug)"},
-//     {902, "unexpected trap or kernel function call (Pilot bug)"},
-//     {903, "attempt to start an already started module (Pilot bug)"},
-//     {904, "page or write protect fault encountered (Pilot bug)"},
-//     {905, "Germ not compatible with initial microcode"},
-//     {906, "Germ and running Pilot have different version numbers"},
-//     {907, "reschedule error, typically because of page or frame fault (Pilot bug)"},
-//     {909, "Germ SIGNAL or ERROR (Pilot bug)"},
-//     {910, "Germ action running (e.g. inLoad, outLoad)"},
-//     {911, "Germ and physical volume have incompatible version numbers"},
-//     {912, "Germ and boot file have incompatible version numbers"},
-//     {913, "no physical boot file installed"},
-//     {914, "boot file contains invalid data"},
-//     {915, "waiting for ethernet debugger to begin debugging me"},
-//     {916, "boot file won't fit in real memory"},
-//     {917, "talking to ethernet debugger"},
-//     {919, "Germ transferred control back to caller (who has hung)"},
-//     {920, "Germ driver running (e.g. disk, ether, floppy)"},
-//     {921, "hard error on device being booted"},
-//     {922, "operation on boot device no completed in expected time"},
-//     {923, "broken link in chained boot file (try reinstalling)"},
-//     {924, "no response to Germ's request for ether boot file"},
-//     {925, "e.g. unexpected sequence number or size"},
-//     {926, "booting media needs attention, e.g., retentioning"},
-//     {927, "boot file ends before it should (try reinstalling)"},
-//     {928, "waiting for any boot server to respond"},
-//     {929, "expected descriptor page doesn't look like one (try reinstalling)"},
-//     {930, "Pilot Control and MesaRuntime components being initialized"},
-//     {931, "Pilot and StartPilot have incompatible version numbers"},
-//     {932, "runtime trap before appropriate trap handler set up (Pilot bug)"},
-//     {933, "Pilot and Germ have incompatible version numbers"},
-//     {934, "boot file's StartList contains bad data"},
-//     {935, "need ethernet debugee server but boot loader being used does not have that capability."},
-//     {936, "waiting for microcode debugger"},
-//     {937, "trying to get the time from either hardware clock or ethernet"},
-//     {938, "running cleanup procedures, e.g. before going to debugger"},
-//     {939, "ProcessorFace.PowerOff called but no power control relay"},
-//     {940, "Pilot Store component being initialized"},
-//     {941, "Bad LoadState version"},
-//     {946, "system logical volume needs scavenging[riskyRepair]"},
-//     {947, "waiting for disk drive to become ready"},
-//     {948, "system physical volume needs scavenging"},
-//     {949, "disk hardware error while scavenging system volume"},
-//     {950, "logical volume being scavenged"},
-//     {951, "alternate feedback for progress during a pass of logical volume scavenging"},
-//     {952, "alternate feedback for additional passes during logical volume scavenging"},
-//     {953, "debugger pointers have been set to a nonexistent volume or to a volume without an installed debugger"},
-//     {960, "temporary files from previous run being deleted"},
-//     {965, "insufficient file space for data space backing storage (specify smaller size with boot switch)"},
-//     {966, "insufficient file space for file lock nodes"},
-//     {970, "client and other non-bootloaded code being mapped"},
-//     {980, "Pilot Communication component being initialized"},
-//     {981, "trying to find a Pup / EthernetOne 8 bit address"},
-//     {982, "can't determine ARPA 32 bit host address"},
-//     {990, "PilotClient.Run called"},
-// };
+//extern CARD32 IT;     // Interval Timer
+VariableIT IT;
 
+//extern CARD16 WM;     // Wakeup mask register - 10.4.4
+//extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
+VariableWP WP;
+
+//extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
+VariableWDC WDC;
+
+//extern CARD16 PTC;    // Process timeout counter - 10.4.5
+CARD16 XTS;    // Xfer trap status - 9.5.5
+
+// 3.3.1 Control Registers
+CARD16            PSB; // PsbIndex - 10.1.1
+//extern MdsHandle         MDS;
+LocalFrameHandle  LF;  // POINTER TO LocalVariables
+GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
+CARD32            CB;  // LONG POINTER TO CodeSegment
+CARD16            PC;
+GFTHandle         GFI;
+
+// 4.5 Instruction Execution
+CARD8  breakByte;
+CARD16 savedPC;
+CARD16 savedSP;
+
+// 10.4.1 Scheduler
+VariableRunning running;
+
+// 10.4.5 Timeouts
+// TimeOutInterval:LONG CARDINAL;
+// One tick = 40 milliseconds
+//const LONG_CARDINAL TimeOutInterval = 40 * 1000;
+
+// time: LONG CARDINAL
+// Due to name conflict with time, rename to time_CheckForTimeouts
+//extern LONG_CARDINAL lastTimeoutTime;
+
+
+//
+// VariableMP
+//
 static void mp_message(CARD16 mp) {
-    // std::string message = mp_message_map.contains(mp) ? mp_message_map.at(mp) : "";
-    // logger.info("MP %04d %s", mp, message);
     logger.info("MP %04d", mp);
 } 
-
 void VariableMP::initialize() {
     observerList.push_back(mp_message);
     observerList.push_back(GuiOp::setMP);
@@ -124,28 +109,8 @@ void VariableMP::initialize() {
 
 
 //
-// WDC
+// VariableRunning
 //
-VariableWDC WDC;
-
-
-//
-// WP
-//
-VariableWP WP;
-
-
-//
-// IT
-//
-VariableIT IT;
-
-
-//
-//
-//
-VariableRunning running;
-
 void VariableRunning::stats(const Logger& logger) {
     logger.info("running::countStart    = %6d", countStart);
     logger.info("running::countStop     = %6d", countStop);

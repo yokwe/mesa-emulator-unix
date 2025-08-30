@@ -40,24 +40,20 @@
 static const Logger logger(__FILE__);
 
 #include "Function.h"
-#include "TimerThread.h"
 #include "ProcessorThread.h"
+#include "Variable.h"
+#include "TimerThread.h"
 
 
 std::mutex              TimerThread::mutexTimer;
 std::condition_variable TimerThread::cvTimer;
 
 int    TimerThread::stopThread;
-CARD16 TimerThread::PTC;
 CARD32 TimerThread::lastTimeoutTime;
 
 void TimerThread::stop() {
 	logger.info("TimerThread::stop");
 	stopThread = 1;
-}
-void TimerThread::setPTC(CARD16 newValue) {
-	PTC = newValue;
-	lastTimeoutTime = IT;
 }
 
 void TimerThread::run() {

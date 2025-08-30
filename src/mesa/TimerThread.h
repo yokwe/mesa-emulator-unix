@@ -46,10 +46,6 @@ public:
 	// Timer interval in milliseconds
 	static const int TIMER_INTERVAL = cTick;
 
-	static CARD16 getPTC() {
-		return PTC;
-	}
-	static void   setPTC(CARD16 newValue);
 	static void   stop();
 
 	// To process timeout in other thread, create processTimeout
@@ -57,7 +53,6 @@ public:
 
 	void run();
 private:
-	static CARD16         PTC;
 	static CARD32         lastTimeoutTime;
 	static int            stopThread;
 	static std::mutex     mutexTimer;

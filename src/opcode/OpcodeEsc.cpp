@@ -40,7 +40,6 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
-#include "../mesa/TimerThread.h"
 #include "../mesa/ProcessorThread.h"
 #include "../mesa/Variable.h"
 
@@ -366,7 +365,7 @@ void E_WRWDC() {
 // 0164  ASSIGN_ESC(a, WRPTC)
 void E_WRPTC() {
 	CARD16 newValue = Pop();
-	TimerThread::setPTC(newValue);
+	PTC = newValue;
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRPTC  %04X", savedPC, newValue);
 //	lastTimeoutTime = Util::getMicroTime();
 }
@@ -409,7 +408,7 @@ void E_RRWDC() {
 }
 // 0174  ASSIGN_ESC(a, RRPTC)
 void E_RRPTC() {
-	CARD16 value = TimerThread::getPTC();
+	CARD16 value = PTC;
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRPTC  %04X", savedPC, value);
 	Push(value);
 }

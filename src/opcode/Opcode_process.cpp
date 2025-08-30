@@ -444,7 +444,7 @@ int TimeoutScan() {
 	CARDINAL count = *FetchPda(OFFSET_PDA(count));
 	for(PsbIndex psb = StartPsb; psb < (StartPsb + count); psb++) {
 		Ticks timeout = *FetchPda(OFFSET_PDA3(block, psb, timeout));
-		if (timeout && timeout == TimerThread::getPTC()) {
+		if (timeout && timeout == PTC) {
 			PsbFlags flags = {*FetchPda(OFFSET_PDA3(block, psb, flags))};
 			flags.waiting = 0;
 			*StorePda(OFFSET_PDA3(block, psb, flags)) = flags.u;
@@ -516,8 +516,7 @@ void E_MW() {
 			cond.wakeup = 0;
 			*Store(c) = cond.u;
 		} else {
-//			*StorePda(OFFSET_PDA3(block, PSB, timeout)) = ((t == 0) ? 0 : MAX(1U, (CARD16)((CARD32)PTC + (CARD32)t)));
-			*StorePda(OFFSET_PDA3(block, PSB, timeout)) = ((t == 0) ? 0 : MAX(1U, (CARD16)((CARD32)TimerThread::getPTC() + (CARD32)t)));
+			*StorePda(OFFSET_PDA3(block, PSB, timeout)) = ((t == 0) ? 0 : MAX(1U, (CARD16)((CARD32)PTC + (CARD32)t)));
 			flags.waiting = 1;
 			*StorePda(OFFSET_PDA3(block, PSB, flags)) = flags.u;
 			Requeue(PDA + OFFSET_PDA(ready), c, PSB);

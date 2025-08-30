@@ -310,7 +310,7 @@ extern VariableWP WP;
 //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
 extern VariableWDC WDC;
 
-//extern CARD16 PTC;    // Process timeout counter - 10.4.5
+extern CARD16 PTC;    // Process timeout counter - 10.4.5
 extern CARD16 XTS;    // Xfer trap status - 9.5.5
 
 // 3.3.1 Control Registers

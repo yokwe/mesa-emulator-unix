@@ -311,6 +311,10 @@ uint64_t Util::getMilliSecondsFromEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
+uint64_t Util::getMicroSecondsFromEpoch() {
+	auto duration = std::chrono::system_clock::now().time_since_epoch();
+	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+}
 
 void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 	for(int i = 0; i < size; i++) {

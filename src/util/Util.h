@@ -267,6 +267,7 @@ public:
 	// misc functions
 	static uint64_t getSecondsFromEpoch();
 	static uint64_t getMilliSecondsFromEpoch();
+	static uint64_t getMicroSecondsFromEpoch();
 
 	static uint32_t getUnixTime() {
 		return (uint32_t)getSecondsFromEpoch();

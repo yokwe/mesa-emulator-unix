@@ -38,23 +38,20 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "MesaBasic.h"
-#include "Constant.h"
-
 class TimerThread {
 public:
-	// Timer interval in milliseconds
-	static const int TIMER_INTERVAL = cTick;
-
 	static void   stop();
 
 	// To process timeout in other thread, create processTimeout
-	static int    processTimeout();
+	static bool   processTimeout();
 
 	void run();
 private:
-	static CARD32         lastTimeoutTime;
+	static uint64_t       lastTimeoutTime;
 	static int            stopThread;
 	static std::mutex     mutexTimer;
 	static std::condition_variable cvTimer;
+
+	static int processTimeoutCount;
+	static int interruptEnabledCount;
 };

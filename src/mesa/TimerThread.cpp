@@ -48,8 +48,11 @@ static const Logger logger(__FILE__);
 std::mutex              TimerThread::mutexTimer;
 std::condition_variable TimerThread::cvTimer;
 
-int    TimerThread::stopThread;
-CARD32 TimerThread::lastTimeoutTime;
+int      TimerThread::stopThread;
+uint64_t TimerThread::lastTimeoutTime;
+
+int TimerThread::processTimeoutCount   = 0;
+int TimerThread::interruptEnabledCount = 0;
 
 void TimerThread::stop() {
 	logger.info("TimerThread::stop");
@@ -59,58 +62,58 @@ void TimerThread::stop() {
 void TimerThread::run() {
 	logger.info("TimerThread::run START");
 
+	processTimeoutCount = 0;
+	interruptEnabledCount = 0;
 	int timerCount = 0;
-	lastTimeoutTime = IT;
-	stopThread = 0;
+	auto tick = std::chrono::milliseconds(cTick);
+	auto time = std::chrono::system_clock::now();
 	std::unique_lock<std::mutex> locker(mutexTimer);
-	for (;;) {
-		if (stopThread) break;
+	for(;;) {
 		timerCount++;
-		CARD32 currentTime = IT;
-		// I will wait until TIMER_INTERVAL is elapsed since preveiousTime.
-		int64_t waitTime = lastTimeoutTime + TIMER_INTERVAL - currentTime;
-		if (waitTime < 0) {
-			// already elapsed
-			if (-waitTime < TIMER_INTERVAL) {
-				// Time difference is not significant. Hope it will recover.
-			} else {
-				// Time difference is significant. Assign value to lastTimeoutTime.
-				lastTimeoutTime = currentTime;
-				logger.warn("Timer lost.  lost = %d ms",(uint32_t) (-waitTime));
-			}
-		} else {
-			// need to wait until TIMER_INTERVAL is elapsed since preveiousTime.
-			std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
-		}
+		auto nextTime = time + tick;
+		std::this_thread::sleep_until(nextTime);
+		time = nextTime;
+		if (stopThread) break;
 
 		{
+			// ProcessorThread::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
+			// Then TimerThread::processTimeout() will notify cvTimer
 			ProcessorThread::requestRescheduleTimer();
 			// wait procesTimeout is invoked
 			for(;;) {
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
-				if (status == std::cv_status::no_timeout) break;
 				if (stopThread) goto exitLoop;
+				if (status == std::cv_status::no_timeout) break;
 			}
 		}
 	}
 exitLoop:
 	logger.info("timerCount             = %8u", timerCount);
+	logger.info("processTimeoutCount    = %8u", processTimeoutCount);
+	logger.info("interruptEnabledCount  = %8u", interruptEnabledCount);
 	logger.info("TimerThread::run STOP");
 }
 
-int TimerThread::processTimeout() {
-	std::unique_lock<std::mutex> locker(mutexTimer);
+bool TimerThread::processTimeout() {
+	// this method is called from processor thread
 	//logger.debug("processTimeout START");
-	// Don't update lastTimeoutTimer, until actual process is performed
-	lastTimeoutTime += TIMER_INTERVAL;
+	processTimeoutCount++;
+	{
+		// start next timer
+		std::unique_lock<std::mutex> locker(mutexTimer);
+		cvTimer.notify_one();
+	}
 
-	// FIXME PTC update only interrupt is enabled.  See CheckForTimeouts
+	bool requeue;
+	if (InterruptsEnabled()) {
+		interruptEnabledCount++;
+		PTC = PTC + 1;
+		if (PTC == 0) PTC = PTC + 1;
 
-	PTC = PTC + 1;
-	if (PTC == 0) PTC = PTC + 1;
-
-	int ret = TimeoutScan();
-	cvTimer.notify_one();
-	//logger.debug("processTimeout FINISH");
-	return ret;
+		requeue = TimeoutScan();
+		//logger.debug("processTimeout FINISH");
+	} else {
+		requeue = false;
+	}
+	return requeue;
 }

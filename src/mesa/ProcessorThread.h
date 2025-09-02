@@ -56,6 +56,7 @@ public:
 	static void requestRescheduleInterrupt();
 
 	static void checkRequestReschedule() {
+		checkRequestRescheduleCount++;
 		if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
@@ -71,6 +72,7 @@ public:
 private:
 	static int stopThread;
 	static int rescheduleRequestCount;
+	static int checkRequestRescheduleCount;
 
 	//
 	static std::mutex         mutexRequestReschedule;

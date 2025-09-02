@@ -51,8 +51,9 @@ static const Logger logger(__FILE__);
 //
 std::condition_variable ProcessorThread::cvRunning;
 
-int ProcessorThread::stopThread             = 0;
-int ProcessorThread::rescheduleRequestCount = 0;
+int ProcessorThread::stopThread                  = 0;
+int ProcessorThread::rescheduleRequestCount      = 0;
+int ProcessorThread::checkRequestRescheduleCount = 0;
 
 std::mutex         ProcessorThread::mutexRequestReschedule;
 VariableAtomicFlag ProcessorThread::rescheduleInterruptFlag;
@@ -168,14 +169,15 @@ exitLoop:
 	TimerThread::stop();
 	InterruptThread::stop();
 
-	logger.info("abortCount             = %8u", abortCount);
-	logger.info("rescheduleCount        = %8u", rescheduleCount);
-	logger.info("needRescheduleCount    = %8u", needRescheduleCount);
-	logger.info("rescheduleRequestCount = %8u", rescheduleRequestCount);
-	logger.info("interruptFlagCount     = %8u", interruptFlagCount);
-	logger.info("interruptCount         = %8u", interruptCount);
-	logger.info("timerFlagCount         = %8u", timerFlagCount);
-	logger.info("timerCount             = %8u", timerCount);
+	logger.info("abortCount                  = %8u", abortCount);
+	logger.info("rescheduleCount             = %8u", rescheduleCount);
+	logger.info("needRescheduleCount         = %8u", needRescheduleCount);
+	logger.info("checkRequestRescheduleCount = %8u", checkRequestRescheduleCount);
+	logger.info("rescheduleRequestCount      = %8u", rescheduleRequestCount);
+	logger.info("interruptFlagCount          = %8u", interruptFlagCount);
+	logger.info("interruptCount              = %8u", interruptCount);
+	logger.info("timerFlagCount              = %8u", timerFlagCount);
+	logger.info("timerCount                  = %8u", timerCount);
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {

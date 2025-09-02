@@ -79,9 +79,9 @@ extern void PageFault(LONG_POINTER ptr);
 extern void WriteProtectFault(LONG_POINTER ptr);
 
 // 10.4.4.2 Interrupt Processing
-extern int ProcessInterrupt();
-extern int CheckForInterrupt();
+extern bool CheckForInterrupt();
+extern bool Interrupt();
 
 // 10.4.5 Timeouts
-extern int TimeoutScan();
-extern int CheckForTimeouts();
+extern bool CheckForTimeouts();
+extern bool TimeoutScan();

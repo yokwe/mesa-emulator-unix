@@ -354,10 +354,19 @@ static int NotifyWakeup(LONG_POINTER c) {
 	return requeue;
 }
 
+static bool InterruptPending() {
+	return WP.pending() && InterruptsEnabled();
+}
+
+// CheckForInterrupts: PROC RETURNS[BOOLEAN]
+bool CheckForInterrupt() {
+	return InterruptPending() ? Interrupt() : false;
+}
+
 // Interrupt: PROC RETURNS [BOOLEAN]
-int ProcessInterrupt() {
+bool Interrupt() {
 	UNSPEC mask = 1;
-	int requeue = 0;
+	bool requeue = false;
 	UNSPEC wakeups = WP.exchange(0);
 	for(int level = InterruptLevel_SIZE - 1; 0 <= level; level--) {
 		if (wakeups & mask) requeue = NotifyWakeup(PDA + OFFSET_PDA3(interrupt, level, condition)) || requeue;
@@ -366,11 +375,6 @@ int ProcessInterrupt() {
 	return requeue;
 }
 
-// CheckForInterrupts: PROC RETURNS[BOOLEAN]
-//int CheckForInterrupt() {
-//	int ret = InterruptThread::isPending() ? ProcessInterrupt() : 0;
-//	return ret;
-//}
 
 // 10.4.3 Faults
 // Fault: PROC[fi: FaultIndex] RETURNS[PsbIndex]
@@ -439,8 +443,8 @@ void WriteProtectFault(LONG_POINTER ptr) {
 // 10.4.5 Timeouts
 
 // TimeoutScan: PROC RETURNS [BOOLEAN]
-int TimeoutScan() {
-	int requeue = 0;
+bool TimeoutScan() {
+	bool requeue = false;
 	CARDINAL count = *FetchPda(OFFSET_PDA(count));
 	for(PsbIndex psb = StartPsb; psb < (StartPsb + count); psb++) {
 		Ticks timeout = *FetchPda(OFFSET_PDA3(block, psb, timeout));
@@ -450,7 +454,7 @@ int TimeoutScan() {
 			*StorePda(OFFSET_PDA3(block, psb, flags)) = flags.u;
 			*StorePda(OFFSET_PDA3(block, psb, timeout)) = 0;
 			Requeue(0, PDA + OFFSET_PDA(ready), psb);
-			requeue = 1;
+			requeue = true;
 		}
 	}
 	return requeue;

@@ -116,7 +116,7 @@ void ProcessorThread::run() {
 						if (rescheduleInterruptFlag) {
 							//logger.debug("reschedule INTERRUPT");
 							// process interrupt
-							if (ProcessInterrupt()) needReschedule = true;
+							if (Interrupt()) needReschedule = true;
 						}
 						if (rescheduleTimerFlag) {
 							//logger.debug("reschedule TIMER");

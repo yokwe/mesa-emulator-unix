@@ -84,15 +84,6 @@ CARD16 savedSP;
 // 10.4.1 Scheduler
 VariableRunning running;
 
-// 10.4.5 Timeouts
-// TimeOutInterval:LONG CARDINAL;
-// One tick = 40 milliseconds
-//const LONG_CARDINAL TimeOutInterval = 40 * 1000;
-
-// time: LONG CARDINAL
-// Due to name conflict with time, rename to time_CheckForTimeouts
-//extern LONG_CARDINAL lastTimeoutTime;
-
 
 //
 // VariableMP

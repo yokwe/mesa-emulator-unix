@@ -77,6 +77,12 @@ void ProcessorThread::run() {
 
 	int abortCount             = 0;
 	int rescheduleCount        = 0;
+	int interruptFlagCount     = 0;
+	int interruptCount         = 0;
+	int timerFlagCount         = 0;
+	int timerCount             = 0;
+	int needRescheduleCount    = 0;
+
 
 	rescheduleInterruptFlag.clear();
 	rescheduleTimerFlag.clear();
@@ -114,16 +120,27 @@ void ProcessorThread::run() {
 						//logger.debug("reschedule START");
 						bool needReschedule = false;
 						if (rescheduleInterruptFlag) {
+							interruptFlagCount++;
 							//logger.debug("reschedule INTERRUPT");
 							// process interrupt
-							if (Interrupt()) needReschedule = true;
+							if (Interrupt()) {
+								interruptCount++;
+								needReschedule = true;
+							}
 						}
 						if (rescheduleTimerFlag) {
+							timerFlagCount++;
 							//logger.debug("reschedule TIMER");
 							// process timeout
-							if (TimerThread::processTimeout()) needReschedule = true;
+							if (TimerThread::processTimeout()) {
+								timerCount++;
+								needReschedule = true;
+							}
 						}
-						if (needReschedule) Reschedule(1);
+						if (needReschedule) {
+							needRescheduleCount++;
+							Reschedule(1);
+						}
 						rescheduleInterruptFlag.clear();
 						rescheduleTimerFlag.clear();
 						//logger.debug("reschedule FINISH");
@@ -153,7 +170,12 @@ exitLoop:
 
 	logger.info("abortCount             = %8u", abortCount);
 	logger.info("rescheduleCount        = %8u", rescheduleCount);
+	logger.info("needRescheduleCount    = %8u", needRescheduleCount);
 	logger.info("rescheduleRequestCount = %8u", rescheduleRequestCount);
+	logger.info("interruptFlagCount     = %8u", interruptFlagCount);
+	logger.info("interruptCount         = %8u", interruptCount);
+	logger.info("timerFlagCount         = %8u", timerFlagCount);
+	logger.info("timerCount             = %8u", timerCount);
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {

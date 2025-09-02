@@ -92,18 +92,19 @@ void ProcessorThread::run() {
 			} catch(RequestReschedule& e) {
 				rescheduleCount++;
 				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
-				std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 				for(;;) {
 					// break if OP_STOPEMULATOR is called
 					if (stopThread) goto exitLoop;
 
-					// If not running, wait someone wake me up.
+					// If not running, wait interrupts or timeouts
 					if (!running) {
 						//logger.debug("waitRunning START");
+						std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 						for(;;) {
-							auto status = cvRunning.wait_for(locker, Util::ONE_SECOND);
-							if (status == std::cv_status::no_timeout) break;
+							cvRunning.wait_for(locker, Util::ONE_SECOND);
 							if (stopThread) goto exitLoop;
+							if (rescheduleInterruptFlag) break;
+							if (rescheduleTimerFlag) break;
 							//logger.debug("waitRunning WAITING");
 						}
 						//logger.debug("waitRunning FINISH");
@@ -111,7 +112,6 @@ void ProcessorThread::run() {
 					// Do reschedule.
 					{
 						//logger.debug("reschedule START");
-						// to avoid race condition of update of rescheduleFlag, guard with mutexReschedule
 						bool needReschedule = false;
 						if (rescheduleInterruptFlag) {
 							//logger.debug("reschedule INTERRUPT");

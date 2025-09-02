@@ -144,7 +144,6 @@ void Interpreter::initRegisters() {
 //	WP  = 0;    // Wakeup pending register - 10.4.4.1
 	WP = (CARD16)0;
 //	WDC = 1;    // Wakeup disable counter - 10.4.4.3
-//	InterruptThread::setWDC(1);
 	WDC = (CARD16)1;
 	PTC = 0;    // Process timeout counter - 10.4.5
 	XTS = 0;    // Xfer trap status - 9.5.5

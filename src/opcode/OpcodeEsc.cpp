@@ -99,12 +99,12 @@ void E_GMF() {
 // 020  ASSIGN_ESC(a, DI)
 void E_DI() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DI  %3d", savedPC, (CARD16)WDC);
-	WDC.disable();
+	DisableInterrupt();
 }
 // 021  ASSIGN_ESC(a, EI)
 void E_EI() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  EI  %3d", savedPC, (CARD16)WDC);
-	WDC.enable();
+	EnableInterrupts();
 	// ProcessorThread::checkRequestReschedule must be placed at very end of implementation of opcode.
 	ProcessorThread::checkRequestReschedule();
 }

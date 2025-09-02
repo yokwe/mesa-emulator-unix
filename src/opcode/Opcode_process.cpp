@@ -249,7 +249,7 @@ void Reschedule(int preemption) {
 	XFER((CARD32)LF, 0, XferType::processSwitch, 0);
 	return;
 BusyWait:
-	if (!WDC.isEnabled()) RescheduleError();
+	if (!InterruptsEnabled()) RescheduleError();
 	if (running) {
 		if (DEBUG_SHOW_RUNNING) logger.debug("stop  running");
 		running = false;

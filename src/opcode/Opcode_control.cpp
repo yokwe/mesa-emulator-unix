@@ -267,7 +267,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		if (nPC == 0) UnboundTrap(dst);
 		if (type == XferType::trap) {
 			*StoreMds(LO_OFFSET(nLF, returnlink)) = src;
-			WDC.disable();
+			DisableInterrupt();
 		}
 	}
 		break;
@@ -463,7 +463,7 @@ void E_XE() {
 		ShortControlLink src = *FetchMds (LF + ptr + OFFSET(TransferDescriptor, src));
 		XFER(dst, src, XferType::xfer, 0);
 
-		WDC.enable();
+		EnableInterrupts();
 	} catch(Abort &abort) {
 		ERROR();
 	}

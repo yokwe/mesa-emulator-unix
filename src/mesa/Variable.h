@@ -114,7 +114,7 @@ public:
         if (storage.load() == cWDC) InterruptError();
         storage.fetch_add(1);
     }
-    bool isEnabled() {
+    bool enabled() {
         return storage.load() == 0;
     }
 };
@@ -309,6 +309,15 @@ extern VariableWP WP;
 
 //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
 extern VariableWDC WDC;
+inline bool InterruptsEnabled() {
+    return WDC.enabled();
+}
+inline void DisableInterrupt() {
+    WDC.disable();
+}
+inline void EnableInterrupts() {
+    WDC.enable();
+}
 
 extern CARD16 PTC;    // Process timeout counter - 10.4.5
 extern CARD16 XTS;    // Xfer trap status - 9.5.5

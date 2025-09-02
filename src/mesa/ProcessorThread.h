@@ -56,7 +56,7 @@ public:
 	static void requestRescheduleInterrupt();
 
 	static void checkRequestReschedule() {
-		if (WDC.isEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
+		if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
 			rescheduleRequestCount++;
 			ERROR_RequestReschedule();
 		}

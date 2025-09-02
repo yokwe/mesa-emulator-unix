@@ -459,22 +459,6 @@ bool TimeoutScan() {
 	}
 	return requeue;
 }
-// CheckForTimeouts: PROC RETURNS [BOOLEAN]
-//int CheckForTimeouts() {
-//	int ret = 0;
-//	CARD32 now = Util::getMicroTime();
-//	if (InterruptThread::isEnabled() && (lastTimeoutTime + TimeOutInterval) <= now) {
-//		lastTimeoutTime += TimeOutInterval;
-//		if ((lastTimeoutTime + TimeOutInterval) <= now) {
-//			logger.error("%s timeout lost  %u", __FUNCTION__, now - lastTimeoutTime);
-//			lastTimeoutTime = now;
-//		}
-//		PTC = PTC + 1;
-//		if (PTC == 0) PTC = PTC + 1;
-//		ret = TimeoutScan();
-//	}
-//	return ret;
-//}
 
 ///////////////////////////////////////////////////////////////////////
 

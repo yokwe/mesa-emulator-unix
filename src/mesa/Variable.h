@@ -150,10 +150,13 @@ public:
 };
 
 
+// IT use one microsecond time
 class VariableIT {
 public:
+    static const CARD32 MicrosecondsPerHundredPulses = 100;
+    static const CARD16 MillisecondsPerTick          = cTick;
     operator CARD32() {
-        return (CARD32)Util::getMilliSecondsFromEpoch();
+        return (CARD32)Util::getMicroSecondsFromEpoch();
     }
 };
 
@@ -302,6 +305,8 @@ extern VariableMP MP;
 
 //extern CARD32 IT;     // Interval Timer
 extern VariableIT IT;
+static const CARD32 MicrosecondsPerHundredPulses = VariableIT::MicrosecondsPerHundredPulses;
+static const CARD16 MillisecondsPerTick = VariableIT::MillisecondsPerTick;
 
 //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
@@ -338,12 +343,3 @@ extern CARD16 savedSP;
 
 // 10.4.1 Scheduler
 extern VariableRunning running;
-
-// 10.4.5 Timeouts
-// TimeOutInterval:LONG CARDINAL;
-// One tick = 40 milliseconds
-//const LONG_CARDINAL TimeOutInterval = 40 * 1000;
-
-// time: LONG CARDINAL
-// Due to name conflict with time, rename to time_CheckForTimeouts
-//extern LONG_CARDINAL lastTimeoutTime;

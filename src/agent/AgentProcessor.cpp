@@ -50,8 +50,8 @@ void AgentProcessor::Initialize() {
 	fcb->processorID[0]               = processorID0;
 	fcb->processorID[1]               = processorID1;
 	fcb->processorID[2]               = processorID2;
-	fcb->microsecondsPerHundredPulses = 100; // one pulse = 1 microsecond
-	fcb->millisecondsPerTick          = cTick;
+	fcb->microsecondsPerHundredPulses = MicrosecondsPerHundredPulses;
+	fcb->millisecondsPerTick          = MillisecondsPerTick;
 	fcb->alignmentFiller              = 0;
 	fcb->realMemoryPageCount          = Memory::getRPSize();
 	fcb->virtualMemoryPageCount       = Memory::getVPSize();

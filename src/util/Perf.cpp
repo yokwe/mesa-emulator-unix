@@ -33,32 +33,28 @@
 // Perf.cpp
 //
 
+#include <vector>
+
+#include "Util.h"
+static const Logger logger(__FILE__);
+
 #include "Perf.h"
 
-PERF_DEFFINE(Dispatch)
-PERF_DEFFINE(Fetch)
-PERF_DEFFINE(Store)
-PERF_DEFFINE(ReadDbl)
-PERF_DEFFINE(FetchMds)
-PERF_DEFFINE(StoreMds)
-PERF_DEFFINE(ReadDblMds)
-PERF_DEFFINE(GetCodeByte)
-PERF_DEFFINE(GetCodeWord)
-PERF_DEFFINE(FetchByte)
-PERF_DEFFINE(StoreByte)
-PERF_DEFFINE(ReadField)
-PERF_DEFFINE(WriteField)
-PERF_DEFFINE(WriteMap)
-PERF_DEFFINE(GetAddress)
-PERF_DEFFINE(FetchPda)
-PERF_DEFFINE(StorePda)
-PERF_DEFFINE(MemoryFetch)
-PERF_DEFFINE(MemoryStore)
-// Fault
-PERF_DEFFINE(FrameFault)
-PERF_DEFFINE(PageFault)
-// Trap
-PERF_DEFFINE(CodeTrap)
-PERF_DEFFINE(EscOpcodeTrap)
-PERF_DEFFINE(OpcodeTrap)
-PERF_DEFFINE(UnboundTrap)
+namespace perf {
+
+struct Entry {
+    const char*     name;
+    const uint64_t& value;
+    Entry(const char* name_, uint64_t& value_) : name(name_), value(value_) {}
+};
+
+}
+
+#include "Perf.inc"
+
+void perf::dump() {
+    for(const auto& e: all) {
+        logger.info("%-22s = %10llu", e.name, e.value);
+    }
+}
+

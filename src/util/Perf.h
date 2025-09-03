@@ -35,23 +35,19 @@
 
 #pragma once
 
-#define PPCAT_NX(A, B) A ## B
-#define PPCAT(A, B) PPCAT_NX(A, B)
+#include <cinttypes>
 
-#define PPSTR_NX(A) #A
-#define PPSTR(A) PPSTR_NX(A)
+#define PERF_DECLARE(name) extern uint64_t name;
 
-#define PERF_NAME(name) PPCAT(perf_, name)
+#define PERF_COUNT(name) { if (PERF_ENABLE) perf::name++; }
 
-#define PERF_DECLARE(name) extern long long PERF_NAME(name);
-#define PERF_DEFFINE(name) long long PERF_NAME(name) = 0;
+#define PERF_LOG() { if (PERF_ENABLE) perf::dump(); }
 
-#define PERF_COUNT(name) { if (PERF_ENABLE) PERF_NAME(name)++; }
+static const bool PERF_ENABLE = true;
 
-#define PERF_DUMP(name) logger.info("%-22s = %10llu", PPSTR(PERF_NAME(name)), PERF_NAME(name));
+namespace perf {
 
-
-static const int PERF_ENABLE    = 1;
+void dump();
 
 PERF_DECLARE(Dispatch)
 PERF_DECLARE(Fetch)
@@ -81,32 +77,4 @@ PERF_DECLARE(EscOpcodeTrap)
 PERF_DECLARE(OpcodeTrap)
 PERF_DECLARE(UnboundTrap)
 
-
-#define PERF_LOG() \
-if (PERF_ENABLE) { \
-	PERF_DUMP(Dispatch) \
-	PERF_DUMP(Fetch) \
-	PERF_DUMP(Store) \
-	PERF_DUMP(ReadDbl) \
-	PERF_DUMP(FetchMds) \
-	PERF_DUMP(StoreMds) \
-	PERF_DUMP(ReadDblMds) \
-	PERF_DUMP(GetCodeByte) \
-	PERF_DUMP(GetCodeWord) \
-	PERF_DUMP(FetchByte) \
-	PERF_DUMP(StoreByte) \
-	PERF_DUMP(ReadField) \
-	PERF_DUMP(WriteField) \
-	PERF_DUMP(WriteMap) \
-	PERF_DUMP(GetAddress) \
-	PERF_DUMP(FetchPda) \
-	PERF_DUMP(StorePda) \
-	PERF_DUMP(MemoryFetch) \
-	PERF_DUMP(MemoryStore) \
-	PERF_DUMP(FrameFault) \
-	PERF_DUMP(PageFault) \
-	PERF_DUMP(CodeTrap) \
-	PERF_DUMP(EscOpcodeTrap) \
-	PERF_DUMP(OpcodeTrap) \
-	PERF_DUMP(UnboundTrap) \
 }

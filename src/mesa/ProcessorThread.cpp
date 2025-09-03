@@ -83,6 +83,7 @@ void ProcessorThread::run() {
 	int timerFlagCount         = 0;
 	int timerCount             = 0;
 	int needRescheduleCount    = 0;
+	int runningCount           = 0;
 
 
 	rescheduleInterruptFlag.clear();
@@ -97,6 +98,10 @@ void ProcessorThread::run() {
 				}
 				Interpreter::execute();
 			} catch(RequestReschedule& e) {
+				// Only ERROR_RequestReschedule throws RequestReschedule.
+				// ERROR_RequestReschedule is called from Reschedule() and ProcessorThread::checkRequestReschedule().
+				// In above both case, RequestReschedule will thrown while interrupt is enabled.
+				// Also above both case, call is from ProcessorThread
 				rescheduleCount++;
 				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
 				for(;;) {
@@ -115,6 +120,8 @@ void ProcessorThread::run() {
 							//logger.debug("waitRunning WAITING");
 						}
 						//logger.debug("waitRunning FINISH");
+					} else {
+						runningCount++;
 					}
 					// Do reschedule.
 					{
@@ -178,6 +185,7 @@ exitLoop:
 	logger.info("interruptCount              = %8u", interruptCount);
 	logger.info("timerFlagCount              = %8u", timerFlagCount);
 	logger.info("timerCount                  = %8u", timerCount);
+	logger.info("runningCount                = %8u", runningCount);
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {

@@ -257,7 +257,9 @@ __attribute__((always_inline)) static inline uint16_t bitField(uint16_t word, in
 #define COUNT_ELEMENT(array) ((sizeof(array)) / (sizeof(array[0])))
 
 // get build directory from Environment variable BUILD_DIR
-const char* getBuildDir();
+inline const char* getBuildDir() {
+	return BUILD_DIR;
+}
 
 class Util {
 public:

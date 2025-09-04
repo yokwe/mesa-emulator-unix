@@ -321,8 +321,3 @@ void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 		dest[i] = std::byteswap(source[i]);
 	}
 }
-
-// get build directory from Environment variable BUILD_DIR
-const char* getBuildDir() {
-	return BUILD_DIR;
-}

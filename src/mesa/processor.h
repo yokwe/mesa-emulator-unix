@@ -30,64 +30,25 @@
 
 
 //
-// InterruptThread.cpp
+// processor.h
 //
 
-#include <condition_variable>
+#pragma once
 
-#include "../util/Util.h"
-static const Logger logger(__FILE__);
+#include "MesaBasic.h"
 
-#include "../util/Perf.h"
+namespace processor {
 
-#include "Variable.h"
-#include "processor.h"
-#include "InterruptThread.h"
+void stop();
 
+void stopAtMP(CARD16 mp);
+void mp_observer(CARD16 mp);
 
-std::mutex              InterruptThread::mutexWP;
-std::condition_variable InterruptThread::cvWP;
+void requestRescheduleTimer();
+void requestRescheduleInterrupt();
 
-int InterruptThread::stopThread        = 0;
+void checkRequestReschedule();
 
-void InterruptThread::stop() {
-	logger.info("InterruptThread::stop");
-	stopThread = 1;
-}
-void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	PERF_COUNT(interrupt, notify)
+void run();
 
-	auto oldValue = WP.fetch_or(interruptSelector);
-
-	if (interruptSelector && (oldValue & interruptSelector) == 0) {
-		std::unique_lock<std::mutex> locker(mutexWP);
-		// start interrupt, wake waiting thread
-		cvWP.notify_one();
-		PERF_COUNT(interrupt, wakeup)
-	}
-}
-//int InterruptThread::isPending() {
-//	return WP && isEnabled();
-//}
-
-void InterruptThread::run() {
-	logger.info("InterruptThread::run START");
-
-	stopThread = 0;
-	std::unique_lock<std::mutex> locker(mutexWP);
-	for (;;) {
-		if (stopThread) break;
-		PERF_COUNT(interrupt, interrupt)
-
-		// wait until interrupt is arrived
-		for(;;) {
-			cvWP.wait_for(locker, Util::ONE_SECOND);
-			if (stopThread) goto exitLoop;
-			if (WP.pending()) break;
-		}
-		PERF_COUNT(interrupt, request)
-		processor::requestRescheduleInterrupt();
-	}
-exitLoop:
-	logger.info("InterruptThread::run STOP");
 }

@@ -42,7 +42,6 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/ProcessorThread.h"
 #include "../opcode/Interpreter.h"
 
 void testBase::initAV(CARD16 origin, CARD16 limit) {

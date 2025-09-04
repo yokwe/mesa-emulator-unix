@@ -243,7 +243,7 @@ void Reschedule(int preemption) {
 #endif
 
 //	running = 1;
-//	ProcessorThread::startRunning();
+//	processor::startRunning();
 	//logger.debug("%s XFER PSB = %4d  GFI = %04X  CB = %08X  PC = %04X  LF = %04X", __FUNCTION__, PSB, GFI, CB, PC, LF);
 	XFER((CARD32)LF, 0, XferType::processSwitch, 0);
 	return;
@@ -255,7 +255,7 @@ BusyWait:
 		ERROR_RequestReschedule();
 	}
 //	running = 0;
-//	ProcessorThread::stopRunning();
+//	processor::stopRunning();
 }
 
 

@@ -42,6 +42,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/MesaProcessor.h"
 #include "../mesa/Memory.h"
+#include "../mesa/processor.h"
 
 #include "../opcode/Interpreter.h"
 
@@ -78,10 +79,10 @@ int main(int /* argc */, char** /* argv */) {
 	uint32_t    rmBits           = entry.memory.rmbits;
 
 	// stop at MP 8000
-	ProcessorThread::stopAtMP( 915);
-	ProcessorThread::stopAtMP(8000);
+	processor::stopAtMP( 915);
+	processor::stopAtMP(8000);
 
-//	ProcessorThread::stopMessageUntilMP(930);
+//	processor::stopMessageUntilMP(930);
 
 	MesaProcessor mesaProcessor;
 

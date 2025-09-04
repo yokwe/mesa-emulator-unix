@@ -39,7 +39,7 @@ static const Logger logger(__FILE__);
 #include "../util/Debug.h"
 
 #include "../mesa/Memory.h"
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/processor.h"
 #include "../agent/Agent.h"
 
 #include "Opcode.h"
@@ -82,7 +82,7 @@ void E_MAPDISPLAY() {
 void E_STOPEMULATOR() {
 	logger.fatal("TRACE %6o  STOPEMULATOR %04X%04X", savedPC, stack[SP - 1], stack[SP - 2]);
 	PopLong(); // pop long parameter
-	ProcessorThread::stop();
+	processor::stop();
 }
 
 

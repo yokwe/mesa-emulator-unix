@@ -14,7 +14,7 @@ target_sources(
         MesaBasic.h
         MesaProcessor.h
         Pilot.h
-        ProcessorThread.h
+        processor.h
         timer.h
         Type.h
         Variable.h
@@ -23,7 +23,7 @@ target_sources(
         Memory.cpp
         MesaProcessor.cpp
         Pilot.cpp
-        ProcessorThread.cpp
+        processor.cpp
         timer.cpp
         Type.cpp
         Variable.cpp

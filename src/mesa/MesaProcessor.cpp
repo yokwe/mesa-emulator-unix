@@ -41,6 +41,9 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../agent/AgentFloppy.h"
+#include "../agent/AgentDisplay.h"
+#include "../agent/AgentProcessor.h"
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
 #include "../agent/StreamPCFA.h"
@@ -51,6 +54,7 @@ static const Logger logger(__FILE__);
 
 #include "timer.h"
 #include "interrupt.h"
+#include "processor.h"
 
 #include "MesaProcessor.h"
 
@@ -86,7 +90,7 @@ void MesaProcessor::initialize() {
 	// AgentProcessor::Initialize use PID[]
 	PID[0] = 0;
 	networkPacket.getAddress(PID[1], PID[2], PID[3]);
-	processor.setProcessorID(PID[1], PID[2], PID[3]);
+	agentProcessor.setProcessorID(PID[1], PID[2], PID[3]);
 
 	// set display width and height
 	display.setDisplayWidth(displayWidth);
@@ -167,7 +171,7 @@ void MesaProcessor::boot() {
 	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
 	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
 	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
-	std::function<void()> f6 = std::bind(&ProcessorThread::run, &processorThread);
+	std::function<void()> f6 = std::function<void()>(processor::run);
 
 	ThreadControl t1("interrupt", f1);
 	ThreadControl t2("timer", f2);
@@ -193,7 +197,7 @@ void MesaProcessor::boot() {
 	t5.stop();
 	t6.stop();
 	timeStop = Util::getMilliSecondsFromEpoch();
-	
+
 	logger.info("MesaProcessor::boot STOP");
 
 	// Properly detach DiskFile
@@ -220,9 +224,7 @@ void MesaProcessor::loadGerm(std::string& path) {
 			exit(1);
 		}
 
-		for(int j = 0; j < PageSize; j++) {
-			p[j] = std::byteswap(map[i].word[j]);
-		}
+		Util::byteswap(map[i].word, p, PageSize);
 
 		p = Memory::getAddress(((i + 1) * PageSize));
 	}

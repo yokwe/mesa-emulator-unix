@@ -136,9 +136,7 @@ void AgentDisplay::Call() {
 		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s setCursorPattern", name);
 		{
 			GuiOp::CursorPattern data;
-			for(CARD32 i = 0; i < ELEMENTSOF(data.data); i++) {
-				data.data[i] = std::byteswap(fcb->cursorPattern.word[i]);
-			}
+			Util::byteswap(fcb->cursorPattern.word, data.data, ELEMENTSOF(data.data));
 			GuiOp::setCursorPattern(&data);
 		}
 		break;

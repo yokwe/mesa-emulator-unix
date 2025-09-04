@@ -40,7 +40,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Memory.h"
 
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/processor.h"
 #include "../mesa/Variable.h"
 
 #include "Opcode.h"
@@ -105,8 +105,8 @@ void E_DI() {
 void E_EI() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  EI  %3d", savedPC, (CARD16)WDC);
 	EnableInterrupts();
-	// ProcessorThread::checkRequestReschedule must be placed at very end of implementation of opcode.
-	ProcessorThread::checkRequestReschedule();
+	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
+	processor::checkRequestReschedule();
 }
 // 022  ASSIGN_ESC(a, XOR)
 void E_XOR() {
@@ -161,8 +161,8 @@ void E_LINT() {
 void E_JS() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JS", savedPC);
 	PC = Pop();
-	// ProcessorThread::checkRequestReschedule must be placed at very end of implementation of opcode.
-	ProcessorThread::checkRequestReschedule();
+	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
+	processor::checkRequestReschedule();
 }
 // 032  ASSIGN_ESC(a, RCFS)
 void E_RCFS() {

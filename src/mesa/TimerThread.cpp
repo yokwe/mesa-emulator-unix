@@ -42,7 +42,7 @@ static const Logger logger(__FILE__);
 #include "../util/Perf.h"
 
 #include "Function.h"
-#include "ProcessorThread.h"
+#include "processor.h"
 #include "Variable.h"
 #include "TimerThread.h"
 
@@ -72,9 +72,9 @@ void TimerThread::run() {
 		if (stopThread) break;
 
 		{
-			// ProcessorThread::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
+			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
 			// Then TimerThread::processTimeout() will notify cvTimer
-			ProcessorThread::requestRescheduleTimer();
+			processor::requestRescheduleTimer();
 			// wait procesTimeout is invoked
 			for(;;) {
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);

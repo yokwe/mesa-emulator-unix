@@ -35,6 +35,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "../agent/AgentBeep.h"
 #include "../agent/AgentDisk.h"
 #include "../agent/AgentDisplay.h"
@@ -44,8 +46,6 @@
 #include "../agent/AgentNetwork.h"
 #include "../agent/AgentProcessor.h"
 #include "../agent/AgentStream.h"
-
-#include "ProcessorThread.h"
 
 class MesaProcessor {
 public:
@@ -118,15 +118,13 @@ private:
 	AgentKeyboard  keyboard;
 	AgentBeep      beep;
 	AgentMouse     mouse;
-	AgentProcessor processor;
+	AgentProcessor agentProcessor;
 	AgentStream    stream;
 //	AgentSerial    serial;
 //	AgentTTY       tty;
 	AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
-	// for child thread
-	ProcessorThread processorThread;
 
 	int64_t timeStart;
 	int64_t timeStop;

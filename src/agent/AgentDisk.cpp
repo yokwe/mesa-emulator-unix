@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Memory.h"
 
 #include "../mesa/interrupt.h"
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/processor.h"
 
 #include "AgentDisk.h"
 #include "DiskFile.h"
@@ -92,7 +92,7 @@ void AgentDisk::IOThread::run() {
 		}
 	} catch(Abort& e) {
 		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		ProcessorThread::stop();
+		processor::stop();
 	}
 exitLoop:
 	logger.info("AgentDisk::IOThread::run STOP");

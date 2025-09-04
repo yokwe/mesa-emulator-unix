@@ -42,7 +42,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
 #include "../mesa/interrupt.h"
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/processor.h"
 
 #include "AgentNetwork.h"
 
@@ -98,7 +98,7 @@ void AgentNetwork::TransmitThread::run() {
 		}
 	} catch(Abort& e) {
 		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		ProcessorThread::stop();
+		processor::stop();
 	}
 exitLoop:
 	logger.info("AgentNetwork::TransmitThread::run STOP");

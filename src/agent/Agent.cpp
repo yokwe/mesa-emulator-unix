@@ -54,7 +54,10 @@ GuamInputOutput::IORegionType *Agent::ioRegionType = 0;
 Agent* Agent::getAgent(int index) {
 	if (GuamInputOutput::AgentDeviceIndex_SIZE <= index) ERROR();
 	Agent* agent = allAgent[index];
-	if (agent == 0) ERROR();
+	if (agent == 0) {
+		logger.fatal("index  %d", index);
+		ERROR();
+	}
 	if (agent->index != index) ERROR();
 	return agent;
 }

@@ -37,7 +37,7 @@
 
 #include "Variable.h"
 
-#include "../mesa/ProcessorThread.h"
+#include "../mesa/processor.h"
 #include "../util/GuiOp.h"
 
 #include "../util/Util.h"
@@ -95,5 +95,5 @@ void VariableMP::initialize() {
     observerList.push_back(mp_message);
     observerList.push_back(GuiOp::setMP);
     observerList.push_back(Logger::mp_observer);
-    observerList.push_back(ProcessorThread::mp_observer);
+    observerList.push_back(processor::mp_observer);
 }

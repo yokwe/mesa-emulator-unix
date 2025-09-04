@@ -38,8 +38,9 @@
 
 #include "../util/Perf.h"
 
-#include "ProcessorThread.h"
-
+#include "Constant.h"
+#include "Variable.h"
+#include "processor.h"
 #include "timer.h"
 
 #include "../util/Util.h"
@@ -73,9 +74,9 @@ void run() {
 		if (stopThread) break;
 
 		{
-			// ProcessorThread::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
+			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
 			// Then TimerThread::processTimeout() will notify cvTimer
-			ProcessorThread::requestRescheduleTimer();
+			processor::requestRescheduleTimer();
 			// wait procesTimeout is invoked
 			for(;;) {
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);

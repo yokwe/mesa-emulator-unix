@@ -41,7 +41,7 @@ static const Logger logger(__FILE__);
 #include "../util/Perf.h"
 
 #include "Variable.h"
-#include "ProcessorThread.h"
+#include "processor.h"
 #include "interrupt.h"
 
 
@@ -72,7 +72,7 @@ void run() {
 			if (WP.pending()) break;
 		}
 		PERF_COUNT(interrupt, request)
-		ProcessorThread::requestRescheduleInterrupt();
+		processor::requestRescheduleInterrupt();
 	}
 exitLoop:
 	logger.info("interrupt::run STOP");

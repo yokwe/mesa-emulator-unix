@@ -42,12 +42,14 @@
 #define PERF_COUNT(group, name) { if (PERF_ENABLE) perf::group::name++; }
 
 #define PERF_LOG() { if (PERF_ENABLE) perf::dump(); }
+#define PERF_CLEAR() { perf::clear(); }
 
 static const bool PERF_ENABLE = true;
 
 namespace perf {
 
 void dump();
+void clear();
 
 // memory
 PERF_DECLARE(memory, Fetch)

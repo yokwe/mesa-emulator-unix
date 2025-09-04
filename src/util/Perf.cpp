@@ -43,8 +43,8 @@ static const Logger logger(__FILE__);
 namespace perf {
 
 struct Entry {
-    const char*     name;
-    const uint64_t& value;
+    const char* name;
+    uint64_t&   value;
     Entry(const char* name_, uint64_t& value_) : name(name_), value(value_) {}
 };
 
@@ -55,6 +55,12 @@ struct Entry {
 void perf::dump() {
     for(const auto& e: all) {
         logger.info("%-34s = %10llu", e.name, e.value);
+    }
+}
+
+void perf::clear() {
+    for(const auto& e: all) {
+        e.value = 0;
     }
 }
 

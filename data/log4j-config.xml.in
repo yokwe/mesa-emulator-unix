@@ -5,10 +5,10 @@
         <param name="Target" value="System.out" />
         <layout class="org.apache.log4j.PatternLayout">
             <!--
-            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-12c %m%n"/>
-            <param name="ConversionPattern" value="%-5p %-12c %m%n" />
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-16c %m%n"/>
+            <param name="ConversionPattern" value="%-5p %-16c %m%n" />
             -->
-            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-12c %m%n" />
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-16c %m%n" />
         </layout>
     </appender>
 
@@ -16,10 +16,10 @@
         <param name="file" value="@CMAKE_BINARY_DIR@/run/debug.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <!--
-            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-12c %m%n"/>
-            <param name="ConversionPattern" value="%-5p %-12c %m%n" />
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-16c %m%n"/>
+            <param name="ConversionPattern" value="%-5p %-16c %m%n" />
             -->
-            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-12c %m%n"/>
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-16c %m%n"/>
         </layout>
     </appender>
 

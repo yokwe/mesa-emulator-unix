@@ -18,6 +18,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# default compiler optimization setting
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
 # default compiler options
 set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 

@@ -30,64 +30,36 @@
 
 
 //
-// InterruptThread.cpp
+// guam.h
 //
 
-#include <condition_variable>
+#pragma once
 
-#include "../util/Util.h"
-static const Logger logger(__FILE__);
+#include <string>
 
-#include "../util/Perf.h"
+#include "Pilot.h"
 
-#include "Variable.h"
-#include "processor.h"
-#include "InterruptThread.h"
+namespace guam {
 
+void setDiskPath(const std::string& diskPath_);
+void setGermPath(const std::string& germPath_);
+void setBootPath(const std::string& bootPath_);
+void setFloppyPath(const std::string& floppyPath_);
+void setBootSwitch(const std::string& bootSwitch_);
+void setBootDevice(const std::string& bootDevice_);
+void setMemorySize(int vmBits_, int rmBits_);
+void setDisplaySize(CARD16 displayWidth_, CARD16 displayHeight_);
+void setNetworkInterfaceName(const std::string& networkInterfaceName_);
 
-std::mutex              InterruptThread::mutexWP;
-std::condition_variable InterruptThread::cvWP;
+void setBootRequestPV    (Boot::Request* request, CARD16 deviceOrdinal = 0);
+void setBootRequestEther (Boot::Request* request, CARD16 deviceOrdinal = 0);
+void setBootRequestStream(Boot::Request* request);
 
-int InterruptThread::stopThread        = 0;
+void setSwitches(System::Switches& switches, const char *string);
 
-void InterruptThread::stop() {
-	logger.info("InterruptThread::stop");
-	stopThread = 1;
-}
-void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	PERF_COUNT(interrupt, notify)
+void initialize();
+void boot(); // don't return until all child thread stopped
 
-	auto oldValue = WP.fetch_or(interruptSelector);
+int64_t elapsedTime();
 
-	if (interruptSelector && (oldValue & interruptSelector) == 0) {
-		std::unique_lock<std::mutex> locker(mutexWP);
-		// start interrupt, wake waiting thread
-		cvWP.notify_one();
-		PERF_COUNT(interrupt, wakeup)
-	}
-}
-//int InterruptThread::isPending() {
-//	return WP && isEnabled();
-//}
-
-void InterruptThread::run() {
-	logger.info("InterruptThread::run START");
-
-	stopThread = 0;
-	std::unique_lock<std::mutex> locker(mutexWP);
-	for (;;) {
-		if (stopThread) break;
-		PERF_COUNT(interrupt, interrupt)
-
-		// wait until interrupt is arrived
-		for(;;) {
-			cvWP.wait_for(locker, Util::ONE_SECOND);
-			if (stopThread) goto exitLoop;
-			if (WP.pending()) break;
-		}
-		PERF_COUNT(interrupt, request)
-		processor::requestRescheduleInterrupt();
-	}
-exitLoop:
-	logger.info("InterruptThread::run STOP");
 }

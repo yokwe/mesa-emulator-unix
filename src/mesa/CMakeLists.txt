@@ -12,7 +12,7 @@ target_sources(
         interrupt.h
         Memory.h
         MesaBasic.h
-        MesaProcessor.h
+        guam.h
         Pilot.h
         processor.h
         timer.h
@@ -21,7 +21,7 @@ target_sources(
     PRIVATE
         interrupt.cpp
         Memory.cpp
-        MesaProcessor.cpp
+        guam.cpp
         Pilot.cpp
         processor.cpp
         timer.cpp

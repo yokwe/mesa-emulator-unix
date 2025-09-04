@@ -40,8 +40,7 @@ static const Logger logger(__FILE__);
 #include "../util/Setting.h"
 #include "../util/GuiOp.h"
 
-#include "../mesa/MesaProcessor.h"
-#include "../mesa/Memory.h"
+#include "../mesa/guam.h"
 #include "../mesa/processor.h"
 
 #include "../opcode/Interpreter.h"
@@ -58,47 +57,43 @@ int main(int /* argc */, char** /* argv */) {
 	// 	ERROR();
 	// }
 	// std::string entryName = argv[1];
-	std::string entryName = "GVWin";
+	auto entryName = "GVWin";
 	logger.info("entryName = %s", entryName);
 
-	Setting setting = Setting::getInstance();
-	Setting::Entry entry = setting.getEntry(entryName);
+	auto setting = Setting::getInstance();
+	auto entry   = setting.getEntry(entryName);
 
-	CARD32      displayWidth     = entry.display.width;
-	CARD32      displayHeight    = entry.display.height;
+	auto displayWidth     = entry.display.width;
+	auto displayHeight    = entry.display.height;
 
-	std::string diskPath         = entry.file.disk;
-	std::string germPath         = entry.file.germ;
-	std::string bootPath         = entry.file.boot;
-	std::string floppyPath       = entry.file.floppy;
-	std::string bootSwitch       = entry.boot.switch_;
-	std::string bootDevice       = entry.boot.device;
-	std::string networkInterface = entry.network.interface;
+	auto diskPath         = entry.file.disk;
+	auto germPath         = entry.file.germ;
+	auto bootPath         = entry.file.boot;
+	auto floppyPath       = entry.file.floppy;
+	auto bootSwitch       = entry.boot.switch_;
+	auto bootDevice       = entry.boot.device;
+	auto networkInterface = entry.network.interface;
 
-	uint32_t    vmBits           = entry.memory.vmbits;
-	uint32_t    rmBits           = entry.memory.rmbits;
+	auto vmBits           = entry.memory.vmbits;
+	auto rmBits           = entry.memory.rmbits;
 
 	// stop at MP 8000
 	processor::stopAtMP( 915);
 	processor::stopAtMP(8000);
 
-//	processor::stopMessageUntilMP(930);
+	guam::setDiskPath(diskPath);
+	guam::setGermPath(germPath);
+	guam::setBootPath(bootPath);
+	guam::setFloppyPath(floppyPath);
+	guam::setBootSwitch(bootSwitch);
+	guam::setBootDevice(bootDevice);
 
-	MesaProcessor mesaProcessor;
+	guam::setMemorySize(vmBits, rmBits);
+	guam::setDisplaySize(displayWidth, displayHeight);
+	guam::setNetworkInterfaceName(networkInterface);
 
-	mesaProcessor.setDiskPath(diskPath);
-	mesaProcessor.setGermPath(germPath);
-	mesaProcessor.setBootPath(bootPath);
-	mesaProcessor.setFloppyPath(floppyPath);
-	mesaProcessor.setBootSwitch(bootSwitch);
-	mesaProcessor.setBootDevice(bootDevice);
-
-	mesaProcessor.setMemorySize(vmBits, rmBits);
-	mesaProcessor.setDisplaySize(displayWidth, displayHeight);
-	mesaProcessor.setNetworkInterfaceName(networkInterface);
-
-	mesaProcessor.initialize();
-	mesaProcessor.boot();
+	guam::initialize();
+	guam::boot();
 	
 	Interpreter::stats();
 	PERF_LOG();
@@ -110,7 +105,7 @@ int main(int /* argc */, char** /* argv */) {
 	//extern void MonoBlt_stats();
 	//MonoBlt_stats();
 
-	logger.info("elapsedTime = %lld msec", mesaProcessor.elapsedTime());
+	logger.info("elapsedTime = %lld msec", guam::elapsedTime());
 
 	logger.info("STOP");
 	return 0;

@@ -30,20 +30,36 @@
 
 
 //
-// MesaProcessor.cpp
+// guam.cpp
 //
 
-#include <bit>
-#include <functional>
-#include <string>
 #include <thread>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "MesaBasic.h"
+#include "Memory.h"
+#include "Pilot.h"
+
+#include "interrupt.h"
+#include "timer.h"
+#include "processor.h"
+
+#include "../agent/Agent.h"
+#include "../agent/AgentDisk.h"
 #include "../agent/AgentFloppy.h"
-#include "../agent/AgentDisplay.h"
+#include "../agent/AgentNetwork.h"
+#include "../agent/AgentKeyboard.h"
+#include "../agent/AgentBeep.h"
+#include "../agent/AgentMouse.h"
 #include "../agent/AgentProcessor.h"
+#include "../agent/AgentStream.h"
+#include "../agent/AgentDisplay.h"
+
+#include "../agent/DiskFile.h"
+#include "../agent/NetworkPacket.h"
+
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
 #include "../agent/StreamPCFA.h"
@@ -52,14 +68,99 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/Interpreter.h"
 
-#include "timer.h"
-#include "interrupt.h"
-#include "processor.h"
+#include "guam.h"
 
-#include "MesaProcessor.h"
+namespace guam {
+
+std::string    diskPath;
+std::string    germPath;
+std::string    bootPath;
+std::string    floppyPath;
+std::string    bootSwitch;
+std::string    bootDevice;
+int            vmBits;
+int            rmBits;
+CARD16         displayWidth;
+CARD16         displayHeight;
+std::string    networkInterfaceName;
+
+std::vector<DiskFile*> diskFileList;
+DiskFile         floppyFile;
+NetworkPacket    networkPacket;
+
+// agent
+AgentDisk      disk;
+AgentFloppy    floppy;
+AgentNetwork   network;
+//	AgentParallel  parallel;
+AgentKeyboard  keyboard;
+AgentBeep      beep;
+AgentMouse     mouse;
+AgentProcessor agentProcessor;
+AgentStream    stream;
+//	AgentSerial    serial;
+//	AgentTTY       tty;
+AgentDisplay   display;
+//	AgentReserved3 reserved3;
+
+int64_t timeStart;
+int64_t timeStop;
 
 
-void MesaProcessor::initialize() {
+void setDiskPath(const std::string& diskPath_) {
+    diskPath = diskPath_;
+}
+void setGermPath(const std::string& germPath_) {
+    germPath = germPath_;
+}
+void setBootPath(const std::string& bootPath_) {
+    bootPath = bootPath_;
+}
+void setFloppyPath(const std::string& floppyPath_) {
+    floppyPath = floppyPath_;
+}
+void setBootSwitch(const std::string& bootSwitch_) {
+    bootSwitch = bootSwitch_;
+}
+void setBootDevice(const std::string& bootDevice_) {
+    bootDevice = bootDevice_;
+}
+void setMemorySize(int vmBits_, int rmBits_) {
+    vmBits = vmBits_;
+    rmBits = rmBits_;
+}
+void setDisplaySize(CARD16 displayWidth_, CARD16 displayHeight_) {
+    displayWidth  = displayWidth_;
+    displayHeight = displayHeight_;
+}
+void setNetworkInterfaceName(const std::string& networkInterfaceName_) {
+    networkInterfaceName = networkInterfaceName_;
+}
+
+void loadGerm(std::string& path) {
+	logger.info("germ  path    = %s", path);
+
+	CARD32 mapSize = 0;
+	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);
+	CARD32 mapPageSize = mapSize / sizeof(DiskFile::Page);
+	logger.info("germ  size = %d  %04X", mapPageSize, mapPageSize);
+
+	// first page goes to mGFT
+	CARD16 *p = Memory::getAddress(mGFT);
+	for(CARD32 i = 0; i < mapPageSize; i++) {
+		if (i == (int)GermOpsImpl::pageEndGermVM) {
+			logger.fatal("i == pageEndGermVM");
+			exit(1);
+		}
+
+		Util::byteswap(map[i].word, p, PageSize);
+
+		p = Memory::getAddress(((i + 1) * PageSize));
+	}
+	Util::unmapFile(map);
+}
+
+void initialize() {
 	setSignalHandler();
 
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
@@ -163,8 +264,8 @@ public:
 	}
 };
 
-void MesaProcessor::boot() {
-	logger.info("MesaProcessor::boot START");
+void boot() {
+	logger.info("boot START");
 
 	std::function<void()> f1 = std::function<void()>(interrupt::run);
 	std::function<void()> f2 = std::function<void()>(timer::run);
@@ -198,37 +299,13 @@ void MesaProcessor::boot() {
 	t6.stop();
 	timeStop = Util::getMilliSecondsFromEpoch();
 
-	logger.info("MesaProcessor::boot STOP");
+	logger.info("boot STOP");
 
 	// Properly detach DiskFile
 	for(DiskFile* diskFile: diskFileList) {
 		diskFile->detach();
 	}
 	floppyFile.detach();
-}
-
-
-void MesaProcessor::loadGerm(std::string& path) {
-	logger.info("germ  path    = %s", path);
-
-	CARD32 mapSize = 0;
-	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);
-	CARD32 mapPageSize = mapSize / sizeof(DiskFile::Page);
-	logger.info("germ  size = %d  %04X", mapPageSize, mapPageSize);
-
-	// first page goes to mGFT
-	CARD16 *p = Memory::getAddress(mGFT);
-	for(CARD32 i = 0; i < mapPageSize; i++) {
-		if (i == (int)GermOpsImpl::pageEndGermVM) {
-			logger.fatal("i == pageEndGermVM");
-			exit(1);
-		}
-
-		Util::byteswap(map[i].word, p, PageSize);
-
-		p = Memory::getAddress(((i + 1) * PageSize));
-	}
-	Util::unmapFile(map);
 }
 
 static void setSwitch(System::Switches& switches, unsigned char c) {
@@ -238,7 +315,7 @@ static void setSwitch(System::Switches& switches, unsigned char c) {
 
 	switches.word[high] |= (CARD16)(1U << (15 - low));
 }
-void MesaProcessor::setSwitches(System::Switches& switches, const char *string) {
+void setSwitches(System::Switches& switches, const char *string) {
 	int len = ::strlen(string);
 	for(int i = 0; i < len; i++) {
 		// decode \[0-3][0-7][0-7] character sequence
@@ -273,13 +350,13 @@ void MesaProcessor::setSwitches(System::Switches& switches, const char *string) 
 		}
 	}
 }
-void MesaProcessor::setBootRequestPV(Boot::Request* request, CARD16 deviceOrdinal) {
+void setBootRequestPV(Boot::Request* request, CARD16 deviceOrdinal) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_bootPhysicalVolume;
 	request->location.deviceType    = Device::T_anyPilotDisk;
 	request->location.deviceOrdinal = deviceOrdinal;
 }
-void MesaProcessor::setBootRequestEther(Boot::Request* request, CARD16 deviceOrdinal) {
+void setBootRequestEther(Boot::Request* request, CARD16 deviceOrdinal) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_inLoad;
 	request->location.deviceType    = Device::T_ethernet;
@@ -295,9 +372,15 @@ void MesaProcessor::setBootRequestEther(Boot::Request* request, CARD16 deviceOrd
 	request->location.ethernetRequest.address.socket.word[0] = 0x000a; // boot socket
 }
 
-void MesaProcessor::setBootRequestStream(Boot::Request* request) {
+void setBootRequestStream(Boot::Request* request) {
 	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
 	request->action                 = Boot::A_inLoad;
 	request->location.deviceType    = Device::T_simpleDataStream;
 	request->location.deviceOrdinal = 0;
+}
+
+int64_t elapsedTime() {
+    return timeStop - timeStart;
+}
+
 }

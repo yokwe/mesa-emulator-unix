@@ -61,10 +61,18 @@ extern void StackError();
 extern void UnboundTrap(ControlLink dst);
 extern void HardwareError();
 
+// 9.5.3 Trap Handlers
+extern void SaveStack(StateHandle state);
+extern void LoadStack(StateHandle state);
+
 // Process
 
 // 10.4.1 Scheduler
 extern void Reschedule(int preemption = 0);
+extern CARD16 PC;
+inline int ValidContext() {
+	return (SIZE(CodeSegment) * 2) <= PC;
+}
 
 // 10.4.2.1 Saving and Loading Process State
 extern void SaveProcess(int preemption);

@@ -378,30 +378,3 @@ static inline CARD16* StorePda(POINTER ptr) {
 	PERF_COUNT(memory, StorePda)
 	return PageCache::store(LengthenPdaPtr(ptr));
 }
-
-// 9.5.3 Trap Handlers
-static inline void SaveStack(StateHandle state) {
-	for(int sp = 0; sp < StackDepth; sp++) {
-		*Store(state + OFFSET3(StateVector, stack, sp)) = stack[sp];
-	}
-	StateWord word;
-	word.breakByte = breakByte;
-	word.stkptr = SP;
-	*Store(state + OFFSET(StateVector, word)) = word.u;
-	SP = savedSP = 0;
-	breakByte = 0;
-}
-static inline void LoadStack(StateHandle state) {
-	StateWord word;
-	word.u = *Fetch(state + OFFSET(StateVector, word));
-	for(int sp = 0; sp < StackDepth; sp++) {
-		stack[sp] = *Fetch(state + OFFSET3(StateVector, stack, sp));
-	}
-	SP = savedSP = word.stkptr;
-	breakByte = word.breakByte;
-}
-
-// 10.4.1 Scheduler
-__attribute__((always_inline)) static inline int ValidContext() {
-	return (SIZE(CodeSegment) * 2) <= PC;
-}

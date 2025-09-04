@@ -88,8 +88,8 @@ public:
 private:
 	static Opcode    tableMop[TABLE_SIZE];
 	static Opcode    tableEsc[TABLE_SIZE];
-	static long long statMop [TABLE_SIZE];
-	static long long statEsc [TABLE_SIZE];
+	static uint64_t statMop [TABLE_SIZE];
+	static uint64_t statEsc [TABLE_SIZE];
 
 	static void initRegisters();
 

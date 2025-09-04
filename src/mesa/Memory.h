@@ -162,9 +162,9 @@ protected:
 		};
 		CARD16* page;
 	};
-	static long long   hit;
-	static long long   missConflict;
-	static long long   missEmpty;
+	static uint64_t   hit;
+	static uint64_t   missConflict;
+	static uint64_t   missEmpty;
 	static Entry       entry[N_ENTRY];
 
 public:

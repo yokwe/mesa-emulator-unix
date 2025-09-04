@@ -43,8 +43,8 @@ static const Logger logger(__FILE__);
 
 Opcode    Interpreter::tableMop[Interpreter::TABLE_SIZE];
 Opcode    Interpreter::tableEsc[Interpreter::TABLE_SIZE];
-long long Interpreter::statMop [Interpreter::TABLE_SIZE];
-long long Interpreter::statEsc [Interpreter::TABLE_SIZE];
+uint64_t Interpreter::statMop [Interpreter::TABLE_SIZE];
+uint64_t Interpreter::statEsc [Interpreter::TABLE_SIZE];
 
 
 void Interpreter::assignMop(Opcode::EXEC exec_, const char* name_, CARD32 code_, CARD32 size_) {
@@ -111,7 +111,7 @@ void Interpreter::fillOpcodeTrap() {
 
 void Interpreter::stats() {
 	if (DEBUG_SHOW_OPCODE_STATS) {
-		long long total = 0;
+		uint64_t total = 0;
 		logger.info("==== Interpreter stats  START");
 		for(int i = 0; i < TABLE_SIZE; i++) {
 			Opcode *op = tableMop + i;

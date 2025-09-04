@@ -186,9 +186,9 @@ void Memory::mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount) {
 	}
 }
 
-long long        PageCache::missConflict;
-long long        PageCache::missEmpty;
-long long        PageCache::hit;
+uint64_t        PageCache::missConflict;
+uint64_t        PageCache::missEmpty;
+uint64_t        PageCache::hit;
 PageCache::Entry PageCache::entry[N_ENTRY];
 
 
@@ -351,7 +351,7 @@ void PageCache::stats() {
 	}
 
 	if (PERF_ENABLE) {
-		long long total = (missEmpty + missConflict) + hit;
+		uint64_t total = (missEmpty + missConflict) + hit;
 		logger.info("PageCache %5d / %5d  %10llu %6.2f%%   miss empty %10llu  conflict %10llu", used, N_ENTRY, total, ((double)hit / total) * 100.0, missEmpty, missConflict);
 	} else {
 		logger.info("PageCache %5d / %5d", used, N_ENTRY);

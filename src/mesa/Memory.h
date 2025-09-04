@@ -221,18 +221,18 @@ public:
 
 // 3.1.3 Virtual Memory Access
 __attribute__((always_inline)) static inline CARD16* Fetch(CARD32 virtualAddress) {
-	PERF_COUNT(Fetch)
+	PERF_COUNT(memory, Fetch)
 	return PageCache::fetch(virtualAddress);
 }
 __attribute__((always_inline)) static inline CARD16* Store(CARD32 virtualAddress) {
-	PERF_COUNT(Store)
+	PERF_COUNT(memory, Store)
 	return PageCache::store(virtualAddress);
 }
 __attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
 	return (ptrA / PageSize) == (ptrB / PageSize);
 }
 __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddress) {
-	PERF_COUNT(ReadDbl)
+	PERF_COUNT(memory, ReadDbl)
 	CARD16* p0 = PageCache::fetch(virtualAddress + 0);
 	CARD16* p1 = isSamePage(virtualAddress + 0, virtualAddress + 1) ? (p0 + 1) : PageCache::fetch(virtualAddress + 1);
 //	Long t;
@@ -247,15 +247,15 @@ __attribute__((always_inline)) static inline CARD32 LengthenPointer(CARD16 point
 	return Memory::lengthenPointer(pointer);
 }
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
-	PERF_COUNT(FetchMds)
+	PERF_COUNT(memory, FetchMds)
 	return PageCache::fetch(Memory::lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
-	PERF_COUNT(StoreMds)
+	PERF_COUNT(memory, StoreMds)
 	return PageCache::store(Memory::lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
-	PERF_COUNT(ReadDblMds)
+	PERF_COUNT(memory, ReadDblMds)
 	CARD16* p0 = PageCache::fetch(Memory::lengthenPointer(ptr + 0));
 	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(Memory::lengthenPointer(ptr + 1));
 //	Long t;
@@ -272,13 +272,13 @@ __attribute__((always_inline)) static inline CARD16 ReadCode(CARD16 offset) {
 
 // 4.3 Instruction Fetch
 __attribute__((always_inline)) static inline CARD8 GetCodeByte() {
-	PERF_COUNT(GetCodeByte)
+	PERF_COUNT(memory, GetCodeByte)
 	CARD16 word = ReadCode(PC / 2);
 	// NO PAGE FAULT AFTER HERE
 	return (PC++ & 1) ? LowByte(word) : HighByte(word);
 }
 __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
-	PERF_COUNT(GetCodeWord)
+	PERF_COUNT(memory, GetCodeWord)
 	CARD32 ptr = CB + (PC / 2);
 	CARD16* p0 = PageCache::fetch(ptr + 0);
 	if (PC & 1) {
@@ -296,7 +296,7 @@ __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
 
 // 7.4 String Instructions
 static inline BYTE FetchByte(LONG_POINTER ptr, LONG_CARDINAL offset) {
-	PERF_COUNT(FetchByte)
+	PERF_COUNT(memory, FetchByte)
 	ptr += offset / 2;
 	BytePair word = {*Fetch(ptr)};
 	return ((offset % 2) == 0) ? (BYTE)word.left : (BYTE)word.right;
@@ -308,7 +308,7 @@ static inline CARD16 FetchWord(LONG_POINTER ptr, LONG_CARDINAL offset) {
 	return ret.u;
 }
 static inline void StoreByte(LONG_POINTER ptr, LONG_CARDINAL offset, BYTE data) {
-	PERF_COUNT(StoreByte)
+	PERF_COUNT(memory, StoreByte)
 	ptr += offset / 2;
 	CARD16* p = Store(ptr);
 	BytePair word = {*p};
@@ -330,7 +330,7 @@ static inline CARD16 Field_MaskTable(CARD8 n) {
 }
 
 static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
-	PERF_COUNT(ReadField)
+	PERF_COUNT(memory, ReadField)
 	FieldSpec spec = {spec8};
 
 	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
@@ -340,7 +340,7 @@ static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
 	return (source >> shift) & Field_MaskTable(spec.size);
 }
 static inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
-	PERF_COUNT(WriteField)
+	PERF_COUNT(memory, WriteField)
 	FieldSpec spec = {spec8};
 
 	if (WordSize < (spec.pos + spec.size + 1)) ERROR();
@@ -371,11 +371,11 @@ __attribute__((always_inline)) static inline POINTER OffsetPda(LONG_POINTER ptr)
 }
 
 static inline CARD16* FetchPda(POINTER ptr) {
-	PERF_COUNT(FetchPda)
+	PERF_COUNT(memory, FetchPda)
 	return PageCache::fetch(LengthenPdaPtr(ptr));
 }
 static inline CARD16* StorePda(POINTER ptr) {
-	PERF_COUNT(StorePda)
+	PERF_COUNT(memory, StorePda)
 	return PageCache::store(LengthenPdaPtr(ptr));
 }
 

@@ -193,7 +193,7 @@ PageCache::Entry PageCache::entry[N_ENTRY];
 
 
 CARD16* Memory::Fetch(CARD32 virtualAddress) {
-	PERF_COUNT(MemoryFetch)
+	PERF_COUNT(memory, MemoryFetch)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
 	if (vpSize <= vp) {
@@ -213,7 +213,7 @@ CARD16* Memory::Fetch(CARD32 virtualAddress) {
 	return page->word + of;
 }
 CARD16* Memory::Store(CARD32 virtualAddress) {
-	PERF_COUNT(MemoryStore)
+	PERF_COUNT(memory, MemoryStore)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
 	if (vpSize <= vp) {
@@ -235,7 +235,7 @@ CARD16* Memory::Store(CARD32 virtualAddress) {
 	return page->word + of;
 }
 CARD16* Memory::getAddress(CARD32 virtualAddress) {
-	PERF_COUNT(GetAddress)
+	PERF_COUNT(memory, GetAddress)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
 	if (vpSize <= vp) {
@@ -303,7 +303,7 @@ void Memory::WriteMap(CARD32 vp, Map map) {
 
 	if (Vacant(map.mf)) map.rp = 0;
 	maps[vp] = map;
-	PERF_COUNT(WriteMap)
+	PERF_COUNT(memory, WriteMap)
 	PageCache::invalidate(vp);
 }
 

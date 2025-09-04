@@ -409,7 +409,7 @@ static void FaultTwo(FaultIndex fi, LONG_UNSPEC parameter) {
 
 // FrameFault: PROC[fsi: FSIndex]
 void FrameFault(FSIndex fsi) {
-	PERF_COUNT(FrameFault)
+	PERF_COUNT(opcode, FrameFault)
 	if (DEBUG_SHOW_FRAME_FAULT) {
 		if (Opcode::getLast()) {
 			logger.debug("%-10s %8d  %-8s  %8X+%4X  %8X", __FUNCTION__, fsi, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
@@ -422,7 +422,7 @@ void FrameFault(FSIndex fsi) {
 
 // PageFault: PROC[ptr: LONG POINTER]
 void PageFault(LONG_POINTER ptr) {
-	PERF_COUNT(PageFault)
+	PERF_COUNT(opcode, PageFault)
 	if (DEBUG_SHOW_PAGE_FAULT) {
 		if (Opcode::getLast()) {
 			logger.debug("%-10s %08X  %-8s  %8X+%4X  %8X", __FUNCTION__, ptr, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));

@@ -37,9 +37,9 @@
 
 #include <cinttypes>
 
-#define PERF_DECLARE(name) extern uint64_t name;
+#define PERF_DECLARE(group, name) namespace group { extern uint64_t name; }
 
-#define PERF_COUNT(name) { if (PERF_ENABLE) perf::name++; }
+#define PERF_COUNT(group, name) { if (PERF_ENABLE) perf::group::name++; }
 
 #define PERF_LOG() { if (PERF_ENABLE) perf::dump(); }
 
@@ -49,32 +49,33 @@ namespace perf {
 
 void dump();
 
-PERF_DECLARE(Dispatch)
-PERF_DECLARE(Fetch)
-PERF_DECLARE(Store)
-PERF_DECLARE(ReadDbl)
-PERF_DECLARE(FetchMds)
-PERF_DECLARE(StoreMds)
-PERF_DECLARE(ReadDblMds)
-PERF_DECLARE(GetCodeByte)
-PERF_DECLARE(GetCodeWord)
-PERF_DECLARE(FetchByte)
-PERF_DECLARE(StoreByte)
-PERF_DECLARE(ReadField)
-PERF_DECLARE(WriteField)
-PERF_DECLARE(WriteMap)
-PERF_DECLARE(GetAddress)
-PERF_DECLARE(FetchPda)
-PERF_DECLARE(StorePda)
-PERF_DECLARE(MemoryFetch)
-PERF_DECLARE(MemoryStore)
-// Fault
-PERF_DECLARE(FrameFault)
-PERF_DECLARE(PageFault)
-// Trap
-PERF_DECLARE(CodeTrap)
-PERF_DECLARE(EscOpcodeTrap)
-PERF_DECLARE(OpcodeTrap)
-PERF_DECLARE(UnboundTrap)
+// memory
+PERF_DECLARE(memory, Fetch)
+PERF_DECLARE(memory, Store)
+PERF_DECLARE(memory, ReadDbl)
+PERF_DECLARE(memory, FetchMds)
+PERF_DECLARE(memory, StoreMds)
+PERF_DECLARE(memory, ReadDblMds)
+PERF_DECLARE(memory, GetCodeByte)
+PERF_DECLARE(memory, GetCodeWord)
+PERF_DECLARE(memory, FetchByte)
+PERF_DECLARE(memory, StoreByte)
+PERF_DECLARE(memory, ReadField)
+PERF_DECLARE(memory, WriteField)
+PERF_DECLARE(memory, WriteMap)
+PERF_DECLARE(memory, GetAddress)
+PERF_DECLARE(memory, FetchPda)
+PERF_DECLARE(memory, StorePda)
+PERF_DECLARE(memory, MemoryFetch)
+PERF_DECLARE(memory, MemoryStore)
+
+// opcode
+PERF_DECLARE(opcode, Dispatch)
+PERF_DECLARE(opcode, FrameFault)
+PERF_DECLARE(opcode, PageFault)
+PERF_DECLARE(opcode, CodeTrap)
+PERF_DECLARE(opcode, EscOpcodeTrap)
+PERF_DECLARE(opcode, OpcodeTrap)
+PERF_DECLARE(opcode, UnboundTrap)
 
 }

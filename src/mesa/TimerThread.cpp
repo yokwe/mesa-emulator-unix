@@ -39,6 +39,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/Perf.h"
+
 #include "Function.h"
 #include "ProcessorThread.h"
 #include "Variable.h"
@@ -51,9 +53,6 @@ std::condition_variable TimerThread::cvTimer;
 int      TimerThread::stopThread;
 uint64_t TimerThread::lastTimeoutTime;
 
-int TimerThread::processTimeoutCount   = 0;
-int TimerThread::interruptEnabledCount = 0;
-
 void TimerThread::stop() {
 	logger.info("TimerThread::stop");
 	stopThread = 1;
@@ -62,14 +61,11 @@ void TimerThread::stop() {
 void TimerThread::run() {
 	logger.info("TimerThread::run START");
 
-	processTimeoutCount = 0;
-	interruptEnabledCount = 0;
-	int timerCount = 0;
 	auto tick = std::chrono::milliseconds(cTick);
 	auto time = std::chrono::system_clock::now();
 	std::unique_lock<std::mutex> locker(mutexTimer);
 	for(;;) {
-		timerCount++;
+		PERF_COUNT(timer, timer)
 		auto nextTime = time + tick;
 		std::this_thread::sleep_until(nextTime);
 		time = nextTime;
@@ -88,16 +84,13 @@ void TimerThread::run() {
 		}
 	}
 exitLoop:
-	logger.info("timerCount             = %8u", timerCount);
-	logger.info("processTimeoutCount    = %8u", processTimeoutCount);
-	logger.info("interruptEnabledCount  = %8u", interruptEnabledCount);
 	logger.info("TimerThread::run STOP");
 }
 
 bool TimerThread::processTimeout() {
 	// this method is called from processor thread
 	//logger.debug("processTimeout START");
-	processTimeoutCount++;
+	PERF_COUNT(timer, timeout)
 	{
 		// start next timer
 		std::unique_lock<std::mutex> locker(mutexTimer);
@@ -106,7 +99,7 @@ bool TimerThread::processTimeout() {
 
 	bool requeue;
 	if (InterruptsEnabled()) {
-		interruptEnabledCount++;
+		PERF_COUNT(timer, updatePTC)
 		PTC = PTC + 1;
 		if (PTC == 0) PTC = PTC + 1;
 

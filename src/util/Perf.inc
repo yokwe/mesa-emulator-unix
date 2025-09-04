@@ -27,6 +27,33 @@ uint64_t perf::opcode::CodeTrap         = 0;
 uint64_t perf::opcode::EscOpcodeTrap    = 0;
 uint64_t perf::opcode::OpcodeTrap       = 0;
 uint64_t perf::opcode::UnboundTrap      = 0;
+uint64_t perf::running::start           = 0;
+uint64_t perf::running::stop            = 0;
+uint64_t perf::interrupt::notify        = 0;
+uint64_t perf::interrupt::wakeup        = 0;
+uint64_t perf::interrupt::interrupt     = 0;
+uint64_t perf::interrupt::request       = 0;
+uint64_t perf::timer::timer             = 0;
+uint64_t perf::timer::timeout           = 0;
+uint64_t perf::timer::updatePTC         = 0;
+uint64_t perf::processor::abort         = 0;
+uint64_t perf::processor::requestReschedule = 0;
+uint64_t perf::processor::needReschedule = 0;
+uint64_t perf::processor::checkRequestReschedule = 0;
+uint64_t perf::processor::rescheduleRequest = 0;
+uint64_t perf::processor::interruptFlag = 0;
+uint64_t perf::processor::interrupt     = 0;
+uint64_t perf::processor::timerFlag     = 0;
+uint64_t perf::processor::timer         = 0;
+uint64_t perf::processor::running       = 0;
+uint64_t perf::network::transmit        = 0;
+uint64_t perf::network::wait_for        = 0;
+uint64_t perf::network::receive         = 0;
+uint64_t perf::network::select          = 0;
+uint64_t perf::disk::process            = 0;
+uint64_t perf::disk::read               = 0;
+uint64_t perf::disk::write              = 0;
+uint64_t perf::disk::verify             = 0;
 
 namespace perf {
 std::vector<perf::Entry> all {
@@ -55,5 +82,32 @@ std::vector<perf::Entry> all {
     {"opcode::EscOpcodeTrap" , perf::opcode::EscOpcodeTrap},
     {"opcode::OpcodeTrap"    , perf::opcode::OpcodeTrap},
     {"opcode::UnboundTrap"   , perf::opcode::UnboundTrap},
+    {"running::start"        , perf::running::start},
+    {"running::stop"         , perf::running::stop},
+    {"interrupt::notify"     , perf::interrupt::notify},
+    {"interrupt::wakeup"     , perf::interrupt::wakeup},
+    {"interrupt::interrupt"  , perf::interrupt::interrupt},
+    {"interrupt::request"    , perf::interrupt::request},
+    {"timer::timer"          , perf::timer::timer},
+    {"timer::timeout"        , perf::timer::timeout},
+    {"timer::updatePTC"      , perf::timer::updatePTC},
+    {"processor::abort"      , perf::processor::abort},
+    {"processor::requestReschedule", perf::processor::requestReschedule},
+    {"processor::needReschedule", perf::processor::needReschedule},
+    {"processor::checkRequestReschedule", perf::processor::checkRequestReschedule},
+    {"processor::rescheduleRequest", perf::processor::rescheduleRequest},
+    {"processor::interruptFlag", perf::processor::interruptFlag},
+    {"processor::interrupt"  , perf::processor::interrupt},
+    {"processor::timerFlag"  , perf::processor::timerFlag},
+    {"processor::timer"      , perf::processor::timer},
+    {"processor::running"    , perf::processor::running},
+    {"network::transmit"     , perf::network::transmit},
+    {"network::wait_for"     , perf::network::wait_for},
+    {"network::receive"      , perf::network::receive},
+    {"network::select"       , perf::network::select},
+    {"disk::process"         , perf::disk::process},
+    {"disk::read"            , perf::disk::read},
+    {"disk::write"           , perf::disk::write},
+    {"disk::verify"          , perf::disk::verify},
 };
 }

@@ -52,10 +52,6 @@ static const Logger logger(__FILE__);
 
 static const CARD32 DEBUG_DONT_USE_THREAD = 0;
 
-static int readCount = 0;
-static int writeCount = 0;
-static int verifyCount = 0;
-
 int AgentDisk::IOThread::stopThread = 0;
 void AgentDisk::IOThread::stop() {
 	logger.info("AgentDisk::IOThread::stop");
@@ -65,8 +61,7 @@ void AgentDisk::IOThread::run() {
 	logger.info("AgentDisk::IOThread::run START");
 
 	stopThread = 0;
-	int processCount = 0;
-	
+
 	try {
 		for(;;) {
 			if (stopThread) break;
@@ -93,17 +88,13 @@ void AgentDisk::IOThread::run() {
 
 			process(iocb, diskFile);
 			InterruptThread::notifyInterrupt(interruptSelector);
-			processCount++;
+			PERF_COUNT(disk, process)
 		}
 	} catch(Abort& e) {
 		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
 		ProcessorThread::stop();
 	}
 exitLoop:
-	logger.info("processCount           = %8u", processCount);
-	logger.info("readCount              = %8u", readCount);
-	logger.info("writeCount             = %8u", writeCount);
-	logger.info("verifyCount            = %8u", verifyCount);
 	logger.info("AgentDisk::IOThread::run STOP");
 }
 void AgentDisk::IOThread::reset() {
@@ -142,7 +133,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		iocb->pageCount = 0;
 		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
-		readCount++;
+		PERF_COUNT(disk, read)
 	}
 		break;
 	case PilotDiskFace::Command::write: {
@@ -158,7 +149,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		iocb->pageCount = 0;
 		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
-		writeCount++;
+		PERF_COUNT(disk, write)
 	}
 		break;
 	case PilotDiskFace::Command::verify: {
@@ -175,7 +166,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		iocb->pageCount = 0;
 		iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
 		//
-		verifyCount++;
+		PERF_COUNT(disk, verify)
 	}
 		break;
 	default:
@@ -270,7 +261,7 @@ void AgentDisk::Call() {
 				iocb->pageCount = 0;
 				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
-				readCount++;
+				PERF_COUNT(disk, read)
 			}
 				break;
 			case PilotDiskFace::Command::write: {
@@ -286,7 +277,7 @@ void AgentDisk::Call() {
 				iocb->pageCount = 0;
 				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
-				writeCount++;
+				PERF_COUNT(disk, write)
 			}
 				break;
 			case PilotDiskFace::Command::verify: {
@@ -303,7 +294,7 @@ void AgentDisk::Call() {
 				iocb->pageCount = 0;
 				iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
 				//
-				verifyCount++;
+				PERF_COUNT(disk, verify)
 			}
 				break;
 			default:

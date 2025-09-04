@@ -52,6 +52,4 @@ private:
 	static std::condition_variable cvWP;
 	
 	static int stopThread;
-	static int notifyCount;
-	static int notifyWakeupCount;
 };

@@ -97,12 +97,3 @@ void VariableMP::initialize() {
     observerList.push_back(Logger::mp_observer);
     observerList.push_back(ProcessorThread::mp_observer);
 }
-
-
-//
-// VariableRunning
-//
-void VariableRunning::stats(const Logger& logger) {
-    logger.info("running::countStart    = %6d", countStart);
-    logger.info("running::countStop     = %6d", countStop);
-}

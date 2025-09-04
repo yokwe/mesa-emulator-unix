@@ -38,6 +38,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/Perf.h"
+
 #include "Variable.h"
 #include "ProcessorThread.h"
 #include "InterruptThread.h"
@@ -47,15 +49,13 @@ std::mutex              InterruptThread::mutexWP;
 std::condition_variable InterruptThread::cvWP;
 
 int InterruptThread::stopThread        = 0;
-int InterruptThread::notifyCount       = 0;
-int InterruptThread::notifyWakeupCount = 0;
 
 void InterruptThread::stop() {
 	logger.info("InterruptThread::stop");
 	stopThread = 1;
 }
 void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
-	notifyCount++;
+	PERF_COUNT(interrupt, notify)
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
@@ -63,7 +63,7 @@ void InterruptThread::notifyInterrupt(CARD16 interruptSelector) {
 		std::unique_lock<std::mutex> locker(mutexWP);
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
-		notifyWakeupCount++;
+		PERF_COUNT(interrupt, wakeup)
 	}
 }
 //int InterruptThread::isPending() {
@@ -74,12 +74,10 @@ void InterruptThread::run() {
 	logger.info("InterruptThread::run START");
 
 	stopThread = 0;
-	int interruptCount = 0;
-	int requestCount   = 0;
 	std::unique_lock<std::mutex> locker(mutexWP);
 	for (;;) {
 		if (stopThread) break;
-		interruptCount++;
+		PERF_COUNT(interrupt, interrupt)
 
 		// wait until interrupt is arrived
 		for(;;) {
@@ -87,13 +85,9 @@ void InterruptThread::run() {
 			if (stopThread) goto exitLoop;
 			if (WP.pending()) break;
 		}
-		requestCount++;
+		PERF_COUNT(interrupt, request)
 		ProcessorThread::requestRescheduleInterrupt();
 	}
 exitLoop:
-	logger.info("notifyCount            = %8u", notifyCount);
-	logger.info("notifyWakeupCount      = %8u", notifyWakeupCount);
-	logger.info("interruptCount         = %8u", interruptCount);
-	logger.info("requestCount           = %8u", requestCount);
 	logger.info("InterruptThread::run STOP");
 }

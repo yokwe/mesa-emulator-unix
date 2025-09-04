@@ -78,4 +78,43 @@ PERF_DECLARE(opcode, EscOpcodeTrap)
 PERF_DECLARE(opcode, OpcodeTrap)
 PERF_DECLARE(opcode, UnboundTrap)
 
+// running
+PERF_DECLARE(running, start)
+PERF_DECLARE(running, stop)
+
+// interrupt
+PERF_DECLARE(interrupt, notify)
+PERF_DECLARE(interrupt, wakeup)
+PERF_DECLARE(interrupt, interrupt)
+PERF_DECLARE(interrupt, request)
+
+// timer
+PERF_DECLARE(timer, timer)
+PERF_DECLARE(timer, timeout)
+PERF_DECLARE(timer, updatePTC)
+
+// processor
+PERF_DECLARE(processor, abort)
+PERF_DECLARE(processor, requestReschedule)
+PERF_DECLARE(processor, needReschedule)
+PERF_DECLARE(processor, checkRequestReschedule)
+PERF_DECLARE(processor, rescheduleRequest)
+PERF_DECLARE(processor, interruptFlag)
+PERF_DECLARE(processor, interrupt)
+PERF_DECLARE(processor, timerFlag)
+PERF_DECLARE(processor, timer)
+PERF_DECLARE(processor, running)
+
+// network
+PERF_DECLARE(network, transmit)
+PERF_DECLARE(network, wait_for)
+PERF_DECLARE(network, receive)
+PERF_DECLARE(network, select)
+
+// disk
+PERF_DECLARE(disk, process)
+PERF_DECLARE(disk, read)
+PERF_DECLARE(disk, write)
+PERF_DECLARE(disk, verify)
+
 }

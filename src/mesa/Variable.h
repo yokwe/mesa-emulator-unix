@@ -45,6 +45,7 @@
 #include "Type.h"
 
 #include "../util/Util.h"
+#include "../util/Perf.h"
 
 
 #define STACK_ERROR() { \
@@ -163,8 +164,6 @@ public:
 
 class VariableRunning {
     bool storage;
-    int  countStart = 0;
-    int  countStop  = 0;
 public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
@@ -172,9 +171,9 @@ public:
     CARD16 operator=(const bool newValue) {
         storage = newValue;
         if (newValue) {
-            countStart++;
+            PERF_COUNT(running, start)
         } else {
-            countStop++;
+            PERF_COUNT(running, stop)
         }
 
         return newValue;
@@ -186,8 +185,6 @@ public:
     void clear() {
         storage = false;
     }
-
-    void stats(const Logger& logger);
 };
 
 

@@ -54,7 +54,7 @@ struct Entry {
 
 void perf::dump() {
     for(const auto& e: all) {
-        logger.info("%-22s = %10llu", e.name, e.value);
+        logger.info("%-34s = %10llu", e.name, e.value);
     }
 }
 

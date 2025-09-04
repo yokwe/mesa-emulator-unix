@@ -34,12 +34,14 @@
 //
 
 #include "../util/Util.h"
+#include "Variable.h"
 static const Logger logger(__FILE__);
 
 #include "../agent/AgentNetwork.h"
 #include "../agent/AgentDisk.h"
 #include "../opcode/Interpreter.h"
 #include "../util/Debug.h"
+#include "../util/Perf.h"
 
 #include "ProcessorThread.h"
 #include "InterruptThread.h"
@@ -52,8 +54,6 @@ static const Logger logger(__FILE__);
 std::condition_variable ProcessorThread::cvRunning;
 
 int ProcessorThread::stopThread                  = 0;
-int ProcessorThread::rescheduleRequestCount      = 0;
-int ProcessorThread::checkRequestRescheduleCount = 0;
 
 std::mutex         ProcessorThread::mutexRequestReschedule;
 VariableAtomicFlag ProcessorThread::rescheduleInterruptFlag;
@@ -76,16 +76,6 @@ void ProcessorThread::run() {
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, Memory::MDS());
 
-	int abortCount             = 0;
-	int rescheduleCount        = 0;
-	int interruptFlagCount     = 0;
-	int interruptCount         = 0;
-	int timerFlagCount         = 0;
-	int timerCount             = 0;
-	int needRescheduleCount    = 0;
-	int runningCount           = 0;
-
-
 	rescheduleInterruptFlag.clear();
 	rescheduleTimerFlag.clear();
 
@@ -102,7 +92,7 @@ void ProcessorThread::run() {
 				// ERROR_RequestReschedule is called from Reschedule() and ProcessorThread::checkRequestReschedule().
 				// In above both case, RequestReschedule will thrown while interrupt is enabled.
 				// Also above both case, call is from ProcessorThread
-				rescheduleCount++;
+				PERF_COUNT(processor, requestReschedule)
 				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
 				for(;;) {
 					// break if OP_STOPEMULATOR is called
@@ -121,32 +111,32 @@ void ProcessorThread::run() {
 						}
 						//logger.debug("waitRunning FINISH");
 					} else {
-						runningCount++;
+						PERF_COUNT(processor, running)
 					}
 					// Do reschedule.
 					{
 						//logger.debug("reschedule START");
 						bool needReschedule = false;
 						if (rescheduleInterruptFlag) {
-							interruptFlagCount++;
+							PERF_COUNT(processor, interruptFlag)
 							//logger.debug("reschedule INTERRUPT");
 							// process interrupt
 							if (Interrupt()) {
-								interruptCount++;
+								PERF_COUNT(processor, interrupt)
 								needReschedule = true;
 							}
 						}
 						if (rescheduleTimerFlag) {
-							timerFlagCount++;
+							PERF_COUNT(processor, timerFlag)
 							//logger.debug("reschedule TIMER");
 							// process timeout
 							if (TimerThread::processTimeout()) {
-								timerCount++;
+								PERF_COUNT(processor, timer)
 								needReschedule = true;
 							}
 						}
 						if (needReschedule) {
-							needRescheduleCount++;
+							PERF_COUNT(processor, needReschedule)
 							Reschedule(1);
 						}
 						rescheduleInterruptFlag.clear();
@@ -158,7 +148,7 @@ void ProcessorThread::run() {
 					break;
 				}
 			} catch(Abort& e) {
-				abortCount++;
+				PERF_COUNT(processor, abort)
 				//logger.debug("Abort %-20s  %8d", e.func, abortCount);
 			}
 		}
@@ -176,16 +166,6 @@ exitLoop:
 	TimerThread::stop();
 	InterruptThread::stop();
 
-	logger.info("abortCount                  = %8u", abortCount);
-	logger.info("rescheduleCount             = %8u", rescheduleCount);
-	logger.info("needRescheduleCount         = %8u", needRescheduleCount);
-	logger.info("checkRequestRescheduleCount = %8u", checkRequestRescheduleCount);
-	logger.info("rescheduleRequestCount      = %8u", rescheduleRequestCount);
-	logger.info("interruptFlagCount          = %8u", interruptFlagCount);
-	logger.info("interruptCount              = %8u", interruptCount);
-	logger.info("timerFlagCount              = %8u", timerFlagCount);
-	logger.info("timerCount                  = %8u", timerCount);
-	logger.info("runningCount                = %8u", runningCount);
 	logger.info("ProcessorThread::run STOP");
 }
 void ProcessorThread::requestRescheduleTimer() {

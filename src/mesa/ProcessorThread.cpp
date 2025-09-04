@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 
 #include "ProcessorThread.h"
 #include "InterruptThread.h"
-#include "TimerThread.h"
+#include "timer.h"
 
 
 //
@@ -130,7 +130,7 @@ void ProcessorThread::run() {
 							PERF_COUNT(processor, timerFlag)
 							//logger.debug("reschedule TIMER");
 							// process timeout
-							if (TimerThread::processTimeout()) {
+							if (timer::processTimeout()) {
 								PERF_COUNT(processor, timer)
 								needReschedule = true;
 							}
@@ -163,7 +163,7 @@ exitLoop:
 	AgentNetwork::ReceiveThread::stop();
 	AgentNetwork::TransmitThread::stop();
 	AgentDisk::IOThread::stop();
-	TimerThread::stop();
+	timer::stop();
 	InterruptThread::stop();
 
 	logger.info("ProcessorThread::run STOP");

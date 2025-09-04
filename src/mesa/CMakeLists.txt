@@ -15,7 +15,7 @@ target_sources(
         MesaProcessor.h
         Pilot.h
         ProcessorThread.h
-        TimerThread.h
+        timer.h
         Type.h
         Variable.h
     PRIVATE
@@ -24,7 +24,7 @@ target_sources(
         MesaProcessor.cpp
         Pilot.cpp
         ProcessorThread.cpp
-        TimerThread.cpp
+        timer.cpp
         Type.cpp
         Variable.cpp
 )

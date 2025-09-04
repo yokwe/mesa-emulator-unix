@@ -34,6 +34,7 @@
 //
 
 #include <bit>
+#include <functional>
 #include <string>
 #include <thread>
 
@@ -47,6 +48,8 @@ static const Logger logger(__FILE__);
 #include "../agent/StreamWWC.h"
 
 #include "../opcode/Interpreter.h"
+
+#include "timer.h"
 
 #include "MesaProcessor.h"
 
@@ -136,19 +139,17 @@ void MesaProcessor::initialize() {
 	timeStart = timeStop = 0;
 }
 
-template <typename T>
 class ThreadControl {
 public:
 	std::string name;
-	T* pointer;
+	std::function<void()> function;
 	std::thread thread;
-	ThreadControl(T* pointer_) {
-		name = demangle(typeid(T).name());
-		pointer = pointer_;
-	}
+
+	ThreadControl(const char* name_, std::function<void()> function_) : name(name_), function(function_) {}
+
 	void start() {
 		logger.info("thread start   %s", name);
-		thread = std::thread(&T::run, pointer);
+		thread = std::thread(function);
 	}
 	void stop() {
 		logger.info("thread joining %s", name);
@@ -160,12 +161,18 @@ public:
 void MesaProcessor::boot() {
 	logger.info("MesaProcessor::boot START");
 
-	ThreadControl t1(&interruptThread);
-	ThreadControl t2(&timerThread);
-	ThreadControl t3(&network.receiveThread);
-	ThreadControl t4(&network.transmitThread);
-	ThreadControl t5(&disk.ioThread);
-	ThreadControl t6(&processorThread);
+	std::function<void()> f1 = std::bind(&InterruptThread::run, &interruptThread);
+	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
+	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
+	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
+	std::function<void()> f6 = std::bind(&ProcessorThread::run, &processorThread);
+
+	ThreadControl t1("interrupt", f1);
+	ThreadControl t2("timer", std::function<void()>(timer::run));
+	ThreadControl t3("receive", f3);
+	ThreadControl t4("transmit", f4);
+	ThreadControl t5("disk", f5);
+	ThreadControl t6("processor", f6);
 
 	timeStart = Util::getMilliSecondsFromEpoch();
 	t1.start();

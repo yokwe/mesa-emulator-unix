@@ -46,7 +46,6 @@
 #include "../agent/AgentStream.h"
 
 #include "InterruptThread.h"
-#include "TimerThread.h"
 #include "ProcessorThread.h"
 
 class MesaProcessor {
@@ -130,7 +129,6 @@ private:
 	// for child thread
 	ProcessorThread processorThread;
 	InterruptThread interruptThread;
-	TimerThread     timerThread;
 
 	int64_t timeStart;
 	int64_t timeStop;

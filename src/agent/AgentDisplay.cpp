@@ -33,8 +33,6 @@
 // AgentDisplay.cpp
 //
 
-#include <bit>
-
 #include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);

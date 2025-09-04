@@ -50,6 +50,7 @@ static const Logger logger(__FILE__);
 #include "../opcode/Interpreter.h"
 
 #include "timer.h"
+#include "interrupt.h"
 
 #include "MesaProcessor.h"
 
@@ -161,14 +162,15 @@ public:
 void MesaProcessor::boot() {
 	logger.info("MesaProcessor::boot START");
 
-	std::function<void()> f1 = std::bind(&InterruptThread::run, &interruptThread);
+	std::function<void()> f1 = std::function<void()>(interrupt::run);
+	std::function<void()> f2 = std::function<void()>(timer::run);
 	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
 	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
 	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
 	std::function<void()> f6 = std::bind(&ProcessorThread::run, &processorThread);
 
 	ThreadControl t1("interrupt", f1);
-	ThreadControl t2("timer", std::function<void()>(timer::run));
+	ThreadControl t2("timer", f2);
 	ThreadControl t3("receive", f3);
 	ThreadControl t4("transmit", f4);
 	ThreadControl t5("disk", f5);
@@ -190,8 +192,8 @@ void MesaProcessor::boot() {
 	t4.stop();
 	t5.stop();
 	t6.stop();
-
 	timeStop = Util::getMilliSecondsFromEpoch();
+	
 	logger.info("MesaProcessor::boot STOP");
 
 	// Properly detach DiskFile

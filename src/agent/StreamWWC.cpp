@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/InterruptThread.h"
+#include "../mesa/interrupt.h"
 
 #include "AgentStream.h"
 #include "StreamWWC.h"
@@ -121,7 +121,7 @@ uint16_t StreamWWC::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoPr
 	if (tr.interruptMesa) {
 		if (fcb->interruptSelector) {
 			fcb->headResult = CoProcessorIOFaceGuam::R_completed;
-			InterruptThread::notifyInterrupt(fcb->interruptSelector);
+			interrupt::notifyInterrupt(fcb->interruptSelector);
 		}
 	}
 	return CoProcessorIOFaceGuam::R_completed;

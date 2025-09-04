@@ -9,7 +9,7 @@ target_sources(
 	PUBLIC
         Constant.h
         Function.h
-        InterruptThread.h
+        interrupt.h
         Memory.h
         MesaBasic.h
         MesaProcessor.h
@@ -19,7 +19,7 @@ target_sources(
         Type.h
         Variable.h
     PRIVATE
-        InterruptThread.cpp
+        interrupt.cpp
         Memory.cpp
         MesaProcessor.cpp
         Pilot.cpp

@@ -40,7 +40,6 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/Interpreter.h"
 
-#include "../mesa/InterruptThread.h"
 #include "../mesa/Variable.h"
 
 class testOpcode_esc : public testBase {

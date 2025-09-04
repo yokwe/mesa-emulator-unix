@@ -41,7 +41,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/Memory.h"
-#include "../mesa/InterruptThread.h"
+#include "../mesa/interrupt.h"
 #include "../mesa/ProcessorThread.h"
 
 #include "AgentNetwork.h"
@@ -93,7 +93,7 @@ void AgentNetwork::TransmitThread::run() {
 			}
 
 			networkPacket->transmit(iocb);
-			InterruptThread::notifyInterrupt(interruptSelector);
+			interrupt::notifyInterrupt(interruptSelector);
 			PERF_COUNT(network, transmit)
 		}
 	} catch(Abort& e) {
@@ -188,7 +188,7 @@ void AgentNetwork::ReceiveThread::run() {
 
 				// use this iocb to receive packet
 				networkPacket->receive(iocb);
-				InterruptThread::notifyInterrupt(interruptSelector);
+				interrupt::notifyInterrupt(interruptSelector);
 				PERF_COUNT(network, receive)
 			}
 		}

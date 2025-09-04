@@ -44,8 +44,8 @@ static const Logger logger(__FILE__);
 #include "../util/Perf.h"
 
 #include "ProcessorThread.h"
-#include "InterruptThread.h"
 #include "timer.h"
+#include "interrupt.h"
 
 
 //
@@ -164,7 +164,7 @@ exitLoop:
 	AgentNetwork::TransmitThread::stop();
 	AgentDisk::IOThread::stop();
 	timer::stop();
-	InterruptThread::stop();
+	interrupt::stop();
 
 	logger.info("ProcessorThread::run STOP");
 }

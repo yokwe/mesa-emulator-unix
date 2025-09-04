@@ -33,7 +33,7 @@ help:
 cmake: distclean-cmake
 	mkdir -p ${BUILD_DIR}; cd ${BUILD_DIR}; cmake ../${SOURCE_DIR} -G Ninja
 
-gen-perf-inc:
+src/util/Perf.inc: src/util/Perf.h data/gen-perf-inc.awk
 	awk -f data/gen-perf-inc.awk src/util/Perf.h >src/util/Perf.inc
 
 build: src/util/Perf.inc
@@ -47,10 +47,10 @@ distclean-cmake:
 distclean-macos:
 	find . -type f -name '._*' -print -delete
 
-main:
+main: src/util/Perf.inc
 	/usr/bin/time cmake --build build --target main
 	
-test:
+test: src/util/Perf.inc
 	/usr/bin/time cmake --build build --target test
 
 guam-headless: src/util/Perf.inc

@@ -73,9 +73,15 @@ CARD16            PSB; // PsbIndex - 10.1.1
 //extern MdsHandle         MDS;
 VariableMDS       MDS;
 
-LocalFrameHandle  LF;  // POINTER TO LocalVariables
-GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
-CARD32            CB;  // LONG POINTER TO CodeSegment
+//LocalFrameHandle  LF;  // POINTER TO LocalVariables
+VariableLF        LF;
+
+//GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
+VariableGF        GF;
+
+//CARD32            CB;  // LONG POINTER TO CodeSegment
+VariableCB        CB;
+
 CARD16            PC;
 GFTHandle         GFI;
 

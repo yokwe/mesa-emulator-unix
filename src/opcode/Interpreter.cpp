@@ -150,15 +150,16 @@ void Interpreter::initRegisters() {
 
 	// 3.3.1 Control Registers
 	PSB = 0; // PsbIndex - 10.1.1
-	MDS = 0U;
-	LF  = 0;  // POINTER TO LocalVariables
-	GF  = 0;  // LONG POINTER TO GlobalVarables
-	CB  = 0;  // LONG POINTER TO CodeSegment
+	MDS = (CARD32)0;
+	LF  = (CARD16)0;  // POINTER TO LocalVariables
+	GF  = (CARD32)0;  // LONG POINTER TO GlobalVarables
+	CB  = (CARD32)0;  // LONG POINTER TO CodeSegment
 	PC  = 0;
 	GFI = 0;
 
-	for(int i = 0; i < StackDepth; i++) stack[i] = 0;
-	SP = 0;
+//	for(int i = 0; i < StackDepth; i++) stack[i] = 0;
+//	SP = 0;
+	stack.clear();
 
 	// 4.5 Instruction Execution
 	breakByte = 0;

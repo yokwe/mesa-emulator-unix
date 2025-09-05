@@ -236,6 +236,7 @@ public:
         for(int i = 0; i < StackDepth; i++) {
             storage[i] = 0;
         }
+        SP = 0;
     }
     void push(CARD16 value) {
         if (StackDepth == SP) StackError();
@@ -283,6 +284,54 @@ public:
     CARD32 lengthenPointer(int pointer) = delete;
     CARD32 lengthenPointer(CARD16 pointer) {
         return storage + pointer;
+    }
+};
+
+
+class VariableCB {
+    CARD32 storage;
+public:
+    VariableCB() : storage(0) {}
+
+    CARD32 operator=(const int newValue) = delete;
+    CARD32 operator=(const CARD32 newValue) {
+        storage = newValue;
+        return newValue;
+    }
+    operator CARD32() {
+        return storage;
+    }
+};
+
+
+class VariableLF {
+    CARD16 storage;
+public:
+    VariableLF() : storage(0) {}
+
+    CARD16 operator=(const int newValue) = delete;
+    CARD16 operator=(const CARD16 newValue) {
+        storage = newValue;
+        return newValue;
+    }
+    operator CARD16() {
+        return storage;
+    }
+};
+
+
+class VariableGF {
+    CARD32 storage;
+public:
+    VariableGF() : storage(0) {}
+
+    CARD32 operator=(const int newValue) = delete;
+    CARD32 operator=(const CARD32 newValue) {
+        storage = newValue;
+        return newValue;
+    }
+    operator CARD32() {
+        return storage;
     }
 };
 
@@ -344,15 +393,21 @@ extern CARD16 XTS;    // Xfer trap status - 9.5.5
 // 3.3.1 Control Registers
 extern CARD16            PSB; // PsbIndex - 10.1.1
 
-//extern MdsHandle         MDS;
-extern VariableMDS         MDS;
+//extern MdsHandle       MDS;
+extern VariableMDS       MDS;
 inline CARD32 LengthenPointer(CARD16 pointer) {
     return MDS.lengthenPointer(pointer);
 }
 
-extern LocalFrameHandle  LF;  // POINTER TO LocalVariables
-extern GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
-extern CARD32            CB;  // LONG POINTER TO CodeSegment
+//extern LocalFrameHandle  LF;  // POINTER TO LocalVariables
+extern VariableLF        LF;
+
+//extern GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
+extern VariableGF        GF;
+
+//extern CARD32            CB;  // LONG POINTER TO CodeSegment
+extern VariableCB        CB;
+
 extern CARD16            PC;
 extern GFTHandle         GFI;
 

@@ -199,7 +199,7 @@ LocalFrameHandle LoadProcess() {
 			}
 		}
 		CARD32 mds = *FetchPda(OFFSET_PDA3(block, PSB, mds)) << WordSize;
-		Memory::setMDS(mds);
+		MDS = mds;
 		return frame;
 	} catch (Abort &abort) {
 		ERROR();

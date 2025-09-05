@@ -225,7 +225,7 @@ void E_DSK() {
 	CARD16 arg = GetCodeByte();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DSK %02X", savedPC, arg);
 	POINTER state = LF + arg;
-	SaveStack(LengthenPointer(state));
+	SaveStack(lengthenPointer(state));
 }
 // 041  ASSIGN_ESC(b, XE)
 // 042  ASSIGN_ESC(b, XF)
@@ -234,7 +234,7 @@ void E_LSK() {
 	CARD16 arg = GetCodeByte();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LSK %02X", savedPC, arg);
 	POINTER state = LF + arg;
-	LoadStack(LengthenPointer(state));
+	LoadStack(lengthenPointer(state));
 }
 // 044  ASSIGN_ESC(a, BNDCKL)
 void E_BNDCKL() {
@@ -348,8 +348,8 @@ void E_WRPSB() {
 // 0161  ASSIGN_ESC(a, WRMDS)
 void E_WRMDS() {
 	CARD32 mds = Pop() << WordSize;
-	Memory::setMDS(mds);
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRMDS  %04X", savedPC, (Memory::MDS() >> WordSize));
+	MDS = mds;
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WRMDS  %04X", savedPC, (MDS >> WordSize));
 }
 // 0162  ASSIGN_ESC(a, WRWP)
 void E_WRWP() {
@@ -392,8 +392,8 @@ void E_RRPSB() {
 }
 // 0171  ASSIGN_ESC(a, RRMDS)
 void E_RRMDS() {
-	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRMDS  %04X", savedPC, (Memory::MDS() >> WordSize));
-	Push((CARD16)(Memory::MDS() >> WordSize));
+	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RRMDS  %04X", savedPC, (MDS >> WordSize));
+	Push((CARD16)(MDS >> WordSize));
 }
 // 0172  ASSIGN_ESC(a, RRWP)
 void E_RRWP() {

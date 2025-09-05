@@ -115,16 +115,6 @@ public:
 		return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
 	}
 
-	__attribute__((always_inline)) static inline CARD32 lengthenPointer(CARD16 pointer) {
-		return mds + pointer;
-	}
-	static void setMDS(CARD32 newValue) {
-		mds = newValue;
-	}
-	static CARD32 MDS() {
-		return mds;
-	}
-
 private:
 	static CARD32  vpSize;
 	static CARD32  rpSize;
@@ -243,21 +233,18 @@ __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddres
 }
 
 // 3.2.1 Main Data Space Access
-__attribute__((always_inline)) static inline CARD32 LengthenPointer(CARD16 pointer) {
-	return Memory::lengthenPointer(pointer);
-}
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
 	PERF_COUNT(memory, FetchMds)
-	return PageCache::fetch(Memory::lengthenPointer(ptr));
+	return PageCache::fetch(lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 	PERF_COUNT(memory, StoreMds)
-	return PageCache::store(Memory::lengthenPointer(ptr));
+	return PageCache::store(lengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(memory, ReadDblMds)
-	CARD16* p0 = PageCache::fetch(Memory::lengthenPointer(ptr + 0));
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(Memory::lengthenPointer(ptr + 1));
+	CARD16* p0 = PageCache::fetch(lengthenPointer(ptr + 0));
+	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(lengthenPointer(ptr + 1));
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;

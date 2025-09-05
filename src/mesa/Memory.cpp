@@ -51,7 +51,6 @@ CARD32         Memory::displayVirtualPage  = 0;
 CARD32         Memory::displayWidth        = 0;
 CARD32         Memory::displayHeight       = 0;
 CARD32         Memory::displayBytesPerLine = 0;
-CARD32         Memory::mds   = 0;
 
 
 // Implementation Specific

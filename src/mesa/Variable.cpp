@@ -69,7 +69,10 @@ CARD16 XTS;    // Xfer trap status - 9.5.5
 
 // 3.3.1 Control Registers
 CARD16            PSB; // PsbIndex - 10.1.1
+
 //extern MdsHandle         MDS;
+VariableMDS       MDS;
+
 LocalFrameHandle  LF;  // POINTER TO LocalVariables
 GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
 CARD32            CB;  // LONG POINTER TO CodeSegment

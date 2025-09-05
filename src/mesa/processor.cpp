@@ -116,7 +116,7 @@ void run() {
 
 	XFER(bootLink.u, 0, XferType::call, 0);
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
-	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, Memory::MDS());
+	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
 
 	rescheduleInterruptFlag.clear();
 	rescheduleTimerFlag.clear();

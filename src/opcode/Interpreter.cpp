@@ -150,8 +150,7 @@ void Interpreter::initRegisters() {
 
 	// 3.3.1 Control Registers
 	PSB = 0; // PsbIndex - 10.1.1
-//	MDS = 0;
-	Memory::setMDS(0);
+	MDS = 0U;
 	LF  = 0;  // POINTER TO LocalVariables
 	GF  = 0;  // LONG POINTER TO GlobalVarables
 	CB  = 0;  // LONG POINTER TO CodeSegment

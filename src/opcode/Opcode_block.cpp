@@ -115,8 +115,8 @@ void E_BLT() {
 
 	if (count == 0) return;
 
-	CARD32 d = LengthenPointer(dest);
-	CARD32 s = LengthenPointer(source);
+	CARD32 d = lengthenPointer(dest);
+	CARD32 s = lengthenPointer(source);
 	CARD32 c = count;
 	CARD32 r;
 
@@ -226,7 +226,7 @@ void E_BLTC() {
 
 	if (count == 0) return;
 
-	CARD32 d = LengthenPointer(dest);
+	CARD32 d = lengthenPointer(dest);
 	CARD32 s = CB + source;
 	CARD32 c = count;
 	CARD32 r;

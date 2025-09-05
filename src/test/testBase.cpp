@@ -230,7 +230,7 @@ void testBase::setUp() {
 	// mPDA = 0x0001000
 	// mGFT = 0x0002000
 	CB  = 0x00030080;
-	Memory::setMDS(0x00040000);
+	MDS = 0x00040000U;
 	GF  = 0x00050080 + SIZE(GlobalOverhead);
 	PC  = 0x20;
 
@@ -262,10 +262,10 @@ void testBase::setUp() {
 	page_PDA = Memory::getAddress(mPDA);
 	page_GFT = Memory::getAddress(mGFT);
 	page_CB  = Memory::getAddress(CB);
-	page_MDS = Memory::getAddress(Memory::MDS());
-	page_AV  = Memory::getAddress(Memory::MDS() + mAV);
-	page_SD  = Memory::getAddress(Memory::MDS() + mSD);
-	page_ETT = Memory::getAddress(Memory::MDS() + mETT);
+	page_MDS = Memory::getAddress(MDS);
+	page_AV  = Memory::getAddress(MDS + mAV);
+	page_SD  = Memory::getAddress(MDS + mSD);
+	page_ETT = Memory::getAddress(MDS + mETT);
 	page_GF  = Memory::getAddress(GF);
 
 	GFI = 1;
@@ -287,7 +287,7 @@ void testBase::setUp() {
 	int fsi = 10;
 	LF = page_AV[fsi];
 	page_AV[fsi] = page_MDS[LF];
-	page_LF  = Memory::getAddress(Memory::MDS() + LF);
+	page_LF  = Memory::getAddress(MDS + LF);
 
 	PSB = 1;
 }

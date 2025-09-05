@@ -249,7 +249,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 
 	LinkType linkType = ControlLinkType(nDst);
 	//Trace::Context context;
-	//context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, Memory::MDS(), LF);
+	//context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, MDS, LF);
 
 	switch (linkType) {
 	case LinkType::oldProcedure : {
@@ -259,7 +259,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		nGFI = *FetchMds(GO_OFFSET(gf, word)) & 0xfffc; // 177774
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
-		if (GF != LengthenPointer(gf)) ERROR(); // Sanity check
+		if (GF != lengthenPointer(gf)) ERROR(); // Sanity check
 		CB = ReadDbl(GFT_OFFSET(nGFI, codebase));
 		if (CB & 1) {
 			CodeTrap(nGFI);
@@ -319,7 +319,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		break;
 	}
 
-//	context.setContext(nGFI, nPC - 1, Memory::MDS(), nLF);
+//	context.setContext(nGFI, nPC - 1, MDS, nLF);
 //	context.process();
 
 	if (push) {
@@ -389,7 +389,7 @@ void E_EFCB() {
 // zLFC - 0355
 void  E_LFC() {
 //	Trace::Context context;
-//	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, Memory::MDS(), LF);
+//	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, MDS, LF);
 
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
@@ -404,7 +404,7 @@ void  E_LFC() {
 	LF = nLF;
 	PC = nPC;
 
-//	context.setContext(GFI, nPC - 1, Memory::MDS(), nLF);
+//	context.setContext(GFI, nPC - 1, MDS, nLF);
 //	context.process();
 
 	ProcDesc dst;

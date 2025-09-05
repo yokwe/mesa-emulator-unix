@@ -166,26 +166,26 @@ class testOpcode_100 : public testBase {
 
 	void testRL0() {
 		page_CB[PC / 2] = zRL0 << 8 | 0x00;
-		CARD32 ptr = Memory::MDS() + 0x10;
+		CARD32 ptr = MDS + 0x10;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS()) + 0], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS) + 0], stack[0]);
 	}
 	void testRLB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRLB << 8 | alpha;
-		CARD32 ptr = Memory::MDS() + 0x10;
+		CARD32 ptr = MDS + 0x10;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS()) + alpha], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS) + alpha], stack[0]);
 	}
 
 
@@ -216,28 +216,28 @@ class testOpcode_100 : public testBase {
 
 	void testRDL0() {
 		page_CB[PC / 2] = zRDL0 << 8 | 0x00;
-		CARD32 ptr = Memory::MDS() + 0x10;
+		CARD32 ptr = MDS + 0x10;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + 0 + 0)], stack[0]);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + 0 + 1)], stack[1]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + 0 + 0)], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + 0 + 1)], stack[1]);
 	}
 	void testRDLB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRDLB << 8 | alpha;
-		CARD32 ptr = Memory::MDS() + 0x10;
+		CARD32 ptr = MDS + 0x10;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + alpha + 0)], stack[0]);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + alpha + 1)], stack[1]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + alpha + 0)], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + alpha + 1)], stack[1]);
 	}
 
 
@@ -288,7 +288,7 @@ class testOpcode_100 : public testBase {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zWLB << 8 | alpha;
 		const CARD16 value = 0x1234;
-		const CARD32 ptr = Memory::MDS() + 0x40;
+		const CARD32 ptr = MDS + 0x40;
 		stack[SP++] = value;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -296,14 +296,14 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - Memory::MDS() + alpha)]);
+		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - MDS + alpha)]);
 	}
 
 
 	void testPSLB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zPSLB << 8 | alpha;
-		const CARD32 ptr = Memory::MDS() + 0x40;
+		const CARD32 ptr = MDS + 0x40;
 		const CARD16 value = 0x1234;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -314,7 +314,7 @@ class testOpcode_100 : public testBase {
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
 		CPPUNIT_ASSERT_EQUAL(LowHalf(ptr),  stack[0]);
 		CPPUNIT_ASSERT_EQUAL(HighHalf(ptr), stack[1]);
-		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - Memory::MDS() + alpha)]);
+		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - MDS + alpha)]);
 	}
 
 
@@ -370,7 +370,7 @@ class testOpcode_100 : public testBase {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zWDLB << 8 | alpha;
 		const CARD32 value = 0x12345678;
-		const CARD32 ptr = Memory::MDS() + 0x40;
+		const CARD32 ptr = MDS + 0x40;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
 		stack[SP++] = LowHalf(ptr);
@@ -379,15 +379,15 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - Memory::MDS() + alpha + 0)]);
-		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - Memory::MDS() + alpha + 1)]);
+		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - MDS + alpha + 0)]);
+		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - MDS + alpha + 1)]);
 	}
 
 
 	void testPSDLB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zPSDLB << 8 | alpha;
-		const CARD32 ptr = Memory::MDS() + 0x40;
+		const CARD32 ptr = MDS + 0x40;
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -399,8 +399,8 @@ class testOpcode_100 : public testBase {
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
 		CPPUNIT_ASSERT_EQUAL(LowHalf(ptr),  stack[0]);
 		CPPUNIT_ASSERT_EQUAL(HighHalf(ptr), stack[1]);
-		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - Memory::MDS() + alpha + 0)]);
-		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - Memory::MDS() + alpha + 1)]);
+		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - MDS + alpha + 0)]);
+		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - MDS + alpha + 1)]);
 	}
 
 
@@ -466,14 +466,14 @@ class testOpcode_100 : public testBase {
 		pair.left  = 0x02;
 		pair.right = 0x04;
 		page_CB[PC / 2] = zRLILP << 8 | pair.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_LF[(pair.left + 0)] = LowHalf(ptr);
 		page_LF[(pair.left + 1)] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + pair.right)], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + pair.right)], stack[0]);
 	}
 
 
@@ -511,15 +511,15 @@ class testOpcode_100 : public testBase {
 		pair.left  = 0x02;
 		pair.right = 0x04;
 		page_CB[PC / 2] = zRLDILP << 8 | pair.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_LF[(pair.left + 0)] = LowHalf(ptr);
 		page_LF[(pair.left + 1)] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + pair.right + 0)], stack[0]);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + pair.right + 1)], stack[1]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + pair.right + 0)], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + pair.right + 1)], stack[1]);
 	}
 
 
@@ -543,14 +543,14 @@ class testOpcode_100 : public testBase {
 		pair.left  = 0x02;
 		pair.right = 0x04;
 		page_CB[PC / 2] = zRGILP << 8 | pair.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_GF[(pair.left + 0)] = LowHalf(ptr);
 		page_GF[(pair.left + 1)] = HighHalf(ptr);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - Memory::MDS() + pair.right)], stack[0]);
+		CPPUNIT_ASSERT_EQUAL(page_MDS[(ptr - MDS + pair.right)], stack[0]);
 	}
 
 
@@ -576,7 +576,7 @@ class testOpcode_100 : public testBase {
 		pair.left  = 0x02;
 		pair.right = 0x04;
 		page_CB[PC / 2] = zWLILP << 8 | pair.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_LF[(pair.left + 0)] = LowHalf(ptr);
 		page_LF[(pair.left + 1)] = HighHalf(ptr);
 		CARD16 value = 0x1234;
@@ -585,7 +585,7 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - Memory::MDS() + pair.right)]);
+		CPPUNIT_ASSERT_EQUAL(value, page_MDS[(ptr - MDS + pair.right)]);
 	}
 
 
@@ -594,7 +594,7 @@ class testOpcode_100 : public testBase {
 		pair.left  = 0x02;
 		pair.right = 0x04;
 		page_CB[PC / 2] = zWLDILP << 8 | pair.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_LF[(pair.left + 0)] = LowHalf(ptr);
 		page_LF[(pair.left + 1)] = HighHalf(ptr);
 		CARD32 value = 0x12345678;
@@ -604,8 +604,8 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - Memory::MDS() + pair.right + 0)]);
-		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - Memory::MDS() + pair.right + 1)]);
+		CPPUNIT_ASSERT_EQUAL(LowHalf(value),  page_MDS[(ptr - MDS + pair.right + 0)]);
+		CPPUNIT_ASSERT_EQUAL(HighHalf(value), page_MDS[(ptr - MDS + pair.right + 1)]);
 	}
 
 
@@ -649,11 +649,11 @@ class testOpcode_100 : public testBase {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRLS << 8 | alpha;
 		CARD16 index = 0x30;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		BytePair value;
 		value.left = 0x12;
 		value.right = 0x34;
-		page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)] = value.u;
+		page_MDS[(ptr - MDS + (index + alpha) / 2)] = value.u;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		stack[SP++] = index;
@@ -667,11 +667,11 @@ class testOpcode_100 : public testBase {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRLS << 8 | alpha;
 		CARD16 index = 0x31;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		BytePair value;
 		value.left = 0x12;
 		value.right = 0x34;
-		page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)] = value.u;
+		page_MDS[(ptr - MDS + (index + alpha) / 2)] = value.u;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		stack[SP++] = index;
@@ -729,11 +729,11 @@ class testOpcode_100 : public testBase {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zWLS << 8 | alpha;
 		CARD16 index = 0x30;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		BytePair value;
 		value.left = 0x12;
 		value.right = 0x34;
-		page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)] = value.u;
+		page_MDS[(ptr - MDS + (index + alpha) / 2)] = value.u;
 		CARD16 data = 0xab;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
@@ -744,17 +744,17 @@ class testOpcode_100 : public testBase {
 		value.left = data;
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(value.u,  page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)]);
+		CPPUNIT_ASSERT_EQUAL(value.u,  page_MDS[(ptr - MDS + (index + alpha) / 2)]);
 	}
 	void testWLS_right() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zWLS << 8 | alpha;
 		CARD16 index = 0x31;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		BytePair value;
 		value.left = 0x12;
 		value.right = 0x34;
-		page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)] = value.u;
+		page_MDS[(ptr - MDS + (index + alpha) / 2)] = value.u;
 		CARD16 data = 0xab;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
@@ -765,7 +765,7 @@ class testOpcode_100 : public testBase {
 		value.right = data;
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(value.u,  page_MDS[(ptr - Memory::MDS() + (index + alpha) / 2)]);
+		CPPUNIT_ASSERT_EQUAL(value.u,  page_MDS[(ptr - MDS + (index + alpha) / 2)]);
 	}
 
 
@@ -852,8 +852,8 @@ class testOpcode_100 : public testBase {
 		spec.pos = 0;
 		spec.size = 3;
 		page_CB[PC / 2] = zRL0F << 8 | spec.u;
-		CARD32 ptr = Memory::MDS() + 0x40;
-		page_MDS[(ptr - Memory::MDS() + 0)] = 0xABCD;
+		CARD32 ptr = MDS + 0x40;
+		page_MDS[(ptr - MDS + 0)] = 0xABCD;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
@@ -873,8 +873,8 @@ class testOpcode_100 : public testBase {
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zRLF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
-		CARD32 ptr = Memory::MDS() + 0x40;
-		page_MDS[(ptr - Memory::MDS() + desc.offset)] = 0xABCD;
+		CARD32 ptr = MDS + 0x40;
+		page_MDS[(ptr - MDS + desc.offset)] = 0xABCD;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		Interpreter::execute();
@@ -893,8 +893,8 @@ class testOpcode_100 : public testBase {
 		desc.field = spec.u;
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zRLFS << 8 | 0x00;
-		CARD32 ptr = Memory::MDS() + 0x40;
-		page_MDS[(ptr - Memory::MDS() + desc.offset)] = 0xABCD;
+		CARD32 ptr = MDS + 0x40;
+		page_MDS[(ptr - MDS + desc.offset)] = 0xABCD;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		stack[SP++] = desc.u;
@@ -935,10 +935,10 @@ class testOpcode_100 : public testBase {
 		spec.size = 3;
 		page_CB[PC / 2] = zRLILPF << 8 | pair.u;
 		page_CB[(PC / 2) + 1] = spec.u << 8 | 0x00;
-		CARD32 ptr = Memory::MDS() + 0x40;
+		CARD32 ptr = MDS + 0x40;
 		page_LF[(pair.left + 0)] = LowHalf(ptr);
 		page_LF[(pair.left + 1)] = HighHalf(ptr);
-		page_MDS[(ptr - Memory::MDS() + pair.right)] = 0xABCD;
+		page_MDS[(ptr - MDS + pair.right)] = 0xABCD;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 3, (int)PC);
@@ -1051,9 +1051,9 @@ class testOpcode_100 : public testBase {
 		spec.pos = 8;
 		spec.size = 3;
 		page_CB[PC / 2] = zWL0F << 8 | spec.u;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		UNSPEC data = 0x0A;
-		page_MDS[(ptr - Memory::MDS() + 0)] = 0x1234;
+		page_MDS[(ptr - MDS + 0)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -1061,7 +1061,7 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - Memory::MDS() + 0)]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - MDS + 0)]);
 	}
 
 
@@ -1074,9 +1074,9 @@ class testOpcode_100 : public testBase {
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zWLF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		UNSPEC data = 0x0A;
-		page_MDS[(ptr - Memory::MDS() + desc.offset)] = 0x1234;
+		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -1084,7 +1084,7 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 3, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - Memory::MDS() + desc.offset)]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - MDS + desc.offset)]);
 	}
 
 
@@ -1097,9 +1097,9 @@ class testOpcode_100 : public testBase {
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zPSLF << 8 | desc.offset;
 		page_CB[(PC / 2) + 1] = desc.field << 8 | 0x00;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		UNSPEC data = 0x0A;
-		page_MDS[(ptr - Memory::MDS() + desc.offset)] = 0x1234;
+		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
 		stack[SP++] = data;
@@ -1109,7 +1109,7 @@ class testOpcode_100 : public testBase {
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
 		CPPUNIT_ASSERT_EQUAL(LowHalf(ptr),  stack[0]);
 		CPPUNIT_ASSERT_EQUAL(HighHalf(ptr), stack[1]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - Memory::MDS() + desc.offset)]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - MDS + desc.offset)]);
 	}
 
 
@@ -1121,9 +1121,9 @@ class testOpcode_100 : public testBase {
 		desc.field = spec.u;
 		desc.offset = 0x10;
 		page_CB[PC / 2] = zWLFS << 8 | 0x00;
-		LONG_POINTER ptr = Memory::MDS() + 0x40;
+		LONG_POINTER ptr = MDS + 0x40;
 		UNSPEC data = 0x0A;
-		page_MDS[(ptr - Memory::MDS() + desc.offset)] = 0x1234;
+		page_MDS[(ptr - MDS + desc.offset)] = 0x1234;
 		stack[SP++] = data;
 		stack[SP++] = LowHalf(ptr);
 		stack[SP++] = HighHalf(ptr);
@@ -1132,7 +1132,7 @@ class testOpcode_100 : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - Memory::MDS() + desc.offset)]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x12A4, page_MDS[(ptr - MDS + desc.offset)]);
 	}
 
 
@@ -1202,12 +1202,12 @@ class testOpcode_100 : public testBase {
 		// test for frame link
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRKIB << 8 | alpha;
-		CARD32 link = Memory::MDS() + 0x60;
+		CARD32 link = MDS + 0x60;
 		CARD16 value = 0xcafe;
 		page_GF[-1] = 0x0000; // [word] = [codelink: 0];
 		page_GF[-2 -(alpha + 1) * 2 + 0] = LowHalf(link); // GlobalBase(GF) - (offset + 1) * 2
 		page_GF[-2 -(alpha + 1) * 2 + 1] = HighHalf(link);
-		page_MDS[link - Memory::MDS() + 0] = value;
+		page_MDS[link - MDS + 0] = value;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
@@ -1220,13 +1220,13 @@ class testOpcode_100 : public testBase {
 		// test for frame link
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zRKDIB << 8 | alpha;
-		CARD32 link = Memory::MDS() + 0x60;
+		CARD32 link = MDS + 0x60;
 		CARD32 value = 0xcafebabe;
 		page_GF[-1] = 0x0000; // [word] = [codelink: 0];
 		page_GF[-2 -(alpha + 1) * 2 + 0] = LowHalf(link); // GlobalBase(GF) - (offset + 1) * 2
 		page_GF[-2 -(alpha + 1) * 2 + 1] = HighHalf(link);
-		page_MDS[link - Memory::MDS() + 0] = LowHalf(value);
-		page_MDS[link - Memory::MDS() + 1] = HighHalf(value);
+		page_MDS[link - MDS + 0] = LowHalf(value);
+		page_MDS[link - MDS + 1] = HighHalf(value);
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);

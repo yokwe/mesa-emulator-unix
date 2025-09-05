@@ -242,7 +242,7 @@ class testOpcode_esc : public testBase {
 	}
 	void testGMF_n() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aGMF;
-		CARD32 vp = Memory::MDS() / PageSize;
+		CARD32 vp = MDS / PageSize;
 		stack[SP++] = LowHalf(vp);
 		stack[SP++] = HighHalf(vp);
 		Interpreter::execute();
@@ -274,7 +274,7 @@ class testOpcode_esc : public testBase {
 	}
 	void testSMF_n() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aSMF;
-		CARD32 vp = Memory::MDS() / PageSize;
+		CARD32 vp = MDS / PageSize;
 		MapFlags mf;
 		mf.u = 0;
 		mf.dirty = 1;
@@ -914,10 +914,10 @@ class testOpcode_esc : public testBase {
 
 	void testBLTLR_n() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLTLR;
-		LONG_POINTER dest   = Memory::MDS() + 0x0020;
+		LONG_POINTER dest   = MDS + 0x0020;
 		CARDINAL     count  = 0x0010;
-		LONG_POINTER source = Memory::MDS() + 0x0070;
-		for(int i = count - 1; 0 <= i; i--) page_MDS[source - Memory::MDS() + i] = (0xB000 | i);
+		LONG_POINTER source = MDS + 0x0070;
+		for(int i = count - 1; 0 <= i; i--) page_MDS[source - MDS + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -928,14 +928,14 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 		for(int i = count - 1; 0 <= i; i--)
-			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[dest - Memory::MDS() + i]);
+			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[dest - MDS + i]);
     }
 	void testBLTLR_o() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLTLR;
-		LONG_POINTER dest   = Memory::MDS() + 0x006f;
+		LONG_POINTER dest   = MDS + 0x006f;
 		CARDINAL     count  = 0x0010;
-		LONG_POINTER source = Memory::MDS() + 0x0070;
-		page_MDS[source - Memory::MDS() + count - 1] = 0x1234;
+		LONG_POINTER source = MDS + 0x0070;
+		page_MDS[source - MDS + count - 1] = 0x1234;
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -946,14 +946,14 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 		for(int i = count - 1; 0 <= i; i--)
-			CPPUNIT_ASSERT_EQUAL((CARD16)0x1234, page_MDS[dest - Memory::MDS() + i]);
+			CPPUNIT_ASSERT_EQUAL((CARD16)0x1234, page_MDS[dest - MDS + i]);
     }
 	void testBLTLR_l() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLTLR;
-		LONG_POINTER dest   = Memory::MDS() + 0x0630;
+		LONG_POINTER dest   = MDS + 0x0630;
 		CARDINAL     count  = 0x0340;
-		LONG_POINTER source = Memory::MDS() + 0x0070;
-		for(int i = count - 1; 0 <= i; i--) page_MDS[source - Memory::MDS() + i] = (0xB000 | i);
+		LONG_POINTER source = MDS + 0x0070;
+		for(int i = count - 1; 0 <= i; i--) page_MDS[source - MDS + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -964,16 +964,16 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 		for(int i = count - 1; 0 <= i; i--)
-			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[dest - Memory::MDS() + i]);
+			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[dest - MDS + i]);
     }
 
 	void testBLEL_t() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLEL;
-		LONG_POINTER dest   = Memory::MDS() + 0x0020;
+		LONG_POINTER dest   = MDS + 0x0020;
 		CARDINAL     count  = 0x0010;
-		LONG_POINTER source = Memory::MDS() + 0x0080;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[source - Memory::MDS() + i] = (0xB000 | i);
-		for(CARDINAL i = 0; i < count; i++) page_MDS[dest   - Memory::MDS() + i] = (0xB000 | i);
+		LONG_POINTER source = MDS + 0x0080;
+		for(CARDINAL i = 0; i < count; i++) page_MDS[source - MDS + i] = (0xB000 | i);
+		for(CARDINAL i = 0; i < count; i++) page_MDS[dest   - MDS + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -987,11 +987,11 @@ class testOpcode_esc : public testBase {
     }
 	void testBLEL_f() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLEL;
-		LONG_POINTER dest   = Memory::MDS() + 0x0020;
+		LONG_POINTER dest   = MDS + 0x0020;
 		CARDINAL     count  = 0x0010;
-		LONG_POINTER source = Memory::MDS() + 0x0080;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[source - Memory::MDS() + i] = (0xB000 | i);
-		for(CARDINAL i = 1; i < count; i++) page_MDS[dest   - Memory::MDS() + i] = (0xB000 | i);
+		LONG_POINTER source = MDS + 0x0080;
+		for(CARDINAL i = 0; i < count; i++) page_MDS[source - MDS + i] = (0xB000 | i);
+		for(CARDINAL i = 1; i < count; i++) page_MDS[dest   - MDS + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -1005,11 +1005,11 @@ class testOpcode_esc : public testBase {
     }
 	void testBLEL_l() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLEL;
-		LONG_POINTER dest   = Memory::MDS() + 0x0020;
+		LONG_POINTER dest   = MDS + 0x0020;
 		CARDINAL     count  = 0x0340;
-		LONG_POINTER source = Memory::MDS() + 0x0680;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[source - Memory::MDS() + i] = (0xB000 | i);
-		for(CARDINAL i = 0; i < count; i++) page_MDS[dest   - Memory::MDS() + i] = (0xB000 | i);
+		LONG_POINTER source = MDS + 0x0680;
+		for(CARDINAL i = 0; i < count; i++) page_MDS[source - MDS + i] = (0xB000 | i);
+		for(CARDINAL i = 0; i < count; i++) page_MDS[dest   - MDS + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(source);
 		stack[SP++] = HighHalf(source);
 		stack[SP++] = count;
@@ -1024,10 +1024,10 @@ class testOpcode_esc : public testBase {
 
 	void testBLECL_t() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLECL;
-		LONG_POINTER ptr    = Memory::MDS() + 0x0020;
+		LONG_POINTER ptr    = MDS + 0x0020;
 		CARDINAL     count  = 0x0010;
 		CARDINAL     offset = 0x0080;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - Memory::MDS() + i] = (0xB000 | i);
+		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - MDS + i] = (0xB000 | i);
 		for(CARDINAL i = 0; i < count; i++) page_CB [offset    + i] = (0xB000 | i);
 		stack[SP++] = offset;
 		stack[SP++] = count;
@@ -1041,10 +1041,10 @@ class testOpcode_esc : public testBase {
     }
 	void testBLECL_f() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLECL;
-		LONG_POINTER ptr    = Memory::MDS() + 0x0020;
+		LONG_POINTER ptr    = MDS + 0x0020;
 		CARDINAL     count  = 0x0010;
 		CARDINAL     offset = 0x0080;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - Memory::MDS() + i] = (0xB000 | i);
+		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - MDS + i] = (0xB000 | i);
 		for(CARDINAL i = 0; i < count; i++) page_CB [offset    + i] = (0xBB01 | i);
 		stack[SP++] = offset;
 		stack[SP++] = count;
@@ -1058,10 +1058,10 @@ class testOpcode_esc : public testBase {
     }
 	void testBLECL_l() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBLECL;
-		LONG_POINTER ptr   = Memory::MDS() + 0x0620;
+		LONG_POINTER ptr   = MDS + 0x0620;
 		CARDINAL     count = 0x0340;
 		CARDINAL    offset = 0x0080;
-		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - Memory::MDS() + i] = (0xB000 | i);
+		for(CARDINAL i = 0; i < count; i++) page_MDS[ptr - MDS + i] = (0xB000 | i);
 		for(CARDINAL i = 0; i < count; i++) page_CB [offset    + i] = (0xB000 | i);
 		stack[SP++] = offset;
 		stack[SP++] = count;
@@ -1081,18 +1081,18 @@ class testOpcode_esc : public testBase {
 	void testBYTBLT_n() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLT;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x40;
+		LONG_POINTER sourceBase   = MDS + 0x40;
 		CARDINAL     count        = 16;
 		CARDINAL     destOffset   = 0x50;
-		LONG_POINTER destBase     = Memory::MDS() + 0x80;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 0] = 0x0011;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 1] = 0x2233;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 2] = 0x4455;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 3] = 0x6677;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 4] = 0x8899;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 5] = 0xAABB;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 6] = 0xCCDD;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 7] = 0xEEFF;
+		LONG_POINTER destBase     = MDS + 0x80;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 0] = 0x0011;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 1] = 0x2233;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 2] = 0x4455;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 3] = 0x6677;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 4] = 0x8899;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 5] = 0xAABB;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 6] = 0xCCDD;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 7] = 0xEEFF;
 
 		stack[SP++] = LowHalf(destBase);
 		stack[SP++] = HighHalf(destBase);
@@ -1106,30 +1106,30 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 0]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x2233, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 1]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x4455, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 2]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x6677, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 3]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x8899, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 4]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xAABB, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 5]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xCCDD, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 6]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 7]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x2233, page_MDS[destBase - MDS + (destOffset / 2) + 1]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x4455, page_MDS[destBase - MDS + (destOffset / 2) + 2]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x6677, page_MDS[destBase - MDS + (destOffset / 2) + 3]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x8899, page_MDS[destBase - MDS + (destOffset / 2) + 4]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xAABB, page_MDS[destBase - MDS + (destOffset / 2) + 5]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xCCDD, page_MDS[destBase - MDS + (destOffset / 2) + 6]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 7]);
 	}
 	void testBYTBLT_o() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLT;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x40;
+		LONG_POINTER sourceBase   = MDS + 0x40;
 		CARDINAL     count        = 16;
 		CARDINAL     destOffset   = 0x22;
-		LONG_POINTER destBase     = Memory::MDS() + 0x40;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 0] = 0x0011;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 1] = 0x2233;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 2] = 0x4455;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 3] = 0x6677;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 4] = 0x8899;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 5] = 0xAABB;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 6] = 0xCCDD;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 7] = 0xEEFF;
+		LONG_POINTER destBase     = MDS + 0x40;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 0] = 0x0011;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 1] = 0x2233;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 2] = 0x4455;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 3] = 0x6677;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 4] = 0x8899;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 5] = 0xAABB;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 6] = 0xCCDD;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 7] = 0xEEFF;
 
 		stack[SP++] = LowHalf(destBase);
 		stack[SP++] = HighHalf(destBase);
@@ -1143,23 +1143,23 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 0]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 1]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 2]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 3]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 4]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 5]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 6]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 7]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 1]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 2]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 3]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 4]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 5]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 6]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 7]);
 	}
 	void testBYTBLT_l() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLT;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x0640;
+		LONG_POINTER sourceBase   = MDS + 0x0640;
 		CARDINAL     count        = 0x0240;
 		CARDINAL     destOffset   = 0x50;
-		LONG_POINTER destBase     = Memory::MDS() + 0x0080;
-		for(CARDINAL i = 0; i < (count / 2); i++) page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + i] = (0xB000 | i);
+		LONG_POINTER destBase     = MDS + 0x0080;
+		for(CARDINAL i = 0; i < (count / 2); i++) page_MDS[sourceBase - MDS + (sourceOffset / 2) + i] = (0xB000 | i);
 		stack[SP++] = LowHalf(destBase);
 		stack[SP++] = HighHalf(destBase);
 		stack[SP++] = destOffset;
@@ -1172,23 +1172,23 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 		for(CARDINAL i = 0; i < (count / 2); i++)
-			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[destBase - Memory::MDS() + (destOffset / 2) + i]);
+			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[destBase - MDS + (destOffset / 2) + i]);
 	}
 	void testBYTBLTR_n() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLTR;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x40;
+		LONG_POINTER sourceBase   = MDS + 0x40;
 		CARDINAL     count        = 16;
 		CARDINAL     destOffset   = 0x40;
-		LONG_POINTER destBase     = Memory::MDS() + 0x80;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 0] = 0x0011;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 1] = 0x2233;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 2] = 0x4455;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 3] = 0x6677;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 4] = 0x8899;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 5] = 0xAABB;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 6] = 0xCCDD;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 7] = 0xEEFF;
+		LONG_POINTER destBase     = MDS + 0x80;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 0] = 0x0011;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 1] = 0x2233;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 2] = 0x4455;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 3] = 0x6677;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 4] = 0x8899;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 5] = 0xAABB;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 6] = 0xCCDD;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 7] = 0xEEFF;
 
 		stack[SP++] = LowHalf(destBase);
 		stack[SP++] = HighHalf(destBase);
@@ -1202,30 +1202,30 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 0]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x2233, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 1]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x4455, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 2]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x6677, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 3]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0x8899, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 4]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xAABB, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 5]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xCCDD, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 6]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 7]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x0011, page_MDS[destBase - MDS + (destOffset / 2) + 0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x2233, page_MDS[destBase - MDS + (destOffset / 2) + 1]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x4455, page_MDS[destBase - MDS + (destOffset / 2) + 2]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x6677, page_MDS[destBase - MDS + (destOffset / 2) + 3]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0x8899, page_MDS[destBase - MDS + (destOffset / 2) + 4]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xAABB, page_MDS[destBase - MDS + (destOffset / 2) + 5]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xCCDD, page_MDS[destBase - MDS + (destOffset / 2) + 6]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 7]);
 	}
 	void testBYTBLTR_o() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLTR;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x40;
+		LONG_POINTER sourceBase   = MDS + 0x40;
 		CARDINAL     count        = 16;
 		CARDINAL     destOffset   = 0x1E;
-		LONG_POINTER destBase     = Memory::MDS() + 0x40;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 0] = 0x0011;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 1] = 0x2233;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 2] = 0x4455;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 3] = 0x6677;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 4] = 0x8899;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 5] = 0xAABB;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 6] = 0xCCDD;
-		page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + 7] = 0xEEFF;
+		LONG_POINTER destBase     = MDS + 0x40;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 0] = 0x0011;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 1] = 0x2233;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 2] = 0x4455;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 3] = 0x6677;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 4] = 0x8899;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 5] = 0xAABB;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 6] = 0xCCDD;
+		page_MDS[sourceBase - MDS + (sourceOffset / 2) + 7] = 0xEEFF;
 
 		stack[SP++] = LowHalf(destBase);
 		stack[SP++] = HighHalf(destBase);
@@ -1239,25 +1239,25 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 0]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 1]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 2]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 3]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 4]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 5]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 6]);
-		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - Memory::MDS() + (destOffset / 2) + 7]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 0]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 1]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 2]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 3]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 4]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 5]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 6]);
+		CPPUNIT_ASSERT_EQUAL((CARD16)0xEEFF, page_MDS[destBase - MDS + (destOffset / 2) + 7]);
 	}
 	void testBYTBLTR_l() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aBYTBLTR;
 		CARDINAL     sourceOffset = 0x20;
-		LONG_POINTER sourceBase   = Memory::MDS() + 0x40;
+		LONG_POINTER sourceBase   = MDS + 0x40;
 		CARDINAL     count        = 260;
 		CARDINAL     destOffset   = 0x400;
-		LONG_POINTER destBase     = Memory::MDS() + 0x80;
+		LONG_POINTER destBase     = MDS + 0x80;
 
 		for(int i = 0; i < (count / 2); i++) {
-			page_MDS[sourceBase - Memory::MDS() + (sourceOffset / 2) + i] = (CARD16)(0xB000 | i);
+			page_MDS[sourceBase - MDS + (sourceOffset / 2) + i] = (CARD16)(0xB000 | i);
 		}
 
 		stack[SP++] = LowHalf(destBase);
@@ -1273,7 +1273,7 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
 
 		for(int i = 0; i < (count / 2); i++) {
-			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[destBase - Memory::MDS() + (destOffset / 2) + i]);
+			CPPUNIT_ASSERT_EQUAL((CARD16)(0xB000 | i), page_MDS[destBase - MDS + (destOffset / 2) + i]);
 		}
 	}
 	void testVERSION() {} // TODO VERSION
@@ -1430,7 +1430,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL((CARD32)(n << WordSize), Memory::MDS());
+		CPPUNIT_ASSERT_EQUAL(((CARD32)n) << WordSize, (CARD32)MDS);
 	}
 	void testWRWP() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aWRWP;
@@ -1508,7 +1508,7 @@ class testOpcode_esc : public testBase {
 	void testRRMDS() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRMDS;
 		CARD16 value = 0x1234;
-		Memory::setMDS(value << 16);
+		MDS = (CARD32)value << 16;
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
@@ -1597,10 +1597,10 @@ class testOpcode_esc : public testBase {
 		// case 1  3x3
 //		CARD16 ptr = 0x1000;
 //
-//		CARD32 dstAddress = Memory::MDS() + 0x3000;
+//		CARD32 dstAddress = MDS + 0x3000;
 //		CARD16 dstPixel   = 0x0;
 //		INT16  dstPpl     = 0x30;
-//		CARD32 srcAddress = Memory::MDS() + 0x2000;
+//		CARD32 srcAddress = MDS + 0x2000;
 //		CARD16 srcPixel   = 0x0;
 //		INT16  srcPpl     = 0x40;
 //		CARD16 width      = 0x30;

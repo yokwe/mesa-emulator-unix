@@ -415,7 +415,7 @@ void E_WLDILP() {
 __attribute__((always_inline)) static inline void E_RS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  RS %3d", savedPC, arg);
 	CARDINAL index = Pop();
-	LONG_POINTER ptr = LengthenPointer(Pop());
+	LONG_POINTER ptr = lengthenPointer(Pop());
 	CARD16 t = FetchByte(ptr, arg + index);
 	// NO PAGE FAULT AFTER HERE
 	Push(t);
@@ -443,7 +443,7 @@ void E_RLS() {
 __attribute__((always_inline)) static inline void E_WS_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  WS %3d", savedPC, arg);
 	CARDINAL index = Pop();
-	LONG_POINTER ptr = LengthenPointer(Pop());
+	LONG_POINTER ptr = lengthenPointer(Pop());
 	BYTE data = LowByte(Pop());
 	StoreByte(ptr, arg + index, data);
 }

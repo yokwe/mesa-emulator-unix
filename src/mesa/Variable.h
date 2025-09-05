@@ -270,6 +270,27 @@ public:
     }
 };
 
+
+class VariableMDS {
+    CARD32 storage;
+public:
+    VariableMDS() : storage(0) {}
+
+    CARD32 operator=(const int newValue) = delete;
+    CARD32 operator=(const CARD32 newValue) {
+        storage = newValue;
+        return newValue;
+    }
+    operator CARD32() {
+        return storage;
+    }
+
+    CARD32 lengthenPointer(CARD16 pointer) {
+        return storage + pointer;
+    }
+};
+
+
 // 3.3.2 Evaluation Stack
 //extern CARD16 stack[StackDepth];
 extern VariableStack stack;
@@ -326,7 +347,13 @@ extern CARD16 XTS;    // Xfer trap status - 9.5.5
 
 // 3.3.1 Control Registers
 extern CARD16            PSB; // PsbIndex - 10.1.1
+
 //extern MdsHandle         MDS;
+extern VariableMDS         MDS;
+inline CARD32 lengthenPointer(CARD16 pointer) {
+    return MDS.lengthenPointer(pointer);
+}
+
 extern LocalFrameHandle  LF;  // POINTER TO LocalVariables
 extern GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
 extern CARD32            CB;  // LONG POINTER TO CodeSegment

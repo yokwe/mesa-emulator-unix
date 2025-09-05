@@ -209,6 +209,13 @@ public:
 	}
 };
 
+__attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
+	return (ptrA / PageSize) == (ptrB / PageSize);
+}
+__attribute__((always_inline)) static inline int isLastOfPage(CARD32 ptr) {
+	return (ptr & PageOffset) == PageOffset;
+}
+
 // 3.1.3 Virtual Memory Access
 __attribute__((always_inline)) static inline CARD16* Fetch(CARD32 virtualAddress) {
 	PERF_COUNT(memory, Fetch)
@@ -218,13 +225,11 @@ __attribute__((always_inline)) static inline CARD16* Store(CARD32 virtualAddress
 	PERF_COUNT(memory, Store)
 	return PageCache::store(virtualAddress);
 }
-__attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
-	return (ptrA / PageSize) == (ptrB / PageSize);
-}
 __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(memory, ReadDbl)
 	CARD16* p0 = PageCache::fetch(virtualAddress + 0);
-	CARD16* p1 = isSamePage(virtualAddress + 0, virtualAddress + 1) ? (p0 + 1) : PageCache::fetch(virtualAddress + 1);
+	CARD16* p1 = p0 + 1;
+	if (isLastOfPage(virtualAddress)) p1 = PageCache::fetch(virtualAddress + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -243,8 +248,10 @@ __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(memory, ReadDblMds)
-	CARD16* p0 = PageCache::fetch(LengthenPointer(ptr + 0));
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(LengthenPointer(ptr + 1));
+	CARD32 p = LengthenPointer(ptr);
+	CARD16* p0 = PageCache::fetch(p + 0);
+	CARD16* p1 = p0 + 1;
+	if (isLastOfPage(p)) p1 = PageCache::fetch(p + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;

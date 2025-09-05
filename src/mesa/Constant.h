@@ -39,7 +39,8 @@
 
 // for compatibility
 //const CARD16 PageSize = Environment::wordsPerPage;
-const CARD16 PageSize = 256;
+const int PageSize   = 256;
+const int PageOffset = 0xFF;
 
 const CARD16 cSS = 14;
 // 3.3.2 Evaluation Stack

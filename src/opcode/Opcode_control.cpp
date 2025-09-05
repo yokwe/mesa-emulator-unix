@@ -259,7 +259,7 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 		nGFI = *FetchMds(GO_OFFSET(gf, word)) & 0xfffc; // 177774
 		if (nGFI == 0) UnboundTrap(dst);
 		GF = ReadDbl(GFT_OFFSET(nGFI, globalFrame));
-		if (GF != lengthenPointer(gf)) ERROR(); // Sanity check
+		if (GF != LengthenPointer(gf)) ERROR(); // Sanity check
 		CB = ReadDbl(GFT_OFFSET(nGFI, codebase));
 		if (CB & 1) {
 			CodeTrap(nGFI);

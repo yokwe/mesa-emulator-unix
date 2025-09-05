@@ -190,7 +190,7 @@ void E_GAW() {
 void E_LP() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LP", savedPC);
 	POINTER ptr = Pop();
-	PushLong((ptr == 0) ? 0 : lengthenPointer(ptr));
+	PushLong((ptr == 0) ? 0 : LengthenPointer(ptr));
 }
 // 0370  ASSIGN_MOP(z, ESC)
 void E_ESC() {

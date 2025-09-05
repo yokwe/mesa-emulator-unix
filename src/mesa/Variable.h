@@ -73,7 +73,6 @@ public:
 
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
-
     CARD16 operator=(const CARD16 newValue) {
         storage = newValue;
         for(auto observer: observerList) observer(newValue);
@@ -98,7 +97,6 @@ public:
 
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
-
     CARD16 operator=(const CARD16 newValue) {
         storage.store(newValue);
         return newValue;
@@ -130,7 +128,6 @@ public:
 
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
-
     CARD16 operator=(const CARD16 newValue) {
         storage.store(newValue);
         return newValue;
@@ -167,7 +164,6 @@ class VariableRunning {
 public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
-
     CARD16 operator=(const bool newValue) {
         storage = newValue;
         if (newValue) {
@@ -284,7 +280,7 @@ public:
     operator CARD32() {
         return storage;
     }
-
+    CARD32 lengthenPointer(int pointer) = delete;
     CARD32 lengthenPointer(CARD16 pointer) {
         return storage + pointer;
     }
@@ -350,7 +346,7 @@ extern CARD16            PSB; // PsbIndex - 10.1.1
 
 //extern MdsHandle         MDS;
 extern VariableMDS         MDS;
-inline CARD32 lengthenPointer(CARD16 pointer) {
+inline CARD32 LengthenPointer(CARD16 pointer) {
     return MDS.lengthenPointer(pointer);
 }
 

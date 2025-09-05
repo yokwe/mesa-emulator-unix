@@ -235,16 +235,16 @@ __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddres
 // 3.2.1 Main Data Space Access
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
 	PERF_COUNT(memory, FetchMds)
-	return PageCache::fetch(lengthenPointer(ptr));
+	return PageCache::fetch(LengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 	PERF_COUNT(memory, StoreMds)
-	return PageCache::store(lengthenPointer(ptr));
+	return PageCache::store(LengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(memory, ReadDblMds)
-	CARD16* p0 = PageCache::fetch(lengthenPointer(ptr + 0));
-	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(lengthenPointer(ptr + 1));
+	CARD16* p0 = PageCache::fetch(LengthenPointer(ptr + 0));
+	CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(LengthenPointer(ptr + 1));
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;

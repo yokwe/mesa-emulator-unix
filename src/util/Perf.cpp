@@ -34,6 +34,8 @@
 //
 
 #include <vector>
+#include <locale>
+#include <sstream>
 
 #include "Util.h"
 static const Logger logger(__FILE__);
@@ -52,9 +54,34 @@ struct Entry {
 
 #include "Perf.inc"
 
+// https://stackoverflow.com/questions/7276826/format-number-with-commas-in-c
+template<class T>
+std::string FormatWithCommas(T value)
+{
+    std::stringstream ss;
+    ss.imbue(std::locale(""));
+    ss << std::fixed << value;
+    return ss.str();
+}
+
+// output aligned name and value
+// value can be very large number. output with thousands separator
 void perf::dump() {
+    std::vector<std::pair<std::string, std::string>> outputs;
     for(const auto& e: all) {
-        logger.info("%-34s = %10llu", e.name, e.value);
+        auto value = FormatWithCommas(e.value);
+        outputs.push_back(std::make_pair(e.name, value));
+    }
+
+    size_t firstLen  = 0;
+    size_t secondLen = 0;
+    for(auto& e: outputs) {
+        firstLen  = std::max(firstLen, e.first.length());
+        secondLen = std::max(secondLen, e.second.length());
+    }
+    std::string format = std_sprintf("%%-%ds = %%%ds", firstLen, secondLen);
+    for(auto& e: outputs) {
+        logger.info(format.c_str(), e.first, e.second);
     }
 }
 
@@ -63,4 +90,3 @@ void perf::clear() {
         e.value = 0;
     }
 }
-

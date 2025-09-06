@@ -10,12 +10,14 @@ target_sources(
 		ByteBuffer.h
 		Debug.h
 		GuiOP.h
+		OpcodeInfo.h
 		Perf.h
 		Setting.h
     	Util.h
 	PRIVATE
 		ByteBuffer.cpp
 		GuiOp.cpp
+		OpcodeInfo.cpp
 		Perf.cpp
 		Setting.cpp
 		Util.cpp

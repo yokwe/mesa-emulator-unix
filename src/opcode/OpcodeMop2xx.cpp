@@ -37,8 +37,9 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/processor.h"
+#include "../mesa/Pilot.h"
 
 #include "Opcode.h"
 
@@ -608,7 +609,7 @@ void E_VMFIND() {
 //	}
 
 	//pageTop: VM.PageNumber = FIRST[VM.PageNumber] + StoragePrograms.countVM;  --end of VM
-	CARD32 pageTop = 0 + Memory::getVPSize();
+	CARD32 pageTop = 0 + memory::getVPSize();
 	//CARD32 pageTop = ReadDbl(rBase + pRunTop + OFFSET(VMDataInternal::Run, interval.page));
 
 	//indexRunFirst: CARDINAL = (pRunFirst - FIRST[PRun])/SIZE[Run];

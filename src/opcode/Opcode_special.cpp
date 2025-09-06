@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/processor.h"
 #include "../agent/Agent.h"
 
@@ -66,12 +66,12 @@ void E_MAPDISPLAY() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  MAPDISPLAY  %6X  %6X %2d %2d", savedPC, startingVirtualPage, startingRealPage, totalPageCount, pageCountInEachBlock);
 	if (totalPageCount != pageCountInEachBlock) ERROR();
 
-	if (startingRealPage != Memory::getDisplayRealPage()) ERROR(); // sanity check
+	if (startingRealPage != memory::getDisplayRealPage()) ERROR(); // sanity check
 
-	CARD32 displayPageSize = Memory::getDisplayPageSize();
+	CARD32 displayPageSize = memory::getDisplayPageSize();
 	if (totalPageCount != displayPageSize) ERROR(); // sanity check
 
-	Memory::mapDisplay(startingVirtualPage, startingRealPage, totalPageCount);
+	memory::mapDisplay(startingVirtualPage, startingRealPage, totalPageCount);
 }
 
 

@@ -43,7 +43,8 @@ static const Logger logger(__FILE__);
 #include "../util/Perf.h"
 
 #include "../mesa/MesaBasic.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
+#include "../mesa/Pilot.h"
 
 #include "Opcode.h"
 
@@ -95,8 +96,8 @@ public:
 
 		arg->flags.direction = bltarg.flags.direction;
 
-		CARD32 base = Memory::getDisplayVirtualPage() * PageSize;
-		CARD32 size = Memory::getDisplayPageSize()    * PageSize;
+		CARD32 base = memory::getDisplayVirtualPage() * PageSize;
+		CARD32 size = memory::getDisplayPageSize()    * PageSize;
 		arg->flags.srcType   = (base <= bltarg.src.word && bltarg.src.word < (base + size));
 		arg->flags.dstType   = (base <= bltarg.dst.word && bltarg.dst.word < (base + size));
 
@@ -685,14 +686,14 @@ void E_COLORBLT() {
 //			rect.width  = arg.width;
 //			rect.height = arg.height;
 //
-//			CARD32 base = Memory::getDisplayVirtualPage() * PageSize;
-//			CARD32 size = Memory::getDisplayPageSize() * PageSize;
+//			CARD32 base = memory::getDisplayVirtualPage() * PageSize;
+//			CARD32 size = memory::getDisplayPageSize() * PageSize;
 //
 //			ColorBlt::Address address = arg.dst;
 //			MonoBlt::Bump(address, 0);
 //
 //			if (base <= address.word && address.word < (base + size)) {
-//				CARD32 displayWorsdPerLine = Memory::getDisplayBytesPerLine() / 2;
+//				CARD32 displayWorsdPerLine = memory::getDisplayBytesPerLine() / 2;
 //
 //				if (arg.dstPpl != (displayWorsdPerLine * WordSize)) {
 //					logger.fatal("arg.dstPpl = %d  displayWordPerLine = %d", arg.dstPpl, displayWorsdPerLine);

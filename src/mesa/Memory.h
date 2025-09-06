@@ -28,13 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
+ //
+ // memory.h
+ //
+
 #pragma once
 
 #include "../util/Util.h"
 
 #include "Constant.h"
 #include "Type.h"
-#include "Pilot.h"
 
 #include "Variable.h"
 
@@ -42,97 +46,44 @@
 
 
 // 3.1 Virtual Memory
-class Memory {
-public:
-	static const CARD32 MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize * WordSize;
-
+namespace memory {
 	struct Page { CARD16 word[PageSize]; };
 	struct Map {
 		MapFlags mf;
 		CARD16 rp;
 	} __attribute__((packed));
 
-	static Map     ReadMap(CARD32 vp);
-	static void    WriteMap(CARD32 vp, Map map);
-	static CARD16* Fetch(CARD32 virtualAddress);
-	static CARD16* Store(CARD32 virtualAddress);
+	Map     ReadMap(CARD32 vp);
+	void    WriteMap(CARD32 vp, Map map);
+	CARD16* Fetch(CARD32 virtualAddress);
+	CARD16* Store(CARD32 virtualAddress);
 
-//  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
-//	The BOOTING ACTION defined by the Principles of Operation should include:
-//	   1. Put real memory behind any special processor pages (I/O pages);
-//        then put all remaining usable real memory behind other virtual memory pages beginning at virtual page 0,
-//        and working upward sequentially (skipping any already-mapped special processor pages).
-//	   2. Read consecutive pages of the Germ into virtual memory beginning at
-//        page Boot.pageGerm + Boot.mdsiGerm*Environment.MaxPagesInMDS (i.e page 1).
-//        At present, the way the initial microcode figures out the device and device address of the Germ,
-//        and the number of pages which comprise the Germ, is processor-dependent.
-//	   3. Set Boot.pRequest = to e.g. [Boot.currentRequestBasicVersion, Boot.bootPhysicalVolume, locationOfPhysicalVolume].
-//	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
-//	   5. Xfer[dest: Boot.pInitialLink].
+	void    initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
+	void    finalize();
 
-	static void initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
-
-	static void finalize();
-
-	static CARD16 *getAddress(CARD32 virtualAddress);
-	static int isVacant(CARD32 virtualAddress);
+	CARD16* peek(CARD32 virtualAddress);
+	int     isVacant(CARD32 virtualAddress);
 	//
-	static void setReferencedFlag(CARD32 vp);
-	static void setReferencedDirtyFlag(CARD32 vp);
+	void    setReferencedFlag(CARD32 vp);
+	void    setReferencedDirtyFlag(CARD32 vp);
 
-	static inline CARD32 getVPSize() {
-		return vpSize;
-	}
-	static inline CARD32 getRPSize() {
-		return rpSize - displayPageSize;
-	}
+	CARD32  getVPSize();
+	CARD32  getRPSize();
 
-	static void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_);
-	static inline CARD32 getDisplayPageSize() {
-		if (displayRealPage == 0) ERROR();
-		return displayPageSize;
-	}
-	static inline CARD32 getDisplayBytesPerLine() {
-		if (displayRealPage == 0) ERROR();
-		return displayBytesPerLine;
-	}
+	void    reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_);
+	CARD32  getDisplayPageSize();
+	CARD32  getDisplayBytesPerLine();
 
-	static void mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount);
-	static inline CARD32 getDisplayRealPage() {
-		if (displayRealPage == 0) ERROR();
-		return displayRealPage;
-	}
-	static inline Page* getDisplayPage() {
-		if (displayRealPage == 0) ERROR();
-		return realPage[displayRealPage];
-	}
-	static inline CARD32 getDisplayVirtualPage() {
-		if (displayVirtualPage == 0) ERROR();
-		return displayVirtualPage;
-	}
-	static inline int isDisplayPage(CARD32 vp) {
-		if (displayVirtualPage == 0) ERROR();
-		return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
-	}
+	void    mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount);
+	CARD32  getDisplayRealPage();
+	Page*   getDisplayPage();
+	CARD32  getDisplayVirtualPage();
+	int     isDisplayPage(CARD32 vp);
 
-private:
-	static CARD32  vpSize;
-	static CARD32  rpSize;
-	static Map    *maps;
-	static CARD16 *pages;
-	static Page  **realPage;
-	static CARD32  displayPageSize;
-	static CARD32  displayRealPage;
-	static CARD32  displayVirtualPage;
-	static CARD32  displayWidth;
-	static CARD32  displayHeight;
-	static CARD32  displayBytesPerLine;
-	static CARD32  mds;
-};
+}
 
 
 class PageCache {
-protected:
 	static constexpr CARD32 N_BIT = 16;
 	static constexpr CARD32 N_ENTRY = 1 << N_BIT;
 	static constexpr CARD32 MASK = (1 << N_BIT) - 1;
@@ -155,7 +106,7 @@ protected:
 	static uint64_t   hit;
 	static uint64_t   missConflict;
 	static uint64_t   missEmpty;
-	static Entry       entry[N_ENTRY];
+	static Entry      entry[N_ENTRY];
 
 public:
 	static void initialize() {

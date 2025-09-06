@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "Symbols.h"
 #include "BCDFile.h"

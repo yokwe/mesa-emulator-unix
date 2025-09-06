@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "AgentStream.h"
 
@@ -124,7 +124,7 @@ void AgentStream::addStream(Stream* stream) {
 void AgentStream::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (CoProcessorIOFaceGuam::CoProcessorFCBType *)Store(fcbAddress);
+	fcb = (CoProcessorIOFaceGuam::CoProcessorFCBType *)memory::peek(fcbAddress);
 	fcb->iocbHead          = 0;
 	fcb->iocbNext          = 0;
 	fcb->headCommand       = 0;

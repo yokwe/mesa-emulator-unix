@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/interrupt.h"
 
 #include "AgentStream.h"

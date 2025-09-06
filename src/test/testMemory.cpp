@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 class testMemory : public testBase {
 
@@ -52,7 +52,7 @@ class testMemory : public testBase {
 
 public:
 	void testPageSize() {
-		CPPUNIT_ASSERT_EQUAL((PageSize * sizeof(CARD16)), sizeof(Memory::Page));
+		CPPUNIT_ASSERT_EQUAL((PageSize * sizeof(CARD16)), sizeof(memory::Page));
 	}
     void testStack() {
     	SP = 0;

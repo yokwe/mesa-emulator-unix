@@ -38,14 +38,14 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "AgentBeep.h"
 
 void AgentBeep::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (BeepIOFaceGuam::BeepFCBType *)Store(fcbAddress);
+	fcb = (BeepIOFaceGuam::BeepFCBType *)memory::peek(fcbAddress);
 	fcb->frequency = 0;
 }
 

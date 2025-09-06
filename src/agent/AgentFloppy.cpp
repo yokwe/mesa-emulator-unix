@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/interrupt.h"
 
 #include "AgentFloppy.h"
@@ -96,7 +96,7 @@ CARD32 AgentFloppy::getFCBSize() {
 void AgentFloppy::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (FloppyIOFaceGuam::FloppyFCBType *)Store(fcbAddress);
+	fcb = (FloppyIOFaceGuam::FloppyFCBType *)memory::peek(fcbAddress);
 	fcb->nextIOCB = 0;
 	fcb->interruptSelector = 0;
 	fcb->stopAgent = 0;

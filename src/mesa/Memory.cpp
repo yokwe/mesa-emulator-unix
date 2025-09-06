@@ -30,33 +30,48 @@
 
 
 //
-// Memory.cpp
+// memory.cpp
 //
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "Memory.h"
+#include "Pilot.h"
+
+#include "memory.h"
+
+namespace memory {
+
+constexpr CARD32 MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize * WordSize;
+constexpr int    VMBITS_MIN               = 20;
+constexpr int    VMBITS_MAX               = 25;
+
+CARD32  vpSize              = 0;
+CARD32  rpSize              = 0;
+Map*    maps                = 0;
+CARD16* pages               = 0;
+Page**  realPage            = 0;
+CARD32  displayPageSize     = 0;
+CARD32  displayRealPage     = 0;
+CARD32  displayVirtualPage  = 0;
+CARD32  displayWidth        = 0;
+CARD32  displayHeight       = 0;
+CARD32  displayBytesPerLine = 0;
 
 
-// class Memory
-CARD32         Memory::vpSize              = 0;
-CARD32         Memory::rpSize              = 0;
-Memory::Map   *Memory::maps                = 0;
-CARD16        *Memory::pages               = 0;
-Memory::Page **Memory::realPage            = 0;
-CARD32         Memory::displayPageSize     = 0;
-CARD32         Memory::displayRealPage     = 0;
-CARD32         Memory::displayVirtualPage  = 0;
-CARD32         Memory::displayWidth        = 0;
-CARD32         Memory::displayHeight       = 0;
-CARD32         Memory::displayBytesPerLine = 0;
-
-
-// Implementation Specific
-static const int VMBITS_MIN = 20;
-static const int VMBITS_MAX = 25;
-void Memory::initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
+//  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
+//	The BOOTING ACTION defined by the Principles of Operation should include:
+//	   1. Put real memory behind any special processor pages (I/O pages);
+//        then put all remaining usable real memory behind other virtual memory pages beginning at virtual page 0,
+//        and working upward sequentially (skipping any already-mapped special processor pages).
+//	   2. Read consecutive pages of the Germ into virtual memory beginning at
+//        page Boot.pageGerm + Boot.mdsiGerm*Environment.MaxPagesInMDS (i.e page 1).
+//        At present, the way the initial microcode figures out the device and device address of the Germ,
+//        and the number of pages which comprise the Germ, is processor-dependent.
+//	   3. Set Boot.pRequest = to e.g. [Boot.currentRequestBasicVersion, Boot.bootPhysicalVolume, locationOfPhysicalVolume].
+//	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
+//	   5. Xfer[dest: Boot.pInitialLink].
+void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 	if (vpSize) ERROR();
 
 	if (vmBits < VMBITS_MIN) ERROR();
@@ -116,7 +131,7 @@ void Memory::initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 	PageCache::initialize();
 }
 
-void Memory::finalize() {
+void finalize() {
 	delete [] maps;
 	maps = 0;
 
@@ -129,7 +144,14 @@ void Memory::finalize() {
 	vpSize = rpSize = 0;
 }
 
-void Memory::reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
+CARD32 getVPSize() {
+	return vpSize;
+}
+CARD32 getRPSize() {
+	return rpSize - displayPageSize;
+}
+
+void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
 	// Taken from APilot/15.3/Faces/Private/UserterminalHeadGuam.mesa
 	// UserTerminal::CalculateDisplayPages
     // wordsPerDWord: CARDINAL = 2;
@@ -161,7 +183,17 @@ void Memory::reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
 
 	logger.info("%s rp = %6X+%2X", __FUNCTION__, rpSize - displayPageSize, displayPageSize);
 }
-void Memory::mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount) {
+
+CARD32 getDisplayPageSize() {
+	if (displayRealPage == 0) ERROR();
+	return displayPageSize;
+}
+CARD32 getDisplayBytesPerLine() {
+	if (displayBytesPerLine == 0) ERROR();
+	return displayBytesPerLine;
+}
+
+void mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount) {
 	logger.info("%s  %6X+%2X  %6X %3d", __FUNCTION__, vp, pageCount, rp, pageCount);
 	if (rp != displayRealPage) {
 		logger.fatal("rp              = %d", rp);
@@ -185,13 +217,25 @@ void Memory::mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount) {
 	}
 }
 
-uint64_t        PageCache::missConflict;
-uint64_t        PageCache::missEmpty;
-uint64_t        PageCache::hit;
-PageCache::Entry PageCache::entry[N_ENTRY];
+CARD32 getDisplayRealPage() {
+	if (displayRealPage == 0) ERROR();
+	return displayRealPage;
+}
+Page* getDisplayPage() {
+	if (displayRealPage == 0) ERROR();
+	return realPage[displayRealPage];
+}
+CARD32 getDisplayVirtualPage() {
+	if (displayVirtualPage == 0) ERROR();
+	return displayVirtualPage;
+}
+int isDisplayPage(CARD32 vp) {
+	if (displayVirtualPage == 0) ERROR();
+	return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
+}
 
 
-CARD16* Memory::Fetch(CARD32 virtualAddress) {
+CARD16* Fetch(CARD32 virtualAddress) {
 	PERF_COUNT(memory, MemoryFetch)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
@@ -211,7 +255,7 @@ CARD16* Memory::Fetch(CARD32 virtualAddress) {
 	//
 	return page->word + of;
 }
-CARD16* Memory::Store(CARD32 virtualAddress) {
+CARD16* Store(CARD32 virtualAddress) {
 	PERF_COUNT(memory, MemoryStore)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
@@ -233,7 +277,7 @@ CARD16* Memory::Store(CARD32 virtualAddress) {
 	//
 	return page->word + of;
 }
-CARD16* Memory::getAddress(CARD32 virtualAddress) {
+CARD16* peek(CARD32 virtualAddress) {
 	PERF_COUNT(memory, GetAddress)
 	const CARD32 vp = virtualAddress / PageSize;
 	const CARD32 of = virtualAddress % PageSize;
@@ -253,7 +297,7 @@ CARD16* Memory::getAddress(CARD32 virtualAddress) {
 	//
 	return page->word + of;
 }
-int Memory::isVacant(CARD32 virtualAddress) {
+int isVacant(CARD32 virtualAddress) {
 	const CARD32 vp = virtualAddress / PageSize;
 	if (vpSize <= vp) {
 		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, virtualAddress, vp);
@@ -263,7 +307,7 @@ int Memory::isVacant(CARD32 virtualAddress) {
 	MapFlags mf = p->mf;
 	return Vacant(mf);
 }
-void Memory::setReferencedFlag(CARD32 vp) {
+void setReferencedFlag(CARD32 vp) {
 	if (vpSize <= vp) {
 		logger.fatal("%s  vp = %4X", __FUNCTION__, vp);
 		ERROR();
@@ -273,7 +317,7 @@ void Memory::setReferencedFlag(CARD32 vp) {
 	mf.referenced = 1;
 	p->mf = mf;
 }
-void Memory::setReferencedDirtyFlag(CARD32 vp) {
+void setReferencedDirtyFlag(CARD32 vp) {
 	if (vpSize <= vp) {
 		logger.fatal("%s  vp = %4X", __FUNCTION__, vp);
 		ERROR();
@@ -285,13 +329,13 @@ void Memory::setReferencedDirtyFlag(CARD32 vp) {
 	p->mf = mf;
 }
 
-Memory::Map Memory::ReadMap(CARD32 vp) {
+Map ReadMap(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map map = maps[vp];
 	if (Vacant(map.mf)) map.rp = 0;
 	return map;
 }
-void Memory::WriteMap(CARD32 vp, Map map) {
+void WriteMap(CARD32 vp, Map map) {
 	if (vpSize <= vp) {
 		logger.error("vpSize  %d", vpSize);
 		logger.error("vp      %d", vp);
@@ -306,20 +350,28 @@ void Memory::WriteMap(CARD32 vp, Map map) {
 	PageCache::invalidate(vp);
 }
 
+}
+
+
+uint64_t        PageCache::missConflict = 0;
+uint64_t        PageCache::missEmpty    = 0;
+uint64_t        PageCache::hit          = 0;
+PageCache::Entry PageCache::entry[PageCache::N_ENTRY];
+
 void PageCache::fetchSetup(Entry *p, CARD32 vp) {
 	if (PERF_ENABLE) {
 		if (p->vpno) missConflict++;
 		else missEmpty++;
 	}
 	// Overwrite content of entry
-	p->page      = Memory::Fetch(vp * PageSize);
+	p->page      = memory::Fetch(vp * PageSize);
 	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;
 	p->flagStore = 0;
 }
 void PageCache::fetchMaintainFlag(Entry *p, CARD32 vp) {
-	Memory::setReferencedFlag(vp);
+	memory::setReferencedFlag(vp);
 	p->flagFetch = 1;
 	// FIXME Should p->flagStore set to 0?
 	//   There can be a chance that fetch after store in same page.
@@ -331,14 +383,14 @@ void PageCache::storeSetup(Entry *p, CARD32 vp) {
 		else missEmpty++;
 	}
 	// Overwrite content of entry
-	p->page      = Memory::Store(vp * PageSize);
+	p->page      = memory::Store(vp * PageSize);
 	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;
 	p->flagStore = 1;
 }
 void PageCache::storeMaintainFlag(Entry *p, CARD32 vp) {
-	Memory::setReferencedDirtyFlag(vp);
+	memory::setReferencedDirtyFlag(vp);
 	p->flagFetch = 1;
 	p->flagStore = 1;
 }

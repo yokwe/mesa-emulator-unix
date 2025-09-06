@@ -42,7 +42,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "../mesa/interrupt.h"
 #include "../mesa/processor.h"
@@ -125,7 +125,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 
 		CARD32 dataPtr = iocb->dataPtr;
 		for(int i = 0; i < iocb->pageCount; i++) {
-			CARD16 *buffer = Memory::getAddress(dataPtr);
+			CARD16 *buffer = memory::peek(dataPtr);
 			diskFile->readPage(block++, buffer);
 			dataPtr += PageSize;
 		}
@@ -141,7 +141,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 
 		CARD32 dataPtr = iocb->dataPtr;
 		for(int i = 0; i < iocb->pageCount; i++) {
-			CARD16 *buffer = Memory::getAddress(dataPtr);
+			CARD16 *buffer = memory::peek(dataPtr);
 			diskFile->writePage(block++, buffer);
 			dataPtr += PageSize;
 		}
@@ -158,7 +158,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		int ret = 0;
 		CARD32 dataPtr = iocb->dataPtr;
 		for(int i = 0; i < iocb->pageCount; i++) {
-			CARD16 *buffer = Memory::getAddress(dataPtr);
+			CARD16 *buffer = memory::peek(dataPtr);
 			ret |= diskFile->verifyPage(block++, buffer);
 			dataPtr += PageSize;
 		}
@@ -185,7 +185,7 @@ CARD32 AgentDisk::getFCBSize() {
 void AgentDisk::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (DiskIOFaceGuam::DiskFCBType*)Store(fcbAddress);
+	fcb = (DiskIOFaceGuam::DiskFCBType*)memory::peek(fcbAddress);
 	fcb->nextIOCB = 0;
 	fcb->interruptSelector = 0;
 	fcb->stopAgent = 0;
@@ -253,7 +253,7 @@ void AgentDisk::Call() {
 
 				CARD32 dataPtr = iocb->dataPtr;
 				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = Memory::getAddress(dataPtr);
+					CARD16 *buffer = memory::peek(dataPtr);
 					diskFile->readPage(block++, buffer);
 					dataPtr += PageSize;
 				}
@@ -269,7 +269,7 @@ void AgentDisk::Call() {
 
 				CARD32 dataPtr = iocb->dataPtr;
 				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = Memory::getAddress(dataPtr);
+					CARD16 *buffer = memory::peek(dataPtr);
 					diskFile->writePage(block++, buffer);
 					dataPtr += PageSize;
 				}
@@ -286,7 +286,7 @@ void AgentDisk::Call() {
 				int ret = 0;
 				CARD32 dataPtr = iocb->dataPtr;
 				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = Memory::getAddress(dataPtr);
+					CARD16 *buffer = memory::peek(dataPtr);
 					ret |= diskFile->verifyPage(block++, buffer);
 					dataPtr += PageSize;
 				}

@@ -40,7 +40,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/interrupt.h"
 #include "../mesa/processor.h"
 
@@ -207,7 +207,7 @@ void AgentNetwork::Initialize() {
 	if (fcbAddress == 0) ERROR();
 	if (networkPacket == 0) ERROR();
 
-	fcb = (EthernetIOFaceGuam::EthernetFCBType *)Store(fcbAddress);
+	fcb = (EthernetIOFaceGuam::EthernetFCBType *)memory::peek(fcbAddress);
 
 	fcb->receiveIOCB               = 0;
 	fcb->transmitIOCB              = 0;

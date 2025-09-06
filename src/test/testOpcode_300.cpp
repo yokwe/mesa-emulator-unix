@@ -602,7 +602,7 @@ class testOpcode_300 : public testBase {
 		Interpreter::execute();
 
 		CPPUNIT_ASSERT_EQUAL((CARD16)(savedPC + 3), page_LF[-1]); // PC of caller
-		CPPUNIT_ASSERT_EQUAL(nLF, LF);                // new LF
+		CPPUNIT_ASSERT_EQUAL(nLF, (CARD16)LF);                // new LF
 		CPPUNIT_ASSERT_EQUAL((CARD16)(nPC.u + 1), PC);            // new PC
 		CPPUNIT_ASSERT_EQUAL(GFI, page_MDS[nLF - 2]);             // stored GFI in LocalOverhead.globallink
 		CPPUNIT_ASSERT_EQUAL(oLF, page_MDS[nLF - 3]);             // stored LF in LocalOverhead.returnllink

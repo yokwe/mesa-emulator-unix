@@ -214,7 +214,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, SP);
-		Memory::Map map = Memory::ReadMap(vp);
+		memory::Map map = memory::ReadMap(vp);
 		CPPUNIT_ASSERT_EQUAL(mf.u, map.mf.u);
 		CPPUNIT_ASSERT_EQUAL(rp, map.rp);
 	}
@@ -236,7 +236,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, SP);
-		Memory::Map map = Memory::ReadMap(vp);
+		memory::Map map = memory::ReadMap(vp);
 		CPPUNIT_ASSERT_EQUAL(mf.u, map.mf.u);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, map.rp);
 	}
@@ -290,7 +290,7 @@ class testOpcode_esc : public testBase {
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, stack[0]);
 		CPPUNIT_ASSERT_EQUAL(LowHalf(vp), stack[1]);
 		CPPUNIT_ASSERT_EQUAL(HighHalf(vp), stack[2]);
-		Memory::Map map = Memory::ReadMap(vp);
+		memory::Map map = memory::ReadMap(vp);
 		CPPUNIT_ASSERT_EQUAL(mf.u, map.mf.u);
 		CPPUNIT_ASSERT_EQUAL((CARD16)vp, map.rp);
 	}
@@ -313,7 +313,7 @@ class testOpcode_esc : public testBase {
 		CARD16 rp = 0;
 		CPPUNIT_ASSERT_EQUAL(LowHalf(rp), stack[1]);
 		CPPUNIT_ASSERT_EQUAL(HighHalf(rp), stack[2]);
-		Memory::Map map = Memory::ReadMap(vp);
+		memory::Map map = memory::ReadMap(vp);
 		CPPUNIT_ASSERT_EQUAL((CARD16)6, map.mf.u);
 		CPPUNIT_ASSERT_EQUAL((CARD16)0, map.rp);
 	}

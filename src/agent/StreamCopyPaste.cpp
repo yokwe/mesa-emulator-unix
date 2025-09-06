@@ -37,7 +37,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "AgentStream.h"
 #include "StreamCopyPaste.h"
@@ -94,7 +94,7 @@ static const Logger logger(__FILE__);
 //END; -- PutCommand
 
 StreamCopyPaste::GetBuffer::GetBuffer(CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) : transferRec(iocb->mesaPut) {
-	data = (CARD8*)Memory::getAddress(transferRec.buffer);
+	data = (CARD8*)memory::peek(transferRec.buffer);
 }
 CARD8 StreamCopyPaste::GetBuffer::get8() {
 	if (transferRec.bytesWritten == transferRec.bytesRead) {
@@ -126,7 +126,7 @@ CARD32 StreamCopyPaste::GetBuffer::get32() {
 
 
 StreamCopyPaste::PutBuffer::PutBuffer(CoProcessorIOFaceGuam::CoProcessorIOCBType *iocb) : transferRec(iocb->mesaGet) {
-	data = (CARD8*)Memory::getAddress(transferRec.buffer);
+	data = (CARD8*)memory::peek(transferRec.buffer);
 }
 void StreamCopyPaste::PutBuffer::PutBuffer::put8(CARD8 value) {
 	if (transferRec.bytesWritten == transferRec.bufferSize) {

@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
 
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "../mesa/processor.h"
 #include "../mesa/Variable.h"
@@ -58,33 +58,33 @@ static const Logger logger(__FILE__);
 // 06  ASSIGN_ESC(a, REQ)
 // 07  ASSIGN_ESC(a, SM)
 void E_SM() {
-	Memory::Map map;
+	memory::Map map;
 	map.mf.u = Pop();
 	map.rp = PopLong();
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SM   vp = %08X  mf = %04X  rp = %08X", savedPC, vp, map.mf.u + 0, map.rp + 0);
 	if (Vacant(map.mf)) map.rp = 0;
-	Memory::WriteMap(vp, map);
+	memory::WriteMap(vp, map);
 }
 // 010  ASSIGN_ESC(a, SMF)
 void E_SMF() {
 	MapFlags newMF = {Pop()};
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  vp = %08X  mf = %04X", savedPC, vp, newMF.u);
-	Memory::Map map = Memory::ReadMap(vp);
+	memory::Map map = memory::ReadMap(vp);
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
 	Push(map.mf.u);
 	PushLong(map.rp);
 	if (!Vacant(map.mf)) {
 		map.mf = newMF;
-		Memory::WriteMap(vp, map);
+		memory::WriteMap(vp, map);
 	}
 }
 // 011  ASSIGN_ESC(a, GMF)
 void E_GMF() {
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  vp = %08X", savedPC, vp);
-	Memory::Map map = Memory::ReadMap(vp);
+	memory::Map map = memory::ReadMap(vp);
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
 	if (Vacant(map.mf)) map.rp = 0;
 	Push(map.mf.u);

@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/MesaBasic.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "Opcode.h"
 

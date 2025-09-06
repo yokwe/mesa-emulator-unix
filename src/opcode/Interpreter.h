@@ -39,7 +39,7 @@
 #include "../util/Perf.h"
 
 #include "../mesa/Variable.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "Opcode.h"
 

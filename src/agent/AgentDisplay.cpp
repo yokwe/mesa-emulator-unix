@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "../util/GuiOp.h"
 
@@ -51,10 +51,10 @@ static const Logger logger(__FILE__);
 void AgentDisplay::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (DisplayIOFaceGuam::DisplayFCBType *)Store(fcbAddress);
+	fcb = (DisplayIOFaceGuam::DisplayFCBType *)memory::peek(fcbAddress);
 	fcb->command                = DisplayIOFaceGuam::C_nop;
 	fcb->status                 = DisplayIOFaceGuam::S_success;
-	fcb->displayMemoryAddress   = Memory::getDisplayRealPage();
+	fcb->displayMemoryAddress   = memory::getDisplayRealPage();
 	fcb->color.red              = 0;
 	fcb->color.green            = 0;
 	fcb->color.blue             = 0;

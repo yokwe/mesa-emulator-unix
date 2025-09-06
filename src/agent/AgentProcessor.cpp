@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../mesa/Constant.h"
 
 #include "AgentProcessor.h"
@@ -46,15 +46,15 @@ static const Logger logger(__FILE__);
 void AgentProcessor::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (ProcessorIOFaceGuam::ProcessorFCBType *)Store(fcbAddress);
+	fcb = (ProcessorIOFaceGuam::ProcessorFCBType *)memory::peek(fcbAddress);
 	fcb->processorID[0]               = processorID0;
 	fcb->processorID[1]               = processorID1;
 	fcb->processorID[2]               = processorID2;
 	fcb->microsecondsPerHundredPulses = MicrosecondsPerHundredPulses;
 	fcb->millisecondsPerTick          = MillisecondsPerTick;
 	fcb->alignmentFiller              = 0;
-	fcb->realMemoryPageCount          = Memory::getRPSize();
-	fcb->virtualMemoryPageCount       = Memory::getVPSize();
+	fcb->realMemoryPageCount          = memory::getRPSize();
+	fcb->virtualMemoryPageCount       = memory::getVPSize();
 	fcb->gmt                          = Util::getMesaTime();
 	fcb->command                      = ProcessorIOFaceGuam::C_noop;
 	fcb->status                       = ProcessorIOFaceGuam::S_success;

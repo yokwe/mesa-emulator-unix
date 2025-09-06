@@ -38,7 +38,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "AgentMouse.h"
 
@@ -46,7 +46,7 @@ static const Logger logger(__FILE__);
 void AgentMouse::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (MouseIOFaceGuam::MouseFCBType *)Store(fcbAddress);
+	fcb = (MouseIOFaceGuam::MouseFCBType *)memory::peek(fcbAddress);
 	fcb->currentMousePosition.mouseXCoord = 0;
 	fcb->currentMousePosition.mouseYCoord = 0;
 	fcb->cursorOffset.mouseXCoord         = 0;

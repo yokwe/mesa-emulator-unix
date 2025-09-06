@@ -39,7 +39,7 @@
 static const Logger logger(__FILE__);
 
 #include "MesaBasic.h"
-#include "Memory.h"
+#include "memory.h"
 #include "Pilot.h"
 
 #include "interrupt.h"
@@ -146,7 +146,7 @@ void loadGerm(std::string& path) {
 	logger.info("germ  size = %d  %04X", mapPageSize, mapPageSize);
 
 	// first page goes to mGFT
-	CARD16 *p = Memory::getAddress(mGFT);
+	CARD16 *p = memory::peek(mGFT);
 	for(CARD32 i = 0; i < mapPageSize; i++) {
 		if (i == (int)GermOpsImpl::pageEndGermVM) {
 			logger.fatal("i == pageEndGermVM");
@@ -155,7 +155,7 @@ void loadGerm(std::string& path) {
 
 		Util::byteswap(map[i].word, p, PageSize);
 
-		p = Memory::getAddress(((i + 1) * PageSize));
+		p = memory::peek(((i + 1) * PageSize));
 	}
 	Util::unmapFile(map);
 }
@@ -164,11 +164,11 @@ void initialize() {
 	setSignalHandler();
 
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
-	Memory::initialize(vmBits, rmBits, Agent::ioRegionPage);
+	memory::initialize(vmBits, rmBits, Agent::ioRegionPage);
 	Interpreter::initialize();
 
 	// Reserve real memory for display
-	Memory::reserveDisplayPage(displayWidth, displayHeight);
+	memory::reserveDisplayPage(displayWidth, displayHeight);
 
 	// AgentDisk use diskFile
 	{
@@ -221,7 +221,7 @@ void initialize() {
 
 	// set boot request
 	{
-		Boot::Request* request = (Boot::Request*)Memory::getAddress(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
+		Boot::Request* request = (Boot::Request*)memory::peek(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
 
 		// clear boot request
 		::memset(request, 0, sizeof(*request));

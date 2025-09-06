@@ -41,7 +41,7 @@ static const Logger logger(__FILE__);
 #include "testBase.h"
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 #include "../opcode/Interpreter.h"
 
 void testBase::initAV(CARD16 origin, CARD16 limit) {
@@ -222,51 +222,51 @@ void testBase::initPDA() {
 
 
 void testBase::setUp() {
-	Memory::initialize(22, 20, (CARD16)0x00a0);
+	memory::initialize(22, 20, (CARD16)0x00a0);
 	Interpreter::initialize();
 
 	GuiOp::setContext(new NullGuiOp);
 
 	// mPDA = 0x0001000
 	// mGFT = 0x0002000
-	CB  = 0x00030080;
+	CB  = 0x00030080U;
 	MDS = 0x00040000U;
 	GF  = 0x00050080 + SIZE(GlobalOverhead);
 	PC  = 0x20;
 
 	{
-		CARD16 *p = Memory::getAddress(0x00030000);
+		CARD16 *p = memory::peek(0x00030000);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x3000 + i;
 	}
 	{
-		CARD16 *p = Memory::getAddress(0x00030000 + 0x100);
+		CARD16 *p = memory::peek(0x00030000 + 0x100);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x100 + i;
 	}
 	{
-		CARD16 *p = Memory::getAddress(0x00030000 + 0x200);
+		CARD16 *p = memory::peek(0x00030000 + 0x200);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x3000 + 0x200 + i;
 	}
 	{
-		CARD16 *p = Memory::getAddress(0x00040000);
+		CARD16 *p = memory::peek(0x00040000);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x4000 + i;
 	}
 	{
-		CARD16 *p = Memory::getAddress(0x00040000 + 0x1000);
+		CARD16 *p = memory::peek(0x00040000 + 0x1000);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x4100 + i;
 	}
 	{
-		CARD16 *p = Memory::getAddress(0x00050000);
+		CARD16 *p = memory::peek(0x00050000);
 		for(int i = 0; i < PageSize; i++) p[i] = 0x5000 + i;
 	}
 
-	page_PDA = Memory::getAddress(mPDA);
-	page_GFT = Memory::getAddress(mGFT);
-	page_CB  = Memory::getAddress(CB);
-	page_MDS = Memory::getAddress(MDS);
-	page_AV  = Memory::getAddress(MDS + mAV);
-	page_SD  = Memory::getAddress(MDS + mSD);
-	page_ETT = Memory::getAddress(MDS + mETT);
-	page_GF  = Memory::getAddress(GF);
+	page_PDA = memory::peek(mPDA);
+	page_GFT = memory::peek(mGFT);
+	page_CB  = memory::peek(CB);
+	page_MDS = memory::peek(MDS);
+	page_AV  = memory::peek(MDS + mAV);
+	page_SD  = memory::peek(MDS + mSD);
+	page_ETT = memory::peek(MDS + mETT);
+	page_GF  = memory::peek(GF);
 
 	GFI = 1;
 
@@ -287,13 +287,13 @@ void testBase::setUp() {
 	int fsi = 10;
 	LF = page_AV[fsi];
 	page_AV[fsi] = page_MDS[LF];
-	page_LF  = Memory::getAddress(MDS + LF);
+	page_LF  = memory::peek(MDS + LF);
 
 	PSB = 1;
 }
 
 void testBase::tearDown() {
-	Memory::finalize();
+	memory::finalize();
 	page_PDA = page_GFT = page_CB = page_AV = page_SD = page_ETT = page_LF = page_GF = 0;
 }
 

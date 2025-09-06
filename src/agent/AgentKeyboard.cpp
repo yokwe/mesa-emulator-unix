@@ -37,14 +37,14 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
-#include "../mesa/Memory.h"
+#include "../mesa/memory.h"
 
 #include "AgentKeyboard.h"
 
 void AgentKeyboard::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (KeyboardIOFaceGuam::KeyboardFCBType *)Store(fcbAddress);
+	fcb = (KeyboardIOFaceGuam::KeyboardFCBType *)memory::peek(fcbAddress);
 	fcb->keyStates[0] = 0xffff;
 	fcb->keyStates[1] = 0xffff;
 	fcb->keyStates[2] = 0xffff;

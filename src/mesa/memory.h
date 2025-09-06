@@ -55,14 +55,14 @@ namespace memory {
 
 	Map     ReadMap(CARD32 vp);
 	void    WriteMap(CARD32 vp, Map map);
-	CARD16* Fetch(CARD32 virtualAddress);
-	CARD16* Store(CARD32 virtualAddress);
+
+	CARD16* FetchPage(CARD32 vp);
+	CARD16* StorePage(CARD32 vp);
 
 	void    initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
 	void    finalize();
 
-	CARD16* peek(CARD32 virtualAddress);
-	int     isVacant(CARD32 virtualAddress);
+	CARD16* peek(CARD32 va);
 	//
 	void    setReferencedFlag(CARD32 vp);
 	void    setReferencedDirtyFlag(CARD32 vp);
@@ -79,7 +79,6 @@ namespace memory {
 	Page*   getDisplayPage();
 	CARD32  getDisplayVirtualPage();
 	int     isDisplayPage(CARD32 vp);
-
 }
 
 

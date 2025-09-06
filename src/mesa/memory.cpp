@@ -235,60 +235,15 @@ int isDisplayPage(CARD32 vp) {
 }
 
 
-CARD16* Fetch(CARD32 virtualAddress) {
-	PERF_COUNT(memory, MemoryFetch)
-	const CARD32 vp = virtualAddress / PageSize;
-	const CARD32 of = virtualAddress % PageSize;
-	if (vpSize <= vp) {
-		logger.fatal("virtaulAddress = %08X  vp = %08X", virtualAddress, vp);
-		ERROR();
-	}
-	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (Vacant(mf)) PageFault(virtualAddress);
-	if (mf.referenced == 0) {
-		mf.referenced = 1;
-		p->mf = mf;
-	}
-	Page* page = realPage[p->rp];
-	if (page == 0) ERROR();
-	//
-	return page->word + of;
-}
-CARD16* Store(CARD32 virtualAddress) {
-	PERF_COUNT(memory, MemoryStore)
-	const CARD32 vp = virtualAddress / PageSize;
-	const CARD32 of = virtualAddress % PageSize;
-	if (vpSize <= vp) {
-		logger.fatal("virtaulAddress = %08X  vp = %08X", virtualAddress, vp);
-		ERROR();
-	}
-	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (Vacant(mf)) PageFault(virtualAddress);
-	if (Protect(mf)) WriteProtectFault(virtualAddress);
-	if (mf.referenced == 0 || mf.dirty == 0) {
-		mf.referenced = 1;
-		mf.dirty      = 1;
-		p->mf = mf;
-	}
-	Page* page = realPage[p->rp];
-	if (page == 0) ERROR();
-	//
-	return page->word + of;
-}
-CARD16* peek(CARD32 virtualAddress) {
+CARD16* peek(CARD32 va) {
 	PERF_COUNT(memory, GetAddress)
-	const CARD32 vp = virtualAddress / PageSize;
-	const CARD32 of = virtualAddress % PageSize;
-	if (vpSize <= vp) {
-		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, virtualAddress, vp);
-		ERROR();
-	}
+	const CARD32 vp = va / PageSize;
+	const CARD32 of = va % PageSize;
+	if (vpSize <= vp) ERROR()
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
 	if (Vacant(mf)) {
-		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, virtualAddress, vp);
+		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
 		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
 		ERROR();
 	}
@@ -297,31 +252,49 @@ CARD16* peek(CARD32 virtualAddress) {
 	//
 	return page->word + of;
 }
-int isVacant(CARD32 virtualAddress) {
-	const CARD32 vp = virtualAddress / PageSize;
-	if (vpSize <= vp) {
-		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, virtualAddress, vp);
-		ERROR();
-	}
+
+CARD16* FetchPage(CARD32 vp) {
+	PERF_COUNT(memory, FetchPage)
+	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
-	return Vacant(mf);
-}
-void setReferencedFlag(CARD32 vp) {
-	if (vpSize <= vp) {
-		logger.fatal("%s  vp = %4X", __FUNCTION__, vp);
-		ERROR();
+	if (Vacant(mf)) PageFault(vp * PageSize);
+	if (mf.referenced == 0) {
+		mf.referenced = 1;
+		p->mf = mf;
 	}
+	Page* page = realPage[p->rp];
+	if (page == 0) ERROR();
+	//
+	return page->word;
+}
+CARD16* StorePage(CARD32 vp) {
+	PERF_COUNT(memory, StorePage)
+	if (vpSize <= vp) ERROR();
+	Map *p = maps + vp;
+	MapFlags mf = p->mf;
+	if (Vacant(mf)) PageFault(vp * PageSize);
+	if (Protect(mf)) WriteProtectFault(vp * PageSize);
+	if (mf.referenced == 0 || mf.dirty == 0) {
+		mf.referenced = 1;
+		mf.dirty      = 1;
+		p->mf = mf;
+	}
+	Page* page = realPage[p->rp];
+	if (page == 0) ERROR();
+	//
+	return page->word ;
+}
+
+void setReferencedFlag(CARD32 vp) {
+	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
 	mf.referenced = 1;
 	p->mf = mf;
 }
 void setReferencedDirtyFlag(CARD32 vp) {
-	if (vpSize <= vp) {
-		logger.fatal("%s  vp = %4X", __FUNCTION__, vp);
-		ERROR();
-	}
+	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
 	mf.referenced = 1;
@@ -364,7 +337,7 @@ void PageCache::fetchSetup(Entry *p, CARD32 vp) {
 		else missEmpty++;
 	}
 	// Overwrite content of entry
-	p->page      = memory::Fetch(vp * PageSize);
+	p->page      = memory::FetchPage(vp);
 	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;
@@ -383,7 +356,7 @@ void PageCache::storeSetup(Entry *p, CARD32 vp) {
 		else missEmpty++;
 	}
 	// Overwrite content of entry
-	p->page      = memory::Store(vp * PageSize);
+	p->page      = memory::StorePage(vp);
 	// NO PAGE FAULT AFTER HERE
 	p->vpno      = vp;
 	p->flagFetch = 1;

@@ -68,8 +68,8 @@ PERF_DECLARE(memory, WriteMap)
 PERF_DECLARE(memory, GetAddress)
 PERF_DECLARE(memory, FetchPda)
 PERF_DECLARE(memory, StorePda)
-PERF_DECLARE(memory, MemoryFetch)
-PERF_DECLARE(memory, MemoryStore)
+PERF_DECLARE(memory, FetchPage)
+PERF_DECLARE(memory, StorePage)
 
 // opcode
 PERF_DECLARE(opcode, Dispatch)

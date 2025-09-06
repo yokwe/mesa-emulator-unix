@@ -39,6 +39,8 @@
 #include <cstdint>
 #include <set>
 #include <source_location>
+#include <locale>
+#include <sstream>
 
 #include <alloca.h>
 
@@ -220,6 +222,17 @@ std::string demangle(const char* mangled);
 int32_t toIntMesaNumber(const std::string& string);
 
 std::string toHexString(int size, const uint8_t* data);
+
+// https://stackoverflow.com/questions/7276826/format-number-with-commas-in-c
+template<class T>
+std::string formatWithCommas(T value) {
+    std::stringstream ss;
+    ss.imbue(std::locale(""));
+    ss << std::fixed << value;
+    return ss.str();
+}
+
+
 
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()

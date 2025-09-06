@@ -128,7 +128,7 @@ void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 	}
 
 	// initialize related class
-	PageCache::initialize();
+	cache::initialize();
 }
 
 void finalize() {
@@ -314,64 +314,86 @@ void WriteMap(CARD32 vp, Map map) {
 
 	maps[vp] = map;
 	PERF_COUNT(memory, WriteMap)
-	PageCache::invalidate(vp);
+	cache::invalidate(vp);
 }
 
-}
+namespace cache {
+	uint64_t  missConflict = 0;
+	uint64_t  missEmpty    = 0;
+	uint64_t  hit          = 0;
+	Entry     entry[N_ENTRY];
 
-
-uint64_t        PageCache::missConflict = 0;
-uint64_t        PageCache::missEmpty    = 0;
-uint64_t        PageCache::hit          = 0;
-PageCache::Entry PageCache::entry[PageCache::N_ENTRY];
-
-void PageCache::fetchSetup(Entry *p, CARD32 vp) {
-	if (PERF_ENABLE) {
-		if (p->vpno) missConflict++;
-		else missEmpty++;
+	void initialize() {
+		for(auto i = 0U; i < N_ENTRY; i++) {
+			entry[i].clear();
+		}
+		hit          = 0;
+		missEmpty    = 0;
+		missConflict = 0;
 	}
-	// Overwrite content of entry
-	p->page      = memory::FetchPage(vp);
-	// NO PAGE FAULT AFTER HERE
-	p->vpno      = vp;
-	p->flagFetch = 1;
-	p->flagStore = 0;
-}
-void PageCache::fetchMaintainFlag(Entry *p, CARD32 vp) {
-	memory::setReferencedFlag(vp);
-	p->flagFetch = 1;
-	// FIXME Should p->flagStore set to 0?
-	//   There can be a chance that fetch after store in same page.
-	// p->flagStore = 0;
-}
-void PageCache::storeSetup(Entry *p, CARD32 vp) {
-	if (PERF_ENABLE) {
-		if (p->vpno) missConflict++;
-		else missEmpty++;
+	void invalidate(CARD32 vp_) {
+		Entry *p = getEntry(vp_);
+		if (p->vpno == vp_) {
+			// void entry of vp_
+			p->flag = 0;
+			p->page = 0;
+		}
 	}
-	// Overwrite content of entry
-	p->page      = memory::StorePage(vp);
-	// NO PAGE FAULT AFTER HERE
-	p->vpno      = vp;
-	p->flagFetch = 1;
-	p->flagStore = 1;
-}
-void PageCache::storeMaintainFlag(Entry *p, CARD32 vp) {
-	memory::setReferencedDirtyFlag(vp);
-	p->flagFetch = 1;
-	p->flagStore = 1;
-}
+	void stats() {
+		int used = 0;
+		for(CARD32 i = 0; i < N_ENTRY; i++) {
+			if (entry[i].vpno) used++;
+		}
 
-void PageCache::stats() {
-	int used = 0;
-	for(CARD32 i = 0; i < N_ENTRY; i++) {
-		if (entry[i].vpno) used++;
+		if (PERF_ENABLE) {
+			uint64_t total = (missEmpty + missConflict) + hit;
+			auto totalString = formatWithCommas(total);
+			auto missEmptyString = formatWithCommas(missEmpty);
+			auto missConflictString = formatWithCommas(missConflict);
+
+			logger.info("PageCache %5d / %5d  %s  %6.2f%%   miss empty %s  conflict %s",
+				used, N_ENTRY, totalString, ((double)hit / total) * 100.0, missEmptyString, missConflictString);
+		} else {
+			logger.info("PageCache %5d / %5d", used, N_ENTRY);
+		}
 	}
 
-	if (PERF_ENABLE) {
-		uint64_t total = (missEmpty + missConflict) + hit;
-		logger.info("PageCache %5d / %5d  %10llu %6.2f%%   miss empty %10llu  conflict %10llu", used, N_ENTRY, total, ((double)hit / total) * 100.0, missEmpty, missConflict);
-	} else {
-		logger.info("PageCache %5d / %5d", used, N_ENTRY);
+	void fetchSetup(Entry *p, CARD32 vp) {
+		if (PERF_ENABLE) {
+			if (p->vpno) missConflict++;
+			else missEmpty++;
+		}
+		// Overwrite content of entry
+		p->page      = memory::FetchPage(vp);
+		// NO PAGE FAULT AFTER HERE
+		p->vpno      = vp;
+		p->flagFetch = 1;
+		p->flagStore = 0;
 	}
+	void fetchMaintainFlag(Entry *p, CARD32 vp) {
+		memory::setReferencedFlag(vp);
+		p->flagFetch = 1;
+		// FIXME Should p->flagStore set to 0?
+		//   There can be a chance that fetch after store in same page.
+		// p->flagStore = 0;
+	}
+	void storeSetup(Entry *p, CARD32 vp) {
+		if (PERF_ENABLE) {
+			if (p->vpno) missConflict++;
+			else missEmpty++;
+		}
+		// Overwrite content of entry
+		p->page      = memory::StorePage(vp);
+		// NO PAGE FAULT AFTER HERE
+		p->vpno      = vp;
+		p->flagFetch = 1;
+		p->flagStore = 1;
+	}
+	void storeMaintainFlag(Entry *p, CARD32 vp) {
+		memory::setReferencedDirtyFlag(vp);
+		p->flagFetch = 1;
+		p->flagStore = 1;
+	}
+}
+
 }

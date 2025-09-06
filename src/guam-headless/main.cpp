@@ -97,7 +97,7 @@ int main(int /* argc */, char** /* argv */) {
 	
 	Interpreter::stats();
 	PERF_LOG();
-	PageCache::stats();
+	memory::cache::stats();
 
 	//extern void MonoBlt_MemoryCache_stats();
 	//MonoBlt_MemoryCache_stats();

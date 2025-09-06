@@ -79,89 +79,75 @@ namespace memory {
 	Page*   getDisplayPage();
 	CARD32  getDisplayVirtualPage();
 	int     isDisplayPage(CARD32 vp);
+
+	namespace cache {
+		constexpr CARD32 N_BIT = 16;
+		constexpr CARD32 N_ENTRY = 1 << N_BIT;
+		constexpr CARD32 MASK = (1 << N_BIT) - 1;
+		inline CARD32 hash(CARD32 vp_) {
+			// When N_BIT == 16, there is no conflict during booting gvwin
+			return vp_ & MASK;
+		}
+		//
+		struct Entry {		
+			union {
+				CARD32 flag;
+				struct {
+					CARD32 vpno      : 30;
+					CARD32 flagFetch :  1;
+					CARD32 flagStore :  1;
+				};
+			};
+			CARD16* page;
+
+			void clear() {
+				flag = 0;
+				page = 0;
+			}
+		};
+		extern uint64_t   hit;
+		extern uint64_t   missConflict;
+		extern uint64_t   missEmpty;
+		extern Entry      entry[N_ENTRY];
+
+		inline Entry* getEntry(CARD32 vp_) {
+			return entry + hash(vp_);
+		}
+
+		void initialize();
+		void invalidate(CARD32 vp_);
+		void stats();
+
+		void fetchSetup(Entry *p, CARD32 vp);
+		void fetchMaintainFlag(Entry *p, CARD32 vp);
+		inline CARD16* fetch(CARD32 va) {
+			const CARD32 vp = va / PageSize;
+			Entry *p = getEntry(vp);
+			if (p->vpno != vp) {
+				fetchSetup(p, vp);
+			} else {
+				if (PERF_ENABLE) hit++;
+				if (p->flagFetch == 0) fetchMaintainFlag(p, vp);
+			}
+			return p->page + (va % PageSize);
+		}
+
+		void storeSetup(Entry *p, CARD32 vp);
+		void storeMaintainFlag(Entry *p, CARD32 vp);
+		inline CARD16* store(CARD32 va) {
+			const CARD32 vp = va / PageSize;
+			Entry *p = getEntry(vp);
+			if (p->vpno != vp) {
+				storeSetup(p, vp);
+			} else {
+				if (PERF_ENABLE) hit++;
+				if (p->flagStore == 0) storeMaintainFlag(p, vp);
+			}
+			return p->page + (va % PageSize);
+		}
+	}
 }
 
-
-class PageCache {
-	static constexpr CARD32 N_BIT = 16;
-	static constexpr CARD32 N_ENTRY = 1 << N_BIT;
-	static constexpr CARD32 MASK = (1 << N_BIT) - 1;
-	static inline CARD32 hash(CARD32 vp_) {
-		// When N_BIT == 16, there is no conflict during booting gvwin
-		return vp_ & MASK;
-	}
-	//
-	struct Entry {		
-		union {
-			CARD32 flag;
-			struct {
-				CARD32 vpno      : 30;
-				CARD32 flagFetch :  1;
-				CARD32 flagStore :  1;
-			};
-		};
-		CARD16* page;
-
-		void clear() {
-			flag = 0;
-			page = 0;
-		}
-	};
-	static uint64_t   hit;
-	static uint64_t   missConflict;
-	static uint64_t   missEmpty;
-	static Entry      entry[N_ENTRY];
-
-public:
-	static void initialize() {
-		for(auto i = 0U; i < N_ENTRY; i++) {
-			entry[i].clear();
-		}
-		hit          = 0;
-		missEmpty    = 0;
-		missConflict = 0;
-	}
-	static inline void invalidate(CARD32 vp_) {
-		Entry *p = entry + hash(vp_);
-		if (p->vpno == vp_) {
-			// void entry of vp_
-			p->flag = 0;
-			p->page = 0;
-		}
-	}
-	static void stats();
-
-	static void fetchSetup(Entry *p, CARD32 vp);
-	static void fetchMaintainFlag(Entry *p, CARD32 vp);
-	__attribute__((always_inline)) static inline CARD16* fetch(CARD32 va) {
-		const CARD32 vp = va / PageSize;
-		const CARD32 of = va % PageSize;
-
-		Entry *p = entry + hash(vp);
-		if (p->vpno != vp) {
-			fetchSetup(p, vp);
-		} else {
-			if (PERF_ENABLE) hit++;
-			if (p->flagFetch == 0) fetchMaintainFlag(p, vp);
-		}
-		return p->page + of;
-	}
-	static void storeSetup(Entry *p, CARD32 vp);
-	static void storeMaintainFlag(Entry *p, CARD32 vp);
-	__attribute__((always_inline)) static inline CARD16* store(CARD32 va) {
-		const CARD32 vp = va / PageSize;
-		const CARD32 of = va % PageSize;
-
-		Entry *p = entry + hash(vp);
-		if (p->vpno != vp) {
-			storeSetup(p, vp);
-		} else {
-			if (PERF_ENABLE) hit++;
-			if (p->flagStore == 0) storeMaintainFlag(p, vp);
-		}
-		return p->page + of;
-	}
-};
 
 __attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
 	return (ptrA / PageSize) == (ptrB / PageSize);
@@ -173,17 +159,17 @@ __attribute__((always_inline)) static inline int isLastOfPage(CARD32 ptr) {
 // 3.1.3 Virtual Memory Access
 __attribute__((always_inline)) static inline CARD16* Fetch(CARD32 virtualAddress) {
 	PERF_COUNT(memory, Fetch)
-	return PageCache::fetch(virtualAddress);
+	return memory::cache::fetch(virtualAddress);
 }
 __attribute__((always_inline)) static inline CARD16* Store(CARD32 virtualAddress) {
 	PERF_COUNT(memory, Store)
-	return PageCache::store(virtualAddress);
+	return memory::cache::store(virtualAddress);
 }
 __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(memory, ReadDbl)
-	CARD16* p0 = PageCache::fetch(virtualAddress + 0);
+	CARD16* p0 = memory::cache::fetch(virtualAddress + 0);
 	CARD16* p1 = p0 + 1;
-	if (isLastOfPage(virtualAddress)) p1 = PageCache::fetch(virtualAddress + 1);
+	if (isLastOfPage(virtualAddress)) p1 = memory::cache::fetch(virtualAddress + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -194,18 +180,18 @@ __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddres
 // 3.2.1 Main Data Space Access
 __attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
 	PERF_COUNT(memory, FetchMds)
-	return PageCache::fetch(LengthenPointer(ptr));
+	return memory::cache::fetch(LengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
 	PERF_COUNT(memory, StoreMds)
-	return PageCache::store(LengthenPointer(ptr));
+	return memory::cache::store(LengthenPointer(ptr));
 }
 __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(memory, ReadDblMds)
 	CARD32 p = LengthenPointer(ptr);
-	CARD16* p0 = PageCache::fetch(p + 0);
+	CARD16* p0 = memory::cache::fetch(p + 0);
 	CARD16* p1 = p0 + 1;
-	if (isLastOfPage(p)) p1 = PageCache::fetch(p + 1);
+	if (isLastOfPage(p)) p1 = memory::cache::fetch(p + 1);
 //	Long t;
 //	t.low  = *p0;
 //	t.high = *p1;
@@ -215,7 +201,7 @@ __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 
 // 3.1.4.3 Code Segments
 __attribute__((always_inline)) static inline CARD16 ReadCode(CARD16 offset) {
-	return *PageCache::fetch(CB + offset);
+	return *memory::cache::fetch(CB + offset);
 }
 
 // 4.3 Instruction Fetch
@@ -228,10 +214,10 @@ __attribute__((always_inline)) static inline CARD8 GetCodeByte() {
 __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
 	PERF_COUNT(memory, GetCodeWord)
 	CARD32 ptr = CB + (PC / 2);
-	CARD16* p0 = PageCache::fetch(ptr + 0);
+	CARD16* p0 = memory::cache::fetch(ptr + 0);
 	if (PC & 1) {
 		// PC is odd
-		CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : PageCache::fetch(ptr + 1);
+		CARD16* p1 = isSamePage(ptr + 0, ptr + 1) ? (p0 + 1) : memory::cache::fetch(ptr + 1);
 		// NO PAGE FAULT AFTER HERE
 		PC += 2;
 		return (LowByte(*p0) << 8) | HighByte(*p1);
@@ -320,9 +306,9 @@ __attribute__((always_inline)) static inline POINTER OffsetPda(LONG_POINTER ptr)
 
 static inline CARD16* FetchPda(POINTER ptr) {
 	PERF_COUNT(memory, FetchPda)
-	return PageCache::fetch(LengthenPdaPtr(ptr));
+	return memory::cache::fetch(LengthenPdaPtr(ptr));
 }
 static inline CARD16* StorePda(POINTER ptr) {
 	PERF_COUNT(memory, StorePda)
-	return PageCache::store(LengthenPdaPtr(ptr));
+	return memory::cache::store(LengthenPdaPtr(ptr));
 }

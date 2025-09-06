@@ -50,6 +50,8 @@ void NetworkPacket::attach(const std::string& name_) {
 
     fd = 0;
 }
+void NetworkPacket::detach() {
+}
 
 void NetworkPacket::discardRecievedPacket() {
 	int count = 0;

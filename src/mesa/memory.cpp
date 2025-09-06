@@ -239,7 +239,7 @@ CARD16* FetchPage(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
-	if (Vacant(mf)) PageFault(vp * PageSize);
+	if (mf.isVacant()) PageFault(vp * PageSize);
 	if (mf.referenced == 0) {
 		mf.referenced = 1;
 		p->mf = mf;
@@ -254,8 +254,8 @@ CARD16* StorePage(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
-	if (Vacant(mf)) PageFault(vp * PageSize);
-	if (Protect(mf)) WriteProtectFault(vp * PageSize);
+	if (mf.isVacant()) PageFault(vp * PageSize);
+	if (mf.isProtect()) WriteProtectFault(vp * PageSize);
 	if (mf.referenced == 0 || mf.dirty == 0) {
 		mf.referenced = 1;
 		mf.dirty      = 1;
@@ -273,7 +273,7 @@ CARD16* peek(CARD32 va) {
 	if (vpSize <= vp) ERROR()
 	Map *p = maps + vp;
 	MapFlags mf = p->mf;
-	if (Vacant(mf)) {
+	if (mf.isVacant()) {
 		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
 		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
 		ERROR();
@@ -303,19 +303,15 @@ void setReferencedDirtyFlag(CARD32 vp) {
 Map ReadMap(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map map = maps[vp];
-	if (Vacant(map.mf)) map.rp = 0;
+	if (map.mf.isVacant()) map.rp = 0;
 	return map;
 }
 void WriteMap(CARD32 vp, Map map) {
-	if (vpSize <= vp) {
-		logger.error("vpSize  %d", vpSize);
-		logger.error("vp      %d", vp);
-		logger.error("map     %02X", map);
-		ERROR();
-	}
+	if (vpSize <= vp) ERROR();
 	if (rpSize <= map.rp) ERROR();
 
-	if (Vacant(map.mf)) map.rp = 0;
+	if (map.mf.isVacant()) map.rp = 0;
+
 	maps[vp] = map;
 	PERF_COUNT(memory, WriteMap)
 	PageCache::invalidate(vp);

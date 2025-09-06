@@ -63,7 +63,7 @@ void E_SM() {
 	map.rp = PopLong();
 	CARD32 vp = PopLong();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SM   vp = %08X  mf = %04X  rp = %08X", savedPC, vp, map.mf.u + 0, map.rp + 0);
-	if (Vacant(map.mf)) map.rp = 0;
+	if (map.mf.isVacant()) map.rp = 0;
 	memory::WriteMap(vp, map);
 }
 // 010  ASSIGN_ESC(a, SMF)
@@ -75,7 +75,7 @@ void E_SMF() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  SMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
 	Push(map.mf.u);
 	PushLong(map.rp);
-	if (!Vacant(map.mf)) {
+	if (!map.mf.isVacant()) {
 		map.mf = newMF;
 		memory::WriteMap(vp, map);
 	}
@@ -86,7 +86,7 @@ void E_GMF() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  vp = %08X", savedPC, vp);
 	memory::Map map = memory::ReadMap(vp);
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  GMF  rp = %08X  mf = %04X", savedPC, map.rp + 0, map.mf.u + 0);
-	if (Vacant(map.mf)) map.rp = 0;
+	if (map.mf.isVacant()) map.rp = 0;
 	Push(map.mf.u);
 	PushLong(map.rp);
 }

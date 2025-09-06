@@ -187,13 +187,13 @@ union MapFlags {
 		CARD16 protect    :  1;
 		CARD16 reserved   : 13;
 	};
+	inline int isVacant() {
+		return protect && dirty && !referenced;
+	}
+	inline int isProtect() {
+		return protect;
+	}
 };
-inline int Vacant(MapFlags mf) {
-	return mf.protect && mf.dirty && !mf.referenced;
-}
-inline int Protect(MapFlags mf) {
-	return mf.protect;
-}
 
 // 3.1.4.3 Code Segments
 struct CodeSegment {

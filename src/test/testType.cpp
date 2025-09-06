@@ -224,11 +224,11 @@ public:
 		CPPUNIT_ASSERT_EQUAL((CARD16)0x0001, mf.u);
 
 		mf.u = (CARD16)0x006;
-		CPPUNIT_ASSERT(Vacant(mf)); // 0110 => 6
+		CPPUNIT_ASSERT(mf.isVacant()); // 0110 => 6
 		mf.u = 0xfff6;
-		CPPUNIT_ASSERT(Vacant(mf)); // 0110 => 6
+		CPPUNIT_ASSERT(mf.isVacant()); // 0110 => 6
 		mf.u = 0xfffe;
-		CPPUNIT_ASSERT(Vacant(mf)); // 1110 => E
+		CPPUNIT_ASSERT(mf.isVacant()); // 1110 => E
 	}
 
 	//	struct CodeSegment {

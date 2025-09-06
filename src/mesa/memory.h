@@ -91,7 +91,7 @@ class PageCache {
 		return vp_ & MASK;
 	}
 	//
-	struct Entry {
+	struct Entry {		
 		union {
 			CARD32 flag;
 			struct {
@@ -101,6 +101,11 @@ class PageCache {
 			};
 		};
 		CARD16* page;
+
+		void clear() {
+			flag = 0;
+			page = 0;
+		}
 	};
 	static uint64_t   hit;
 	static uint64_t   missConflict;
@@ -109,9 +114,8 @@ class PageCache {
 
 public:
 	static void initialize() {
-		for(CARD32 i = 0; i < N_ENTRY; i++) {
-			entry[i].flag = 0;
-			entry[i].page = 0;
+		for(auto i = 0U; i < N_ENTRY; i++) {
+			entry[i].clear();
 		}
 		hit          = 0;
 		missEmpty    = 0;

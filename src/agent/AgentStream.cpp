@@ -135,6 +135,8 @@ void AgentStream::Initialize() {
 	fcb->stopAgent         = 0;
 	fcb->agentStopped      = 1;
 	fcb->streamWordSize    = 0;
+
+	map.clear();
 //
 //	BootStream* bootStream = new BootStream;
 //	addStream((Stream*)bootStream);

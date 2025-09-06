@@ -234,25 +234,6 @@ int isDisplayPage(CARD32 vp) {
 	return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
 }
 
-
-CARD16* peek(CARD32 va) {
-	PERF_COUNT(memory, GetAddress)
-	const CARD32 vp = va / PageSize;
-	const CARD32 of = va % PageSize;
-	if (vpSize <= vp) ERROR()
-	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (Vacant(mf)) {
-		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
-		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
-		ERROR();
-	}
-	Page* page = realPage[p->rp];
-	if (page == 0) ERROR();
-	//
-	return page->word + of;
-}
-
 CARD16* FetchPage(CARD32 vp) {
 	PERF_COUNT(memory, FetchPage)
 	if (vpSize <= vp) ERROR();
@@ -284,6 +265,23 @@ CARD16* StorePage(CARD32 vp) {
 	if (page == 0) ERROR();
 	//
 	return page->word ;
+}
+CARD16* peek(CARD32 va) {
+	PERF_COUNT(memory, GetAddress)
+	const CARD32 vp = va / PageSize;
+	const CARD32 of = va % PageSize;
+	if (vpSize <= vp) ERROR()
+	Map *p = maps + vp;
+	MapFlags mf = p->mf;
+	if (Vacant(mf)) {
+		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
+		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
+		ERROR();
+	}
+	Page* page = realPage[p->rp];
+	if (page == 0) ERROR();
+	//
+	return page->word + of;
 }
 
 void setReferencedFlag(CARD32 vp) {

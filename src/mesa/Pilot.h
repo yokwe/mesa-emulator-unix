@@ -3075,12 +3075,12 @@ namespace CPSwapDefs {
 		CARD16 availableE;
 	} __attribute__((packed));
 
-	const CARD32 SWAPINFO = PDA + OFFSET(ProcessDataArea, available);
+	// const CARD32 SWAPINFO = PDA + OFFSET(ProcessDataArea, available);
 
 
 	//PESV: PROCEDURE[] RETURNS [LONG POINTER TO ExternalStateVector] = INLINE {
 	//  RETURN[LOOPHOLE[PSB.PDA.available, SwapInfo].externalStateVector]};
-	const CARD32 PSEV = SWAPINFO + OFFSET(SwapInfo, externalStateVector);
+	// const CARD32 PSEV = SWAPINFO + OFFSET(SwapInfo, externalStateVector);
 
 	//ExternalStateVector: TYPE = MACHINE DEPENDENT RECORD [
 	//	-- Items describing the boot session in general:

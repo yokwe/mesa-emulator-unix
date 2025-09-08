@@ -66,14 +66,12 @@ int lastEsc;
 static void registerOpcode();
 
 static void mopOpcodeTrap() {
-	auto last = lastMop;
-	if (last == 0) ERROR();
-	OpcodeTrap(last);
+	if (lastMop == 0) ERROR();
+	OpcodeTrap(lastMop);
 }
 static void escOpcodeTrap() {
-	auto last = lastEsc;
-	if (last == 0) ERROR();
-	EscOpcodeTrap(last);
+	if (lastEsc == 0) ERROR();
+	EscOpcodeTrap(lastEsc);
 }
 
 

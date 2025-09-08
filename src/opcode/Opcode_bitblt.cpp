@@ -46,8 +46,6 @@ static const Logger logger(__FILE__);
 #include "../mesa/memory.h"
 #include "../mesa/Pilot.h"
 
-#include "Opcode.h"
-
 class MonoBlt {
 public:
 	static MonoBlt* getInstance(ColorBlt::ColorBltTable& arg);

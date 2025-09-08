@@ -7,16 +7,14 @@ add_library(opcode STATIC)
 target_sources(
 	opcode
 	PUBLIC
-    Interpreter.h
-    Opcode.h
+    opcode2.h
   PRIVATE
-    Interpreter.cpp
     Opcode_bitblt.cpp
     Opcode_block.cpp
     Opcode_control.cpp
     Opcode_process.cpp
     Opcode_special.cpp
-    Opcode.cpp
+    opcode2.cpp
     OpcodeEsc.cpp
     OpcodeMop0xx.cpp
     OpcodeMop1xx.cpp

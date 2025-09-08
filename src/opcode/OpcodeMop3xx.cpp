@@ -37,8 +37,10 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "Opcode.h"
-#include "Interpreter.h"
+#include "../mesa/MesaBasic.h"
+#include "../mesa/memory.h"
+
+#include "opcode2.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -194,11 +196,11 @@ void E_LP() {
 }
 // 0370  ASSIGN_MOP(z, ESC)
 void E_ESC() {
-	Interpreter::dispatchEsc(GetCodeByte());
+	DispatchEsc(GetCodeByte());
 }
 // 0371  ASSIGN_MOP(z, ESCL)
 void E_ESCL() {
-	Interpreter::dispatchEsc(GetCodeByte());
+	DispatchEsc(GetCodeByte());
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

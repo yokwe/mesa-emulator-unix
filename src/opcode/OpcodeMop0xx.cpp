@@ -37,8 +37,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "Opcode.h"
-#include "Interpreter.h"
+#include "../mesa/MesaBasic.h"
+#include "../mesa/Variable.h"
+#include "../mesa/memory.h"
+
+#include "opcode2.h"
 
 
 // 00  ASSIGN_MOP(z, NOOP)
@@ -311,7 +314,7 @@ void E_BNDCK() {
 void E_BRK() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  BRK", savedPC);
 	if (breakByte == 0) BreakTrap();
-	Interpreter::dispatchMop(breakByte);
+	Dispatch((CARD8)breakByte);
 	breakByte = 0;
 }
 // 077  ASSIGN_MOP(z, STC)

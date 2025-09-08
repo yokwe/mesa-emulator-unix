@@ -42,7 +42,9 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
-#include "../opcode/Interpreter.h"
+#include "../mesa/Variable.h"
+
+#include "../opcode/opcode2.h"
 
 void testBase::initAV(CARD16 origin, CARD16 limit) {
 	if ((sizeof(PrincOps::FrameSizeMap) / sizeof(PrincOps::FrameSizeMap[0])) != (PrincOps::LastAVHeapSlot + 1)) ERROR();
@@ -223,7 +225,8 @@ void testBase::initPDA() {
 
 void testBase::setUp() {
 	memory::initialize(22, 20, (CARD16)0x00a0);
-	Interpreter::initialize();
+	opcode::initialize();
+	variable::initialize();
 
 	GuiOp::setContext(new NullGuiOp);
 

@@ -48,6 +48,11 @@
 #include "../util/Perf.h"
 
 
+namespace variable {
+    extern void initialize();
+}
+
+
 #define STACK_ERROR() { \
 	logger.fatal("STACK_ERROR  %s -- %5d %s", __FUNCTION__, __LINE__, __FILE__); \
 	StackError(); \

@@ -76,22 +76,6 @@ static void escOpcodeTrap() {
 	EscOpcodeTrap(last);
 }
 
-// 0370  ASSIGN_MOP(z, ESC)
-void E_ESC_() {
-	dispatchEsc(GetCodeByte());
-}
-// 0371  ASSIGN_MOP(z, ESCL)
-void E_ESCL_() {
-	dispatchEsc(GetCodeByte());
-}
-static void registerMop(int code_, op op_, const char* name_) {
-    opMop.at(code_) = op_;
-    nameMop.at(code_) = name_;
-}
-static void registerEsc(int code_, op op_, const char* name_) {
-    opEsc.at(code_) = op_;
-    nameEsc.at(code_) = name_;
-}
 
 void initialize() {
     nameMop.fill("");
@@ -104,9 +88,7 @@ void initialize() {
     lastEsc = 0;
     
     registerOpcode();
-    registerMop(zESC, E_ESC_, "ESC");
-    registerMop(zESCL, E_ESCL_, "ESCL");
-
+    
     // supply name to uninitialized entry
     for(int i = 0; i < TABLE_SIZE; i++) {
         if (nameMop[i].empty()) nameMop[i] = std_sprintf("mop-%03o", i);
@@ -123,21 +105,23 @@ void initialize() {
 void stats() {
 	if (DEBUG_SHOW_OPCODE_STATS) {
 		uint64_t total = 0;
-		logger.info("==== Opcode stats  START");
+		logger.info("==== opcode stats  START");
 		for(int i = 0; i < TABLE_SIZE; i++) {
             bool opIsTrap = opMop[i] == mopOpcodeTrap;
 			if (statsMop[i] == 0 && opIsTrap) continue;
-			logger.info("stats mop  %3o  %-16s  %10lld", i, nameMop[i], statsMop[i], opIsTrap ? "*" : "");
+            auto number = formatWithCommas(statsMop[i]);
+			logger.info("stats mop  %3o  %-12s  %10s %s", i, nameMop[i], number, opIsTrap ? "*" : "");
 			total += statsMop[i];
 		}
 		for(int i = 0; i < TABLE_SIZE; i++) {
             bool opIsTrap = opEsc[i] == escOpcodeTrap;
 			if (statsEsc[i] == 0 && opIsTrap) continue;
-			logger.info("stats esc  %3o  %-16s  %10lld %s", i, nameMop[i], statsMop[i], opIsTrap ? "*" : "");
+            auto number = formatWithCommas(statsEsc[i]);
+			logger.info("stats esc  %3o  %-12s  %10s %s", i, nameEsc[i], number, opIsTrap ? "*" : "");
 			total += statsEsc[i];
 		}
-		logger.info("total = %lld", total);
-		logger.info("==== Opcode stats  STOP");
+		logger.info("total = %s", formatWithCommas(total));
+		logger.info("==== opcode stats  STOP");
 	}
 }
 
@@ -145,6 +129,15 @@ void stats() {
 //
 // registration of opcode
 //
+static void registerMop(int code_, op op_, const char* name_) {
+    opMop.at(code_) = op_;
+    nameMop.at(code_) = name_;
+}
+static void registerEsc(int code_, op op_, const char* name_) {
+    opEsc.at(code_) = op_;
+    nameEsc.at(code_) = name_;
+}
+
 #undef MOP
 #undef ESC
 #define MOP(enable, code, prefix, name) if (enable) registerMop(prefix##name, E_##name, #name); 

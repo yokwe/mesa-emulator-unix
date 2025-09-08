@@ -36,6 +36,7 @@
 #include <thread>
 
 #include "../util/Util.h"
+#include "Variable.h"
 static const Logger logger(__FILE__);
 
 #include "MesaBasic.h"
@@ -66,7 +67,7 @@ static const Logger logger(__FILE__);
 #include "../agent/StreamTCP.h"
 #include "../agent/StreamWWC.h"
 
-#include "../opcode/Interpreter.h"
+#include "../opcode/opcode2.h"
 
 #include "guam.h"
 
@@ -165,7 +166,8 @@ void initialize() {
 
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
 	memory::initialize(vmBits, rmBits, Agent::ioRegionPage);
-	Interpreter::initialize();
+	opcode::initialize();
+	variable::initialize();
 
 	// Reserve real memory for display
 	memory::reserveDisplayPage(displayWidth, displayHeight);

@@ -40,8 +40,6 @@ static const Logger logger(__FILE__);
 #include "../mesa/MesaBasic.h"
 #include "../mesa/memory.h"
 
-#include "Opcode.h"
-
 #define USE_FAST_BLT
 
 static const int    DEBUG_FORCE_ABORT = 0;

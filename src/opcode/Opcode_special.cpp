@@ -42,8 +42,6 @@ static const Logger logger(__FILE__);
 #include "../mesa/processor.h"
 #include "../agent/Agent.h"
 
-#include "Opcode.h"
-
 // CallAgent: PROC [devIndex: AgentDeviceIndex] = MACHINE CODE
 //	  {Mopcodes.zESC, aCALLAGENT};
 void E_CALLAGENT() {

@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/guam.h"
 #include "../mesa/processor.h"
 
-#include "../opcode/Interpreter.h"
+#include "../opcode/opcode2.h"
 
 
 int main(int /* argc */, char** /* argv */) {
@@ -95,7 +95,7 @@ int main(int /* argc */, char** /* argv */) {
 	guam::initialize();
 	guam::boot();
 	
-	Interpreter::stats();
+	opcode::stats();
 	PERF_LOG();
 	memory::cache::stats();
 

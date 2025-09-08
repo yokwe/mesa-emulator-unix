@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
-#include "../opcode/Interpreter.h"
+#include "../opcode/opcode2.h"
 
 class testOpcode_000 : public testBase {
 	CPPUNIT_TEST_SUITE(testOpcode_000);
@@ -126,7 +126,7 @@ class testOpcode_000 : public testBase {
 
 	void testLL0() {
 		page_CB[PC / 2] = zLL0 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -134,7 +134,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL1() {
 		page_CB[PC / 2] = zLL1 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -142,7 +142,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL2() {
 		page_CB[PC / 2] = zLL2 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -150,7 +150,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL3() {
 		page_CB[PC / 2] = zLL3 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -158,7 +158,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL4() {
 		page_CB[PC / 2] = zLL4 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -166,7 +166,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL5() {
 		page_CB[PC / 2] = zLL5 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -174,7 +174,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL6() {
 		page_CB[PC / 2] = zLL6 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -182,7 +182,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL7() {
 		page_CB[PC / 2] = zLL7 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -190,7 +190,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL8() {
 		page_CB[PC / 2] = zLL8 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -198,7 +198,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL9() {
 		page_CB[PC / 2] = zLL9 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -206,7 +206,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL10() {
 		page_CB[PC / 2] = zLL10 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -214,7 +214,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLL11() {
 		page_CB[PC / 2] = zLL11 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -223,7 +223,7 @@ class testOpcode_000 : public testBase {
 	void testLLB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zLLB << 8 | alpha;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -233,7 +233,7 @@ class testOpcode_000 : public testBase {
 
 	void testLLD0() {
 		page_CB[PC / 2] = zLLD0 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -242,7 +242,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD1() {
 		page_CB[PC / 2] = zLLD1 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -251,7 +251,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD2() {
 		page_CB[PC / 2] = zLLD2 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -260,7 +260,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD3() {
 		page_CB[PC / 2] = zLLD3 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -269,7 +269,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD4() {
 		page_CB[PC / 2] = zLLD4 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -278,7 +278,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD5() {
 		page_CB[PC / 2] = zLLD5 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -287,7 +287,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD6() {
 		page_CB[PC / 2] = zLLD6 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -296,7 +296,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD7() {
 		page_CB[PC / 2] = zLLD7 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -305,7 +305,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD8() {
 		page_CB[PC / 2] = zLLD8 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -314,7 +314,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLLD10() {
 		page_CB[PC / 2] = zLLD10 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -324,7 +324,7 @@ class testOpcode_000 : public testBase {
 	void testLLDB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zLLDB << 8 | alpha;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -337,7 +337,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL0 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -347,7 +347,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL1 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -357,7 +357,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL2 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -367,7 +367,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL3 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -377,7 +377,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL4 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -387,7 +387,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL5 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -397,7 +397,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL6 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -407,7 +407,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL7 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -417,7 +417,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL8 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -427,7 +427,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL9 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -437,7 +437,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSL10 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -448,7 +448,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSLB << 8 | alpha;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -461,7 +461,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -473,7 +473,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -485,7 +485,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -497,7 +497,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -509,7 +509,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -521,7 +521,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -533,7 +533,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -545,7 +545,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -558,7 +558,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zPL0 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -569,7 +569,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zPL1 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -580,7 +580,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zPL2 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -591,7 +591,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zPL3 << 8 | 0x00;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -603,7 +603,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zPLB << 8 | alpha;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -617,7 +617,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -632,7 +632,7 @@ class testOpcode_000 : public testBase {
 		const CARD32 value = 0x12345678;
 		stack[SP++] = LowHalf(value);
 		stack[SP++] = HighHalf(value);
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -645,7 +645,7 @@ class testOpcode_000 : public testBase {
 
 	void testLG0() {
 		page_CB[PC / 2] = zLG0 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -653,7 +653,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLG1() {
 		page_CB[PC / 2] = zLG1 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -661,7 +661,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLG2() {
 		page_CB[PC / 2] = zLG2 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -670,7 +670,7 @@ class testOpcode_000 : public testBase {
 	void testLGB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zLGB << 8 | alpha;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -680,7 +680,7 @@ class testOpcode_000 : public testBase {
 
 	void testLGD0() {
 		page_CB[PC / 2] = zLGD0 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -689,7 +689,7 @@ class testOpcode_000 : public testBase {
 	}
 	void testLGD2() {
 		page_CB[PC / 2] = zLGD2 << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -699,7 +699,7 @@ class testOpcode_000 : public testBase {
 	void testLGDB() {
 		CARD8 alpha = 0x20;
 		page_CB[PC / 2] = zLGDB << 8 | alpha;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(2, (int)SP);
@@ -713,7 +713,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zSGB << 8 | alpha;
 		const CARD16 value = 0x1234;
 		stack[SP++] = value;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
@@ -728,7 +728,7 @@ class testOpcode_000 : public testBase {
 		const CARD16 index = 0x1111;
 		stack[SP++] = index;
 		stack[SP++] = range;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -743,7 +743,7 @@ class testOpcode_000 : public testBase {
 
 		int catchException = 0;
 		try {
-			Interpreter::execute();
+			Execute();
 		} catch (Abort &info) {
 			catchException = 1;
 		}
@@ -757,7 +757,7 @@ class testOpcode_000 : public testBase {
 	void testBRK_n() {
 		breakByte = zLL0;
 		page_CB[PC / 2] = zBRK << 8 | 0x00;
-		Interpreter::execute();
+		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 1, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(1, (int)SP);
@@ -769,7 +769,7 @@ class testOpcode_000 : public testBase {
 		page_CB[PC / 2] = zBRK << 8 | 0x00;
 		int catchException = 0;
 		try {
-			Interpreter::execute();
+			Execute();
 		} catch (Abort &info) {
 			//logger.debug("Abort  func = %-20s line = %4d file = %s\n", info.func, info.line, info.file);
 			catchException = 1;

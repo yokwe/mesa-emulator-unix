@@ -33,6 +33,8 @@
 // Opcode_process.cpp
 //
 
+#include <algorithm>
+
 #include "../util/Debug.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
@@ -44,14 +46,11 @@ static const Logger logger(__FILE__);
 #include "../mesa/memory.h"
 #include "../mesa/Function.h"
 
-#include "Opcode.h"
-
 #define OFFSET_PDA(m)      OFFSET(ProcessDataArea, m)
 #define OFFSET_PDA2(m,n)   OFFSET3(ProcessDataArea, m, n)
 #define OFFSET_PDA3(m,n,o) OFFSET4(ProcessDataArea, m, n, o)
 
 #define OFFSET_SV(m) OFFSET(StateVector, m)
-#define MAX(a,b) (((a) < (b)) ? (b) : (a))
 
 //#define TRACE_RESCHEDULE
 
@@ -410,11 +409,11 @@ static void FaultTwo(FaultIndex fi, LONG_UNSPEC parameter) {
 void FrameFault(FSIndex fsi) {
 	PERF_COUNT(opcode, FrameFault)
 	if (DEBUG_SHOW_FRAME_FAULT) {
-		if (Opcode::getLast()) {
-			logger.debug("%-10s %8d  %-8s  %8X+%4X  %8X", __FUNCTION__, fsi, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
-		} else {
+		// if (Opcode::getLast()) {
+		// 	logger.debug("%-10s %8d  %-8s  %8X+%4X  %8X", __FUNCTION__, fsi, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
+		// } else {
 			logger.debug("%-10s %8d", __FUNCTION__, fsi);
-		}
+		// }
 	}
 	FaultOne(qFrameFault, fsi);
 }
@@ -423,11 +422,11 @@ void FrameFault(FSIndex fsi) {
 void PageFault(LONG_POINTER ptr) {
 	PERF_COUNT(opcode, PageFault)
 	if (DEBUG_SHOW_PAGE_FAULT) {
-		if (Opcode::getLast()) {
-			logger.debug("%-10s %08X  %-8s  %8X+%4X  %8X", __FUNCTION__, ptr, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
-		} else {
+		// if (Opcode::getLast()) {
+		// 	logger.debug("%-10s %08X  %-8s  %8X+%4X  %8X", __FUNCTION__, ptr, Opcode::getLast()->getName(), CB, savedPC, (CB + savedPC));
+		// } else {
 			logger.debug("%-10s %08X", __FUNCTION__, ptr);
-		}
+		// }
 	}
 	if (DEBUG_STOP_AT_PAGE_FAULT) ERROR();
 	FaultTwo(qPageFault, ptr);
@@ -503,7 +502,7 @@ void E_MW() {
 			cond.wakeup = 0;
 			*Store(c) = cond.u;
 		} else {
-			*StorePda(OFFSET_PDA3(block, PSB, timeout)) = ((t == 0) ? 0 : MAX(1U, (CARD16)((CARD32)PTC + (CARD32)t)));
+			*StorePda(OFFSET_PDA3(block, PSB, timeout)) = ((t == 0) ? 0 : std::max((CARD16)1, (CARD16)((CARD32)PTC + (CARD32)t)));
 			flags.waiting = 1;
 			*StorePda(OFFSET_PDA3(block, PSB, flags)) = flags.u;
 			Requeue(PDA + OFFSET_PDA(ready), c, PSB);

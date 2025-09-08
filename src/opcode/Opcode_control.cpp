@@ -47,9 +47,6 @@ static const Logger logger(__FILE__);
 
 //#include "../trace/Trace.h"
 
-#include "Opcode.h"
-
-
 // 9.5.2 Trap Processing
 // Trap: PROC[ptr: POINTER TO ControlLink]
 static inline void Trap(POINTER ptr) {

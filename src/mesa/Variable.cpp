@@ -94,6 +94,50 @@ CARD16 savedSP;
 VariableRunning running;
 
 
+void variable::initialize() {
+	// Processor ID
+	PID[0] = 0x0000;
+	PID[1] = 0x0000;
+	PID[2] = 0x0000;
+	PID[3] = 0x0000;
+//	MP  = 0;    // Maintenance Panel
+	MP.clear();
+//	IT  = 0;    // Interval Timer
+//	WM  = 0;    // Wakeup mask register - 10.4.4
+//	WP  = 0;    // Wakeup pending register - 10.4.4.1
+	WP = (CARD16)0;
+//	WDC = 1;    // Wakeup disable counter - 10.4.4.3
+	WDC = (CARD16)1;
+	PTC = 0;    // Process timeout counter - 10.4.5
+	XTS = 0;    // Xfer trap status - 9.5.5
+
+	// 3.3.1 Control Registers
+	PSB = 0; // PsbIndex - 10.1.1
+	MDS = (CARD32)0;
+	LF  = (CARD16)0;  // POINTER TO LocalVariables
+	GF  = (CARD32)0;  // LONG POINTER TO GlobalVarables
+	CB  = (CARD32)0;  // LONG POINTER TO CodeSegment
+	PC  = 0;
+	GFI = 0;
+
+//	for(int i = 0; i < StackDepth; i++) stack[i] = 0;
+//	SP = 0;
+	stack.clear();
+
+	// 4.5 Instruction Execution
+	breakByte = 0;
+	savedPC   = 0;
+	savedSP   = 0;
+
+	// 10.4.1 Scheduler
+	//running = 1;
+	running = true;
+
+	// 10.4.5 Timeouts
+    //lastTimeoutTime = 0;
+}
+
+
 //
 // VariableMP
 //

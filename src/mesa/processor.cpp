@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../agent/AgentDisk.h"
 #include "../agent/AgentNetwork.h"
 
-#include "../opcode/Interpreter.h"
+#include "../opcode/opcode2.h"
 
 #include "processor.h"
 #include "timer.h"
@@ -128,7 +128,7 @@ void run() {
 				if (DEBUG_STOP_AT_NOT_RUNNING) {
 					if (!running) ERROR();
 				}
-				Interpreter::execute();
+				Execute();
 			} catch(RequestReschedule& e) {
 				// Only ERROR_RequestReschedule throws RequestReschedule.
 				// ERROR_RequestReschedule is called from Reschedule() and processor::checkRequestReschedule().

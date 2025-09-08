@@ -69,7 +69,7 @@ void initialize();
 void stats();
 }
 
-__attribute__((always_inline)) inline void dispatchEsc(uint8_t code) {
+__attribute__((always_inline)) inline void DispatchEsc(uint8_t code) {
     opcode::lastEsc = code;
     opcode::opEsc[code]();
     opcode::lastEsc = 0;

@@ -318,6 +318,6 @@
 {"type": "esc", "code": 139, "length":2, "name":"STOPEMULATOR"},
 {"type": "esc", "code": 140, "length":2, "name":"214"},
 {"type": "esc", "code": 192, "length":2, "name":"COLORBLT"},
-{"type": "esc", "code": 196, "length":2, "name":"305"},
+{"type": "esc", "code": 197, "length":2, "name":"305"},
 {"type": "esc", "code": 198, "length":2, "name":"306"}
 ]}

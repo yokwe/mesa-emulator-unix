@@ -69,21 +69,35 @@ void initialize();
 void stats();
 }
 
+#define OPCODE_STATS_COUNT_BEFORE 
+
 __attribute__((always_inline)) inline void DispatchEsc(uint8_t code) {
+#ifdef OPCODE_STATS_COUNT_BEFORE
+	// increment stat counter before execution for opcode that generate EscOpcodeTrap
+	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsEsc[code]++;
+#endif
     opcode::lastEsc = code;
     opcode::opEsc[code]();
     opcode::lastEsc = 0;
+#ifndef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter after execution. We don't count ABORTED instruction.
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsEsc[code]++;
+#endif
 }
 
 // 4.5 Instruction Execution
 __attribute__((always_inline)) inline void Dispatch(uint8_t code) {
+#ifdef OPCODE_STATS_COUNT_BEFORE
+	// increment stat counter before execution for opcode that generate OpcodeTrap
+	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;
+#endif
     opcode::lastMop = code;
     opcode::opMop[code]();
     opcode::lastMop = 0;
+#ifndef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter after execution. We don't count ABORTED instruction.
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;
+#endif
 }
 static inline void Execute() {
     savedPC = PC;

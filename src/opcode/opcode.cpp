@@ -40,8 +40,6 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../mesa/Constant.h"
-
 #include "opcode.h"
 
 namespace opcode {

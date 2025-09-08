@@ -37,7 +37,6 @@
 
 #include <string>
 
-#include "../mesa/Constant.h"
 #include "../mesa/Pilot.h"
 
 

@@ -973,22 +973,20 @@ const LONG_POINTER PDA = mPDA;
 //     ENDCASE];
 // PsbIndex: TYPE = [0..1024);
 const int PsbIndex_SIZE = 1024;
-struct ProcessDataArea {
-	union {
-		struct {
-			Queue ready;
-			CARD16 count;
-			UNSPEC unused;
-			CARD16 available[5];
-			// StateAliocationTable: TYPE = ARRAY Priority OF POINTER TO StateVector;
-			PDA_POINTER state[Priority_SIZE];
-			//InterruptVector interrupt;
-			InterruptItem interrupt[InterruptLevel_SIZE];
-			//FaultVector fault;
-			FaultQueue fault[FaultIndex_SIZE];
-		};
-		ProcessStateBlock block[0];
+union ProcessDataArea {
+	struct {
+		Queue ready;
+		CARD16 count;
+		UNSPEC unused;
+		CARD16 available[5];
+		// StateAliocationTable: TYPE = ARRAY Priority OF POINTER TO StateVector;
+		PDA_POINTER state[Priority_SIZE];
+		//InterruptVector interrupt;
+		InterruptItem interrupt[InterruptLevel_SIZE];
+		//FaultVector fault;
+		FaultQueue fault[FaultIndex_SIZE];
 	};
+	ProcessStateBlock block[0];
 };
 
 // StartPsb: PsbIndex = (SIZE[ProcessDataArea] + SIZE[ProcessStateBlock] - 1) / SIZE[ProcessStateBlock];

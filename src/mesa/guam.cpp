@@ -67,7 +67,7 @@ static const Logger logger(__FILE__);
 #include "../agent/StreamTCP.h"
 #include "../agent/StreamWWC.h"
 
-#include "../opcode/opcode2.h"
+#include "../opcode/opcode.h"
 
 #include "guam.h"
 

@@ -41,7 +41,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Variable.h"
 #include "../mesa/memory.h"
 
-#include "opcode2.h"
+#include "opcode.h"
 
 
 // 00  ASSIGN_MOP(z, NOOP)

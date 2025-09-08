@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "testBase.h"
 
-#include "../opcode/opcode2.h"
+#include "../opcode/opcode.h"
 
 class testOpcode_300 : public testBase {
 	CPPUNIT_TEST_SUITE(testOpcode_300);

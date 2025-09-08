@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/guam.h"
 #include "../mesa/processor.h"
 
-#include "../opcode/opcode2.h"
+#include "../opcode/opcode.h"
 
 
 int main(int /* argc */, char** /* argv */) {

@@ -42,7 +42,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Constant.h"
 
-#include "opcode2.h"
+#include "opcode.h"
 
 namespace opcode {
 

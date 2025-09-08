@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../agent/AgentDisk.h"
 #include "../agent/AgentNetwork.h"
 
-#include "../opcode/opcode2.h"
+#include "../opcode/opcode.h"
 
 #include "processor.h"
 #include "timer.h"

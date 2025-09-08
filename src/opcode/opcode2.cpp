@@ -129,19 +129,19 @@ void stats() {
 //
 // registration of opcode
 //
-static void registerMop(int code_, op op_, const char* name_) {
-    opMop.at(code_) = op_;
+static void registerMop(int enable, int code_, op op_, const char* name_) {
+    if (enable) opMop.at(code_) = op_;
     nameMop.at(code_) = name_;
 }
-static void registerEsc(int code_, op op_, const char* name_) {
-    opEsc.at(code_) = op_;
+static void registerEsc(int enable, int code_, op op_, const char* name_) {
+    if (enable) opEsc.at(code_) = op_;
     nameEsc.at(code_) = name_;
 }
 
 #undef MOP
 #undef ESC
-#define MOP(enable, code, prefix, name) if (enable) registerMop(prefix##name, E_##name, #name); 
-#define ESC(enable, code, prefix, name) if (enable) registerEsc(prefix##name, E_##name, #name); 
+#define MOP(enable, code, prefix, name) registerMop(enable, prefix##name, E_##name, #name); 
+#define ESC(enable, code, prefix, name) registerEsc(enable, prefix##name, E_##name, #name); 
 
 static void registerOpcode() {
 #include "opcode.inc"

@@ -89,18 +89,3 @@ protected:
 
 	static LONG_POINTER AllocFCB(int index, int fcbSize);
 };
-
-
-//class AgentNull : public Agent {
-//public:
-//	AgentNull() : Agent(GuamInputOutput::null, "null") {}
-//
-//	CARD32 getFCBSize() {
-//		return 0;
-//	}
-//
-//	void Initialize() {}
-//	void Call() {
-//		ERROR();
-//	}
-//};

@@ -1,0 +1,318 @@
+/usr/bin/time build/guam-headless/guam-headless
+21:03:20.824 INFO  main             START
+21:03:20.824 INFO  main             entryName = GVWin
+21:03:20.824 INFO  Setting          path  /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/setting.json
+21:03:20.825 INFO  processor        stopAtMP  915
+21:03:20.825 INFO  processor        stopAtMP 8000
+21:03:20.825 INFO  guam             vmBits = 25  rmBits = 24
+21:03:20.828 INFO  memory           reserveDisplayPage rp =   FEC0+A0
+21:03:20.828 INFO  guam             Disk  /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:20.828 INFO  DiskFile         DiskFile::attach /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:20.828 INFO  Util             mapFile    0  size =  C800000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:20.828 INFO  guam             Floppy /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:20.828 INFO  DiskFile         DiskFile::attach /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:20.828 INFO  Util             mapFile    1  size =   168000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:20.828 INFO  guam             networkInterfaceName = ens192
+21:03:20.828 INFO  NetworkPacket_dummy NetworkPacket dummy
+21:03:20.828 INFO  NetworkPacket_dummy name     = ens192
+21:03:20.828 INFO  NetworkPacket_dummy protocol = 0x0600
+21:03:20.828 INFO  Agent            Agent  1 Disk        fcb = 8020  16
+21:03:20.828 INFO  Agent            Agent  2 Floppy      fcb = 8030  14
+21:03:20.828 INFO  Agent            Agent  3 Network     fcb = 803E  15
+21:03:20.828 INFO  Agent            Agent  5 Keyboard    fcb = 804E   7
+21:03:20.828 INFO  Agent            Agent  6 Beep        fcb = 8056   1
+21:03:20.828 INFO  Agent            Agent  7 Mouse       fcb = 8058   7
+21:03:20.828 INFO  Agent            Agent  8 Processor   fcb = 8060  14
+21:03:20.828 INFO  Agent            Agent  9 Stream      fcb = 806E  12
+21:03:20.828 INFO  Agent            Agent 12 Display     fcb = 807A  40
+21:03:20.828 INFO  AgentDisk        AGENT Disk  0  CHS = 12800  2 16  /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:20.828 DEBUG AgentFloppy      AGENT Floppy  0  CHS =    80  2 18  /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:20.828 INFO  guam             Agent FCB  8000 80A2
+21:03:20.828 INFO  guam             Boot  /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/NSINSTLR.DAT
+21:03:20.828 INFO  Util             mapFile    2  size =    9B200  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/NSINSTLR.DAT
+21:03:20.828 INFO  StreamBoot       110 BOOT     /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/NSINSTLR.DAT
+21:03:20.828 INFO  StreamCopyPaste  101 CopyPaste
+21:03:20.828 INFO  StreamPCFA         1 PCFA    
+21:03:20.828 INFO  StreamTCP         21 TCP     
+21:03:20.828 INFO  StreamWWC        108 WWC     
+21:03:20.828 INFO  guam             germ  path    = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.GRM
+21:03:20.828 INFO  Util             mapFile    3  size =     5000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.GRM
+21:03:20.828 INFO  guam             germ  size = 40  0028
+21:03:20.828 INFO  Util             unmapFile  3  size =     5000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.GRM
+21:03:20.828 INFO  guam             bootDevice DISK
+21:03:20.828 INFO  guam             bootSwitch = Oy{|}\200\346\347\350\377
+21:03:20.828 INFO  guam             setSwitch O 117
+21:03:20.828 INFO  guam             setSwitch y 171
+21:03:20.828 INFO  guam             setSwitch { 173
+21:03:20.828 INFO  guam             setSwitch | 174
+21:03:20.828 INFO  guam             setSwitch } 175
+21:03:20.828 INFO  guam             setSwitch ? 200
+21:03:20.828 INFO  guam             setSwitch ? 346
+21:03:20.828 INFO  guam             setSwitch ? 347
+21:03:20.828 INFO  guam             setSwitch ? 350
+21:03:20.828 INFO  guam             setSwitch ? 377
+21:03:20.828 INFO  guam             boot START
+21:03:20.828 INFO  guam             thread start   interrupt
+21:03:20.828 INFO  guam             thread start   timer
+21:03:20.828 INFO  guam             thread start   receive
+21:03:20.828 INFO  interrupt        interrup::run START
+21:03:20.828 INFO  AgentNetwork     AgentNetwork::ReceiveThread::run START
+21:03:20.828 INFO  guam             thread start   transmit
+21:03:20.828 INFO  timer            timer::run START
+21:03:20.828 INFO  guam             thread start   disk
+21:03:20.828 INFO  AgentNetwork     AgentNetwork::TransmitThread::run START
+21:03:20.828 INFO  guam             thread start   processor
+21:03:20.828 INFO  AgentDisk        AgentDisk::IOThread::run START
+21:03:20.828 INFO  guam             thread joining interrupt
+21:03:20.828 INFO  processor        processor::run START
+21:03:20.828 INFO  processor        bootLink  0080 2 0000  00000202
+21:03:20.828 INFO  processor        GFI = 001C  CB  = 00001208  GF  = 00000AB0
+21:03:20.828 INFO  processor        LF  = 099C  PC  = 26E9      MDS = 00000000
+21:03:20.828 INFO  Variable         MP 0900
+21:03:20.845 INFO  Variable         MP 0910
+21:03:20.845 INFO  Variable         MP 0920
+21:03:20.845 INFO  AgentDisk        AGENT Disk start  0000
+21:03:20.845 INFO  Variable         MP 0910
+21:03:20.845 INFO  Variable         MP 0920
+21:03:20.845 INFO  Variable         MP 0910
+21:03:20.845 INFO  Variable         MP 0920
+21:03:20.845 INFO  Variable         MP 0910
+21:03:20.845 INFO  Variable         MP 0910
+21:03:20.845 INFO  AgentDisk        AGENT Disk stop
+21:03:20.845 INFO  Variable         MP 0920
+21:03:20.846 INFO  AgentDisk        AGENT Disk start  0000
+21:03:20.846 INFO  Variable         MP 0910
+21:03:20.846 INFO  Variable         MP 0920
+21:03:20.846 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.866 INFO  Variable         MP 0910
+21:03:20.866 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.867 INFO  Variable         MP 0920
+21:03:20.867 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0920
+21:03:20.868 INFO  Variable         MP 0910
+21:03:20.868 INFO  Variable         MP 0919
+21:03:20.868 INFO  Variable         MP 0930
+21:03:20.868 INFO  Variable         MP 0930
+21:03:20.868 INFO  Variable         MP 0940
+21:03:20.897 INFO  Variable         MP 0937
+21:03:20.897 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.902 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.902 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.906 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.906 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.911 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.911 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.915 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.915 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.920 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.920 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.924 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.924 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.929 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.929 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.934 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.934 INFO  AgentNetwork     AGENT Network  start  0000 0000
+21:03:20.938 INFO  AgentNetwork     AGENT Network  stop
+21:03:20.938 INFO  Variable         MP 0940
+21:03:20.938 INFO  AgentDisk        AGENT Disk stop
+21:03:20.940 INFO  AgentDisk        AGENT Disk start  4000
+21:03:20.943 INFO  Variable         MP 0940
+21:03:20.943 INFO  Variable         MP 0960
+21:03:21.034 INFO  Variable         MP 0970
+21:03:21.240 INFO  Variable         MP 0980
+21:03:21.240 INFO  AgentNetwork     AGENT Network  start  0400 0800
+21:03:21.275 INFO  Variable         MP 0990
+21:03:21.358 INFO  AgentStream      AGENT Stream start  0200
+21:03:21.359 INFO  memory           mapDisplay    1A3F+A0    FEC0 160
+21:03:21.369 INFO  Variable         MP 7600
+21:03:21.395 INFO  Variable         MP 7600
+21:03:26.518 INFO  Variable         MP 7700
+21:03:26.614 INFO  StreamWWC        WWC      connect  mesaIsServer = 0  state mesa = 0  pc = 0
+21:03:27.036 DEBUG Opcode_control   UnboundTrap 00000003
+21:03:27.110 DEBUG Opcode_control   UnboundTrap 00000003
+21:03:30.836 INFO  AgentFloppy      AGENT Floppy start
+21:03:30.841 INFO  Variable         MP 7800
+21:03:33.356 INFO  StreamPCFA       PCFA     connect  mesaIsServer = 0  state mesa = 0  pc = 0
+21:03:36.442 INFO  Variable         MP 8000
+21:03:36.442 INFO  processor        stop at MP 8000
+21:03:36.442 INFO  processor        timer::stop
+21:03:36.442 INFO  AgentNetwork     AgentNetwork::ReceiveThread::stop
+21:03:36.442 INFO  AgentNetwork     AgentNetwork::TransmitThread::stop
+21:03:36.442 INFO  AgentDisk        AgentDisk::IOThread::stop
+21:03:36.442 INFO  timer            timer::stop
+21:03:36.442 INFO  interrupt        interrupt::stop
+21:03:36.442 INFO  processor        processor::run STOP
+21:03:36.473 INFO  timer            TimerThread::run STOP
+21:03:36.879 INFO  AgentNetwork     AgentNetwork::ReceiveThread::run STOP
+21:03:37.199 INFO  AgentNetwork     AgentNetwork::TransmitThread::run STOP
+21:03:37.440 INFO  interrupt        interrupt::run STOP
+21:03:37.440 INFO  AgentDisk        AgentDisk::IOThread::run STOP
+21:03:37.441 INFO  guam             thread joined  interrupt
+21:03:37.441 INFO  guam             thread joining timer
+21:03:37.441 INFO  guam             thread joined  timer
+21:03:37.441 INFO  guam             thread joining receive
+21:03:37.441 INFO  guam             thread joined  receive
+21:03:37.441 INFO  guam             thread joining transmit
+21:03:37.441 INFO  guam             thread joined  transmit
+21:03:37.441 INFO  guam             thread joining disk
+21:03:37.441 INFO  guam             thread joined  disk
+21:03:37.441 INFO  guam             thread joining processor
+21:03:37.441 INFO  guam             thread joined  processor
+21:03:37.441 INFO  guam             boot STOP
+21:03:37.441 INFO  DiskFile         DiskFile::detach /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:37.441 INFO  Util             unmapFile  0  size =  C800000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/GVWIN.DSK
+21:03:37.445 INFO  DiskFile         DiskFile::detach /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:37.445 INFO  Util             unmapFile  1  size =   168000  path = /Users/hasegawa/vscode-workplace/mesa-emulator-unix/build/run/floppy144
+21:03:37.451 INFO  Perf             memory::Fetch                     =  65,630,958
+21:03:37.451 INFO  Perf             memory::Store                     =  12,677,048
+21:03:37.451 INFO  Perf             memory::ReadDbl                   =  33,682,042
+21:03:37.451 INFO  Perf             memory::FetchMds                  = 240,713,340
+21:03:37.451 INFO  Perf             memory::StoreMds                  = 137,693,719
+21:03:37.451 INFO  Perf             memory::ReadDblMds                =  23,980,649
+21:03:37.451 INFO  Perf             memory::GetCodeByte               = 783,548,293
+21:03:37.451 INFO  Perf             memory::GetCodeWord               =  12,320,078
+21:03:37.451 INFO  Perf             memory::FetchByte                 =   9,265,815
+21:03:37.451 INFO  Perf             memory::StoreByte                 =   1,220,140
+21:03:37.451 INFO  Perf             memory::ReadField                 =   4,869,099
+21:03:37.451 INFO  Perf             memory::WriteField                =   4,483,400
+21:03:37.451 INFO  Perf             memory::WriteMap                  =     452,239
+21:03:37.451 INFO  Perf             memory::GetAddress                =      32,686
+21:03:37.451 INFO  Perf             memory::FetchPda                  =   1,300,076
+21:03:37.451 INFO  Perf             memory::StorePda                  =     539,267
+21:03:37.452 INFO  Perf             memory::FetchPage                 =      13,829
+21:03:37.452 INFO  Perf             memory::StorePage                 =       7,929
+21:03:37.452 INFO  Perf             opcode::Dispatch                  = 564,779,182
+21:03:37.452 INFO  Perf             opcode::FrameFault                =         402
+21:03:37.452 INFO  Perf             opcode::PageFault                 =       3,056
+21:03:37.452 INFO  Perf             opcode::CodeTrap                  =         362
+21:03:37.452 INFO  Perf             opcode::EscOpcodeTrap             =      41,816
+21:03:37.452 INFO  Perf             opcode::OpcodeTrap                =           0
+21:03:37.452 INFO  Perf             opcode::UnboundTrap               =           2
+21:03:37.452 INFO  Perf             running::start                    =       5,562
+21:03:37.452 INFO  Perf             running::stop                     =       5,561
+21:03:37.452 INFO  Perf             interrupt::notify                 =       5,901
+21:03:37.452 INFO  Perf             interrupt::wakeup                 =       5,853
+21:03:37.452 INFO  Perf             interrupt::interrupt              =       5,851
+21:03:37.452 INFO  Perf             interrupt::request                =       5,850
+21:03:37.452 INFO  Perf             timer::timer                      =         391
+21:03:37.452 INFO  Perf             timer::timeout                    =         390
+21:03:37.452 INFO  Perf             timer::updatePTC                  =         390
+21:03:37.452 INFO  Perf             processor::abort                  =      45,638
+21:03:37.452 INFO  Perf             processor::requestReschedule      =       5,989
+21:03:37.452 INFO  Perf             processor::needReschedule         =       5,983
+21:03:37.452 INFO  Perf             processor::checkRequestReschedule =  72,739,221
+21:03:37.452 INFO  Perf             processor::rescheduleRequest      =         427
+21:03:37.452 INFO  Perf             processor::interruptFlag          =       5,848
+21:03:37.452 INFO  Perf             processor::interrupt              =       5,847
+21:03:37.452 INFO  Perf             processor::timerFlag              =         390
+21:03:37.452 INFO  Perf             processor::timer                  =         380
+21:03:37.452 INFO  Perf             processor::running                =         427
+21:03:37.452 INFO  Perf             network::transmit                 =          29
+21:03:37.452 INFO  Perf             network::wait_for                 =          36
+21:03:37.452 INFO  Perf             network::receive                  =           0
+21:03:37.452 INFO  Perf             network::select                   =          16
+21:03:37.452 INFO  Perf             disk::process                     =       5,870
+21:03:37.452 INFO  Perf             disk::read                        =       5,354
+21:03:37.452 INFO  Perf             disk::write                       =         515
+21:03:37.452 INFO  Perf             disk::verify                      =           1
+21:03:37.453 INFO  memory           PageCache 11912 / 65536  1,322,359,603  100.00%   miss empty 21,758  conflict 0
+21:03:37.453 INFO  main             elapsedTime = 16613 msec
+21:03:37.453 INFO  main             STOP
+       16.63 real         5.31 user         0.17 sys
+macstudio2023:mesa-emulator-unix hasegawa$ 

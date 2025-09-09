@@ -85,7 +85,7 @@ CARD16         displayWidth;
 CARD16         displayHeight;
 std::string    networkInterfaceName;
 
-std::vector<DiskFile*> diskFileList;
+DiskFile         diskFile;
 DiskFile         floppyFile;
 NetworkPacket    networkPacket;
 
@@ -172,35 +172,44 @@ void initialize() {
 	// Reserve real memory for display
 	memory::reserveDisplayPage(displayWidth, displayHeight);
 
-	// AgentDisk use diskFile
-	{
-		logger.info("Disk  %s", diskPath);
-		DiskFile* diskFile = new DiskFile;
-		diskFile->attach(diskPath);
-		diskFileList.push_back(diskFile);
-		disk.addDiskFile(diskFile);
-	}
-
+	//
+	// Initialize Agent
+	//
+	// AgentDisk
+	logger.info("Disk  %s", diskPath);
+	diskFile.attach(diskPath);
+	disk.addDiskFile(&diskFile);
+	// AgentFloppy
 	logger.info("Floppy %s", floppyPath);
 	floppyFile.attach(floppyPath);
 	floppy.addDiskFile(&floppyFile);
-
 	// AgentNetwork use networkPacket
 	logger.info("networkInterfaceName = %s", networkInterfaceName);
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
-
 	// AgentProcessor::Initialize use PID[]
 	PID[0] = 0;
 	networkPacket.getAddress(PID[1], PID[2], PID[3]);
 	agentProcessor.setProcessorID(PID[1], PID[2], PID[3]);
-
-	// set display width and height
+	// AgentDisplay
 	display.setDisplayWidth(displayWidth);
 	display.setDisplayHeight(displayHeight);
 
-	// Initialization of Agent
-	Agent::InitializeAgent();
+	// Enable Agents
+	disk.Enable();
+	floppy.Enable();
+	network.Enable();
+//	AgentParallel  parallel;
+	keyboard.Enable();
+	beep.Enable();
+	mouse.Enable();
+	agentProcessor.Enable();
+	stream.Enable();
+//	AgentSerial    serial;
+//	AgentTTY       tty;
+	display.Enable();
+//	AgentReserved3 reserved3;
+
 	logger.info("Agent FCB  %04X %04X", Agent::ioRegionPage * PageSize, Agent::getIORegion());
 
 	logger.info("Boot  %s", bootPath);
@@ -304,9 +313,7 @@ void boot() {
 	logger.info("boot STOP");
 
 	// Properly detach DiskFile
-	for(DiskFile* diskFile: diskFileList) {
-		diskFile->detach();
-	}
+	diskFile.detach();
 	floppyFile.detach();
 }
 

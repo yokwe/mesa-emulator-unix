@@ -61,14 +61,13 @@ public:
 	};
 
 
-	AgentStream() : Agent(GuamInputOutput::AgentDeviceIndex::stream, "Stream") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::stream;
+	static const inline auto name_ = "Stream";
+	static const inline auto fcbSize_ = SIZE(CoProcessorIOFaceGuam::CoProcessorFCBType);
+	AgentStream() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
 	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
-	}
-
+	
 	void Initialize();
 	void Call();
 

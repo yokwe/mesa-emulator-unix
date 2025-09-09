@@ -39,6 +39,8 @@
 #include <condition_variable>
 #include <deque>
 
+#include "../mesa/Pilot.h"
+
 #include "Agent.h"
 #include "DiskFile.h"
 
@@ -80,20 +82,24 @@ public:
 
 	IOThread ioThread;
 
-	AgentDisk() : Agent(GuamInputOutput::AgentDeviceIndex::disk, "Disk") {
-		fcb = 0;
-		dcb = 0;
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::disk;
+	static const inline auto name_ = "Disk";
+	static const inline auto fcbSize_ = SIZE(DiskIOFaceGuam::DiskFCBType) + SIZE(DiskIOFaceGuam::DiskDCBType);
+	AgentDisk() : Agent(index_, name_, fcbSize_) {
+		fcb      = 0;
+		dcb      = 0;
+		diskFile = 0;
 	}
-
-	CARD32 getFCBSize();
 
 	void Initialize();
 	void Call();
 
-	void addDiskFile(DiskFile* diskFile);
+	void addDiskFile(DiskFile* diskFile_) {
+		diskFile = diskFile_;
+	}
 
 private:
-	DiskIOFaceGuam::DiskFCBType* fcb;
-	DiskIOFaceGuam::DiskDCBType* dcb;
-	std::deque<DiskFile*>        diskFileList;
+	DiskIOFaceGuam::DiskFCBType* fcb      = 0;
+	DiskIOFaceGuam::DiskDCBType* dcb      = 0;
+	DiskFile*                    diskFile = 0;;
 };

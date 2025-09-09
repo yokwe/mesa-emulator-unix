@@ -39,14 +39,13 @@
 
 class AgentMouse : public Agent {
 public:
-	AgentMouse() : Agent(GuamInputOutput::AgentDeviceIndex::mouse, "Mouse") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::mouse;
+	static const inline auto name_ = "Mouse";
+	static const inline auto fcbSize_ = SIZE(MouseIOFaceGuam::MouseFCBType);
+	AgentMouse() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
 	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
-	}
-
+	
 	void Initialize();
 	void Call();
 

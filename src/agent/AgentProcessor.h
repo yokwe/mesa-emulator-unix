@@ -39,15 +39,14 @@
 
 class AgentProcessor : public Agent {
 public:
-	AgentProcessor() : Agent(GuamInputOutput::AgentDeviceIndex::processor, "Processor") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::processor;
+	static const inline auto name_ = "Processor";
+	static const inline auto fcbSize_ = SIZE(ProcessorIOFaceGuam::ProcessorFCBType);
+	AgentProcessor() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
 		processorID0 = processorID1 = processorID2 = 0;
 	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
-	}
-
+	
 	void Initialize();
 	void Call();
 

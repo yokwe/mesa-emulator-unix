@@ -177,11 +177,6 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 }
 
 
-
-CARD32 AgentDisk::getFCBSize() {
-	return SIZE(DiskIOFaceGuam::DiskFCBType) + SIZE(DiskIOFaceGuam::DiskDCBType) * diskFileList.size();
-}
-
 void AgentDisk::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
@@ -190,16 +185,13 @@ void AgentDisk::Initialize() {
 	fcb->interruptSelector = 0;
 	fcb->stopAgent = 0;
 	fcb->agentStopped = 1;
-	fcb->numberOfDCBs = diskFileList.size();
+	fcb->numberOfDCBs = 1;
 
 	if (fcb->numberOfDCBs == 0) ERROR();
 
 	dcb = fcb->dcbs;
-	for(int i = 0; i < fcb->numberOfDCBs; i++) {
-		DiskFile* diskFile = diskFileList[i];
-		diskFile->setDiskDCBType(dcb + i);
-		logger.info("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath());
-	}
+	diskFile->setDiskDCBType(dcb);
+	logger.info("AGENT %s  CHS = %5d %2d %2d  %s", name, dcb->numberOfCylinders, dcb->numberOfHeads, dcb->sectorsPerTrack, diskFile->getPath());
 }
 
 void AgentDisk::Call() {
@@ -232,7 +224,6 @@ void AgentDisk::Call() {
 			logger.fatal("AGENT %s deviceIndex = %d", name, deviceIndex);
 			ERROR();
 		}
-		DiskFile* diskFile = diskFileList[deviceIndex];
 		PilotDiskFace::Command command = (PilotDiskFace::Command)iocb->command;
 		switch(command) {
 		case PilotDiskFace::Command::read:
@@ -318,8 +309,4 @@ void AgentDisk::Call() {
 	// notify with interrupt
 	//WP |= fcb->interruptSelector;
 	//interrupt::notifyInterrupt(fcb->interruptSelector);
-}
-
-void AgentDisk::addDiskFile(DiskFile* diskFile) {
-	diskFileList.push_back(diskFile);
 }

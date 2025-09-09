@@ -40,19 +40,16 @@
 
 class AgentBeep : public Agent {
 public:
-	AgentBeep() : Agent(GuamInputOutput::AgentDeviceIndex::beep, "Beep") {
-		fcb = 0;
-	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
-	}
-
-	void Initialize();
-	void Call();
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::beep;
+	static const inline auto name_ = "Beep";
+	static const inline auto fcbSize_ = SIZE(BeepIOFaceGuam::BeepFCBType);
+	AgentBeep() : Agent(index_, name_, fcbSize_) {}
 
 private:
 	BeepIOFaceGuam::BeepFCBType *fcb;
+
+	void Initialize();
+	void Call();
 };
 
 #endif

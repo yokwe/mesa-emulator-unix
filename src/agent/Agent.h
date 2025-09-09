@@ -35,6 +35,8 @@
 
 #pragma once
 
+#include <array>
+
 #include "../mesa/Pilot.h"
 #include "../mesa/Constant.h"
 
@@ -52,51 +54,40 @@ public:
 	// ioRegionPtr = Environment.LongPointerFromPage[ioRegionPage];
 	// ioRegionPageCount = ioRegionAfterEnd - Inline.LowHalf[ioRegionPage];
 	static const CARD32 ioRegionPage = 0x80; // TODO What is a optimal value for ioRegionPage?  ?GermOpsImpl::pageEndGermVM?
-	static const CARD32 ioRegionPtr = ioRegionPage * PageSize;
+	static inline GuamInputOutput::IORegionType* ioRegionPtr = 0;
 
-
-	static void InitializeAgent();
-
-	static Agent* getAgent(int index);
-
-	static void CallAgent(int index) {
-		Agent* agent = getAgent(index);
-		agent->Call();
+	static inline Agent* getAgent(int index) {
+		return all.at(index);
 	}
 
-	const char *name;
-	const int   index;
-	CARD32      fcbAddress;
-
-	Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_);
-	virtual ~Agent() {}
-
-	void InitializeFCB();
-
-	virtual CARD32 getFCBSize() = 0;
-	virtual void Initialize() = 0;
-	virtual void Call() = 0;
+	static void CallAgent(int index) {
+		getAgent(index)->Call();
+	}
 
 	static CARD32 getIORegion() {
 		return ioRegion;
 	}
 
+	const int   index;
+	const char* name;
+	const int   fcbSize;
+	CARD32      fcbAddress;
+
+	Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_, int fcbSize_) :
+		index((int)index_), name(name_), fcbSize(fcbSize_), fcbAddress(0) {}
+	virtual ~Agent() {}
+
+	void Enable();
 protected:
-	static Agent *allAgent[GuamInputOutput::AgentDeviceIndex_SIZE];
+	static inline std::array<Agent*, GuamInputOutput::AgentDeviceIndex_SIZE> all = {0};
 
-	static CARD32 ioRegion;
-	static GuamInputOutput::IORegionType *ioRegionType;
+	static inline CARD32 ioRegion = ioRegionPage * PageSize;
+	static inline GuamInputOutput::IORegionType* ioRegionType = 0;
 
-	static inline CARD32 roundUp(CARD32 n) {
-		if (n & 1) n++;
-		return n;
-	}
-	static CARD32 Alloc(CARD32 size) {
-		CARD32 ret = ioRegion;
-		ioRegion += roundUp(size);
-		if (size == 0) ret = 0;
-		return ret;
-	}
+	virtual void Initialize() = 0;
+	virtual void Call()       = 0;
+
+	static LONG_POINTER AllocFCB(int index, int fcbSize);
 };
 
 

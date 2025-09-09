@@ -39,12 +39,11 @@
 
 class AgentKeyboard : public Agent {
 public:
-	AgentKeyboard() : Agent(GuamInputOutput::AgentDeviceIndex::keyboard, "Keyboard") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::keyboard;
+	static const inline auto name_ = "Keyboard";
+	static const inline auto fcbSize_ = SIZE(KeyboardIOFaceGuam::KeyboardFCBType);
+	AgentKeyboard() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
-	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
 	}
 
 	void Initialize();

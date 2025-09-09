@@ -47,7 +47,10 @@ public:
 	// Little endian is better. because od command of intel cpu use little endian
 	static const int USE_LITTLE_ENDIAN = 1;
 
-	AgentFloppy() : Agent(GuamInputOutput::AgentDeviceIndex::floppy, "Floppy") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::floppy;
+	static const inline auto name_ = "Floppy";
+	static const inline auto fcbSize_ = SIZE(FloppyIOFaceGuam::FloppyFCBType) + SIZE(FloppyIOFaceGuam::FloppyDCBType);
+	AgentFloppy() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
 		dcb = 0;
 	}
@@ -57,10 +60,12 @@ public:
 	void Initialize();
 	void Call();
 
-	void addDiskFile(DiskFile *diskFile);
+	void addDiskFile(DiskFile *diskFile_) {
+		diskFile = diskFile_;
+	}
 
 private:
-	FloppyIOFaceGuam::FloppyFCBType *fcb;
-	FloppyIOFaceGuam::FloppyDCBType *dcb;
-	std::deque<DiskFile*>            diskFileList;
+	FloppyIOFaceGuam::FloppyFCBType* fcb;
+	FloppyIOFaceGuam::FloppyDCBType* dcb;
+	DiskFile*                        diskFile;
 };

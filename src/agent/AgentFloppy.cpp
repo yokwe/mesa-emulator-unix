@@ -87,12 +87,6 @@ static CARD32 diskAddressToSector(FloppyIOFaceGuam::FloppyDCBType* dcb, FloppyDi
 }
 
 
-
-CARD32 AgentFloppy::getFCBSize() {
-	if (diskFileList.size() == 0) return 0;
-	return SIZE(FloppyIOFaceGuam::FloppyFCBType) + SIZE(FloppyIOFaceGuam::FloppyDCBType) * diskFileList.size();
-}
-
 void AgentFloppy::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
@@ -101,14 +95,11 @@ void AgentFloppy::Initialize() {
 	fcb->interruptSelector = 0;
 	fcb->stopAgent = 0;
 	fcb->agentStopped = 1;
-	fcb->numberOfDCBs = diskFileList.size();
+	fcb->numberOfDCBs = 1;
 
 	dcb = fcb->dcbs;
-	for(int i = 0; i < fcb->numberOfDCBs; i++) {
-		DiskFile* diskFile = diskFileList[i];
-		diskFile->setFloppyDCBType(fcb->dcbs + i);
-		logger.debug("AGENT %s  %i  CHS = %5d %2d %2d  %s", name, i, dcb[i].numberOfCylinders, dcb[i].numberOfHeads, dcb[i].sectorsPerTrack, diskFile->getPath());
-	}
+	diskFile->setFloppyDCBType(fcb->dcbs);
+	logger.debug("AGENT %s  CHS = %5d %2d %2d  %s", name, dcb->numberOfCylinders, dcb->numberOfHeads, dcb->sectorsPerTrack, diskFile->getPath());
 }
 
 void AgentFloppy::Call() {
@@ -139,8 +130,7 @@ void AgentFloppy::Call() {
 		}
 		FloppyIOFaceGuam::FloppyDCBType* dcb = fcb->dcbs + deviceIndex;
 		const CARD32 sectorNo = diskAddressToSector(dcb, iocb->operation.address);
-		DiskFile* diskFile = diskFileList[deviceIndex];
-
+		
 		//"AGENT %s %d", name, fcb->command
 		FloppyDiskFace::Function command = (FloppyDiskFace::Function)iocb->operation.function;
 		switch(command) {
@@ -260,8 +250,4 @@ void AgentFloppy::Call() {
 	// notify with interrupt
 	//WP |= fcb->interruptSelector;
 	interrupt::notifyInterrupt(fcb->interruptSelector);
-}
-
-void AgentFloppy::addDiskFile(DiskFile *diskFile) {
-	this->diskFileList.push_back(diskFile);
 }

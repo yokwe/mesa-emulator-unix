@@ -133,13 +133,12 @@ public:
 	ReceiveThread  receiveThread;
 	TransmitThread transmitThread;
 
-	AgentNetwork() : Agent(GuamInputOutput::AgentDeviceIndex::network, "Network") {
+	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::network;
+	static const inline auto name_ = "Network";
+	static const inline auto fcbSize_ = SIZE(EthernetIOFaceGuam::EthernetFCBType);
+	AgentNetwork() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
 		networkPacket = 0;
-	}
-
-	CARD32 getFCBSize() {
-		return SIZE(*fcb);
 	}
 
 	void Initialize();

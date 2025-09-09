@@ -41,65 +41,26 @@ static const Logger logger(__FILE__);
 
 #include "Agent.h"
 
-
-Agent* Agent::allAgent[GuamInputOutput::AgentDeviceIndex_SIZE] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-CARD32 Agent::ioRegion = Agent::ioRegionPtr;
-
-GuamInputOutput::IORegionType *Agent::ioRegionType = 0;
-
-
-Agent* Agent::getAgent(int index) {
-	if (GuamInputOutput::AgentDeviceIndex_SIZE <= index) ERROR();
-	Agent* agent = allAgent[index];
-	if (agent == 0) {
-		logger.fatal("index  %d", index);
-		ERROR();
-	}
-	if (agent->index != index) ERROR();
-	return agent;
+void Agent::Enable() {
+	all.at(index) = this;
+	fcbAddress = AllocFCB(index, fcbSize);
+    logger.info("Agent %2d %-10s  fcb = %04X  %2d", index, name, fcbAddress, fcbSize);
+	Initialize();
 }
 
-Agent::Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_) : name(name_), index((int)index_) {
-	int index = (int)index_;
-	if (allAgent[index]) ERROR();
-	allAgent[index] = this;
-	fcbAddress = 0;
-}
+LONG_POINTER Agent::AllocFCB(int index, int size) {
+    if (size == 0) ERROR();
 
-void Agent::InitializeFCB() {
-	CARD32 size = getFCBSize();
-	fcbAddress = Alloc(size);
-	ioRegionType->fcbptrs[index] = fcbAddress;
-
-	logger.info("Agent %2d %-10s  fcb = %04X  %2d", index, name, fcbAddress, size);
-};
-
-
-void Agent::InitializeAgent() {
-	// First allocate IORegionType at ioRegionPtr and fill with zero
-	ioRegionType = (GuamInputOutput::IORegionType*)memory::peek(Alloc(SIZE(GuamInputOutput::IORegionType)));
-	for(int i = 0; i < GuamInputOutput::AgentDeviceIndex_SIZE; i++) {
-		ioRegionType->fcbptrs[i] = 0;
-	}
-
-	// Then allocate FCB after IORegionType.
-	for(int i = 0; i < GuamInputOutput::AgentDeviceIndex_SIZE; i++) {
-		Agent *agent = allAgent[i];
-		if (agent == 0) continue;
-		if (agent->getFCBSize() == 0) continue;
-
-		agent->InitializeFCB();
-	}
-
-	// Call Agent Initialize method to initialize fcb and state
-	for(int i = 0; i < GuamInputOutput::AgentDeviceIndex_SIZE; i++) {
-		Agent *agent = allAgent[i];
-		if (agent == 0) continue;
-		if (agent->getFCBSize() == 0) continue;
-
-		agent->Initialize();
-	}
+	// setup ioRegionPtr if needed
+    if (ioRegionPtr == 0) {
+        ioRegionPtr = (GuamInputOutput::IORegionType*)memory::peek(ioRegion);
+        memset(ioRegionPtr, 0, sizeof(GuamInputOutput::IORegionType));
+        ioRegion += SIZE(GuamInputOutput::IORegionType);
+    }
+    // update fcbptrs
+    ioRegionPtr->fcbptrs[index] = ioRegion;
+    
+    CARD32 ret = ioRegion;
+    ioRegion += size + (size & 1);
+    return ret;
 }

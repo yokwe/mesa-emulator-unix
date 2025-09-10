@@ -109,19 +109,16 @@ void checkRequestReschedule() {
 
 void run() {
 	logger.info("processor::run START");
-
-	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
-
-	logger.info("bootLink  %04X %d %04X  %08X", bootLink.data + 0, bootLink.tag + 0, bootLink.fill, bootLink.u);
-
-	XFER(bootLink.u, 0, XferType::call, 0);
-	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
-	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
-
+	stopThread = 0;
 	rescheduleInterruptFlag.clear();
 	rescheduleTimerFlag.clear();
 
-	stopThread = 0;
+	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
+	XFER(bootLink.u, 0, XferType::call, 0);
+	logger.info("bootLink  data  %04X   tag  %d", bootLink.data + 0, bootLink.tag + 0);
+	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
+	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
+
 	try {
 		for(;;) {
 			try {

@@ -165,9 +165,10 @@ void initialize() {
 	setSignalHandler();
 
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
-	memory::initialize(vmBits, rmBits, Agent::ioRegionPage);
+	memory::initialize(vmBits, rmBits, agent::ioRegionPage);
 	opcode::initialize();
 	variable::initialize();
+	agent::initialize();
 
 	// Reserve real memory for display
 	memory::reserveDisplayPage(displayWidth, displayHeight);
@@ -188,12 +189,18 @@ void initialize() {
 	networkPacket.attach(networkInterfaceName);
 	network.setNetworkPacket(&networkPacket);
 	// AgentProcessor::Initialize use PID[]
-	PID[0] = 0;
+	// get PID from network adapter
 	networkPacket.getAddress(PID[1], PID[2], PID[3]);
+	logger.info("PID = %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+	// set PID to AgentProcessor
 	agentProcessor.setProcessorID(PID[1], PID[2], PID[3]);
 	// AgentDisplay
+	logger.info("displayWidth  = %4d", displayWidth);
+	logger.info("displayHeight = %4d", displayHeight);
 	display.setDisplayWidth(displayWidth);
 	display.setDisplayHeight(displayHeight);
+	// Stream::Boot
+	logger.info("bootPath = %s", bootPath);
 
 	// Enable Agents
 	disk.Enable();
@@ -209,13 +216,10 @@ void initialize() {
 //	AgentTTY       tty;
 	display.Enable();
 //	AgentReserved3 reserved3;
-
-	logger.info("Agent FCB  %04X %04X", Agent::ioRegionPage * PageSize, Agent::getIORegion());
-
-	logger.info("Boot  %s", bootPath);
+	logger.info("Agent FCB  %04X %04X", agent::ioRegionPage * PageSize, agent::getIORegion());
 
 	// Initialization of Stream handler
-	AgentStream* agentStream = (AgentStream*)Agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
+	AgentStream* agentStream = (AgentStream*)agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
 	// 110 Boot
 	agentStream->addStream(new StreamBoot(bootPath));
 	// 101 CopyPaste

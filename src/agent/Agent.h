@@ -35,13 +35,27 @@
 
 #pragma once
 
-#include <array>
-
+#include "../mesa/MesaBasic.h"
 #include "../mesa/Pilot.h"
-#include "../mesa/Constant.h"
 
 class Agent {
 public:
+	const int   index;
+	const char* name;
+	const int   fcbSize;
+	CARD32      fcbAddress;
+
+	Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_, int fcbSize_) :
+		index((int)index_), name(name_), fcbSize(fcbSize_), fcbAddress(0) {}
+	virtual ~Agent() {}
+
+	void Enable();
+
+	virtual void Initialize() = 0;
+	virtual void Call()       = 0;
+};
+
+namespace agent {
 	// ioRegionLast: CARDINAL = 255;
 	// ioRegionAfterEnd: CARDINAL = ioRegionLast + 1;
 	static const CARD16 ioRegionLast = 255;
@@ -54,38 +68,12 @@ public:
 	// ioRegionPtr = Environment.LongPointerFromPage[ioRegionPage];
 	// ioRegionPageCount = ioRegionAfterEnd - Inline.LowHalf[ioRegionPage];
 	static const CARD32 ioRegionPage = 0x80; // TODO What is a optimal value for ioRegionPage?  ?GermOpsImpl::pageEndGermVM?
-	static inline GuamInputOutput::IORegionType* ioRegionPtr = 0;
 
-	static inline Agent* getAgent(int index) {
-		return all.at(index);
-	}
+	void          initialize();
+	LONG_POINTER  getIORegion();
+	LONG_POINTER  AllocFCB(int index, int fcbSize);
 
-	static void CallAgent(int index) {
-		getAgent(index)->Call();
-	}
-
-	static CARD32 getIORegion() {
-		return ioRegion;
-	}
-
-	const int   index;
-	const char* name;
-	const int   fcbSize;
-	CARD32      fcbAddress;
-
-	Agent(GuamInputOutput::AgentDeviceIndex index_, char const *name_, int fcbSize_) :
-		index((int)index_), name(name_), fcbSize(fcbSize_), fcbAddress(0) {}
-	virtual ~Agent() {}
-
-	void Enable();
-protected:
-	static inline std::array<Agent*, GuamInputOutput::AgentDeviceIndex_SIZE> all = {0};
-
-	static inline CARD32 ioRegion = ioRegionPage * PageSize;
-	static inline GuamInputOutput::IORegionType* ioRegionType = 0;
-
-	virtual void Initialize() = 0;
-	virtual void Call()       = 0;
-
-	static LONG_POINTER AllocFCB(int index, int fcbSize);
-};
+	void   addAgent(Agent* agent);
+	Agent* getAgent(int index);
+	void   callAgent(int index);
+}

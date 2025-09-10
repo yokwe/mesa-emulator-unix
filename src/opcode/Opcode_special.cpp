@@ -47,7 +47,7 @@ static const Logger logger(__FILE__);
 void E_CALLAGENT() {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  CALLAGENT %2d", savedPC, stack[SP - 1]);
 	CARD16 index = Pop();
-	Agent::CallAgent(index);
+	agent::callAgent(index);
 }
 
 

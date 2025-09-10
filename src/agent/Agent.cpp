@@ -42,25 +42,52 @@ static const Logger logger(__FILE__);
 #include "Agent.h"
 
 void Agent::Enable() {
-	all.at(index) = this;
-	fcbAddress = AllocFCB(index, fcbSize);
+    agent::addAgent(this);
+	fcbAddress = agent::AllocFCB(index, fcbSize);
     logger.info("Agent %2d %-10s  fcb = %04X  %2d", index, name, fcbAddress, fcbSize);
 	Initialize();
 }
 
-LONG_POINTER Agent::AllocFCB(int index, int size) {
-    if (size == 0) ERROR();
+namespace agent {
+    using namespace GuamInputOutput;
 
-	// setup ioRegionPtr if needed
-    if (ioRegionPtr == 0) {
-        ioRegionPtr = (GuamInputOutput::IORegionType*)memory::peek(ioRegion);
-        memset(ioRegionPtr, 0, sizeof(GuamInputOutput::IORegionType));
-        ioRegion += SIZE(GuamInputOutput::IORegionType);
+	IORegionType* ioRegionPtr  = 0;
+	CARD32        ioRegion     = 0;
+	std::array<Agent*, AgentDeviceIndex_SIZE> all;
+
+    void initialize() {
+		ioRegion    = ioRegionPage * PageSize;
+		ioRegionPtr = 0;
+		all.fill(0);
+	}
+	LONG_POINTER getIORegion() {
+		return ioRegion;
+	}
+
+	void addAgent(Agent* agent) {
+		all.at(agent->index) = agent;
+	}
+	Agent* getAgent(int index) {
+		return all.at(index);
+	}
+	void callAgent(int index) {
+		getAgent(index)->Call();
+	}
+
+    LONG_POINTER AllocFCB(int index, int size) {
+        if (size == 0) ERROR();
+
+        // setup ioRegionPtr if needed
+        if (ioRegionPtr == 0) {
+            ioRegionPtr = (IORegionType*)memory::peek(ioRegion);
+            memset(ioRegionPtr, 0, sizeof(IORegionType));
+            ioRegion += SIZE(IORegionType);
+        }
+        // update fcbptrs
+        ioRegionPtr->fcbptrs[index] = ioRegion;
+        
+        CARD32 ret = ioRegion;
+        ioRegion += size + (size & 1);
+        return ret;
     }
-    // update fcbptrs
-    ioRegionPtr->fcbptrs[index] = ioRegion;
-    
-    CARD32 ret = ioRegion;
-    ioRegion += size + (size & 1);
-    return ret;
 }

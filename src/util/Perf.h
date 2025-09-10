@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <cinttypes>
+#include <cstdint>
 
 #define PERF_DECLARE(group, name) namespace group { extern uint64_t name; }
 

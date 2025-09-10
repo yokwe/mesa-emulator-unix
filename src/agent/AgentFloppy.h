@@ -35,8 +35,6 @@
 
 #pragma once
 
-#include <deque>
-
 #include "Agent.h"
 #include "DiskFile.h"
 

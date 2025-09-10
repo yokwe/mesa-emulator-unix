@@ -46,14 +46,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-
 namespace timer {
 
-uint64_t       lastTimeoutTime;
-bool           stopThread;
-std::mutex     mutexTimer;
+bool                    stopThread;
+std::mutex              mutexTimer;
 std::condition_variable cvTimer;
-
 
 void stop() {
 	logger.info("timer::stop");
@@ -62,7 +59,8 @@ void stop() {
 
 void run() {
 	logger.info("timer::run START");
-
+	stopThread = false;
+	
 	auto tick = std::chrono::milliseconds(cTick);
 	auto time = std::chrono::system_clock::now();
 	std::unique_lock<std::mutex> locker(mutexTimer);

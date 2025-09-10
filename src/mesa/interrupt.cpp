@@ -44,12 +44,11 @@ static const Logger logger(__FILE__);
 #include "processor.h"
 #include "interrupt.h"
 
-
 namespace interrupt {
 
+bool                    stopThread;
 std::mutex              mutexWP;
 std::condition_variable cvWP;
-bool                    stopThread;
 
 void stop() {
 	logger.info("interrupt::stop");
@@ -58,8 +57,8 @@ void stop() {
 
 void run() {
 	logger.info("interrup::run START");
-
-	stopThread = 0;
+	stopThread = false;
+	
 	std::unique_lock<std::mutex> locker(mutexWP);
 	for (;;) {
 		if (stopThread) break;

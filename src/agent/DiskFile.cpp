@@ -68,6 +68,7 @@ int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
 }
 
 void DiskFile::attach(const std::string& path_) {
+	if (page != 0) ERROR();
 	path = path_;
 	logger.info("DiskFile::attach %s", path);
 
@@ -76,6 +77,8 @@ void DiskFile::attach(const std::string& path_) {
 }
 
 void DiskFile::detach() {
+	if (page == 0) return; // not attached
+
 	logger.info("DiskFile::detach %s", path);
 
 	Util::unmapFile(page);

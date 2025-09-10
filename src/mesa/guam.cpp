@@ -33,6 +33,7 @@
 // guam.cpp
 //
 
+#include <csignal>
 #include <thread>
 
 #include "../util/Util.h"
@@ -162,7 +163,10 @@ void loadGerm(std::string& path) {
 }
 
 void initialize() {
-	setSignalHandler();
+	setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
 
 	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
 	memory::initialize(vmBits, rmBits, agent::ioRegionPage);

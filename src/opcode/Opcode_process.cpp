@@ -375,7 +375,7 @@ bool Interrupt() {
 
 // 10.4.3 Faults
 // Fault: PROC[fi: FaultIndex] RETURNS[PsbIndex]
-static inline PsbIndex Fault(FaultIndex fi) {
+inline PsbIndex Fault(FaultIndex fi) {
 	PsbIndex faulted = PSB;
 	Requeue(PDA + OFFSET_PDA(ready), PDA + OFFSET_PDA3(fault, fi, queue), faulted);
 	NotifyWakeup(PDA + OFFSET_PDA3(fault, fi, condition));

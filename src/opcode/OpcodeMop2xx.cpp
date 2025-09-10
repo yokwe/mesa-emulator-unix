@@ -44,7 +44,7 @@ static const Logger logger(__FILE__);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_CATCH_(CARD16 arg) {
+inline void E_CATCH_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  CATCH %3d", savedPC, arg);
 }
 // 0200  ASSIGN_MOP(z, CATCH)
@@ -53,7 +53,7 @@ void E_CATCH() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_J_(INT16 arg) {
+inline void E_J_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  J %5d", savedPC, arg);
 	PC = savedPC + arg;
 	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
@@ -87,7 +87,7 @@ void E_JW() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JUE_(CARD16 arg0, INT16 arg1) {
+inline void E_JUE_(CARD16 arg0, INT16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUE %3d %3d", savedPC, arg0, arg1);
 	UNSPEC data = Pop();
 	if (data == arg0) PC = savedPC + arg1;
@@ -101,7 +101,7 @@ void E_JEP() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JEB_(INT16 arg) {
+inline void E_JEB_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JEB %3d", savedPC, arg);
 	UNSPEC v = Pop();
 	UNSPEC u = Pop();
@@ -121,7 +121,7 @@ void E_JEBB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JUNE_(CARD16 arg0, INT16 arg1) {
+inline void E_JUNE_(CARD16 arg0, INT16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUNE %3d %3d", savedPC, arg0, arg1);
 	UNSPEC data = Pop();
 	if (data != arg0) PC = savedPC + arg1;
@@ -135,7 +135,7 @@ void E_JNEP() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JNE_(INT16 arg) {
+inline void E_JNE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JNE %3d", savedPC, arg);
 	UNSPEC v = Pop();
 	UNSPEC u = Pop();
@@ -156,7 +156,7 @@ void E_JNEBB() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // 0220  ASSIGN_MOP(z, JLB)
-__attribute__((always_inline)) static inline void E_JL_(INT16 arg) {
+inline void E_JL_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JL %3d", savedPC, arg);
 	INT16 k = Pop();
 	INT16 j = Pop();
@@ -170,7 +170,7 @@ void E_JLB() {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // 0221  ASSIGN_MOP(z, JGEB)
-__attribute__((always_inline)) static inline void E_JGE_(INT16 arg) {
+inline void E_JGE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JGE %3d", savedPC, arg);
 	INT16 k = Pop();
 	INT16 j = Pop();
@@ -183,7 +183,7 @@ void E_JGEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JG_(INT16 arg) {
+inline void E_JG_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JG %3d", savedPC, arg);
 	INT16 k = Pop();
 	INT16 j = Pop();
@@ -197,7 +197,7 @@ void E_JGB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JLE_(INT16 arg) {
+inline void E_JLE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JLE %3d", savedPC, arg);
 	INT16 k = Pop();
 	INT16 j = Pop();
@@ -211,7 +211,7 @@ void E_JLEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JUL_(INT16 arg) {
+inline void E_JUL_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUL %3d", savedPC, arg);
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
@@ -225,7 +225,7 @@ void E_JULB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JUGE_(INT16 arg) {
+inline void E_JUGE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUGE %3d", savedPC, arg);
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
@@ -239,7 +239,7 @@ void E_JUGEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JUG_(INT16 arg) {
+inline void E_JUG_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUG %3d", savedPC, arg);
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
@@ -253,7 +253,7 @@ void E_JUGB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JULE_(INT16 arg) {
+inline void E_JULE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JULE %3d", savedPC, arg);
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
@@ -267,7 +267,7 @@ void E_JULEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JZ_(INT16 arg) {
+inline void E_JZ_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JZ %3d", savedPC, arg);
 	UNSPEC u = Pop();
 	if (u == 0) PC = savedPC + arg;
@@ -288,7 +288,7 @@ void E_JZB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JNZ_(INT16 arg) {
+inline void E_JNZ_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JNZ %3d", savedPC, arg);
 	UNSPEC u = Pop();
 	if (u != 0) PC = savedPC + arg;
@@ -309,7 +309,7 @@ void E_JNZB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JDE_(INT16 arg) {
+inline void E_JDE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JDE %5d", savedPC, arg);
 	LONG_UNSPEC v = PopLong();
 	LONG_UNSPEC u = PopLong();
@@ -323,7 +323,7 @@ void E_JDEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JDNE_(INT16 arg) {
+inline void E_JDNE_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JDNE %5d", savedPC, arg);
 	LONG_UNSPEC v = PopLong();
 	LONG_UNSPEC u = PopLong();
@@ -337,7 +337,7 @@ void E_JDNEB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JIB_(CARD16 arg) {
+inline void E_JIB_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JIB %5d", savedPC, arg);
 	CARDINAL limit = Pop();
 	CARDINAL index = Pop();
@@ -354,7 +354,7 @@ void E_JIB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_JIW_(CARD16 arg) {
+inline void E_JIW_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JIW %5d", savedPC, arg);
 	CARDINAL limit = Pop();
 	CARDINAL index = Pop();
@@ -500,7 +500,7 @@ void E_IOR() {
 	Push(u | v);
 }
 // 0264  ASSIGN_MOP(z, ADDSB)
-__attribute__((always_inline)) static inline void E_ADDS_(INT16 arg) {
+inline void E_ADDS_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  ADDS %02X", savedPC, arg);
 	CARD16 i = Pop();
 	Push(i + arg);
@@ -551,7 +551,7 @@ void E_ACD() {
 	PushLong(s + t);
 }
 // 0273  ASSIGN_MOP(z, AL0IB)
-__attribute__((always_inline)) static inline void E_AL0I_(CARD16 arg) {
+inline void E_AL0I_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  AL0I %02X", savedPC, arg);
 	CARD16* p = FetchMds(LF);
 	// NO PAGE FAULT AFTER HERE

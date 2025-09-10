@@ -48,10 +48,12 @@
 // 3.1 Virtual Memory
 namespace memory {
 	struct Page { CARD16 word[PageSize]; };
+#pragma pack(push, 2)
 	struct Map {
 		MapFlags mf;
 		CARD16 rp;
-	} __attribute__((packed));
+	};
+#pragma pack(pop)
 
 	Map     ReadMap(CARD32 vp);
 	void    WriteMap(CARD32 vp, Map map);
@@ -149,23 +151,23 @@ namespace memory {
 }
 
 
-__attribute__((always_inline)) static inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
+inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {
 	return (ptrA / PageSize) == (ptrB / PageSize);
 }
-__attribute__((always_inline)) static inline int isLastOfPage(CARD32 ptr) {
+inline int isLastOfPage(CARD32 ptr) {
 	return (ptr & PageOffset) == PageOffset;
 }
 
 // 3.1.3 Virtual Memory Access
-__attribute__((always_inline)) static inline CARD16* Fetch(CARD32 virtualAddress) {
+inline CARD16* Fetch(CARD32 virtualAddress) {
 	PERF_COUNT(memory, Fetch)
 	return memory::cache::fetch(virtualAddress);
 }
-__attribute__((always_inline)) static inline CARD16* Store(CARD32 virtualAddress) {
+inline CARD16* Store(CARD32 virtualAddress) {
 	PERF_COUNT(memory, Store)
 	return memory::cache::store(virtualAddress);
 }
-__attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddress) {
+inline CARD32 ReadDbl(CARD32 virtualAddress) {
 	PERF_COUNT(memory, ReadDbl)
 	CARD16* p0 = memory::cache::fetch(virtualAddress + 0);
 	CARD16* p1 = p0 + 1;
@@ -178,15 +180,15 @@ __attribute__((always_inline)) static inline CARD32 ReadDbl(CARD32 virtualAddres
 }
 
 // 3.2.1 Main Data Space Access
-__attribute__((always_inline)) static inline CARD16* FetchMds(CARD16 ptr) {
+inline CARD16* FetchMds(CARD16 ptr) {
 	PERF_COUNT(memory, FetchMds)
 	return memory::cache::fetch(LengthenPointer(ptr));
 }
-__attribute__((always_inline)) static inline CARD16* StoreMds(CARD16 ptr) {
+inline CARD16* StoreMds(CARD16 ptr) {
 	PERF_COUNT(memory, StoreMds)
 	return memory::cache::store(LengthenPointer(ptr));
 }
-__attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
+inline CARD32 ReadDblMds(CARD16 ptr) {
 	PERF_COUNT(memory, ReadDblMds)
 	CARD32 p = LengthenPointer(ptr);
 	CARD16* p0 = memory::cache::fetch(p + 0);
@@ -200,18 +202,18 @@ __attribute__((always_inline)) static inline CARD32 ReadDblMds(CARD16 ptr) {
 }
 
 // 3.1.4.3 Code Segments
-__attribute__((always_inline)) static inline CARD16 ReadCode(CARD16 offset) {
+inline CARD16 ReadCode(CARD16 offset) {
 	return *memory::cache::fetch(CB + offset);
 }
 
 // 4.3 Instruction Fetch
-__attribute__((always_inline)) static inline CARD8 GetCodeByte() {
+inline CARD8 GetCodeByte() {
 	PERF_COUNT(memory, GetCodeByte)
 	CARD16 word = ReadCode(PC / 2);
 	// NO PAGE FAULT AFTER HERE
 	return (PC++ & 1) ? LowByte(word) : HighByte(word);
 }
-__attribute__((always_inline)) static inline CARD16 GetCodeWord() {
+inline CARD16 GetCodeWord() {
 	PERF_COUNT(memory, GetCodeWord)
 	CARD32 ptr = CB + (PC / 2);
 	CARD16* p0 = memory::cache::fetch(ptr + 0);
@@ -229,19 +231,19 @@ __attribute__((always_inline)) static inline CARD16 GetCodeWord() {
 }
 
 // 7.4 String Instructions
-static inline BYTE FetchByte(LONG_POINTER ptr, LONG_CARDINAL offset) {
+inline BYTE FetchByte(LONG_POINTER ptr, LONG_CARDINAL offset) {
 	PERF_COUNT(memory, FetchByte)
 	ptr += offset / 2;
 	BytePair word = {*Fetch(ptr)};
 	return ((offset % 2) == 0) ? (BYTE)word.left : (BYTE)word.right;
 }
-static inline CARD16 FetchWord(LONG_POINTER ptr, LONG_CARDINAL offset) {
+inline CARD16 FetchWord(LONG_POINTER ptr, LONG_CARDINAL offset) {
 	BytePair ret;
 	ret.left  = FetchByte(ptr, offset);
 	ret.right = FetchByte(ptr, offset + 1);
 	return ret.u;
 }
-static inline void StoreByte(LONG_POINTER ptr, LONG_CARDINAL offset, BYTE data) {
+inline void StoreByte(LONG_POINTER ptr, LONG_CARDINAL offset, BYTE data) {
 	PERF_COUNT(memory, StoreByte)
 	ptr += offset / 2;
 	CARD16* p = Store(ptr);
@@ -259,11 +261,11 @@ static inline void StoreByte(LONG_POINTER ptr, LONG_CARDINAL offset, BYTE data) 
 //		0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f, 0x00ff,
 //		0x01ff, 0x03ff, 0x07ff, 0x0fff, 0x1fff, 0x3fff, 0x7fff, 0xffff
 //};
-static inline CARD16 Field_MaskTable(CARD8 n) {
+inline CARD16 Field_MaskTable(CARD8 n) {
 	return (CARD16)((1U << (n + 1)) - 1);
 }
 
-static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
+inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
 	PERF_COUNT(memory, ReadField)
 	FieldSpec spec = {spec8};
 
@@ -273,7 +275,7 @@ static inline UNSPEC ReadField(UNSPEC source, CARD8 spec8) {
 	// return Shift(source, -shift) & MaskTable(spec.size);
 	return (source >> shift) & Field_MaskTable(spec.size);
 }
-static inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
+inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
 	PERF_COUNT(memory, WriteField)
 	FieldSpec spec = {spec8};
 
@@ -288,7 +290,7 @@ static inline UNSPEC WriteField(UNSPEC dest, CARD8 spec8, UNSPEC data) {
 
 
 // 9.4.2 External Function Calls
-static inline CARD32 FetchLink(CARD32 offset) {
+inline CARD32 FetchLink(CARD32 offset) {
 	GlobalWord word = {*Fetch(GO_OFFSET(GF, word))};
 	//CARD32 pointer = word.codelinks ? (CB - (CARD32)((offset + 1) * 2)) : (GlobalBase(GF) - (CARD32)((offset + 1) * 2));
 	CARD32 pointer = (word.codelinks ? CB : GlobalBase(GF)) - (CARD32)((offset + 1) * 2);
@@ -296,19 +298,19 @@ static inline CARD32 FetchLink(CARD32 offset) {
 }
 
 // 10.1.1 Process Data Area
-__attribute__((always_inline)) static inline LONG_POINTER LengthenPdaPtr(POINTER ptr) {
+inline LONG_POINTER LengthenPdaPtr(POINTER ptr) {
 	return PDA + ptr;
 }
-__attribute__((always_inline)) static inline POINTER OffsetPda(LONG_POINTER ptr) {
+inline POINTER OffsetPda(LONG_POINTER ptr) {
 	if ((ptr & 0xffff0000) != (PDA & 0xffff0000)) ERROR();
 	return (CARD16)(ptr - PDA);
 }
 
-static inline CARD16* FetchPda(POINTER ptr) {
+inline CARD16* FetchPda(POINTER ptr) {
 	PERF_COUNT(memory, FetchPda)
 	return memory::cache::fetch(LengthenPdaPtr(ptr));
 }
-static inline CARD16* StorePda(POINTER ptr) {
+inline CARD16* StorePda(POINTER ptr) {
 	PERF_COUNT(memory, StorePda)
 	return memory::cache::store(LengthenPdaPtr(ptr));
 }

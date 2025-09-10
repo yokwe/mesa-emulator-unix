@@ -39,7 +39,7 @@
 
 #include "Type.h"
 
-
+#pragma pack(push, 2)
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 //
@@ -122,7 +122,7 @@ namespace ColorBlt {
 	struct Address {
 		LONG_POINTER word;
 		CARDINAL     pixel;
-	} __attribute__((packed));
+	};
 
 	//PatternParm: TYPE = MACHINE DEPENDENT RECORD [
 	//  -- used with Src to describe pattern brick
@@ -547,7 +547,7 @@ namespace BackingStore {
 	//--  an opaque type.)
 	struct Data {
 		CARD16 data[7];
-	} __attribute__((packed));
+	};
 };
 
 
@@ -649,7 +649,7 @@ namespace VMDataInternal {
 				CARD16 swapUnits             :  2; // Space.SwapUnitType
 			} irregularSwapUnitData;
 		} swapUnitData;
-	} __attribute__((packed));
+	};
 
 	//countRunPad: CARDINAL = 1;
 	const CARD16 countRunPad = 1;
@@ -667,19 +667,18 @@ namespace VMDataInternal {
 namespace TimeStamp {
 	//Stamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
 	//Null: Stamp = Stamp[net: 0, host: 0, time: 0];
-
 	struct Stamp {
 		union {
 			struct {
 				CARD16 host : 8;
 				CARD16 net  : 8;
-			} __attribute__((packed));
+			};
 			CARD16    u0;
 		};
 		CARD32 time;
 //		CARD16 timeLow;
 //		CARD16 timeHigh;
-	} __attribute__((packed));
+	};
 };
 
 
@@ -787,7 +786,7 @@ namespace BcdDefs {
 	struct FTRecord {
 		CARD16           name;
 		TimeStamp::Stamp version;
-	} __attribute__((packed));
+	};
 	//FTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO FTRecord;
 	//FTNull: FTIndex = LAST[FTIndex];
 	//FTSelf: FTIndex = LAST[FTIndex] - 1;
@@ -868,7 +867,7 @@ namespace BcdDefs {
 		SGIndex sgi;
 		CARD16  offset;
 		CARD16  length;
-	} __attribute__((packed));
+	};
 
 	//MTRecord: TYPE = --MACHINE DEPENDENT-- RECORD [
 	//  name: NameRecord,
@@ -909,11 +908,11 @@ namespace BcdDefs {
 				CARD16 linkLoc       : 2;
 			};
 			CARD16 u6;
-		} __attribute__((packed));
+		};
 		CARD16  framesize;
 		ENIndex entries;
 		ATIndex atoms;
-	} __attribute__((packed));
+	};
 
 	//MTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO MTRecord;
 	//MTNull: MTIndex = LAST[MTIndex];
@@ -926,7 +925,7 @@ namespace BcdDefs {
 	struct ENRecord {
 		CARD16 nEntries;
 		CARD16 ininialPC[0];
-	} __attribute__((packed));
+	};
 	//ENIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO ENRecord;
 	//ENNull: ENIndex = LAST[ENIndex];
 	const CARD16 ENNull = tLimit;
@@ -954,7 +953,7 @@ namespace BcdDefs {
 		};
 		CARD16 file;
 		CARD16 gfi;
-	} __attribute__((packed));
+	};
 
 
 	//EXPRecord: TYPE = --MACHINE DEPENDENT-- RECORD [
@@ -978,7 +977,7 @@ namespace BcdDefs {
 		};
 		CARD16 file;
 		Link links[0];
-	} __attribute__((packed));
+	};
 
 
 	//BCD: TYPE = RECORD [
@@ -1081,7 +1080,7 @@ namespace BcdDefs {
 		ATIndex  atLimit;
 		CARD16   apOffset;
 		CARD16   apLimit;
-	} __attribute__((packed));
+	};
 };
 
 
@@ -1261,13 +1260,13 @@ namespace System {
 
 	struct NetworkNumber {
 		CARD16 word[2];
-	} __attribute__((packed));
+	};
 	struct HostNumber {
 		CARD16 word[3];
-	} __attribute__((packed));
+	};
 	struct SocketNumber {
 		CARD16 word[1];
-	} __attribute__((packed));
+	};
 
 	//NetworkAddress: TYPE = MACHINE DEPENDENT RECORD [
 	//   net: NetworkNumber,
@@ -1277,7 +1276,7 @@ namespace System {
 		NetworkNumber net;
 		HostNumber    host;
 		SocketNumber  socket;
-	} __attribute__((packed));
+	};
 }
 
 
@@ -1335,7 +1334,7 @@ namespace PilotDiskFace {
 		CARD32 deviceStatus;          // RECORD[a, b: UNSPEC] = NULL
 		DiskAddress diskHeader;       // NULL
 		CARD16 device;                // DeviceHandle = TYPE[1]
-	} __attribute__((packed));
+	};
 
 	//Command: TYPE = MACHINE DEPENDENT {noOp(0), read(1), write(2), verify(3),
 	//  format(4), readHeader(5), readHeaderAndData(6), makeBootable(7),
@@ -1385,7 +1384,7 @@ namespace PilotDisk {
 		struct {
 			CARD32 fileID;
 			CARD16 pad[3];
-		} __attribute__((packed));
+		};
 		System::UniversalID id;
 	};
 }
@@ -1445,7 +1444,7 @@ namespace Boot {
 		PilotDisk::FileID          fID;
 		CARD32                     firstPage;
 		PilotDiskFace::DiskAddress da;
-	} __attribute__((packed));
+	};
 #pragma pack(pop)
 
 	//EthernetRequest: TYPE = MACHINE DEPENDENT RECORD [
@@ -1456,7 +1455,7 @@ namespace Boot {
 	struct EthernetRequest {
 		System::HostNumber     bfn;
 		System::NetworkAddress address;
-	} __attribute__((packed));
+	};
 
 
 	//Location: TYPE = MACHINE DEPENDENT RECORD [  -- format known by the initial microcode.
@@ -1532,12 +1531,12 @@ namespace Boot {
 	//PVBootFiles: TYPE = ARRAY BootFileType [hardMicrocode..pilot] OF DiskFileID;
 	struct PVBootFiles {
 		DiskFileID bootFile[4];  // 0..3
-	} __attribute__((packed));
+	};
 
 	//LVBootFiles: TYPE = ARRAY BootFileType [hardMicrocode..debuggee] OF DiskFileID;
 	struct LVBootFiles {
 		DiskFileID bootFile[6];  // 0..5
-	} __attribute__((packed));
+	};
 
 }
 
@@ -1580,7 +1579,7 @@ namespace LogicalVolumeFormat {
 				CARD16 stateTag :  2;
 			};
 		};
-	} __attribute__((packed));
+	};
 
 
 	//Descriptor: TYPE = MACHINE DEPENDENT RECORD [
@@ -1654,7 +1653,7 @@ namespace LogicalVolumeFormat {
 		CARD32              numberOfBadPagesLastTime;
 		CARD16              fill[118];
 		CARD16              checksum;
-	} __attribute__((packed));
+	};
 #pragma pack(pop)
 }
 
@@ -1689,7 +1688,7 @@ namespace PhysicalVolumeFormat {
 		CARD32 lvPage;
 		CARD32 pvPage;
 		CARD32 nPages;
-	} __attribute__((packed));
+	};
 #pragma pack(pop)
 
 	//  physicalVolumeLabelLength: CARDINAL = 40;
@@ -1742,7 +1741,7 @@ namespace PhysicalVolumeFormat {
 		CARD16              localTimeParametersValid;
 		CARD32              localTimeParameters;
 		CARD16              checksum;
-	} __attribute__((packed));
+	};
 #pragma pack(pop)
 }
 
@@ -1808,7 +1807,7 @@ namespace BiParallelPortFace {
 	struct Operation {
 		CARD32 dataBufferPtr;
 		CARD16 bufferByteLength;
-	} __attribute__((packed));
+	};
 
 	//TransferMode: TYPE = { put, get };
 	const CARD16 TM_put = 0;
@@ -2053,7 +2052,7 @@ namespace NewRS232CFace {
 	struct Operation {
 		CARD32 dataBuffer;
 		CARD16 bufferByteLength;
-	} __attribute__((packed));
+	};
 
 	//ClientType: TYPE = MACHINE DEPENDENT {ascii, ebcdic, unknown};
 	const CARD16 CT_ascii    = 0;
@@ -2535,7 +2534,7 @@ namespace EthernetIOFaceGuam {
 		CARD16 processorID[3];
 		CARD16 packetsMissed;
 		CARD16 agentBlockSize;
-	} __attribute__((packed));
+	};
 
 	//EthernetIOCBPtr: TYPE = LONG POINTER TO EthernetIOCBType;
 	//EthernetIOCBType: TYPE = MACHINE DEPENDENT RECORD [
@@ -2730,7 +2729,7 @@ namespace ParallelIOFaceGuam {
 		CARD32 nextIOCB;
 		CARD16 status;
 		CARD16 bytesTransferred;
-	} __attribute__((packed));
+	};
 
 	//ParallelIOCBStatus: TYPE = MACHINE DEPENDENT {
 	//  inProgress(0), completed(1), aborted(2)};
@@ -2812,7 +2811,7 @@ namespace SerialIOFaceGuam {
 		NewRS232CFace::DeviceStatus deviceStatus;
 		CARD16 commandStatus;
 		CARD16 agentBlockSize;
-	} __attribute__((packed));
+	};
 
 	//SerialCommand: TYPE = MACHINE DEPENDENT {
 	//  noOp(0), abortReceive(1), abortTransmit(2), breakOff(3), breakOn(4), getDeviceStatus(5),
@@ -3009,7 +3008,7 @@ namespace LoadStateFormat {
 		};
 		CARD16 index;
 		CARD16 globalFrame; // can be PrincOps.GlobalFrameHandle or PrincOpsExtras2.GFTHandle
-	} __attribute__((packed));
+	};
 
 
 	//BcdInfo: TYPE = MACHINE DEPENDENT RECORD [
@@ -3028,7 +3027,7 @@ namespace LoadStateFormat {
 		};
 		CARD32 base;
 		CARD16 id;
-	} __attribute__((packed));
+	};
 
 
 	//Object: TYPE = MACHINE DEPENDENT RECORD [
@@ -3050,7 +3049,7 @@ namespace LoadStateFormat {
 		CARD16 nextID;
 		CARD16 moduleInfo;
 		CARD16 bcdInfo;
-	} __attribute__((packed));
+	};
 }
 
 
@@ -3073,7 +3072,7 @@ namespace CPSwapDefs {
 		CARD16 availableC;
 		CARD16 availableD;
 		CARD16 availableE;
-	} __attribute__((packed));
+	};
 
 	// const CARD32 SWAPINFO = PDA + OFFSET(ProcessDataArea, available);
 
@@ -3128,7 +3127,7 @@ namespace CPSwapDefs {
 		CARD16 swapData[20];
 		CARD16 spareA;
 		CARD16 spareB;
-	} __attribute__((packed));
+	};
 }
 
 
@@ -3194,3 +3193,5 @@ namespace PrincOpsExtras2 {
 //  GFTHandleToIndex: PROCEDURE [gfh: GFTHandle] RETURNS [GFTIndex] = INLINE {
 //	RETURN[ LOOPHOLE[gfh] / SIZE[GFTItem] ] };
 }
+
+#pragma pack(pop)

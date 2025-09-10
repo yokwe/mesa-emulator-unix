@@ -123,7 +123,7 @@ public:
 		arg->colorMapping.color[1] = 0;
 	}
 
-	static inline void Bump(ColorBlt::Address& address, int offset) {
+	inline void Bump(ColorBlt::Address& address, int offset) {
 		offset += address.pixel;
 		// Don't use like  offset / WordSize. Cannot get correct value if offset has minus number.
 		address.word += LongArithShift(offset, -Environment::logBitsPerWord);
@@ -217,7 +217,7 @@ protected:
 	}
 
 
-	static inline CARD16 Function_mono(int srcFunc, int dstFunc, CARD16 s, CARD16 d) {
+	inline CARD16 Function_mono(int srcFunc, int dstFunc, CARD16 s, CARD16 d) {
 		if (srcFunc == ColorBlt::SF_complement) s = ~s;
 
 		switch(dstFunc) {
@@ -863,7 +863,7 @@ void fillTest(int shift) {
 ~ srcXorDst         1  1  =>  1
 
 
-static inline CARD16 Function(ColorBlt::ColorBltFlags flags, CARD16 s, CARD16 d) {
+inline CARD16 Function(ColorBlt::ColorBltFlags flags, CARD16 s, CARD16 d) {
 	// Function
 	if (flags.srcFunc == ColorBlt::SF_complement) s ^= 1;
 
@@ -906,7 +906,7 @@ static inline CARD16 Function(ColorBlt::ColorBltFlags flags, CARD16 s, CARD16 d)
 
 
 /*
-static inline CARD16 ReadPixel(ColorBlt::Address address, int offset, CARD16 type, CARD16 pattern = 0, CARD16 unpacked = 0) {
+inline CARD16 ReadPixel(ColorBlt::Address address, int offset, CARD16 type, CARD16 pattern = 0, CARD16 unpacked = 0) {
 	Bump(address, offset);
 	int shift = WordSize - (address.pixel + 1);
 	CARD16 word = *Fetch(address.word);

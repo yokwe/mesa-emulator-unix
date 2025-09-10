@@ -48,7 +48,7 @@ static const Logger logger(__FILE__);
 
 // 9.5.2 Trap Processing
 // Trap: PROC[ptr: POINTER TO ControlLink]
-static inline void Trap(POINTER ptr) {
+inline void Trap(POINTER ptr) {
 	ControlLink handler = ReadDblMds(ptr);
 	PC = savedPC;
 	SP = savedSP;
@@ -57,20 +57,20 @@ static inline void Trap(POINTER ptr) {
 }
 
 // TrapZero: PROC[ptr: POINTER TO ControlLink]
-static inline void TrapZero(POINTER ptr) {
+inline void TrapZero(POINTER ptr) {
 	Trap(ptr);
 	ERROR_Abort();
 }
 
 // TrapOne: PROC[ptr POINTER TO ControlLink, parameter: UNSPEC]
-static inline void TrapOne(POINTER ptr, UNSPEC parameter) {
+inline void TrapOne(POINTER ptr, UNSPEC parameter) {
 	Trap(ptr);
 	*StoreMds(LF + 0) = parameter;
 	ERROR_Abort();
 }
 
 // TrapTwo: PROC[ptr POINTER TO ControlLink, parameter: LONG UNSPEC]
-static inline void TrapTwo(POINTER ptr, LONG_UNSPEC parameter) {
+inline void TrapTwo(POINTER ptr, LONG_UNSPEC parameter) {
 	Trap(ptr);
 	*StoreMds(LF + 0) = LowHalf(parameter);
 	*StoreMds(LF + 1) = HighHalf(parameter);
@@ -176,7 +176,7 @@ void LoadStack(StateHandle state) {
 
 // 9.5.5 Xfer Traps
 // CheckForXferTraps: PROC[dst: ConrolLink, type: XferType]
-static inline void CheckForXferTraps(ControlLink dst, XferType type) {
+inline void CheckForXferTraps(ControlLink dst, XferType type) {
 	if (Odd(XTS)) {
 		GlobalWord word = {*Fetch(GO_OFFSET(GF, word))};
 		if (word.trapxfers) {
@@ -197,7 +197,7 @@ static inline void CheckForXferTraps(ControlLink dst, XferType type) {
 // 9.2.2 Frame Allocation Primitives
 
 // Alloc: PROC[fsi: FSIndex] RETURNS[LocalFrameHandle]
-static inline LocalFrameHandle Alloc(FSIndex fsi) {
+inline LocalFrameHandle Alloc(FSIndex fsi) {
 	AVItem item;
 	FSIndex slot = fsi;
 	for(;;) {
@@ -214,7 +214,7 @@ static inline LocalFrameHandle Alloc(FSIndex fsi) {
 }
 
 // Free: PROC[frame: LocalFrameHandle]
-static inline void Free(LocalFrameHandle frame) {
+inline void Free(LocalFrameHandle frame) {
 	LocalWord word = {*FetchMds(LO_OFFSET(frame, word))};
 	AVItem item = {*FetchMds(AV + OFFSET_AV(word.fsi))};
 	*StoreMds(frame) = item.u;
@@ -334,13 +334,13 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 
 // 9.4.2 External Function Calls
 // Call: PROC[dst: ControlLink]
-static inline void Call(ControlLink dst) {
+inline void Call(ControlLink dst) {
 	*StoreMds(LO_OFFSET(LF, pc)) = PC;
 	XFER(dst, LF, XferType::call, 0);
 }
 ///////////////////////////////////////////////////////////////////////
 
-__attribute__((always_inline)) static inline void E_EFC_(CARD16 arg) {
+inline void E_EFC_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  EFC %5d", savedPC, arg);
 	Call(FetchLink(arg));
 }

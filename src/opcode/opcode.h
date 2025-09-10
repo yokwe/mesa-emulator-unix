@@ -71,7 +71,7 @@ void stats();
 
 #define OPCODE_STATS_COUNT_BEFORE 
 
-__attribute__((always_inline)) inline void DispatchEsc(uint8_t code) {
+inline void DispatchEsc(uint8_t code) {
 #ifdef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter before execution for opcode that generate EscOpcodeTrap
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsEsc[code]++;
@@ -86,7 +86,7 @@ __attribute__((always_inline)) inline void DispatchEsc(uint8_t code) {
 }
 
 // 4.5 Instruction Execution
-__attribute__((always_inline)) inline void Dispatch(uint8_t code) {
+inline void Dispatch(uint8_t code) {
 #ifdef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter before execution for opcode that generate OpcodeTrap
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;
@@ -99,7 +99,7 @@ __attribute__((always_inline)) inline void Dispatch(uint8_t code) {
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;
 #endif
 }
-static inline void Execute() {
+inline void Execute() {
     savedPC = PC;
     savedSP = SP;
     Dispatch(GetCodeByte());

@@ -38,6 +38,8 @@
 #include "MesaBasic.h"
 #include "Constant.h"
 
+#pragma pack(push, 2)
+
 // 2.1 Basic Data Types
 // const int WordSize = Environment::bitsPerWord;
 const int WordSize = 16;
@@ -246,8 +248,7 @@ struct OldGlobalOverhead {
 	CARD16       word;
 	CARD32       codebase;
 	UNSPEC       global[0];
-}
-__attribute__((packed));
+};
 
 // GlobalBase: PROC[frame: GlobalFrameHandle] RETURNS [GlobalFrameBase]
 inline GlobalFrameBase OldBlobaseBase(GlobalFrameHandle frame) {
@@ -382,8 +383,7 @@ struct BitAddress {
 		};
 		CARD16 u;
 	};
-} __attribute__((packed));
-
+};
 
 
 // 8.4.2.1 BitBlt Arguments
@@ -477,7 +477,7 @@ struct FontRecord {
 	LONG_POINTER flags;
 	LONG_POINTER rasterInfos;
 	CARDINAL     height;
-} __attribute__((packed));
+};
 
 // FontBitsPtr: TYPE = LONG BASE POINTER TO ARRAY[0..0) OF UNSPECIFIED;
 // FontRasters: TYPE = LONG BASE POINTER TO <<tasters>> ARRAY [0..0) OF WORD;
@@ -487,13 +487,13 @@ struct FontRecord {
 // SpacingWidth: TYPE = Byte;
 struct SpacingWidthsRecord {
 	CARD8 width[256];
-} __attribute__((packed));
+};
 
 // PrinterWidths: TYPE = LONG POINTER TO ARRAY Byte OF PrinterWidth;
 // PrinterWidth: TYPE = CARDINAL;
 struct PrinterWidthsRecord {
 	CARD16 width[256];
-} __attribute__((packed));
+};
 
 // FlagsArray: TYPE = LONG POINTER TO PACKED ARRAY Byte OF Flags;
 // Flags: TYPE = MACHINE DEPENDENT RECORD [
@@ -502,7 +502,7 @@ struct PrinterWidthsRecord {
 struct FlagsArrayRecord {
 	// 256 * 2 / 16 = 32
 	CARD16 flags[32];
-} __attribute__((packed));
+};
 
 // RasterInfos: TYPE = LONG POINTER TO ARRAY Byte OF RasterInfo;
 // RasterInfo: TYPE = MACHINE DEPENDENT RECORD [
@@ -558,7 +558,7 @@ struct TxtBltArg {
 	CARD16       margin;
 	INT16        space;
 	LONG_POINTER coord;
-} __attribute__((packed));
+};
 #pragma pack(pop)
 
 // Result: TYPE = MACHINE DEPENDENT {normal, margin, stop, unused};
@@ -992,3 +992,5 @@ union ProcessDataArea {
 // StartPsb: PsbIndex = (SIZE[ProcessDataArea] + SIZE[ProcessStateBlock] - 1) / SIZE[ProcessStateBlock];
 // StartPsb <= (64 + 7) / 8 = 8
 const CARD32 StartPsb = (SIZE(ProcessDataArea) + SIZE(ProcessStateBlock) - 1) / SIZE(ProcessStateBlock);
+
+#pragma pack(pop)

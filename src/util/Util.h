@@ -262,7 +262,7 @@ std::string formatWithCommas(T value) {
 
 // bitFiled is used in symbols
 uint16_t bitField(uint16_t word, int startBit, int stopBit);
-__attribute__((always_inline)) static inline uint16_t bitField(uint16_t word, int startBit) {
+inline uint16_t bitField(uint16_t word, int startBit) {
 	return bitField(word, startBit, startBit);
 }
 

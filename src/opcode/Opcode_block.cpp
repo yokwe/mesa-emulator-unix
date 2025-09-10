@@ -46,7 +46,7 @@ static const int    DEBUG_FORCE_ABORT = 0;
 
 static const CARD32 MASK_OFFSET = PageSize - 1;
 
-__attribute__((always_inline)) static inline void BLT(CARD32& s, CARD32& d, CARD32& c, CARD32& r) {
+inline void BLT(CARD32& s, CARD32& d, CARD32& c, CARD32& r) {
 	CARD16 *sp = Fetch(s);
 	CARD16 *dp = Store(d);
 	// NO PAGE FAULT AFTER THIS
@@ -64,7 +64,7 @@ __attribute__((always_inline)) static inline void BLT(CARD32& s, CARD32& d, CARD
 	while(run--) *dp++ = *sp++;
 }
 
-__attribute__((always_inline)) static inline void BLTR(CARD32& s, CARD32& d, CARD32& c, CARD32& r) {
+inline void BLTR(CARD32& s, CARD32& d, CARD32& c, CARD32& r) {
 	CARD16 *sp = Fetch(s);
 	CARD16 *dp = Store(d);
 	// NO PAGE FAULT AFTER THIS
@@ -82,7 +82,7 @@ __attribute__((always_inline)) static inline void BLTR(CARD32& s, CARD32& d, CAR
 	while(run--) *dp-- = *sp--;
 }
 
-__attribute__((always_inline)) static inline CARD32 BLE(CARD32& a, CARD32& b, CARD32& c, CARD32& r) {
+inline CARD32 BLE(CARD32& a, CARD32& b, CARD32& c, CARD32& r) {
 	CARD16 *ap = Fetch(a);
 	CARD16 *bp = Fetch(b);
 	// NO PAGE FAULT AFTER THIS
@@ -513,7 +513,7 @@ void E_BLECL() {
 
 
 // aCKSUM - 052
-__attribute__((always_inline)) static inline CARDINAL Checksum(CARDINAL chksum, CARDINAL data) {
+inline CARDINAL Checksum(CARDINAL chksum, CARDINAL data) {
 	CARDINAL temp = chksum + data;
 	if (temp < chksum) temp = temp + 1;
 	if ((CARD16)0x8000 <= temp) {

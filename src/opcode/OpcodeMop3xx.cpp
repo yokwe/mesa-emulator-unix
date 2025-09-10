@@ -44,7 +44,7 @@ static const Logger logger(__FILE__);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_LI_(CARD16 arg) {
+inline void E_LI_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LI %5d", savedPC, arg);
 	Push(arg);
 }
@@ -100,7 +100,7 @@ void E_LIHB() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_LID_(CARD32 arg) {
+inline void E_LID_(CARD32 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LID %5d", savedPC, arg);
 	PushLong(arg);
 }
@@ -110,7 +110,7 @@ void E_LID0() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_LA_(CARD16 arg) {
+inline void E_LA_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LA %5d", savedPC, arg);
 	Push(LF + arg);
 }
@@ -140,7 +140,7 @@ void E_LAW() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_GA_(CARD16 arg) {
+inline void E_GA_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LA %5d", savedPC, arg);
 	Push((CARD16)(GF + arg));
 }
@@ -204,7 +204,7 @@ void E_ESCL() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_LGA_(CARD16 arg) {
+inline void E_LGA_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LGA %5d", savedPC, arg);
 	PushLong(GF + arg);
 }
@@ -222,7 +222,7 @@ void E_LGAW() {
 }
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-__attribute__((always_inline)) static inline void E_DESC_(CARD16 arg) {
+inline void E_DESC_(CARD16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  DESC %02X", savedPC, arg);
 	Push(GFI | 0x0003);
 	Push(arg);

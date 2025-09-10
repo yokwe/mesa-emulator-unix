@@ -238,13 +238,13 @@ CARD16* FetchPage(CARD32 vp) {
 	PERF_COUNT(memory, FetchPage)
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (mf.isVacant()) PageFault(vp * PageSize);
-	if (mf.referenced == 0) {
-		mf.referenced = 1;
-		p->mf = mf;
+	Map map = *p;
+	if (map.mf.isVacant()) PageFault(vp * PageSize);
+	if (map.mf.referenced == 0) {
+		map.mf.referenced = 1;
+		p->mf = map.mf;
 	}
-	Page* page = realPage[p->rp];
+	Page* page = realPage[map.rp];
 	if (page == 0) ERROR();
 	//
 	return page->word;
@@ -253,15 +253,15 @@ CARD16* StorePage(CARD32 vp) {
 	PERF_COUNT(memory, StorePage)
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (mf.isVacant()) PageFault(vp * PageSize);
-	if (mf.isProtect()) WriteProtectFault(vp * PageSize);
-	if (mf.referenced == 0 || mf.dirty == 0) {
-		mf.referenced = 1;
-		mf.dirty      = 1;
-		p->mf = mf;
+	Map map = *p;
+	if (map.mf.isVacant()) PageFault(vp * PageSize);
+	if (map.mf.isProtect()) WriteProtectFault(vp * PageSize);
+	if (map.mf.referenced == 0 || map.mf.dirty == 0) {
+		map.mf.referenced = 1;
+		map.mf.dirty      = 1;
+		p->mf = map.mf;
 	}
-	Page* page = realPage[p->rp];
+	Page* page = realPage[map.rp];
 	if (page == 0) ERROR();
 	//
 	return page->word ;
@@ -271,14 +271,13 @@ CARD16* peek(CARD32 va) {
 	const CARD32 vp = va / PageSize;
 	const CARD32 of = va % PageSize;
 	if (vpSize <= vp) ERROR()
-	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	if (mf.isVacant()) {
+	Map map = maps[vp];
+	if (map.mf.isVacant()) {
 		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
-		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, maps[vp].mf.u + 0, maps[vp].rp + 0);
+		logger.fatal("%s  mf = %4X  rp = %4X", __FUNCTION__, map.mf.u + 0, map.rp + 0);
 		ERROR();
 	}
-	Page* page = realPage[p->rp];
+	Page* page = realPage[map.rp];
 	if (page == 0) ERROR();
 	//
 	return page->word + of;
@@ -287,17 +286,13 @@ CARD16* peek(CARD32 va) {
 void setReferencedFlag(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	mf.referenced = 1;
-	p->mf = mf;
+	p->mf.referenced = 1;
 }
 void setReferencedDirtyFlag(CARD32 vp) {
 	if (vpSize <= vp) ERROR();
 	Map *p = maps + vp;
-	MapFlags mf = p->mf;
-	mf.referenced = 1;
-	mf.dirty      = 1;
-	p->mf = mf;
+	p->mf.referenced = 1;
+	p->mf.dirty      = 1;
 }
 
 Map ReadMap(CARD32 vp) {

@@ -61,6 +61,7 @@ void AgentProcessor::Initialize() {
 
 static CARD32 gmtDifference = 0;
 void AgentProcessor::Call() {
+	PERF_COUNT(agent, processor)
 	switch (fcb->command) {
 	case ProcessorIOFaceGuam::C_noop:
 		if (DEBUG_SHOW_AGENT_PROCESSOR) logger.debug("AGENT %s noop", name);

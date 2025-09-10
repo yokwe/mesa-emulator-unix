@@ -57,6 +57,7 @@ void AgentMouse::Initialize() {
 }
 
 void AgentMouse::Call() {
+	PERF_COUNT(agent, mouse)
 	switch(fcb->command) {
 	case MouseIOFaceGuam::C_nop:
 		if (DEBUG_SHOW_AGENT_MOUSE) logger.debug("AGENT %s nop", name);

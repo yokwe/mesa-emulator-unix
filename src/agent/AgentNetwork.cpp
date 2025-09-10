@@ -233,6 +233,7 @@ void AgentNetwork::Initialize() {
 }
 
 void AgentNetwork::Call() {
+	PERF_COUNT(agent, network)
 	if (fcb->stopAgent) {
 		if (!fcb->receiveStopped) {
 			logger.info("AGENT %s  stop", name);

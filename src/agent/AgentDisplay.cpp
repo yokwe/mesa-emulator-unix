@@ -96,6 +96,7 @@ void AgentDisplay::Initialize() {
 }
 
 void AgentDisplay::Call() {
+	PERF_COUNT(agent, display)
 	switch (fcb->command) {
 	case DisplayIOFaceGuam::C_nop:
 		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s nop", name);

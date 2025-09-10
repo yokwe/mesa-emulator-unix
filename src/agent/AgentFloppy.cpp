@@ -103,6 +103,7 @@ void AgentFloppy::Initialize() {
 }
 
 void AgentFloppy::Call() {
+	PERF_COUNT(agent, floppy)
 	if (fcb->stopAgent) {
 		if (!fcb->agentStopped) {
 			logger.info("AGENT %s stop", name);

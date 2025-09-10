@@ -34,6 +34,7 @@
 //
 
 #include "../util/Debug.h"
+#include "../util/Perf.h"
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
@@ -50,6 +51,7 @@ void AgentBeep::Initialize() {
 }
 
 void AgentBeep::Call() {
+	PERF_COUNT(agent, beep)
 	if (DEBUG_SHOW_AGENT_BEEP) logger.debug("AGENT %s %5d", name, fcb->frequency);
 	// TODO AgentBeep::Call
 	return;

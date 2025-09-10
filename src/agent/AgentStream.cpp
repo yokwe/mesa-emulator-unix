@@ -143,6 +143,7 @@ void AgentStream::Initialize() {
 }
 
 void AgentStream::Call() {
+	PERF_COUNT(agent, stream)
 	if (fcb->stopAgent) {
 		if (!fcb->agentStopped) {
 			logger.info("AGENT %s stop", name);

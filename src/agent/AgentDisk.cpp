@@ -195,6 +195,7 @@ void AgentDisk::Initialize() {
 }
 
 void AgentDisk::Call() {
+	PERF_COUNT(agent, disk)
 	if (fcb->stopAgent) {
 		if (!fcb->agentStopped) {
 			logger.info("AGENT %s stop", name);

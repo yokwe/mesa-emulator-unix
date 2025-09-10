@@ -60,6 +60,7 @@ void AgentKeyboard::Call() {
 }
 
 void AgentKeyboard::keyPress(LevelVKeys::KeyName keyName) {
+	PERF_COUNT(agent, keyPress)
 	const int keyStates_SIZE = sizeof(fcb->keyStates) / sizeof(fcb->keyStates[0]);
 	const int a = keyName / WordSize;
 	const int b = keyName % WordSize;
@@ -73,6 +74,7 @@ void AgentKeyboard::keyPress(LevelVKeys::KeyName keyName) {
 	fcb->keyStates[a] &= ~mask;
 }
 void AgentKeyboard::keyRelease(LevelVKeys::KeyName keyName) {
+	PERF_COUNT(agent, keyRelease)
 	const int keyStates_SIZE = sizeof(fcb->keyStates) / sizeof(fcb->keyStates[0]);
 	const int a = keyName / WordSize;
 	const int b = keyName % WordSize;

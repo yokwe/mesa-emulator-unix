@@ -119,4 +119,16 @@ PERF_DECLARE(disk, read)
 PERF_DECLARE(disk, write)
 PERF_DECLARE(disk, verify)
 
+// agent
+PERF_DECLARE(agent, beep)
+PERF_DECLARE(agent, disk)
+PERF_DECLARE(agent, display)
+PERF_DECLARE(agent, floppy)
+PERF_DECLARE(agent, keyPress)
+PERF_DECLARE(agent, keyRelease)
+PERF_DECLARE(agent, mouse)
+PERF_DECLARE(agent, network)
+PERF_DECLARE(agent, processor)
+PERF_DECLARE(agent, stream)
+
 }

@@ -54,6 +54,16 @@ uint64_t perf::disk::process            = 0;
 uint64_t perf::disk::read               = 0;
 uint64_t perf::disk::write              = 0;
 uint64_t perf::disk::verify             = 0;
+uint64_t perf::agent::beep              = 0;
+uint64_t perf::agent::disk              = 0;
+uint64_t perf::agent::display           = 0;
+uint64_t perf::agent::floppy            = 0;
+uint64_t perf::agent::keyPress          = 0;
+uint64_t perf::agent::keyRelease        = 0;
+uint64_t perf::agent::mouse             = 0;
+uint64_t perf::agent::network           = 0;
+uint64_t perf::agent::processor         = 0;
+uint64_t perf::agent::stream            = 0;
 
 namespace perf {
 std::vector<perf::Entry> all {
@@ -109,5 +119,15 @@ std::vector<perf::Entry> all {
     {"disk::read"            , perf::disk::read},
     {"disk::write"           , perf::disk::write},
     {"disk::verify"          , perf::disk::verify},
+    {"agent::beep"           , perf::agent::beep},
+    {"agent::disk"           , perf::agent::disk},
+    {"agent::display"        , perf::agent::display},
+    {"agent::floppy"         , perf::agent::floppy},
+    {"agent::keyPress"       , perf::agent::keyPress},
+    {"agent::keyRelease"     , perf::agent::keyRelease},
+    {"agent::mouse"          , perf::agent::mouse},
+    {"agent::network"        , perf::agent::network},
+    {"agent::processor"      , perf::agent::processor},
+    {"agent::stream"         , perf::agent::stream},
 };
 }

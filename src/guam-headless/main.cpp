@@ -77,10 +77,6 @@ int main(int /* argc */, char** /* argv */) {
 	auto vmBits           = entry.memory.vmbits;
 	auto rmBits           = entry.memory.rmbits;
 
-	// stop at MP 8000
-	processor::stopAtMP( 915);
-	processor::stopAtMP(8000);
-
 	guam::setDiskPath(diskPath);
 	guam::setGermPath(germPath);
 	guam::setBootPath(bootPath);
@@ -92,20 +88,38 @@ int main(int /* argc */, char** /* argv */) {
 	guam::setDisplaySize(displayWidth, displayHeight);
 	guam::setNetworkInterfaceName(networkInterface);
 
-	guam::initialize();
-	guam::boot();
-	
-	opcode::stats();
-	PERF_LOG();
-	memory::cache::stats();
+	// stop at MP 8000
+	processor::stopAtMP( 915);
+	processor::stopAtMP(8000);
+
+	{
+		guam::initialize();
+		guam::boot();
+		guam::finalize();
+		
+		opcode::stats();
+		PERF_LOG();
+		memory::cache::stats();
+		logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
+	}
+
+	// {
+	// 	guam::initialize();
+	// 	guam::boot();
+	// 	guam::finalize();
+		
+	// 	opcode::stats();
+	// 	PERF_LOG();
+	// 	memory::cache::stats();
+	// 	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
+	// }
+
 
 	//extern void MonoBlt_MemoryCache_stats();
 	//MonoBlt_MemoryCache_stats();
 
 	//extern void MonoBlt_stats();
 	//MonoBlt_stats();
-
-	logger.info("elapsedTime = %lld msec", guam::elapsedTime());
 
 	logger.info("STOP");
 	return 0;

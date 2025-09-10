@@ -34,6 +34,7 @@
 //
 
 #include <csignal>
+#include <cstring>
 #include <thread>
 
 #include "../util/Util.h"
@@ -86,9 +87,9 @@ CARD16         displayWidth;
 CARD16         displayHeight;
 std::string    networkInterfaceName;
 
-DiskFile         diskFile;
-DiskFile         floppyFile;
-NetworkPacket    networkPacket;
+DiskFile       diskFile;
+DiskFile       floppyFile;
+NetworkPacket  networkPacket;
 
 // agent
 AgentDisk      disk;
@@ -105,8 +106,7 @@ AgentStream    stream;
 AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
-int64_t timeStart;
-int64_t timeStop;
+int64_t elapsedTime;
 
 
 void setDiskPath(const std::string& diskPath_) {
@@ -173,6 +173,8 @@ void initialize() {
 	opcode::initialize();
 	variable::initialize();
 	agent::initialize();
+
+	elapsedTime = 0;
 
 	// Reserve real memory for display
 	memory::reserveDisplayPage(displayWidth, displayHeight);
@@ -243,7 +245,7 @@ void initialize() {
 		Boot::Request* request = (Boot::Request*)memory::peek(SD + OFFSET_SD(SDDefs::sFirstGermRequest));
 
 		// clear boot request
-		::memset(request, 0, sizeof(*request));
+		memset(request, 0, sizeof(*request));
 
 		logger.info("bootDevice %s", bootDevice);
 		if (bootDevice == "DISK") {
@@ -260,8 +262,6 @@ void initialize() {
 		logger.info("bootSwitch = %s", bootSwitch);
 		setSwitches(request->switches, bootSwitch.c_str());
 	}
-
-	timeStart = timeStop = 0;
 }
 
 class ThreadControl {
@@ -300,7 +300,7 @@ void boot() {
 	ThreadControl t5("disk", f5);
 	ThreadControl t6("processor", f6);
 
-	timeStart = Util::getMilliSecondsFromEpoch();
+	auto timeStart = Util::getMilliSecondsFromEpoch();
 	t1.start();
 	t2.start();
 	t3.start();
@@ -316,13 +316,20 @@ void boot() {
 	t4.stop();
 	t5.stop();
 	t6.stop();
-	timeStop = Util::getMilliSecondsFromEpoch();
+	auto timeStop = Util::getMilliSecondsFromEpoch();
+
+	elapsedTime = timeStop - timeStart;
 
 	logger.info("boot STOP");
+}
 
-	// Properly detach DiskFile
+void finalize() {
+	// detach file or device
 	diskFile.detach();
 	floppyFile.detach();
+	networkPacket.detach();
+
+	memory::finalize();
 }
 
 static void setSwitch(System::Switches& switches, unsigned char c) {
@@ -396,8 +403,8 @@ void setBootRequestStream(Boot::Request* request) {
 	request->location.deviceOrdinal = 0;
 }
 
-int64_t elapsedTime() {
-    return timeStop - timeStart;
+int64_t getElapsedTime() {
+    return elapsedTime;
 }
 
 }

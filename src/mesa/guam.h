@@ -59,7 +59,8 @@ void setSwitches(System::Switches& switches, const char *string);
 
 void initialize();
 void boot(); // don't return until all child thread stopped
+void finalize();
 
-int64_t elapsedTime();
+int64_t getElapsedTime();
 
 }

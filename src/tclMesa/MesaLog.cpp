@@ -51,7 +51,7 @@ int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[
         Tcl_SetObjResult(interp, result);
         return TCL_ERROR;
     }
-    // guam::log info format args...
+    // mesa::log info format args...
     // 0         1    2      3
     std::string level  = Tcl_GetString(objv[1]);
     const char* format = Tcl_GetString(objv[2]);

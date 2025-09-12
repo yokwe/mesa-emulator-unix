@@ -38,3 +38,4 @@
 #include <tcl.h>
 
 int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

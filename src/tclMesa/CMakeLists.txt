@@ -10,7 +10,9 @@ target_sources(
 		mesa.h
 	PRIVATE
 		main.cpp
+		MesaGuam.cpp
 		MesaLog.cpp
 )
 
-target_link_libraries(tclMesa util tcl log4cxx)
+add_dependencies     (tclMesa mesa opcode agent util)
+target_link_libraries(tclMesa mesa opcode agent util tcl log4cxx)

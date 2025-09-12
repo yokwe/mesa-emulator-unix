@@ -53,6 +53,7 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 		return TCL_ERROR;
 	}
 	Tcl_CreateObjCommand(interp, "mesa::log", MesaLog, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::guam", MesaGuam, NULL, NULL);
 	return TCL_OK;
 }
 

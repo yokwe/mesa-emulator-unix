@@ -56,8 +56,8 @@ test: src/util/Perf.inc
 guam-headless: src/util/Perf.inc
 	/usr/bin/time cmake --build build --target guam-headless
 
-tclGuam:
-	/usr/bin/time cmake --build build --target tclGuam
+tclMesa:
+	/usr/bin/time cmake --build build --target tclMesa
 
 	
 #
@@ -76,5 +76,5 @@ run-guam-headless: guam-headless prepare-log
 run-test: test prepare-log
 	${BUILD_DIR}/test/test
 
-run-tclGuam: tclGuam prepare-log
-	${BUILD_DIR}/tclGuam/tclGuam
+run-tclMesa: tclMesa prepare-log
+	${BUILD_DIR}/tclMesa/tclMesa

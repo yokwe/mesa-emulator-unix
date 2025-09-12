@@ -30,11 +30,11 @@
 
 
 //
-// guam.h
+// mesa.h
 //
 
 #pragma once
 
 #include <tcl.h>
 
-extern "C" int DLLEXPORT Guam_Init(Tcl_Interp *interp);
+int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

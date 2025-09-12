@@ -30,64 +30,62 @@
  *******************************************************************************/
 
 //
-// guam.cpp
+// main.cpp
 //
 
-#include <tcl.h>
-#include <tclDecls.h>
-
-#include "guam.h"
+#include <filesystem>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-constexpr const char* PACKAGE_NAME    = "Guam";
+#include <tcl.h>
+
+#include "mesa.h"
+
+constexpr const char* PACKAGE_NAME    = "Mesa";
 constexpr const char* PACKAGE_VERSION = "1.0.";
 
-static int Log_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata;
-    if (objc < 3) {
-        auto result = Tcl_ObjPrintf("Unexpected objc is less than 3  objc = %d", objc);
-        logger.error(Tcl_GetString(result));
-        Tcl_SetObjResult(interp, result);
-        return TCL_ERROR;
-    }
-    // guam::log info format args...
-    // 0         1    2      3
-    std::string level  = Tcl_GetString(objv[1]);
-    const char* format = Tcl_GetString(objv[2]);
-
-    Tcl_Obj* result = Tcl_Format(interp, format, objc - 3, objv + 3);
-    if (result == NULL) return TCL_ERROR;
-
-    if (level == "debug") {
-        logger.debug(Tcl_GetString(result));
-    } else if (level == "info") {
-        logger.info(Tcl_GetString(result));
-    } else if (level == "warn") {
-        logger.warn(Tcl_GetString(result));
-    } else if (level == "error") {
-        logger.error(Tcl_GetString(result));
-    } else if (level == "fatal") {
-        logger.fatal(Tcl_GetString(result));
-    } else {
-        result = Tcl_ObjPrintf("Unexpected level \"%s\"", level.c_str());
-        logger.error(Tcl_GetString(result));
-        Tcl_SetObjResult(interp, result);
-        return TCL_ERROR;
-    }
-
-	Tcl_SetObjResult(interp, result);
-	return TCL_OK;
-}
-
-extern "C" int DLLEXPORT Guam_Init(Tcl_Interp *interp) {
+extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
     logger.info("Guam_Init");
 	/* changed this to check for an error - GPS */
 	if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) == TCL_ERROR) {
         logger.error("Tcl_PkgProvide failed");
 		return TCL_ERROR;
 	}
-	Tcl_CreateObjCommand(interp, "guam::log", Log_Cmd, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::log", MesaLog, NULL, NULL);
 	return TCL_OK;
+}
+
+int AppInit(Tcl_Interp *interp) {
+	if (Tcl_Init(interp) == TCL_ERROR) {
+        logger.fatal("Tcl_Init failed");
+		return TCL_ERROR;
+    }
+
+    Mesa_Init(interp);
+
+    auto scriptFile = std::filesystem::path(BUILD_DIR) / "run" / "mesa.tcl";
+    if (std::filesystem::exists(scriptFile)) {
+        logger.info("eval  mesa scrip  %s", scriptFile.c_str());
+        auto script = readFile(scriptFile);
+        Tcl_Eval(interp, script.c_str());
+    }
+
+	return TCL_OK;
+}
+
+int main(int argc, char *argv[]) {
+    logger.info("START");
+    
+	setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
+
+    Tcl_FindExecutable(argv[0]);
+	Tcl_Main(argc, argv, AppInit);
+
+    // Tcl_Main call ::exit() and so don't reach here
+    logger.info("STOP");
+	return 0;
 }

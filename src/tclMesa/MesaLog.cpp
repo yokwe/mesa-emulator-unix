@@ -30,48 +30,52 @@
  *******************************************************************************/
 
 //
-// main.cpp
+// MasaLog.cpp
 //
 
-#include <filesystem>
+#include <tcl.h>
+#include <tclDecls.h>
+
+#include "mesa.h"
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include <tcl.h>
+int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+    (void)cdata;
+    Tcl_Obj* result = 0;
 
-#include "guam.h"
-
-int AppInit(Tcl_Interp *interp) {
-	if (Tcl_Init(interp) == TCL_ERROR) {
-        logger.fatal("Tcl_Init failed");
-		return TCL_ERROR;
+    if (objc < 3) {
+        result = Tcl_ObjPrintf("Unexpected objc is less than 3  objc = %d", objc);
+        logger.error(Tcl_GetString(result));
+        Tcl_SetObjResult(interp, result);
+        return TCL_ERROR;
     }
+    // guam::log info format args...
+    // 0         1    2      3
+    std::string level  = Tcl_GetString(objv[1]);
+    const char* format = Tcl_GetString(objv[2]);
 
-    Guam_Init(interp);
+    result = Tcl_Format(interp, format, objc - 3, objv + 3);
+    if (result == NULL) return TCL_ERROR;
+	Tcl_SetObjResult(interp, result);
 
-    auto guamScriptFile = std::filesystem::path(BUILD_DIR) / "run" / "guam.tcl";
-    if (std::filesystem::exists(guamScriptFile)) {
-        logger.info("eval  guam scrip  %s", guamScriptFile.c_str());
-        auto guamScript = readFile(guamScriptFile);
-        Tcl_Eval(interp, guamScript.c_str());
+    if (level == "debug") {
+        logger.debug(Tcl_GetString(result));
+    } else if (level == "info") {
+        logger.info(Tcl_GetString(result));
+    } else if (level == "warn") {
+        logger.warn(Tcl_GetString(result));
+    } else if (level == "error") {
+        logger.error(Tcl_GetString(result));
+    } else if (level == "fatal") {
+        logger.fatal(Tcl_GetString(result));
+    } else {
+        result = Tcl_ObjPrintf("Unexpected level \"%s\"", level.c_str());
+        logger.error(Tcl_GetString(result));
+        Tcl_SetObjResult(interp, result);
+        return TCL_ERROR;
     }
 
 	return TCL_OK;
-}
-
-int main(int argc, char *argv[]) {
-    logger.info("START");
-    
-	setSignalHandler(SIGINT);
-	setSignalHandler(SIGTERM);
-	setSignalHandler(SIGHUP);
-	setSignalHandler(SIGSEGV);
-
-    Tcl_FindExecutable(argv[0]);
-	Tcl_Main(argc, argv, AppInit);
-
-    // Tcl_Main call ::exit() and so don't reach here
-    logger.info("STOP");
-	return 0;
 }

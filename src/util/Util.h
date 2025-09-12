@@ -232,6 +232,7 @@ std::string formatWithCommas(T value) {
     return ss.str();
 }
 
+std::string readFile(const std::string& path);
 
 
 // convert to utf8

@@ -39,6 +39,7 @@
 #include <utility>
 #include <chrono>
 #include <iostream>
+#include <fstream>
 #include <bit>
 
 #include <execinfo.h>
@@ -230,6 +231,12 @@ std::string toHexString(int size, const uint8_t* data) {
      return ss.str();
 }
 
+std::string readFile(const std::string& path) {
+	std::ifstream ifs(path.c_str());
+	std::stringstream buffer;
+	buffer << ifs.rdbuf();
+	return buffer.str();
+}
 
 uint16_t bitField(uint16_t word, int startBit, int stopBit) {
 	const int MAX_BIT = 15;

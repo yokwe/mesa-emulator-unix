@@ -30,6 +30,7 @@ set(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 # prepare data files
 configure_file(../data/log4j-config.xml.in run/log4j-config.xml @ONLY)
 configure_file(../data/setting.json.in     run/setting.json     @ONLY)
+configure_file(../data/guam.tcl            run/guam.tcl     COPYONLY)
 
 configure_file(../data/Dawn/Dawn.dsk       run/Dawn.dsk     COPYONLY)
 configure_file(../data/Dawn/Dawn.germ      run/Dawn.germ    COPYONLY)
@@ -75,4 +76,5 @@ add_subdirectory (main	         ../build/main)
 add_subdirectory (mesa           ../build/mesa)
 add_subdirectory (opcode         ../build/opcode)
 add_subdirectory (test           ../build/test)
+add_subdirectory (tclGuam        ../build/tclGuam)
 add_subdirectory (util           ../build/util)

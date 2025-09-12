@@ -34,6 +34,7 @@
 //
 
 #include <tcl.h>
+#include <tclDecls.h>
 
 #include "guam.h"
 
@@ -43,21 +44,40 @@ static const Logger logger(__FILE__);
 constexpr const char* PACKAGE_NAME    = "Guam";
 constexpr const char* PACKAGE_VERSION = "1.0.";
 
-static int Hello_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-	(void)cdata;
-	(void)objc;
-	(void)objv;
-	Tcl_SetObjResult(interp, Tcl_NewStringObj("Hello", -1));
-	logger.info("hello");
-	return TCL_OK;
-}
+static int Log_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+    (void)cdata;
+    if (objc < 3) {
+        auto result = Tcl_ObjPrintf("Unexpected objc is less than 3  objc = %d", objc);
+        logger.error(Tcl_GetString(result));
+        Tcl_SetObjResult(interp, result);
+        return TCL_ERROR;
+    }
+    // guam::log info format args...
+    // 0         1    2      3
+    std::string level  = Tcl_GetString(objv[1]);
+    const char* format = Tcl_GetString(objv[2]);
 
-static int Boot_Cmd(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-	(void)cdata;
-	(void)objc;
-	(void)objv;
-	Tcl_SetObjResult(interp, Tcl_NewStringObj("Boot", -1));
-	logger.info("boot");
+    Tcl_Obj* result = Tcl_Format(interp, format, objc - 3, objv + 3);
+    if (result == NULL) return TCL_ERROR;
+
+    if (level == "debug") {
+        logger.debug(Tcl_GetString(result));
+    } else if (level == "info") {
+        logger.info(Tcl_GetString(result));
+    } else if (level == "warn") {
+        logger.warn(Tcl_GetString(result));
+    } else if (level == "error") {
+        logger.error(Tcl_GetString(result));
+    } else if (level == "fatal") {
+        logger.fatal(Tcl_GetString(result));
+    } else {
+        result = Tcl_ObjPrintf("Unexpected level \"%s\"", level.c_str());
+        logger.error(Tcl_GetString(result));
+        Tcl_SetObjResult(interp, result);
+        return TCL_ERROR;
+    }
+
+	Tcl_SetObjResult(interp, result);
 	return TCL_OK;
 }
 
@@ -68,7 +88,6 @@ extern "C" int DLLEXPORT Guam_Init(Tcl_Interp *interp) {
         logger.error("Tcl_PkgProvide failed");
 		return TCL_ERROR;
 	}
-	Tcl_CreateObjCommand(interp, "guam::hello", Hello_Cmd, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "guam::boot", Boot_Cmd, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "guam::log", Log_Cmd, NULL, NULL);
 	return TCL_OK;
 }

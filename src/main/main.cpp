@@ -50,9 +50,10 @@ static const Logger logger(__FILE__);
 int main(int, char**) {
 	logger.info("START");
 
+	setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
 	setSignalHandler(SIGSEGV);
-	setSignalHandler(SIGILL);
-	setSignalHandler(SIGABRT);
 
 	{
 		// write code here.

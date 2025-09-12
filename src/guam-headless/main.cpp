@@ -61,6 +61,11 @@ void startAndStop() {
 int main(int /* argc */, char** /* argv */) {
 	logger.info("START");
 
+	setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
+
 	GuiOp::setContext(new NullGuiOp);
 
 	// sanity check

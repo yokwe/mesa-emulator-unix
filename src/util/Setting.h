@@ -149,4 +149,5 @@ public:
 	static Setting getInstance(const std::string& path);
 	
 	Entry getEntry(const std::string& name);
+	bool containsEntry(const std::string& name);
 };

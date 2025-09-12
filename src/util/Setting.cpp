@@ -96,8 +96,7 @@ void from_json(const json& j, Setting::ButtonMap& p) {
 
 
 Setting Setting::getInstance(const std::string& path) {
-	logger.info("path  %s", path);
-
+//	logger.info("path  %s", path);
 	std::ifstream f(path);
 	json data = json::parse(f);
 
@@ -133,4 +132,11 @@ Setting::Entry Setting::getEntry(const std::string& name) {
 	logger.error("Unexpected name");
 	logger.error("  name  %s", name);
 	ERROR()
+}
+
+bool Setting::containsEntry(const std::string& name) {
+	for(auto e: entryList) {
+		if (e.name == name) return true;
+	}
+	return false;
 }

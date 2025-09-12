@@ -75,17 +75,8 @@ static const Logger logger(__FILE__);
 
 namespace guam {
 
-std::string    diskPath;
-std::string    germPath;
-std::string    bootPath;
-std::string    floppyPath;
-std::string    bootSwitch;
-std::string    bootDevice;
-int            vmBits;
-int            rmBits;
-CARD16         displayWidth;
-CARD16         displayHeight;
-std::string    networkInterfaceName;
+int64_t        elapsedTime;
+Config         config;
 
 DiskFile       diskFile;
 DiskFile       floppyFile;
@@ -106,40 +97,14 @@ AgentStream    stream;
 AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
-int64_t elapsedTime;
 
-
-void setDiskPath(const std::string& diskPath_) {
-    diskPath = diskPath_;
+void setConfig(const Config& config_) {
+	config = config_;
 }
-void setGermPath(const std::string& germPath_) {
-    germPath = germPath_;
+void getConfig(Config& config_) {
+	config_ = config;
 }
-void setBootPath(const std::string& bootPath_) {
-    bootPath = bootPath_;
-}
-void setFloppyPath(const std::string& floppyPath_) {
-    floppyPath = floppyPath_;
-}
-void setBootSwitch(const std::string& bootSwitch_) {
-    bootSwitch = bootSwitch_;
-}
-void setBootDevice(const std::string& bootDevice_) {
-    bootDevice = bootDevice_;
-}
-void setMemorySize(int vmBits_, int rmBits_) {
-    vmBits = vmBits_;
-    rmBits = rmBits_;
-}
-void setDisplaySize(CARD16 displayWidth_, CARD16 displayHeight_) {
-    displayWidth  = displayWidth_;
-    displayHeight = displayHeight_;
-}
-void setNetworkInterfaceName(const std::string& networkInterfaceName_) {
-    networkInterfaceName = networkInterfaceName_;
-}
-
-void loadGerm(std::string& path) {
+static void loadGerm(std::string& path) {
 	logger.info("germ  path    = %s", path);
 
 	CARD32 mapSize = 0;
@@ -161,15 +126,98 @@ void loadGerm(std::string& path) {
 	}
 	Util::unmapFile(map);
 }
+static void setSwitch(System::Switches& switches, unsigned char c) {
+	logger.info("setSwitch %c %3o", c, c);
+	int high = (c >> 4) & 0x0f;
+	int low = c & 0x0f;
 
-void initialize() {
+	switches.word[high] |= (CARD16)(1U << (15 - low));
+}
+static void setSwitches(System::Switches& switches, const char *string) {
+	int len = ::strlen(string);
+	for(int i = 0; i < len; i++) {
+		// decode \[0-3][0-7][0-7] character sequence
+		if (string[i] == '\\') {
+			int n = 0;
+			char c1 = string[i + 1];
+			char c2 = string[i + 2];
+			char c3 = string[i + 3];
+			i += 3;
+
+			if ('0' <= c1 && c1 <= '3') {
+				n = (c1 - '0') * 64;
+			} else {
+				logger.fatal("c1 = %c", c1);
+				ERROR();
+			}
+			if ('0' <= c2 && c2 <= '7') {
+				n += (c2 - '0') * 8;
+			} else {
+				logger.fatal("c2 = %c", c1);
+				ERROR();
+			}
+			if ('0' <= c3 && c3 <= '7') {
+				n += (c3 - '0');
+			} else {
+				logger.fatal("c3 = %c", c1);
+				ERROR();
+			}
+			setSwitch(switches, (char)(n & 0xff));
+		} else {
+			setSwitch(switches, string[i]);
+		}
+	}
+}
+static void setBootRequestPV(Boot::Request* request, CARD16 deviceOrdinal = 0) {
+	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
+	request->action                 = Boot::A_bootPhysicalVolume;
+	request->location.deviceType    = Device::T_anyPilotDisk;
+	request->location.deviceOrdinal = deviceOrdinal;
+}
+static void setBootRequestEther(Boot::Request* request, CARD16 deviceOrdinal = 0) {
+	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
+	request->action                 = Boot::A_inLoad;
+	request->location.deviceType    = Device::T_ethernet;
+	request->location.deviceOrdinal = deviceOrdinal;
+	request->location.ethernetRequest.bfn.word[0]            = 0x0000; // Unique number assigned to each boot file based on 48 bit host number
+	request->location.ethernetRequest.bfn.word[1]            = 0xaa00;
+	request->location.ethernetRequest.bfn.word[2]            = 0x0e60;
+	request->location.ethernetRequest.address.net.word[0]    = 0x0000; // unknown
+	request->location.ethernetRequest.address.net.word[1]    = 0x0000;
+	request->location.ethernetRequest.address.host.word[0]   = 0xffff; // broadcast
+	request->location.ethernetRequest.address.host.word[1]   = 0xffff;
+	request->location.ethernetRequest.address.host.word[2]   = 0xffff;
+	request->location.ethernetRequest.address.socket.word[0] = 0x000a; // boot socket
+}
+static void setBootRequestStream(Boot::Request* request) {
+	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
+	request->action                 = Boot::A_inLoad;
+	request->location.deviceType    = Device::T_simpleDataStream;
+	request->location.deviceOrdinal = 0;
+}
+
+static void initialize() {
 	setSignalHandler(SIGINT);
 	setSignalHandler(SIGTERM);
 	setSignalHandler(SIGHUP);
 	setSignalHandler(SIGSEGV);
 
-	logger.info("vmBits = %2d  rmBits = %2d", vmBits, rmBits);
-	memory::initialize(vmBits, rmBits, agent::ioRegionPage);
+	logger.info("diskFilePath      %s", config.diskFilePath);
+	logger.info("germFilePath      %s", config.germFilePath);
+	logger.info("bootFilePath      %s", config.bootFilePath);
+	logger.info("floppyFilePath    %s", config.floppyFilePath);
+	logger.info("networkInterface  %s", config.networkInterface);
+	logger.info("bootSwitch        %s", config.bootSwitch);
+	logger.info("bootDevice        %s", config.bootDevice);
+
+	logger.info("displayWidth   %4d", config.displayWidth);
+	logger.info("displayHeight  %4d", config.displayHeight);
+	logger.info("vmBits         %4d", config.vmBits);
+	logger.info("rmBits         %4d", config.rmBits);
+
+	// start initialize
+	elapsedTime = 0;
+	memory::initialize(config.vmBits, config.rmBits, agent::ioRegionPage);
 	opcode::initialize();
 	variable::initialize();
 	agent::initialize();
@@ -177,37 +225,31 @@ void initialize() {
 	elapsedTime = 0;
 
 	// Reserve real memory for display
-	memory::reserveDisplayPage(displayWidth, displayHeight);
+	memory::reserveDisplayPage(config.displayWidth, config.displayHeight);
 
 	//
 	// Initialize Agent
 	//
 	// AgentDisk
-	logger.info("Disk  %s", diskPath);
-	diskFile.attach(diskPath);
+	diskFile.attach(config.diskFilePath);
 	disk.addDiskFile(&diskFile);
 	// AgentFloppy
-	logger.info("Floppy %s", floppyPath);
-	floppyFile.attach(floppyPath);
+	floppyFile.attach(config.floppyFilePath);
 	floppy.addDiskFile(&floppyFile);
 	// AgentNetwork use networkPacket
-	logger.info("networkInterfaceName = %s", networkInterfaceName);
-	networkPacket.attach(networkInterfaceName);
+	networkPacket.attach(config.networkInterface);
 	network.setNetworkPacket(&networkPacket);
 	// AgentProcessor::Initialize use PID[]
 	// get PID from network adapter
 	networkPacket.getAddress(PID[1], PID[2], PID[3]);
-	logger.info("PID = %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
 	// set PID to AgentProcessor
 	agentProcessor.setProcessorID(PID[1], PID[2], PID[3]);
 	// AgentDisplay
-	logger.info("displayWidth  = %4d", displayWidth);
-	logger.info("displayHeight = %4d", displayHeight);
-	display.setDisplayWidth(displayWidth);
-	display.setDisplayHeight(displayHeight);
+	display.setDisplayWidth(config.displayWidth);
+	display.setDisplayHeight(config.displayHeight);
 	// Stream::Boot
-	logger.info("bootPath = %s", bootPath);
-
+	// bootFilePath
 	// Enable Agents
 	disk.Enable();
 	floppy.Enable();
@@ -227,7 +269,7 @@ void initialize() {
 	// Initialization of Stream handler
 	AgentStream* agentStream = (AgentStream*)agent::getAgent((int)GuamInputOutput::AgentDeviceIndex::stream);
 	// 110 Boot
-	agentStream->addStream(new StreamBoot(bootPath));
+	agentStream->addStream(new StreamBoot(config.bootFilePath));
 	// 101 CopyPaste
 	agentStream->addStream(new StreamCopyPaste);
 	//   1 PCFA
@@ -238,7 +280,7 @@ void initialize() {
 	agentStream->addStream(new StreamWWC);
 
 	// load germ file into vm
-	loadGerm(germPath);
+	loadGerm(config.germFilePath);
 
 	// set boot request
 	{
@@ -247,20 +289,18 @@ void initialize() {
 		// clear boot request
 		memset(request, 0, sizeof(*request));
 
-		logger.info("bootDevice %s", bootDevice);
-		if (bootDevice == "DISK") {
+		if (config.bootDevice == "DISK") {
 			setBootRequestPV(request);
-		} else if (bootDevice == "ETHER") {
+		} else if (config.bootDevice == "ETHER") {
 			setBootRequestEther(request);
-		} else if (bootDevice == "STREAM") {
+		} else if (config.bootDevice == "STREAM") {
 			setBootRequestStream(request);
 		} else {
 			logger.fatal("Unknown bootDevice");
 			ERROR()
 		}
 
-		logger.info("bootSwitch = %s", bootSwitch);
-		setSwitches(request->switches, bootSwitch.c_str());
+		setSwitches(request->switches, config.bootSwitch.c_str());
 	}
 }
 
@@ -283,7 +323,7 @@ public:
 	}
 };
 
-void boot() {
+static void boot() {
 	logger.info("boot START");
 
 	std::function<void()> f1 = std::function<void()>(interrupt::run);
@@ -323,7 +363,7 @@ void boot() {
 	logger.info("boot STOP");
 }
 
-void finalize() {
+static void finalize() {
 	// detach file or device
 	diskFile.detach();
 	floppyFile.detach();
@@ -332,75 +372,10 @@ void finalize() {
 	memory::finalize();
 }
 
-static void setSwitch(System::Switches& switches, unsigned char c) {
-	logger.info("setSwitch %c %3o", c, c);
-	int high = (c >> 4) & 0x0f;
-	int low = c & 0x0f;
-
-	switches.word[high] |= (CARD16)(1U << (15 - low));
-}
-void setSwitches(System::Switches& switches, const char *string) {
-	int len = ::strlen(string);
-	for(int i = 0; i < len; i++) {
-		// decode \[0-3][0-7][0-7] character sequence
-		if (string[i] == '\\') {
-			int n = 0;
-			char c1 = string[i + 1];
-			char c2 = string[i + 2];
-			char c3 = string[i + 3];
-			i += 3;
-
-			if ('0' <= c1 && c1 <= '3') {
-				n = (c1 - '0') * 64;
-			} else {
-				logger.fatal("c1 = %c", c1);
-				ERROR();
-			}
-			if ('0' <= c2 && c2 <= '7') {
-				n += (c2 - '0') * 8;
-			} else {
-				logger.fatal("c2 = %c", c1);
-				ERROR();
-			}
-			if ('0' <= c3 && c3 <= '7') {
-				n += (c3 - '0');
-			} else {
-				logger.fatal("c3 = %c", c1);
-				ERROR();
-			}
-			setSwitch(switches, (char)(n & 0xff));
-		} else {
-			setSwitch(switches, string[i]);
-		}
-	}
-}
-void setBootRequestPV(Boot::Request* request, CARD16 deviceOrdinal) {
-	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
-	request->action                 = Boot::A_bootPhysicalVolume;
-	request->location.deviceType    = Device::T_anyPilotDisk;
-	request->location.deviceOrdinal = deviceOrdinal;
-}
-void setBootRequestEther(Boot::Request* request, CARD16 deviceOrdinal) {
-	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
-	request->action                 = Boot::A_inLoad;
-	request->location.deviceType    = Device::T_ethernet;
-	request->location.deviceOrdinal = deviceOrdinal;
-	request->location.ethernetRequest.bfn.word[0]            = 0x0000; // Unique number assigned to each boot file based on 48 bit host number
-	request->location.ethernetRequest.bfn.word[1]            = 0xaa00;
-	request->location.ethernetRequest.bfn.word[2]            = 0x0e60;
-	request->location.ethernetRequest.address.net.word[0]    = 0x0000; // unknown
-	request->location.ethernetRequest.address.net.word[1]    = 0x0000;
-	request->location.ethernetRequest.address.host.word[0]   = 0xffff; // broadcast
-	request->location.ethernetRequest.address.host.word[1]   = 0xffff;
-	request->location.ethernetRequest.address.host.word[2]   = 0xffff;
-	request->location.ethernetRequest.address.socket.word[0] = 0x000a; // boot socket
-}
-
-void setBootRequestStream(Boot::Request* request) {
-	request->requestBasicVersion    = Boot::currentRequestBasicVersion;
-	request->action                 = Boot::A_inLoad;
-	request->location.deviceType    = Device::T_simpleDataStream;
-	request->location.deviceOrdinal = 0;
+void run() {
+	initialize();
+	boot();
+	finalize();
 }
 
 int64_t getElapsedTime() {

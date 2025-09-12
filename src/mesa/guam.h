@@ -41,25 +41,27 @@
 
 namespace guam {
 
-void setDiskPath(const std::string& diskPath_);
-void setGermPath(const std::string& germPath_);
-void setBootPath(const std::string& bootPath_);
-void setFloppyPath(const std::string& floppyPath_);
-void setBootSwitch(const std::string& bootSwitch_);
-void setBootDevice(const std::string& bootDevice_);
-void setMemorySize(int vmBits_, int rmBits_);
-void setDisplaySize(CARD16 displayWidth_, CARD16 displayHeight_);
-void setNetworkInterfaceName(const std::string& networkInterfaceName_);
+struct Config {
+    std::string diskFilePath;
+    std::string germFilePath;
+    std::string bootFilePath;
+    std::string floppyFilePath;
+    std::string networkInterface;
+    std::string bootSwitch;
+    std::string bootDevice;
 
-void setBootRequestPV    (Boot::Request* request, CARD16 deviceOrdinal = 0);
-void setBootRequestEther (Boot::Request* request, CARD16 deviceOrdinal = 0);
-void setBootRequestStream(Boot::Request* request);
+    int displayWidth;
+    int displayHeight;
+    int vmBits;
+    int rmBits;
 
-void setSwitches(System::Switches& switches, const char *string);
+    Config() : displayWidth(0), displayHeight(0), vmBits(0), rmBits(0) {}
+};
 
-void initialize();
-void boot(); // don't return until all child thread stopped
-void finalize();
+void setConfig(const Config& config);
+void getConfig(Config& config);
+
+void run(); // don't return until all child thread stopped
 
 int64_t getElapsedTime();
 

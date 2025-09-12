@@ -47,17 +47,6 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/opcode.h"
 
-void startAndStop() {
-	guam::initialize();
-	guam::boot();
-	guam::finalize();
-	
-	opcode::stats();
-	PERF_LOG();
-	memory::cache::stats();
-	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
-}
-
 int main(int /* argc */, char** /* argv */) {
 	logger.info("START");
 
@@ -80,40 +69,36 @@ int main(int /* argc */, char** /* argv */) {
 	auto setting = Setting::getInstance();
 	auto entry   = setting.getEntry(entryName);
 
-	auto displayWidth     = entry.display.width;
-	auto displayHeight    = entry.display.height;
+	guam::Config config;
+	config.diskFilePath     = entry.file.disk;
+    config.germFilePath     = entry.file.germ;
+    config.bootFilePath     = entry.file.boot;
+    config.floppyFilePath   = entry.file.floppy;
+    config.networkInterface = entry.network.interface;
+    config.bootSwitch       = entry.boot.switch_;
+    config.bootDevice       = entry.boot.device;
+    config.displayWidth     = entry.display.width;
+    config.displayHeight    = entry.display.height;
+    config.vmBits           = entry.memory.vmbits;
+    config.rmBits           = entry.memory.rmbits;
 
-	auto diskPath         = entry.file.disk;
-	auto germPath         = entry.file.germ;
-	auto bootPath         = entry.file.boot;
-	auto floppyPath       = entry.file.floppy;
-	auto bootSwitch       = entry.boot.switch_;
-	auto bootDevice       = entry.boot.device;
-	auto networkInterface = entry.network.interface;
-
-	auto vmBits           = entry.memory.vmbits;
-	auto rmBits           = entry.memory.rmbits;
-
-	guam::setDiskPath(diskPath);
-	guam::setGermPath(germPath);
-	guam::setBootPath(bootPath);
-	guam::setFloppyPath(floppyPath);
-	guam::setBootSwitch(bootSwitch);
-	guam::setBootDevice(bootDevice);
-
-	guam::setMemorySize(vmBits, rmBits);
-	guam::setDisplaySize(displayWidth, displayHeight);
-	guam::setNetworkInterfaceName(networkInterface);
+	guam::setConfig(config);
 
 	// stop at MP 8000
 	processor::stopAtMP( 915);
 	processor::stopAtMP(8000);
 
 	logger.info("thread start");
-	auto thread = std::thread(startAndStop);
+	auto thread = std::thread(guam::run);
 	logger.info("thread joinning");
 	thread.join();
 	logger.info("thread joined");
+	
+	// output stats
+	opcode::stats();
+	PERF_LOG();
+	memory::cache::stats();
+	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
 
 	// {
 	// 	guam::initialize();

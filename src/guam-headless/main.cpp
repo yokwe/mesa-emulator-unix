@@ -33,6 +33,8 @@
 // main.cpp
 //
 
+#include <thread>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
@@ -45,6 +47,16 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/opcode.h"
 
+void startAndStop() {
+	guam::initialize();
+	guam::boot();
+	guam::finalize();
+	
+	opcode::stats();
+	PERF_LOG();
+	memory::cache::stats();
+	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
+}
 
 int main(int /* argc */, char** /* argv */) {
 	logger.info("START");
@@ -92,16 +104,11 @@ int main(int /* argc */, char** /* argv */) {
 	processor::stopAtMP( 915);
 	processor::stopAtMP(8000);
 
-	{
-		guam::initialize();
-		guam::boot();
-		guam::finalize();
-		
-		opcode::stats();
-		PERF_LOG();
-		memory::cache::stats();
-		logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
-	}
+	logger.info("thread start");
+	auto thread = std::thread(startAndStop);
+	logger.info("thread joinning");
+	thread.join();
+	logger.info("thread joined");
 
 	// {
 	// 	guam::initialize();

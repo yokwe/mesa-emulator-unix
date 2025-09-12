@@ -62,6 +62,11 @@ int AppInit(Tcl_Interp *interp) {
 
 int main(int argc, char *argv[]) {
     logger.info("START");
+    
+	setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
 
     Tcl_FindExecutable(argv[0]);
 	Tcl_Main(argc, argv, AppInit);

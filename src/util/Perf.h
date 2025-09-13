@@ -80,10 +80,6 @@ PERF_DECLARE(opcode, EscOpcodeTrap)
 PERF_DECLARE(opcode, OpcodeTrap)
 PERF_DECLARE(opcode, UnboundTrap)
 
-// running
-PERF_DECLARE(running, start)
-PERF_DECLARE(running, stop)
-
 // interrupt
 PERF_DECLARE(interrupt, notify)
 PERF_DECLARE(interrupt, wakeup)
@@ -130,5 +126,23 @@ PERF_DECLARE(agent, mouse)
 PERF_DECLARE(agent, network)
 PERF_DECLARE(agent, processor)
 PERF_DECLARE(agent, stream)
+
+// variable
+PERF_DECLARE(variable, MP)
+PERF_DECLARE(variable, WDC)
+PERF_DECLARE(variable, WDC_enable)
+PERF_DECLARE(variable, WDC_disable)
+PERF_DECLARE(variable, WP)
+PERF_DECLARE(variable, WP_exchange)
+PERF_DECLARE(variable, WP_fetch_or)
+PERF_DECLARE(variable, IT)
+PERF_DECLARE(variable, PSB)
+PERF_DECLARE(variable, MDS)
+PERF_DECLARE(variable, LF)
+PERF_DECLARE(variable, GF)
+PERF_DECLARE(variable, CB)
+PERF_DECLARE(variable, running)
+PERF_DECLARE(variable, running_start)
+PERF_DECLARE(variable, running_stop)
 
 }

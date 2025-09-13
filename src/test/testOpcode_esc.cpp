@@ -1420,7 +1420,7 @@ class testOpcode_esc : public testBase {
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);
 		CPPUNIT_ASSERT_EQUAL(0, (int)SP);
-		CPPUNIT_ASSERT_EQUAL(Index(n), PSB);
+		CPPUNIT_ASSERT_EQUAL(Index(n), (CARD16)PSB);
 	}
 	void testWRMDS() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aWRMDS;
@@ -1498,7 +1498,7 @@ class testOpcode_esc : public testBase {
 	}
 	void testRRPSB() {
 		page_CB[(PC / 2) + 0] = zESC << 8 | aRRPSB;
-		PSB = 55;
+		PSB = (CARD16)55;
 		Execute();
 
 		CPPUNIT_ASSERT_EQUAL(savedPC + 2, (int)PC);

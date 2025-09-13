@@ -27,8 +27,6 @@ uint64_t perf::opcode::CodeTrap         = 0;
 uint64_t perf::opcode::EscOpcodeTrap    = 0;
 uint64_t perf::opcode::OpcodeTrap       = 0;
 uint64_t perf::opcode::UnboundTrap      = 0;
-uint64_t perf::running::start           = 0;
-uint64_t perf::running::stop            = 0;
 uint64_t perf::interrupt::notify        = 0;
 uint64_t perf::interrupt::wakeup        = 0;
 uint64_t perf::interrupt::interrupt     = 0;
@@ -64,6 +62,22 @@ uint64_t perf::agent::mouse             = 0;
 uint64_t perf::agent::network           = 0;
 uint64_t perf::agent::processor         = 0;
 uint64_t perf::agent::stream            = 0;
+uint64_t perf::variable::MP             = 0;
+uint64_t perf::variable::WDC            = 0;
+uint64_t perf::variable::WDC_enable     = 0;
+uint64_t perf::variable::WDC_disable    = 0;
+uint64_t perf::variable::WP             = 0;
+uint64_t perf::variable::WP_exchange    = 0;
+uint64_t perf::variable::WP_fetch_or    = 0;
+uint64_t perf::variable::IT             = 0;
+uint64_t perf::variable::PSB            = 0;
+uint64_t perf::variable::MDS            = 0;
+uint64_t perf::variable::LF             = 0;
+uint64_t perf::variable::GF             = 0;
+uint64_t perf::variable::CB             = 0;
+uint64_t perf::variable::running        = 0;
+uint64_t perf::variable::running_start  = 0;
+uint64_t perf::variable::running_stop   = 0;
 
 namespace perf {
 std::vector<perf::Entry> all {
@@ -92,8 +106,6 @@ std::vector<perf::Entry> all {
     {"opcode::EscOpcodeTrap" , perf::opcode::EscOpcodeTrap},
     {"opcode::OpcodeTrap"    , perf::opcode::OpcodeTrap},
     {"opcode::UnboundTrap"   , perf::opcode::UnboundTrap},
-    {"running::start"        , perf::running::start},
-    {"running::stop"         , perf::running::stop},
     {"interrupt::notify"     , perf::interrupt::notify},
     {"interrupt::wakeup"     , perf::interrupt::wakeup},
     {"interrupt::interrupt"  , perf::interrupt::interrupt},
@@ -129,5 +141,21 @@ std::vector<perf::Entry> all {
     {"agent::network"        , perf::agent::network},
     {"agent::processor"      , perf::agent::processor},
     {"agent::stream"         , perf::agent::stream},
+    {"variable::MP"          , perf::variable::MP},
+    {"variable::WDC"         , perf::variable::WDC},
+    {"variable::WDC_enable"  , perf::variable::WDC_enable},
+    {"variable::WDC_disable" , perf::variable::WDC_disable},
+    {"variable::WP"          , perf::variable::WP},
+    {"variable::WP_exchange" , perf::variable::WP_exchange},
+    {"variable::WP_fetch_or" , perf::variable::WP_fetch_or},
+    {"variable::IT"          , perf::variable::IT},
+    {"variable::PSB"         , perf::variable::PSB},
+    {"variable::MDS"         , perf::variable::MDS},
+    {"variable::LF"          , perf::variable::LF},
+    {"variable::GF"          , perf::variable::GF},
+    {"variable::CB"          , perf::variable::CB},
+    {"variable::running"     , perf::variable::running},
+    {"variable::running_start", perf::variable::running_start},
+    {"variable::running_stop", perf::variable::running_stop},
 };
 }

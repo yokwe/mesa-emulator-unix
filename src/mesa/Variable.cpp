@@ -68,7 +68,7 @@ CARD16 PTC;    // Process timeout counter - 10.4.5
 CARD16 XTS;    // Xfer trap status - 9.5.5
 
 // 3.3.1 Control Registers
-CARD16            PSB; // PsbIndex - 10.1.1
+VariablePSB       PSB; // PsbIndex - 10.1.1
 
 //extern MdsHandle         MDS;
 VariableMDS       MDS;
@@ -112,7 +112,7 @@ void variable::initialize() {
 	XTS = 0;    // Xfer trap status - 9.5.5
 
 	// 3.3.1 Control Registers
-	PSB = 0; // PsbIndex - 10.1.1
+	PSB = (CARD16)0;  // PsbIndex - 10.1.1
 	MDS = (CARD32)0;
 	LF  = (CARD16)0;  // POINTER TO LocalVariables
 	GF  = (CARD32)0;  // LONG POINTER TO GlobalVarables

@@ -292,7 +292,7 @@ void testBase::setUp() {
 	page_AV[fsi] = page_MDS[LF];
 	page_LF  = memory::peek(MDS + LF);
 
-	PSB = 1;
+	PSB = (CARD16)1;
 }
 
 void testBase::tearDown() {

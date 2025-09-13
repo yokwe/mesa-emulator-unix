@@ -79,6 +79,7 @@ public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const CARD16 newValue) {
+        PERF_COUNT(variable, MP)
         storage = newValue;
         for(auto observer: observerList) observer(newValue);
         return newValue;
@@ -103,6 +104,7 @@ public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const CARD16 newValue) {
+        PERF_COUNT(variable, WDC)
         storage.store(newValue);
         return newValue;
     }
@@ -111,10 +113,12 @@ public:
     }
 
     void enable() {
+        PERF_COUNT(variable, WDC_enable)
         if (storage.load() == 0) InterruptError();
         storage.fetch_sub(1);
     }
     void disable() {
+        PERF_COUNT(variable, WDC_disable)
         if (storage.load() == cWDC) InterruptError();
         storage.fetch_add(1);
     }
@@ -134,6 +138,7 @@ public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const CARD16 newValue) {
+        PERF_COUNT(variable, WP)
         storage.store(newValue);
         return newValue;
     }
@@ -142,9 +147,11 @@ public:
     }
 
     CARD16 exchange(CARD16 value) {
+        PERF_COUNT(variable, WP_exchange)
         return storage.exchange(value);
     }
     CARD16 fetch_or(CARD16 value) {
+        PERF_COUNT(variable, WP_fetch_or)
         return storage.fetch_or(value);
     }
     bool pending() {
@@ -159,6 +166,7 @@ public:
     static const CARD32 MicrosecondsPerHundredPulses = 100;
     static const CARD16 MillisecondsPerTick          = cTick;
     operator CARD32() {
+        PERF_COUNT(variable, IT)
         return (CARD32)Util::getMicroSecondsFromEpoch();
     }
 };
@@ -170,11 +178,12 @@ public:
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const bool newValue) {
+        PERF_COUNT(variable, running)
         storage = newValue;
         if (newValue) {
-            PERF_COUNT(running, start)
+            PERF_COUNT(variable, running_start)
         } else {
-            PERF_COUNT(running, stop)
+            PERF_COUNT(variable, running_stop)
         }
 
         return newValue;
@@ -280,6 +289,7 @@ public:
 
     CARD32 operator=(const int newValue) = delete;
     CARD32 operator=(const CARD32 newValue) {
+        PERF_COUNT(variable, MDS)
         storage = newValue;
         return newValue;
     }
@@ -300,6 +310,7 @@ public:
 
     CARD32 operator=(const int newValue) = delete;
     CARD32 operator=(const CARD32 newValue) {
+        PERF_COUNT(variable, CB)
         storage = newValue;
         return newValue;
     }
@@ -316,6 +327,7 @@ public:
 
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const CARD16 newValue) {
+        PERF_COUNT(variable, LF)
         storage = newValue;
         return newValue;
     }
@@ -332,10 +344,28 @@ public:
 
     CARD32 operator=(const int newValue) = delete;
     CARD32 operator=(const CARD32 newValue) {
+        PERF_COUNT(variable, GF)
         storage = newValue;
         return newValue;
     }
     operator CARD32() {
+        return storage;
+    }
+};
+
+
+class VariablePSB {
+    CARD16 storage;
+public:
+    VariablePSB() : storage(0) {}
+
+    CARD16 operator=(const int newValue) = delete;
+    CARD16 operator=(const CARD16 newValue) {
+        PERF_COUNT(variable, PSB)
+        storage = newValue;
+        return newValue;
+    }
+    operator CARD16() {
         return storage;
     }
 };
@@ -396,7 +426,7 @@ extern CARD16 PTC;    // Process timeout counter - 10.4.5
 extern CARD16 XTS;    // Xfer trap status - 9.5.5
 
 // 3.3.1 Control Registers
-extern CARD16            PSB; // PsbIndex - 10.1.1
+extern VariablePSB       PSB; // PsbIndex - 10.1.1
 
 //extern MdsHandle       MDS;
 extern VariableMDS       MDS;

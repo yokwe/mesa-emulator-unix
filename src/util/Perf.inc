@@ -21,6 +21,7 @@ uint64_t perf::memory::StorePda         = 0;
 uint64_t perf::memory::FetchPage        = 0;
 uint64_t perf::memory::StorePage        = 0;
 uint64_t perf::opcode::Dispatch         = 0;
+uint64_t perf::opcode::DispatchEsc      = 0;
 uint64_t perf::opcode::FrameFault       = 0;
 uint64_t perf::opcode::PageFault        = 0;
 uint64_t perf::opcode::CodeTrap         = 0;
@@ -100,6 +101,7 @@ std::vector<perf::Entry> all {
     {"memory::FetchPage"     , perf::memory::FetchPage},
     {"memory::StorePage"     , perf::memory::StorePage},
     {"opcode::Dispatch"      , perf::opcode::Dispatch},
+    {"opcode::DispatchEsc"   , perf::opcode::DispatchEsc},
     {"opcode::FrameFault"    , perf::opcode::FrameFault},
     {"opcode::PageFault"     , perf::opcode::PageFault},
     {"opcode::CodeTrap"      , perf::opcode::CodeTrap},

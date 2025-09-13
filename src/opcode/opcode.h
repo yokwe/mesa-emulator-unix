@@ -72,6 +72,7 @@ void stats();
 #define OPCODE_STATS_COUNT_BEFORE 
 
 inline void DispatchEsc(uint8_t code) {
+    PERF_COUNT(opcode, DispatchEsc)
 #ifdef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter before execution for opcode that generate EscOpcodeTrap
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsEsc[code]++;
@@ -87,6 +88,7 @@ inline void DispatchEsc(uint8_t code) {
 
 // 4.5 Instruction Execution
 inline void Dispatch(uint8_t code) {
+    PERF_COUNT(opcode, Dispatch)
 #ifdef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter before execution for opcode that generate OpcodeTrap
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;

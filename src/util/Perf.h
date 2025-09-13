@@ -73,6 +73,7 @@ PERF_DECLARE(memory, StorePage)
 
 // opcode
 PERF_DECLARE(opcode, Dispatch)
+PERF_DECLARE(opcode, DispatchEsc)
 PERF_DECLARE(opcode, FrameFault)
 PERF_DECLARE(opcode, PageFault)
 PERF_DECLARE(opcode, CodeTrap)

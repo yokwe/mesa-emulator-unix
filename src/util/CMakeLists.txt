@@ -13,6 +13,7 @@ target_sources(
 		OpcodeInfo.h
 		Perf.h
 		Setting.h
+		tcl.h
     	Util.h
 	PRIVATE
 		ByteBuffer.cpp
@@ -20,6 +21,7 @@ target_sources(
 		OpcodeInfo.cpp
 		Perf.cpp
 		Setting.cpp
+		tcl.cpp
 		Util.cpp
 )
 

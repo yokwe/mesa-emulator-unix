@@ -54,6 +54,7 @@ static const Logger logger(__FILE__);
 #include "../util/Setting.h"
 #include "../util/GuiOp.h"
 #include "../util/Perf.h"
+#include "../util/tcl.h"
 
 #include "mesa.h"
 
@@ -77,53 +78,56 @@ std::map<std::string, int*> intMap = {
     FIELD_MAP_ENTRY(rmBits),
 };
 
-int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const objv[]) {
     (void)cdata;
-    std::string command = Tcl_GetString(objv[0]);
+    tcl::Interp interp(interp_);
+
+    std::string command = tcl::toString(objv[0]);
     // mesa::guam config diskFile XXX
     // 0          1      2        3
     //            command subjet  value
-    std::string subCommand = Tcl_GetString(objv[1]);
+    std::string subCommand = tcl::toString(objv[1]);
     if (subCommand == "config") {
         if (objc == 2) {
-            Tcl_Obj* result = Tcl_NewStringObj("",  0);
+            std::string result;
+
             for(auto i = stringMap.cbegin(); i != stringMap.cend(); i++) {
-//                logger.info("%-16s  \"%s\"", i->first, i->second);
                 auto string = std_sprintf("%-16s  \"%s\"\n", i->first, *i->second);
-                Tcl_AppendToObj(result, string.c_str(), string.length());
+                result += string;
             }
             for(auto i = intMap.cbegin(); i != intMap.cend(); i++) {
-//                logger.info("%-13s  %4d", i->first, *i->second);
                 auto string = std_sprintf("%-13s  %4d\n", i->first, *i->second);
-                Tcl_AppendToObj(result, string.c_str(), string.length());
+                result += string;
             }
-            Tcl_SetObjResult(interp, result);
+            interp.result(result);
             return TCL_OK;
         }
         if (objc == 3 || objc == 4) {
-            std::string subject = Tcl_GetString(objv[2]);
+            std::string subject = tcl::toString(objv[2]);
             if (intMap.contains(subject)) {
                 if (objc == 3) {
-                    auto p = intMap.at(subject);
-                    Tcl_SetObjResult(interp, Tcl_NewIntObj(*p));
+                    int* p = intMap.at(subject);
+                    interp.result(*p);
                     return TCL_OK;
                 }
                 if (objc == 4) {
-                    auto value = objv[3];
-                    auto p = intMap.at(subject);
-                    return Tcl_GetIntFromObj(interp, value, p);
+                    int* p = intMap.at(subject);
+                    int status;
+                    auto value = toInt(interp, objv[3], status);
+                    if (status == TCL_OK) *p = value;
+                    return status;
                 }
             }
             if (stringMap.contains(subject)) {
                 if (objc == 3) {
-                    auto p = stringMap.at(subject);
-                    Tcl_SetObjResult(interp, Tcl_NewStringObj(p->c_str(), p->length()));
+                    std::string* p = stringMap.at(subject);
+                    interp.result(*p);
                     return TCL_OK;
                 }
                 if (objc == 4) {
-                    auto value = objv[3];
-                    auto p = stringMap.at(subject);
-                    *p = Tcl_GetStringFromObj(value, NULL);
+                    std::string* p = stringMap.at(subject);
+                    auto value = tcl::toString(objv[3]);
+                    *p = value;
                     return TCL_OK;
                 }
             }
@@ -136,15 +140,14 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
             for(auto i = setting.entryList.cbegin(); i != setting.entryList.cend(); i++) {
                 string.append(std_sprintf(" %s", i->name));
             }
-
-            Tcl_SetObjResult(interp, Tcl_NewStringObj(string.c_str(), string.length()));
+            interp.result(string);
             return TCL_OK;
         }
         if (objc == 3) {
             std::string entryName = Tcl_GetString(objv[2]);
             if (!setting.containsEntry(entryName)) {
                 auto string = std_sprintf("no entry \"%s\" in setting", entryName);
-                Tcl_SetObjResult(interp, Tcl_NewStringObj(string.c_str(), string.length()));
+                interp.result(string);
                 return TCL_ERROR;
             }
             auto entry   = setting.getEntry(entryName);
@@ -164,8 +167,8 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
         }
     }
     if (subCommand == "time" && objc == 2) {
-        auto elapsedTime = guam::getElapsedTime();
-        Tcl_SetObjResult(interp, Tcl_NewWideIntObj(elapsedTime));
+        long elapsedTime = guam::getElapsedTime();
+        interp.result(elapsedTime);
         return TCL_OK;
     }
     if (subCommand == "run" && objc == 2) {
@@ -198,7 +201,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
         }
         string.append("\"");
 
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(string.c_str(), string.length()));
+        interp.result(string);
         return TCL_ERROR;
     }
 }

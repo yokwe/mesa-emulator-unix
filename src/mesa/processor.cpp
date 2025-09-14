@@ -119,6 +119,7 @@ void run() {
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
 
+	running.timeStart();
 	try {
 		for(;;) {
 			try {
@@ -198,6 +199,8 @@ void run() {
 	}
 
 exitLoop:
+	running.timeStop();
+
 	// stop relevant thread
 	AgentNetwork::ReceiveThread::stop();
 	AgentNetwork::TransmitThread::stop();

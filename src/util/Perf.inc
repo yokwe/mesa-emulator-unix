@@ -79,6 +79,8 @@ uint64_t perf::variable::CB             = 0;
 uint64_t perf::variable::running        = 0;
 uint64_t perf::variable::running_start  = 0;
 uint64_t perf::variable::running_stop   = 0;
+uint64_t perf::variable::time_running   = 0;
+uint64_t perf::variable::time_not_running = 0;
 
 namespace perf {
 std::vector<perf::Entry> all {
@@ -159,5 +161,7 @@ std::vector<perf::Entry> all {
     {"variable::running"     , perf::variable::running},
     {"variable::running_start", perf::variable::running_start},
     {"variable::running_stop", perf::variable::running_stop},
+    {"variable::time_running", perf::variable::time_running},
+    {"variable::time_not_running", perf::variable::time_not_running},
 };
 }

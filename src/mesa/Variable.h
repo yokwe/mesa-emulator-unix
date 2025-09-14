@@ -174,16 +174,41 @@ public:
 
 class VariableRunning {
     bool storage;
+    bool timeEnable = false;
+    uint64_t timeChange = 0;
+    uint64_t now        = 0;
 public:
+    void timeStart() {
+        if (PERF_ENABLE) timeChange = Util::getMicroSecondsFromEpoch();
+        timeEnable = true;
+    }
+    void timeStop() {
+        timeEnable = false;
+        if (PERF_ENABLE) {
+            now = Util::getMicroSecondsFromEpoch();
+            if (storage) {
+                PERF_ADD(variable, time_running, (now - timeChange))
+            } else {
+                PERF_ADD(variable, time_not_running, (now - timeChange))
+            }
+        }
+    }
     // prohibit assignment from int
     CARD16 operator=(const int newValue) = delete;
     CARD16 operator=(const bool newValue) {
         PERF_COUNT(variable, running)
         storage = newValue;
-        if (newValue) {
-            PERF_COUNT(variable, running_start)
-        } else {
-            PERF_COUNT(variable, running_stop)
+
+        if (PERF_ENABLE) {
+            now = Util::getMicroSecondsFromEpoch();
+            if (newValue) {
+                PERF_COUNT(variable, running_start)
+                if (timeEnable) PERF_ADD(variable, time_not_running, (now - timeChange))
+            } else {
+                PERF_COUNT(variable, running_stop)
+                if (timeEnable) PERF_ADD(variable, time_running, (now - timeChange))
+            }
+            timeChange = now;
         }
 
         return newValue;

@@ -40,6 +40,7 @@
 #define PERF_DECLARE(group, name) namespace group { extern uint64_t name; }
 
 #define PERF_COUNT(group, name) { if (PERF_ENABLE) perf::group::name++; }
+#define PERF_ADD(group, name, value) { if (PERF_ENABLE) perf::group::name += value; }
 
 #define PERF_LOG() { if (PERF_ENABLE) perf::dump(); }
 #define PERF_CLEAR() { perf::clear(); }
@@ -145,5 +146,7 @@ PERF_DECLARE(variable, CB)
 PERF_DECLARE(variable, running)
 PERF_DECLARE(variable, running_start)
 PERF_DECLARE(variable, running_stop)
+PERF_DECLARE(variable, time_running)
+PERF_DECLARE(variable, time_not_running)
 
 }

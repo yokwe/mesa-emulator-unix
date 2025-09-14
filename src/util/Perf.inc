@@ -53,6 +53,7 @@ uint64_t perf::disk::process            = 0;
 uint64_t perf::disk::read               = 0;
 uint64_t perf::disk::write              = 0;
 uint64_t perf::disk::verify             = 0;
+uint64_t perf::disk::process_time       = 0;
 uint64_t perf::agent::beep              = 0;
 uint64_t perf::agent::disk              = 0;
 uint64_t perf::agent::display           = 0;
@@ -135,6 +136,7 @@ std::vector<perf::Entry> all {
     {"disk::read"            , perf::disk::read},
     {"disk::write"           , perf::disk::write},
     {"disk::verify"          , perf::disk::verify},
+    {"disk::process_time"    , perf::disk::process_time},
     {"agent::beep"           , perf::agent::beep},
     {"agent::disk"           , perf::agent::disk},
     {"agent::display"        , perf::agent::display},

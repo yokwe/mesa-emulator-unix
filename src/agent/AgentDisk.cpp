@@ -50,6 +50,9 @@ static const Logger logger(__FILE__);
 #include "AgentDisk.h"
 #include "DiskFile.h"
 
+using namespace DiskIOFaceGuam;
+using namespace PilotDiskFace;
+
 static const CARD32 DEBUG_DONT_USE_THREAD = 0;
 
 int AgentDisk::IOThread::stopThread = 0;
@@ -60,14 +63,15 @@ void AgentDisk::IOThread::stop() {
 void AgentDisk::IOThread::run() {
 	logger.info("AgentDisk::IOThread::run START");
 
+	uint64_t time;
 	stopThread = 0;
 
 	try {
 		for(;;) {
 			if (stopThread) break;
 
-			DiskIOFaceGuam::DiskIOCBType* iocb     = 0;
-			DiskFile*                     diskFile = 0;
+			DiskIOCBType* iocb     = 0;
+			DiskFile*     diskFile = 0;
 			{
 				std::unique_lock<std::mutex> locker(ioMutex);
 				if (ioQueue.empty()) {
@@ -86,7 +90,12 @@ void AgentDisk::IOThread::run() {
 				ioQueue.pop_front();
 			}
 
+			if (PERF_ENABLE) time = Util::getMicroSecondsFromEpoch();
 			process(iocb, diskFile);
+			if (PERF_ENABLE) {
+				uint64_t now = Util::getMicroSecondsFromEpoch();
+				PERF_ADD(disk, process_time, now - time)
+			}
 			interrupt::notifyInterrupt(interruptSelector);
 			PERF_COUNT(disk, process)
 		}
@@ -106,7 +115,7 @@ void AgentDisk::IOThread::setInterruptSelector(CARD16 interruptSelector) {
 	this->interruptSelector = interruptSelector;
 }
 
-void AgentDisk::IOThread::enqueue(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile) {
+void AgentDisk::IOThread::enqueue(DiskIOCBType* iocb, DiskFile* diskFile) {
 	std::unique_lock<std::mutex> locker(ioMutex);
 	Item item(iocb, diskFile);
 
@@ -114,13 +123,13 @@ void AgentDisk::IOThread::enqueue(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 	ioCV.notify_all();
 }
 
-void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile) {
+void AgentDisk::IOThread::process(DiskIOCBType* iocb, DiskFile* diskFile) {
 	CARD32 block = diskFile->getBlock(iocb);
 
 	//"AGENT %s %d", name, fcb->command
-	PilotDiskFace::Command command = (PilotDiskFace::Command)iocb->command;
+	Command command = (Command)iocb->command;
 	switch(command) {
-	case PilotDiskFace::Command::read: {
+	case Command::read: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		CARD32 dataPtr = iocb->dataPtr;
@@ -131,12 +140,12 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
+		iocb->status = (CARD16)Status::goodCompletion;
 		//
 		PERF_COUNT(disk, read)
 	}
 		break;
-	case PilotDiskFace::Command::write: {
+	case Command::write: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		CARD32 dataPtr = iocb->dataPtr;
@@ -147,12 +156,12 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
+		iocb->status = (CARD16)Status::goodCompletion;
 		//
 		PERF_COUNT(disk, write)
 	}
 		break;
-	case PilotDiskFace::Command::verify: {
+	case Command::verify: {
 		if (DEBUG_SHOW_AGENT_DISK) logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 		int ret = 0;
@@ -164,7 +173,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 		}
 		//
 		iocb->pageCount = 0;
-		iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
+		iocb->status = ret ? (CARD16)Status::dataVerifyError : (CARD16)Status::goodCompletion;
 		//
 		PERF_COUNT(disk, verify)
 	}
@@ -180,7 +189,7 @@ void AgentDisk::IOThread::process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* 
 void AgentDisk::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	fcb = (DiskIOFaceGuam::DiskFCBType*)memory::peek(fcbAddress);
+	fcb = (DiskFCBType*)memory::peek(fcbAddress);
 	fcb->nextIOCB = 0;
 	fcb->interruptSelector = 0;
 	fcb->stopAgent = 0;
@@ -217,7 +226,7 @@ void AgentDisk::Call() {
 		return; // Return if there is no IOCB
 	}
 	CARD32 nextIOCB = fcb->nextIOCB;
-	DiskIOFaceGuam::DiskIOCBType *iocb = (DiskIOFaceGuam::DiskIOCBType *)Store(nextIOCB);
+	DiskIOCBType *iocb = (DiskIOCBType *)Store(nextIOCB);
 	for(;;) {
 		// sanity check
 		CARD16 deviceIndex = iocb->deviceIndex;
@@ -225,11 +234,11 @@ void AgentDisk::Call() {
 			logger.fatal("AGENT %s deviceIndex = %d", name, deviceIndex);
 			ERROR();
 		}
-		PilotDiskFace::Command command = (PilotDiskFace::Command)iocb->command;
+		Command command = (Command)iocb->command;
 		switch(command) {
-		case PilotDiskFace::Command::read:
-		case PilotDiskFace::Command::write:
-		case PilotDiskFace::Command::verify:
+		case Command::read:
+		case Command::write:
+		case Command::verify:
 			break;
 		default:
 			logger.fatal("AGENT %s command = %d", name, command);
@@ -240,8 +249,8 @@ void AgentDisk::Call() {
 			CARD32 block = diskFile->getBlock(iocb);
 
 			switch(command) {
-			case PilotDiskFace::Command::read: {
-				logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
+			case Command::read: {
+//				logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				CARD32 dataPtr = iocb->dataPtr;
 				for(int i = 0; i < iocb->pageCount; i++) {
@@ -251,13 +260,13 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
+				iocb->status = (CARD16)Status::goodCompletion;
 				//
 				PERF_COUNT(disk, read)
 			}
 				break;
-			case PilotDiskFace::Command::write: {
-				logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
+			case Command::write: {
+//				logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				CARD32 dataPtr = iocb->dataPtr;
 				for(int i = 0; i < iocb->pageCount; i++) {
@@ -267,13 +276,13 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = (CARD16)PilotDiskFace::Status::goodCompletion;
+				iocb->status = (CARD16)Status::goodCompletion;
 				//
 				PERF_COUNT(disk, write)
 			}
 				break;
-			case PilotDiskFace::Command::verify: {
-				logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
+			case Command::verify: {
+//				logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
 
 				int ret = 0;
 				CARD32 dataPtr = iocb->dataPtr;
@@ -284,7 +293,7 @@ void AgentDisk::Call() {
 				}
 				//
 				iocb->pageCount = 0;
-				iocb->status = ret ? (CARD16)PilotDiskFace::Status::dataVerifyError : (CARD16)PilotDiskFace::Status::goodCompletion;
+				iocb->status = ret ? (CARD16)Status::dataVerifyError : (CARD16)Status::goodCompletion;
 				//
 				PERF_COUNT(disk, verify)
 			}
@@ -300,7 +309,7 @@ void AgentDisk::Call() {
 		if (iocb->nextIOCB == 0) break;
 		// advance to next IOCB
 		nextIOCB = iocb->nextIOCB;
-		iocb = (DiskIOFaceGuam::DiskIOCBType *)Store(nextIOCB);
+		iocb = (DiskIOCBType *)Store(nextIOCB);
 	}
 
 	if (DEBUG_DONT_USE_THREAD) {

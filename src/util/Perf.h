@@ -116,6 +116,7 @@ PERF_DECLARE(disk, process)
 PERF_DECLARE(disk, read)
 PERF_DECLARE(disk, write)
 PERF_DECLARE(disk, verify)
+PERF_DECLARE(disk, process_time)
 
 // agent
 PERF_DECLARE(agent, beep)

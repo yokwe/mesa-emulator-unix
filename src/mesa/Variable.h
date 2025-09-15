@@ -36,7 +36,6 @@
 #pragma once
 
 #include <vector>
-#include <functional>
 #include <atomic>
 
 #include "Constant.h"
@@ -107,7 +106,7 @@ public:
 private:
     std::vector<Observer> observerList;
     CARD16 storage;
-    
+
     void initialize();
 };
 

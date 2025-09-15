@@ -175,6 +175,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
 	    guam::setConfig(config);
 
 	    GuiOp::setContext(new NullGuiOp);
+        MP.addObserver(GuiOp::setMP);
 
 	    // stop at MP 8000
         processor::stopAtMP( 915);

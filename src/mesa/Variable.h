@@ -66,14 +66,27 @@ namespace variable {
 
 
 class VariableMP {
-    CARD16 storage;
-
-    std::vector<std::function<void(CARD16)>> observerList;
-    void initialize();
 public:
     VariableMP() {
         storage = 0;
         initialize();
+    }
+
+    using Observer = void (*)(CARD16);
+    void addObserver(Observer observer) {
+        observerList.push_back(observer);
+    }
+    void removeObserver(Observer observer) {
+        for(auto i = observerList.begin(); i != observerList.end();) {
+            if (*i == observer) {
+                i = observerList.erase(i);
+            } else {
+                i++;
+            }
+        }
+    }
+    void clearObserver() {
+        observerList.clear();
     }
 
     // prohibit assignment from int
@@ -91,6 +104,11 @@ public:
     void clear() {
         storage = 0;
     }
+private:
+    std::vector<Observer> observerList;
+    CARD16 storage;
+    
+    void initialize();
 };
 
 

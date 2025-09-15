@@ -145,8 +145,7 @@ static void mp_message(CARD16 mp) {
     logger.info("MP %04d", mp);
 } 
 void VariableMP::initialize() {
-    observerList.push_back(mp_message);
-    observerList.push_back(GuiOp::setMP);
-    observerList.push_back(Logger::mp_observer);
-    observerList.push_back(processor::mp_observer);
+	addObserver(mp_message);
+    addObserver(Logger::mp_observer);
+    addObserver(processor::mp_observer);
 }

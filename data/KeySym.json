@@ -1,4 +1,4 @@
-{ "keysym": [
+{ "KeySym": [
     { "name": "space",                       "code":    32, "codeHex":   "0x20"},
     { "name": "exclam",                      "code":    33, "codeHex":   "0x21"},
     { "name": "quotedbl",                    "code":    34, "codeHex":   "0x22"},

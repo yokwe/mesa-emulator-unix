@@ -83,6 +83,11 @@ std::map<std::string, int*> intMap = {
 static std::string        imageName;
 static Tk_PhotoHandle     photoHandle = 0;
 static Tk_PhotoImageBlock imageBlock = {0, 0, 0, 0, 0, {0}};
+
+static inline constexpr int multipleOf(int number, int base) {
+    int rem = number % base;
+    return (rem == 0) ? number : number + (base - rem);
+}
 void initialize(Tk_PhotoImageBlock& imageBlock, int width, int height) {
     if (imageBlock.pixelPtr) {
         ckfree(imageBlock.pixelPtr);
@@ -95,7 +100,7 @@ void initialize(Tk_PhotoImageBlock& imageBlock, int width, int height) {
     imageBlock.offset[2] = 2; // blue
     imageBlock.offset[3] = 3; // alpah
     // use 32 bit memory access
-    int lineWidth = width + (width % 32);
+    int lineWidth = multipleOf(width, 32);
     imageBlock.pitch     = lineWidth * imageBlock.pixelSize;
     int totalByte = imageBlock.pitch * imageBlock.height;
     imageBlock.pixelPtr  = (unsigned char*)ckalloc(totalByte);

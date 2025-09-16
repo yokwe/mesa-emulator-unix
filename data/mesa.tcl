@@ -12,38 +12,32 @@ set displayHeight [mesa::guam config displayHeight]
 
 package require Tk
 
-proc create_photo_image_data {w h} {
-    set rows {}
-    for {set y 0} {$y < $h} {incr y} {
-        set row {}
-        for {set x 0} {$x < $w} {incr x} {
-            lappend row {#fff}
-        }
-        lappend rows $row
-    }
-    return $rows
-}
 
 frame .mesa
 pack  .mesa -fill both -expand 1
 
+# Create empty photo image to display
 set display [image create photo -width $displayWidth -height $displayHeight]
-$display put [create_photo_image_data $displayWidth $displayHeight]
-label .mesa.display -image $display -takefocus 1
-pack  .mesa.display -side top
+# Allocate photo image block for display
+# Save photo image name to update display image from emulator
+mesa::guam display $display $displayWidth $displayHeight
 
-focus .mesa.display
+label  .mesa.display -image $display -takefocus 1
+pack   .mesa.display -side top
 
-frame .mesa.panel
-pack  .mesa.panel -side top
+# To receive key event on .mesa.display
+focus  .mesa.display
+
+frame  .mesa.panel
+pack   .mesa.panel -side top
 
 button .mesa.panel.run -text run -takefocus 0
-pack .mesa.panel.run -side right
+pack   .mesa.panel.run -side right
 
 label  .mesa.panel.mp  -text 0000 -takefocus 0
-pack .mesa.panel.mp  -side left
+pack   .mesa.panel.mp  -side left
 label  .mesa.panel.display -text "screen $displayWidth x $displayHeight" -takefocus 0
-pack .mesa.panel.display  -side left
+pack   .mesa.panel.display  -side left
 
 
 bind .mesa.display <KeyPress>      { keyPress %K }

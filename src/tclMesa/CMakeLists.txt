@@ -15,4 +15,4 @@ target_sources(
 )
 
 add_dependencies     (tclMesa mesa opcode agent util)
-target_link_libraries(tclMesa mesa opcode agent util tcl log4cxx)
+target_link_libraries(tclMesa mesa opcode agent util tk tcl log4cxx)

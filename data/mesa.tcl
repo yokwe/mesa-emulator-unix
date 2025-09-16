@@ -3,7 +3,7 @@
 #
 
 # show tcl information
-#parray tcl_platform
+parray tcl_platform
 
 # load config
 mesa::guam setting GVWin
@@ -12,23 +12,39 @@ set displayHeight [mesa::guam config displayHeight]
 
 package require Tk
 
-wm withdraw .
+proc create_photo_image_data {w h} {
+    set rows {}
+    for {set y 0} {$y < $h} {incr y} {
+        set row {}
+        for {set x 0} {$x < $w} {incr x} {
+            lappend row {#fff}
+        }
+        lappend rows $row
+    }
+    return $rows
+}
 
-toplevel .mesa
+frame .mesa
+pack  .mesa -fill both -expand 1
 
-frame  .mesa.display -background lightblue -width $displayWidth -height $displayHeight -takefocus 1
-frame  .mesa.panel
-button .mesa.panel.run -text run
-label  .mesa.panel.mp  -text 0000
-label  .mesa.panel.display -text "screen $displayWidth x $displayHeight"
+set display [image create photo -width $displayWidth -height $displayHeight]
+$display put [create_photo_image_data $displayWidth $displayHeight]
+label .mesa.display -image $display -takefocus 1
+pack  .mesa.display -side top
 
 focus .mesa.display
 
-pack .mesa.display -side top -anchor nw
-pack .mesa.panel -side top -anchor w
-pack .mesa.panel.display -side left
-pack .mesa.panel.mp  -side left
+frame .mesa.panel
+pack  .mesa.panel -side top
+
+button .mesa.panel.run -text run -takefocus 0
 pack .mesa.panel.run -side right
+
+label  .mesa.panel.mp  -text 0000 -takefocus 0
+pack .mesa.panel.mp  -side left
+label  .mesa.panel.display -text "screen $displayWidth x $displayHeight" -takefocus 0
+pack .mesa.panel.display  -side left
+
 
 bind .mesa.display <KeyPress>      { keyPress %K }
 bind .mesa.display <KeyRelease>    { keyRelease %K }

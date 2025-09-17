@@ -290,8 +290,8 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         auto keySymNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
         auto keySymString = tcl::toString(objv[3]);
-        logger.info("keyPress      %4X  %s", keySymNumber, keySymString);
-        // TODO call AgentKey
+//        logger.info("keyPress      %4X  %s", keySymNumber, keySymString);
+        guam::keyPress(keySymNumber, keySymString);
         return TCL_OK;
     }
     if (subCommand == "keyRelease" && objc == 4) {
@@ -300,8 +300,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         auto keySymNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
         auto keySymString = tcl::toString(objv[3]);
-        logger.info("keyRelease    %4X  %s", keySymNumber, keySymString);
-        // TODO call AgentKey
+        guam::keyRelease(keySymNumber, keySymString);
         return TCL_OK;
     }
     if (subCommand == "buttonPress" && objc == 3) {
@@ -309,8 +308,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         // 0          1           2
         auto buttonNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
-        logger.info("buttonPress    %d", buttonNumber);
-        // TODO call AgentKey
+        guam::buttonPress(buttonNumber);
         return TCL_OK;
     }
     if (subCommand == "buttonRelease" && objc == 3) {
@@ -318,8 +316,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         // 0          1             2
         auto buttonNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
-        logger.info("buttonRelease  %d", buttonNumber);
-        // TODO call AgentKey
+        guam::buttonRelease(buttonNumber);
         return TCL_OK;
     }
     if (subCommand == "motion" && objc == 4) {
@@ -329,8 +326,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         if (status != TCL_OK) return status;
         auto y = toInt(interp, objv[3], status);
         if (status != TCL_OK) return status;
-        logger.info("motion %4d  %4d", x, y);
-        // TODO call AgentMouse
+        guam::motion(x, y);
         return TCL_OK;
     }
 

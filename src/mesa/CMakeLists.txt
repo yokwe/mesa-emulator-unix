@@ -10,6 +10,7 @@ target_sources(
         Constant.h
         Function.h
         interrupt.h
+        keymap.h
         memory.h
         MesaBasic.h
         guam.h
@@ -20,6 +21,7 @@ target_sources(
         Variable.h
     PRIVATE
         interrupt.cpp
+        keymap.cpp
         memory.cpp
         guam.cpp
         Pilot.cpp

@@ -58,6 +58,19 @@ CARD32  displayWidth        = 0;
 CARD32  displayHeight       = 0;
 CARD32  displayBytesPerLine = 0;
 
+static void initializeVariables() {
+	vpSize              = 0;
+	rpSize              = 0;
+	maps                = 0;
+	pages               = 0;
+	realPage            = 0;
+	displayPageSize     = 0;
+	displayRealPage     = 0;
+	displayVirtualPage  = 0;
+	displayWidth        = 0;
+	displayHeight       = 0;
+	displayBytesPerLine = 0;
+}
 
 //  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
 //	The BOOTING ACTION defined by the Principles of Operation should include:
@@ -73,15 +86,14 @@ CARD32  displayBytesPerLine = 0;
 //	   5. Xfer[dest: Boot.pInitialLink].
 void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 	if (vpSize) ERROR();
-
 	if (vmBits < VMBITS_MIN) ERROR();
 	if (VMBITS_MAX < vmBits) ERROR();
 	if (vmBits < rmBits) ERROR();
 
+	initializeVariables();
+
 	vpSize = 1 << (vmBits - Environment::logWordsPerPage);
 	rpSize = 1 << (rmBits - Environment::logWordsPerPage);
-	displayRealPage = 0;
-	displayPageSize = 0;
 
 	if (MAX_REALMEMORY_PAGE_SIZE < rpSize) rpSize = MAX_REALMEMORY_PAGE_SIZE;
 
@@ -132,16 +144,11 @@ void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 }
 
 void finalize() {
-	delete [] maps;
-	maps = 0;
-
-	delete [] realPage;
-	realPage = 0;
-
+	delete[] maps;
+	delete[] realPage;
 	delete[] pages;
-	pages = 0;
 
-	vpSize = rpSize = 0;
+	initializeVariables();
 }
 
 CARD32 getVPSize() {
@@ -162,7 +169,7 @@ void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
 	displayWidth = displayWidth_;
 	displayHeight = displayHeight_;
 
-	const int alignedDisplayWidth = ((displayWidth + bitsPerDWord - 1) / bitsPerDWord) * bitsPerDWord;
+	int alignedDisplayWidth = multipleOf(displayWidth, bitsPerDWord);
 	displayBytesPerLine = alignedDisplayWidth / 8;
 
 	const int PAGE_SIZE = PageSize * sizeof(CARD16);

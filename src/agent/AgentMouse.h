@@ -49,10 +49,7 @@ public:
 	void Initialize();
 	void Call();
 
-	void setPosition(int x, int y) {
-		fcb->currentMousePosition.mouseXCoord = x;
-		fcb->currentMousePosition.mouseYCoord = y;
-	}
+	void setPosition(int x, int y);
 
 private:
 	MouseIOFaceGuam::MouseFCBType *fcb;

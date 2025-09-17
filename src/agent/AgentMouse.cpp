@@ -78,3 +78,9 @@ void AgentMouse::Call() {
 		break;
 	}
 }
+
+void AgentMouse::setPosition(int x, int y) {
+	if (fcb == 0) return;
+	fcb->currentMousePosition.mouseXCoord = x;
+	fcb->currentMousePosition.mouseYCoord = y;
+}

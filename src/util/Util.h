@@ -234,6 +234,11 @@ std::string formatWithCommas(T value) {
 
 std::string readFile(const std::string& path);
 
+inline constexpr int multipleOf(int number, int base) {
+    int rem = number % base;
+    return (rem == 0) ? number : number + (base - rem);
+}
+
 
 // convert to utf8
 #define TO_CSTRING(e) (e).toUtf8().constData()

@@ -84,13 +84,9 @@ static std::string        imageName;
 static Tk_PhotoHandle     photoHandle = 0;
 static Tk_PhotoImageBlock imageBlock = {0, 0, 0, 0, 0, {0}};
 
-static inline constexpr int multipleOf(int number, int base) {
-    int rem = number % base;
-    return (rem == 0) ? number : number + (base - rem);
-}
 void initialize(Tk_PhotoImageBlock& imageBlock, int width, int height) {
     if (imageBlock.pixelPtr) {
-        ckfree(imageBlock.pixelPtr);
+        ckfree(imageBlock.pixelPtr); // FIXME is this good?
     }
     imageBlock.width     = width;
     imageBlock.height    = height;
@@ -103,7 +99,7 @@ void initialize(Tk_PhotoImageBlock& imageBlock, int width, int height) {
     int lineWidth = multipleOf(width, 32);
     imageBlock.pitch     = lineWidth * imageBlock.pixelSize;
     int totalByte = imageBlock.pitch * imageBlock.height;
-    imageBlock.pixelPtr  = (unsigned char*)ckalloc(totalByte);
+    imageBlock.pixelPtr  = (unsigned char*)ckalloc(totalByte); // FIXEME is this good?
     // fill with white and full opaque
     memset(imageBlock.pixelPtr, 0xFF, totalByte);
 }

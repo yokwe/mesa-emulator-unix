@@ -33,12 +33,12 @@
 // guam.cpp
 //
 
+#include <array>
 #include <csignal>
 #include <cstring>
 #include <thread>
 
 #include "../util/Util.h"
-#include "Variable.h"
 static const Logger logger(__FILE__);
 
 #include "MesaBasic.h"
@@ -48,6 +48,7 @@ static const Logger logger(__FILE__);
 #include "interrupt.h"
 #include "timer.h"
 #include "processor.h"
+#include "keymap.h"
 
 #include "../agent/Agent.h"
 #include "../agent/AgentDisk.h"
@@ -380,6 +381,60 @@ void run() {
 
 int64_t getElapsedTime() {
     return elapsedTime;
+}
+
+
+//
+// key event
+//
+void keyPress(int number, const std::string& string) {
+	(void)string;
+	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
+	logger.info("keyPress    %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
+	auto keyName = levelVKey.keyName;
+	if (keyName != LevelVKeys::null) keyboard.keyPress(keyName);
+}
+void keyRelease(int number, const std::string& string) {
+	(void)string;
+	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
+	logger.info("keyRelease  %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
+	auto keyName = levelVKey.keyName;
+	if (keyName != LevelVKeys::null) keyboard.keyRelease(keyName);
+}
+
+//
+// mouse event
+//
+static std::array<LevelVKeys::KeyName, 5> buttonMap = {
+	LevelVKeys::Point,
+	LevelVKeys::Adjust,
+	LevelVKeys::Menu,
+	LevelVKeys::null,
+	LevelVKeys::null,
+};
+void buttonPress(int number) {
+	LevelVKeys::KeyName keyName = buttonMap[number];
+	logger.info("buttonPress    %d  %3d", number, keyName);
+	if (keyName != LevelVKeys::null) {
+		keyboard.keyPress(keyName);
+	} else {
+		logger.error("Unexpeced mouse button  %d", number);
+		ERROR();
+	}
+}
+void buttonRelease(int number) {
+	LevelVKeys::KeyName keyName = buttonMap[number];
+	logger.info("buttonRelease  %d  %3d", number, keyName);
+	if (keyName != LevelVKeys::null) {
+		keyboard.keyRelease(keyName);
+	} else {
+		logger.error("Unexpeced mouse button  %d", number);
+		ERROR();
+	}
+}
+void motion(int x, int y) {
+//	logger.info("motion      %4d  %4d", x, y);
+	mouse.setPosition(x, y);
 }
 
 }

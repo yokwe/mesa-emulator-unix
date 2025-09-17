@@ -30,43 +30,24 @@
 
 
 //
-// guam.h
+// keymap.h
 //
 
 #pragma once
 
 #include <string>
+#include <map>
 
-namespace guam {
+#include "Pilot.h"
 
-struct Config {
-    std::string diskFilePath;
-    std::string germFilePath;
-    std::string bootFilePath;
-    std::string floppyFilePath;
-    std::string networkInterface;
-    std::string bootSwitch;
-    std::string bootDevice;
+namespace keymap {
 
-    int displayWidth;
-    int displayHeight;
-    int vmBits;
-    int rmBits;
-
-    Config() : displayWidth(0), displayHeight(0), vmBits(0), rmBits(0) {}
+struct LevelVKey {
+    std::string         name;
+    LevelVKeys::KeyName keyName;
 };
 
-void setConfig(const Config& config);
-void getConfig(Config& config);
-
-void run(); // don't return until all child thread stopped
-
-int64_t getElapsedTime();
-
-void keyPress     (int keySymNumber, const std::string& keySymString);
-void keyRelease   (int keySymNumber, const std::string& keySymString);
-void buttonPress  (int buttonNumber);
-void buttonRelease(int buttonNumber);
-void motion       (int x, int y);
+void initialize();
+const LevelVKey& getLevelVKey(int keySymNumber);
 
 }

@@ -172,10 +172,9 @@ void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
 	int alignedDisplayWidth = multipleOf(displayWidth, bitsPerDWord);
 	displayBytesPerLine = alignedDisplayWidth / 8;
 
-	const int PAGE_SIZE = PageSize * sizeof(CARD16);
-	const int imageSize = (alignedDisplayWidth * displayHeight) / 8;
-	displayPageSize     = ((imageSize + PAGE_SIZE - 1) / PAGE_SIZE);
-
+	int imageSizeInByte = (alignedDisplayWidth * displayHeight) / 8;
+	int pageSizeInByte  = PageSize * sizeof(CARD16);
+	displayPageSize     = multipleOf(imageSizeInByte, pageSizeInByte) / pageSizeInByte;
 	const CARD32 vp = rpSize - displayPageSize;
 	displayRealPage = maps[vp].rp;
 

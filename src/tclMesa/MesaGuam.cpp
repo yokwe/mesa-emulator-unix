@@ -128,6 +128,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
     (void)cdata;
     tcl::Interp interp(interp_);
 
+    int status;
     std::string command = tcl::toString(objv[0]);
     // mesa::guam config diskFile XXX
     // 0          1      2        3
@@ -159,7 +160,6 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
                 }
                 if (objc == 4) {
                     int* p = intMap.at(subject);
-                    int status;
                     auto value = toInt(interp, objv[3], status);
                     if (status == TCL_OK) *p = value;
                     return status;
@@ -245,7 +245,6 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         if (objc == 5) {
             // mesa::guam display imageName width height
             // 0          1       2         3     4
-            int status;
             imageName = tcl::toString(objv[2]);
             auto width = toInt(interp, objv[3], status);
             if (status != TCL_OK) return status;
@@ -278,6 +277,61 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
                 return TCL_OK;
             }
         }
+    }
+
+// bind .mesa.display <KeyPress>      { keyPress %K }
+// bind .mesa.display <KeyRelease>    { keyRelease %K }
+// bind .mesa.display <ButtonPress>   { mouseButtonPress %b }
+// bind .mesa.display <ButtonRelease> { mouseButtonRelease %b }
+// bind .mesa.display <Motion>        { mouseMotion %x %y }
+    if (subCommand == "keyPress" && objc == 4) {
+        // mesa::guam keyPress keySymNumber keySymString
+        // 0          1        2            3
+        auto keySymNumber = toInt(interp, objv[2], status);
+        if (status != TCL_OK) return status;
+        auto keySymString = tcl::toString(objv[3]);
+        logger.info("keyPress      %4X  %s", keySymNumber, keySymString);
+        // TODO call AgentKey
+        return TCL_OK;
+    }
+    if (subCommand == "keyRelease" && objc == 4) {
+        // mesa::guam keyRelease keySymNumber keySymString
+        // 0          1        2            3
+        auto keySymNumber = toInt(interp, objv[2], status);
+        if (status != TCL_OK) return status;
+        auto keySymString = tcl::toString(objv[3]);
+        logger.info("keyRelease    %4X  %s", keySymNumber, keySymString);
+        // TODO call AgentKey
+        return TCL_OK;
+    }
+    if (subCommand == "buttonPress" && objc == 3) {
+        // mesa::guam buttonPress buttonNumber
+        // 0          1           2
+        auto buttonNumber = toInt(interp, objv[2], status);
+        if (status != TCL_OK) return status;
+        logger.info("buttonPress    %d", buttonNumber);
+        // TODO call AgentKey
+        return TCL_OK;
+    }
+    if (subCommand == "buttonRelease" && objc == 3) {
+        // mesa::guam buttonRelease buttonNumber
+        // 0          1             2
+        auto buttonNumber = toInt(interp, objv[2], status);
+        if (status != TCL_OK) return status;
+        logger.info("buttonRelease  %d", buttonNumber);
+        // TODO call AgentKey
+        return TCL_OK;
+    }
+    if (subCommand == "motion" && objc == 4) {
+        // mesa::guam motion x y
+        // 0          1      2 3
+        auto x = toInt(interp, objv[2], status);
+        if (status != TCL_OK) return status;
+        auto y = toInt(interp, objv[3], status);
+        if (status != TCL_OK) return status;
+        logger.info("motion %4d  %4d", x, y);
+        // TODO call AgentMouse
+        return TCL_OK;
     }
 
     {

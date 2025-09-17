@@ -40,24 +40,8 @@ label  .mesa.panel.display -text "screen $displayWidth x $displayHeight" -takefo
 pack   .mesa.panel.display  -side left
 
 
-bind .mesa.display <KeyPress>      { keyPress %K }
-bind .mesa.display <KeyRelease>    { keyRelease %K }
-bind .mesa.display <ButtonPress>   { mouseButtonPress %b }
-bind .mesa.display <ButtonRelease> { mouseButtonRelease %b }
-bind .mesa.display <Motion>        { mouseMotion %x %y }
-
-proc keyPress keySym {
-    puts "keyPress $keySym"
-}
-proc keyRelease keySym {
-    puts "keyRelease $keySym"
-}
-proc mouseButtonPress button {
-    puts "mouseButtonPress $button"
-}
-proc mouseButtonRelease button {
-    puts "mouseButtonRelease $button"
-}
-proc mouseMotion {x y} {
-    puts "mouseMotion $x $y"
-}
+bind .mesa.display <KeyPress>      { mesa::guam keyPress %N %K }
+bind .mesa.display <KeyRelease>    { mesa::guam keyRelease %N %K }
+bind .mesa.display <ButtonPress>   { mesa::guam buttonPress %b }
+bind .mesa.display <ButtonRelease> { mesa::guam buttonRelease %b }
+bind .mesa.display <Motion>        { mesa::guam motion %x %y }

@@ -236,6 +236,15 @@ CARD32 getDisplayVirtualPage() {
 	if (displayVirtualPage == 0) ERROR();
 	return displayVirtualPage;
 }
+
+bool isMemoryInitialize() {
+	return vpSize;
+}
+bool isDisplayMapped() {
+	return 	displayVirtualPage;
+}
+
+
 int isDisplayPage(CARD32 vp) {
 	if (displayVirtualPage == 0) ERROR();
 	return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));

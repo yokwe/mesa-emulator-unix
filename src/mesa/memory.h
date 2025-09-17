@@ -80,6 +80,10 @@ namespace memory {
 	CARD32  getDisplayRealPage();
 	Page*   getDisplayPage();
 	CARD32  getDisplayVirtualPage();
+
+	bool	isMemoryInitialize();
+	bool    isDisplayMapped();
+
 	int     isDisplayPage(CARD32 vp);
 
 	namespace cache {

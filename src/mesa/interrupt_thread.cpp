@@ -56,7 +56,7 @@ void stop() {
 }
 
 void run() {
-	logger.info("interrup::run START");
+	logger.info("interrup_thread::run START");
 	stopThread = false;
 	
 	std::unique_lock<std::mutex> locker(mutexWP);

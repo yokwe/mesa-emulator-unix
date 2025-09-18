@@ -53,12 +53,12 @@ std::mutex              mutexTimer;
 std::condition_variable cvTimer;
 
 void stop() {
-	logger.info("timer::stop");
+	logger.info("timer_thread::stop");
     stopThread = true;
 }
 
 void run() {
-	logger.info("timer::run START");
+	logger.info("timer_thread::run START");
 	stopThread = false;
 	
 	auto tick = std::chrono::milliseconds(cTick);
@@ -84,7 +84,7 @@ void run() {
 		}
 	}
 exitLoop:
-	logger.info("TimerThread::run STOP");
+	logger.info("timer_thread::run STOP");
 }
 
 // To process timeout in other thread, create processTimeout
@@ -105,7 +105,6 @@ bool processTimeout() {
 		if (PTC == 0) PTC = PTC + 1;
 
 		requeue = TimeoutScan();
-		//logger.debug("processTimeout FINISH");
 	} else {
 		requeue = false;
 	}

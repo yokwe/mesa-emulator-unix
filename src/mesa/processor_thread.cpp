@@ -108,7 +108,7 @@ void checkRequestReschedule() {
 }
 
 void run() {
-	logger.info("processor::run START");
+	logger.info("processor_thread::run START");
 	stopThread = 0;
 	rescheduleInterruptFlag.clear();
 	rescheduleTimerFlag.clear();
@@ -208,7 +208,7 @@ exitLoop:
 	timer_thread::stop();
 	interrupt_thread::stop();
 
-	logger.info("processor::run STOP");
+	logger.info("processor_thread::run STOP");
 }
 
 }

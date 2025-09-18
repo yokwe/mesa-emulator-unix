@@ -90,7 +90,7 @@ void AgentDisplay::Initialize() {
 	fcb->patternFillMode        = DisplayIOFaceGuam::PFM_copy;
 	fcb->complemented           = 0;
 	fcb->colorIndex             = 0;
-	fcb->displayType            = DisplayIOFaceGuam::T_monochrome;
+	fcb->displayType            = this->displayType;
 	fcb->displayWidth           = this->displayWidth;
 	fcb->displayHeight          = this->displayHeight;
 }

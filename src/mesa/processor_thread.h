@@ -30,42 +30,25 @@
 
 
 //
-// AgentDisplay.h
+// processor_thread::
 //
 
 #pragma once
 
-#include "Agent.h"
+#include "MesaBasic.h"
 
-class AgentDisplay : public Agent {
-public:
-	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::display;
-	static const inline auto name_ = "Display";
-	static const inline auto fcbSize_ = SIZE(DisplayIOFaceGuam::DisplayFCBType);
-	AgentDisplay() : Agent(index_, name_, fcbSize_) {
-		fcb                  = 0;
-		displayWidth         = 0;
-		displayHeight        = 0;
-	}
+namespace processor_thread {
 
-	void Initialize();
-	void Call();
+void stop();
 
-	void setDisplayWidth(CARD16 newValue) {
-		this->displayWidth = newValue;
-	}
-	void setDisplayHeight(CARD16 newValue) {
-		this->displayHeight = newValue;
-	}
-	void setDisplayType(CARD16 newValue) {
-		this->displayType = newValue;
-	}
+void stopAtMP(CARD16 mp);
+void mp_observer(CARD16 mp);
 
-	
-private:
-	DisplayIOFaceGuam::DisplayFCBType *fcb;
-	//
-	CARD16 displayWidth;
-	CARD16 displayHeight;
-	CARD16 displayType;
-};
+void requestRescheduleTimer();
+void requestRescheduleInterrupt();
+
+void checkRequestReschedule();
+
+void run();
+
+}

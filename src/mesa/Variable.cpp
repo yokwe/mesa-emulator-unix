@@ -37,7 +37,7 @@
 
 #include "Variable.h"
 
-#include "../mesa/processor.h"
+#include "../mesa/processor_thread.h"
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
@@ -146,5 +146,5 @@ static void mp_message(CARD16 mp) {
 void VariableMP::initialize() {
 	addObserver(mp_message);
     addObserver(Logger::mp_observer);
-    addObserver(processor::mp_observer);
+    addObserver(processor_thread::mp_observer);
 }

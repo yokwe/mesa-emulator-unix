@@ -30,25 +30,18 @@
 
 
 //
-// processor.h
+// interrupt_thread.h
 //
 
 #pragma once
 
 #include "MesaBasic.h"
 
-namespace processor {
+namespace interrupt_thread {
 
 void stop();
-
-void stopAtMP(CARD16 mp);
-void mp_observer(CARD16 mp);
-
-void requestRescheduleTimer();
-void requestRescheduleInterrupt();
-
-void checkRequestReschedule();
-
 void run();
+
+void notifyInterrupt(CARD16 interruptSelector);
 
 }

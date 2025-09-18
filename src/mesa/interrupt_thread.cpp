@@ -41,17 +41,17 @@ static const Logger logger(__FILE__);
 #include "../util/Perf.h"
 
 #include "Variable.h"
-#include "processor.h"
-#include "interrupt.h"
+#include "processor_thread.h"
+#include "interrupt_thread.h"
 
-namespace interrupt {
+namespace interrupt_thread {
 
 bool                    stopThread;
 std::mutex              mutexWP;
 std::condition_variable cvWP;
 
 void stop() {
-	logger.info("interrupt::stop");
+	logger.info("interrupt_thread::stop");
     stopThread = true;
 }
 
@@ -71,10 +71,10 @@ void run() {
 			if (WP.pending()) break;
 		}
 		PERF_COUNT(interrupt, request)
-		processor::requestRescheduleInterrupt();
+		processor_thread::requestRescheduleInterrupt();
 	}
 exitLoop:
-	logger.info("interrupt::run STOP");
+	logger.info("interrupt_thread::run STOP");
 }
 
 void notifyInterrupt(CARD16 interruptSelector) {

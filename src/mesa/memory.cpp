@@ -139,6 +139,8 @@ void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 		maps[i].rp = 0;
 	}
 
+	// TOTO take parameter of display width and height and allocate display emmory here
+
 	// initialize related class
 	cache::initialize();
 }

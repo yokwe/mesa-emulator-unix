@@ -44,8 +44,8 @@ static const Logger logger(__FILE__);
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
 
-#include "../mesa/interrupt.h"
-#include "../mesa/processor.h"
+#include "../mesa/interrupt_thread.h"
+#include "../mesa/processor_thread.h"
 
 #include "AgentDisk.h"
 #include "DiskFile.h"
@@ -96,12 +96,12 @@ void AgentDisk::IOThread::run() {
 				uint64_t now = Util::getMicroSecondsFromEpoch();
 				PERF_ADD(disk, process_time, now - time)
 			}
-			interrupt::notifyInterrupt(interruptSelector);
+			interrupt_thread::notifyInterrupt(interruptSelector);
 			PERF_COUNT(disk, process)
 		}
 	} catch(Abort& e) {
 		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		processor::stop();
+		processor_thread::stop();
 	}
 exitLoop:
 	logger.info("AgentDisk::IOThread::run STOP");
@@ -313,10 +313,10 @@ void AgentDisk::Call() {
 	}
 
 	if (DEBUG_DONT_USE_THREAD) {
-		interrupt::notifyInterrupt(fcb->interruptSelector);
+		interrupt_thread::notifyInterrupt(fcb->interruptSelector);
 	}
 
 	// notify with interrupt
 	//WP |= fcb->interruptSelector;
-	//interrupt::notifyInterrupt(fcb->interruptSelector);
+	//interrupt_thread::notifyInterrupt(fcb->interruptSelector);
 }

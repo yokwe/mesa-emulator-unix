@@ -45,9 +45,9 @@ static const Logger logger(__FILE__);
 #include "memory.h"
 #include "Pilot.h"
 
-#include "interrupt.h"
-#include "timer.h"
-#include "processor.h"
+#include "interrupt_thread.h"
+#include "timer_thread.h"
+#include "processor_thread.h"
 #include "keymap.h"
 
 #include "../agent/Agent.h"
@@ -91,7 +91,7 @@ AgentNetwork   network;
 AgentKeyboard  keyboard;
 AgentBeep      beep;
 AgentMouse     mouse;
-AgentProcessor agentProcessor;
+AgentProcessor processor;
 AgentStream    stream;
 //	AgentSerial    serial;
 //	AgentTTY       tty;
@@ -229,7 +229,7 @@ static void initialize() {
 	memory::reserveDisplayPage(config.displayWidth, config.displayHeight);
 
 	//
-	// Initialize Agent
+	// Setup Agents
 	//
 	// AgentDisk
 	diskFile.attach(config.diskFilePath);
@@ -245,13 +245,19 @@ static void initialize() {
 	networkPacket.getAddress(PID[1], PID[2], PID[3]);
 	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
 	// set PID to AgentProcessor
-	agentProcessor.setProcessorID(PID[1], PID[2], PID[3]);
+	processor.setProcessorID(PID[1], PID[2], PID[3]);
 	// AgentDisplay
 	display.setDisplayWidth(config.displayWidth);
 	display.setDisplayHeight(config.displayHeight);
+	// FIXME take value from config
+	display.setDisplayType(DisplayIOFaceGuam::T_monochrome);
 	// Stream::Boot
 	// bootFilePath
 	// Enable Agents
+
+	//
+	// Initialize Agents
+	//
 	disk.Enable();
 	floppy.Enable();
 	network.Enable();
@@ -259,7 +265,7 @@ static void initialize() {
 	keyboard.Enable();
 	beep.Enable();
 	mouse.Enable();
-	agentProcessor.Enable();
+	processor.Enable();
 	stream.Enable();
 //	AgentSerial    serial;
 //	AgentTTY       tty;
@@ -279,6 +285,12 @@ static void initialize() {
 	agentStream->addStream(new StreamTCP);
 	// 108 WWC
 	agentStream->addStream(new StreamWWC);
+
+	{
+		// TODO do initialization like StartPilot in PirotControl.mesa
+		// TODO do initialize like ProcessorHeadGuam.mesa
+		// TODO do initialize like UserTerminalHeadGuam.mesa
+	}
 
 	// load germ file into vm
 	loadGerm(config.germFilePath);
@@ -327,12 +339,12 @@ public:
 static void boot() {
 	logger.info("boot START");
 
-	std::function<void()> f1 = std::function<void()>(interrupt::run);
-	std::function<void()> f2 = std::function<void()>(timer::run);
+	std::function<void()> f1 = std::function<void()>(interrupt_thread::run);
+	std::function<void()> f2 = std::function<void()>(timer_thread::run);
 	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
 	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
 	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
-	std::function<void()> f6 = std::function<void()>(processor::run);
+	std::function<void()> f6 = std::function<void()>(processor_thread::run);
 
 	ThreadControl t1("interrupt", f1);
 	ThreadControl t2("timer", f2);

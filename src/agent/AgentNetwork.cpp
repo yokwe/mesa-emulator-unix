@@ -41,8 +41,8 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
-#include "../mesa/interrupt.h"
-#include "../mesa/processor.h"
+#include "../mesa/interrupt_thread.h"
+#include "../mesa/processor_thread.h"
 
 #include "AgentNetwork.h"
 
@@ -93,12 +93,12 @@ void AgentNetwork::TransmitThread::run() {
 			}
 
 			networkPacket->transmit(iocb);
-			interrupt::notifyInterrupt(interruptSelector);
+			interrupt_thread::notifyInterrupt(interruptSelector);
 			PERF_COUNT(network, transmit)
 		}
 	} catch(Abort& e) {
 		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		processor::stop();
+		processor_thread::stop();
 	}
 exitLoop:
 	logger.info("AgentNetwork::TransmitThread::run STOP");
@@ -188,7 +188,7 @@ void AgentNetwork::ReceiveThread::run() {
 
 				// use this iocb to receive packet
 				networkPacket->receive(iocb);
-				interrupt::notifyInterrupt(interruptSelector);
+				interrupt_thread::notifyInterrupt(interruptSelector);
 				PERF_COUNT(network, receive)
 			}
 		}

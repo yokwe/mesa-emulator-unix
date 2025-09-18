@@ -9,24 +9,24 @@ target_sources(
 	PUBLIC
         Constant.h
         Function.h
-        interrupt.h
+        interrupt_thread.h
         keymap.h
         memory.h
         MesaBasic.h
         guam.h
         Pilot.h
-        processor.h
-        timer.h
+        processor_thread.h
+        timer_thread.h
         Type.h
         Variable.h
     PRIVATE
-        interrupt.cpp
+        interrupt_thread.cpp
         keymap.cpp
         memory.cpp
         guam.cpp
         Pilot.cpp
-        processor.cpp
-        timer.cpp
+        processor_thread.cpp
+        timer_thread.cpp
         Type.cpp
         Variable.cpp
 )

@@ -30,18 +30,17 @@
 
 
 //
-// interrupt.h
+// timer_thread.h
 //
 
 #pragma once
 
-#include "MesaBasic.h"
-
-namespace interrupt {
+namespace timer_thread {
 
 void stop();
 void run();
 
-void notifyInterrupt(CARD16 interruptSelector);
+// To process timeout in other thread, create processTimeout
+bool processTimeout();
 
 }

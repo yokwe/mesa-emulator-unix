@@ -39,7 +39,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
-#include "../mesa/interrupt.h"
+#include "../mesa/interrupt_thread.h"
 
 #include "AgentStream.h"
 #include "StreamBoot.h"
@@ -123,7 +123,7 @@ uint16_t StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoP
 	if (tr.interruptMesa) {
 		if (fcb->interruptSelector) {
 			fcb->headResult = CoProcessorIOFaceGuam::R_completed;
-			interrupt::notifyInterrupt(fcb->interruptSelector);
+			interrupt_thread::notifyInterrupt(fcb->interruptSelector);
 		}
 	}
 

@@ -30,17 +30,86 @@
 
 
 //
-// timer.h
+// timer_thread.cpp
 //
 
-#pragma once
+#include <chrono>
+#include <thread>
 
-namespace timer {
+#include "../util/Perf.h"
 
-void stop();
-void run();
+#include "Constant.h"
+#include "Variable.h"
+#include "processor_thread.h"
+#include "timer_thread.h"
+
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
+
+namespace timer_thread {
+
+bool                    stopThread;
+std::mutex              mutexTimer;
+std::condition_variable cvTimer;
+
+void stop() {
+	logger.info("timer::stop");
+    stopThread = true;
+}
+
+void run() {
+	logger.info("timer::run START");
+	stopThread = false;
+	
+	auto tick = std::chrono::milliseconds(cTick);
+	auto time = std::chrono::system_clock::now();
+	std::unique_lock<std::mutex> locker(mutexTimer);
+	for(;;) {
+		PERF_COUNT(timer, timer)
+		auto nextTime = time + tick;
+		std::this_thread::sleep_until(nextTime);
+		time = nextTime;
+		if (stopThread) break;
+
+		{
+			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
+			// Then TimerThread::processTimeout() will notify cvTimer
+			processor_thread::requestRescheduleTimer();
+			// wait procesTimeout is invoked
+			for(;;) {
+				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
+				if (stopThread) goto exitLoop;
+				if (status == std::cv_status::no_timeout) break;
+			}
+		}
+	}
+exitLoop:
+	logger.info("TimerThread::run STOP");
+}
 
 // To process timeout in other thread, create processTimeout
-bool processTimeout();
+bool processTimeout() {
+	// this method is called from processor thread
+	//logger.debug("processTimeout START");
+	PERF_COUNT(timer, timeout)
+	{
+		// start next timer
+		std::unique_lock<std::mutex> locker(mutexTimer);
+		cvTimer.notify_one();
+	}
+
+	bool requeue;
+	if (InterruptsEnabled()) {
+		PERF_COUNT(timer, updatePTC)
+		PTC = PTC + 1;
+		if (PTC == 0) PTC = PTC + 1;
+
+		requeue = TimeoutScan();
+		//logger.debug("processTimeout FINISH");
+	} else {
+		requeue = false;
+	}
+	return requeue;
+}
 
 }

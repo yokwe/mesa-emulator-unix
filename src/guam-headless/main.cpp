@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../util/GuiOp.h"
 
 #include "../mesa/guam.h"
-#include "../mesa/processor.h"
+#include "../mesa/processor_thread.h"
 
 #include "../opcode/opcode.h"
 
@@ -85,8 +85,8 @@ int main(int /* argc */, char** /* argv */) {
 	guam::setConfig(config);
 
 	// stop at MP 8000
-	processor::stopAtMP( 915);
-	processor::stopAtMP(8000);
+	processor_thread::stopAtMP( 915);
+	processor_thread::stopAtMP(8000);
 
 	logger.info("thread start");
 	auto thread = std::thread(guam::run);

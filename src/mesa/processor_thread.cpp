@@ -45,16 +45,16 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/opcode.h"
 
-#include "processor.h"
-#include "timer.h"
-#include "interrupt.h"
+#include "processor_thread.h"
+#include "timer_thread.h"
+#include "interrupt_thread.h"
 #include "Variable.h"
 
 #include "../util/Debug.h"
 #include "../util/Perf.h"
 
 
-namespace processor {
+namespace processor_thread {
 
 bool                    stopThread;
 std::condition_variable cvRunning;
@@ -170,7 +170,7 @@ void run() {
 							PERF_COUNT(processor, timerFlag)
 							//logger.debug("reschedule TIMER");
 							// process timeout
-							if (timer::processTimeout()) {
+							if (timer_thread::processTimeout()) {
 								PERF_COUNT(processor, timer)
 								needReschedule = true;
 							}
@@ -205,8 +205,8 @@ exitLoop:
 	AgentNetwork::ReceiveThread::stop();
 	AgentNetwork::TransmitThread::stop();
 	AgentDisk::IOThread::stop();
-	timer::stop();
-	interrupt::stop();
+	timer_thread::stop();
+	interrupt_thread::stop();
 
 	logger.info("processor::run STOP");
 }

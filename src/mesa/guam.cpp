@@ -50,6 +50,7 @@ static const Logger logger(__FILE__);
 #include "timer_thread.h"
 #include "processor_thread.h"
 #include "keymap.h"
+#include "display.h"
 
 #include "../agent/Agent.h"
 #include "../agent/AgentDisk.h"
@@ -99,6 +100,7 @@ AgentStream    stream;
 AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
+display::DisplayContext displayContext;
 
 void setConfig(const Config& config_) {
 	config = config_;
@@ -232,12 +234,26 @@ static void initialize() {
 
 	elapsedTime = 0;
 
-	// Reserve real memory for display
-	memory::reserveDisplayPage(config.displayWidth, config.displayHeight);
-
 	//
 	// Setup Agents
 	//
+	// AgentDisplay
+	{
+		auto displayType = displayTypeMap.at(config.displayType);
+		displayContext = display::DisplayContext::getInstance(displayType, config.displayWidth, config.displayHeight);
+		logger.info("displayContext  %s  %d x %d   %d pages", config.displayType, displayContext.width, displayContext.height, displayContext.pagesForBitmap);
+		// Reserve real memory for display
+		memory::reserveDisplayPage(displayContext.pagesForBitmap);
+		auto displayMemoryAddress = memory::getDisplayRealPage();
+		displayContext.displayMemoryAddress = displayMemoryAddress;
+		
+		// configure AgentDisplay
+		display.setDisplayType(displayContext.type);
+		display.setDisplayWidth(displayContext.width);
+		display.setDisplayHeight(displayContext.height);
+		display.setDisplayMemoryAddress(displayMemoryAddress);
+	}
+
 	// AgentDisk
 	diskFile.attach(config.diskFilePath);
 	disk.addDiskFile(&diskFile);
@@ -253,15 +269,6 @@ static void initialize() {
 	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
 	// set PID to AgentProcessor
 	processor.setProcessorID(PID[1], PID[2], PID[3]);
-	// AgentDisplay
-	{
-		auto displayType = displayTypeMap.at(config.displayType);
-		display.setDisplayType(displayType);
-		display.setDisplayWidth(config.displayWidth);
-		display.setDisplayHeight(config.displayHeight);
-	}
-	// FIXME take value from config
-	display.setDisplayType(DisplayIOFaceGuam::T_monochrome);
 	// Stream::Boot
 	// bootFilePath
 	// Enable Agents

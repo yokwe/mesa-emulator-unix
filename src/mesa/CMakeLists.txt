@@ -8,6 +8,7 @@ target_sources(
 	mesa
 	PUBLIC
         Constant.h
+        display.h
         Function.h
         interrupt_thread.h
         keymap.h
@@ -21,6 +22,7 @@ target_sources(
         Type.h
         Variable.h
     PRIVATE
+        display.cpp
         interrupt_thread.cpp
         keymap.cpp
         memory.cpp

@@ -34,9 +34,9 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Setting.h"
+#include "setting.h"
 
-#include "Util.h"
+#include "../util/Util.h"
 static const Logger logger(__FILE__);
 
 using json = nlohmann::json;

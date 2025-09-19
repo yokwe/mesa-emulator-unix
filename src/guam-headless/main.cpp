@@ -39,11 +39,11 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
-#include "../util/Setting.h"
 #include "../util/GuiOp.h"
 
 #include "../mesa/guam.h"
 #include "../mesa/processor_thread.h"
+#include "../mesa/setting.h"
 
 #include "../opcode/opcode.h"
 

@@ -16,6 +16,7 @@ target_sources(
         guam.h
         Pilot.h
         processor_thread.h
+        setting.h
         timer_thread.h
         Type.h
         Variable.h
@@ -26,6 +27,7 @@ target_sources(
         guam.cpp
         Pilot.cpp
         processor_thread.cpp
+        setting.cpp
         timer_thread.cpp
         Type.cpp
         Variable.cpp

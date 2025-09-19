@@ -45,6 +45,7 @@ using json = nlohmann::json;
 #define simple(name) p.name = j.at(#name);
 
 void from_json(const json& j, Setting::Entry::Display& p) {
+	simple(type)
 	simple(width)
 	simple(height)
 }

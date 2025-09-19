@@ -39,6 +39,7 @@ public:
 	public:
 		class Display {
 		public:
+			std::string type;
 			int width;
 			int height;
 

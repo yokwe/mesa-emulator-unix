@@ -69,7 +69,7 @@ void E_MAPDISPLAY() {
 	CARD32 displayPageSize = memory::getDisplayPageSize();
 	if (totalPageCount != displayPageSize) ERROR(); // sanity check
 
-	memory::mapDisplay(startingVirtualPage, startingRealPage, totalPageCount);
+	memory::mapDisplay(startingVirtualPage, startingRealPage, totalPageCount, pageCountInEachBlock);
 }
 
 

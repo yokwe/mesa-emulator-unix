@@ -201,8 +201,8 @@ CARD32 getDisplayBytesPerLine() {
 	return displayBytesPerLine;
 }
 
-void mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount) {
-	logger.info("%s  %6X+%2X  %6X %3d", __FUNCTION__, vp, pageCount, rp, pageCount);
+void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock) {
+	logger.info("%s  %6X+%2X  %6X %3d %3d", __FUNCTION__, vp, pageCount, rp, pageCount, pageCountInEachBlock);
 	if (rp != displayRealPage) {
 		logger.fatal("rp              = %d", rp);
 		logger.fatal("displayRealPage = %d", displayRealPage);

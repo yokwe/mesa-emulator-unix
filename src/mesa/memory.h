@@ -76,7 +76,7 @@ namespace memory {
 	CARD32  getDisplayPageSize();
 	CARD32  getDisplayBytesPerLine();
 
-	void    mapDisplay(CARD32 vp, CARD32 rp, CARD32 pageCount);
+	void    mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock);
 	CARD32  getDisplayRealPage();
 	Page*   getDisplayPage();
 	CARD32  getDisplayVirtualPage();

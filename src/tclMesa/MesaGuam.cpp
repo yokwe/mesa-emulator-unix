@@ -50,10 +50,10 @@ static const Logger logger(__FILE__);
 #include "../mesa/guam.h"
 #include "../mesa/processor_thread.h"
 #include "../mesa/memory.h"
+#include "../mesa/Setting.h"
 
 #include "../opcode/opcode.h"
 
-#include "../util/Setting.h"
 #include "../util/GuiOp.h"
 #include "../util/Perf.h"
 #include "../util/tcl.h"
@@ -72,6 +72,7 @@ std::map<std::string, std::string*> stringMap = {
     FIELD_MAP_ENTRY(networkInterface),
     FIELD_MAP_ENTRY(bootSwitch),
     FIELD_MAP_ENTRY(bootDevice),
+    FIELD_MAP_ENTRY(displayType),
 };
 std::map<std::string, int*> intMap = {
     FIELD_MAP_ENTRY(displayWidth),
@@ -146,48 +147,9 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
             interp.result(result);
             return TCL_OK;
         }
-        if (objc == 3 || objc == 4) {
-            std::string subject = tcl::toString(objv[2]);
-            if (intMap.contains(subject)) {
-                if (objc == 3) {
-                    int* p = intMap.at(subject);
-                    interp.result(*p);
-                    return TCL_OK;
-                }
-                if (objc == 4) {
-                    int* p = intMap.at(subject);
-                    auto value = toInt(interp, objv[3], status);
-                    if (status == TCL_OK) *p = value;
-                    return status;
-                }
-            }
-            if (stringMap.contains(subject)) {
-                if (objc == 3) {
-                    std::string* p = stringMap.at(subject);
-                    interp.result(*p);
-                    return TCL_OK;
-                }
-                if (objc == 4) {
-                    std::string* p = stringMap.at(subject);
-                    auto value = tcl::toString(objv[3]);
-                    *p = value;
-                    return TCL_OK;
-                }
-            }
-        }
-    }
-    if (subCommand == "setting") {
-        auto setting = Setting::getInstance();
-        if (objc == 2) {
-            std::string string = "valid entry for setting are ";
-            for(auto i = setting.entryList.cbegin(); i != setting.entryList.cend(); i++) {
-                string.append(std_sprintf(" %s", i->name));
-            }
-            interp.result(string);
-            return TCL_OK;
-        }
         if (objc == 3) {
             std::string entryName = Tcl_GetString(objv[2]);
+            auto setting = Setting::getInstance();
             if (!setting.containsEntry(entryName)) {
                 auto string = std_sprintf("no entry \"%s\" in setting", entryName);
                 interp.result(string);
@@ -202,6 +164,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
             config.networkInterface = entry.network.interface;
             config.bootSwitch       = entry.boot.switch_;
             config.bootDevice       = entry.boot.device;
+            config.displayType      = entry.display.type;
             config.displayWidth     = entry.display.width;
             config.displayHeight    = entry.display.height;
             config.vmBits           = entry.memory.vmbits;
@@ -275,18 +238,12 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         }
     }
 
-// bind .mesa.display <KeyPress>      { keyPress %K }
-// bind .mesa.display <KeyRelease>    { keyRelease %K }
-// bind .mesa.display <ButtonPress>   { mouseButtonPress %b }
-// bind .mesa.display <ButtonRelease> { mouseButtonRelease %b }
-// bind .mesa.display <Motion>        { mouseMotion %x %y }
     if (subCommand == "keyPress" && objc == 4) {
         // mesa::guam keyPress keySymNumber keySymString
         // 0          1        2            3
         auto keySymNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
         auto keySymString = tcl::toString(objv[3]);
-//        logger.info("keyPress      %4X  %s", keySymNumber, keySymString);
         guam::keyPress(keySymNumber, keySymString);
         return TCL_OK;
     }

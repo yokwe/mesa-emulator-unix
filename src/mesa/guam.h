@@ -37,7 +37,11 @@
 
 #include <string>
 
+#include "Pilot.h"
+
 namespace guam {
+
+using namespace DisplayIOFaceGuam;
 
 struct Config {
     std::string diskFilePath;
@@ -48,10 +52,11 @@ struct Config {
     std::string bootSwitch;
     std::string bootDevice;
 
-    int displayWidth;
-    int displayHeight;
-    int vmBits;
-    int rmBits;
+    std::string displayType;
+    int         displayWidth;
+    int         displayHeight;
+    int         vmBits;
+    int         rmBits;
 
     Config() : displayWidth(0), displayHeight(0), vmBits(0), rmBits(0) {}
 };

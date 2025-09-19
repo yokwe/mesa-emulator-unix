@@ -197,6 +197,12 @@ static void setBootRequestStream(Boot::Request* request) {
 	request->location.deviceOrdinal = 0;
 }
 
+static std::map<std::string, DisplayIOFaceGuam::DisplayType> displayTypeMap = {
+	{"monochrome",        DisplayIOFaceGuam::DisplayType::monochrome},
+	{"fourBitPlaneColor", DisplayIOFaceGuam::DisplayType::fourBitPlaneColor},
+	{"byteColor",         DisplayIOFaceGuam::DisplayType::byteColor}
+};
+
 static void initialize() {
 	setSignalHandler(SIGINT);
 	setSignalHandler(SIGTERM);
@@ -210,6 +216,7 @@ static void initialize() {
 	logger.info("networkInterface  %s", config.networkInterface);
 	logger.info("bootSwitch        %s", config.bootSwitch);
 	logger.info("bootDevice        %s", config.bootDevice);
+	logger.info("displayType       %s", config.displayType);
 
 	logger.info("displayWidth   %4d", config.displayWidth);
 	logger.info("displayHeight  %4d", config.displayHeight);
@@ -247,10 +254,10 @@ static void initialize() {
 	// set PID to AgentProcessor
 	processor.setProcessorID(PID[1], PID[2], PID[3]);
 	// AgentDisplay
+	display.setDisplayType(displayTypeMap.at(config.displayType));
 	display.setDisplayWidth(config.displayWidth);
 	display.setDisplayHeight(config.displayHeight);
-	// FIXME take value from config
-	display.setDisplayType(DisplayIOFaceGuam::T_monochrome);
+
 	// Stream::Boot
 	// bootFilePath
 	// Enable Agents

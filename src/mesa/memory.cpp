@@ -215,6 +215,12 @@ void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBl
 	}
 	displayVirtualPage = vp;
 
+	// for(CARD32 i = 0; i < pageCount; i++) {
+	// 	Map map = maps[vp + i];
+	// 	logger.info("map  %8X  %8X  %8X  %2X", vp + i, rp + i, map.rp, map.mf.u);
+	// }
+
+	// IMPORTANT Need to assign rp and clear MapFLags
 	// make [vp..vp + pageCount) clear
 	MapFlags clear = {0};
 	for(CARD32 i = 0; i < pageCount; i++) {

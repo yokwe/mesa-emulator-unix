@@ -39,11 +39,11 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
+#include "../util/Setting.h"
 #include "../util/GuiOp.h"
 
 #include "../mesa/guam.h"
 #include "../mesa/processor_thread.h"
-#include "../mesa/Setting.h"
 
 #include "../opcode/opcode.h"
 
@@ -77,7 +77,6 @@ int main(int /* argc */, char** /* argv */) {
     config.networkInterface = entry.network.interface;
     config.bootSwitch       = entry.boot.switch_;
     config.bootDevice       = entry.boot.device;
-    config.displayType      = entry.display.type;
     config.displayWidth     = entry.display.width;
     config.displayHeight    = entry.display.height;
     config.vmBits           = entry.memory.vmbits;

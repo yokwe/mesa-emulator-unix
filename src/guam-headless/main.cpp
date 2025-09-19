@@ -77,6 +77,7 @@ int main(int /* argc */, char** /* argv */) {
     config.networkInterface = entry.network.interface;
     config.bootSwitch       = entry.boot.switch_;
     config.bootDevice       = entry.boot.device;
+    config.displayType      = entry.display.type;
     config.displayWidth     = entry.display.width;
     config.displayHeight    = entry.display.height;
     config.vmBits           = entry.memory.vmbits;

@@ -6,7 +6,7 @@
 parray tcl_platform
 
 # load config
-mesa::guam setting GVWin
+mesa::guam config GVWin
 set displayWidth  [mesa::guam config displayWidth]
 set displayHeight [mesa::guam config displayHeight]
 

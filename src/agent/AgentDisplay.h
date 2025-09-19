@@ -42,12 +42,7 @@ public:
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::display;
 	static const inline auto name_ = "Display";
 	static const inline auto fcbSize_ = SIZE(DisplayIOFaceGuam::DisplayFCBType);
-	AgentDisplay() : Agent(index_, name_, fcbSize_) {
-		fcb                  = 0;
-		displayWidth         = 0;
-		displayHeight        = 0;
-	}
-
+	AgentDisplay() : Agent(index_, name_, fcbSize_), fcb(0), displayWidth(0), displayHeight(0), displayType(0) {}
 	void Initialize();
 	void Call();
 

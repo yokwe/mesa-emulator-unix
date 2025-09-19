@@ -72,6 +72,7 @@ std::map<std::string, std::string*> stringMap = {
     FIELD_MAP_ENTRY(networkInterface),
     FIELD_MAP_ENTRY(bootSwitch),
     FIELD_MAP_ENTRY(bootDevice),
+    FIELD_MAP_ENTRY(displayType),
 };
 std::map<std::string, int*> intMap = {
     FIELD_MAP_ENTRY(displayWidth),
@@ -146,47 +147,8 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
             interp.result(result);
             return TCL_OK;
         }
-        if (objc == 3 || objc == 4) {
-            std::string subject = tcl::toString(objv[2]);
-            if (intMap.contains(subject)) {
-                if (objc == 3) {
-                    int* p = intMap.at(subject);
-                    interp.result(*p);
-                    return TCL_OK;
-                }
-                if (objc == 4) {
-                    int* p = intMap.at(subject);
-                    auto value = toInt(interp, objv[3], status);
-                    if (status == TCL_OK) *p = value;
-                    return status;
-                }
-            }
-            if (stringMap.contains(subject)) {
-                if (objc == 3) {
-                    std::string* p = stringMap.at(subject);
-                    interp.result(*p);
-                    return TCL_OK;
-                }
-                if (objc == 4) {
-                    std::string* p = stringMap.at(subject);
-                    auto value = tcl::toString(objv[3]);
-                    *p = value;
-                    return TCL_OK;
-                }
-            }
-        }
-    }
-    if (subCommand == "setting") {
-        auto setting = Setting::getInstance();
-        if (objc == 2) {
-            std::string string = "valid entry for setting are ";
-            for(auto i = setting.entryList.cbegin(); i != setting.entryList.cend(); i++) {
-                string.append(std_sprintf(" %s", i->name));
-            }
-            interp.result(string);
-            return TCL_OK;
-        }
         if (objc == 3) {
+            auto setting = Setting::getInstance();
             std::string entryName = Tcl_GetString(objv[2]);
             if (!setting.containsEntry(entryName)) {
                 auto string = std_sprintf("no entry \"%s\" in setting", entryName);
@@ -202,6 +164,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
             config.networkInterface = entry.network.interface;
             config.bootSwitch       = entry.boot.switch_;
             config.bootDevice       = entry.boot.device;
+            config.displayType      = entry.display.type;
             config.displayWidth     = entry.display.width;
             config.displayHeight    = entry.display.height;
             config.vmBits           = entry.memory.vmbits;

@@ -47,6 +47,7 @@ struct Config {
     std::string networkInterface;
     std::string bootSwitch;
     std::string bootDevice;
+    std::string displayType;
 
     int displayWidth;
     int displayHeight;

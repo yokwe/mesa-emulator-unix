@@ -147,29 +147,51 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
             interp.result(result);
             return TCL_OK;
         }
-        if (objc == 3) {
-            auto setting = Setting::getInstance();
-            std::string entryName = Tcl_GetString(objv[2]);
-            if (!setting.containsEntry(entryName)) {
-                auto string = std_sprintf("no entry \"%s\" in setting", entryName);
-                interp.result(string);
-                return TCL_ERROR;
+       if (objc == 3) {
+            std::string subject = tcl::toString(objv[2]);
+            if (intMap.contains(subject)) {
+                if (objc == 3) {
+                    int* p = intMap.at(subject);
+                    interp.result(*p);
+                    return TCL_OK;
+                }
             }
-            auto entry   = setting.getEntry(entryName);
+            if (stringMap.contains(subject)) {
+                if (objc == 3) {
+                    std::string* p = stringMap.at(subject);
+                    interp.result(*p);
+                    return TCL_OK;
+                }
+            }
+        }
+        if (objc == 4) {
+            // mesa::guam config load GVWin
+            // 0          1      2    3
+            std::string subject = tcl::toString(objv[2]);
+            if (subject == "load") {
+                auto setting = Setting::getInstance();
+                std::string entryName = Tcl_GetString(objv[3]);
+                if (!setting.containsEntry(entryName)) {
+                    auto string = std_sprintf("no entry \"%s\" in setting", entryName);
+                    interp.result(string);
+                    return TCL_ERROR;
+                }
+                auto entry   = setting.getEntry(entryName);
 
-            config.diskFilePath     = entry.file.disk;
-            config.germFilePath     = entry.file.germ;
-            config.bootFilePath     = entry.file.boot;
-            config.floppyFilePath   = entry.file.floppy;
-            config.networkInterface = entry.network.interface;
-            config.bootSwitch       = entry.boot.switch_;
-            config.bootDevice       = entry.boot.device;
-            config.displayType      = entry.display.type;
-            config.displayWidth     = entry.display.width;
-            config.displayHeight    = entry.display.height;
-            config.vmBits           = entry.memory.vmbits;
-            config.rmBits           = entry.memory.rmbits;
-            return TCL_OK;
+                config.diskFilePath     = entry.file.disk;
+                config.germFilePath     = entry.file.germ;
+                config.bootFilePath     = entry.file.boot;
+                config.floppyFilePath   = entry.file.floppy;
+                config.networkInterface = entry.network.interface;
+                config.bootSwitch       = entry.boot.switch_;
+                config.bootDevice       = entry.boot.device;
+                config.displayType      = entry.display.type;
+                config.displayWidth     = entry.display.width;
+                config.displayHeight    = entry.display.height;
+                config.vmBits           = entry.memory.vmbits;
+                config.rmBits           = entry.memory.rmbits;
+                return TCL_OK;
+            }
         }
     }
     if (subCommand == "time" && objc == 2) {

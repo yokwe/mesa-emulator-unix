@@ -12,7 +12,6 @@ target_sources(
 		GuiOP.h
 		OpcodeInfo.h
 		Perf.h
-		Setting.h
 		tcl.h
     	Util.h
 	PRIVATE
@@ -20,7 +19,6 @@ target_sources(
 		GuiOp.cpp
 		OpcodeInfo.cpp
 		Perf.cpp
-		Setting.cpp
 		tcl.cpp
 		Util.cpp
 )

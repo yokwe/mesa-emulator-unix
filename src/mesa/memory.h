@@ -72,14 +72,13 @@ namespace memory {
 	CARD32  getVPSize();
 	CARD32  getRPSize();
 
-	void    reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_);
-	CARD32  getDisplayPageSize();
-	CARD32  getDisplayBytesPerLine();
+	void    reserveDisplayPage(CARD32 displayPageSize);
 
 	void    mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock);
 	CARD32  getDisplayRealPage();
 	Page*   getDisplayPage();
 	CARD32  getDisplayVirtualPage();
+	CARD32  getDisplayPageSize();
 
 	bool	isMemoryInitialize();
 	bool    isDisplayMapped();

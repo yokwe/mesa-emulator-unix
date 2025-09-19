@@ -56,7 +56,6 @@ CARD32  displayRealPage     = 0;
 CARD32  displayVirtualPage  = 0;
 CARD32  displayWidth        = 0;
 CARD32  displayHeight       = 0;
-CARD32  displayBytesPerLine = 0;
 
 static void initializeVariables() {
 	vpSize              = 0;
@@ -69,7 +68,6 @@ static void initializeVariables() {
 	displayVirtualPage  = 0;
 	displayWidth        = 0;
 	displayHeight       = 0;
-	displayBytesPerLine = 0;
 }
 
 //  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
@@ -160,23 +158,8 @@ CARD32 getRPSize() {
 	return rpSize - displayPageSize;
 }
 
-void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
-	// Taken from APilot/15.3/Faces/Private/UserterminalHeadGuam.mesa
-	// UserTerminal::CalculateDisplayPages
-    // wordsPerDWord: CARDINAL = 2;
-    // bitsPerDWord: CARDINAL = Environment.bitsPerWord * wordsPerDWord;
-    const int wordsPerDWord = 2;
-	const int bitsPerDWord = Environment::bitsPerWord * wordsPerDWord;
-
-	displayWidth = displayWidth_;
-	displayHeight = displayHeight_;
-
-	int alignedDisplayWidth = multipleOf(displayWidth, bitsPerDWord);
-	displayBytesPerLine = alignedDisplayWidth / 8;
-
-	int imageSizeInByte = (alignedDisplayWidth * displayHeight) / 8;
-	int pageSizeInByte  = PageSize * sizeof(CARD16);
-	displayPageSize     = multipleOf(imageSizeInByte, pageSizeInByte) / pageSizeInByte;
+void reserveDisplayPage(CARD32 displayPageSize_) {
+	displayPageSize = displayPageSize_;
 	const CARD32 vp = rpSize - displayPageSize;
 	displayRealPage = maps[vp].rp;
 
@@ -189,20 +172,11 @@ void reserveDisplayPage(CARD16 displayWidth_, CARD16 displayHeight_) {
 		WriteMap(vp + i, map);
 	}
 
-	logger.info("%s rp = %6X+%2X", __FUNCTION__, rpSize - displayPageSize, displayPageSize);
-}
-
-CARD32 getDisplayPageSize() {
-	if (displayRealPage == 0) ERROR();
-	return displayPageSize;
-}
-CARD32 getDisplayBytesPerLine() {
-	if (displayBytesPerLine == 0) ERROR();
-	return displayBytesPerLine;
+	logger.info("%s  %6X+%X", __FUNCTION__, rpSize - displayPageSize, displayPageSize);
 }
 
 void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock) {
-	logger.info("%s  %6X+%2X  %6X %3d %3d", __FUNCTION__, vp, pageCount, rp, pageCount, pageCountInEachBlock);
+	logger.info("%s  %6X+%X  %6X %X %X", __FUNCTION__, vp, pageCount, rp, pageCount, pageCountInEachBlock);
 	if (rp != displayRealPage) {
 		logger.fatal("rp              = %d", rp);
 		logger.fatal("displayRealPage = %d", displayRealPage);
@@ -211,7 +185,7 @@ void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBl
 	if (pageCount != displayPageSize) {
 		logger.fatal("pageCount       = %d", pageCount);
 		logger.fatal("displayPageSize = %d", displayPageSize);
-		ERROR();
+//		ERROR();
 	}
 	displayVirtualPage = vp;
 
@@ -242,6 +216,10 @@ Page* getDisplayPage() {
 CARD32 getDisplayVirtualPage() {
 	if (displayVirtualPage == 0) ERROR();
 	return displayVirtualPage;
+}
+CARD32 getDisplayPageSize() {
+	if (displayPageSize == 0) ERROR();
+	return displayPageSize;
 }
 
 bool isMemoryInitialize() {

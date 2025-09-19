@@ -51,13 +51,10 @@ static const Logger logger(__FILE__);
 void AgentDisplay::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	// displayMemoryAddress is usded to startingRealPage of E_MAPDISPLAY
-	// displayType displayWidth displayHeight is used to calculate number of page for display
-
 	fcb = (DisplayIOFaceGuam::DisplayFCBType *)memory::peek(fcbAddress);
 	fcb->command                = DisplayIOFaceGuam::C_nop;
 	fcb->status                 = DisplayIOFaceGuam::S_success;
-	fcb->displayMemoryAddress   = memory::getDisplayRealPage();
+	fcb->displayMemoryAddress   = displayMemoryAddress;
 	fcb->color.red              = 0;
 	fcb->color.green            = 0;
 	fcb->color.blue             = 0;

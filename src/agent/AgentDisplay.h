@@ -42,25 +42,32 @@ public:
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::display;
 	static const inline auto name_ = "Display";
 	static const inline auto fcbSize_ = SIZE(DisplayIOFaceGuam::DisplayFCBType);
-	AgentDisplay() : Agent(index_, name_, fcbSize_), fcb(0), displayWidth(0), displayHeight(0), displayType(0) {}
+	AgentDisplay() : Agent(index_, name_, fcbSize_), fcb(0), displayType(0), displayWidth(0), displayHeight(0) {}
 	void Initialize();
 	void Call();
 
+	void setDisplayType(CARD16 newValue) {
+		this->displayType = newValue;
+	}
 	void setDisplayWidth(CARD16 newValue) {
 		this->displayWidth = newValue;
 	}
 	void setDisplayHeight(CARD16 newValue) {
 		this->displayHeight = newValue;
 	}
-	void setDisplayType(CARD16 newValue) {
-		this->displayType = newValue;
+	void setDisplayMemoryAddress(CARD32 newValue) {
+		this->displayMemoryAddress = newValue;
 	}
 
 	
 private:
 	DisplayIOFaceGuam::DisplayFCBType *fcb;
-	//
+
+	// displayMemoryAddress is usded to startingRealPage of E_MAPDISPLAY
+	// displayMemoryAddress is real memory address
+
+	CARD16 displayType;
 	CARD16 displayWidth;
 	CARD16 displayHeight;
-	CARD16 displayType;
+	CARD32 displayMemoryAddress;
 };

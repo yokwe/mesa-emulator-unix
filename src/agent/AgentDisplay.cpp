@@ -160,3 +160,13 @@ void AgentDisplay::Call() {
 		break;
 	}
 }
+
+void AgentDisplay::setDisplayWidth(CARD16 newValue) {
+	this->displayWidth = newValue;
+}
+void AgentDisplay::setDisplayHeight(CARD16 newValue) {
+	this->displayHeight = newValue;
+}
+void AgentDisplay::setDisplayType(DisplayIOFaceGuam::DisplayType newValue) {
+	this->displayType = newValue;
+}

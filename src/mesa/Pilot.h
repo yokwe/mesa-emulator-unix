@@ -2403,9 +2403,11 @@ namespace DisplayIOFaceGuam {
 
 	//DisplayType: TYPE = MACHINE DEPENDENT {
 	//  monochrome(0), fourBitPlaneColor(1), byteColor(2)};
-	const CARD16 T_monochrome        = 0;
-	const CARD16 T_fourBitPlaneColor = 1;
-	const CARD16 T_byteColor         = 2;
+	enum class DisplayType : CARD32 {
+		monochrome        = 0,
+		fourBitPlaneColor = 1,
+		byteColor         = 2,
+	};
 
 	//-- Fields in LookupTableEntry are arranged from high to low within a 32-bit word.
 	//LookupTableEntry: TYPE = MACHINE DEPENDENT RECORD [
@@ -2495,7 +2497,7 @@ namespace DisplayIOFaceGuam {
 		CARD16              patternFillMode;
 		CARD16              complemented;
 		CARD16              colorIndex;
-		CARD16              displayType;
+		DisplayType         displayType;
 		CARD16              displayWidth;
 		CARD16              displayHeight;
 	};

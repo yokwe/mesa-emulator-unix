@@ -51,21 +51,14 @@ public:
 	void Initialize();
 	void Call();
 
-	void setDisplayWidth(CARD16 newValue) {
-		this->displayWidth = newValue;
-	}
-	void setDisplayHeight(CARD16 newValue) {
-		this->displayHeight = newValue;
-	}
-	void setDisplayType(CARD16 newValue) {
-		this->displayType = newValue;
-	}
+	void setDisplayWidth(CARD16 newValue);
+	void setDisplayHeight(CARD16 newValue);
+	void setDisplayType(DisplayIOFaceGuam::DisplayType newValue);
 
-	
 private:
 	DisplayIOFaceGuam::DisplayFCBType *fcb;
 	//
-	CARD16 displayWidth;
-	CARD16 displayHeight;
-	CARD16 displayType;
+	CARD16                         displayWidth;
+	CARD16                         displayHeight;
+	DisplayIOFaceGuam::DisplayType displayType;
 };

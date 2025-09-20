@@ -39,24 +39,19 @@
 
 namespace display {
 
-class DisplayContext {
-public:
-	CARD16 type;
-	CARD16 width;
-	CARD16 height;
+struct Config {
+	int type;
+	int width;
+	int height;
 
-	CARD32 wordsPerLine;
-	CARD32 words;
-	CARD32 pagesForBitmap;
+	int wordsPerLine;
+	int wordSize;
+	int pageSize;
 
-    CARD32 displayMemoryAddress;
-
-    DisplayContext() :
-        type(0), width(0), height(0), wordsPerLine(0), words(0), pagesForBitmap(0), displayMemoryAddress(0) {}
-	DisplayContext(CARD16 type_, CARD16 width_, CARD16 height_, CARD32 wordsPerLine_, CARD32 words_, CARD32 pagesForBitmap_) :
-		type(type_), width(width_), height(height_), wordsPerLine(wordsPerLine_), words(words_), pagesForBitmap(pagesForBitmap_), displayMemoryAddress(0) {}
-
-	static DisplayContext getInstance(CARD16 type, CARD16 width, CARD16 height);
+	Config() : type(0), width(0), height(0), wordsPerLine(0), wordSize(0), pageSize(0) {}
 };
+
+const Config& getConfig();
+void initialize(CARD16 type, CARD16 width, CARD16 height);
 
 }

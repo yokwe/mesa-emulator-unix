@@ -42,32 +42,25 @@ static const Logger logger(__FILE__);
 
 namespace memory {
 
-constexpr CARD32 MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize * WordSize;
-constexpr int    VMBITS_MIN               = 20;
-constexpr int    VMBITS_MAX               = 25;
+Config config;
+const Config& getConfig() {
+	return config;
+}
 
-CARD32  vpSize              = 0;
-CARD32  rpSize              = 0;
-Map*    maps                = 0;
-CARD16* pages               = 0;
-Page**  realPage            = 0;
-CARD32  displayPageSize     = 0;
-CARD32  displayRealPage     = 0;
-CARD32  displayVirtualPage  = 0;
-CARD32  displayWidth        = 0;
-CARD32  displayHeight       = 0;
+
+constexpr int MAX_REALMEMORY_PAGE_SIZE = RealMemoryImplGuam::largestArraySize * WordSize;
+constexpr int VMBITS_MIN               = 20;
+constexpr int VMBITS_MAX               = 25;
+
+Map*    maps      = 0;
+CARD16* pages     = 0;
+Page**  realPage  = 0;
 
 static void initializeVariables() {
-	vpSize              = 0;
-	rpSize              = 0;
-	maps                = 0;
-	pages               = 0;
-	realPage            = 0;
-	displayPageSize     = 0;
-	displayRealPage     = 0;
-	displayVirtualPage  = 0;
-	displayWidth        = 0;
-	displayHeight       = 0;
+	maps     = 0;
+	pages    = 0;
+	realPage = 0;
+	config.clear();
 }
 
 //  From APilot/15.3/Pilot/Private/GermOpsImpl.mesa
@@ -83,36 +76,36 @@ static void initializeVariables() {
 //	   4. Set WDC>0, NWW=0, MDS=Boot.mdsiGerm, STKP=0.
 //	   5. Xfer[dest: Boot.pInitialLink].
 void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
-	if (vpSize) ERROR();
+	if (config.vpSize) ERROR();
 	if (vmBits < VMBITS_MIN) ERROR();
 	if (VMBITS_MAX < vmBits) ERROR();
 	if (vmBits < rmBits) ERROR();
 
 	initializeVariables();
 
-	vpSize = 1 << (vmBits - Environment::logWordsPerPage);
-	rpSize = 1 << (rmBits - Environment::logWordsPerPage);
+	config.vpSize = 1 << (vmBits - Environment::logWordsPerPage);
+	config.rpSize = 1 << (rmBits - Environment::logWordsPerPage);
 
-	if (MAX_REALMEMORY_PAGE_SIZE < rpSize) rpSize = MAX_REALMEMORY_PAGE_SIZE;
+	if (MAX_REALMEMORY_PAGE_SIZE < config.rpSize) config.rpSize = MAX_REALMEMORY_PAGE_SIZE;
 
 //	logger.info("vmBist = %d  vpSize = %6d  %4X", vmBits, vpSize, vpSize);
 //	logger.info("rmBist = %d  rpSize = %6d  %4X", rmBits, rpSize, rpSize);
 
 	// allocate pages.
-	pages = new CARD16[rpSize * PageSize];
+	pages = new CARD16[config.rpSize * PageSize];
 	// initialize for valgrind
-	memset(pages, 0, sizeof(CARD16) * rpSize * PageSize);
+	memset(pages, 0, sizeof(CARD16) * config.rpSize * PageSize);
 
 	// allocate realPage and assign their values.
-	realPage = new Page*[rpSize];
-	for(CARD32 i = 0; i < rpSize; i++) {
+	realPage = new Page*[config.rpSize];
+	for(CARD32 i = 0; i < config.rpSize; i++) {
 		realPage[i] = (Page *)(pages + i * PageSize);
 	}
 
 	MapFlags vacant = {6};
 	MapFlags clear = {0};
 
-	maps = new Map[vpSize];
+	maps = new Map[config.vpSize];
 	//const int VP_START = pageGerm + countGermVM;
 	CARD32 rp = 0;
 	// vp:[ioRegionPage .. 256) <=> rp:[0..256-ioRegionPage)
@@ -126,18 +119,16 @@ void initialize(int vmBits, int rmBits, CARD16 ioRegionPage) {
 		maps[i].rp = rp++;
 	}
 	// vp: [256 .. rpSize)
-	for(CARD32 i = 256; i < rpSize; i++) {
+	for(CARD32 i = 256; i < config.rpSize; i++) {
 		maps[i].mf = clear;
 		maps[i].rp = rp++;
 	}
-	if (rp != rpSize) ERROR();
+	if (rp != config.rpSize) ERROR();
 	// vp: [rpSize .. vpSize)
-	for(CARD32 i = rpSize; i < vpSize; i++) {
+	for(CARD32 i = config.rpSize; i < config.vpSize; i++) {
 		maps[i].mf = vacant;
 		maps[i].rp = 0;
 	}
-
-	// TOTO take parameter of display width and height and allocate display emmory here
 
 	// initialize related class
 	cache::initialize();
@@ -151,43 +142,38 @@ void finalize() {
 	initializeVariables();
 }
 
-CARD32 getVPSize() {
-	return vpSize;
-}
-CARD32 getRPSize() {
-	return rpSize - displayPageSize;
-}
+void reserveDisplayPage(int displayPageSize) {
+	config.display.pageSize = displayPageSize;
 
-void reserveDisplayPage(CARD32 displayPageSize_) {
-	displayPageSize = displayPageSize_;
-	const CARD32 vp = rpSize - displayPageSize;
-	displayRealPage = maps[vp].rp;
+	// grab allocated real memory for display
+	const CARD32 vp = config.rpSize - config.display.pageSize;
+	config.display.rp = maps[vp].rp;
 
 	// make [rpSize - displayPageSize..rpSize) vacant
 	MapFlags vacant = {6};
-	for(CARD32 i = 0; i < displayPageSize; i++) {
-		Map map;
-		map.mf = vacant;
-		map.rp = 0;
+	Map map;
+	map.mf = vacant;
+	map.rp = 0;
+	for(int i = 0; i < displayPageSize; i++) {
 		WriteMap(vp + i, map);
 	}
 
-	logger.info("%s  %6X+%X", __FUNCTION__, rpSize - displayPageSize, displayPageSize);
+	logger.info("%s  %6X+%X", __FUNCTION__, config.rpSize, config.display.pageSize);
 }
 
 void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock) {
 	logger.info("%s  %6X+%X  %6X %X %X", __FUNCTION__, vp, pageCount, rp, pageCount, pageCountInEachBlock);
-	if (rp != displayRealPage) {
-		logger.fatal("rp              = %d", rp);
-		logger.fatal("displayRealPage = %d", displayRealPage);
+	if (rp != (CARD32)config.display.rp) {
+		logger.fatal("rp                = %d", rp);
+		logger.fatal("config.display.rp = %d", config.display.rp);
 		ERROR();
 	}
-	if (pageCount != displayPageSize) {
+	if (pageCount != config.display.pageSize) {
 		logger.fatal("pageCount       = %d", pageCount);
-		logger.fatal("displayPageSize = %d", displayPageSize);
-//		ERROR();
+		logger.fatal("config.display.pageSize = %d", config.display.pageSize);
+		ERROR();
 	}
-	displayVirtualPage = vp;
+	config.display.vp = vp;
 
 	// for(CARD32 i = 0; i < pageCount; i++) {
 	// 	Map map = maps[vp + i];
@@ -205,39 +191,19 @@ void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBl
 	}
 }
 
-CARD32 getDisplayRealPage() {
-	if (displayRealPage == 0) ERROR();
-	return displayRealPage;
-}
-Page* getDisplayPage() {
-	if (displayRealPage == 0) ERROR();
-	return realPage[displayRealPage];
-}
-CARD32 getDisplayVirtualPage() {
-	if (displayVirtualPage == 0) ERROR();
-	return displayVirtualPage;
-}
-CARD32 getDisplayPageSize() {
-	if (displayPageSize == 0) ERROR();
-	return displayPageSize;
-}
-
-bool isMemoryInitialize() {
-	return vpSize;
-}
 bool isDisplayMapped() {
-	return 	displayVirtualPage;
+	return 	config.isDisplayMapped();
 }
 
 
-int isDisplayPage(CARD32 vp) {
-	if (displayVirtualPage == 0) ERROR();
-	return (displayVirtualPage <= vp && vp < (displayVirtualPage + displayPageSize));
+int isDisplayPage(int vp) {
+	if (config.display.pageSize == 0) ERROR();
+	return config.isDisplayPage(vp);
 }
 
 CARD16* FetchPage(CARD32 vp) {
 	PERF_COUNT(memory, FetchPage)
-	if (vpSize <= vp) ERROR();
+	if (config.vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	Map map = *p;
 	if (map.mf.isVacant()) PageFault(vp * PageSize);
@@ -252,7 +218,7 @@ CARD16* FetchPage(CARD32 vp) {
 }
 CARD16* StorePage(CARD32 vp) {
 	PERF_COUNT(memory, StorePage)
-	if (vpSize <= vp) ERROR();
+	if (config.vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	Map map = *p;
 	if (map.mf.isVacant()) PageFault(vp * PageSize);
@@ -271,7 +237,7 @@ CARD16* peek(CARD32 va) {
 	PERF_COUNT(memory, GetAddress)
 	const CARD32 vp = va / PageSize;
 	const CARD32 of = va % PageSize;
-	if (vpSize <= vp) ERROR()
+	if (config.vpSize <= vp) ERROR()
 	Map map = maps[vp];
 	if (map.mf.isVacant()) {
 		logger.fatal("%s  va = %6X  vp = %4X", __FUNCTION__, va, vp);
@@ -285,26 +251,26 @@ CARD16* peek(CARD32 va) {
 }
 
 void setReferencedFlag(CARD32 vp) {
-	if (vpSize <= vp) ERROR();
+	if (config.vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	p->mf.referenced = 1;
 }
 void setReferencedDirtyFlag(CARD32 vp) {
-	if (vpSize <= vp) ERROR();
+	if (config.vpSize <= vp) ERROR();
 	Map *p = maps + vp;
 	p->mf.referenced = 1;
 	p->mf.dirty      = 1;
 }
 
 Map ReadMap(CARD32 vp) {
-	if (vpSize <= vp) ERROR();
+	if (config.vpSize <= vp) ERROR();
 	Map map = maps[vp];
 	if (map.mf.isVacant()) map.rp = 0;
 	return map;
 }
 void WriteMap(CARD32 vp, Map map) {
-	if (vpSize <= vp) ERROR();
-	if (rpSize <= map.rp) ERROR();
+	if (config.vpSize <= vp) ERROR();
+	if (config.rpSize <= map.rp) ERROR();
 
 	if (map.mf.isVacant()) map.rp = 0;
 

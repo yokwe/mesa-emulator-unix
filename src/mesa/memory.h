@@ -46,112 +46,164 @@
 
 
 // 3.1 Virtual Memory
+
+//
+// namespace memory
+//
 namespace memory {
-	struct Page { CARD16 word[PageSize]; };
-#pragma pack(push, 2)
-	struct Map {
-		MapFlags mf;
-		CARD16 rp;
+
+struct Config {
+	struct Display {
+		int     pageSize;
+		int     vp;
+		int     rp;
+		CARD16* bitmap;
+
+		Display() {
+			clear();
+		}
+		void clear() {
+			pageSize = 0;
+			vp       = 0;
+			rp       = 0;
+			bitmap   = 0;
+		}
 	};
+
+	CARD32  vpSize;
+	CARD32  rpSize;
+	Display display;
+
+	Config() {
+		clear();
+	}
+	void clear() {
+		vpSize = 0;
+		rpSize = 0;
+		display.clear();
+	}
+
+	bool isDisplayMapped() {
+		return display.vp;
+	}
+	bool isDisplayPage(int vp) {
+		return display.vp <= vp && vp < display.vp + display.pageSize;
+	}
+};
+const Config& getConfig();
+
+
+struct Page { CARD16 word[PageSize]; };
+#pragma pack(push, 2)
+struct Map {
+	MapFlags mf;
+	CARD16 rp;
+};
 #pragma pack(pop)
 
-	Map     ReadMap(CARD32 vp);
-	void    WriteMap(CARD32 vp, Map map);
+Map     ReadMap(CARD32 vp);
+void    WriteMap(CARD32 vp, Map map);
 
-	CARD16* FetchPage(CARD32 vp);
-	CARD16* StorePage(CARD32 vp);
+CARD16* FetchPage(CARD32 vp);
+CARD16* StorePage(CARD32 vp);
 
-	void    initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
-	void    finalize();
+void    initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
+void    finalize();
 
-	CARD16* peek(CARD32 va);
-	//
-	void    setReferencedFlag(CARD32 vp);
-	void    setReferencedDirtyFlag(CARD32 vp);
+CARD16* peek(CARD32 va);
+//
+void    setReferencedFlag(CARD32 vp);
+void    setReferencedDirtyFlag(CARD32 vp);
 
-	CARD32  getVPSize();
-	CARD32  getRPSize();
+// CARD32  getVPSize();
+// CARD32  getRPSize();
 
-	void    reserveDisplayPage(CARD32 displayPageSize);
+void reserveDisplayPage(int displayPageSize);
+void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock);
+// CARD32  getDisplayRealPage();
+// Page*   getDisplayPage();
+// CARD32  getDisplayVirtualPage();
+// CARD32  getDisplayPageSize();
 
-	void    mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock);
-	CARD32  getDisplayRealPage();
-	Page*   getDisplayPage();
-	CARD32  getDisplayVirtualPage();
-	CARD32  getDisplayPageSize();
+// bool	isMemoryInitialize();
+// bool    isDisplayMapped();
 
-	bool	isMemoryInitialize();
-	bool    isDisplayMapped();
+// int     isDisplayPage(CARD32 vp);
 
-	int     isDisplayPage(CARD32 vp);
 
-	namespace cache {
-		constexpr CARD32 N_BIT = 16;
-		constexpr CARD32 N_ENTRY = 1 << N_BIT;
-		constexpr CARD32 MASK = (1 << N_BIT) - 1;
-		inline CARD32 hash(CARD32 vp_) {
-			// When N_BIT == 16, there is no conflict during booting gvwin
-			return vp_ & MASK;
-		}
-		//
-		struct Entry {		
-			union {
-				CARD32 flag;
-				struct {
-					CARD32 vpno      : 30;
-					CARD32 flagFetch :  1;
-					CARD32 flagStore :  1;
-				};
-			};
-			CARD16* page;
+//
+// namespace memory::cache
+//
+namespace cache {
 
-			void clear() {
-				flag = 0;
-				page = 0;
-			}
-		};
-		extern uint64_t   hit;
-		extern uint64_t   missConflict;
-		extern uint64_t   missEmpty;
-		extern Entry      entry[N_ENTRY];
-
-		inline Entry* getEntry(CARD32 vp_) {
-			return entry + hash(vp_);
-		}
-
-		void initialize();
-		void invalidate(CARD32 vp_);
-		void stats();
-
-		void fetchSetup(Entry *p, CARD32 vp);
-		void fetchMaintainFlag(Entry *p, CARD32 vp);
-		inline CARD16* fetch(CARD32 va) {
-			const CARD32 vp = va / PageSize;
-			Entry *p = getEntry(vp);
-			if (p->vpno != vp) {
-				fetchSetup(p, vp);
-			} else {
-				if (PERF_ENABLE) hit++;
-				if (p->flagFetch == 0) fetchMaintainFlag(p, vp);
-			}
-			return p->page + (va % PageSize);
-		}
-
-		void storeSetup(Entry *p, CARD32 vp);
-		void storeMaintainFlag(Entry *p, CARD32 vp);
-		inline CARD16* store(CARD32 va) {
-			const CARD32 vp = va / PageSize;
-			Entry *p = getEntry(vp);
-			if (p->vpno != vp) {
-				storeSetup(p, vp);
-			} else {
-				if (PERF_ENABLE) hit++;
-				if (p->flagStore == 0) storeMaintainFlag(p, vp);
-			}
-			return p->page + (va % PageSize);
-		}
-	}
+constexpr CARD32 N_BIT = 16;
+constexpr CARD32 N_ENTRY = 1 << N_BIT;
+constexpr CARD32 MASK = (1 << N_BIT) - 1;
+inline CARD32 hash(CARD32 vp_) {
+	// When N_BIT == 16, there is no conflict during booting gvwin
+	return vp_ & MASK;
 }
+//
+struct Entry {		
+	union {
+		CARD32 flag;
+		struct {
+			CARD32 vpno      : 30;
+			CARD32 flagFetch :  1;
+			CARD32 flagStore :  1;
+		};
+	};
+	CARD16* page;
+
+	void clear() {
+		flag = 0;
+		page = 0;
+	}
+};
+extern uint64_t   hit;
+extern uint64_t   missConflict;
+extern uint64_t   missEmpty;
+extern Entry      entry[N_ENTRY];
+
+inline Entry* getEntry(CARD32 vp_) {
+	return entry + hash(vp_);
+}
+
+void initialize();
+void invalidate(CARD32 vp_);
+void stats();
+
+void fetchSetup(Entry *p, CARD32 vp);
+void fetchMaintainFlag(Entry *p, CARD32 vp);
+inline CARD16* fetch(CARD32 va) {
+	const CARD32 vp = va / PageSize;
+	Entry *p = getEntry(vp);
+	if (p->vpno != vp) {
+		fetchSetup(p, vp);
+	} else {
+		if (PERF_ENABLE) hit++;
+		if (p->flagFetch == 0) fetchMaintainFlag(p, vp);
+	}
+	return p->page + (va % PageSize);
+}
+
+void storeSetup(Entry *p, CARD32 vp);
+void storeMaintainFlag(Entry *p, CARD32 vp);
+inline CARD16* store(CARD32 va) {
+	const CARD32 vp = va / PageSize;
+	Entry *p = getEntry(vp);
+	if (p->vpno != vp) {
+		storeSetup(p, vp);
+	} else {
+		if (PERF_ENABLE) hit++;
+		if (p->flagStore == 0) storeMaintainFlag(p, vp);
+	}
+	return p->page + (va % PageSize);
+}
+
+} // end of namespace memory::cache
+
+} // end of namespace memory
 
 
 inline int isSamePage(CARD32 ptrA, CARD32 ptrB) {

@@ -232,25 +232,26 @@ static void initialize() {
 
 	elapsedTime = 0;
 
+	const memory::Config& memoryConfig = memory::getConfig();
+
+	{
+		auto displayType = displayTypeMap.at(config.displayType);
+		display::initialize(displayType, config.displayWidth, config.displayHeight);
+	}
+	const display::Config& displayConfig = display::getConfig();
+	logger.info("displayConnfig  %s  %d x %d   %d pages", config.displayType, displayConfig.width, displayConfig.height, displayConfig.pageSize);
+
 	//
 	// Setup Agents
 	//
 	// AgentDisplay
-	{
-		auto displayType = displayTypeMap.at(config.displayType);
-		display::initialize(displayType, config.displayWidth, config.displayHeight);
-		auto displayConfig = display::getConfig();
-		logger.info("displayConnfig  %s  %d x %d   %d pages", config.displayType, displayConfig.width, displayConfig.height, displayConfig.pageSize);
-		// Reserve real memory for display
-		memory::reserveDisplayPage(displayConfig.pageSize);
-		auto memoryConfig = memory::getConfig();
-		
-		// configure AgentDisplay
-		display.setDisplayType(displayConfig.type);
-		display.setDisplayWidth(displayConfig.width);
-		display.setDisplayHeight(displayConfig.height);
-		display.setDisplayMemoryAddress(memoryConfig.display.rp);
-	}
+	// Reserve real memory for display
+	memory::reserveDisplayPage(displayConfig.pageSize);
+	// configure AgentDisplay
+	display.setDisplayType(displayConfig.type);
+	display.setDisplayWidth(displayConfig.width);
+	display.setDisplayHeight(displayConfig.height);
+	display.setDisplayMemoryAddress(memoryConfig.display.rp);
 
 	// AgentDisk
 	diskFile.attach(config.diskFilePath);
@@ -267,6 +268,8 @@ static void initialize() {
 	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
 	// set PID to AgentProcessor
 	processor.setProcessorID(PID[1], PID[2], PID[3]);
+	processor.setRealMemoryPageCount(memoryConfig.rpSize);
+	processor.setVirtualMemoryPageCount(memoryConfig.vpSize);
 	// Stream::Boot
 	// bootFilePath
 	// Enable Agents

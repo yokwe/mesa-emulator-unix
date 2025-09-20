@@ -38,6 +38,7 @@
 #include <map>
 #include <utility>
 #include <thread>
+#include <bit>
 
 #include <tcl.h>
 #include <tclDecls.h>
@@ -51,6 +52,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/processor_thread.h"
 #include "../mesa/memory.h"
 #include "../mesa/setting.h"
+#include "../mesa/display.h"
 
 #include "../opcode/opcode.h"
 
@@ -118,6 +120,156 @@ void fill(Tk_PhotoImageBlock& imageBlock, uint8_t r, uint8_t g, uint8_t b) {
             p += imageBlock.pixelSize;
         }
         lineStart += imageBlock.pitch;
+    }
+}
+
+class MesaMonoSource {
+public:
+    const int MASK_INIT = 0x8000;
+
+    int height;
+    int width;
+    int wordsPerLine;
+
+    CARD16* line;
+    CARD16* p;
+    int x;
+    int y;
+    int mask;
+    int word;
+
+    MesaMonoSource(CARD16* bitmap, const display::Config& config) {
+        height = config.height;
+        width = config.width;
+        wordsPerLine = config.wordsPerLine;
+
+        line = bitmap;
+        p  = line;
+        x = 0;
+        y = 0;
+        mask = MASK_INIT;
+        word = std::byteswap(*p);
+    };
+
+    int test() {
+        return word & mask;
+    }
+    int next() {
+//        logger.info("mesa  next  %4d  %4d", x, y);
+        if ((x + 1) < width) {
+            x++;
+            if (x & 0x0F) {
+                mask >>= 1;
+            } else {
+                // advance word
+                mask = MASK_INIT;
+                p++;
+                word = std::byteswap(*p);
+            }
+        } else {
+            if ((y + 1) < height) {
+                // advance line
+                y++;
+                line += wordsPerLine;
+                p = line;
+                x = 0;
+                mask = MASK_INIT;
+                word = std::byteswap(*p);
+            } else {
+                // reach to end
+                return 0;
+            }
+        }
+        return 1;
+    }
+};
+class PhotoDest {
+public:
+    CARD8 *pixelPtr;	// Pointer to the first pixel.
+    int width;			// Width of block, in pixels.
+    int height;			// Height of block, in pixels.
+    int pitch;			// Address difference between corresponding pixels in successive lines.
+    int pixelSize;		// Address difference between successive pixels in the same line.
+    int offsetR;        // Address differences between the red, green, blue and alpha components of the pixel and the pixel as a whole.
+    int offsetG;
+    int offsetB;
+    int offsetA;
+
+    CARD8* line;
+    CARD8* p;
+    int x;
+    int y;
+
+    PhotoDest(Tk_PhotoImageBlock& imageBlock) {
+        pixelPtr  = imageBlock.pixelPtr;
+        width     = imageBlock.width;
+        height    = imageBlock.height;
+        pitch     = imageBlock.pitch;
+        pixelSize = imageBlock.pixelSize;
+        offsetR   = imageBlock.offset[0];
+        offsetG   = imageBlock.offset[1];
+        offsetB   = imageBlock.offset[2];
+        offsetA   = imageBlock.offset[3];
+
+        line = pixelPtr;
+        p    = line;
+        x    = 0;
+        y    = 0;
+    };
+    void set(CARD8 r, CARD8 g, CARD8 b, CARD8 a) {
+        p[offsetR] = r;
+        p[offsetG] = g;
+        p[offsetB] = b;
+        p[offsetA] = a;
+    }
+    void set(CARD8 rgb, CARD8 a = 0xFF) {
+        set(rgb, rgb, rgb, a);
+    }
+    int next() {
+//        logger.info("photo next  %4d  %4d", x, y);
+        x++;
+        if (x < width) {
+            // advance
+            p += pixelSize;
+        } else {
+            y++;
+            if (y < height) {
+                // advance line
+                line += pitch;
+                p = line;
+                x = 0;
+            } else {
+                return 0;
+            }
+        }
+        return 1;
+    }
+};
+
+
+void copyScreen(Tk_PhotoImageBlock& imageBlock) {
+    const auto memoryConfig = memory::getConfig();
+    const auto displayConfig = display::getConfig();
+    // sanity check
+    logger.info("memoryConfig  %d  x  %d", displayConfig.width, displayConfig.height);
+    logger.info("imageBlock    %d  x  %d", imageBlock.width, imageBlock.height);
+    if (displayConfig.width != imageBlock.width) logger.info("width no same");
+    if (displayConfig.height != imageBlock.height) logger.info("height no same");
+
+    int width = displayConfig.width;
+    int height = displayConfig.height;
+
+    MesaMonoSource source{memoryConfig.display.bitmap, displayConfig};
+    PhotoDest dest{imageBlock};
+    int totalDot = width * height;
+    for(int i = 0; i < totalDot; i++) {
+        if (i) {
+            source.next();
+            dest.next();
+        }
+       CARD8 rgb = source.test() ? 0x00 : 0xFF;
+       (void)rgb;
+       dest.set(rgb);
     }
 }
 
@@ -207,7 +359,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
 
 	    // stop at MP 8000
         processor_thread::stopAtMP( 915);
-        processor_thread::stopAtMP(8000);
+//      processor_thread::stopAtMP(8000);
 
         logger.info("guam thread start");
         auto thread = std::thread(guam::run);
@@ -254,6 +406,20 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
                 if (status != TCL_OK) return status;
                 fill(imageBlock, r, g, b);
                 put(interp, imageBlock);
+                return TCL_OK;
+            }
+        }
+        if (objc == 3) {
+            std::string subject = tcl::toString(objv[2]);
+            // mesa::gaum test display
+            // 0          1    2
+            if (subject == "display") {
+                if (memory::getConfig().display.bitmap) {
+                    copyScreen(imageBlock);
+                    put(interp, imageBlock);
+                } else {
+                    logger.info("no mesa bitmap");
+                }
                 return TCL_OK;
             }
         }

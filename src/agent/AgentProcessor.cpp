@@ -45,8 +45,6 @@ static const Logger logger(__FILE__);
 void AgentProcessor::Initialize() {
 	if (fcbAddress == 0) ERROR();
 
-	auto memoryConfig = memory::getConfig();
-
 	fcb = (ProcessorIOFaceGuam::ProcessorFCBType *)memory::peek(fcbAddress);
 	fcb->processorID[0]               = processorID0;
 	fcb->processorID[1]               = processorID1;
@@ -54,8 +52,8 @@ void AgentProcessor::Initialize() {
 	fcb->microsecondsPerHundredPulses = MicrosecondsPerHundredPulses;
 	fcb->millisecondsPerTick          = MillisecondsPerTick;
 	fcb->alignmentFiller              = 0;
-	fcb->realMemoryPageCount          = memoryConfig.rpSize;
-	fcb->virtualMemoryPageCount       = memoryConfig.vpSize;
+	fcb->realMemoryPageCount          = realMemoryPageCount;
+	fcb->virtualMemoryPageCount       = virtualMemoryPageCount;
 	fcb->gmt                          = Util::getMesaTime();
 	fcb->command                      = ProcessorIOFaceGuam::C_noop;
 	fcb->status                       = ProcessorIOFaceGuam::S_success;

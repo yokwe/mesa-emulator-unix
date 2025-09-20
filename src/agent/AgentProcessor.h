@@ -55,10 +55,18 @@ public:
 		processorID1 = processorID1_;
 		processorID2 = processorID2_;
 	}
+	void setRealMemoryPageCount(CARD32 newValue) {
+		realMemoryPageCount = newValue;
+	}
+	void setVirtualMemoryPageCount(CARD32 newValue) {
+		virtualMemoryPageCount = newValue;
+	}
 
 private:
 	ProcessorIOFaceGuam::ProcessorFCBType *fcb;
 	CARD16 processorID0;
 	CARD16 processorID1;
 	CARD16 processorID2;
+	CARD32 realMemoryPageCount;
+	CARD32 virtualMemoryPageCount;
 };

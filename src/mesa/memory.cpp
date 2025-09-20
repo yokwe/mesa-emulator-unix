@@ -146,8 +146,10 @@ void reserveDisplayPage(int displayPageSize) {
 	config.display.pageSize = displayPageSize;
 
 	// grab allocated real memory for display
-	const CARD32 vp = config.rpSize - config.display.pageSize;
-	config.display.rp = maps[vp].rp;
+	CARD32 vp = config.rpSize - config.display.pageSize;
+	CARD32 rp = maps[vp].rp;
+	config.display.rp = rp;
+	config.display.bitmap = realPage[rp]->word;
 
 	// make [rpSize - displayPageSize..rpSize) vacant
 	MapFlags vacant = {6};

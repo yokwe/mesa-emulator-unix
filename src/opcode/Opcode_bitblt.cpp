@@ -94,8 +94,8 @@ public:
 
 		arg->flags.direction = bltarg.flags.direction;
 
-		CARD32 base = memory::getDisplayVirtualPage() * PageSize;
-		CARD32 size = memory::getDisplayPageSize()    * PageSize;
+		CARD32 base = memory::getConfig().display.vp * PageSize;
+		CARD32 size = memory::getConfig().display.pageSize * PageSize;
 		arg->flags.srcType   = (base <= bltarg.src.word && bltarg.src.word < (base + size));
 		arg->flags.dstType   = (base <= bltarg.dst.word && bltarg.dst.word < (base + size));
 

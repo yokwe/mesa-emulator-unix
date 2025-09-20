@@ -100,8 +100,6 @@ AgentStream    stream;
 AgentDisplay   display;
 //	AgentReserved3 reserved3;
 
-display::DisplayContext displayContext;
-
 void setConfig(const Config& config_) {
 	config = config_;
 }
@@ -240,18 +238,18 @@ static void initialize() {
 	// AgentDisplay
 	{
 		auto displayType = displayTypeMap.at(config.displayType);
-		displayContext = display::DisplayContext::getInstance(displayType, config.displayWidth, config.displayHeight);
-		logger.info("displayContext  %s  %d x %d   %d pages", config.displayType, displayContext.width, displayContext.height, displayContext.pagesForBitmap);
+		display::initialize(displayType, config.displayWidth, config.displayHeight);
+		auto displayConfig = display::getConfig();
+		logger.info("displayConnfig  %s  %d x %d   %d pages", config.displayType, displayConfig.width, displayConfig.height, displayConfig.pageSize);
 		// Reserve real memory for display
-		memory::reserveDisplayPage(displayContext.pagesForBitmap);
-		auto displayMemoryAddress = memory::getDisplayRealPage();
-		displayContext.displayMemoryAddress = displayMemoryAddress;
+		memory::reserveDisplayPage(displayConfig.pageSize);
+		auto memoryConfig = memory::getConfig();
 		
 		// configure AgentDisplay
-		display.setDisplayType(displayContext.type);
-		display.setDisplayWidth(displayContext.width);
-		display.setDisplayHeight(displayContext.height);
-		display.setDisplayMemoryAddress(displayMemoryAddress);
+		display.setDisplayType(displayConfig.type);
+		display.setDisplayWidth(displayConfig.width);
+		display.setDisplayHeight(displayConfig.height);
+		display.setDisplayMemoryAddress(memoryConfig.display.rp);
 	}
 
 	// AgentDisk

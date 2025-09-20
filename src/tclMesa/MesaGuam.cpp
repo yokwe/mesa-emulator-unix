@@ -209,12 +209,11 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         processor_thread::stopAtMP( 915);
         processor_thread::stopAtMP(8000);
 
-        logger.info("thread start");
+        logger.info("guam thread start");
         auto thread = std::thread(guam::run);
-        logger.info("thread joinning");
-        thread.join();
-        logger.info("thread joined");
-        return TCL_OK;
+        thread.detach();
+        logger.info("guam thread detached");
+    return TCL_OK;
     }
     if (subCommand == "stats" && objc == 2) {
         opcode::stats();

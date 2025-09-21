@@ -64,6 +64,10 @@ public:
 
     void initialize(Tcl_Interp* interp, const std::string& name);
 
+    bool isInitialzied() {
+        return interp;
+    }
+
     void putBlock();
 
     void fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a);

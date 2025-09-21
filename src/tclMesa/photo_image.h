@@ -79,5 +79,6 @@ public:
     }
 
     void copyMesaDisplay();
+    void copyMesaDisplayMonochrome();
 
 };

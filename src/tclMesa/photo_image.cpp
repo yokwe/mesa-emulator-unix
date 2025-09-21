@@ -33,8 +33,6 @@
 // photo_image.cpp
 //
 
-#include <bit>
-
 #include <tcl.h>
 #include <tclDecls.h>
 #include <tk.h>
@@ -111,129 +109,52 @@ void PhotoImage::fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 }
 
 
-class MesaMonoSource {
-public:
-    const int MASK_INIT = 0x8000;
+#define PROCESS_BIT(bitPos) { if (x == width) break; p[0] = p[1] = p[2] = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; x++; p += pixelSize; }
+void PhotoImage::copyMesaDisplayMonochrome() {
+    const auto memoryConfig = memory::getConfig();
+    const auto displayConfig = display::getConfig();
 
-    int height;
-    int width;
-    int wordsPerLine;
+    int wordsPerLine = displayConfig.wordsPerLine;
+    int pixelSize    = imageBlock.pixelSize;
+    int pitch        = imageBlock.pitch;
 
-    CARD16* line;
-    CARD16* p;
-    int x;
-    int y;
-    int mask;
-    int word;
+    uint16_t* bitmapLine = memoryConfig.display.bitmap;
+    uint8_t*  pixelLine  = imageBlock.pixelPtr;
 
-    MesaMonoSource(CARD16* bitmap, const display::Config& config) {
-        height = config.height;
-        width = config.width;
-        wordsPerLine = config.wordsPerLine;
+    for(int y = 0;;) {
+        // start line
+        uint16_t* s = bitmapLine;
+        uint8_t*  p = pixelLine;
 
-        line = bitmap;
-        p  = line;
-        x = 0;
-        y = 0;
-        mask = MASK_INIT;
-        word = std::byteswap(*p);
-    };
-
-    int test() {
-        return word & mask;
-    }
-    int next() {
-//        logger.info("mesa  next  %4d  %4d", x, y);
-        if ((x + 1) < width) {
-            x++;
-            if (x & 0x0F) {
-                mask >>= 1;
-            } else {
-                // advance word
-                mask = MASK_INIT;
-                p++;
-                word = std::byteswap(*p);
-            }
-        } else {
-            if ((y + 1) < height) {
-                // advance line
-                y++;
-                line += wordsPerLine;
-                p = line;
-                x = 0;
-                mask = MASK_INIT;
-                word = std::byteswap(*p);
-            } else {
-                // reach to end
-                return 0;
-            }
+        int word = *s;
+        for(int x = 0;;) {
+            // process one word
+            PROCESS_BIT(8)
+            PROCESS_BIT(9)
+            PROCESS_BIT(10)
+            PROCESS_BIT(11)
+            PROCESS_BIT(12)
+            PROCESS_BIT(13)
+            PROCESS_BIT(14)
+            PROCESS_BIT(15)
+            PROCESS_BIT(0)
+            PROCESS_BIT(1)
+            PROCESS_BIT(2)
+            PROCESS_BIT(3)
+            PROCESS_BIT(4)
+            PROCESS_BIT(5)
+            PROCESS_BIT(6)
+            PROCESS_BIT(7)
+            // prepare for next word
+            word = *s++;
         }
-        return 1;
+        y++;
+        if (y == height) break;
+        // prepare for next line
+        bitmapLine += wordsPerLine;
+        pixelLine  += pitch;
     }
-};
-class PhotoDest {
-public:
-    CARD8 *pixelPtr;	// Pointer to the first pixel.
-    int width;			// Width of block, in pixels.
-    int height;			// Height of block, in pixels.
-    int pitch;			// Address difference between corresponding pixels in successive lines.
-    int pixelSize;		// Address difference between successive pixels in the same line.
-    int offsetR;        // Address differences between the red, green, blue and alpha components of the pixel and the pixel as a whole.
-    int offsetG;
-    int offsetB;
-    int offsetA;
-
-    CARD8* line;
-    CARD8* p;
-    int x;
-    int y;
-
-    PhotoDest(Tk_PhotoImageBlock& imageBlock) {
-        pixelPtr  = imageBlock.pixelPtr;
-        width     = imageBlock.width;
-        height    = imageBlock.height;
-        pitch     = imageBlock.pitch;
-        pixelSize = imageBlock.pixelSize;
-        offsetR   = imageBlock.offset[0];
-        offsetG   = imageBlock.offset[1];
-        offsetB   = imageBlock.offset[2];
-        offsetA   = imageBlock.offset[3];
-
-        line = pixelPtr;
-        p    = line;
-        x    = 0;
-        y    = 0;
-    };
-    void set(CARD8 r, CARD8 g, CARD8 b, CARD8 a) {
-        p[offsetR] = r;
-        p[offsetG] = g;
-        p[offsetB] = b;
-        p[offsetA] = a;
-    }
-    void set(CARD8 rgb, CARD8 a = 0xFF) {
-        set(rgb, rgb, rgb, a);
-    }
-    int next() {
-//        logger.info("photo next  %4d  %4d", x, y);
-        x++;
-        if (x < width) {
-            // advance
-            p += pixelSize;
-        } else {
-            y++;
-            if (y < height) {
-                // advance line
-                line += pitch;
-                p = line;
-                x = 0;
-            } else {
-                return 0;
-            }
-        }
-        return 1;
-    }
-};
-
+}
 
 void PhotoImage::copyMesaDisplay() {
     const auto memoryConfig = memory::getConfig();
@@ -242,19 +163,11 @@ void PhotoImage::copyMesaDisplay() {
     // sanity check
     checkImageSize();
     if (displayConfig.width != width || displayConfig.height != height) ERROR();
-    if (displayConfig.type != DisplayIOFaceGuam::T_monochrome) ERROR();
     if (memoryConfig.display.bitmap == 0) ERROR();
 
-    MesaMonoSource source{memoryConfig.display.bitmap, displayConfig};
-    PhotoDest dest{imageBlock};
-    int totalDot = width * height;
-    for(int i = 0; i < totalDot; i++) {
-        if (i) {
-            source.next();
-            dest.next();
-        }
-       CARD8 rgb = source.test() ? 0x00 : 0xFF;
-       (void)rgb;
-       dest.set(rgb);
+    if (displayConfig.type == DisplayIOFaceGuam::T_monochrome) {
+        copyMesaDisplayMonochrome();
+    } else {
+        ERROR()
     }
 }

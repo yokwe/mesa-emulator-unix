@@ -38,7 +38,6 @@
 #include <map>
 #include <utility>
 #include <thread>
-#include <bit>
 
 #include <tcl.h>
 #include <tclDecls.h>
@@ -52,13 +51,14 @@ static const Logger logger(__FILE__);
 #include "../mesa/processor_thread.h"
 #include "../mesa/memory.h"
 #include "../mesa/setting.h"
-#include "../mesa/display.h"
 
 #include "../opcode/opcode.h"
 
 #include "../util/GuiOp.h"
 #include "../util/Perf.h"
 #include "../util/tcl.h"
+
+#include "photo_image.h"
 
 #include "mesa.h"
 
@@ -83,194 +83,12 @@ std::map<std::string, int*> intMap = {
     FIELD_MAP_ENTRY(rmBits),
 };
 
-static std::string        imageName;
-static Tk_PhotoHandle     photoHandle = 0;
-static Tk_PhotoImageBlock imageBlock = {0, 0, 0, 0, 0, {0}};
+static PhotoImage tkDisplay;
 
-void initialize(Tk_PhotoImageBlock& imageBlock, int width, int height) {
-    if (imageBlock.pixelPtr) {
-        ckfree(imageBlock.pixelPtr); // FIXME is this good?
-    }
-    imageBlock.width     = width;
-    imageBlock.height    = height;
-    imageBlock.pixelSize = 4; // red + gree + blue + alpha
-    imageBlock.offset[0] = 0; // red
-    imageBlock.offset[1] = 1; // green
-    imageBlock.offset[2] = 2; // blue
-    imageBlock.offset[3] = 3; // alpah
-    // use 32 bit memory access
-    int lineWidth = multipleOf(width, 32);
-    imageBlock.pitch     = lineWidth * imageBlock.pixelSize;
-    int totalByte = imageBlock.pitch * imageBlock.height;
-    imageBlock.pixelPtr  = (unsigned char*)ckalloc(totalByte); // FIXEME is this good?
-    // fill with white and full opaque
-    memset(imageBlock.pixelPtr, 0xFF, totalByte);
-}
-int put(Tcl_Interp* interp, Tk_PhotoImageBlock& imageBlock) {
-    return Tk_PhotoPutBlock(interp, photoHandle, &imageBlock, 0, 0, imageBlock.width, imageBlock.height, TK_PHOTO_COMPOSITE_SET);
-}
-void fill(Tk_PhotoImageBlock& imageBlock, uint8_t r, uint8_t g, uint8_t b) {
-    uint8_t* lineStart = imageBlock.pixelPtr;
-    for(int line = 0; line < imageBlock.height; line++) {
-        auto p = lineStart;
-        for(int bit = 0; bit < imageBlock.width; bit++) {
-            p[0] = r;
-            p[1] = g;
-            p[2] = b;
-            p += imageBlock.pixelSize;
-        }
-        lineStart += imageBlock.pitch;
-    }
-}
-
-class MesaMonoSource {
-public:
-    const int MASK_INIT = 0x8000;
-
-    int height;
-    int width;
-    int wordsPerLine;
-
-    CARD16* line;
-    CARD16* p;
-    int x;
-    int y;
-    int mask;
-    int word;
-
-    MesaMonoSource(CARD16* bitmap, const display::Config& config) {
-        height = config.height;
-        width = config.width;
-        wordsPerLine = config.wordsPerLine;
-
-        line = bitmap;
-        p  = line;
-        x = 0;
-        y = 0;
-        mask = MASK_INIT;
-        word = std::byteswap(*p);
-    };
-
-    int test() {
-        return word & mask;
-    }
-    int next() {
-//        logger.info("mesa  next  %4d  %4d", x, y);
-        if ((x + 1) < width) {
-            x++;
-            if (x & 0x0F) {
-                mask >>= 1;
-            } else {
-                // advance word
-                mask = MASK_INIT;
-                p++;
-                word = std::byteswap(*p);
-            }
-        } else {
-            if ((y + 1) < height) {
-                // advance line
-                y++;
-                line += wordsPerLine;
-                p = line;
-                x = 0;
-                mask = MASK_INIT;
-                word = std::byteswap(*p);
-            } else {
-                // reach to end
-                return 0;
-            }
-        }
-        return 1;
-    }
-};
-class PhotoDest {
-public:
-    CARD8 *pixelPtr;	// Pointer to the first pixel.
-    int width;			// Width of block, in pixels.
-    int height;			// Height of block, in pixels.
-    int pitch;			// Address difference between corresponding pixels in successive lines.
-    int pixelSize;		// Address difference between successive pixels in the same line.
-    int offsetR;        // Address differences between the red, green, blue and alpha components of the pixel and the pixel as a whole.
-    int offsetG;
-    int offsetB;
-    int offsetA;
-
-    CARD8* line;
-    CARD8* p;
-    int x;
-    int y;
-
-    PhotoDest(Tk_PhotoImageBlock& imageBlock) {
-        pixelPtr  = imageBlock.pixelPtr;
-        width     = imageBlock.width;
-        height    = imageBlock.height;
-        pitch     = imageBlock.pitch;
-        pixelSize = imageBlock.pixelSize;
-        offsetR   = imageBlock.offset[0];
-        offsetG   = imageBlock.offset[1];
-        offsetB   = imageBlock.offset[2];
-        offsetA   = imageBlock.offset[3];
-
-        line = pixelPtr;
-        p    = line;
-        x    = 0;
-        y    = 0;
-    };
-    void set(CARD8 r, CARD8 g, CARD8 b, CARD8 a) {
-        p[offsetR] = r;
-        p[offsetG] = g;
-        p[offsetB] = b;
-        p[offsetA] = a;
-    }
-    void set(CARD8 rgb, CARD8 a = 0xFF) {
-        set(rgb, rgb, rgb, a);
-    }
-    int next() {
-//        logger.info("photo next  %4d  %4d", x, y);
-        x++;
-        if (x < width) {
-            // advance
-            p += pixelSize;
-        } else {
-            y++;
-            if (y < height) {
-                // advance line
-                line += pitch;
-                p = line;
-                x = 0;
-            } else {
-                return 0;
-            }
-        }
-        return 1;
-    }
-};
-
-
-void copyScreen(Tk_PhotoImageBlock& imageBlock) {
-    const auto memoryConfig = memory::getConfig();
-    const auto displayConfig = display::getConfig();
-    // sanity check
-    logger.info("memoryConfig  %d  x  %d", displayConfig.width, displayConfig.height);
-    logger.info("imageBlock    %d  x  %d", imageBlock.width, imageBlock.height);
-    if (displayConfig.width != imageBlock.width) logger.info("width no same");
-    if (displayConfig.height != imageBlock.height) logger.info("height no same");
-
-    int width = displayConfig.width;
-    int height = displayConfig.height;
-
-    MesaMonoSource source{memoryConfig.display.bitmap, displayConfig};
-    PhotoDest dest{imageBlock};
-    int totalDot = width * height;
-    for(int i = 0; i < totalDot; i++) {
-        if (i) {
-            source.next();
-            dest.next();
-        }
-       CARD8 rgb = source.test() ? 0x00 : 0xFF;
-       (void)rgb;
-       dest.set(rgb);
-    }
+static void guamDisplayMesa() {
+    if (memory::getConfig().display.bitmap == 0) return;
+    tkDisplay.copyMesaDisplay();
+    tkDisplay.putBlock();
 }
 
 int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const objv[]) {
@@ -365,7 +183,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         auto thread = std::thread(guam::run);
         thread.detach();
         logger.info("guam thread detached");
-    return TCL_OK;
+        return TCL_OK;
     }
     if (subCommand == "stats" && objc == 2) {
         opcode::stats();
@@ -374,29 +192,33 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         return TCL_OK;
     }
     if (subCommand == "display") {
-        if (objc == 5) {
-            // mesa::guam display imageName width height
-            // 0          1       2         3     4
-            imageName = tcl::toString(objv[2]);
-            auto width = toInt(interp, objv[3], status);
-            if (status != TCL_OK) return status;
-            auto height = toInt(interp, objv[4], status);
-            if (status != TCL_OK) return status;
-
-            initialize(imageBlock, width, height);
-            fill(imageBlock, 255, 255, 255);
-
-            photoHandle = Tk_FindPhoto(interp, imageName.c_str());
-            put(interp, imageBlock);
+        if (objc == 2) {
+            // mesa::guam display
+            if (memory::getConfig().display.bitmap) {
+                guamDisplayMesa();
+                return TCL_OK;
+            } else {
+                std::string result{"mesa display is not mapped"};
+                logger.info(result);
+                interp.result(result);
+                return TCL_ERROR;
+            }
+        }
+        if (objc == 3) {
+            // mesa::guam display imageName
+            // mesa::guam display mesa
+            // 0          1       2
+            auto name = tcl::toString(objv[2]);
+            tkDisplay.initialize(interp, name);
+            tkDisplay.full(0xFF);
+            tkDisplay.putBlock();
             return TCL_OK;
         }
-    }
-    if (subCommand == "test") {
         if (objc == 6) {
+            // mesa::guam display set r g b
+            // 0          1       2   3 4 5
             std::string subject = tcl::toString(objv[2]);
-            // mesa::guam test display r g b
-            // 0          1    2       3 4 5
-            if (subject == "display") {
+            if (subject == "set") {
                 int status;
                 auto r = toInt(interp, objv[3], status);
                 if (status != TCL_OK) return status;
@@ -404,22 +226,8 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
                 if (status != TCL_OK) return status;
                 auto b = toInt(interp, objv[5], status);
                 if (status != TCL_OK) return status;
-                fill(imageBlock, r, g, b);
-                put(interp, imageBlock);
-                return TCL_OK;
-            }
-        }
-        if (objc == 3) {
-            std::string subject = tcl::toString(objv[2]);
-            // mesa::gaum test display
-            // 0          1    2
-            if (subject == "display") {
-                if (memory::getConfig().display.bitmap) {
-                    copyScreen(imageBlock);
-                    put(interp, imageBlock);
-                } else {
-                    logger.info("no mesa bitmap");
-                }
+                tkDisplay.fill(r, g, b);
+                tkDisplay.putBlock();
                 return TCL_OK;
             }
         }
@@ -436,7 +244,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         auto keySymNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
         auto keySymString = tcl::toString(objv[3]);
-//        logger.info("keyPress      %4X  %s", keySymNumber, keySymString);
+        if (keySymString == "Escape")  guamDisplayMesa(); // FIXME Make ESC key redraw display
         guam::keyPress(keySymNumber, keySymString);
         return TCL_OK;
     }

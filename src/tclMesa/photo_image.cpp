@@ -109,9 +109,123 @@ void PhotoImage::fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 }
 
 
-#define PROCESS_BIT_A(bitPos)  { b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
-#define PROCESS_BIT_B(bitPos)  { if (x == width) break; x++; b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
-void PhotoImage::copyMesaDisplayMonochrome() {
+#define PROCESS_BIT_32_A(bitPos)  { b = (word & (0x80000000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
+#define PROCESS_BIT_32_B(bitPos)  { if (x == width) break; x++; b = (word & (0x80000000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
+void PhotoImage::copyMesaDisplayMonochrome32() {
+    const auto memoryConfig = memory::getConfig();
+    const auto displayConfig = display::getConfig();
+
+    int wordsPerLine = displayConfig.wordsPerLine;
+    int pixelSize    = imageBlock.pixelSize;
+    int pitch        = imageBlock.pitch;
+
+    if (pixelSize != 4) ERROR();
+
+    uint16_t* bitmapLine = memoryConfig.display.bitmap;
+    uint8_t*  pixelLine  = imageBlock.pixelPtr;
+
+    int a = width / 32;
+
+    for(int y = 0;;) {
+        // start line
+        uint32_t* s = (uint32_t*)bitmapLine;
+        uint8_t*  p = pixelLine;
+
+        int word = *s;
+        int x = 0;
+        int b;
+        for(int i = 0; i < a; i++) {
+            // process one word
+            PROCESS_BIT_32_A(24)
+            PROCESS_BIT_32_A(25)
+            PROCESS_BIT_32_A(26)
+            PROCESS_BIT_32_A(27)
+            PROCESS_BIT_32_A(28)
+            PROCESS_BIT_32_A(29)
+            PROCESS_BIT_32_A(30)
+            PROCESS_BIT_32_A(31)
+
+            PROCESS_BIT_32_A(16)
+            PROCESS_BIT_32_A(17)
+            PROCESS_BIT_32_A(18)
+            PROCESS_BIT_32_A(19)
+            PROCESS_BIT_32_A(20)
+            PROCESS_BIT_32_A(21)
+            PROCESS_BIT_32_A(22)
+            PROCESS_BIT_32_A(23)
+
+            PROCESS_BIT_32_A(8)
+            PROCESS_BIT_32_A(9)
+            PROCESS_BIT_32_A(10)
+            PROCESS_BIT_32_A(11)
+            PROCESS_BIT_32_A(12)
+            PROCESS_BIT_32_A(13)
+            PROCESS_BIT_32_A(14)
+            PROCESS_BIT_32_A(15)
+
+            PROCESS_BIT_32_A(0)
+            PROCESS_BIT_32_A(1)
+            PROCESS_BIT_32_A(2)
+            PROCESS_BIT_32_A(3)
+            PROCESS_BIT_32_A(4)
+            PROCESS_BIT_32_A(5)
+            PROCESS_BIT_32_A(6)
+            PROCESS_BIT_32_A(7)
+            // prepare for next word
+            x += 32;
+            word = *s++;
+        }
+
+        for(;;) {
+            // process one word
+            PROCESS_BIT_32_B(24)
+            PROCESS_BIT_32_B(25)
+            PROCESS_BIT_32_B(26)
+            PROCESS_BIT_32_B(27)
+            PROCESS_BIT_32_B(28)
+            PROCESS_BIT_32_B(29)
+            PROCESS_BIT_32_B(30)
+            PROCESS_BIT_32_B(31)
+
+            PROCESS_BIT_32_B(16)
+            PROCESS_BIT_32_B(17)
+            PROCESS_BIT_32_B(18)
+            PROCESS_BIT_32_B(19)
+            PROCESS_BIT_32_B(20)
+            PROCESS_BIT_32_B(21)
+            PROCESS_BIT_32_B(22)
+            PROCESS_BIT_32_B(23)
+
+            PROCESS_BIT_32_B(8)
+            PROCESS_BIT_32_B(9)
+            PROCESS_BIT_32_B(10)
+            PROCESS_BIT_32_B(11)
+            PROCESS_BIT_32_B(12)
+            PROCESS_BIT_32_B(13)
+            PROCESS_BIT_32_B(14)
+            PROCESS_BIT_32_B(15)
+            
+            PROCESS_BIT_32_B(0)
+            PROCESS_BIT_32_B(1)
+            PROCESS_BIT_32_B(2)
+            PROCESS_BIT_32_B(3)
+            PROCESS_BIT_32_B(4)
+            PROCESS_BIT_32_B(5)
+            PROCESS_BIT_32_B(6)
+            PROCESS_BIT_32_B(7)
+            break;
+        }
+        y++;
+        if (y == height) break;
+        // prepare for next line
+        bitmapLine += wordsPerLine;
+        pixelLine  += pitch;
+    }
+}
+
+#define PROCESS_BIT_16_A(bitPos)  { b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
+#define PROCESS_BIT_16_B(bitPos)  { if (x == width) break; x++; b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
+void PhotoImage::copyMesaDisplayMonochrome16() {
     const auto memoryConfig = memory::getConfig();
     const auto displayConfig = display::getConfig();
 
@@ -136,22 +250,22 @@ void PhotoImage::copyMesaDisplayMonochrome() {
         int b;
         for(int i = 0; i < a; i++) {
             // process one word
-            PROCESS_BIT_A(8)
-            PROCESS_BIT_A(9)
-            PROCESS_BIT_A(10)
-            PROCESS_BIT_A(11)
-            PROCESS_BIT_A(12)
-            PROCESS_BIT_A(13)
-            PROCESS_BIT_A(14)
-            PROCESS_BIT_A(15)
-            PROCESS_BIT_A(0)
-            PROCESS_BIT_A(1)
-            PROCESS_BIT_A(2)
-            PROCESS_BIT_A(3)
-            PROCESS_BIT_A(4)
-            PROCESS_BIT_A(5)
-            PROCESS_BIT_A(6)
-            PROCESS_BIT_A(7)
+            PROCESS_BIT_16_A(8)
+            PROCESS_BIT_16_A(9)
+            PROCESS_BIT_16_A(10)
+            PROCESS_BIT_16_A(11)
+            PROCESS_BIT_16_A(12)
+            PROCESS_BIT_16_A(13)
+            PROCESS_BIT_16_A(14)
+            PROCESS_BIT_16_A(15)
+            PROCESS_BIT_16_A(0)
+            PROCESS_BIT_16_A(1)
+            PROCESS_BIT_16_A(2)
+            PROCESS_BIT_16_A(3)
+            PROCESS_BIT_16_A(4)
+            PROCESS_BIT_16_A(5)
+            PROCESS_BIT_16_A(6)
+            PROCESS_BIT_16_A(7)
             // prepare for next word
             x += 16;
             word = *s++;
@@ -159,22 +273,22 @@ void PhotoImage::copyMesaDisplayMonochrome() {
 
         for(;;) {
             // process one word
-            PROCESS_BIT_B(8)
-            PROCESS_BIT_B(9)
-            PROCESS_BIT_B(10)
-            PROCESS_BIT_B(11)
-            PROCESS_BIT_B(12)
-            PROCESS_BIT_B(13)
-            PROCESS_BIT_B(14)
-            PROCESS_BIT_B(15)
-            PROCESS_BIT_B(0)
-            PROCESS_BIT_B(1)
-            PROCESS_BIT_B(2)
-            PROCESS_BIT_B(3)
-            PROCESS_BIT_B(4)
-            PROCESS_BIT_B(5)
-            PROCESS_BIT_B(6)
-            PROCESS_BIT_B(7)
+            PROCESS_BIT_16_B(8)
+            PROCESS_BIT_16_B(9)
+            PROCESS_BIT_16_B(10)
+            PROCESS_BIT_16_B(11)
+            PROCESS_BIT_16_B(12)
+            PROCESS_BIT_16_B(13)
+            PROCESS_BIT_16_B(14)
+            PROCESS_BIT_16_B(15)
+            PROCESS_BIT_16_B(0)
+            PROCESS_BIT_16_B(1)
+            PROCESS_BIT_16_B(2)
+            PROCESS_BIT_16_B(3)
+            PROCESS_BIT_16_B(4)
+            PROCESS_BIT_16_B(5)
+            PROCESS_BIT_16_B(6)
+            PROCESS_BIT_16_B(7)
             break;
         }
         y++;
@@ -195,7 +309,10 @@ void PhotoImage::copyMesaDisplay() {
     if (memoryConfig.display.bitmap == 0) ERROR();
 
     if (displayConfig.type == DisplayIOFaceGuam::T_monochrome) {
-        copyMesaDisplayMonochrome();
+        auto a = Util::getMicroSecondsFromEpoch();
+        copyMesaDisplayMonochrome16();
+        auto b = Util::getMicroSecondsFromEpoch();
+        logger.info("XX  %llu", b - a);
     } else {
         ERROR()
     }

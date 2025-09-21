@@ -160,11 +160,11 @@ void reserveDisplayPage(int displayPageSize) {
 		WriteMap(vp + i, map);
 	}
 
-	logger.info("%s  %6X+%X", __FUNCTION__, config.rpSize, config.display.pageSize);
+	logger.info("%s  %6X+%X", __FUNCTION__, config.rpSize - config.display.pageSize, config.display.pageSize);
 }
 
 void mapDisplay(CARD32 vp, CARD32 rp, CARD16 pageCount, CARD16 pageCountInEachBlock) {
-	logger.info("%s  %6X+%X  %6X %X %X", __FUNCTION__, vp, pageCount, rp, pageCount, pageCountInEachBlock);
+	logger.info("%s  %4X  %4X  %X  %X", __FUNCTION__, vp, rp, pageCount, pageCountInEachBlock);
 	if (rp != (CARD32)config.display.rp) {
 		logger.fatal("rp                = %d", rp);
 		logger.fatal("config.display.rp = %d", config.display.rp);

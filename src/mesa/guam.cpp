@@ -239,7 +239,6 @@ static void initialize() {
 		display::initialize(displayType, config.displayWidth, config.displayHeight);
 	}
 	const display::Config& displayConfig = display::getConfig();
-	logger.info("displayConnfig  %s  %d x %d   %d pages", config.displayType, displayConfig.width, displayConfig.height, displayConfig.pageSize);
 
 	//
 	// Setup Agents

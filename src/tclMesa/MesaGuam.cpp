@@ -85,7 +85,10 @@ std::map<std::string, int*> intMap = {
 
 static PhotoImage tkDisplay;
 
-static void guamDisplayMesa() {
+void refreshDisplay() {
+    // if photo image is not created, return
+    if (!tkDisplay.isInitialzied()) return;
+    // if mesa display is not mapped, return
     if (memory::getConfig().display.bitmap == 0) return;
     tkDisplay.copyMesaDisplay();
     tkDisplay.putBlock();
@@ -195,7 +198,7 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         if (objc == 2) {
             // mesa::guam display
             if (memory::getConfig().display.bitmap) {
-                guamDisplayMesa();
+                refreshDisplay();
                 return TCL_OK;
             } else {
                 std::string result{"mesa display is not mapped"};
@@ -244,7 +247,6 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
         auto keySymNumber = toInt(interp, objv[2], status);
         if (status != TCL_OK) return status;
         auto keySymString = tcl::toString(objv[3]);
-        if (keySymString == "Escape")  guamDisplayMesa(); // FIXME Make ESC key redraw display
         guam::keyPress(keySymNumber, keySymString);
         return TCL_OK;
     }

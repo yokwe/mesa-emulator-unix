@@ -47,9 +47,23 @@ static const Logger logger(__FILE__);
 // TODO Implements colorType == DisplayIOFaceGuam::T_monochrome and DisplayIOFaceGuam::T_byteColor
 // TODO Provide Implementation for mono and 256
 
+#define DEBUG_SHOW_AGENT_DISPLAY 1
+
+DisplayIOFaceGuam::LookupTableEntry COLOR_WHITE;
+DisplayIOFaceGuam::LookupTableEntry COLOR_BLACK;
 
 void AgentDisplay::Initialize() {
 	if (fcbAddress == 0) ERROR();
+
+	COLOR_WHITE.red      = 255;
+	COLOR_WHITE.green    = 255;
+	COLOR_WHITE.blue     = 255;
+	COLOR_WHITE.reserved = 0;
+
+	COLOR_BLACK.red      = 0;
+	COLOR_BLACK.green    = 0;
+	COLOR_BLACK.blue     = 0;
+	COLOR_BLACK.reserved = 0;
 
 	fcb = (DisplayIOFaceGuam::DisplayFCBType *)memory::peek(fcbAddress);
 	fcb->command                = DisplayIOFaceGuam::C_nop;
@@ -93,6 +107,11 @@ void AgentDisplay::Initialize() {
 	fcb->displayType            = this->displayType;
 	fcb->displayWidth           = this->displayWidth;
 	fcb->displayHeight          = this->displayHeight;
+
+	// clear clt
+	memset(clt, 0, sizeof(clt));
+	clt[ColorDisplayFace::white] = COLOR_WHITE;
+	clt[ColorDisplayFace::black] = COLOR_BLACK;
 }
 
 void AgentDisplay::Call() {
@@ -102,29 +121,16 @@ void AgentDisplay::Call() {
 		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s nop", name);
 		break;
 	case DisplayIOFaceGuam::C_setCLTEntry:
-		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s setCLTEntry", name);
-		// TODO AgentDisplay::Call DisplayIOFaceGuam::C_setCLTEntry
+		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s setCLTEntry  colorIndex = %d   %04X  %04X",
+			name, fcb->colorIndex, fcb->color.u0, fcb->color.u1);
+		clt[fcb->colorIndex] = fcb->color;
+	    fcb->status = DisplayIOFaceGuam::S_success;
 		break;
 	case DisplayIOFaceGuam::C_getCLTEntry:
-		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s getCLTEntry  colorIndex = %d", name, fcb->colorIndex);
-		// TODO AgentDisplay::Call DisplayIOFaceGuam::C_getCLTEntry
-	    if (1 < fcb->colorIndex) fcb->status = DisplayIOFaceGuam::S_readOnlyCLT;
-	    else {
-	        fcb->color.red      = 255;
-	        fcb->color.green    = 255;
-	        fcb->color.blue     = 255;
-	        fcb->color.reserved =   0;
-	        fcb->status = DisplayIOFaceGuam::S_success;
-	    }
-
-		switch (fcb->colorIndex) {
-		case ColorDisplayFace::black:
-			break;
-		case ColorDisplayFace::white:
-			break;
-		default:
-			break;
-		}
+		fcb->color = clt[fcb->colorIndex];
+		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s getCLTEntry  colorIndex = %d   %04X  %04X",
+			name, fcb->colorIndex, fcb->color.u0, fcb->color.u1);
+		fcb->status = DisplayIOFaceGuam::S_success;
 		break;
 	case DisplayIOFaceGuam::C_setBackground:
 		logger.warn("AGENT %s setBackground", name);

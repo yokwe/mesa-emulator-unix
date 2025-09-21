@@ -109,7 +109,8 @@ void PhotoImage::fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
 }
 
 
-#define PROCESS_BIT(bitPos) { if (x == width) break; p[0] = p[1] = p[2] = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; x++; p += pixelSize; }
+#define PROCESS_BIT_A(bitPos)  { b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
+#define PROCESS_BIT_B(bitPos)  { if (x == width) break; x++; b = (word & (0x8000 >> bitPos)) ? 0x00 : 0xFF; *p++ = b; *p++ = b; *p++ = b; p++; }
 void PhotoImage::copyMesaDisplayMonochrome() {
     const auto memoryConfig = memory::getConfig();
     const auto displayConfig = display::getConfig();
@@ -118,8 +119,12 @@ void PhotoImage::copyMesaDisplayMonochrome() {
     int pixelSize    = imageBlock.pixelSize;
     int pitch        = imageBlock.pitch;
 
+    if (pixelSize != 4) ERROR();
+
     uint16_t* bitmapLine = memoryConfig.display.bitmap;
     uint8_t*  pixelLine  = imageBlock.pixelPtr;
+
+    int a = width / 16;
 
     for(int y = 0;;) {
         // start line
@@ -127,26 +132,50 @@ void PhotoImage::copyMesaDisplayMonochrome() {
         uint8_t*  p = pixelLine;
 
         int word = *s;
-        for(int x = 0;;) {
+        int x = 0;
+        int b;
+        for(int i = 0; i < a; i++) {
             // process one word
-            PROCESS_BIT(8)
-            PROCESS_BIT(9)
-            PROCESS_BIT(10)
-            PROCESS_BIT(11)
-            PROCESS_BIT(12)
-            PROCESS_BIT(13)
-            PROCESS_BIT(14)
-            PROCESS_BIT(15)
-            PROCESS_BIT(0)
-            PROCESS_BIT(1)
-            PROCESS_BIT(2)
-            PROCESS_BIT(3)
-            PROCESS_BIT(4)
-            PROCESS_BIT(5)
-            PROCESS_BIT(6)
-            PROCESS_BIT(7)
+            PROCESS_BIT_A(8)
+            PROCESS_BIT_A(9)
+            PROCESS_BIT_A(10)
+            PROCESS_BIT_A(11)
+            PROCESS_BIT_A(12)
+            PROCESS_BIT_A(13)
+            PROCESS_BIT_A(14)
+            PROCESS_BIT_A(15)
+            PROCESS_BIT_A(0)
+            PROCESS_BIT_A(1)
+            PROCESS_BIT_A(2)
+            PROCESS_BIT_A(3)
+            PROCESS_BIT_A(4)
+            PROCESS_BIT_A(5)
+            PROCESS_BIT_A(6)
+            PROCESS_BIT_A(7)
             // prepare for next word
+            x += 16;
             word = *s++;
+        }
+
+        for(;;) {
+            // process one word
+            PROCESS_BIT_B(8)
+            PROCESS_BIT_B(9)
+            PROCESS_BIT_B(10)
+            PROCESS_BIT_B(11)
+            PROCESS_BIT_B(12)
+            PROCESS_BIT_B(13)
+            PROCESS_BIT_B(14)
+            PROCESS_BIT_B(15)
+            PROCESS_BIT_B(0)
+            PROCESS_BIT_B(1)
+            PROCESS_BIT_B(2)
+            PROCESS_BIT_B(3)
+            PROCESS_BIT_B(4)
+            PROCESS_BIT_B(5)
+            PROCESS_BIT_B(6)
+            PROCESS_BIT_B(7)
+            break;
         }
         y++;
         if (y == height) break;

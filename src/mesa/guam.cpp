@@ -421,14 +421,14 @@ int64_t getElapsedTime() {
 void keyPress(int number, const std::string& string) {
 	(void)string;
 	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
-	logger.info("keyPress    %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
+//	logger.info("keyPress    %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
 	auto keyName = levelVKey.keyName;
 	if (keyName != LevelVKeys::null) keyboard.keyPress(keyName);
 }
 void keyRelease(int number, const std::string& string) {
 	(void)string;
 	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
-	logger.info("keyRelease  %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
+//	logger.info("keyRelease  %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
 	auto keyName = levelVKey.keyName;
 	if (keyName != LevelVKeys::null) keyboard.keyRelease(keyName);
 }
@@ -445,7 +445,7 @@ static std::array<LevelVKeys::KeyName, 5> buttonMap = {
 };
 void buttonPress(int number) {
 	LevelVKeys::KeyName keyName = buttonMap[number];
-	logger.info("buttonPress    %d  %3d", number, keyName);
+//	logger.info("buttonPress    %d  %3d", number, keyName);
 	if (keyName != LevelVKeys::null) {
 		keyboard.keyPress(keyName);
 	} else {
@@ -455,7 +455,7 @@ void buttonPress(int number) {
 }
 void buttonRelease(int number) {
 	LevelVKeys::KeyName keyName = buttonMap[number];
-	logger.info("buttonRelease  %d  %3d", number, keyName);
+//	logger.info("buttonRelease  %d  %3d", number, keyName);
 	if (keyName != LevelVKeys::null) {
 		keyboard.keyRelease(keyName);
 	} else {

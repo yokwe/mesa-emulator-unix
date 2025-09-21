@@ -35,10 +35,11 @@
 
 #include <filesystem>
 
+#include <tcl.h>
+#include <tclDecls.h>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include <tcl.h>
 
 #include "mesa.h"
 
@@ -57,6 +58,21 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 	return TCL_OK;
 }
 
+//
+// refresh display
+//
+static void refreshDisplayTimerStart();
+static constexpr int REFRESH_INTERVAL = 100; // in milli seconds
+static void refreshDisplayTimerProc(void *) {
+	// regist for repeat
+	refreshDisplayTimerStart();
+	
+    refreshDisplay();
+}
+void refreshDisplayTimerStart() {
+	Tcl_CreateTimerHandler(REFRESH_INTERVAL, refreshDisplayTimerProc, 0);
+}
+
 int AppInit(Tcl_Interp *interp) {
 	if (Tcl_Init(interp) == TCL_ERROR) {
         logger.fatal("Tcl_Init failed");
@@ -71,6 +87,9 @@ int AppInit(Tcl_Interp *interp) {
         auto script = readFile(scriptFile);
         Tcl_Eval(interp, script.c_str());
     }
+
+	// create timer to refreash display
+	refreshDisplayTimerStart();
 
 	return TCL_OK;
 }

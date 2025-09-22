@@ -124,17 +124,18 @@ void PhotoImage::copyMesaDisplayMonochrome32() {
     uint16_t* bitmapLine = memoryConfig.display.bitmap;
     uint8_t*  pixelLine  = imageBlock.pixelPtr;
 
-    int a = width / 32;
+    int nWord = width / 32;
 
     for(int y = 0;;) {
         // start line
         uint32_t* s = (uint32_t*)bitmapLine;
         uint8_t*  p = pixelLine;
 
-        int word = *s;
         int x = 0;
         int b;
-        for(int i = 0; i < a; i++) {
+        int word;
+        for(int i = 0; i < nWord; i++) {
+            word = *s;
             // process one word
             PROCESS_BIT_32_A(24)
             PROCESS_BIT_32_A(25)
@@ -173,47 +174,49 @@ void PhotoImage::copyMesaDisplayMonochrome32() {
             PROCESS_BIT_32_A(7)
             // prepare for next word
             x += 32;
-            word = *s++;
+            s++;
         }
+        if (x < width) {
+            word = *s;
+            for(;;) {
+                // process one word
+                PROCESS_BIT_32_B(24)
+                PROCESS_BIT_32_B(25)
+                PROCESS_BIT_32_B(26)
+                PROCESS_BIT_32_B(27)
+                PROCESS_BIT_32_B(28)
+                PROCESS_BIT_32_B(29)
+                PROCESS_BIT_32_B(30)
+                PROCESS_BIT_32_B(31)
 
-        for(;;) {
-            // process one word
-            PROCESS_BIT_32_B(24)
-            PROCESS_BIT_32_B(25)
-            PROCESS_BIT_32_B(26)
-            PROCESS_BIT_32_B(27)
-            PROCESS_BIT_32_B(28)
-            PROCESS_BIT_32_B(29)
-            PROCESS_BIT_32_B(30)
-            PROCESS_BIT_32_B(31)
+                PROCESS_BIT_32_B(16)
+                PROCESS_BIT_32_B(17)
+                PROCESS_BIT_32_B(18)
+                PROCESS_BIT_32_B(19)
+                PROCESS_BIT_32_B(20)
+                PROCESS_BIT_32_B(21)
+                PROCESS_BIT_32_B(22)
+                PROCESS_BIT_32_B(23)
 
-            PROCESS_BIT_32_B(16)
-            PROCESS_BIT_32_B(17)
-            PROCESS_BIT_32_B(18)
-            PROCESS_BIT_32_B(19)
-            PROCESS_BIT_32_B(20)
-            PROCESS_BIT_32_B(21)
-            PROCESS_BIT_32_B(22)
-            PROCESS_BIT_32_B(23)
-
-            PROCESS_BIT_32_B(8)
-            PROCESS_BIT_32_B(9)
-            PROCESS_BIT_32_B(10)
-            PROCESS_BIT_32_B(11)
-            PROCESS_BIT_32_B(12)
-            PROCESS_BIT_32_B(13)
-            PROCESS_BIT_32_B(14)
-            PROCESS_BIT_32_B(15)
-            
-            PROCESS_BIT_32_B(0)
-            PROCESS_BIT_32_B(1)
-            PROCESS_BIT_32_B(2)
-            PROCESS_BIT_32_B(3)
-            PROCESS_BIT_32_B(4)
-            PROCESS_BIT_32_B(5)
-            PROCESS_BIT_32_B(6)
-            PROCESS_BIT_32_B(7)
-            break;
+                PROCESS_BIT_32_B(8)
+                PROCESS_BIT_32_B(9)
+                PROCESS_BIT_32_B(10)
+                PROCESS_BIT_32_B(11)
+                PROCESS_BIT_32_B(12)
+                PROCESS_BIT_32_B(13)
+                PROCESS_BIT_32_B(14)
+                PROCESS_BIT_32_B(15)
+                
+                PROCESS_BIT_32_B(0)
+                PROCESS_BIT_32_B(1)
+                PROCESS_BIT_32_B(2)
+                PROCESS_BIT_32_B(3)
+                PROCESS_BIT_32_B(4)
+                PROCESS_BIT_32_B(5)
+                PROCESS_BIT_32_B(6)
+                PROCESS_BIT_32_B(7)
+                break;
+            }
         }
         y++;
         if (y == height) break;
@@ -238,17 +241,18 @@ void PhotoImage::copyMesaDisplayMonochrome16() {
     uint16_t* bitmapLine = memoryConfig.display.bitmap;
     uint8_t*  pixelLine  = imageBlock.pixelPtr;
 
-    int a = width / 16;
+    int nWord = width / 16;
 
     for(int y = 0;;) {
         // start line
         uint16_t* s = bitmapLine;
         uint8_t*  p = pixelLine;
 
-        int word = *s;
         int x = 0;
         int b;
-        for(int i = 0; i < a; i++) {
+        int word;
+        for(int i = 0; i < nWord; i++) {
+            word = *s;
             // process one word
             PROCESS_BIT_16_A(8)
             PROCESS_BIT_16_A(9)
@@ -258,6 +262,7 @@ void PhotoImage::copyMesaDisplayMonochrome16() {
             PROCESS_BIT_16_A(13)
             PROCESS_BIT_16_A(14)
             PROCESS_BIT_16_A(15)
+
             PROCESS_BIT_16_A(0)
             PROCESS_BIT_16_A(1)
             PROCESS_BIT_16_A(2)
@@ -268,28 +273,31 @@ void PhotoImage::copyMesaDisplayMonochrome16() {
             PROCESS_BIT_16_A(7)
             // prepare for next word
             x += 16;
-            word = *s++;
+            s++;
         }
+        if (x < width) {
+            word = *s;
+            for(;;) {
+                // process one word
+                PROCESS_BIT_16_B(8)
+                PROCESS_BIT_16_B(9)
+                PROCESS_BIT_16_B(10)
+                PROCESS_BIT_16_B(11)
+                PROCESS_BIT_16_B(12)
+                PROCESS_BIT_16_B(13)
+                PROCESS_BIT_16_B(14)
+                PROCESS_BIT_16_B(15)
 
-        for(;;) {
-            // process one word
-            PROCESS_BIT_16_B(8)
-            PROCESS_BIT_16_B(9)
-            PROCESS_BIT_16_B(10)
-            PROCESS_BIT_16_B(11)
-            PROCESS_BIT_16_B(12)
-            PROCESS_BIT_16_B(13)
-            PROCESS_BIT_16_B(14)
-            PROCESS_BIT_16_B(15)
-            PROCESS_BIT_16_B(0)
-            PROCESS_BIT_16_B(1)
-            PROCESS_BIT_16_B(2)
-            PROCESS_BIT_16_B(3)
-            PROCESS_BIT_16_B(4)
-            PROCESS_BIT_16_B(5)
-            PROCESS_BIT_16_B(6)
-            PROCESS_BIT_16_B(7)
-            break;
+                PROCESS_BIT_16_B(0)
+                PROCESS_BIT_16_B(1)
+                PROCESS_BIT_16_B(2)
+                PROCESS_BIT_16_B(3)
+                PROCESS_BIT_16_B(4)
+                PROCESS_BIT_16_B(5)
+                PROCESS_BIT_16_B(6)
+                PROCESS_BIT_16_B(7)
+                break;
+            }
         }
         y++;
         if (y == height) break;

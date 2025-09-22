@@ -20,7 +20,7 @@ pack  .mesa -fill both -expand 1
 set display [image create photo -width $displayWidth -height $displayHeight]
 # Allocate photo image block for display
 # Save photo image name to update display image from emulator
-mesa::guam display $display
+mesa::guam display set $display
 
 label  .mesa.display -image $display -takefocus 1
 pack   .mesa.display -side top

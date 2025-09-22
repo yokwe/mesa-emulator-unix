@@ -7,11 +7,14 @@ add_executable(tclMesa)
 target_sources(
 	tclMesa
 	PUBLIC
-		mesa.h
 		photo_image.h
+		tclMesa.h
 	PRIVATE
 		main.cpp
 		MesaGuam.cpp
+		MesaGuam_boot.cpp
+		MesaGuam_config.cpp
+		MesaGuam_display.cpp
 		MesaLog.cpp
 		photo_image.cpp
 )

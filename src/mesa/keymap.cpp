@@ -134,7 +134,7 @@ void initialize() {
 
         keyMap[key] = value;
     }
-    logger.info("kyeMap  %d", keyMap.size());
+    logger.info("keyMap  %d", keyMap.size());
 }
 
 static LevelVKey null = {"null", LevelVKeys::null};

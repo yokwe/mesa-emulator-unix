@@ -74,6 +74,10 @@ public:
         std::string ret(Tcl_GetStringResult(interp));
         return ret;
     }
+    bool hasResult() {
+        auto result = Tcl_GetObjResult(interp);
+        return result->length || result->typePtr;
+    }
 };
 
 class Obj {

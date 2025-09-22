@@ -41,7 +41,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "mesa.h"
+#include "tclMesa.h"
 
 constexpr const char* PACKAGE_NAME    = "Mesa";
 constexpr const char* PACKAGE_VERSION = "1.0.";

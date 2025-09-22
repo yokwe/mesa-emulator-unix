@@ -64,7 +64,7 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 static void refreshDisplayTimerStart();
 static constexpr int REFRESH_INTERVAL = 100; // in milli seconds
 static void refreshDisplayTimerProc(void *) {
-	// refreshDisplay takes about 9-12 ms
+	// refreshDisplay takes about 2 ms
 	refreshDisplay();
 	// create timer for next iteration
 	refreshDisplayTimerStart();

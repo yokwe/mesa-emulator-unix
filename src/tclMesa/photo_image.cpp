@@ -57,40 +57,39 @@ void PhotoImage::initialize(Tcl_Interp* interp_, const std::string& name_) {
     handle = Tk_FindPhoto(interp, name.c_str());
     if (handle == NULL) ERROR();
 
-    Tk_PhotoGetSize(handle, &width, &height);
+    const Tk_ImageType* imageType = 0;
+    imageMaster = (Tk_ImageMaster*)Tk_GetImageMasterData( interp, name.c_str(), &imageType);
+    if (imageType == 0) ERROR();
 
-    imageBlock.width     = width;
-    imageBlock.height    = height;
-    imageBlock.pixelSize = 4; // red + gree + blue + alpha
-    imageBlock.offset[0] = 0; // red
-    imageBlock.offset[1] = 1; // green
-    imageBlock.offset[2] = 2; // blue
-    imageBlock.offset[3] = 3; // alpah
-    imageBlock.pitch     = width * imageBlock.pixelSize;
-    int totalByte = imageBlock.pitch * imageBlock.height;
-    // allocate memory
-    imageBlock.pixelPtr  = (unsigned char*)ckalloc(totalByte);
-    // fill with white and full opaque
-    memset(imageBlock.pixelPtr, 0xFF, totalByte);
-}
+    Tk_PhotoGetImage(handle, &imageBlock);
+    logger.info("pixelPtr   %p", imageBlock.pixelPtr);
+    logger.info("width     %4d", imageBlock.width);
+    logger.info("height    %4d", imageBlock.height);
+    logger.info("pitch     %4d", imageBlock.pitch);
+    logger.info("pixelSize %4d", imageBlock.pixelSize);
+    logger.info("offset 0  %4d", imageBlock.offset[0]);
+    logger.info("offset 1  %4d", imageBlock.offset[1]);
+    logger.info("offset 2  %4d", imageBlock.offset[2]);
+    logger.info("offset 3  %4d", imageBlock.offset[3]);
 
-void PhotoImage::finalize() {
-    // free allocated memory
-    ckfree(imageBlock.pixelPtr);
+    if (imageBlock.pixelSize != 4) ERROR();
+    if (imageBlock.pitch != (imageBlock.width * 4)) ERROR();
+
+    width  = imageBlock.width;
+    height = imageBlock.height;
 }
 
 void PhotoImage::checkImageSize() {
+    // detect image size change
     int width, height;
     Tk_PhotoGetSize(handle, &width, &height);
     if (width != this->width || height != this->height) ERROR();
 }
 
-void PhotoImage::putBlock() {
-    // sanity check
-    checkImageSize();
-
-    int ret = Tk_PhotoPutBlock(interp, handle, &imageBlock, 0, 0, imageBlock.width, imageBlock.height, TK_PHOTO_COMPOSITE_SET);
-    if (ret != TCL_OK) ERROR();
+void PhotoImage::updateImage() {
+    Tk_ImageChanged(*imageMaster, 0, 0,
+        imageBlock.width, imageBlock.height,
+        imageBlock.width, imageBlock.height);
 }
 
 void PhotoImage::fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {

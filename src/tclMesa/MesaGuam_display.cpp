@@ -52,7 +52,7 @@ void refreshDisplay() {
     // if mesa display is not mapped, return
     if (memory::getConfig().display.bitmap == 0) return;
     tkDisplay.copyMesaDisplay();
-    tkDisplay.putBlock();
+    tkDisplay.updateImage();
 }
 
 // mesa::guam display refresh
@@ -74,7 +74,7 @@ int MesaGuam_display(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *c
         auto name = tcl::toString(objv[2]);
         tkDisplay.initialize(interp, name);
         tkDisplay.full(0xFF); // 0xFF means WHITE
-        tkDisplay.putBlock();
+        tkDisplay.updateImage();
         return TCL_OK;
     }
     if (objc == 4) {
@@ -94,7 +94,7 @@ int MesaGuam_display(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *c
         }
         tkDisplay.initialize(interp, name);
         tkDisplay.full(0xFF); // 0xFF means WHITE
-        tkDisplay.putBlock();
+        tkDisplay.updateImage();
         return TCL_OK;
 
     }
@@ -112,7 +112,7 @@ int MesaGuam_display(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *c
             auto b = toInt(interp, objv[5], status);
             if (status != TCL_OK) return status;
             tkDisplay.fill(r, g, b);
-            tkDisplay.putBlock();
+            tkDisplay.updateImage();
             return TCL_OK;
         }
     }

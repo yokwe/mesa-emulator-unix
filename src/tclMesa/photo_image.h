@@ -48,19 +48,14 @@ class PhotoImage {
     int                width;
     int                height;
     Tk_PhotoImageBlock imageBlock;
+    Tk_ImageMaster*    imageMaster;
 
     void initialize();
-
     void finalize();
-
     void checkImageSize();
 public:
     PhotoImage() :
-        interp(0), handle(0), width(0), height(0) {
-    }
-    ~PhotoImage() {
-        finalize();
-    }
+        interp(0), handle(0), width(0), height(0), imageMaster(0) {}
 
     void initialize(Tcl_Interp* interp, const std::string& name);
 
@@ -68,7 +63,7 @@ public:
         return interp;
     }
 
-    void putBlock();
+    void updateImage();
 
     void fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
     void fill(uint8_t r, uint8_t g, uint8_t b) {

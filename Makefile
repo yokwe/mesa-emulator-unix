@@ -8,7 +8,7 @@ DATA_DIR   := data
 
 export BUILD_DIR
 
-LOG4CXX_CONFIGURATION := ${BUILD_DIR}/run/log4j-config.xml
+LOG4CXX_CONFIGURATION := data/log4j-config.xml
 export LOG4CXX_CONFIGURATION
 
 
@@ -65,7 +65,7 @@ tclMesa:
 #
 prepare-log:
 	mkdir -p ${BUILD_DIR}/run
-	echo -n >${BUILD_DIR}/run/debug.log
+	/bin/echo -n >${BUILD_DIR}/run/debug.log
 
 run-main: main prepare-log
 	/usr/bin/time ${BUILD_DIR}/main/main

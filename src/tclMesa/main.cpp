@@ -81,7 +81,7 @@ int AppInit(Tcl_Interp *interp) {
 
     Mesa_Init(interp);
 
-    auto scriptFile = std::filesystem::path(BUILD_DIR) / "run" / "mesa.tcl";
+    auto scriptFile = std::filesystem::path("data/mesa.tcl");
     if (std::filesystem::exists(scriptFile)) {
         logger.info("eval  mesa scrip  %s", scriptFile.c_str());
         auto script = readFile(scriptFile);

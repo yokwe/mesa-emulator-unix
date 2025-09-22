@@ -29,9 +29,8 @@ set(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
 # prepare data files
 configure_file(../data/log4j-config.xml.in run/log4j-config.xml @ONLY)
-configure_file(../data/setting.json.in     run/setting.json     @ONLY)
-configure_file(../data/mesa.tcl            run/mesa.tcl     COPYONLY)
 
+configure_file(../data/setting.json        run/setting.json COPYONLY)
 configure_file(../data/Dawn/Dawn.dsk       run/Dawn.dsk     COPYONLY)
 configure_file(../data/Dawn/Dawn.germ      run/Dawn.germ    COPYONLY)
 configure_file(../data/floppy/floppy144    run/floppy144    COPYONLY)

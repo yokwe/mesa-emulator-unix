@@ -62,7 +62,8 @@ int MesaGuam(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const obj
     tcl::Interp interp(interp_);
 
     std::string command = tcl::toString(objv[0]);
-    std::string subCommand = tcl::toString(objv[1]);
+    std::string subCommand;
+    if (2 <= objc) subCommand.append(tcl::toString(objv[1]));
 
     // bind .mesa.display <Motion>        { mesa::guam motion %x %y }
     // bind .mesa.display <KeyPress>      { mesa::guam keyPress %N %K }
@@ -144,12 +145,12 @@ int invalidCommand(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *con
     (void)cdata;
     tcl::Interp interp(interp_);
     if (!interp.hasResult()) {
-        auto string = std_sprintf("invalid command name \"%s", objv[0]);
+        std::string commandString = tcl::toString(objv[0]);
         for(int i = 1; i < objc; i++) {
-            string.append(std_sprintf(" %s", Tcl_GetString(objv[i])));
+            commandString.append(" ");
+            commandString.append(Tcl_GetString(objv[i]));
         }
-        string.append("\"");
-
+        auto string = std_sprintf("invalid command name \"%s\"", commandString);
         interp.result(string);
     }
     return TCL_ERROR;

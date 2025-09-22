@@ -309,10 +309,7 @@ void PhotoImage::copyMesaDisplay() {
     if (memoryConfig.display.bitmap == 0) ERROR();
 
     if (displayConfig.type == DisplayIOFaceGuam::T_monochrome) {
-        auto a = Util::getMicroSecondsFromEpoch();
-        copyMesaDisplayMonochrome16();
-        auto b = Util::getMicroSecondsFromEpoch();
-        logger.info("XX  %llu", b - a);
+        copyMesaDisplayMonochrome32();
     } else {
         ERROR()
     }

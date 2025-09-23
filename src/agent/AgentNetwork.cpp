@@ -118,7 +118,7 @@ void AgentNetwork::ReceiveThread::stop() {
 void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
 	std::unique_lock<std::mutex> locker(receiveMutex);
 
-	int64_t sec = Util::getSecondsFromEpoch();
+	int64_t sec = Util::getSecondsSinceEpoch();
 
 	// TODO Is this correct?
 	// Remove item which has same data

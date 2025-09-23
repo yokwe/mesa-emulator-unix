@@ -31,21 +31,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-//#include "../mesa/Type.h"
-//#include "../trace/Trace.h"
-//
-//// Define PageFault and WriteProtectFault for Memory.h
-//void PageFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//	ERROR();
-//}
-//void WriteProtectFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//	ERROR();
-//}
-
-// To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
-//	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
+#include "../util/net.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -56,7 +42,10 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 
 	{
-		// write code here.
+		auto deviceList = net::getDeviceList();
+		for(const auto& e: deviceList) {
+			logger.info("device  %s", (std::string)e);
+		}
 	}
 
 	logger.info("STOP");

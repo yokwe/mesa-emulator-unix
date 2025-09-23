@@ -286,12 +286,12 @@ public:
 	static constexpr std::chrono::milliseconds ONE_SECOND = std::chrono::seconds(1);
 
 	// misc functions
-	static uint64_t getSecondsFromEpoch();
-	static uint64_t getMilliSecondsFromEpoch();
-	static uint64_t getMicroSecondsFromEpoch();
+	static uint64_t getSecondsSinceEpoch();
+	static uint64_t getMilliSecondsSinceEpoch();
+	static uint64_t getMicroSecondsSinceEpoch();
 
 	static uint32_t getUnixTime() {
-		return (uint32_t)getSecondsFromEpoch();
+		return (uint32_t)getSecondsSinceEpoch();
 	}
 	static uint32_t getMesaTime() {
 		return toMesaTime(getUnixTime());

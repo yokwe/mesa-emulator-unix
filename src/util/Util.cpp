@@ -309,15 +309,15 @@ void  Util::unmapFile(void* page) {
 }
 
 // Time stuff
-uint64_t Util::getSecondsFromEpoch() {
+uint64_t Util::getSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 }
-uint64_t Util::getMilliSecondsFromEpoch() {
+uint64_t Util::getMilliSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
-uint64_t Util::getMicroSecondsFromEpoch() {
+uint64_t Util::getMicroSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }

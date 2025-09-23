@@ -368,7 +368,7 @@ static void boot() {
 	ThreadControl t5("disk", f5);
 	ThreadControl t6("processor", f6);
 
-	auto timeStart = Util::getMilliSecondsFromEpoch();
+	auto timeStart = Util::getMilliSecondsSinceEpoch();
 	t1.start();
 	t2.start();
 	t3.start();
@@ -384,7 +384,7 @@ static void boot() {
 	t4.stop();
 	t5.stop();
 	t6.stop();
-	auto timeStop = Util::getMilliSecondsFromEpoch();
+	auto timeStop = Util::getMilliSecondsSinceEpoch();
 
 	elapsedTime = timeStop - timeStart;
 

@@ -140,7 +140,9 @@ void keyRelease(int number, const std::string& string) {
 //
 // mouse event
 //
-static std::array<LevelVKeys::KeyName, 5> buttonMap = {
+// mouse button number start from 1
+static std::array<LevelVKeys::KeyName, 6> buttonMap = {
+	LevelVKeys::null,
 	LevelVKeys::Point,
 	LevelVKeys::Adjust,
 	LevelVKeys::Menu,

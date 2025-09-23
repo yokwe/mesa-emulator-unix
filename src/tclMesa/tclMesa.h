@@ -39,14 +39,15 @@
 
 #include "../mesa/guam.h"
 
-int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaLog  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaGuam (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaEvent(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
 void refreshDisplay();
 
 extern guam::Config config;
 
-int invalidCommand(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaGuam_boot(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaGuam_config(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int invalidCommand  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaGuam_boot   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaGuam_config (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaGuam_display(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

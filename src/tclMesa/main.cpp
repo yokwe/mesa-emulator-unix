@@ -41,6 +41,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "keymap.h"
+
 #include "tclMesa.h"
 
 constexpr const char* PACKAGE_NAME    = "Mesa";
@@ -53,8 +55,9 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
         logger.error("Tcl_PkgProvide failed");
 		return TCL_ERROR;
 	}
-	Tcl_CreateObjCommand(interp, "mesa::log", MesaLog, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::guam", MesaGuam, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::log",   MesaLog,   NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::guam",  MesaGuam,  NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::event", MesaEvent, NULL, NULL);
 	return TCL_OK;
 }
 
@@ -80,6 +83,8 @@ int AppInit(Tcl_Interp *interp) {
     }
 
     Mesa_Init(interp);
+
+	keymap::initialize();
 
     auto scriptFile = std::filesystem::path("data/mesa.tcl");
     if (std::filesystem::exists(scriptFile)) {

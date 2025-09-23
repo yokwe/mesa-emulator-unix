@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "Pilot.h"
+#include "../mesa/Pilot.h"
 
 namespace keymap {
 

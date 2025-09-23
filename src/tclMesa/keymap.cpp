@@ -38,7 +38,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Pilot.h"
+#include "../mesa/Pilot.h"
 
 #include "keymap.h"
 
@@ -110,13 +110,13 @@ void initialize() {
         keySymMap[e.name] = e.code;
     }
     std::map<std::string, LevelVKey> levelVKeysMap;
-    for(auto e: keySymVector) {
+    for(const auto& e: levelVKeysVector) {
         LevelVKey entry = {e.name, (LevelVKeys::KeyName)e.code};
         levelVKeysMap[e.name] = entry;
     }
 
     keyMap.clear();
-    for(auto e: keyMapVector) {
+    for(const auto& e: keyMapVector) {
         if (e.keySym    == "null") continue;
         if (e.levelVKey == "null") continue;
 

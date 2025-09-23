@@ -42,12 +42,11 @@ static const Logger logger(__FILE__);
 #include <net/bpf.h>
 #include <net/if.h>
 
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "ByteBuffer.h"
-#include "Network.h"
-
 
 #include "BPF.h"
 
@@ -104,7 +103,10 @@ void BPF::close() {
 		fd = -1;
 	}
 	delete buffer;
-	buffer = 0;
+	path.clear();
+	fd         = -1;
+	bufferSize = -1;
+	buffer     = 0;
 }
 
 const std::vector<ByteBuffer>& BPF::read() {
@@ -122,24 +124,24 @@ const std::vector<ByteBuffer>& BPF::read() {
 
 		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
-		readData.append(element);
+		readData.push_back(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);
 	}
 
 	return readData;
 }
-void BPF::write(const Network::Packet& value) {
+void BPF::write(const ByteBuffer& value) {
 	int ret;
 	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
 }
 
-// for Network::Driver
+// for net::Driver
 // no error check
 int  BPF::select  (uint32_t timeout, int& opErrno) {
 	(void)timeout;
 	opErrno = 0;
-	if (readData.isEmpty()) {
+	if (readData.empty()) {
 		int ret = getNonBlockingReadBytes();
 
 		if (ret == 0) {
@@ -159,7 +161,7 @@ int  BPF::select  (uint32_t timeout, int& opErrno) {
 
 		return ret;
 	} else {
-		return readData.first().limit();
+		return readData.front().limit();
 	}
 }
 int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
@@ -167,13 +169,13 @@ int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
 	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
-int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch) {
+int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch) {
 	opErrno = 0;
 	// if readData is empty, fill readData
-	if (readData.isEmpty()) read();
+	if (readData.empty()) read();
 
 	// Take first entry
-	ByteBuffer bb = readData.first();
+	ByteBuffer bb = readData.front();
 	int len = bb.limit() - bb.base();
 	if (dataLen < (uint32_t)len) {
 		logger.error("Unexpected");
@@ -239,7 +241,7 @@ void BPF::setInterface(const std::string& value) {
 	int ret;
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
-	::strncpy(ifr.ifr_name, TO_CSTRING(value), IFNAMSIZ - 1);
+	::strncpy(ifr.ifr_name, value.c_str(), IFNAMSIZ - 1);
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETIF, &ifr))
 }
 

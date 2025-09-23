@@ -7,10 +7,13 @@ add_executable(tclMesa)
 target_sources(
 	tclMesa
 	PUBLIC
+		keymap.h
 		photo_image.h
 		tclMesa.h
 	PRIVATE
+		keymap.cpp
 		main.cpp
+		MesaEvent.cpp
 		MesaGuam.cpp
 		MesaGuam_boot.cpp
 		MesaGuam_config.cpp

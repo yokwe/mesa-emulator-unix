@@ -101,6 +101,7 @@ public:
 
     void open() {
         bpf.open();
+		bpfOpen = true;
         logger.info("bpf.fd         = %d", bpf.fd);
         logger.info("bpf.path       = %s", bpf.path);
         logger.info("bpf.bufferSize = %d", bpf.bufferSize);
@@ -123,7 +124,10 @@ public:
     }
 
     void close() {
-        bpf.close();
+		if (bpfOpen) {
+			bpf.close();
+			bpfOpen = false;
+		}
     }
     
     // no error checking
@@ -141,6 +145,7 @@ public:
     }
 
     BPF bpf;
+	bool bpfOpen = false;
 };
 
 Driver* getDriver(const Device& device) {

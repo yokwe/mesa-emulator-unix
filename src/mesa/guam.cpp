@@ -61,7 +61,6 @@ static const Logger logger(__FILE__);
 #include "../agent/AgentDisplay.h"
 
 #include "../agent/DiskFile.h"
-#include "../agent/NetworkPacket.h"
 
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
@@ -70,6 +69,8 @@ static const Logger logger(__FILE__);
 #include "../agent/StreamWWC.h"
 
 #include "../opcode/opcode.h"
+
+#include "../util/net.h"
 
 #include "guam.h"
 
@@ -80,7 +81,7 @@ Config         config;
 
 DiskFile       diskFile;
 DiskFile       floppyFile;
-NetworkPacket  networkPacket;
+net::Driver*   netDriver;
 
 // agent
 AgentDisk      disk;
@@ -237,6 +238,16 @@ static void initialize() {
 	}
 	const display::Config& displayConfig = display::getConfig();
 
+	{
+		auto device = net::getDevice(config.networkInterface);
+		device.getAddress(PID[1], PID[2], PID[3]);
+		// get PID from network adapter
+		logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+
+		netDriver = net::getDriver(device);
+		netDriver->open();
+	}
+
 	//
 	// Setup Agents
 	//
@@ -255,13 +266,9 @@ static void initialize() {
 	// AgentFloppy
 	floppyFile.attach(config.floppyFilePath);
 	floppy.addDiskFile(&floppyFile);
-	// AgentNetwork use networkPacket
-	networkPacket.attach(config.networkInterface);
-	network.setNetworkPacket(&networkPacket);
-	// AgentProcessor::Initialize use PID[]
-	// get PID from network adapter
-	networkPacket.getAddress(PID[1], PID[2], PID[3]);
-	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+	// AgentNetwork use net::Driver
+	network.setDriver(netDriver);
+	// AgentProcessor::Initialize using PID[]
 	// set PID to AgentProcessor
 	processor.setProcessorID(PID[1], PID[2], PID[3]);
 	processor.setRealMemoryPageCount(memoryConfig.rpSize);
@@ -395,7 +402,9 @@ static void finalize() {
 	// detach file or device
 	diskFile.detach();
 	floppyFile.detach();
-	networkPacket.detach();
+
+	netDriver->close();
+	netDriver = 0;
 
 	memory::finalize();
 }

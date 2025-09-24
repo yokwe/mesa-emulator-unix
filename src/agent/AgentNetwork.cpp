@@ -47,7 +47,6 @@ static const Logger logger(__FILE__);
 #include "AgentNetwork.h"
 
 
-int AgentNetwork::TransmitThread::stopThread;
 void AgentNetwork::TransmitThread::stop() {
 	logger.info("AgentNetwork::TransmitThread::stop");
 	stopThread = 1;
@@ -62,10 +61,58 @@ void AgentNetwork::TransmitThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType*
 
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("TransmitThread receiveQueue.size = %d", transmitQueue.size());
 }
+void AgentNetwork::TransmitThread::transmit(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+	if (iocb == 0) ERROR();
+	if (iocb->bufferLength == 0) ERROR();
+	if (iocb->bufferAddress == 0) ERROR();
+
+	CARD32 dataLen = iocb->bufferLength;
+	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
+	CARD8 buffer[net::Packet::SIZE];
+
+	Util::byteswap((CARD16*)data, (CARD16*)buffer, (dataLen + 1) / 2);
+	// no odd length packet
+	if (dataLen & 1) {
+		buffer[dataLen] = 0;
+		dataLen++;
+	}
+	// minimal packet size is 64
+	if (dataLen < 64) {
+		for(int i = iocb->bufferLength; i < 64; i++) buffer[i] = 0;
+		dataLen = 64;
+	}
+	int opErrno = 0;
+	int ret = driver->transmit(buffer, dataLen, opErrno);
+
+	if (ret == -1) {
+		// set iocb->status if possibble
+
+		//static const CARD16 S_inProgress              =   1;
+		//static const CARD16 S_completedOK             =   2;
+		//static const CARD16 S_tooManyCollisions       =   4;
+		//static const CARD16 S_badCRC                  =   8;
+		//static const CARD16 S_alignmentError          =  16;
+		//static const CARD16 S_packetTooLong           =  32;
+		//static const CARD16 S_bacCRDAndAlignmentError = 128;
+		logger.fatal("%s  %d  sendto returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
+		ERROR();
+
+		switch (opErrno) {
+		default:
+			iocb->status = EthernetIOFaceGuam::S_tooManyCollisions;
+		}
+		return;
+	}
+	if (ret != (int)dataLen) {
+		logger.fatal("%s  %d  ret != dataLen.  ret = %d  dataLen = %d", __FUNCTION__, __LINE__, ret, dataLen);
+		ERROR();
+	}
+	iocb->status = EthernetIOFaceGuam::S_completedOK;
+}
 
 void AgentNetwork::TransmitThread::run() {
 	logger.info("AgentNetwork::TransmitThread::run START");
-	if (networkPacket == 0) ERROR();
+	if (driver == 0) ERROR();
 
 	stopThread = 0;
 
@@ -92,7 +139,7 @@ void AgentNetwork::TransmitThread::run() {
 				transmitQueue.pop_front();
 			}
 
-			networkPacket->transmit(iocb);
+			transmit(iocb);
 			interrupt_thread::notifyInterrupt(interruptSelector);
 			PERF_COUNT(network, transmit)
 		}
@@ -109,7 +156,6 @@ void AgentNetwork::TransmitThread::reset() {
 }
 
 
-int AgentNetwork::ReceiveThread::stopThread;
 void AgentNetwork::ReceiveThread::stop() {
 	logger.info("AgentNetwork::ReceiveThread::stop");
 	stopThread = 1;
@@ -147,10 +193,55 @@ void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* 
 
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("ReceiveThread receiveQueue.size = %d", receiveQueue.size());
 }
+void AgentNetwork::ReceiveThread::receive(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+	if (iocb == 0) ERROR();
+	if (iocb->bufferLength == 0) ERROR();
+	if (iocb->bufferAddress == 0) ERROR();
+
+	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
+	CARD32 dataLen = iocb->bufferLength;
+	int    opErrno = 0;
+
+	CARD8 buffer[net::Packet::SIZE];
+	int ret = driver->receive(buffer, sizeof(buffer), opErrno);
+
+	if (ret == -1) {
+		// set iocb->status if possible
+
+		//static const CARD16 S_inProgress              =   1;
+		//static const CARD16 S_completedOK             =   2;
+		//static const CARD16 S_tooManyCollisions       =   4;
+		//static const CARD16 S_badCRC                  =   8;
+		//static const CARD16 S_alignmentError          =  16;
+		//static const CARD16 S_packetTooLong           =  32;
+		//static const CARD16 S_bacCRDAndAlignmentError = 128;
+		logger.fatal("%s  %d  recv   returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
+		ERROR();
+
+		switch (opErrno) {
+		default:
+			iocb->status = EthernetIOFaceGuam::S_badCRC;
+		}
+		return;
+	}
+	if (ret < 0) {
+		logger.fatal("unknown ret = %d", ret);
+		ERROR();
+	}
+
+	if (dataLen < (CARD32)ret) {
+		iocb->status = EthernetIOFaceGuam::S_packetTooLong;
+		return;
+	}
+
+	Util::byteswap((uint16_t*)buffer, (CARD16*)data, (ret + 1) / 2);
+	iocb->actualLength = ret;
+	iocb->status = EthernetIOFaceGuam::S_completedOK;
+}
 
 void AgentNetwork::ReceiveThread::run() {
 	logger.info("AgentNetwork::ReceiveThread::run START");
-	if (networkPacket == 0) ERROR();
+	if (driver == 0) ERROR();
 
 	stopThread = 0;
 	
@@ -161,7 +252,7 @@ void AgentNetwork::ReceiveThread::run() {
 		int opErrno = 0;
 		// Below "1" means 1 second
 		PERF_COUNT(network, select)
-		int ret = networkPacket->select(1, opErrno);
+		int ret = driver->select(1, opErrno);
 		if (ret == -1) {
 			logger.fatal("%s  %d  select returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
 			ERROR();
@@ -178,7 +269,7 @@ void AgentNetwork::ReceiveThread::run() {
 			// data is ready
 			if (receiveQueue.empty()) {
 				// there is no item in queue, discard packet
-				networkPacket->discardOnePacket();
+				discardOnePacket();
 			} else {
 				// there is item in queue
 				// remove one item from queue
@@ -187,7 +278,7 @@ void AgentNetwork::ReceiveThread::run() {
 				receiveQueue.pop_front();
 
 				// use this iocb to receive packet
-				networkPacket->receive(iocb);
+				receive(iocb);
 				interrupt_thread::notifyInterrupt(interruptSelector);
 				PERF_COUNT(network, receive)
 			}
@@ -198,14 +289,19 @@ void AgentNetwork::ReceiveThread::run() {
 void AgentNetwork::ReceiveThread::reset() {
 	std::unique_lock<std::mutex> locker(receiveMutex);
 	receiveQueue.clear();
-	networkPacket->discardRecievedPacket();
+	driver->discard();
+}
+void AgentNetwork::ReceiveThread::discardOnePacket() {
+	net::Packet packet;
+	int opErrno;
+	driver->receive(packet.data(), packet.capacity(), opErrno);
 }
 
 
 
 void AgentNetwork::Initialize() {
 	if (fcbAddress == 0) ERROR();
-	if (networkPacket == 0) ERROR();
+	if (driver == 0) ERROR();
 
 	fcb = (EthernetIOFaceGuam::EthernetFCBType *)memory::peek(fcbAddress);
 
@@ -218,18 +314,13 @@ void AgentNetwork::Initialize() {
 	fcb->transmitStopped           = 1;
 	fcb->hearSelf                  = 0;
 
-	// use local variable to avoid gcc 9 warning
-	CARD16 id0, id1, id2;
-	networkPacket->getAddress(id0, id1, id2);
-	fcb->processorID[0] = id0;
-	fcb->processorID[1] = id1;
-	fcb->processorID[2] = id2;
+	driver->device.getAddress(fcb->processorID[0], fcb->processorID[1], fcb->processorID[2]);
 
 	fcb->packetsMissed             = 0;
 	fcb->agentBlockSize            = 0;
 
-	receiveThread.setNetworkPacket(networkPacket);
-	transmitThread.setNetworkPacket(networkPacket);
+	receiveThread.setDriver(driver);
+	transmitThread.setDriver(driver);
 }
 
 void AgentNetwork::Call() {

@@ -18,7 +18,6 @@ target_sources(
     AgentProcessor.h
     AgentStream.h
     DiskFile.h
-    NetworkPacket.h
     StreamBoot.h
     StreamCopyPaste.h
     StreamPCFA.h
@@ -36,7 +35,6 @@ target_sources(
     AgentProcessor.cpp
     AgentStream.cpp
     DiskFile.cpp
-    NetworkPacket_dummy.cpp
     StreamBoot.cpp
     StreamCopyPaste.cpp
     StreamPCFA.cpp

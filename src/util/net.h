@@ -51,8 +51,15 @@ public:
 
     Device(const std::string& name_, uint64_t address_) : name(name_), address(address_) {}
     operator std::string() const noexcept {
-        std::string string = std_sprintf("{%ll08x  %s}", address, name);
+        uint16_t w1, w2, w3;
+        getAddress(w1, w2, w3);
+        std::string string = std_sprintf("{%04x-%04x-%04x  %s}", w1, w2, w3, name);
         return string;
+    }
+    void getAddress(uint16_t& word1, uint16_t& word2, uint16_t& word3) const {
+        word1 = (uint16_t)(address >> 32);
+        word2 = (uint16_t)(address >> 16);
+        word3 = (uint16_t)(address >>  0);
     }
 };
 

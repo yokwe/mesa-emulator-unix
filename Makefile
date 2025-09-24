@@ -59,6 +59,8 @@ guam-headless: src/util/Perf.inc
 tclMesa:
 	/usr/bin/time cmake --build build --target tclMesa
 
+xnsTimeServer:
+	/usr/bin/time cmake --build build --target xnsTimeServer
 	
 #
 # run-XXX
@@ -78,3 +80,6 @@ run-test: test prepare-log
 
 run-tclMesa: tclMesa prepare-log
 	${BUILD_DIR}/tclMesa/tclMesa
+
+run-xnsTimeServer: xnsTimeServer prepare-log
+	${BUILD_DIR}/xnsTimeServer/xnsTimeServer

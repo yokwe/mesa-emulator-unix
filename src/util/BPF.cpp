@@ -81,16 +81,13 @@ void BPF::open() {
 	char tempPath[sizeof("/dev/bpf00") + 1];
 	int  tempFD;
 
-	for(int i = 0; i < 99; i++) {
+	for(int i = 0; i < 256; i++) {
 		snprintf(tempPath, sizeof(tempPath), "/dev/bpf%d", i);
 		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
-		if (tempFD < 0) {
-			int opErrno = errno;
-			LOG_ERRNO(opErrno);
-			continue;
-		}
+		if (tempFD < 0) continue;
 		break;
 	}
+	if (tempFD <0) ERROR()
 	path       = tempPath;
 	fd         = tempFD;
 	bufferSize = getBufferSize();

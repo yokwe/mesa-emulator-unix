@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include <string>
 #include <cstring>
 #include <cstdint>
@@ -83,6 +84,8 @@ std::string std_sprintf(const char* format, Args&& ... args) {
     std_sprintf_(result, STD_SPRINTF_DEFAULT_BUFFER_SIZE, format, std_sprintf_convert_(std::forward<Args>(args)) ...);
     return result;
 }
+
+std::string std_vsprintf(const char* format, va_list ap);
 
 class Logger {
 public:
@@ -263,7 +266,7 @@ inline constexpr int multipleOf(int number, int base) {
 	} else { \
 		logger.error("Unknown value = %d", (int)value); \
 		ERROR(); \
-		return std::string("%1").arg((int)value); \
+		return std_sprintf("%d", (int)value); \
 	}
 
 // bitFiled is used in symbols

@@ -327,3 +327,22 @@ void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 		dest[i] = std::byteswap(source[i]);
 	}
 }
+
+
+void std_vsprintf_(std::string& result, int bufferSize, const char* format, va_list ap) {
+	char* buf = (char*)alloca(bufferSize);
+	int ret = std::vsnprintf(buf, bufferSize, format, ap);
+	if (bufferSize <= ret) {
+		// failure
+		// + 1 for trailing null character
+		std_vsprintf_(result, ret + 1, format, ap);
+	} else {
+		// success
+		result += buf;
+	}
+}
+std::string std_vsprintf(const char* format, va_list ap) {
+	std::string result;
+	std_vsprintf_(result, STD_SPRINTF_DEFAULT_BUFFER_SIZE, format, ap);
+	return result;
+}

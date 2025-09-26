@@ -155,19 +155,6 @@ public:
 		myPosition += 6;
 	}
 
-	void read(uint8_t& value) {
-		read8(value);
-	}
-	void read(uint16_t& value) {
-		read16(value);
-	}
-	void read(uint32_t& value) {
-		read32(value);
-	}
-	void read(uint64_t& value) {
-		read48(value);
-	}
-
 	void read  (const int readSize, uint8_t* value) {
 		read(myPosition, readSize, value);
 		myPosition += readSize;
@@ -195,19 +182,6 @@ public:
 	void write48(uint64_t value) {
 		write48(myPosition, value);
 		myLimit = myPosition += 6;
-	}
-
-	void write(uint8_t value) {
-		write8(value);
-	}
-	void write(uint16_t value) {
-		write16(value);
-	}
-	void write(uint32_t value) {
-		write32(value);
-	}
-	void write(uint64_t value) {
-		write48(value);
 	}
 
 	void write  (const int writeSize, const uint8_t* value) {

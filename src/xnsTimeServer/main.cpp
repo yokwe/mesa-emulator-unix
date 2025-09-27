@@ -32,33 +32,38 @@
 static const Logger logger(__FILE__);
 
 #include "../util/net.h"
+#include "../util/ByteBuffer.h"
+#include "../xns2/Ethernet.h"
 
-int main(int, char**) {
+void callInitialize() {
+     xns::ethernet::initialize();
+}
+
+int main(int, char **) {
 	logger.info("START");
 
-    auto device = net::getDevice("en0");
-    logger.info("device  %s", (std::string)device);
-    auto driver = net::getDriver(device);
-    
+	auto device = net::getDevice("en0");
+	logger.info("device  %s", (std::string)device);
+	auto driver = net::getDriver(device);
 
-    driver->open();
-    int opErrno;
-    int timeout = 1; // 1 second
-    int result;
-    
-    uint8_t buffer [net::Packet::SIZE];
-
-
-    driver->discard();
-    for(int i = 0; i < 10; i++) {
-        logger.info("select");
-        result = driver->select(timeout, opErrno);
-        logger.info("select   %d", result);
-        if (result == 0) continue;
-        result = driver->receive(buffer, sizeof(buffer), opErrno);
-        logger.info("receive  %d", result);
-        logger.info("packet  %s", toHexString(result, buffer));
+    {
+//        (void)xns::ethernet::initialize();
+//        (void)xns::ethernet::Host::BROADCAST.toString();
     }
+	driver->open();
+	driver->discard();
+    for(;;) {
+        auto packets = driver->read();
+        if (packets.empty()) continue;
 
-    logger.info("STOP");
+        for(const auto& e: packets) {
+            ByteBuffer bb = e;
+            xns::ethernet::Frame frame;
+            frame.fromByteBuffer(bb);
+
+            logger.info("frame  %4d  %s  %s  %s  %s", bb.limit(), -frame.dest, -frame.source, -frame.type, frame.block.toString());
+        }
+	}
+
+	logger.info("STOP");
 }

@@ -38,16 +38,20 @@ static const Logger logger(__FILE__);
 
 #include "Ethernet.h"
 
-namespace xns::ethernet {
-
-void initialize() {
-    logger.info("%s  intialize", __FUNCTION__);
-}
+namespace xns {
 
 UINT48 Host::BROADCAST = Host{0xFFFF'FFFF'FFFFL, "BROADCAST"};
 UINT48 Host::UNKNOWN   = Host{0x0000'0000'0000L, "UNKNOWN"};
 UINT48 Host::BFN_GVWIN = Host{0x0000'aa00'0e60L, "BFN_GVWIN"};
 UINT48 Host::SELF      = Host{0x9c76'0e4a'08f0L, "SELF"};
+
+}
+
+namespace xns::ethernet {
+
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
+}
 
 UINT16 Type::XNS = Type{0x0600, "XNS"};
 UINT16 Type::IP  = Type{0x0800, "IP"};

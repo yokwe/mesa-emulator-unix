@@ -37,9 +37,7 @@
 
 #include "Type.h"
 
-namespace xns::ethernet {
-
-void initialize();
+namespace xns {
 
 class Host : public UINT48 {
     static inline const char* group = "xns::ethernet::Host";
@@ -50,15 +48,15 @@ public:
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
-    void toByteBuffer (ByteBuffer& bb) const {
-        bb.write48(value);
-    }
-
     static UINT48 BROADCAST;
     static UINT48 UNKNOWN;
     static UINT48 BFN_GVWIN;  // Boot File Number of GVWin
     static UINT48 SELF;
 };
+
+namespace ethernet {
+
+void initialize();
 
 class Type : public UINT16 {
     static inline const char* group = "xns::ethernet::Type";
@@ -69,10 +67,6 @@ public:
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
-    void toByteBuffer (ByteBuffer& bb) const {
-        bb.write48(value);
-    }
-
     static UINT16 XNS;
     static UINT16 IP;
 };
@@ -90,5 +84,7 @@ struct Frame {
         block.fromByteBuffer(bb);
     }
 };
+
+}
 
 }

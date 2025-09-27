@@ -103,6 +103,9 @@ void ByteBuffer::copyFrom(int len, const uint8_t* data) {
 std::string ByteBuffer::toString(int limit) const {
 	return toHexString(limit <= myLimit ? limit : myLimit, myData);
 }
+std::string ByteBuffer::toString(int base, int limit) const {
+	return toHexString(limit - base, myData + base);
+}
 
 void ByteBuffer::limit(int newValue) {
 	if (myBase <= newValue && newValue <= myCapacity) {

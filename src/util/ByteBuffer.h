@@ -83,6 +83,7 @@ public:
 	void copyFrom(int len, const uint8_t* data);
 
 	std::string toString(int limit = 65536) const;
+	std::string toString(int base, int limit) const;
 
 	int base() const {
 		return myBase;

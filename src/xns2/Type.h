@@ -392,7 +392,7 @@ public:
     // Base
     //
     std::string toString() const {
-        return buffer.toString();
+        return buffer.toString(buffer.base(), buffer.limit());
     }
     void fromByteBuffer(ByteBuffer& bb) {
         buffer = bb.newBase();

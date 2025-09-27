@@ -28,55 +28,53 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
+ //
+ // IDP.cpp
+ //
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/net.h"
-#include "../util/ByteBuffer.h"
-#include "../xns2/Ethernet.h"
-#include "../xns2/IDP.h"
+#include "IDP.h"
 
-void callInitialize() {
-     xns::ethernet::initialize();
-     xns::idp::initialize();
+namespace xns::idp {
+
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
 }
 
-int main(int, char **) {
-	logger.info("START");
+UINT16 Checksum::NOCHECK = Checksum{0xFFFF, "****"};
 
-	auto device = net::getDevice("en0");
-	logger.info("device  %s", (std::string)device);
-	auto driver = net::getDriver(device);
+UINT8 Type::RIP    = Type(1, "RIP");
+UINT8 Type::ECHO   = Type(2, "ECHO");
+UINT8 Type::ERROR_ = Type(3, "ERROR");
+UINT8 Type::PEX    = Type(4, "PEX");
+UINT8 Type::SPP    = Type(5, "SPP");
+UINT8 Type::BOOT   = Type(6, "BOOT");
 
-	driver->open();
-	driver->discard();
-    for(;;) {
-        auto packets = driver->read();
-        if (packets.empty()) continue;
+UINT32 Net::ALL     = Net(0xFFFF'FFFF, "ALL");
+UINT32 Net::UNKNOWN = Net(0x0000'0000, "UNKNOWN");
 
-        for(const auto& packet: packets) {
-            xns::ethernet::Frame frame;
-            auto packetData = packet;
-            frame.fromByteBuffer(packetData);
-            auto frameData = frame.block.toBuffer();
+UINT16 Socket::RIP       = Socket(1, "RIP");
+UINT16 Socket::ECHO      = Socket(2, "ECHO"); 
+UINT16 Socket::ERROR_    = Socket(3, "ERROR"); 
+UINT16 Socket::ENVOY     = Socket(4, "ENVOY");
+UINT16 Socket::COURIER   = Socket(5, "COURIER"); 
+UINT16 Socket::CHS_OLD   = Socket(7, "CHS_OLD"); 
+UINT16 Socket::TIME      = Socket(8, "TIME");
+			
+UINT16 Socket::BOOT      = Socket(10, "BOOT"); 
+UINT16 Socket::DIAG      = Socket(19, "DIAG");
+			
+UINT16 Socket::CHS       = Socket(20, "CHS"); 
+UINT16 Socket::AUTH      = Socket(21, "AUTH"); 
+UINT16 Socket::MAIL      = Socket(22, "MAIL"); 
+UINT16 Socket::NETEXEC   = Socket(23, "NETEXEC"); 
+UINT16 Socket::WSINFO    = Socket(24, "WSINFO"); 
+UINT16 Socket::BINDING   = Socket(28, "BINDING");
+			
+UINT16 Socket::GERM      = Socket(35, "GERM");
+UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
 
-//            logger.info("frame  %4d  %s  %s  %s  %d", frameData.limit(), -frame.dest, -frame.source, -frame.type, idpData.remaining());
-
-            if (frame.type == xns::ethernet::Type::XNS) {
-                xns::idp::IDP idp;
-                idp.fromByteBuffer(frameData);
-
-                auto idpData = idp.block.toBuffer();
-
-                auto dst = std_sprintf("%s-%s-%s", -idp.dstNet, -idp.dstHost, -idp.dstSocket);
-                auto src = std_sprintf("%s-%s-%s", -idp.srcNet, -idp.srcHost, -idp.srcSocket);
-
-                logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
-                    -idp.checksum, -idp.length, -idp.control, -idp.type,
-                    dst, src, idpData.remaining());
-            }
-        }
-	}
-
-	logger.info("STOP");
 }

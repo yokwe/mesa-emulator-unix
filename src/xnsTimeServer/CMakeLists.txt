@@ -7,6 +7,6 @@ add_executable (
   main.cpp
   )
 
-add_dependencies(xnsTimeServer util)
+add_dependencies(xnsTimeServer xns util)
 
-target_link_libraries (xnsTimeServer util)
+target_link_libraries (xnsTimeServer xns util)

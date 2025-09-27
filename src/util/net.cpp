@@ -144,6 +144,13 @@ public:
         bpf.discard();
     }
 
+	const std::vector<ByteBuffer>& read() {
+		return bpf.read();
+	}
+	void write(const ByteBuffer& value) {
+		bpf.write(value);
+	}
+
     BPF bpf;
 	bool bpfOpen = false;
 };

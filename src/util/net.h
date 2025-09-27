@@ -76,6 +76,10 @@ public:
     virtual int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* milliSecondsSinceEpoch = nullptr) = 0;
     virtual void discard() = 0;
 
+    // packet base functions
+    virtual const std::vector<ByteBuffer>& read() = 0;
+    virtual void write(const ByteBuffer& value) = 0;
+
     Driver(const Device& device_) : device(device_.name, device_.address) {}
     virtual ~Driver() {}
 };

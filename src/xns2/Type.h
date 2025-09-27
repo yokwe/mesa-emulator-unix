@@ -37,6 +37,8 @@
 
 #include <string>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "../util/ByteBuffer.h"
 #include "../util/Util.h"
@@ -63,11 +65,25 @@ template <typename T>
 class BaseNumber : public Base {
     static_assert(std::is_integral<T>::value, "T is not number type");
 protected:
+    struct Key {
+        const std::string group;
+        const T           value;
+        Key(const std::string& group_, T value_) : group(group_), value(value_) {}
+        std::strong_ordering operator<=>(const Key& that) const {
+            return (this->value == that.value) ? (this->group <=> that.group) : (this->value <=> that.value);
+        }
+    };
+
     T           value;
-    const char* format;
+    std::string format;
     bool        readOnly;
-    BaseNumber(T value_, const char* format_) : value(value_), format(format_), readOnly(true) {}
+
+    BaseNumber(T value_, const char* format_) : value(value_), format(format_), readOnly(true) {
+        logger.info("XX  %s  %LX", format, value);
+
+    }
     BaseNumber(const char* format_) : value(0), format(format_), readOnly(false) {}
+    virtual ~BaseNumber() {}
 public:
     // copy constructor
     BaseNumber(const BaseNumber& that) : value(that.value), format(that.format), readOnly(that.readOnly) {}
@@ -97,114 +113,213 @@ public:
         return toString();
     }
 
-    // 
-    // Base
-    //
-    std::string toString() const {
-        return std_sprintf(format, value);
+    T toValue() const {
+        return value;
     }
+    const char* toFormat() const {
+        return format.c_str();
+    }
+    // Base
+    std::string toString() const {
+        return std_sprintf(toFormat(), value);
+    }
+    // BaseNumber
+    virtual void fromByteBufferGroup(const char* group, ByteBuffer& bb) = 0;
 };
 //
 // UINTx
 //
+template <typename T>
+struct ConstantEntry {
+    std::string group;
+    T           value;
+    std::string format;
+    ConstantEntry(std::string group_, T value_, std::string format_) : group(group_), value(value_), format(format_) {}
+};
+
 class UINT8 : public BaseNumber<uint8_t> {
+    using T = uint8_t;
     static inline const char* DEFAULT_FORMAT = "%u";
+    static inline std::map<Key, UINT8> constantMap;
 protected:
-    UINT8(const char* format_) : BaseNumber<uint8_t>(format_) {}
+    UINT8(const char* format_) : BaseNumber<T>(format_) {}
+    UINT8(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
+        Key key(group, value);
+        constantMap[key] = *this;
+    } // for enum
 public:
-    UINT8(uint8_t value_, const char* format_) : BaseNumber<uint8_t>(value_, format_)  {} // for enum
-    UINT8() : BaseNumber<uint8_t>(DEFAULT_FORMAT)  {}
+    static std::vector<ConstantEntry<T>> getConstantEtnry() {
+        std::vector<ConstantEntry<T>> ret;
+        for(auto e: constantMap) {
+            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
+            ret.push_back(entry);
+        }
+        return ret;
+    }
+
+    UINT8() : BaseNumber<T>(DEFAULT_FORMAT) {}
 
     // need to define operator = here
-    uint8_t operator = (uint8_t newValue) {
-        return BaseNumber<uint8_t>::operator=(newValue);
+    T operator = (T newValue) {
+        return BaseNumber<T>::operator=(newValue);
     }
-    //
     // Base
-    //
     void fromByteBuffer(ByteBuffer& bb) {
         bb.read8(value);
     }
     void toByteBuffer (ByteBuffer& bb) const {
         bb.write8(value);
     }
+    // BaseNumber
+    void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
+        UINT8::fromByteBuffer(bb);
+        //
+        Key key{group, value};
+        if (constantMap[key]) {
+            *this = constantMap[key];
+        }
+    }
 };
 class UINT16 : public BaseNumber<uint16_t> {
+    using T = uint16_t;
     static inline const char* DEFAULT_FORMAT = "%u";
+    static inline std::map<Key, UINT16> constantMap;
 protected:
-    UINT16(const char* format_) : BaseNumber<uint16_t>(format_) {}
-    UINT16(uint16_t value_, const char* format_) : BaseNumber<uint16_t>(value_, format_) {} // for enum
+    UINT16(const char* format_) : BaseNumber<T>(format_) {}
+    UINT16(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
+        Key key(group, value);
+        constantMap[key] = *this;
+    } // for enum
 public:
-    UINT16() : BaseNumber<uint16_t>(DEFAULT_FORMAT) {}
-    // need to define operator = here
-    int operator = (uint16_t newValue) {
-        return BaseNumber<uint16_t>::operator=(newValue);
+    static std::vector<ConstantEntry<T>> getConstantEtnry() {
+        std::vector<ConstantEntry<T>> ret;
+        for(auto e: constantMap) {
+            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
+            ret.push_back(entry);
+        }
+        return ret;
     }
-    //
+
+    UINT16() : BaseNumber<T>(DEFAULT_FORMAT) {}
+    // need to define operator = here
+    int operator = (T newValue) {
+        return BaseNumber<T>::operator=(newValue);
+    }
     // Base
-    //
     void fromByteBuffer(ByteBuffer& bb) {
         bb.read16(value);
     }
     void toByteBuffer (ByteBuffer& bb) const {
         bb.write16(value);
     }
+    // BaseNumber
+    void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
+        UINT16::fromByteBuffer(bb);
+        //
+        Key key{group, value};
+        if (constantMap.contains(key)) {
+            *this = constantMap[key];
+        }
+    }
 };
 class UINT32 : public BaseNumber<uint32_t> {
+    using T = uint32_t;
     static inline const char* DEFAULT_FORMAT = "%u";
+    static inline std::map<Key, UINT32> constantMap;
 protected:
-    UINT32(const char* format_) : BaseNumber<uint32_t>(format_) {}
-    UINT32(uint32_t value_, const char* format_) : BaseNumber<uint32_t>(value_, format_) {} // for enum
+    UINT32(const char* format_) : BaseNumber<T>(format_) {}
+    UINT32(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
+        Key key(group, value);
+        constantMap[key] = *this;
+    } // for enum
 public:
-    UINT32() : BaseNumber<uint32_t>(DEFAULT_FORMAT) {}
-    // need to define operator = here
-    int operator = (uint32_t newValue) {
-        return BaseNumber<uint32_t>::operator=(newValue);
+    static std::vector<ConstantEntry<T>> getConstantEtnry() {
+        std::vector<ConstantEntry<T>> ret;
+        for(auto e: constantMap) {
+            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
+            ret.push_back(entry);
+        }
+        return ret;
     }
-    //
+
+    UINT32() : BaseNumber<T>(DEFAULT_FORMAT) {}
+    // need to define operator = here
+    int operator = (T newValue) {
+        return BaseNumber<T>::operator=(newValue);
+    }
     // Base
-    //
     void fromByteBuffer(ByteBuffer& bb) {
         bb.read32(value);
     }
     void toByteBuffer (ByteBuffer& bb) const {
         bb.write32(value);
     }
+    // BaseNumber
+    void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
+        UINT32::fromByteBuffer(bb);
+        //
+        Key key{group, value};
+        if (constantMap.contains(key)) {
+            *this = constantMap[key];
+        }
+    }
 };
 class UINT48 : public BaseNumber<uint64_t> {
-    static inline const char* DEFAULT_FORMAT = "%08lX";
+    using T = uint64_t;
+    static inline const char* DEFAULT_FORMAT = "%012lX";
+    static inline std::map<Key, UINT48> constantMap;
 protected:
-    UINT48(const char* format_) : BaseNumber<uint64_t>(format_) {}
-    UINT48(uint64_t value_, const char* format_) : BaseNumber<uint64_t>(value_, format_)  {} // for enum
+protected:
+    UINT48(const char* format_) : BaseNumber<T>(format_) {}
+    UINT48(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
+        Key key(group, value);
+        constantMap[key] = *this;
+    } // for enum
 public:
-    UINT48() : BaseNumber<uint64_t>(DEFAULT_FORMAT) {}
-    // need to define operator = here
-    long operator = (uint64_t newValue) {
-        return BaseNumber<uint64_t>::operator=(newValue);
+    static std::vector<ConstantEntry<T>> getConstantEtnry() {
+        std::vector<ConstantEntry<T>> ret;
+        for(auto e: constantMap) {
+            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
+            ret.push_back(entry);
+        }
+        return ret;
     }
 
-    //
+    UINT48() : BaseNumber<T>(DEFAULT_FORMAT) {}
+    // need to define operator = here
+    long operator = (T newValue) {
+        return BaseNumber<T>::operator=(newValue);
+    }
     // Base
-    //
     void fromByteBuffer(ByteBuffer& bb) {
         bb.read48(value);
     }
     void toByteBuffer (ByteBuffer& bb) const {
         bb.write48(value);
     }
+    // BaseNumber
+    void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
+        UINT48::fromByteBuffer(bb);
+        //
+        Key key{group, value};
+        if (constantMap.contains(key)) {
+            *this = constantMap[key];
+        }
+    }
 };
 //
 // INTx
 //
 class INT16 : public BaseNumber<int16_t> {
+    using T = int16_t;
     static inline const char* DEFAULT_FORMAT = "%d";
 protected:
-    INT16(const char* format_) : BaseNumber<int16_t>(format_) {}
+    INT16(const char* format_) : BaseNumber<T>(format_) {}
 public:
-    INT16() : BaseNumber<int16_t>(DEFAULT_FORMAT) {}
+    INT16() : BaseNumber<T>(DEFAULT_FORMAT) {}
     // need to define operator = here
-    int operator = (int16_t newValue) {
-        return BaseNumber<int16_t>::operator=(newValue);
+    int operator = (T newValue) {
+        return BaseNumber<T>::operator=(newValue);
     }
     //
     // Base
@@ -223,12 +338,13 @@ public:
 // BOOLEAN
 //
 class BOOLEAN : public BaseNumber<uint16_t> {
+    using T = uint16_t;
 public:
-    BOOLEAN() : BaseNumber<uint16_t>("") {}
+    BOOLEAN() : BaseNumber<T>("") {}
 
     // define operator =
     bool operator = (bool newValue) {
-        return BaseNumber<uint16_t>::operator=(newValue ? 1 : 0);
+        return BaseNumber<T>::operator=(newValue ? 1 : 0);
     }
 
     //

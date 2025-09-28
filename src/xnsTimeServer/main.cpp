@@ -37,6 +37,8 @@ static const Logger logger(__FILE__);
 #include "../xns2/Ethernet.h"
 #include "../xns2/IDP.h"
 #include "../xns2/PEX.h"
+#include "../xns2/RIP.h"
+#include "../xns2/SPP.h"
 #include "../xns2/Time.h"
 
 void callInitialize() {
@@ -93,7 +95,27 @@ int main(int, char **) {
 
                         logger.info("        TIME  %s  %s", -request.version, -request.type);
                     }
-
+                    continue;
+                }
+                if (idp.type == xns::idp::Type::RIP) {
+                    xns::rip::RIP rip;
+                    rip.fromByteBuffer(idpData);
+                    std::string string;
+                    for(const auto& entry: rip.table) {
+                        string += std_sprintf(" {%s %s}", -entry.net, -entry.delay);
+                    }
+                    logger.info("    RIP  %s  %s", -rip.type, string.substr(1));
+                    //
+                    continue;
+                }
+                if (idp.type == xns::idp::Type::SPP) {
+                    continue;
+                }
+                if (idp.type == xns::idp::Type::ERROR_) {
+                    continue;
+                }
+                if (idp.type == xns::idp::Type::ECHO) {
+                    continue;
                 }
             }
         }

@@ -41,4 +41,37 @@ namespace xns::echo {
 
 void initialize();
 
+class Type : public UINT16 {
+    static inline const char* group = "xns::echo::Type";
+    Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+public:
+    Type() : UINT16() {}
+
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    
+    static UINT16 REQUEST;   // 1
+    static UINT16 RESPONSE;  // 2
+};
+
+struct Echo {
+    Type  type;
+    BLOCK block;
+
+    // this <= ByteBuffer
+    void fromByteBuffer(ByteBuffer& bb) {
+        type.fromByteBuffer(bb);
+        block.fromByteBuffer(bb);
+    }
+
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const {
+        type.toByteBuffer(bb);
+        block.toByteBuffer(bb);
+    }
+};
+
+
+
 }

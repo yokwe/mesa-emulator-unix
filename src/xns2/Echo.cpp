@@ -44,4 +44,7 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
+UINT16 Type::REQUEST      = Type(1, "REQUEST");
+UINT16 Type::RESPONSE     = Type(2, "RESPONSE");
+
 }

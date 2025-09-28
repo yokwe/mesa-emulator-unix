@@ -41,4 +41,52 @@ namespace xns::error {
 
 void initialize();
 
+class ErrorNumber : public UINT16 {
+    static inline const char* group = "xns::error::ErrorNumber";
+    ErrorNumber(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+public:
+    ErrorNumber() : UINT16() {}
+
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    
+	static UINT16 UNSPEC;               // An unspecified error is detected at destination
+	static UINT16 BAD_CHECKSUM;         // The checksum is incorrect or the packet has some other serious inconsistency detected at destination
+	static UINT16 NO_SOCKET;            // The specified socket does not exist at the specified destination host
+	static UINT16 RESOURCE_LIMIT;       // The destination cannot accept the packet due to resource limitations
+	static UINT16 LISTEN_REJECT;        //
+	static UINT16 INVALID_PACKET_TYPE;  //
+	static UINT16 PROTOCOL_VIOLATION;   //
+
+	static UINT16 UNSPECIFIED_IN_ROUTE; // An unspecified error occurred before reaching destination
+	static UINT16 INCONSISTENT;         // The checksum is incorrect, or the packet has some other serious inconsistency before reaching destination
+	static UINT16 CANT_GET_THERE;       // The destination host cannot be reached from here.
+	static UINT16 EXCESS_HOPS;          // The packet has passed through 15 internet routes without reaching its destination.
+	static UINT16 TOO_BIG;              // The packet is too large to be forwarded through some intermediate network.
+			                            // The Error Parameter field contains the length of the largest packet that can be accommodated.
+	static UINT16 CONGESTION_WARNING;   //
+	static UINT16 CONGESTION_DISCARD;   //
+};
+
+struct Error_ {
+    ErrorNumber errorNumber;
+    UINT16      errorParameter;
+    BLOCK       block;
+
+    // this <= ByteBuffer
+    void fromByteBuffer(ByteBuffer& bb) {
+        errorNumber.fromByteBuffer(bb);
+        errorParameter.fromByteBuffer(bb);
+        block.fromByteBuffer(bb);
+    }
+
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const {
+        errorNumber.toByteBuffer(bb);
+        errorParameter.toByteBuffer(bb);
+        block.toByteBuffer(bb);
+    }
+};
+
 }

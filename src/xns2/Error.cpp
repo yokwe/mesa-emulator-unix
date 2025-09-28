@@ -44,4 +44,22 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
+UINT16 ErrorNumber::UNSPEC               = ErrorNumber(0, "UNSPEC");
+UINT16 ErrorNumber::BAD_CHECKSUM         = ErrorNumber(1, "BAD_CHECKSUM");
+UINT16 ErrorNumber::NO_SOCKET            = ErrorNumber(2, "NO_SOCKET");
+UINT16 ErrorNumber::RESOURCE_LIMIT       = ErrorNumber(3, "RESOURCE_LIMIT");
+
+UINT16 ErrorNumber::LISTEN_REJECT        = ErrorNumber(4, "LISTEN_REJECT");
+UINT16 ErrorNumber::INVALID_PACKET_TYPE  = ErrorNumber(5, "INVALID_PACKET_TYPE");
+UINT16 ErrorNumber::PROTOCOL_VIOLATION   = ErrorNumber(6, "PROTOCOL_VIOLATION");
+
+UINT16 ErrorNumber::UNSPECIFIED_IN_ROUTE = ErrorNumber(01000, "UNSPECIFIED_IN_ROUTE");
+UINT16 ErrorNumber::INCONSISTENT         = ErrorNumber(01001, "INCONSISTENT");
+UINT16 ErrorNumber::CANT_GET_THERE       = ErrorNumber(01002, "CANT_GET_THERE");
+UINT16 ErrorNumber::EXCESS_HOPS          = ErrorNumber(01003, "EXCESS_HOPS");
+UINT16 ErrorNumber::TOO_BIG              = ErrorNumber(01004, "TOO_BIG");
+
+UINT16 ErrorNumber::CONGESTION_WARNING   = ErrorNumber(01005, "CONGESTION_WARNING");
+UINT16 ErrorNumber::CONGESTION_DISCARD   = ErrorNumber(01006, "CONGESTION_DISCARD");
+
 }

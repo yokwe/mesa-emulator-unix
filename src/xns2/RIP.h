@@ -36,6 +36,7 @@
 #pragma once
 
 #include "Type.h"
+#include "IDP.h"
 
 namespace xns::rip {
 
@@ -54,6 +55,43 @@ public:
     static UINT16 REQUEST;   // 1
     static UINT16 RESPONSE;  // 2
 };
+class Delay : public UINT16 {
+    static inline const char* group = "xns::rip::Delay";
+    Delay(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+public:
+    Delay() : UINT16() {}
 
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    
+    static UINT16 INFINITY;   // 16
+};
+
+struct NetDelay {
+    Net   net;
+    Delay delay;
+
+    // this <= ByteBuffer
+    void fromByteBuffer(ByteBuffer& bb) {
+        net.fromByteBuffer(bb);
+        delay.fromByteBuffer(bb);
+    }
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const {
+        net.toByteBuffer(bb);
+        delay.toByteBuffer(bb);
+    }
+};
+
+struct RIP {
+    Type                  type;
+    std::vector<NetDelay> table;
+
+    // this <= ByteBuffer
+    void fromByteBuffer(ByteBuffer& bb);
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const;
+};
 
 }

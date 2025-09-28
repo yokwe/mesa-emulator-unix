@@ -10,11 +10,13 @@ target_sources(
 		Ethernet.h
 		IDP.h
 		PEX.h
+		Time.h
 		Type.h
 	PRIVATE
 		Ethernet.cpp
 		IDP.cpp
 		PEX.cpp
+		Time.cpp
 		Type.cpp
 )
 

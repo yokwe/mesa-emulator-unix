@@ -42,6 +42,7 @@ static const Logger logger(__FILE__);
 #include "Ethernet.h"
 #include "IDP.h"
 #include "PEX.h"
+#include "Time.h"
 
 namespace xns {
 
@@ -49,6 +50,7 @@ void initialize() {
      xns::ethernet::initialize();
      xns::idp::initialize();
      xns::pex::initialize();
+     xns::time::initialize();
 }
 
 void dumpFormatList() {

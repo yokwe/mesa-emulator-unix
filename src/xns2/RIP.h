@@ -42,7 +42,7 @@ namespace xns::rip {
 void initialize();
 
 class Type : public UINT16 {
-    static inline const char* group = "xns::time::Type";
+    static inline const char* group = "xns::rip::Type";
     Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Type() : UINT16() {}

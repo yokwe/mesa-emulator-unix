@@ -36,10 +36,10 @@ static const Logger logger(__FILE__);
 #include "../xns2/Type.h"
 #include "../xns2/Ethernet.h"
 #include "../xns2/IDP.h"
+#include "../xns2/PEX.h"
 
 void callInitialize() {
-     xns::ethernet::initialize();
-     xns::idp::initialize();
+     xns::initialize();
 }
 
 int main(int, char **) {
@@ -77,6 +77,16 @@ int main(int, char **) {
                 logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
                     -idp.checksum, -idp.length, -idp.control, -idp.type,
                     dst, src, idpData.remaining());
+                
+                if (idp.type == xns::idp::Type::PEX) {
+                    xns::pex::PEX pex;
+                    pex.fromByteBuffer(idpData);
+
+                    auto pexData = pex.block.toBuffer();
+
+                    logger.info("    PEX  %s  %s  %s", -pex.id, -pex.type, pex.block.toString());
+
+                }
             }
         }
 	}

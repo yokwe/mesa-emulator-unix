@@ -37,6 +37,7 @@ static const Logger logger(__FILE__);
 #include "../xns2/Ethernet.h"
 #include "../xns2/IDP.h"
 #include "../xns2/PEX.h"
+#include "../xns2/Time.h"
 
 void callInitialize() {
      xns::initialize();
@@ -85,6 +86,13 @@ int main(int, char **) {
                     auto pexData = pex.block.toBuffer();
 
                     logger.info("    PEX  %s  %s  %s", -pex.id, -pex.type, pex.block.toString());
+
+                    if (pex.type == xns::pex::Type::TIME) {
+                        xns::time::Request request;
+                        request.fromByteBuffer(pexData);
+
+                        logger.info("        TIME  %s  %s", -request.version, -request.type);
+                    }
 
                 }
             }

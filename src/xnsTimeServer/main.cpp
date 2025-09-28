@@ -33,6 +33,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/net.h"
 #include "../util/ByteBuffer.h"
+#include "../xns2/Type.h"
 #include "../xns2/Ethernet.h"
 #include "../xns2/IDP.h"
 
@@ -43,6 +44,8 @@ void callInitialize() {
 
 int main(int, char **) {
 	logger.info("START");
+
+//    xns::dumpFormatList();
 
 	auto device = net::getDevice("en0");
 	logger.info("device  %s", (std::string)device);

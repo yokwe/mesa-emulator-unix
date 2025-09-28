@@ -38,6 +38,24 @@
 #include "Type.h"
 #include "Ethernet.h"
 
+namespace xns {
+
+class Net : public UINT32 {
+    static inline const char* group = "xns::idp::Net";
+    Net(uint32_t value_, const char* name_) : UINT32(group, value_, name_) {}
+public:
+    Net() : UINT32("%8X") {}
+
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    static UINT32 ALL;
+    static UINT32 UNKNOWN;
+};
+
+}
+
+
 namespace xns::idp {
 
 void initialize();
@@ -69,19 +87,6 @@ public:
     static UINT8 PEX;
     static UINT8 SPP;
     static UINT8 BOOT;
-};
-
-class Net : public UINT32 {
-    static inline const char* group = "xns::idp::Net";
-    Net(uint32_t value_, const char* name_) : UINT32(group, value_, name_) {}
-public:
-    Net() : UINT32("%8X") {}
-
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
-    }
-    static UINT32 ALL;
-    static UINT32 UNKNOWN;
 };
 
 class Socket : public UINT16 {

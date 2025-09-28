@@ -40,6 +40,14 @@ static const Logger logger(__FILE__);
 
 #include "IDP.h"
 
+namespace xns {
+
+UINT32 Net::ALL     = Net(0xFFFF'FFFF, "ALL");
+UINT32 Net::UNKNOWN = Net(0x0000'0000, "UNKNOWN");
+
+}
+
+
 namespace xns::idp {
 
 void initialize() {
@@ -54,9 +62,6 @@ UINT8 Type::ERROR_ = Type(3, "ERROR");
 UINT8 Type::PEX    = Type(4, "PEX");
 UINT8 Type::SPP    = Type(5, "SPP");
 UINT8 Type::BOOT   = Type(6, "BOOT");
-
-UINT32 Net::ALL     = Net(0xFFFF'FFFF, "ALL");
-UINT32 Net::UNKNOWN = Net(0x0000'0000, "UNKNOWN");
 
 UINT16 Socket::RIP       = Socket(1, "RIP");
 UINT16 Socket::ECHO      = Socket(2, "ECHO"); 

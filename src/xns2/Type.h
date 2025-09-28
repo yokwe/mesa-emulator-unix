@@ -73,18 +73,42 @@ protected:
             return (this->value == that.value) ? (this->group <=> that.group) : (this->value <=> that.value);
         }
     };
+    static inline std::map<Key, std::string> formatMap;
+    void applyGroup(const char* group) {
+        Key key{group, value};
+        if (formatMap.contains(key)) {
+            this->format   = formatMap[key];
+            this->readOnly = true;
+        }
+    }
 
     T           value;
     std::string format;
     bool        readOnly;
 
-    BaseNumber(T value_, const char* format_) : value(value_), format(format_), readOnly(true) {
-        logger.info("XX  %s  %LX", format, value);
-
+    BaseNumber(const char* group, T value_, const char* format_) : value(value_), format(format_), readOnly(true) {
+        Key key{group, value};
+        formatMap[key] = format;
     }
+
     BaseNumber(const char* format_) : value(0), format(format_), readOnly(false) {}
     virtual ~BaseNumber() {}
 public:
+    struct FormatEntry {
+        std::string group;
+        T           value;
+        std::string format;
+        FormatEntry(std::string group_, T value_, std::string format_) : group(group_), value(value_), format(format_) {}
+    };
+    static std::vector<FormatEntry> getFormatList() {
+        std::vector<FormatEntry> ret;
+        for(auto& i: formatMap) {
+            FormatEntry entry{i.first.group, i.first.value, i.second};
+            ret.push_back(entry);
+        }
+        return ret;
+    }
+
     // copy constructor
     BaseNumber(const BaseNumber& that) : value(that.value), format(that.format), readOnly(that.readOnly) {}
     // copy assignment operator
@@ -123,40 +147,19 @@ public:
     std::string toString() const {
         return std_sprintf(toFormat(), value);
     }
-    // BaseNumber
-    virtual void fromByteBufferGroup(const char* group, ByteBuffer& bb) = 0;
 };
+void dumpFormatList();
+
 //
 // UINTx
 //
-template <typename T>
-struct ConstantEntry {
-    std::string group;
-    T           value;
-    std::string format;
-    ConstantEntry(std::string group_, T value_, std::string format_) : group(group_), value(value_), format(format_) {}
-};
-
 class UINT8 : public BaseNumber<uint8_t> {
     using T = uint8_t;
     static inline const char* DEFAULT_FORMAT = "%u";
-    static inline std::map<Key, UINT8> constantMap;
 protected:
     UINT8(const char* format_) : BaseNumber<T>(format_) {}
-    UINT8(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
-        Key key(group, value);
-        constantMap[key] = *this;
-    } // for enum
+    UINT8(const char* group, T value_, const char* format_) : BaseNumber<T>(group, value_, format_) {} // for enum
 public:
-    static std::vector<ConstantEntry<T>> getConstantEtnry() {
-        std::vector<ConstantEntry<T>> ret;
-        for(auto e: constantMap) {
-            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
-            ret.push_back(entry);
-        }
-        return ret;
-    }
-
     UINT8() : BaseNumber<T>(DEFAULT_FORMAT) {}
 
     // need to define operator = here
@@ -174,32 +177,16 @@ public:
     void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
         UINT8::fromByteBuffer(bb);
         //
-        Key key{group, value};
-        if (constantMap[key]) {
-            *this = constantMap[key];
-        }
+        applyGroup(group);
     }
 };
 class UINT16 : public BaseNumber<uint16_t> {
     using T = uint16_t;
     static inline const char* DEFAULT_FORMAT = "%u";
-    static inline std::map<Key, UINT16> constantMap;
 protected:
     UINT16(const char* format_) : BaseNumber<T>(format_) {}
-    UINT16(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
-        Key key(group, value);
-        constantMap[key] = *this;
-    } // for enum
+    UINT16(const char* group, T value_, const char* format_) : BaseNumber<T>(group, value_, format_) {} // for enum
 public:
-    static std::vector<ConstantEntry<T>> getConstantEtnry() {
-        std::vector<ConstantEntry<T>> ret;
-        for(auto e: constantMap) {
-            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
-            ret.push_back(entry);
-        }
-        return ret;
-    }
-
     UINT16() : BaseNumber<T>(DEFAULT_FORMAT) {}
     // need to define operator = here
     int operator = (T newValue) {
@@ -216,32 +203,16 @@ public:
     void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
         UINT16::fromByteBuffer(bb);
         //
-        Key key{group, value};
-        if (constantMap.contains(key)) {
-            *this = constantMap[key];
-        }
+        applyGroup(group);
     }
 };
 class UINT32 : public BaseNumber<uint32_t> {
     using T = uint32_t;
     static inline const char* DEFAULT_FORMAT = "%u";
-    static inline std::map<Key, UINT32> constantMap;
 protected:
     UINT32(const char* format_) : BaseNumber<T>(format_) {}
-    UINT32(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
-        Key key(group, value);
-        constantMap[key] = *this;
-    } // for enum
+    UINT32(const char* group, T value_, const char* format_) : BaseNumber<T>(group, value_, format_) {} // for enum
 public:
-    static std::vector<ConstantEntry<T>> getConstantEtnry() {
-        std::vector<ConstantEntry<T>> ret;
-        for(auto e: constantMap) {
-            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
-            ret.push_back(entry);
-        }
-        return ret;
-    }
-
     UINT32() : BaseNumber<T>(DEFAULT_FORMAT) {}
     // need to define operator = here
     int operator = (T newValue) {
@@ -258,33 +229,17 @@ public:
     void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
         UINT32::fromByteBuffer(bb);
         //
-        Key key{group, value};
-        if (constantMap.contains(key)) {
-            *this = constantMap[key];
-        }
+        applyGroup(group);
     }
 };
 class UINT48 : public BaseNumber<uint64_t> {
     using T = uint64_t;
     static inline const char* DEFAULT_FORMAT = "%012lX";
-    static inline std::map<Key, UINT48> constantMap;
 protected:
 protected:
     UINT48(const char* format_) : BaseNumber<T>(format_) {}
-    UINT48(const char* group, T value_, const char* format_) : BaseNumber<T>(value_, format_) {
-        Key key(group, value);
-        constantMap[key] = *this;
-    } // for enum
+    UINT48(const char* group, T value_, const char* format_) : BaseNumber<T>(group, value_, format_) {} // for enum
 public:
-    static std::vector<ConstantEntry<T>> getConstantEtnry() {
-        std::vector<ConstantEntry<T>> ret;
-        for(auto e: constantMap) {
-            ConstantEntry<T> entry(e.first.group, e.first.value, e.second.format);
-            ret.push_back(entry);
-        }
-        return ret;
-    }
-
     UINT48() : BaseNumber<T>(DEFAULT_FORMAT) {}
     // need to define operator = here
     long operator = (T newValue) {
@@ -301,10 +256,7 @@ public:
     void fromByteBufferGroup(const char* group, ByteBuffer& bb) {
         UINT48::fromByteBuffer(bb);
         //
-        Key key{group, value};
-        if (constantMap.contains(key)) {
-            *this = constantMap[key];
-        }
+        applyGroup(group);
     }
 };
 //

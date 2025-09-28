@@ -42,6 +42,34 @@ static const Logger logger(__FILE__);
 
 namespace xns {
 
+void dumpFormatList() {
+    {
+        auto list = xns::BaseNumber<uint8_t>::getFormatList();
+        for(const auto& e: list) {
+            logger.info("%8s %-20s  %14d  %s", "uint8_t", e.group, e.value, e.format);
+        }
+    }
+    {
+        auto list = xns::BaseNumber<uint16_t>::getFormatList();
+        for(const auto& e: list) {
+            logger.info("%8s %-20s  %14d  %s", "uint16_t", e.group, e.value, e.format);
+        }
+    }
+    {
+        auto list = xns::BaseNumber<uint32_t>::getFormatList();
+        for(const auto& e: list) {
+            logger.info("%8s %-20s  %14d  %s", "uint32_t", e.group, e.value, e.format);
+        }
+    }
+    {
+        auto list = xns::BaseNumber<uint64_t>::getFormatList();
+        for(const auto& e: list) {
+            logger.info("%8s %-20s  0x%012lX  %s", "uint64_t", e.group, e.value, e.format);
+        }
+    }
+
+}
+
 void STRING::fromByteBuffer(ByteBuffer& bb) {
 	uint16_t length;
 	bb.read16(length);

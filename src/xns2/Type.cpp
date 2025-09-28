@@ -39,8 +39,17 @@ static const Logger logger(__FILE__);
 #include "../util/ByteBuffer.h"
 
 #include "Type.h"
+#include "Ethernet.h"
+#include "IDP.h"
+#include "PEX.h"
 
 namespace xns {
+
+void initialize() {
+     xns::ethernet::initialize();
+     xns::idp::initialize();
+     xns::pex::initialize();
+}
 
 void dumpFormatList() {
     {

@@ -37,13 +37,14 @@
 
 #include <string>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 #include "../util/ByteBuffer.h"
 #include "../util/Util.h"
 
 namespace xns {
+
+void initialize();
 
 // helper macro to invoke fromByteBuufer / toByteBuffer
 #define FROM_BYTE_BUFFER(bb, name) name.fromByteBuffer(bb)
@@ -117,6 +118,10 @@ public:
         this->format   = that.format;
         this->readOnly = that.readOnly;
         return *this;
+    }
+
+    std::strong_ordering operator<=>(const BaseNumber<T>& that) const {
+        return this->value <=> that.value;
     }
 
     T operator = (T newValue) {

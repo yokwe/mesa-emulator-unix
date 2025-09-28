@@ -36,6 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/ByteBuffer.h"
+
 #include "IDP.h"
 
 namespace xns::idp {
@@ -76,5 +78,57 @@ UINT16 Socket::BINDING   = Socket(28, "BINDING");
 			
 UINT16 Socket::GERM      = Socket(35, "GERM");
 UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
+
+void IDP::fromByteBuffer(ByteBuffer& bb) {
+        checksum.fromByteBuffer(bb);
+        length.fromByteBuffer(bb);
+        control.fromByteBuffer(bb);
+        type.fromByteBuffer(bb);
+        dstNet.fromByteBuffer(bb);
+        dstHost.fromByteBuffer(bb);
+        dstSocket.fromByteBuffer(bb);
+        srcNet.fromByteBuffer(bb);
+        srcHost.fromByteBuffer(bb);
+        srcSocket.fromByteBuffer(bb);
+
+        // FIX length using value of length field
+        int newLimit = bb.position() + +length - HEADER_LENGTH;
+        if (newLimit <= 0) ERROR()
+        bb.limit(newLimit);
+
+        // check checksum
+        if (checksum != Checksum::NOCHECK) {
+            uint16_t myChecksum = computeChecksum(bb);
+            if (checksum != myChecksum) {
+                // Checksum error
+                logger.warn("Checksum error");
+            }
+        }
+
+        block.fromByteBuffer(bb);
+}
+
+uint16_t computeChecksum(const ByteBuffer& bb) {
+    int base  = bb.base();
+    int limit = bb.limit();
+    uint8_t* data = bb.data();
+
+    uint32_t w;
+    uint32_t s = 0;
+    for(int i = base + 2; i < limit;) {
+        w = data[i++] << 8;
+        w |= data[i++];
+
+		// add w to s
+		s += w;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+		// shift left
+		s <<= 1;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+    }
+    return (uint16_t)s;
+}
 
 }

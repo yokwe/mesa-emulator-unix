@@ -116,8 +116,11 @@ public:
 	static UINT16 TELEDEBUG;
 };
 
+uint16_t computeChecksum(const ByteBuffer& bb);
 
 struct IDP {
+    static constexpr int HEADER_LENGTH = 30;
+
     Checksum checksum;
     UINT16   length;
     UINT8    control;
@@ -133,20 +136,7 @@ struct IDP {
 
     BLOCK    block;
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        checksum.fromByteBuffer(bb);
-        length.fromByteBuffer(bb);
-        control.fromByteBuffer(bb);
-        type.fromByteBuffer(bb);
-        dstNet.fromByteBuffer(bb);
-        dstHost.fromByteBuffer(bb);
-        dstSocket.fromByteBuffer(bb);
-        srcNet.fromByteBuffer(bb);
-        srcHost.fromByteBuffer(bb);
-        srcSocket.fromByteBuffer(bb);
-
-        block.fromByteBuffer(bb);
-    }
+    void fromByteBuffer(ByteBuffer& bb);
 };
 
 }

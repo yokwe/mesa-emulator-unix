@@ -117,6 +117,19 @@ struct Response {
     UINT16    dstEnd;           // 0 for no DST
     Tolerance tolerance;    // 0 for 
     UINT32    toleranceValue;   // supposed time error in unit of tolerance
+
+    void toByteBuffer(ByteBuffer& bb) {
+        version.toByteBuffer(bb);
+        type.toByteBuffer(bb);
+        time.toByteBuffer(bb);
+        offsetDirection.toByteBuffer(bb);
+        offsetHours.toByteBuffer(bb);
+        offsetMinutes.toByteBuffer(bb);
+        dstStart.toByteBuffer(bb);
+        dstEnd.toByteBuffer(bb);
+        tolerance.toByteBuffer(bb);
+        toleranceValue.toByteBuffer(bb);
+    }
 };
 
 }

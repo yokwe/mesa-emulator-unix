@@ -87,7 +87,7 @@ public:
 class Packet : public ByteBuffer {
     void copyFrom(const ByteBuffer& that);
 public:
-    static constexpr int SIZE = 1514;
+    static constexpr int SIZE = 6 + 6 + 2 + 1500; // 1514
 
     Packet();
     ~Packet();

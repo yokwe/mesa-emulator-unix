@@ -300,4 +300,5 @@ void ByteBuffer::addPadding(int n) {
 	for(int i = 0; i < n; i++) {
 		write8(index + i, 0);
 	}
+	myLimit += n;
 }

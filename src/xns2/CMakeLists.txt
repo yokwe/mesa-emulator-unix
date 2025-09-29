@@ -7,6 +7,7 @@ add_library(xns STATIC)
 target_sources(
 	xns
 	PUBLIC
+		Config.h
 		Echo.h
 		Error.h
 		Ethernet.h
@@ -17,6 +18,7 @@ target_sources(
 		Time.h
 		Type.h
 	PRIVATE
+		Config.cpp
 		Echo.cpp
 		Error.cpp
 		Ethernet.cpp

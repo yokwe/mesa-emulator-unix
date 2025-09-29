@@ -69,7 +69,7 @@ public:
 	static UINT16 CONGESTION_DISCARD;   //
 };
 
-struct Error_ {
+struct Error {
     ErrorNumber errorNumber;
     UINT16      errorParameter;
     BLOCK       block;

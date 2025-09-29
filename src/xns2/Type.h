@@ -539,5 +539,55 @@ public:
     }
 };
 
+//
+// Host
+//
+class Host : public UINT48 {
+    using T = uint64_t;
+    static inline const char* group = "xns::ethernet::Host";
+public:
+    Host(T value_, const char* name_) : UINT48(group, value_, name_) {}
+    Host() : UINT48("%12lX") {}
+
+    long operator = (T newValue) {
+        return UINT48::operator=(newValue);
+    }
+
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    static UINT48 BROADCAST;
+    static UINT48 UNKNOWN;
+    static UINT48 BFN_GVWIN;  // Boot File Number of GVWin
+    static UINT48 SELF;
+};
+//
+// Net
+//
+class Net : public UINT32 {
+    static inline const char* group = "xns::idp::Net";
+public:
+    Net(uint32_t value_, const char* name_) : UINT32(group, value_, name_) {}
+    Net() : UINT32("%8X") {}
+
+    uint32_t operator = (uint32_t that) {
+        UINT32::operator =(that);
+        return that;
+    }
+
+    void fromByteBuffer(ByteBuffer& bb) {
+        fromByteBufferGroup(group, bb);
+    }
+    static UINT32 ALL;
+    static UINT32 UNKNOWN;
+};
+
+namespace host {
+    std::string toOctalString(uint64_t value);
+    std::string toDecimalString(uint64_t value);
+    std::string toHexaDecimalString(uint64_t value, const std::string& sep);
+
+    uint64_t fromString(const std::string& string);
+}
 
 }

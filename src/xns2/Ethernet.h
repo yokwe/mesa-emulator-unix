@@ -37,24 +37,7 @@
 
 #include "Type.h"
 
-namespace xns {
-
-class Host : public UINT48 {
-    static inline const char* group = "xns::ethernet::Host";
-    Host(uint64_t value_, const char* name_) : UINT48(group, value_, name_) {}
-public:
-    Host() : UINT48("%12lX") {}
-
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
-    }
-    static UINT48 BROADCAST;
-    static UINT48 UNKNOWN;
-    static UINT48 BFN_GVWIN;  // Boot File Number of GVWin
-    static UINT48 SELF;
-};
-
-namespace ethernet {
+namespace xns::ethernet {
 
 void initialize();
 
@@ -72,6 +55,10 @@ public:
 };
 
 struct Frame {
+    static constexpr int HEADER_LENGTH  = 14;
+    static constexpr int MINIMU_LENGTH  = 64;
+    static constexpr int MAXIMUM_LENGTH = 6 + 6 + 2 + 1500; // 1514
+
     Host  dest;
     Host  source;
     Type  type;
@@ -83,8 +70,25 @@ struct Frame {
         type.fromByteBuffer(bb);
         block.fromByteBuffer(bb);
     }
+    void toByteBuffer(ByteBuffer& bb) {
+        int position = bb.position();
+        int limit    = bb.limit();
+        int length   = limit - position;
+
+        dest.toByteBuffer(bb);
+        source.toByteBuffer(bb);
+        type.toByteBuffer(bb);
+        block.toByteBuffer(bb);
+
+        // add padding if necessary
+        if (length < MINIMU_LENGTH) {
+            int padding = MINIMU_LENGTH - length;
+            for(int i = 0; i < padding; i++) bb.write8(0);
+        }
+    }
 };
 
-}
+
+void processRequest(const Frame& request, ByteBuffer& response);
 
 }

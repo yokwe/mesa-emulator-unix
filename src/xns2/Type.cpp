@@ -33,6 +33,9 @@
 // Type.cpp
 //
 
+#include <string>
+#include <regex>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
@@ -127,6 +130,106 @@ void STRING::toByteBuffer  (ByteBuffer& bb) const {
 }
 
 
+std::string host::toOctalString(uint64_t value) {
+    return std_sprintf("%lob", value);
+}
+std::string host::toDecimalString(uint64_t value) {
+    auto n = value;
+    std::string string;
+    for(;;) {
+        if (n == 0) break;
+        auto quotient  = n / 1000;
+        auto remainder = (int)(n % 1000);
+//        string += std_sprintf("-%03d", remainder);
+        string.insert(0, std_sprintf("-%03d", remainder));
+        n = quotient;
+    }
+    return string.substr(1);
+}
+std::string host::toHexaDecimalString(uint64_t value, const std::string& sep) {
+    std::string string;
+    string = std_sprintf("%02X", ((int)(value >> 40)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(value >> 32)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(value >> 24)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(value >> 16)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(value >>  8)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(value >>  0)) & 0xFF);
+    return string;
+}
 
+#define HEXSEP "[-:]?"
+uint64_t host::fromString(const std::string& string) {
+    static std::regex dec4("([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})");
+    static std::regex dec5("([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})");
+    static std::regex hex6("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
+    static std::regex oct("([0-7]+)b");
+
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, dec4)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1]);
+            ret *= 1000;
+            ret += std::stoi(m[2]);
+            ret *= 1000;
+            ret += std::stoi(m[3]);
+            ret *= 1000;
+            ret += std::stoi(m[4]);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, dec5)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1]);
+            ret *= 1000;
+            ret += std::stoi(m[2]);
+            ret *= 1000;
+            ret += std::stoi(m[3]);
+            ret *= 1000;
+            ret += std::stoi(m[4]);
+            ret *= 1000;
+            ret += std::stoi(m[5]);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, hex6)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[2], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[3], nullptr, 16);
+            ret<<= 8;
+            ret += std::stoi(m[4], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[5], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[6], nullptr, 16);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, oct)) {
+            return std::stol(m[1], nullptr, 8);
+        }
+    }
+
+    logger.error("Unexpected");
+    logger.error("  string = %s!", string);
+    ERROR();
+}
+
+
+UINT48 Host::BROADCAST = Host{0xFFFF'FFFF'FFFFL, "BROADCAST"};
+UINT48 Host::UNKNOWN   = Host{0x0000'0000'0000L, "UNKNOWN"};
+UINT48 Host::BFN_GVWIN = Host{0x0000'aa00'0e60L, "BFN_GVWIN"};
+
+UINT32 Net::ALL     = Net(0xFFFF'FFFF, "ALL");
+UINT32 Net::UNKNOWN = Net(0x0000'0000, "UNKNOWN");
 
 }

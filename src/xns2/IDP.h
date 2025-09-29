@@ -36,25 +36,6 @@
 #pragma once
 
 #include "Type.h"
-#include "Ethernet.h"
-
-namespace xns {
-
-class Net : public UINT32 {
-    static inline const char* group = "xns::idp::Net";
-    Net(uint32_t value_, const char* name_) : UINT32(group, value_, name_) {}
-public:
-    Net() : UINT32("%8X") {}
-
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
-    }
-    static UINT32 ALL;
-    static UINT32 UNKNOWN;
-};
-
-}
-
 
 namespace xns::idp {
 
@@ -65,6 +46,15 @@ class Checksum : public UINT16 {
     Checksum(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Checksum() : UINT16("%04X") {}
+
+    UINT16 operator = (UINT16 that) {
+        UINT16::operator =(that);
+        return that;
+    }
+    uint16_t operator = (uint16_t that) {
+        UINT16::operator =(that);
+        return that;
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
@@ -121,7 +111,7 @@ public:
 	static UINT16 TELEDEBUG;
 };
 
-uint16_t computeChecksum(const ByteBuffer& bb);
+uint16_t computeChecksum(const ByteBuffer& bb); // bb.rewind() point to IDP.checksum
 
 struct IDP {
     static constexpr int HEADER_LENGTH = 30;
@@ -142,6 +132,9 @@ struct IDP {
     BLOCK    block;
 
     void fromByteBuffer(ByteBuffer& bb);
+    void toByteBuffer(ByteBuffer& bb);
 };
+
+void process(IDP& receive, IDP& transmit);
 
 }

@@ -40,14 +40,6 @@ static const Logger logger(__FILE__);
 
 #include "IDP.h"
 
-namespace xns {
-
-UINT32 Net::ALL     = Net(0xFFFF'FFFF, "ALL");
-UINT32 Net::UNKNOWN = Net(0x0000'0000, "UNKNOWN");
-
-}
-
-
 namespace xns::idp {
 
 void initialize() {
@@ -84,6 +76,30 @@ UINT16 Socket::BINDING   = Socket(28, "BINDING");
 UINT16 Socket::GERM      = Socket(35, "GERM");
 UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
 
+
+uint16_t computeChecksum(const ByteBuffer& bb) {
+    int base  = bb.base();
+    int limit = bb.limit();
+    uint8_t* data = bb.data();
+
+    uint32_t w;
+    uint32_t s = 0;
+    for(int i = base + 2; i < limit;) {
+        w = data[i++] << 8;
+        w |= data[i++];
+
+		// add w to s
+		s += w;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+		// shift left
+		s <<= 1;
+		// if there is overflow, increment t
+		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
+    }
+    return (uint16_t)s;
+}
+
 void IDP::fromByteBuffer(ByteBuffer& bb) {
         checksum.fromByteBuffer(bb);
         length.fromByteBuffer(bb);
@@ -113,27 +129,25 @@ void IDP::fromByteBuffer(ByteBuffer& bb) {
         block.fromByteBuffer(bb);
 }
 
-uint16_t computeChecksum(const ByteBuffer& bb) {
-    int base  = bb.base();
-    int limit = bb.limit();
-    uint8_t* data = bb.data();
+void IDP::toByteBuffer(ByteBuffer& bb) {
+    int position = bb.position();
+    int limit    = bb.limit();
+    int length_   = limit - position;
 
-    uint32_t w;
-    uint32_t s = 0;
-    for(int i = base + 2; i < limit;) {
-        w = data[i++] << 8;
-        w |= data[i++];
+    checksum.toByteBuffer(bb);
+    length.toByteBuffer(bb);
+    control.toByteBuffer(bb);
+    type.toByteBuffer(bb);
+    dstNet.toByteBuffer(bb);
+    dstHost.toByteBuffer(bb);
+    dstSocket.toByteBuffer(bb);
+    srcNet.toByteBuffer(bb);
+    srcHost.toByteBuffer(bb);
+    srcSocket.toByteBuffer(bb);
+    block.toByteBuffer(bb);
 
-		// add w to s
-		s += w;
-		// if there is overflow, increment t
-		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
-		// shift left
-		s <<= 1;
-		// if there is overflow, increment t
-		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
-    }
-    return (uint16_t)s;
+    // make odd length to even length
+    if (length_ % 2) bb.write8(0);
 }
 
 }

@@ -29,6 +29,10 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
+#include <array>
+#include <cstdint>
+#include <map>
+
 static const Logger logger(__FILE__);
 
 #include "../util/net.h"
@@ -40,48 +44,116 @@ static const Logger logger(__FILE__);
 #include "../xns2/RIP.h"
 #include "../xns2/SPP.h"
 #include "../xns2/Time.h"
+#include "../xns2/Config.h"
 
 void callInitialize() {
      xns::initialize();
 }
 
+struct Routing {
+    uint32_t    net;
+    uint16_t    delay;
+    std::string name;
+
+    Routing(uint32_t net_, uint16_t delay_, const std::string& name_) : net(net_), delay(delay_), name(name_) {}
+    Routing() : net(0), delay(0), name("") {}
+};
+std::map<uint32_t, Routing> routingMap;
+
+
 int main(int, char **) {
 	logger.info("START");
 
 //    xns::dumpFormatList();
+    auto config = xns::config::Config::getInstance();
+    logger.info("config network interface  %s", config.network.interface);
+    for(const auto& e: config.host) {
+        xns::Host(e.address, e.name.c_str());
+        logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address, "-"), xns::host::toDecimalString(e.address), e.name);
+    }
+    for(const auto& e: config.net) {
+        Routing routing = Routing(e.net, e.delay, e.name);
+        routingMap[e.net] = routing;
+        xns::Net(e.net, e.name.c_str());
+        logger.info("config net  %d  %d  %s", e.net, e.delay, e.name);
+    }
 
-	auto device = net::getDevice("en0");
-	logger.info("device  %s", (std::string)device);
+	auto device = net::getDevice(config.network.interface);
+	logger.info("device  %s  %012lX", device.name, device.address);
+
+    uint64_t SELF_HOST = device.address;
+
+
+
+    xns::Host(0, "");
+
+
 	auto driver = net::getDriver(device);
+
+
 
 	driver->open();
 	driver->discard();
     for(;;) {
-        auto packets = driver->read();
-        if (packets.empty()) continue;
+        auto receiveDataList = driver->read();
+        if (receiveDataList.empty()) continue;
 
-        for(const auto& packet: packets) {
-            xns::ethernet::Frame frame;
-            auto packetData = packet;
-            frame.fromByteBuffer(packetData);
-            auto frameData = frame.block.toBuffer();
+        for(ByteBuffer receiveBB: receiveDataList) {
+            // decode receiveData
+            xns::ethernet::Frame receiveFrame;
+            receiveFrame.fromByteBuffer(receiveBB);
 
-//            logger.info("frame  %4d  %s  %s  %s  %d", frameData.limit(), -frame.dest, -frame.source, -frame.type, idpData.remaining());
+            if (receiveFrame.dest != SELF_HOST && receiveFrame.dest != xns::Host::BROADCAST) {
+                logger.info("frame  %4d  %s  %s  %s  %d", receiveBB.limit(), -receiveFrame.dest, -receiveFrame.source, -receiveFrame.type, receiveFrame.block.toBuffer().remaining());
+                continue;
+            }
 
-            if (frame.type == xns::ethernet::Type::XNS) {
-                xns::idp::IDP idp;
-                idp.fromByteBuffer(frameData);
+            // prepare transmitBuffer and transmitFrame
+            std::array<uint8_t, xns::ethernet::Frame::MAXIMUM_LENGTH> transmitBuffer;
+            transmitBuffer.fill(0);
+            ByteBuffer transmitBB(transmitBuffer.size(), transmitBuffer.data());
+            xns::ethernet::Frame transmitFrame;
+            transmitFrame.dest = receiveFrame.source;
+            transmitFrame.source = SELF_HOST;
+            transmitFrame.type   = receiveFrame.type;
 
-                auto idpData = idp.block.toBuffer();
+            if (receiveFrame.type == xns::ethernet::Type::XNS) {
+                xns::idp::IDP receiveIDP;
+                auto receiveFrameData = receiveFrame.block.toBuffer();
+                receiveIDP.fromByteBuffer(receiveFrameData);
 
-                auto dst = std_sprintf("%s-%s-%s", -idp.dstNet, -idp.dstHost, -idp.dstSocket);
-                auto src = std_sprintf("%s-%s-%s", -idp.srcNet, -idp.srcHost, -idp.srcSocket);
+                xns::idp::IDP transmitIDP;
+                transmitIDP.checksum  = 0;
+                transmitIDP.length    = 0;
+                transmitIDP.control   = 0;
+                transmitIDP.type      = receiveIDP.type;
+                transmitIDP.dstNet    = receiveIDP.srcNet;
+                transmitIDP.dstHost   = receiveIDP.srcHost;
+                transmitIDP.dstSocket = receiveIDP.srcSocket;
+                transmitIDP.srcNet    = 0;
+                transmitIDP.srcHost   = SELF_HOST;
+                transmitIDP.srcSocket = receiveIDP.dstSocket;
+
+
+//                xns::idp::process(receiveIDP, transmitIDP);
+                // add padding if necessary
+                
+
+
+
+
+
+
+                auto idpData = receiveIDP.block.toBuffer();
+
+                auto dst = std_sprintf("%s-%s-%s", -receiveIDP.dstNet, -receiveIDP.dstHost, -receiveIDP.dstSocket);
+                auto src = std_sprintf("%s-%s-%s", -receiveIDP.srcNet, -receiveIDP.srcHost, -receiveIDP.srcSocket);
 
                 logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
-                    -idp.checksum, -idp.length, -idp.control, -idp.type,
+                    -receiveIDP.checksum, -receiveIDP.length, -receiveIDP.control, -receiveIDP.type,
                     dst, src, idpData.remaining());
                 
-                if (idp.type == xns::idp::Type::PEX) {
+                if (receiveIDP.type == xns::idp::Type::PEX) {
                     xns::pex::PEX pex;
                     pex.fromByteBuffer(idpData);
 
@@ -97,7 +169,7 @@ int main(int, char **) {
                     }
                     continue;
                 }
-                if (idp.type == xns::idp::Type::RIP) {
+                if (receiveIDP.type == xns::idp::Type::RIP) {
                     xns::rip::RIP rip;
                     rip.fromByteBuffer(idpData);
                     std::string string;
@@ -108,13 +180,13 @@ int main(int, char **) {
                     //
                     continue;
                 }
-                if (idp.type == xns::idp::Type::SPP) {
+                if (receiveIDP.type == xns::idp::Type::SPP) {
                     continue;
                 }
-                if (idp.type == xns::idp::Type::ERROR_) {
+                if (receiveIDP.type == xns::idp::Type::ERROR_) {
                     continue;
                 }
-                if (idp.type == xns::idp::Type::ECHO) {
+                if (receiveIDP.type == xns::idp::Type::ECHO) {
                     continue;
                 }
             }

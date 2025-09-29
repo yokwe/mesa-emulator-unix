@@ -83,7 +83,8 @@ void BPF::open() {
 
 	for(int i = 0; i < 256; i++) {
 		snprintf(tempPath, sizeof(tempPath), "/dev/bpf%d", i);
-		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
+//		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
+		tempFD = ::open(tempPath, O_RDWR);
 		if (tempFD < 0) continue;
 		break;
 	}

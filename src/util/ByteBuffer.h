@@ -57,7 +57,7 @@ public:
 	~ByteBuffer();
 	ByteBuffer(const ByteBuffer& that);
 	ByteBuffer& operator =(const ByteBuffer& that);
-
+	
 	ByteBuffer(int capacity, uint8_t* data);
 
 	bool isNull() {
@@ -195,4 +195,6 @@ public:
 	void write32(const int index, uint32_t value);
 	void write48(const int index, uint64_t value);
 	void write  (const int index, const int writeSize, const uint8_t* value);
+
+	void addPadding(int n);
 };

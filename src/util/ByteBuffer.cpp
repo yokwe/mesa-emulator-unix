@@ -294,4 +294,10 @@ void ByteBuffer::write(const int index, const int writeSize, const uint8_t* valu
 	memcpy(data, value, writeSize);
 }
 
-
+void ByteBuffer::addPadding(int n) {
+	if (n < 0) ERROR();
+	int index = myLimit;
+	for(int i = 0; i < n; i++) {
+		write8(index + i, 0);
+	}
+}

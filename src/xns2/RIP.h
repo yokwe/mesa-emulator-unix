@@ -36,7 +36,6 @@
 #pragma once
 
 #include "Type.h"
-#include "IDP.h"
 
 namespace xns::rip {
 

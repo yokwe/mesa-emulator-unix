@@ -1,23 +1,15 @@
 {
-	"network": {
-		"interface": "epair0b",
-		"local"    : 1111,
-		"list": [
-	        {"name": "AAAA", "net": 1111, "hop": 0},
-	        {"name": "BBBB", "net": 2222, "hop": 1},
-	        {"name": "CCCC", "net": 3333, "hop": 2}
-		]
+	"network" : {
+		"interface": "en0"
 	},
-	
-	"host": {
-		"list": [
-			{"name": "WIN98",   "value": "00:0c:29:e9:61:91"},
-			{"name": "UBUNTU",  "value": "00:0c:29:08:37:5d"},
-			{"name": "FREEBSD", "value": "b6:7a:f1:90:03:48"}
-	
-		]
-	},
-	
+	"net": [
+		{"net": 1, "delay": 0, "name" : "ONE"},
+		{"net": 2, "delay": 1, "name" : "TWO"},
+		{"net": 3, "delay": 2, "name" : "THREE"}
+	],
+	"host": [
+		{"name": "macstudio2023",   "address": "9c:76:0e:4a:08:f0"}
+	],
 	"time" : {
 		"offsetDirection" : 1,
 		"offsetHours"     : 9,

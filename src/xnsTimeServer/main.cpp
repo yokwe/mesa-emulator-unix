@@ -37,6 +37,8 @@ static const Logger logger(__FILE__);
 
 #include "../util/net.h"
 #include "../util/ByteBuffer.h"
+#include "../util/EthernetPacket.h"
+
 #include "../xns2/Type.h"
 #include "../xns2/Ethernet.h"
 #include "../xns2/IDP.h"
@@ -58,8 +60,22 @@ struct Routing {
     Routing(uint32_t net_, uint16_t delay_, const std::string& name_) : net(net_), delay(delay_), name(name_) {}
     Routing() : net(0), delay(0), name("") {}
 };
-std::map<uint32_t, Routing> routingMap;
 
+struct Context {
+    xns::config::Config         config;
+    uint64_t                    ME;
+    std::map<uint32_t, Routing> routingMap;
+
+    Context(net::Device device, xns::config::Config config_) : config(config_), ME(device.address) {
+        // build routingMap
+        for(const auto& e: config.net) {
+            Routing routing = Routing(e.net, e.delay, e.name);
+            routingMap[e.net] = routing;
+        }
+    }
+    Context() : config(), ME(0) {}
+};
+Context context;
 
 int main(int, char **) {
 	logger.info("START");
@@ -68,29 +84,20 @@ int main(int, char **) {
     auto config = xns::config::Config::getInstance();
     logger.info("config network interface  %s", config.network.interface);
     for(const auto& e: config.host) {
-        xns::Host(e.address, e.name.c_str());
-        logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address, "-"), xns::host::toDecimalString(e.address), e.name);
+        xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
+        logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address), xns::host::toDecimalString(e.address), e.name);
     }
     for(const auto& e: config.net) {
         Routing routing = Routing(e.net, e.delay, e.name);
-        routingMap[e.net] = routing;
-        xns::Net(e.net, e.name.c_str());
+        xns::Net(e.net, e.name.c_str()); // regist net name of xns::Net
         logger.info("config net  %d  %d  %s", e.net, e.delay, e.name);
     }
 
 	auto device = net::getDevice(config.network.interface);
-	logger.info("device  %s  %012lX", device.name, device.address);
-
-    uint64_t SELF_HOST = device.address;
-
-
-
-    xns::Host(0, "");
-
-
+	logger.info("device  %s  %s", device.name, xns::host::toHexaDecimalString(device.address));
 	auto driver = net::getDriver(device);
 
-
+    context = Context(device, config);
 
 	driver->open();
 	driver->discard();
@@ -103,7 +110,7 @@ int main(int, char **) {
             xns::ethernet::Frame receiveFrame;
             receiveFrame.fromByteBuffer(receiveBB);
 
-            if (receiveFrame.dest != SELF_HOST && receiveFrame.dest != xns::Host::BROADCAST) {
+            if (receiveFrame.dest != context.ME && receiveFrame.dest != xns::Host::BROADCAST) {
                 logger.info("frame  %4d  %s  %s  %s  %d", receiveBB.limit(), -receiveFrame.dest, -receiveFrame.source, -receiveFrame.type, receiveFrame.block.toBuffer().remaining());
                 continue;
             }
@@ -114,7 +121,7 @@ int main(int, char **) {
             ByteBuffer transmitBB(transmitBuffer.size(), transmitBuffer.data());
             xns::ethernet::Frame transmitFrame;
             transmitFrame.dest = receiveFrame.source;
-            transmitFrame.source = SELF_HOST;
+            transmitFrame.source = context.ME;
             transmitFrame.type   = receiveFrame.type;
 
             if (receiveFrame.type == xns::ethernet::Type::XNS) {
@@ -131,18 +138,8 @@ int main(int, char **) {
                 transmitIDP.dstHost   = receiveIDP.srcHost;
                 transmitIDP.dstSocket = receiveIDP.srcSocket;
                 transmitIDP.srcNet    = 0;
-                transmitIDP.srcHost   = SELF_HOST;
+                transmitIDP.srcHost   = context.ME;
                 transmitIDP.srcSocket = receiveIDP.dstSocket;
-
-
-//                xns::idp::process(receiveIDP, transmitIDP);
-                // add padding if necessary
-                
-
-
-
-
-
 
                 auto idpData = receiveIDP.block.toBuffer();
 

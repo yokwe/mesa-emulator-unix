@@ -63,7 +63,7 @@ public:
 	void open();
 	void close();
 
-	// For Packet and ByteBuffer
+	// For ByteBuffer
 	void write(const ByteBuffer& value);
 
 	// read() returns std::vector<ByteBuffer> readData.

@@ -41,7 +41,9 @@ class EthernetPacket : public ByteBuffer {
 public:
     static constexpr int SIZE = 6 + 6 + 2 + 1500; // 1514
 
-    EthernetPacket() : ByteBuffer(sizeof(packetData), packetData) {}
+    EthernetPacket() : ByteBuffer(sizeof(packetData), packetData) {
+        memset(packetData, 0, sizeof(packetData));
+    }
     ~EthernetPacket() {}
 
     // Packet

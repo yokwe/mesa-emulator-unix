@@ -43,12 +43,12 @@ class ByteBuffer {
 protected:
 	static constexpr int INVALID_POS = -1;
 
-	int     myBase;
-	int     myPosition;
-	int     myLimit;
-	int     myCapacity;
-	uint8_t *myData;
-	int     myMarkPos;
+	int      myBase;
+	int      myPosition;
+	int      myLimit;
+	int      myCapacity;
+	uint8_t* myData;
+	int      myMarkPos;
 
 	void copyFrom(const ByteBuffer& that);
 

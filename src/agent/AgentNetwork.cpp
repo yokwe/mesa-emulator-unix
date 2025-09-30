@@ -39,6 +39,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/EthernetPacket.h"
+
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
 #include "../mesa/interrupt_thread.h"
@@ -68,7 +70,7 @@ void AgentNetwork::TransmitThread::transmit(EthernetIOFaceGuam::EthernetIOCBType
 
 	CARD32 dataLen = iocb->bufferLength;
 	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
-	CARD8 buffer[net::Packet::SIZE];
+	CARD8 buffer[EthernetPacket::SIZE];
 
 	Util::byteswap((CARD16*)data, (CARD16*)buffer, (dataLen + 1) / 2);
 	// no odd length packet
@@ -202,7 +204,7 @@ void AgentNetwork::ReceiveThread::receive(EthernetIOFaceGuam::EthernetIOCBType* 
 	CARD32 dataLen = iocb->bufferLength;
 	int    opErrno = 0;
 
-	CARD8 buffer[net::Packet::SIZE];
+	CARD8 buffer[EthernetPacket::SIZE];
 	int ret = driver->receive(buffer, sizeof(buffer), opErrno);
 
 	if (ret == -1) {
@@ -292,7 +294,7 @@ void AgentNetwork::ReceiveThread::reset() {
 	driver->discard();
 }
 void AgentNetwork::ReceiveThread::discardOnePacket() {
-	net::Packet packet;
+	EthernetPacket packet;
 	int opErrno;
 	driver->receive(packet.data(), packet.capacity(), opErrno);
 }

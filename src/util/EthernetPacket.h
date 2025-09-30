@@ -30,63 +30,52 @@
 
 
 //
-// net.h
+// EthernetPacket.h
 //
 
 #pragma once
 
-#include <string>
-#include <cstdint>
-
 #include "ByteBuffer.h"
 
-#include "../util/Util.h"
-
-namespace net {
-
-class Device {
+class EthernetPacket : public ByteBuffer {
 public:
-    const std::string name;
-    const uint64_t    address;
+    static constexpr int SIZE = 6 + 6 + 2 + 1500; // 1514
 
-    Device(const std::string& name_, uint64_t address_) : name(name_), address(address_) {}
-    operator std::string() const noexcept {
-        uint16_t w1, w2, w3;
-        getAddress(w1, w2, w3);
-        std::string string = std_sprintf("{%04x-%04x-%04x  %s}", w1, w2, w3, name);
-        return string;
+    EthernetPacket() : ByteBuffer(sizeof(packetData), packetData) {}
+    ~EthernetPacket() {}
+
+    // Packet
+    EthernetPacket(const EthernetPacket& that) {
+        copyFrom(that);
     }
-    void getAddress(uint16_t& word1, uint16_t& word2, uint16_t& word3) const {
-        word1 = (uint16_t)(address >> 32);
-        word2 = (uint16_t)(address >> 16);
-        word3 = (uint16_t)(address >>  0);
+    EthernetPacket& operator =(const EthernetPacket& that) {
+        copyFrom(that);
+        return *this;
+    }
+
+    // ByteBuffer
+    EthernetPacket(const ByteBuffer& that) : ByteBuffer() {
+        copyFrom(that);
+    }
+    EthernetPacket& operator =(const ByteBuffer& that) {
+        copyFrom(that);
+        return *this;
+    }
+private:
+    uint8_t packetData[SIZE];
+    
+    void copyFrom(const ByteBuffer& that) {
+        // copy values from that
+        myBase     = that.base();
+        myPosition = that.position();
+        myLimit    = that.limit();
+        // use packetData for myData
+        myCapacity = sizeof(packetData);
+        myData     = packetData;
+        // reset myMarkPos
+        myMarkPos  = INVALID_POS;
+        // copy data from that to myPacketData
+        memset(packetData, 0, sizeof(packetData));
+        memcpy(packetData, that.data(), that.capacity());
     }
 };
-
-class Driver {
-public:
-    const Device device;
-
-    virtual void open()  = 0;
-    virtual void close() = 0;
-
-    // no error checking
-    virtual int  select  (uint32_t timeout, int& opErrno) = 0;
-    virtual int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno) = 0;
-    virtual int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* milliSecondsSinceEpoch = nullptr) = 0;
-    virtual void discard() = 0;
-
-    // packet base functions
-    virtual const std::vector<ByteBuffer>& read() = 0;
-    virtual void write(const ByteBuffer& value) = 0;
-
-    Driver(const Device& device_) : device(device_.name, device_.address) {}
-    virtual ~Driver() {}
-};
-
-std::vector<Device> getDeviceList();
-
-Device  getDevice(const std::string& name);
-Driver* getDriver(const Device& device);
-
-}

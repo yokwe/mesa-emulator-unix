@@ -162,11 +162,11 @@ public:
 	// BIOCVERSION
 	//   Returns the major and	minor version numbers of the filter language
 
-	// BIOCGRSIG
+	// BIOCGHDRCMPLT
 	//   Sets the status of	the "header complete" flag.
 	uint32_t getHeaderComplete();
 
-	// BIOCSRSIG
+	// BIOCSHDRCMPLT
 	//   Gets the status of	the "header complete" flag.
 	//   When value is 0, source address is filled automatically
 	//   When value is 1, source address is not filled automatically

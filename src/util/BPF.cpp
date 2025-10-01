@@ -275,23 +275,23 @@ void BPF::setReadFilter(const struct bpf_program* value) {
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETFNR, value))
 }
 
-// BIOCGRSIG
+// BIOCGHDRCMPLT
 //   Sets the status of	the "header complete" flag.
 uint32_t BPF::getHeaderComplete() {
 	int ret;
 	uint32_t value;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGRSIG, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGHDRCMPLT, &value))
 	return value;
 }
 
-// BIOCSRSIG
+// BIOCSHDRCMPLT
 //   Gets the status of	the "header complete" flag.
 //   When value is 0, source address is filled automatically
 //   When value is 1, source address is not filled automatically
 //   Default value is 0
 void BPF::setHeaderComplete(uint32_t value) {
 	int ret;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRSIG, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSHDRCMPLT, &value))
 }
 
 //// BIOCGDIRECTION
@@ -335,6 +335,8 @@ void BPF::setSeeSent(uint32_t value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSSEESENT, &value))
 }
+
+
 
 // FIONREAD
 //   Returns the number of bytes that are immediately available for	reading

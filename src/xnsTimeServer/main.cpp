@@ -28,11 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-
  
+ //
+ // main.cpp
+ //
 
-#include <cstdint>
-#include <map>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
@@ -43,11 +43,6 @@ static const Logger logger(__FILE__);
 
 #include "../xns2/Type.h"
 #include "../xns2/Ethernet.h"
-#include "../xns2/IDP.h"
-#include "../xns2/PEX.h"
-#include "../xns2/RIP.h"
-#include "../xns2/SPP.h"
-#include "../xns2/Time.h"
 #include "../xns2/Config.h"
 
 #include "Server.h"
@@ -79,6 +74,8 @@ int main(int, char **) {
 
     context = Context(config);
 	logger.info("device  %s  %s", context.driver->device.name, xns::host::toHexaDecimalString(context.driver->device.address));
+	logger.info("ME      %s", xns::host::toHexaDecimalString(context.ME));
+	logger.info("NET     %d", context.NET);
 
     auto& driver = *context.driver;
 	driver.open();
@@ -106,7 +103,6 @@ int main(int, char **) {
             payload.flip();
             logger.info("payload  length  %d", payload.length());
             if (payload.empty()) continue;
-            continue;
 
             xns::ethernet::Frame transmit;
             // build transmit
@@ -126,62 +122,11 @@ int main(int, char **) {
                 if (length < xns::ethernet::Frame::MINIMUM_LENGTH) {
                     tx.writeZero(xns::ethernet::Frame::MINIMUM_LENGTH - length);
                 }
+                tx.flip();
+                logger.info("TX  length  %d", tx.length());
             }
             driver.write(tx);
         }
-
-/*
-        if (receiveFrame.type == xns::ethernet::Type::XNS) {
-            xns::idp::IDP receiveIDP;
-            auto receiveFrameData = receiveFrame.block.toBuffer();
-            receiveIDP.fromByteBuffer(receiveFrameData);
-            auto idpData = receiveIDP.block.toBuffer();
-
-            auto dst = std_sprintf("%s-%s-%s", -receiveIDP.dstNet, -receiveIDP.dstHost, -receiveIDP.dstSocket);
-            auto src = std_sprintf("%s-%s-%s", -receiveIDP.srcNet, -receiveIDP.srcHost, -receiveIDP.srcSocket);
-
-            logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
-                -receiveIDP.checksum, -receiveIDP.length, -receiveIDP.control, -receiveIDP.type,
-                dst, src, idpData.remaining());
-            
-            if (receiveIDP.type == xns::idp::Type::PEX) {
-                xns::pex::PEX pex;
-                pex.fromByteBuffer(idpData);
-
-                auto pexData = pex.block.toBuffer();
-
-                logger.info("    PEX  %s  %s  %s", -pex.id, -pex.type, pex.block.toString());
-
-                if (pex.type == xns::pex::Type::TIME) {
-                    xns::time::Request request;
-                    request.fromByteBuffer(pexData);
-
-                    logger.info("        TIME  %s  %s", -request.version, -request.type);
-                }
-                continue;
-            }
-            if (receiveIDP.type == xns::idp::Type::RIP) {
-                xns::rip::RIP rip;
-                rip.fromByteBuffer(idpData);
-                std::string string;
-                for(const auto& entry: rip.table) {
-                    string += std_sprintf(" {%s %s}", -entry.net, -entry.delay);
-                }
-                logger.info("    RIP  %s  %s", -rip.type, string.substr(1));
-                //
-                continue;
-            }
-            if (receiveIDP.type == xns::idp::Type::SPP) {
-                continue;
-            }
-            if (receiveIDP.type == xns::idp::Type::ERROR_) {
-                continue;
-            }
-            if (receiveIDP.type == xns::idp::Type::ECHO) {
-                continue;
-            }
-        }
-*/
 	}
 
 	logger.info("STOP");

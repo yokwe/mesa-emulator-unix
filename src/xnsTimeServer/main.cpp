@@ -228,9 +228,6 @@ void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
         int base = rx.position(); // save position to fix length
         receive.fromByteBuffer(rx);
  
-        uint16_t checksum;
-        rx.read16(base, checksum);
-
         {
             auto dst = std_sprintf("%s-%s-%s", -receive.dstNet, -receive.dstHost, -receive.dstSocket);
             auto src = std_sprintf("%s-%s-%s", -receive.srcNet, -receive.srcHost, -receive.srcSocket);
@@ -239,18 +236,7 @@ void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
                 dst, src, rx.remaining(), rx.toStringFromPosition());
         }
 
-        auto computedChecksum = xns::idp::computeChecksum(rx, base + 2);
-//        auto checksum_A = xns::idp::computeChecksum_A(rx, position);
-        logger.info("checksum  %04X  %04X", checksum, computedChecksum);
-
         logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
-
-        // check checksum
-        if (receive.checksum != xns::idp::Checksum::NOCHECK && checksum != +receive.checksum) {
-            // checksum error
-//            logger.warn("checksum error  %04X  %04X", checksum, +receive.checksum);
-//            ERROR();
-        }
 
         // FIX length using value of length field
         if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
@@ -260,6 +246,20 @@ void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
         int newLimit = base + +receive.length;
         rx.limit(newLimit);
         logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
+
+        // check checksum
+        if (receive.checksum != xns::idp::Checksum::NOCHECK) {
+            uint16_t checksum;
+            rx.read16(base, checksum);
+
+            auto computedChecksum = xns::idp::computeChecksum(rx, base);
+            if (checksum != computedChecksum) {
+                // checksum error
+                logger.warn("checksum  %04X  %04X", checksum, computedChecksum);
+                // TODO return error packet
+                ERROR();
+            }
+        }
     }
 
     EthernetPacket payload;

@@ -64,26 +64,35 @@ public:
 		return myData == nullptr;
 	}
 
-	// Create subrange ByteBuffer
-	ByteBuffer newBase(int newValue) const {
-		ByteBuffer ret(*this);
-		ret.setBase(newValue);
-		return ret;
-	}
-	ByteBuffer newBase() const {
-		return newBase(myPosition);
-	}
+	// // Create subrange ByteBuffer
+	// ByteBuffer newBase(int newValue) const {
+	// 	ByteBuffer ret(*this);
+	// 	ret.setBase(newValue);
+	// 	return ret;
+	// }
+	// ByteBuffer newBase() const {
+	// 	return newBase(myPosition);
+	// }
 	void setBase(int newValue) {
 		myBase     = newValue;
 		myPosition = newValue;
 		myMarkPos  = INVALID_POS;
 	}
+	void setBase() {
+		setBase(myPosition);
+	}
 
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const uint8_t* data);
 
-	std::string toString(int limit = 65536) const;
-	std::string toString(int base, int limit) const;
+	// output as hexadecimal string between base and limit
+	std::string toString(int offset = 0) const;
+	std::string toStringFromBase() const {
+		return toString(base());
+	}
+	std::string toStringFromPosition() const {
+		return toString(position());
+	}
 
 	int base() const {
 		return myBase;
@@ -106,6 +115,12 @@ public:
 	}
 	bool hasRemaining() const {
 		return myPosition < myLimit;
+	}
+	int length() const {
+		return myLimit - myBase;
+	}
+	bool empty() const {
+		return length() == 0;
 	}
 
 	// prepare for read buffer from beginning
@@ -196,5 +211,5 @@ public:
 	void write48(const int index, uint64_t value);
 	void write  (const int index, const int writeSize, const uint8_t* value);
 
-	void addPadding(int n);
+	void writeZero(int n);
 };

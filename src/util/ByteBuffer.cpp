@@ -100,11 +100,8 @@ void ByteBuffer::copyFrom(int len, const uint8_t* data) {
 	myLimit    = myBase + len;
 }
 
-std::string ByteBuffer::toString(int limit) const {
-	return toHexString(limit <= myLimit ? limit : myLimit, myData);
-}
-std::string ByteBuffer::toString(int base, int limit) const {
-	return toHexString(limit - base, myData + base);
+std::string ByteBuffer::toString(int offset) const {
+	return toHexString(limit() - offset, data() + offset);
 }
 
 void ByteBuffer::limit(int newValue) {
@@ -115,6 +112,7 @@ void ByteBuffer::limit(int newValue) {
 		logger.error("  newValue = %5d", newValue);
 		logger.error("  base     = %5d", myBase);
 		logger.error("  capacity = %5d", myCapacity);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -294,11 +292,7 @@ void ByteBuffer::write(const int index, const int writeSize, const uint8_t* valu
 	memcpy(data, value, writeSize);
 }
 
-void ByteBuffer::addPadding(int n) {
-	if (n < 0) ERROR();
-	int index = myLimit;
-	for(int i = 0; i < n; i++) {
-		write8(index + i, 0);
-	}
-	myLimit += n;
+void ByteBuffer::writeZero(int n) {
+	if (n < 0) ERROR()
+	for(int i = 0; i < n; i++) write8(0);
 }

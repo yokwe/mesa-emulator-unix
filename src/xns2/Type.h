@@ -91,7 +91,7 @@ protected:
         Key key{group, value};
         formatMap[key] = format;
     }
-
+    BaseNumber(T value_, const char* format_) : value(value_), format(format_), readOnly(false) {}
     BaseNumber(const char* format_) : value(0), format(format_), readOnly(false) {}
     virtual ~BaseNumber() {}
 public:
@@ -244,8 +244,11 @@ protected:
 protected:
     UINT48(const char* format_) : BaseNumber<T>(format_) {}
     UINT48(const char* group, T value_, const char* format_) : BaseNumber<T>(group, value_, format_) {} // for enum
+    UINT48(T value_, const char* format_) : BaseNumber<T>(value_, format_) {}
 public:
     UINT48() : BaseNumber<T>(DEFAULT_FORMAT) {}
+    UINT48(T value_) : BaseNumber<T>(value_, DEFAULT_FORMAT) {}
+
     // need to define operator = here
     long operator = (T newValue) {
         return BaseNumber<T>::operator=(newValue);
@@ -320,6 +323,7 @@ public:
 //
 // BLOCK
 //
+/*
 class BLOCK : public Base {
 protected:
     ByteBuffer buffer;
@@ -360,6 +364,8 @@ public:
         bb.write(size, data);
     }
 };
+*/
+
 //
 // STRING
 //
@@ -545,9 +551,11 @@ public:
 class Host : public UINT48 {
     using T = uint64_t;
     static inline const char* group = "xns::ethernet::Host";
+    static inline const char* DEFAULT_FORMAT = "%012lX";
 public:
     Host(T value_, const char* name_) : UINT48(group, value_, name_) {}
-    Host() : UINT48("%12lX") {}
+    Host(T value_) : UINT48(value_, DEFAULT_FORMAT) {}
+    Host() : UINT48(DEFAULT_FORMAT) {}
 
     long operator = (T newValue) {
         return UINT48::operator=(newValue);

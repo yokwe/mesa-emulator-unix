@@ -64,13 +64,14 @@ public:
 struct PEX {
     ID     id;
     Type   type;
-    BLOCK  block;
+
+    PEX(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         id.fromByteBuffer(bb);
         type.fromByteBuffer(bb);
-
-        block.fromByteBuffer(bb);
     }
 };
 

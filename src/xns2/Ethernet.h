@@ -62,29 +62,23 @@ struct Frame {
     Host  dest;
     Host  source;
     Type  type;
-    BLOCK block;
+
+    Frame() : dest(), source(), type() {}
+
+    Frame(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         dest.fromByteBuffer(bb);
         source.fromByteBuffer(bb);
         type.fromByteBuffer(bb);
-        block.fromByteBuffer(bb);
     }
-    void toByteBuffer(ByteBuffer& bb) {
-        int position = bb.position();
-        int limit    = bb.limit();
-        int length   = limit - position;
 
+    void toByteBuffer(ByteBuffer& bb) {
         dest.toByteBuffer(bb);
         source.toByteBuffer(bb);
         type.toByteBuffer(bb);
-        block.toByteBuffer(bb);
-
-        // add padding if necessary
-        if (length < MINIMU_LENGTH) {
-            int padding = MINIMU_LENGTH - length;
-            for(int i = 0; i < padding; i++) bb.write8(0);
-        }
     }
 };
 

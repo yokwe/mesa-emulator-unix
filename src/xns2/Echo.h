@@ -57,18 +57,19 @@ public:
 
 struct Echo {
     Type  type;
-    BLOCK block;
 
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb) {
         type.fromByteBuffer(bb);
-        block.fromByteBuffer(bb);
     }
 
     // ByteBuffer <= this
     void toByteBuffer(ByteBuffer& bb) const {
         type.toByteBuffer(bb);
-        block.toByteBuffer(bb);
+    }
+
+    Echo(ByteBuffer& bb) {
+        this->fromByteBuffer(bb);
     }
 };
 

@@ -72,20 +72,16 @@ public:
 struct Error {
     ErrorNumber errorNumber;
     UINT16      errorParameter;
-    BLOCK       block;
-
-    // this <= ByteBuffer
-    void fromByteBuffer(ByteBuffer& bb) {
-        errorNumber.fromByteBuffer(bb);
-        errorParameter.fromByteBuffer(bb);
-        block.fromByteBuffer(bb);
-    }
 
     // ByteBuffer <= this
     void toByteBuffer(ByteBuffer& bb) const {
         errorNumber.toByteBuffer(bb);
         errorParameter.toByteBuffer(bb);
-        block.toByteBuffer(bb);
+    }
+
+    Error(ByteBuffer& bb) {
+        errorNumber.fromByteBuffer(bb);
+        errorParameter.fromByteBuffer(bb);
     }
 };
 

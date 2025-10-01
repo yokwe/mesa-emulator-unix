@@ -40,8 +40,10 @@
 
 namespace xns::config {
 
-struct Network {
+struct Server {
     std::string interface;
+    uint64_t    address;
+    uint32_t    net;
 };
 
 struct Net {
@@ -64,7 +66,7 @@ struct Time {
 };
 
 struct Config {
-    Network           network;
+    Server            server;
     std::vector<Net>  net;
     std::vector<Host> host;
     Time              time;

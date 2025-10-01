@@ -50,8 +50,11 @@ using json = nlohmann::json;
 
 namespace xns::config {
 
-void from_json(const json& j, Network& p) {
+void from_json(const json& j, Server& p) {
 	simple(interface)
+    std::string string = j.at("address");
+    p.address = xns::host::fromString(string);
+	simple(net)
 }
 void from_json(const json& j, Net& p) {
     simple(net)
@@ -80,7 +83,7 @@ Config Config::getInstance(const std::string& path) {
 
 	Config ret;
 
-    ret.network = data.at("network").template get<Network>();
+    ret.server = data.at("server").template get<Server>();
 	for(auto e: data["net"]) {
 		ret.net.push_back(e.template get<Net>());
 	}

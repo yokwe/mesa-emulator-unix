@@ -29,7 +29,6 @@
  *******************************************************************************/
 
 #include "../util/Util.h"
-#include <array>
 #include <cstdint>
 #include <map>
 
@@ -69,15 +68,14 @@ struct Context {
     std::map<uint32_t, Routing> routingMap;
 
     Context(xns::config::Config config_) : config(config_) {
-        auto device = net::getDevice(config.network.interface);
+        auto device = net::getDevice(config.server.interface);
         driver = net::getDriver(device);
-        ME     = device.address;
-        NET    = 0;
+        ME     = config.server.address;
+        NET    = config.server.net;
         // build routingMap
         for(const auto& e: config.net) {
             Routing routing = Routing(e.net, e.delay, e.name);
             routingMap[e.net] = routing;
-            if (routing.delay == 0) NET = e.net;
         }
     }
     Context() : config(), driver(0), ME(0), NET(0) {}
@@ -95,7 +93,7 @@ int main(int, char **) {
 
 //    xns::dumpFormatList();
     auto config = xns::config::Config::getInstance();
-    logger.info("config network interface  %s", config.network.interface);
+    logger.info("config network interface  %s", config.server.interface);
     // register constant of host and net from config
     {
         for(const auto& e: config.host) {
@@ -236,7 +234,7 @@ void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
                 dst, src, rx.remaining(), rx.toStringFromPosition());
         }
 
-        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
+//        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
 
         // FIX length using value of length field
         if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
@@ -245,7 +243,7 @@ void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
         }
         int newLimit = base + +receive.length;
         rx.limit(newLimit);
-        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
+//        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
 
         // check checksum
         if (receive.checksum != xns::idp::Checksum::NOCHECK) {

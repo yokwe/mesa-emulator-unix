@@ -225,6 +225,7 @@ std::string demangle(const char* mangled);
 int32_t toIntMesaNumber(const std::string& string);
 
 std::string toHexString(int size, const uint8_t* data);
+std::vector<uint8_t> fromHexString(const std::string& string);
 
 // https://stackoverflow.com/questions/7276826/format-number-with-commas-in-c
 template<class T>

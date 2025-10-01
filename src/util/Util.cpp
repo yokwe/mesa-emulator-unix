@@ -34,6 +34,8 @@
 //
 
 #include <filesystem>
+#include <vector>
+#include <regex>
 #include <stack>
 #include <map>
 #include <utility>
@@ -221,15 +223,31 @@ int32_t toIntMesaNumber(const std::string& string) {
 }
 
 std::string toHexString(int size, const uint8_t* data) {
-	std::stringstream ss;
-    ss << std::hex;
-
-     for(int i = 0; i < size; i++) {
-         ss << std::setw(2) << std::setfill('0') << (int)data[i];
-	 }
-
-     return ss.str();
+	std::string string;
+	for(int i = 0; i < size; i++) {
+		string += std_sprintf("%02X",data[i]);
+	}
+	return string;
 }
+std::vector<uint8_t> fromHexString(const std::string& string) {
+	// sanity check
+	static std::regex hex("^([0-9a-fA-F]{2})+$");
+	if (!std::regex_match(string, hex)) {
+		logger.error("string %s!", string);
+		ERROR()
+	}
+
+	std::vector<uint8_t> array;
+	static std::regex hex2("[0-9a-fA-F]{2}");
+	std::sregex_token_iterator begin(string.cbegin(), string.cend(), hex2, 0);
+	std::sregex_token_iterator end;
+	for(auto& i = begin; i != end; i++) {
+		uint8_t value = (uint8_t)std::stoi(i->str(), nullptr, 16);
+		array.push_back(value);
+	}
+	return array;
+}
+
 
 std::string readFile(const std::string& path) {
 	std::ifstream ifs(path.c_str());

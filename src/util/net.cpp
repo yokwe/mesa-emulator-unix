@@ -109,7 +109,7 @@ public:
         bpf.setInterface(device.name);
         bpf.setPromiscuous();
         bpf.setImmediate(1);
-        bpf.setHeaderComplete(0);
+        bpf.setHeaderComplete(1);
         bpf.setReadTimeout(1);
 //        bpf.setReadFilter(::BPF::PROGRAM_IP);
         bpf.setReadFilter(::BPF::PROGRAM_XNS);

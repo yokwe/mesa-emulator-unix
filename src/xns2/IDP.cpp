@@ -77,12 +77,9 @@ UINT16 Socket::GERM      = Socket(35, "GERM");
 UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
 
 
-uint16_t computeChecksum(const ByteBuffer& bb, int base) {
-    int limit = bb.limit();
-    uint8_t* data = bb.data();
-
+uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne) {
     uint32_t s = 0;
-    for(int i = base; i < limit;) {
+    for(int i = start; i < endPlusOne;) {
         uint32_t w = (data[i++] & 0xFFFFU) << 8;
         w |= data[i++];
 

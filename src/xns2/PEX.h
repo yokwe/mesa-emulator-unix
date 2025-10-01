@@ -65,6 +65,7 @@ struct PEX {
     ID     id;
     Type   type;
 
+    PEX() {}
     PEX(ByteBuffer& bb) {
         fromByteBuffer(bb);
     }
@@ -72,6 +73,10 @@ struct PEX {
     void fromByteBuffer(ByteBuffer& bb) {
         id.fromByteBuffer(bb);
         type.fromByteBuffer(bb);
+    }
+    void toByteBuffer(ByteBuffer& bb) {
+        id.toByteBuffer(bb);
+        type.toByteBuffer(bb);
     }
 };
 

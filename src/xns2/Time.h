@@ -46,6 +46,11 @@ class Version : public UINT16 {
     Version(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Version() : UINT16() {}
+    
+    uint16_t operator =(uint16_t that) {
+        this->value = that;
+        return that;
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
@@ -58,6 +63,11 @@ class Type : public UINT16 {
     Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Type() : UINT16() {}
+
+    uint16_t operator =(uint16_t that) {
+        this->value = that;
+        return that;
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
@@ -73,6 +83,11 @@ class Direction : public UINT16 {
 public:
     Direction() : UINT16() {}
 
+    uint16_t operator =(uint16_t that) {
+        this->value = that;
+        return that;
+    }
+
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
@@ -86,13 +101,18 @@ class Tolerance : public UINT16 {
     Tolerance(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Tolerance() : UINT16() {}
+    
+    uint16_t operator =(uint16_t that) {
+        this->value = that;
+        return that;
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
 
     static UINT16 UNKNOWN; // 0
-    static UINT16 KNOWN;  // 1
+    static UINT16 KNOWN;   // 1
 };
 
 
@@ -100,7 +120,7 @@ struct Request {
     Version   version;
     Type      type;
 
-    void fromByteBuffer(ByteBuffer& bb) {
+    Request(ByteBuffer& bb) {
         version.fromByteBuffer(bb);
         type.fromByteBuffer(bb);
     }
@@ -115,8 +135,8 @@ struct Response {
     UINT16    offsetMinutes;
     UINT16    dstStart;         // 0 for no DST
     UINT16    dstEnd;           // 0 for no DST
-    Tolerance tolerance;    // 0 for 
-    UINT32    toleranceValue;   // supposed time error in unit of tolerance
+    Tolerance tolerance;        // 0 for UNKNOWN  1 for KNOWN
+    UINT32    toleranceValue;   // supposed time error in unit of millisecond
 
     void toByteBuffer(ByteBuffer& bb) {
         version.toByteBuffer(bb);

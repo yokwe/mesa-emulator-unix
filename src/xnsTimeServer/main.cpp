@@ -63,19 +63,32 @@ struct Routing {
 
 struct Context {
     xns::config::Config         config;
+    net::Driver*                driver;
     uint64_t                    ME;
+    uint32_t                    NET;
     std::map<uint32_t, Routing> routingMap;
 
-    Context(net::Device device, xns::config::Config config_) : config(config_), ME(device.address) {
+    Context(xns::config::Config config_) : config(config_) {
+        auto device = net::getDevice(config.network.interface);
+        driver = net::getDriver(device);
+        ME     = device.address;
+        NET    = 0;
         // build routingMap
         for(const auto& e: config.net) {
             Routing routing = Routing(e.net, e.delay, e.name);
             routingMap[e.net] = routing;
+            if (routing.delay == 0) NET = e.net;
         }
     }
-    Context() : config(), ME(0) {}
+    Context() : config(), driver(0), ME(0), NET(0) {}
 };
 Context context;
+
+void processXNS (ByteBuffer& rx, ByteBuffer& tx);
+void processECHO(ByteBuffer& rx, ByteBuffer& tx);
+void processPEX (ByteBuffer& rx, ByteBuffer& tx);
+void processRIP (ByteBuffer& rx, ByteBuffer& tx);
+void processSPP (ByteBuffer& rx, ByteBuffer& tx);
 
 int main(int, char **) {
 	logger.info("START");
@@ -83,112 +96,237 @@ int main(int, char **) {
 //    xns::dumpFormatList();
     auto config = xns::config::Config::getInstance();
     logger.info("config network interface  %s", config.network.interface);
-    for(const auto& e: config.host) {
-        xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
-        logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address), xns::host::toDecimalString(e.address), e.name);
+    // register constant of host and net from config
+    {
+        for(const auto& e: config.host) {
+            (void)xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
+            logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address), xns::host::toDecimalString(e.address), e.name);
+        }
+        for(const auto& e: config.net) {
+            Routing routing = Routing(e.net, e.delay, e.name);
+            (void)xns::Net(e.net, e.name.c_str()); // regist net name of xns::Net
+            logger.info("config net  %d  %d  %s", e.net, e.delay, e.name);
+        }
     }
-    for(const auto& e: config.net) {
-        Routing routing = Routing(e.net, e.delay, e.name);
-        xns::Net(e.net, e.name.c_str()); // regist net name of xns::Net
-        logger.info("config net  %d  %d  %s", e.net, e.delay, e.name);
-    }
 
-	auto device = net::getDevice(config.network.interface);
-	logger.info("device  %s  %s", device.name, xns::host::toHexaDecimalString(device.address));
-	auto driver = net::getDriver(device);
+    context = Context(config);
+	logger.info("device  %s  %s", context.driver->device.name, xns::host::toHexaDecimalString(context.driver->device.address));
 
-    context = Context(device, config);
-
-	driver->open();
-	driver->discard();
+    auto& driver = *context.driver;
+	driver.open();
+	driver.discard();
     for(;;) {
-        auto receiveDataList = driver->read();
+        auto receiveDataList = driver.read();
         if (receiveDataList.empty()) continue;
 
-        for(ByteBuffer receiveBB: receiveDataList) {
-            // decode receiveData
-            xns::ethernet::Frame receiveFrame;
-            receiveFrame.fromByteBuffer(receiveBB);
+        for(ByteBuffer rx: receiveDataList) {
+//            logger.info("RX  %4d  %s", rx.length(), rx.toStringFromBase());
+            
+            // build receive
+            xns::ethernet::Frame receive(rx);
+//            logger.info("frame  %4d  %s  %s  %s  %d", rx.length(), -receive.dest, -receive.source, -receive.type, rx.remaining());
 
-            if (receiveFrame.dest != context.ME && receiveFrame.dest != xns::Host::BROADCAST) {
-                logger.info("frame  %4d  %s  %s  %s  %d", receiveBB.limit(), -receiveFrame.dest, -receiveFrame.source, -receiveFrame.type, receiveFrame.block.toBuffer().remaining());
+            if (receive.dest != context.ME && receive.dest != xns::Host::BROADCAST) {
+                // not my address or not broadcast
+                logger.info("frame  %4d  %s  %s  %s  %d", rx.limit(), -receive.dest, -receive.source, -receive.type, rx.remaining());
                 continue;
             }
 
-            // prepare transmitBuffer and transmitFrame
-            std::array<uint8_t, xns::ethernet::Frame::MAXIMUM_LENGTH> transmitBuffer;
-            transmitBuffer.fill(0);
-            ByteBuffer transmitBB(transmitBuffer.size(), transmitBuffer.data());
-            xns::ethernet::Frame transmitFrame;
-            transmitFrame.dest = receiveFrame.source;
-            transmitFrame.source = context.ME;
-            transmitFrame.type   = receiveFrame.type;
+            EthernetPacket payload;
+            if (receive.type == xns::ethernet::Type::XNS) {
+                processXNS(rx, payload);
+            }
+            // if payload is empty, continue with next received data
+            if (payload.empty()) continue;
+            continue;
 
-            if (receiveFrame.type == xns::ethernet::Type::XNS) {
-                xns::idp::IDP receiveIDP;
-                auto receiveFrameData = receiveFrame.block.toBuffer();
-                receiveIDP.fromByteBuffer(receiveFrameData);
+            xns::ethernet::Frame transmit;
+            // build transmit
+            {
+                transmit.dest   = receive.source;
+                transmit.source = context.ME;
+                transmit.type   = receive.type;
+            }
 
-                xns::idp::IDP transmitIDP;
-                transmitIDP.checksum  = 0;
-                transmitIDP.length    = 0;
-                transmitIDP.control   = 0;
-                transmitIDP.type      = receiveIDP.type;
-                transmitIDP.dstNet    = receiveIDP.srcNet;
-                transmitIDP.dstHost   = receiveIDP.srcHost;
-                transmitIDP.dstSocket = receiveIDP.srcSocket;
-                transmitIDP.srcNet    = 0;
-                transmitIDP.srcHost   = context.ME;
-                transmitIDP.srcSocket = receiveIDP.dstSocket;
-
-                auto idpData = receiveIDP.block.toBuffer();
-
-                auto dst = std_sprintf("%s-%s-%s", -receiveIDP.dstNet, -receiveIDP.dstHost, -receiveIDP.dstSocket);
-                auto src = std_sprintf("%s-%s-%s", -receiveIDP.srcNet, -receiveIDP.srcHost, -receiveIDP.srcSocket);
-
-                logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
-                    -receiveIDP.checksum, -receiveIDP.length, -receiveIDP.control, -receiveIDP.type,
-                    dst, src, idpData.remaining());
-                
-                if (receiveIDP.type == xns::idp::Type::PEX) {
-                    xns::pex::PEX pex;
-                    pex.fromByteBuffer(idpData);
-
-                    auto pexData = pex.block.toBuffer();
-
-                    logger.info("    PEX  %s  %s  %s", -pex.id, -pex.type, pex.block.toString());
-
-                    if (pex.type == xns::pex::Type::TIME) {
-                        xns::time::Request request;
-                        request.fromByteBuffer(pexData);
-
-                        logger.info("        TIME  %s  %s", -request.version, -request.type);
-                    }
-                    continue;
-                }
-                if (receiveIDP.type == xns::idp::Type::RIP) {
-                    xns::rip::RIP rip;
-                    rip.fromByteBuffer(idpData);
-                    std::string string;
-                    for(const auto& entry: rip.table) {
-                        string += std_sprintf(" {%s %s}", -entry.net, -entry.delay);
-                    }
-                    logger.info("    RIP  %s  %s", -rip.type, string.substr(1));
-                    //
-                    continue;
-                }
-                if (receiveIDP.type == xns::idp::Type::SPP) {
-                    continue;
-                }
-                if (receiveIDP.type == xns::idp::Type::ERROR_) {
-                    continue;
-                }
-                if (receiveIDP.type == xns::idp::Type::ECHO) {
-                    continue;
+            EthernetPacket tx;
+            // build tx
+            {
+                transmit.toByteBuffer(tx);
+                tx.write(payload.length(), payload.data());
+                int length = tx.length();
+                if (length < xns::ethernet::Frame::MINIMU_LENGTH) {
+                    tx.writeZero(xns::ethernet::Frame::MINIMU_LENGTH - length);
                 }
             }
+            driver.write(tx);
         }
+
+/*
+        if (receiveFrame.type == xns::ethernet::Type::XNS) {
+            xns::idp::IDP receiveIDP;
+            auto receiveFrameData = receiveFrame.block.toBuffer();
+            receiveIDP.fromByteBuffer(receiveFrameData);
+            auto idpData = receiveIDP.block.toBuffer();
+
+            auto dst = std_sprintf("%s-%s-%s", -receiveIDP.dstNet, -receiveIDP.dstHost, -receiveIDP.dstSocket);
+            auto src = std_sprintf("%s-%s-%s", -receiveIDP.srcNet, -receiveIDP.srcHost, -receiveIDP.srcSocket);
+
+            logger.info("%s  %s  %s  %s  %-22s  %-22s  %d",
+                -receiveIDP.checksum, -receiveIDP.length, -receiveIDP.control, -receiveIDP.type,
+                dst, src, idpData.remaining());
+            
+            if (receiveIDP.type == xns::idp::Type::PEX) {
+                xns::pex::PEX pex;
+                pex.fromByteBuffer(idpData);
+
+                auto pexData = pex.block.toBuffer();
+
+                logger.info("    PEX  %s  %s  %s", -pex.id, -pex.type, pex.block.toString());
+
+                if (pex.type == xns::pex::Type::TIME) {
+                    xns::time::Request request;
+                    request.fromByteBuffer(pexData);
+
+                    logger.info("        TIME  %s  %s", -request.version, -request.type);
+                }
+                continue;
+            }
+            if (receiveIDP.type == xns::idp::Type::RIP) {
+                xns::rip::RIP rip;
+                rip.fromByteBuffer(idpData);
+                std::string string;
+                for(const auto& entry: rip.table) {
+                    string += std_sprintf(" {%s %s}", -entry.net, -entry.delay);
+                }
+                logger.info("    RIP  %s  %s", -rip.type, string.substr(1));
+                //
+                continue;
+            }
+            if (receiveIDP.type == xns::idp::Type::SPP) {
+                continue;
+            }
+            if (receiveIDP.type == xns::idp::Type::ERROR_) {
+                continue;
+            }
+            if (receiveIDP.type == xns::idp::Type::ECHO) {
+                continue;
+            }
+        }
+*/
 	}
 
 	logger.info("STOP");
 }
+
+
+void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
+    logger.info("XNS %4d  %s", rx.remaining(), rx.toStringFromPosition());
+
+    xns::idp::IDP receive;
+    // build receive
+    {
+        int base = rx.position(); // save position to fix length
+        receive.fromByteBuffer(rx);
+ 
+        uint16_t checksum;
+        rx.read16(base, checksum);
+
+        {
+            auto dst = std_sprintf("%s-%s-%s", -receive.dstNet, -receive.dstHost, -receive.dstSocket);
+            auto src = std_sprintf("%s-%s-%s", -receive.srcNet, -receive.srcHost, -receive.srcSocket);
+            logger.info("IDP %s  %s  %s  %s  %-22s  %-22s  %d  %s",
+                -receive.checksum, -receive.length, -receive.control, -receive.type,
+                dst, src, rx.remaining(), rx.toStringFromPosition());
+        }
+
+        auto computedChecksum = xns::idp::computeChecksum(rx, base + 2);
+//        auto checksum_A = xns::idp::computeChecksum_A(rx, position);
+        logger.info("checksum  %04X  %04X", checksum, computedChecksum);
+
+        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
+
+        // check checksum
+        if (receive.checksum != xns::idp::Checksum::NOCHECK && checksum != +receive.checksum) {
+            // checksum error
+//            logger.warn("checksum error  %04X  %04X", checksum, +receive.checksum);
+//            ERROR();
+        }
+
+        // FIX length using value of length field
+        if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
+            logger.error("wrong length  %d", +receive.length);
+            ERROR();
+        }
+        int newLimit = base + +receive.length;
+        rx.limit(newLimit);
+        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
+    }
+
+    EthernetPacket payload;
+    if (receive.type == xns::idp::Type::ECHO) {
+        processECHO(rx, payload);
+    }
+    if (receive.type == xns::idp::Type::PEX) {
+       processPEX(rx, payload);
+    }
+    if (receive.type == xns::idp::Type::RIP) {
+        processRIP(rx, payload);
+    }
+    if (receive.type == xns::idp::Type::SPP) {
+        processSPP(rx, payload);
+    }
+
+    if (payload.empty()) return;
+
+    xns::idp::IDP transmit;
+    // build transmit
+    {
+        // make data length even
+        if (payload.length() % 1) payload.writeZero(1);
+
+        transmit.checksum  = 0;
+        transmit.length    = payload.length();
+        transmit.control   = 0;
+        transmit.type      = receive.type;
+        transmit.dstNet    = receive.srcNet;
+        transmit.dstHost   = receive.srcHost;
+        transmit.dstSocket = receive.srcSocket;
+        transmit.srcNet    = context.NET;
+        transmit.srcHost   = context.ME;
+        transmit.srcSocket = receive.dstSocket;
+
+        // write to tx
+        int position = tx.position();
+        transmit.toByteBuffer(tx);
+
+        // update checksum
+        uint16_t checksum = xns::idp::computeChecksum(tx, position);
+        tx.write16(0, checksum);
+    }
+}
+
+void processECHO(ByteBuffer& rx, ByteBuffer& tx) {
+    (void)rx;
+    (void)tx;
+    logger.info("%s", __FUNCTION__);
+}
+void processPEX (ByteBuffer& rx, ByteBuffer& tx) {
+    xns::pex::PEX receive(rx);
+    logger.info("PEX  %s  %s  %d  %s", -receive.id, -receive.type, rx.remaining(), rx.toStringFromPosition());
+
+    (void)rx;
+    (void)tx;
+    logger.info("%s", __FUNCTION__);
+}
+void processRIP (ByteBuffer& rx, ByteBuffer& tx) {
+    (void)rx;
+    (void)tx;
+    logger.info("%s", __FUNCTION__);
+}
+void processSPP (ByteBuffer& rx, ByteBuffer& tx) {
+    (void)rx;
+    (void)tx;
+    logger.info("%s", __FUNCTION__);
+}
+ 
+

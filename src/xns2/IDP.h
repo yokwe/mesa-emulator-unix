@@ -111,7 +111,7 @@ public:
 	static UINT16 TELEDEBUG;
 };
 
-uint16_t computeChecksum(const ByteBuffer& bb); // bb.rewind() point to IDP.checksum
+uint16_t computeChecksum(const ByteBuffer& bb, int position); // bb.rewind() point to IDP.checksum
 
 struct IDP {
     static constexpr int HEADER_LENGTH = 30;
@@ -129,7 +129,8 @@ struct IDP {
     Host     srcHost;
     Socket   srcSocket;
 
-    BLOCK    block;
+    IDP(ByteBuffer& bb);
+    IDP() {}
 
     void fromByteBuffer(ByteBuffer& bb);
     void toByteBuffer(ByteBuffer& bb);

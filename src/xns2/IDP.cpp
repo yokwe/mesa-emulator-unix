@@ -77,15 +77,13 @@ UINT16 Socket::GERM      = Socket(35, "GERM");
 UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
 
 
-uint16_t computeChecksum(const ByteBuffer& bb) {
-    int base  = bb.base();
+uint16_t computeChecksum(const ByteBuffer& bb, int base) {
     int limit = bb.limit();
     uint8_t* data = bb.data();
 
-    uint32_t w;
     uint32_t s = 0;
-    for(int i = base + 2; i < limit;) {
-        w = data[i++] << 8;
+    for(int i = base; i < limit;) {
+        uint32_t w = (data[i++] & 0xFFFFU) << 8;
         w |= data[i++];
 
 		// add w to s
@@ -101,39 +99,19 @@ uint16_t computeChecksum(const ByteBuffer& bb) {
 }
 
 void IDP::fromByteBuffer(ByteBuffer& bb) {
-        checksum.fromByteBuffer(bb);
-        length.fromByteBuffer(bb);
-        control.fromByteBuffer(bb);
-        type.fromByteBuffer(bb);
-        dstNet.fromByteBuffer(bb);
-        dstHost.fromByteBuffer(bb);
-        dstSocket.fromByteBuffer(bb);
-        srcNet.fromByteBuffer(bb);
-        srcHost.fromByteBuffer(bb);
-        srcSocket.fromByteBuffer(bb);
-
-        // FIX length using value of length field
-        int newLimit = bb.position() + +length - HEADER_LENGTH;
-        if (newLimit <= 0) ERROR()
-        bb.limit(newLimit);
-
-        // check checksum
-        if (checksum != Checksum::NOCHECK) {
-            uint16_t myChecksum = computeChecksum(bb);
-            if (checksum != myChecksum) {
-                // Checksum error
-                logger.warn("Checksum error");
-            }
-        }
-
-        block.fromByteBuffer(bb);
+    checksum.fromByteBuffer(bb);
+    length.fromByteBuffer(bb);
+    control.fromByteBuffer(bb);
+    type.fromByteBuffer(bb);
+    dstNet.fromByteBuffer(bb);
+    dstHost.fromByteBuffer(bb);
+    dstSocket.fromByteBuffer(bb);
+    srcNet.fromByteBuffer(bb);
+    srcHost.fromByteBuffer(bb);
+    srcSocket.fromByteBuffer(bb);
 }
 
 void IDP::toByteBuffer(ByteBuffer& bb) {
-    int position = bb.position();
-    int limit    = bb.limit();
-    int length_   = limit - position;
-
     checksum.toByteBuffer(bb);
     length.toByteBuffer(bb);
     control.toByteBuffer(bb);
@@ -144,10 +122,19 @@ void IDP::toByteBuffer(ByteBuffer& bb) {
     srcNet.toByteBuffer(bb);
     srcHost.toByteBuffer(bb);
     srcSocket.toByteBuffer(bb);
-    block.toByteBuffer(bb);
+}
 
-    // make odd length to even length
-    if (length_ % 2) bb.write8(0);
+IDP::IDP (ByteBuffer& bb)  {
+    checksum.fromByteBuffer(bb);
+    length.fromByteBuffer(bb);
+    control.fromByteBuffer(bb);
+    type.fromByteBuffer(bb);
+    dstNet.fromByteBuffer(bb);
+    dstHost.fromByteBuffer(bb);
+    dstSocket.fromByteBuffer(bb);
+    srcNet.fromByteBuffer(bb);
+    srcHost.fromByteBuffer(bb);
+    srcSocket.fromByteBuffer(bb);
 }
 
 }

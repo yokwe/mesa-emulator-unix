@@ -28,10 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include "../util/Util.h"
+
+ 
+
 #include <cstdint>
 #include <map>
 
+#include "../util/Util.h"
 static const Logger logger(__FILE__);
 
 #include "../util/net.h"
@@ -47,46 +50,13 @@ static const Logger logger(__FILE__);
 #include "../xns2/Time.h"
 #include "../xns2/Config.h"
 
+#include "Server.h"
+
 void callInitialize() {
      xns::initialize();
 }
 
-struct Routing {
-    uint32_t    net;
-    uint16_t    delay;
-    std::string name;
-
-    Routing(uint32_t net_, uint16_t delay_, const std::string& name_) : net(net_), delay(delay_), name(name_) {}
-    Routing() : net(0), delay(0), name("") {}
-};
-
-struct Context {
-    xns::config::Config         config;
-    net::Driver*                driver;
-    uint64_t                    ME;
-    uint32_t                    NET;
-    std::map<uint32_t, Routing> routingMap;
-
-    Context(xns::config::Config config_) : config(config_) {
-        auto device = net::getDevice(config.server.interface);
-        driver = net::getDriver(device);
-        ME     = config.server.address;
-        NET    = config.server.net;
-        // build routingMap
-        for(const auto& e: config.net) {
-            Routing routing = Routing(e.net, e.delay, e.name);
-            routingMap[e.net] = routing;
-        }
-    }
-    Context() : config(), driver(0), ME(0), NET(0) {}
-};
 Context context;
-
-void processXNS (ByteBuffer& rx, ByteBuffer& tx);
-void processECHO(ByteBuffer& rx, ByteBuffer& tx);
-void processPEX (ByteBuffer& rx, ByteBuffer& tx);
-void processRIP (ByteBuffer& rx, ByteBuffer& tx);
-void processSPP (ByteBuffer& rx, ByteBuffer& tx);
 
 int main(int, char **) {
 	logger.info("START");
@@ -131,10 +101,10 @@ int main(int, char **) {
             }
 
             EthernetPacket payload;
-            if (receive.type == xns::ethernet::Type::XNS) {
-                processXNS(rx, payload);
-            }
+            if (receive.type == xns::ethernet::Type::XNS) processIDP(rx, payload, context);
             // if payload is empty, continue with next received data
+            payload.flip();
+            logger.info("payload  length  %d", payload.length());
             if (payload.empty()) continue;
             continue;
 
@@ -151,9 +121,10 @@ int main(int, char **) {
             {
                 transmit.toByteBuffer(tx);
                 tx.write(payload.length(), payload.data());
+                // add padding if it is smaller than MINIMUM_LENGTH
                 int length = tx.length();
-                if (length < xns::ethernet::Frame::MINIMU_LENGTH) {
-                    tx.writeZero(xns::ethernet::Frame::MINIMU_LENGTH - length);
+                if (length < xns::ethernet::Frame::MINIMUM_LENGTH) {
+                    tx.writeZero(xns::ethernet::Frame::MINIMUM_LENGTH - length);
                 }
             }
             driver.write(tx);
@@ -215,116 +186,3 @@ int main(int, char **) {
 
 	logger.info("STOP");
 }
-
-
-void processXNS(ByteBuffer& rx, ByteBuffer& tx) {
-    logger.info("XNS %4d  %s", rx.remaining(), rx.toStringFromPosition());
-
-    xns::idp::IDP receive;
-    // build receive
-    {
-        int base = rx.position(); // save position to fix length
-        receive.fromByteBuffer(rx);
- 
-        {
-            auto dst = std_sprintf("%s-%s-%s", -receive.dstNet, -receive.dstHost, -receive.dstSocket);
-            auto src = std_sprintf("%s-%s-%s", -receive.srcNet, -receive.srcHost, -receive.srcSocket);
-            logger.info("IDP %s  %s  %s  %s  %-22s  %-22s  %d  %s",
-                -receive.checksum, -receive.length, -receive.control, -receive.type,
-                dst, src, rx.remaining(), rx.toStringFromPosition());
-        }
-
-//        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
-
-        // FIX length using value of length field
-        if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
-            logger.error("wrong length  %d", +receive.length);
-            ERROR();
-        }
-        int newLimit = base + +receive.length;
-        rx.limit(newLimit);
-//        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
-
-        // check checksum
-        if (receive.checksum != xns::idp::Checksum::NOCHECK) {
-            uint16_t checksum;
-            rx.read16(base, checksum);
-
-            auto computedChecksum = xns::idp::computeChecksum(rx, base);
-            if (checksum != computedChecksum) {
-                // checksum error
-                logger.warn("checksum  %04X  %04X", checksum, computedChecksum);
-                // TODO return error packet
-                ERROR();
-            }
-        }
-    }
-
-    EthernetPacket payload;
-    if (receive.type == xns::idp::Type::ECHO) {
-        processECHO(rx, payload);
-    }
-    if (receive.type == xns::idp::Type::PEX) {
-       processPEX(rx, payload);
-    }
-    if (receive.type == xns::idp::Type::RIP) {
-        processRIP(rx, payload);
-    }
-    if (receive.type == xns::idp::Type::SPP) {
-        processSPP(rx, payload);
-    }
-
-    if (payload.empty()) return;
-
-    xns::idp::IDP transmit;
-    // build transmit
-    {
-        // make data length even
-        if (payload.length() % 1) payload.writeZero(1);
-
-        transmit.checksum  = 0;
-        transmit.length    = payload.length();
-        transmit.control   = 0;
-        transmit.type      = receive.type;
-        transmit.dstNet    = receive.srcNet;
-        transmit.dstHost   = receive.srcHost;
-        transmit.dstSocket = receive.srcSocket;
-        transmit.srcNet    = context.NET;
-        transmit.srcHost   = context.ME;
-        transmit.srcSocket = receive.dstSocket;
-
-        // write to tx
-        int position = tx.position();
-        transmit.toByteBuffer(tx);
-
-        // update checksum
-        uint16_t checksum = xns::idp::computeChecksum(tx, position);
-        tx.write16(0, checksum);
-    }
-}
-
-void processECHO(ByteBuffer& rx, ByteBuffer& tx) {
-    (void)rx;
-    (void)tx;
-    logger.info("%s", __FUNCTION__);
-}
-void processPEX (ByteBuffer& rx, ByteBuffer& tx) {
-    xns::pex::PEX receive(rx);
-    logger.info("PEX  %s  %s  %d  %s", -receive.id, -receive.type, rx.remaining(), rx.toStringFromPosition());
-
-    (void)rx;
-    (void)tx;
-    logger.info("%s", __FUNCTION__);
-}
-void processRIP (ByteBuffer& rx, ByteBuffer& tx) {
-    (void)rx;
-    (void)tx;
-    logger.info("%s", __FUNCTION__);
-}
-void processSPP (ByteBuffer& rx, ByteBuffer& tx) {
-    (void)rx;
-    (void)tx;
-    logger.info("%s", __FUNCTION__);
-}
- 
-

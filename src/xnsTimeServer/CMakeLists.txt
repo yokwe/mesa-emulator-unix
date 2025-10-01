@@ -2,10 +2,23 @@
 # xnsTimeServer
 #
 
-add_executable (
+add_executable(
   xnsTimeServer
-  main.cpp
   )
+
+target_sources(
+	xnsTimeServer
+	PUBLIC
+    Server.h
+  PRIVATE
+    ECHO.cpp
+    IDP.cpp
+    main.cpp
+    PEX.cpp
+    PEX_TIME.cpp
+    RIP.cpp
+    SPP.cpp
+)
 
 add_dependencies(xnsTimeServer xns util)
 

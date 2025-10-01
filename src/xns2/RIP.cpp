@@ -29,13 +29,40 @@
  *******************************************************************************/
 
 
-//
-// mesa.h
-//
+ //
+ // RIP.cpp
+ //
 
-#pragma once
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include <tcl.h>
+#include "RIP.h"
 
-int MesaLog(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaGuam(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+namespace xns::rip {
+
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
+}
+
+UINT16 Type::REQUEST      = Type(1, "REQUEST");
+UINT16 Type::RESPONSE     = Type(2, "RESPONSE");
+
+UINT16 Delay::INFINITY     = Delay(16, "INFINITY");
+
+void RIP::fromByteBuffer(ByteBuffer& bb) {
+    type.fromByteBuffer(bb);
+    while(bb.hasRemaining()) {
+        NetDelay entry;
+        entry.fromByteBuffer(bb);
+        table.push_back(entry);
+    }
+}
+// ByteBuffer <= this
+void RIP::toByteBuffer(ByteBuffer& bb) const {
+    type.toByteBuffer(bb);
+    for(const auto& entry: table) {
+        entry.toByteBuffer(bb);
+    }
+}
+
+}

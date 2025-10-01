@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cstdio>
 #include <string>
 #include <cstring>
 #include <cstdint>
@@ -83,6 +84,8 @@ std::string std_sprintf(const char* format, Args&& ... args) {
     std_sprintf_(result, STD_SPRINTF_DEFAULT_BUFFER_SIZE, format, std_sprintf_convert_(std::forward<Args>(args)) ...);
     return result;
 }
+
+std::string std_vsprintf(const char* format, va_list ap);
 
 class Logger {
 public:
@@ -222,6 +225,7 @@ std::string demangle(const char* mangled);
 int32_t toIntMesaNumber(const std::string& string);
 
 std::string toHexString(int size, const uint8_t* data);
+std::vector<uint8_t> fromHexString(const std::string& string);
 
 // https://stackoverflow.com/questions/7276826/format-number-with-commas-in-c
 template<class T>
@@ -263,7 +267,7 @@ inline constexpr int multipleOf(int number, int base) {
 	} else { \
 		logger.error("Unknown value = %d", (int)value); \
 		ERROR(); \
-		return std::string("%1").arg((int)value); \
+		return std_sprintf("%d", (int)value); \
 	}
 
 // bitFiled is used in symbols
@@ -286,12 +290,12 @@ public:
 	static constexpr std::chrono::milliseconds ONE_SECOND = std::chrono::seconds(1);
 
 	// misc functions
-	static uint64_t getSecondsFromEpoch();
-	static uint64_t getMilliSecondsFromEpoch();
-	static uint64_t getMicroSecondsFromEpoch();
+	static uint64_t getSecondsSinceEpoch();
+	static uint64_t getMilliSecondsSinceEpoch();
+	static uint64_t getMicroSecondsSinceEpoch();
 
 	static uint32_t getUnixTime() {
-		return (uint32_t)getSecondsFromEpoch();
+		return (uint32_t)getSecondsSinceEpoch();
 	}
 	static uint32_t getMesaTime() {
 		return toMesaTime(getUnixTime());

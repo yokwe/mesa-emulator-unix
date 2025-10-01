@@ -36,7 +36,7 @@
 #include <tcl.h>
 #include <tclDecls.h>
 
-#include "mesa.h"
+#include "tclMesa.h"
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);

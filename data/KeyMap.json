@@ -1,126 +1,231 @@
 { "KeyMap": [
-    {"keySym": "null", "code": 0, "levelVKey": "null"},
-    {"keySym": "null", "code": 1, "levelVKey": "Bullet"},
-    {"keySym": "null", "code": 2, "levelVKey": "SuperSub"},
-    {"keySym": "null", "code": 3, "levelVKey": "Case"},
-    {"keySym": "null", "code": 4, "levelVKey": "Strikeout"},
-    {"keySym": "null", "code": 5, "levelVKey": "KeypadTwo"},
-    {"keySym": "null", "code": 6, "levelVKey": "KeypadThree"},
-    {"keySym": "null", "code": 7, "levelVKey": "SingleQuote"},
-    {"keySym": "null", "code": 8, "levelVKey": "KeypadAdd"},
-    {"keySym": "null", "code": 9, "levelVKey": "KeypadSubtract"},
+    {"code":   0, "levelVKey": "null",              "keySym": "null"},
+    {"code":   1, "levelVKey": "Bullet",            "keySym": "null"},
+    {"code":   2, "levelVKey": "SuperSub",          "keySym": "null"},
+    {"code":   3, "levelVKey": "Case",              "keySym": "null"},
+    {"code":   4, "levelVKey": "Strikeout",         "keySym": "null"},
+    {"code":   5, "levelVKey": "KeypadTwo",         "keySym": "null"},
+    {"code":   6, "levelVKey": "KeypadThree",       "keySym": "null"},
 
-    {"keySym": "null", "code": 10, "levelVKey": "KeypadMultiply"},
-    {"keySym": "null", "code": 11, "levelVKey": "KeypadDivide"},
-    {"keySym": "null", "code": 12, "levelVKey": "KeypadClear"},
-    {"keySym": "null", "code": 13, "levelVKey": "Point"},
-    {"keySym": "null", "code": 14, "levelVKey": "Adjust"},
-    {"keySym": "null", "code": 15, "levelVKey": "Menu"},
-    {"keySym": "null", "code": 16, "levelVKey": "Five"},
-    {"keySym": "null", "code": 17, "levelVKey": "Four"},
-    {"keySym": "null", "code": 18, "levelVKey": "Six"},
-    {"keySym": "null", "code": 19, "levelVKey": "E"},
+    {"code":   7, "levelVKey": "SingleQuote",       "keySym": "backslash"},
+    {"code":   7, "levelVKey": "SingleQuote",       "keySym": "bar"},
 
-    {"keySym": "null", "code": 20, "levelVKey": "Seven"},
-    {"keySym": "null", "code": 21, "levelVKey": "D"},
-    {"keySym": "null", "code": 22, "levelVKey": "U"},
-    {"keySym": "null", "code": 23, "levelVKey": "V"},
-    {"keySym": "null", "code": 24, "levelVKey": "Zero"},
-    {"keySym": "null", "code": 25, "levelVKey": "K"},
-    {"keySym": "null", "code": 26, "levelVKey": "Dash"},
-    {"keySym": "null", "code": 27, "levelVKey": "P"},
-    {"keySym": "null", "code": 28, "levelVKey": "Slash"},
-    {"keySym": "null", "code": 29, "levelVKey": "Font"},
+    {"code":   8, "levelVKey": "KeypadAdd",         "keySym": "null"},
+    {"code":   9, "levelVKey": "KeypadSubtract",    "keySym": "null"},
 
-    {"keySym": "null", "code": 30, "levelVKey": "Same"},
-    {"keySym": "null", "code": 31, "levelVKey": "BS"},
-    {"keySym": "null", "code": 32, "levelVKey": "Three"},
-    {"keySym": "null", "code": 33, "levelVKey": "Two"},
-    {"keySym": "null", "code": 34, "levelVKey": "W"},
-    {"keySym": "null", "code": 35, "levelVKey": "Q"},
-    {"keySym": "null", "code": 36, "levelVKey": "S"},
-    {"keySym": "null", "code": 37, "levelVKey": "A"},
-    {"keySym": "null", "code": 38, "levelVKey": "Nine"},
-    {"keySym": "null", "code": 39, "levelVKey": "I"},
+    {"code":  10, "levelVKey": "KeypadMultiply",    "keySym": "null"},
+    {"code":  11, "levelVKey": "KeypadDivide",      "keySym": "null"},
+    {"code":  12, "levelVKey": "KeypadClear",       "keySym": "null"},
+    {"code":  13, "levelVKey": "Point",             "keySym": "null"},
+    {"code":  14, "levelVKey": "Adjust",            "keySym": "null"},
+    {"code":  15, "levelVKey": "Menu",              "keySym": "null"},
 
-    {"keySym": "null", "code": 40, "levelVKey": "X"},
-    {"keySym": "null", "code": 41, "levelVKey": "O"},
-    {"keySym": "null", "code": 42, "levelVKey": "L"},
-    {"keySym": "null", "code": 43, "levelVKey": "Comma"},
-    {"keySym": "null", "code": 44, "levelVKey": "Quote"},
-    {"keySym": "null", "code": 45, "levelVKey": "RightBracket"},
-    {"keySym": "null", "code": 46, "levelVKey": "Open"},
-    {"keySym": "null", "code": 47, "levelVKey": "Special"},
-    {"keySym": "null", "code": 48, "levelVKey": "One"},
-    {"keySym": "null", "code": 49, "levelVKey": "Tab"},
+    {"code":  16, "levelVKey": "Five",              "keySym": "5"},
+    {"code":  16, "levelVKey": "Five",              "keySym": "percent"},
+    
+    {"code":  17, "levelVKey": "Four",              "keySym": "4"},
+    {"code":  17, "levelVKey": "Four",              "keySym": "dollar"},
 
-    {"keySym": "null", "code": 50, "levelVKey": "ParaTab"},
-    {"keySym": "null", "code": 51, "levelVKey": "F"},
-    {"keySym": "null", "code": 52, "levelVKey": "Props"},
-    {"keySym": "null", "code": 53, "levelVKey": "C"},
-    {"keySym": "null", "code": 54, "levelVKey": "J"},
-    {"keySym": "null", "code": 55, "levelVKey": "B"},
-    {"keySym": "null", "code": 56, "levelVKey": "Z"},
-    {"keySym": "null", "code": 57, "levelVKey": "LeftShift"},
-    {"keySym": "null", "code": 58, "levelVKey": "Period"},
-    {"keySym": "null", "code": 59, "levelVKey": "SemiColon"},
+    {"code":  18, "levelVKey": "Six",               "keySym": "6"},
+    {"code":  18, "levelVKey": "Six",               "keySym": "asciicircum"},
 
-    {"keySym": "null", "code": 60, "levelVKey": "NewPara"},
-    {"keySym": "null", "code": 61, "levelVKey": "OpenQuote"},
-    {"keySym": "Delete", "code": 62, "levelVKey": "Delete"},
-    {"keySym": "null", "code": 63, "levelVKey": "Next"},
-    {"keySym": "null", "code": 64, "levelVKey": "R"},
-    {"keySym": "null", "code": 65, "levelVKey": "T"},
-    {"keySym": "null", "code": 66, "levelVKey": "G"},
-    {"keySym": "null", "code": 67, "levelVKey": "Y"},
-    {"keySym": "null", "code": 68, "levelVKey": "H"},
-    {"keySym": "null", "code": 69, "levelVKey": "Eight"},
+    {"code":  19, "levelVKey": "E",                 "keySym": "E"},
+    {"code":  19, "levelVKey": "E",                 "keySym": "e"},
 
-    {"keySym": "null", "code": 70, "levelVKey": "N"},
-    {"keySym": "null", "code": 71, "levelVKey": "M"},
-    {"keySym": "null", "code": 72, "levelVKey": "Lock"},
-    {"keySym": "null", "code": 73, "levelVKey": "Space"},
-    {"keySym": "null", "code": 74, "levelVKey": "LeftBracket"},
-    {"keySym": "null", "code": 75, "levelVKey": "Equal"},
-    {"keySym": "null", "code": 76, "levelVKey": "RightShift"},
-    {"keySym": "null", "code": 77, "levelVKey": "Stop"},
-    {"keySym": "null", "code": 78, "levelVKey": "Move"},
-    {"keySym": "null", "code": 79, "levelVKey": "Undo"},
+    {"code":  20, "levelVKey": "Seven",             "keySym": "7"},
+    {"code":  20, "levelVKey": "Seven",             "keySym": "ampersand"},
+    
+    {"code":  21, "levelVKey": "D",                 "keySym": "D"},
+    {"code":  21, "levelVKey": "D",                 "keySym": "d"},
 
-    {"keySym": "null", "code": 80, "levelVKey": "Margins"},
-    {"keySym": "null", "code": 81, "levelVKey": "KeypadSeven"},
-    {"keySym": "null", "code": 82, "levelVKey": "KeypadEight"},
-    {"keySym": "null", "code": 83, "levelVKey": "KeypadNine"},
-    {"keySym": "null", "code": 84, "levelVKey": "KeypadFour"},
-    {"keySym": "null", "code": 85, "levelVKey": "KeypadFive"},
-    {"keySym": "null", "code": 86, "levelVKey": "English"},
-    {"keySym": "null", "code": 87, "levelVKey": "KeypadSix"},
-    {"keySym": "null", "code": 88, "levelVKey": "Katakana"},
-    {"keySym": "null", "code": 89, "levelVKey": "Copy"},
+    {"code":  22, "levelVKey": "U",                 "keySym": "U"},
+    {"code":  22, "levelVKey": "U",                 "keySym": "u"},
 
-    {"keySym": "null", "code": 90, "levelVKey": "Find"},
-    {"keySym": "null", "code": 91, "levelVKey": "Again"},
-    {"keySym": "null", "code": 92, "levelVKey": "Help"},
-    {"keySym": "null", "code": 93, "levelVKey": "Expand"},
-    {"keySym": "null", "code": 94, "levelVKey": "KeypadOne"},
-    {"keySym": "null", "code": 95, "levelVKey": "DiagnosticBitTwo"},
-    {"keySym": "null", "code": 96, "levelVKey": "DiagnosticBitOne"},
-    {"keySym": "null", "code": 97, "levelVKey": "Center"},
-    {"keySym": "null", "code": 98, "levelVKey": "KeypadZero"},
-    {"keySym": "null", "code": 99, "levelVKey": "Bold"},
+    {"code":  23, "levelVKey": "V",                 "keySym": "V"},
+    {"code":  23, "levelVKey": "V",                 "keySym": "v"},
 
-    {"keySym": "null", "code": 100, "levelVKey": "Italic"},
-    {"keySym": "null", "code": 101, "levelVKey": "Underline"},
-    {"keySym": "null", "code": 102, "levelVKey": "Superscript"},
-    {"keySym": "null", "code": 103, "levelVKey": "Subscript"},
-    {"keySym": "null", "code": 104, "levelVKey": "Smaller"},
-    {"keySym": "null", "code": 105, "levelVKey": "KeypadPeriod"},
-    {"keySym": "null", "code": 106, "levelVKey": "KeypadComma"},
-    {"keySym": "null", "code": 107, "levelVKey": "LeftShiftAlt"},
-    {"keySym": "null", "code": 108, "levelVKey": "DoubleQuote"},
-    {"keySym": "null", "code": 109, "levelVKey": "Defaults"},
+    {"code":  24, "levelVKey": "Zero",              "keySym": "0"},
+    {"code":  24, "levelVKey": "Zero",              "keySym": "parenright"},
+    
+    {"code":  25, "levelVKey": "K",                 "keySym": "K"},
+    {"code":  25, "levelVKey": "K",                 "keySym": "k"},
 
-    {"keySym": "null", "code": 110, "levelVKey": "Hiragana"},
-    {"keySym": "null", "code": 111, "levelVKey": "RightShiftAlt"}
+    {"code":  26, "levelVKey": "Dash",              "keySym": "minus"},
+    {"code":  26, "levelVKey": "Dash",              "keySym": "underscore"},
 
+    {"code":  27, "levelVKey": "P",                 "keySym": "P"},
+    {"code":  27, "levelVKey": "P",                 "keySym": "p"},
+
+    {"code":  28, "levelVKey": "Slash",             "keySym": "slash"},
+    {"code":  28, "levelVKey": "Slash",             "keySym": "question"},
+
+    {"code":  29, "levelVKey": "Font",              "keySym": "null"},
+
+    {"code":  30, "levelVKey": "Same",              "keySym": "null"},
+
+    {"code":  31, "levelVKey": "BS",                "keySym": "BackSpace"},
+
+    {"code":  32, "levelVKey": "Three",             "keySym": "3"},
+    {"code":  32, "levelVKey": "Three",             "keySym": "numbersign"},
+
+    {"code":  33, "levelVKey": "Two",               "keySym": "2"},
+    {"code":  33, "levelVKey": "Two",               "keySym": "at"},
+    
+    {"code":  34, "levelVKey": "W",                 "keySym": "W"},
+    {"code":  34, "levelVKey": "W",                 "keySym": "w"},
+
+    {"code":  35, "levelVKey": "Q",                 "keySym": "Q"},
+    {"code":  35, "levelVKey": "Q",                 "keySym": "q"},
+
+    {"code":  36, "levelVKey": "S",                 "keySym": "S"},
+    {"code":  36, "levelVKey": "S",                 "keySym": "s"},
+
+    {"code":  37, "levelVKey": "A",                 "keySym": "A"},
+    {"code":  37, "levelVKey": "A",                 "keySym": "a"},
+
+    {"code":  38, "levelVKey": "Nine",              "keySym": "9"},
+    {"code":  38, "levelVKey": "Nine",              "keySym": "parenleft"},
+
+    {"code":  39, "levelVKey": "I",                 "keySym": "I"},
+    {"code":  39, "levelVKey": "I",                 "keySym": "i"},
+
+    {"code":  40, "levelVKey": "X",                 "keySym": "X"},
+    {"code":  40, "levelVKey": "X",                 "keySym": "x"},
+
+    {"code":  41, "levelVKey": "O",                 "keySym": "O"},
+    {"code":  41, "levelVKey": "O",                 "keySym": "o"},
+
+    {"code":  42, "levelVKey": "L",                 "keySym": "L"},
+    {"code":  42, "levelVKey": "L",                 "keySym": "l"},
+
+    {"code":  43, "levelVKey": "Comma",             "keySym": "comma"},
+    {"code":  43, "levelVKey": "Comma",             "keySym": "less"},
+
+    {"code":  44, "levelVKey": "Quote",             "keySym": "null"},
+
+    {"code":  45, "levelVKey": "RightBracket",      "keySym": "bracketright"},
+    {"code":  45, "levelVKey": "RightBracket",      "keySym": "braceright"},
+
+    {"code":  46, "levelVKey": "Open",              "keySym": "null"},
+    {"code":  47, "levelVKey": "Special",           "keySym": "null"},
+
+    {"code":  48, "levelVKey": "One",               "keySym": "1"},
+    {"code":  48, "levelVKey": "One",               "keySym": "exclam"},
+
+    {"code":  49, "levelVKey": "Tab",               "keySym": "null"},
+
+    {"code":  50, "levelVKey": "ParaTab",           "keySym": "Tab"},
+
+    {"code":  51, "levelVKey": "F",                 "keySym": "F"},
+    {"code":  51, "levelVKey": "F",                 "keySym": "f"},
+
+    {"code":  52, "levelVKey": "Props",             "keySym": "null"},
+
+    {"code":  53, "levelVKey": "C",                 "keySym": "C"},
+    {"code":  53, "levelVKey": "C",                 "keySym": "c"},
+
+    {"code":  54, "levelVKey": "J",                 "keySym": "J"},
+    {"code":  54, "levelVKey": "J",                 "keySym": "j"},
+
+    {"code":  55, "levelVKey": "B",                 "keySym": "B"},
+    {"code":  55, "levelVKey": "B",                 "keySym": "b"},
+    
+    {"code":  56, "levelVKey": "Z",                 "keySym": "Z"},
+    {"code":  56, "levelVKey": "Z",                 "keySym": "z"},
+
+    {"code":  57, "levelVKey": "LeftShift",         "keySym": "Shift_L"},
+
+    {"code":  58, "levelVKey": "Period",            "keySym": "period"},
+    {"code":  58, "levelVKey": "Period",            "keySym": "greater"},
+
+    {"code":  59, "levelVKey": "SemiColon",         "keySym": "semicolon"},
+    {"code":  59, "levelVKey": "SemiColon",         "keySym": "colon"},
+
+    {"code":  60, "levelVKey": "NewPara",           "keySym": "Return"},
+
+    {"code":  61, "levelVKey": "OpenQuote",         "keySym": "null"},
+
+    {"code":  62, "levelVKey": "Delete",            "keySym": "Delete"},
+
+    {"code":  63, "levelVKey": "Next",              "keySym": "null"},
+
+    {"code":  64, "levelVKey": "R",                 "keySym": "R"},
+    {"code":  64, "levelVKey": "R",                 "keySym": "r"},
+
+    {"code":  65, "levelVKey": "T",                 "keySym": "T"},
+    {"code":  65, "levelVKey": "T",                 "keySym": "t"},
+    
+    {"code":  66, "levelVKey": "G",                 "keySym": "G"},
+    {"code":  66, "levelVKey": "G",                 "keySym": "g"},
+
+    {"code":  67, "levelVKey": "Y",                 "keySym": "Y"},
+    {"code":  67, "levelVKey": "Y",                 "keySym": "y"},
+
+    {"code":  68, "levelVKey": "H",                 "keySym": "H"},
+    {"code":  68, "levelVKey": "H",                 "keySym": "h"},
+
+    {"code":  69, "levelVKey": "Eight",             "keySym": "8"},
+    {"code":  69, "levelVKey": "Eight",             "keySym": "asterisk"},
+
+    {"code":  70, "levelVKey": "N",                 "keySym": "N"},
+    {"code":  70, "levelVKey": "N",                 "keySym": "n"},
+
+    {"code":  71, "levelVKey": "M",                 "keySym": "M"},
+    {"code":  71, "levelVKey": "M",                 "keySym": "m"},
+
+    {"code":  72, "levelVKey": "Lock",              "keySym": "Caps_Lock"},
+
+    {"code":  73, "levelVKey": "Space",             "keySym": "space"},
+
+    {"code":  74, "levelVKey": "LeftBracket",       "keySym": "bracketleft"},
+    {"code":  74, "levelVKey": "LeftBracket",       "keySym": "braceleft"},
+    
+    {"code":  75, "levelVKey": "Equal",             "keySym": "equal"},
+    {"code":  75, "levelVKey": "Equal",             "keySym": "plus"},
+    
+    {"code":  76, "levelVKey": "RightShift",        "keySym": "Shift_R"},
+
+    {"code":  77, "levelVKey": "Stop",              "keySym": "Escape"},
+    
+    {"code":  78, "levelVKey": "Move",              "keySym": "null"},
+    {"code":  79, "levelVKey": "Undo",              "keySym": "null"},
+    
+    {"code":  80, "levelVKey": "Margins",           "keySym": "null"},
+    {"code":  81, "levelVKey": "KeypadSeven",       "keySym": "null"},
+    {"code":  82, "levelVKey": "KeypadEight",       "keySym": "null"},
+    {"code":  83, "levelVKey": "KeypadNine",        "keySym": "null"},
+    {"code":  84, "levelVKey": "KeypadFour",        "keySym": "null"},
+    {"code":  85, "levelVKey": "KeypadFive",        "keySym": "null"},
+    {"code":  86, "levelVKey": "English",           "keySym": "null"},
+    {"code":  87, "levelVKey": "KeypadSix",         "keySym": "null"},
+    {"code":  88, "levelVKey": "Katakana",          "keySym": "null"},
+    {"code":  89, "levelVKey": "Copy",              "keySym": "null"},
+
+    {"code":  90, "levelVKey": "Find",              "keySym": "null"},
+    {"code":  91, "levelVKey": "Again",             "keySym": "null"},
+    {"code":  92, "levelVKey": "Help",              "keySym": "null"},
+    {"code":  93, "levelVKey": "Expand",            "keySym": "null"},
+    {"code":  94, "levelVKey": "KeypadOne",         "keySym": "null"},
+    {"code":  95, "levelVKey": "DiagnosticBitTwo",  "keySym": "null"},
+    {"code":  96, "levelVKey": "DiagnosticBitOne",  "keySym": "null"},
+    {"code":  97, "levelVKey": "Center",            "keySym": "null"},
+    {"code":  98, "levelVKey": "KeypadZero",        "keySym": "null"},
+    {"code":  99, "levelVKey": "Bold",              "keySym": "null"},
+
+    {"code": 100, "levelVKey": "Italic",            "keySym": "null"},
+    {"code": 101, "levelVKey": "Underline",         "keySym": "null"},
+    {"code": 102, "levelVKey": "Superscript",       "keySym": "null"},
+    {"code": 103, "levelVKey": "Subscript",         "keySym": "null"},
+    {"code": 104, "levelVKey": "Smaller",           "keySym": "null"},
+    {"code": 105, "levelVKey": "KeypadPeriod",      "keySym": "null"},
+    {"code": 106, "levelVKey": "KeypadComma",       "keySym": "null"},
+    {"code": 107, "levelVKey": "LeftShiftAlt",      "keySym": "null"},
+
+    {"code": 108, "levelVKey": "DoubleQuote",       "keySym": "apostrophe"},
+    {"code": 108, "levelVKey": "DoubleQuote",       "keySym": "quotedbl"},
+
+    {"code": 109, "levelVKey": "Defaults",          "keySym": "null"},
+    
+    {"code": 110, "levelVKey": "Hiragana",          "keySym": "null"},
+    {"code": 111, "levelVKey": "RightShiftAlt",     "keySym": "null"}
 ] }

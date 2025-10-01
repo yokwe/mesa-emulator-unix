@@ -43,12 +43,12 @@ class ByteBuffer {
 protected:
 	static constexpr int INVALID_POS = -1;
 
-	int     myBase;
-	int     myPosition;
-	int     myLimit;
-	int     myCapacity;
-	uint8_t *myData;
-	int     myMarkPos;
+	int      myBase;
+	int      myPosition;
+	int      myLimit;
+	int      myCapacity;
+	uint8_t* myData;
+	int      myMarkPos;
 
 	void copyFrom(const ByteBuffer& that);
 
@@ -57,32 +57,42 @@ public:
 	~ByteBuffer();
 	ByteBuffer(const ByteBuffer& that);
 	ByteBuffer& operator =(const ByteBuffer& that);
-
+	
 	ByteBuffer(int capacity, uint8_t* data);
 
 	bool isNull() {
 		return myData == nullptr;
 	}
 
-	// Create subrange ByteBuffer
-	ByteBuffer newBase(int newValue) const {
-		ByteBuffer ret(*this);
-		ret.setBase(newValue);
-		return ret;
-	}
-	ByteBuffer newBase() const {
-		return newBase(myPosition);
-	}
+	// // Create subrange ByteBuffer
+	// ByteBuffer newBase(int newValue) const {
+	// 	ByteBuffer ret(*this);
+	// 	ret.setBase(newValue);
+	// 	return ret;
+	// }
+	// ByteBuffer newBase() const {
+	// 	return newBase(myPosition);
+	// }
 	void setBase(int newValue) {
 		myBase     = newValue;
 		myPosition = newValue;
 		myMarkPos  = INVALID_POS;
 	}
+	void setBase() {
+		setBase(myPosition);
+	}
 
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const uint8_t* data);
 
-	std::string toString(int limit = 65536) const;
+	// output as hexadecimal string between base and limit
+	std::string toString(int offset = 0) const;
+	std::string toStringFromBase() const {
+		return toString(base());
+	}
+	std::string toStringFromPosition() const {
+		return toString(position());
+	}
 
 	int base() const {
 		return myBase;
@@ -105,6 +115,12 @@ public:
 	}
 	bool hasRemaining() const {
 		return myPosition < myLimit;
+	}
+	int length() const {
+		return myLimit - myBase;
+	}
+	bool empty() const {
+		return length() == 0;
 	}
 
 	// prepare for read buffer from beginning
@@ -154,6 +170,7 @@ public:
 		read48(myPosition, value);
 		myPosition += 6;
 	}
+
 	void read  (const int readSize, uint8_t* value) {
 		read(myPosition, readSize, value);
 		myPosition += readSize;
@@ -182,6 +199,7 @@ public:
 		write48(myPosition, value);
 		myLimit = myPosition += 6;
 	}
+
 	void write  (const int writeSize, const uint8_t* value) {
 		write(myPosition, writeSize, value);
 		myLimit = myPosition += writeSize;
@@ -192,4 +210,6 @@ public:
 	void write32(const int index, uint32_t value);
 	void write48(const int index, uint64_t value);
 	void write  (const int index, const int writeSize, const uint8_t* value);
+
+	void writeZero(int n);
 };

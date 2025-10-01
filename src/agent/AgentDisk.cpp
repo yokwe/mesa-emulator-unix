@@ -90,10 +90,10 @@ void AgentDisk::IOThread::run() {
 				ioQueue.pop_front();
 			}
 
-			if (PERF_ENABLE) time = Util::getMicroSecondsFromEpoch();
+			if (PERF_ENABLE) time = Util::getMicroSecondsSinceEpoch();
 			process(iocb, diskFile);
 			if (PERF_ENABLE) {
-				uint64_t now = Util::getMicroSecondsFromEpoch();
+				uint64_t now = Util::getMicroSecondsSinceEpoch();
 				PERF_ADD(disk, process_time, now - time)
 			}
 			interrupt_thread::notifyInterrupt(interruptSelector);

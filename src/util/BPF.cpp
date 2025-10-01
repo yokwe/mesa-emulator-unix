@@ -42,12 +42,11 @@ static const Logger logger(__FILE__);
 #include <net/bpf.h>
 #include <net/if.h>
 
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "ByteBuffer.h"
-#include "Network.h"
-
 
 #include "BPF.h"
 
@@ -82,16 +81,14 @@ void BPF::open() {
 	char tempPath[sizeof("/dev/bpf00") + 1];
 	int  tempFD;
 
-	for(int i = 0; i < 99; i++) {
+	for(int i = 0; i < 256; i++) {
 		snprintf(tempPath, sizeof(tempPath), "/dev/bpf%d", i);
-		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
-		if (tempFD < 0) {
-			int opErrno = errno;
-			LOG_ERRNO(opErrno);
-			continue;
-		}
+//		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
+		tempFD = ::open(tempPath, O_RDWR);
+		if (tempFD < 0) continue;
 		break;
 	}
+	if (tempFD <0) ERROR()
 	path       = tempPath;
 	fd         = tempFD;
 	bufferSize = getBufferSize();
@@ -104,7 +101,10 @@ void BPF::close() {
 		fd = -1;
 	}
 	delete buffer;
-	buffer = 0;
+	path.clear();
+	fd         = -1;
+	bufferSize = -1;
+	buffer     = 0;
 }
 
 const std::vector<ByteBuffer>& BPF::read() {
@@ -122,24 +122,24 @@ const std::vector<ByteBuffer>& BPF::read() {
 
 		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
-		readData.append(element);
+		readData.push_back(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);
 	}
 
 	return readData;
 }
-void BPF::write(const Network::Packet& value) {
+void BPF::write(const ByteBuffer& value) {
 	int ret;
 	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
 }
 
-// for Network::Driver
+// for net::Driver
 // no error check
 int  BPF::select  (uint32_t timeout, int& opErrno) {
 	(void)timeout;
 	opErrno = 0;
-	if (readData.isEmpty()) {
+	if (readData.empty()) {
 		int ret = getNonBlockingReadBytes();
 
 		if (ret == 0) {
@@ -159,7 +159,7 @@ int  BPF::select  (uint32_t timeout, int& opErrno) {
 
 		return ret;
 	} else {
-		return readData.first().limit();
+		return readData.front().limit();
 	}
 }
 int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
@@ -167,13 +167,13 @@ int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
 	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
 	return ret;
 }
-int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch) {
+int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch) {
 	opErrno = 0;
 	// if readData is empty, fill readData
-	if (readData.isEmpty()) read();
+	if (readData.empty()) read();
 
 	// Take first entry
-	ByteBuffer bb = readData.first();
+	ByteBuffer bb = readData.front();
 	int len = bb.limit() - bb.base();
 	if (dataLen < (uint32_t)len) {
 		logger.error("Unexpected");
@@ -239,7 +239,7 @@ void BPF::setInterface(const std::string& value) {
 	int ret;
 	struct ifreq ifr;
 	memset(&ifr, 0, sizeof(ifr));
-	::strncpy(ifr.ifr_name, TO_CSTRING(value), IFNAMSIZ - 1);
+	::strncpy(ifr.ifr_name, value.c_str(), IFNAMSIZ - 1);
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETIF, &ifr))
 }
 
@@ -275,23 +275,23 @@ void BPF::setReadFilter(const struct bpf_program* value) {
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSETFNR, value))
 }
 
-// BIOCGRSIG
+// BIOCGHDRCMPLT
 //   Sets the status of	the "header complete" flag.
 uint32_t BPF::getHeaderComplete() {
 	int ret;
 	uint32_t value;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGRSIG, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCGHDRCMPLT, &value))
 	return value;
 }
 
-// BIOCSRSIG
+// BIOCSHDRCMPLT
 //   Gets the status of	the "header complete" flag.
 //   When value is 0, source address is filled automatically
 //   When value is 1, source address is not filled automatically
 //   Default value is 0
 void BPF::setHeaderComplete(uint32_t value) {
 	int ret;
-	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSRSIG, &value))
+	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSHDRCMPLT, &value))
 }
 
 //// BIOCGDIRECTION
@@ -335,6 +335,8 @@ void BPF::setSeeSent(uint32_t value) {
 	int ret;
 	CHECK_SYSCALL(ret, ::ioctl(fd, BIOCSSEESENT, &value))
 }
+
+
 
 // FIONREAD
 //   Returns the number of bytes that are immediately available for	reading

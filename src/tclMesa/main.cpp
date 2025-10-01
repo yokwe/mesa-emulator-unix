@@ -35,12 +35,15 @@
 
 #include <filesystem>
 
+#include <tcl.h>
+#include <tclDecls.h>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include <tcl.h>
+#include "keymap.h"
 
-#include "mesa.h"
+#include "tclMesa.h"
 
 constexpr const char* PACKAGE_NAME    = "Mesa";
 constexpr const char* PACKAGE_VERSION = "1.0.";
@@ -52,9 +55,25 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
         logger.error("Tcl_PkgProvide failed");
 		return TCL_ERROR;
 	}
-	Tcl_CreateObjCommand(interp, "mesa::log", MesaLog, NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::guam", MesaGuam, NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::log",   MesaLog,   NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::guam",  MesaGuam,  NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::event", MesaEvent, NULL, NULL);
 	return TCL_OK;
+}
+
+//
+// refresh display
+//
+static void refreshDisplayTimerStart();
+static constexpr int REFRESH_INTERVAL = 100; // in milli seconds
+static void refreshDisplayTimerProc(void *) {
+	// refreshDisplay takes about 2 ms
+	refreshDisplay();
+	// create timer for next iteration
+	refreshDisplayTimerStart();
+ }
+void refreshDisplayTimerStart() {
+	Tcl_CreateTimerHandler(REFRESH_INTERVAL, refreshDisplayTimerProc, 0);
 }
 
 int AppInit(Tcl_Interp *interp) {
@@ -65,12 +84,17 @@ int AppInit(Tcl_Interp *interp) {
 
     Mesa_Init(interp);
 
-    auto scriptFile = std::filesystem::path(BUILD_DIR) / "run" / "mesa.tcl";
+	keymap::initialize();
+
+    auto scriptFile = std::filesystem::path("data/mesa.tcl");
     if (std::filesystem::exists(scriptFile)) {
         logger.info("eval  mesa scrip  %s", scriptFile.c_str());
         auto script = readFile(scriptFile);
         Tcl_Eval(interp, script.c_str());
     }
+
+	// create timer to refreash display
+	refreshDisplayTimerStart();
 
 	return TCL_OK;
 }

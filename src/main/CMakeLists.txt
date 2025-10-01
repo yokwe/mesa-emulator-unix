@@ -1,5 +1,5 @@
 #
-# man
+# main
 #
 
 add_executable (

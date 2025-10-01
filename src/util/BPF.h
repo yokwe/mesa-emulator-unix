@@ -35,34 +35,36 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <unistd.h>
 #include <sys/time.h>
 #include <net/bpf.h>
 
-
-#include "Network.h"
+#include "ByteBuffer.h"
 
 class BPF {
 public:
 	static const struct bpf_program* PROGRAM_IP;
 	static const struct bpf_program* PROGRAM_XNS;
 
-	int     fd;
+	int         fd;
 	std::string path;
-	int     bufferSize;
-	uint8_t* buffer;
+	int         bufferSize;
+	uint8_t*    buffer;
 
 	std::vector<ByteBuffer> readData;
 
-	BPF() : fd(-1), bufferSize(-1), buffer(nullptr) {}
+	BPF() : fd(-1), bufferSize(-1), buffer(0) {}
 	~BPF() { close(); }
 
 	// openDevice sets fd and path
 	void open();
 	void close();
 
-	// For Packet and ByteBuffer
-	void write(const Network::Packet& value);
+	// For ByteBuffer
+	void write(const ByteBuffer& value);
 
 	// read() returns std::vector<ByteBuffer> readData.
 	// Backing store of ByteBuffer is member variable buffer.
@@ -78,11 +80,11 @@ public:
 	const std::vector<ByteBuffer>& read();
 
 
-	// for Network::Driver
+	// for net::Driver
 	// no error check
 	int  select  (uint32_t timeout, int& opErrno);
 	int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno);
-	int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, int64_t* msecSinceEpoch = nullptr);
+	int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch = nullptr);
 	void discard ();
 
 
@@ -160,11 +162,11 @@ public:
 	// BIOCVERSION
 	//   Returns the major and	minor version numbers of the filter language
 
-	// BIOCGRSIG
+	// BIOCGHDRCMPLT
 	//   Sets the status of	the "header complete" flag.
 	uint32_t getHeaderComplete();
 
-	// BIOCSRSIG
+	// BIOCSHDRCMPLT
 	//   Gets the status of	the "header complete" flag.
 	//   When value is 0, source address is filled automatically
 	//   When value is 1, source address is not filled automatically

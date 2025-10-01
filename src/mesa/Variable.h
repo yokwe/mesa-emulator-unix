@@ -184,7 +184,7 @@ public:
     static const CARD16 MillisecondsPerTick          = cTick;
     operator CARD32() {
         PERF_COUNT(variable, IT)
-        return (CARD32)Util::getMicroSecondsFromEpoch();
+        return (CARD32)Util::getMicroSecondsSinceEpoch();
     }
 };
 
@@ -196,13 +196,13 @@ class VariableRunning {
     uint64_t now        = 0;
 public:
     void timeStart() {
-        if (PERF_ENABLE) timeChange = Util::getMicroSecondsFromEpoch();
+        if (PERF_ENABLE) timeChange = Util::getMicroSecondsSinceEpoch();
         timeEnable = true;
     }
     void timeStop() {
         timeEnable = false;
         if (PERF_ENABLE) {
-            now = Util::getMicroSecondsFromEpoch();
+            now = Util::getMicroSecondsSinceEpoch();
             if (storage) {
                 PERF_ADD(variable, time_running, (now - timeChange))
             } else {
@@ -217,7 +217,7 @@ public:
         storage = newValue;
 
         if (PERF_ENABLE) {
-            now = Util::getMicroSecondsFromEpoch();
+            now = Util::getMicroSecondsSinceEpoch();
             if (newValue) {
                 PERF_COUNT(variable, running_start)
                 if (timeEnable) PERF_ADD(variable, time_not_running, (now - timeChange))

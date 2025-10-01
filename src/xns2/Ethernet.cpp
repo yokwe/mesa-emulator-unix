@@ -29,24 +29,25 @@
  *******************************************************************************/
 
 
-//
-// keymap.h
-//
+ //
+ // Ethernet.cpp
+ //
 
-#pragma once
+ #include <cstddef>
+#include <regex>
 
-#include <string>
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include "Pilot.h"
+#include "Ethernet.h"
 
-namespace keymap {
+namespace xns::ethernet {
 
-struct LevelVKey {
-    std::string         name;
-    LevelVKeys::KeyName keyName;
-};
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
+}
 
-void initialize();
-const LevelVKey& getLevelVKey(int keySymNumber);
+UINT16 Type::XNS = Type{0x0600, "XNS"};
+UINT16 Type::IP  = Type{0x0800, "IP"};
 
 }

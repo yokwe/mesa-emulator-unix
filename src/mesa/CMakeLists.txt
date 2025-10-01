@@ -11,7 +11,6 @@ target_sources(
         display.h
         Function.h
         interrupt_thread.h
-        keymap.h
         memory.h
         MesaBasic.h
         guam.h
@@ -24,7 +23,6 @@ target_sources(
     PRIVATE
         display.cpp
         interrupt_thread.cpp
-        keymap.cpp
         memory.cpp
         guam.cpp
         Pilot.cpp

@@ -33,11 +33,9 @@
 // guam.cpp
 //
 
-#include <array>
 #include <csignal>
 #include <cstring>
 #include <thread>
-#include <map>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
@@ -49,7 +47,6 @@ static const Logger logger(__FILE__);
 #include "interrupt_thread.h"
 #include "timer_thread.h"
 #include "processor_thread.h"
-#include "keymap.h"
 #include "display.h"
 
 #include "../agent/Agent.h"
@@ -64,7 +61,6 @@ static const Logger logger(__FILE__);
 #include "../agent/AgentDisplay.h"
 
 #include "../agent/DiskFile.h"
-#include "../agent/NetworkPacket.h"
 
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
@@ -73,6 +69,8 @@ static const Logger logger(__FILE__);
 #include "../agent/StreamWWC.h"
 
 #include "../opcode/opcode.h"
+
+#include "../util/net.h"
 
 #include "guam.h"
 
@@ -83,7 +81,7 @@ Config         config;
 
 DiskFile       diskFile;
 DiskFile       floppyFile;
-NetworkPacket  networkPacket;
+net::Driver*   netDriver;
 
 // agent
 AgentDisk      disk;
@@ -239,7 +237,16 @@ static void initialize() {
 		display::initialize(displayType, config.displayWidth, config.displayHeight);
 	}
 	const display::Config& displayConfig = display::getConfig();
-	logger.info("displayConnfig  %s  %d x %d   %d pages", config.displayType, displayConfig.width, displayConfig.height, displayConfig.pageSize);
+
+	{
+		auto device = net::getDevice(config.networkInterface);
+		device.getAddress(PID[1], PID[2], PID[3]);
+		// get PID from network adapter
+		logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+
+		netDriver = net::getDriver(device);
+		netDriver->open();
+	}
 
 	//
 	// Setup Agents
@@ -259,13 +266,9 @@ static void initialize() {
 	// AgentFloppy
 	floppyFile.attach(config.floppyFilePath);
 	floppy.addDiskFile(&floppyFile);
-	// AgentNetwork use networkPacket
-	networkPacket.attach(config.networkInterface);
-	network.setNetworkPacket(&networkPacket);
-	// AgentProcessor::Initialize use PID[]
-	// get PID from network adapter
-	networkPacket.getAddress(PID[1], PID[2], PID[3]);
-	logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
+	// AgentNetwork use net::Driver
+	network.setDriver(netDriver);
+	// AgentProcessor::Initialize using PID[]
 	// set PID to AgentProcessor
 	processor.setProcessorID(PID[1], PID[2], PID[3]);
 	processor.setRealMemoryPageCount(memoryConfig.rpSize);
@@ -372,7 +375,7 @@ static void boot() {
 	ThreadControl t5("disk", f5);
 	ThreadControl t6("processor", f6);
 
-	auto timeStart = Util::getMilliSecondsFromEpoch();
+	auto timeStart = Util::getMilliSecondsSinceEpoch();
 	t1.start();
 	t2.start();
 	t3.start();
@@ -388,7 +391,7 @@ static void boot() {
 	t4.stop();
 	t5.stop();
 	t6.stop();
-	auto timeStop = Util::getMilliSecondsFromEpoch();
+	auto timeStop = Util::getMilliSecondsSinceEpoch();
 
 	elapsedTime = timeStop - timeStart;
 
@@ -399,7 +402,9 @@ static void finalize() {
 	// detach file or device
 	diskFile.detach();
 	floppyFile.detach();
-	networkPacket.detach();
+
+	netDriver->close();
+	netDriver = 0;
 
 	memory::finalize();
 }
@@ -414,57 +419,13 @@ int64_t getElapsedTime() {
     return elapsedTime;
 }
 
-
-//
-// key event
-//
-void keyPress(int number, const std::string& string) {
-	(void)string;
-	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
-	logger.info("keyPress    %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
-	auto keyName = levelVKey.keyName;
-	if (keyName != LevelVKeys::null) keyboard.keyPress(keyName);
+void keyPress   (LevelVKeys::KeyName keyName) {
+	keyboard.keyPress(keyName);
 }
-void keyRelease(int number, const std::string& string) {
-	(void)string;
-	const keymap::LevelVKey& levelVKey = keymap::getLevelVKey(number);
-	logger.info("keyRelease  %4X  %-12s  %3d %s", number, string, levelVKey.keyName, levelVKey.name);
-	auto keyName = levelVKey.keyName;
-	if (keyName != LevelVKeys::null) keyboard.keyRelease(keyName);
+void keyRelease (LevelVKeys::KeyName keyName) {
+	keyboard.keyRelease(keyName);
 }
-
-//
-// mouse event
-//
-static std::array<LevelVKeys::KeyName, 5> buttonMap = {
-	LevelVKeys::Point,
-	LevelVKeys::Adjust,
-	LevelVKeys::Menu,
-	LevelVKeys::null,
-	LevelVKeys::null,
-};
-void buttonPress(int number) {
-	LevelVKeys::KeyName keyName = buttonMap[number];
-	logger.info("buttonPress    %d  %3d", number, keyName);
-	if (keyName != LevelVKeys::null) {
-		keyboard.keyPress(keyName);
-	} else {
-		logger.error("Unexpeced mouse button  %d", number);
-		ERROR();
-	}
-}
-void buttonRelease(int number) {
-	LevelVKeys::KeyName keyName = buttonMap[number];
-	logger.info("buttonRelease  %d  %3d", number, keyName);
-	if (keyName != LevelVKeys::null) {
-		keyboard.keyRelease(keyName);
-	} else {
-		logger.error("Unexpeced mouse button  %d", number);
-		ERROR();
-	}
-}
-void motion(int x, int y) {
-//	logger.info("motion      %4d  %4d", x, y);
+void setPosition(int x, int y) {
 	mouse.setPosition(x, y);
 }
 

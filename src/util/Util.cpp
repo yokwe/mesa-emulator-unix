@@ -34,6 +34,8 @@
 //
 
 #include <filesystem>
+#include <vector>
+#include <regex>
 #include <stack>
 #include <map>
 #include <utility>
@@ -221,15 +223,31 @@ int32_t toIntMesaNumber(const std::string& string) {
 }
 
 std::string toHexString(int size, const uint8_t* data) {
-	std::stringstream ss;
-    ss << std::hex;
-
-     for(int i = 0; i < size; i++) {
-         ss << std::setw(2) << std::setfill('0') << (int)data[i];
-	 }
-
-     return ss.str();
+	std::string string;
+	for(int i = 0; i < size; i++) {
+		string += std_sprintf("%02X",data[i]);
+	}
+	return string;
 }
+std::vector<uint8_t> fromHexString(const std::string& string) {
+	// sanity check
+	static std::regex hex("^([0-9a-fA-F]{2})+$");
+	if (!std::regex_match(string, hex)) {
+		logger.error("string %s!", string);
+		ERROR()
+	}
+
+	std::vector<uint8_t> array;
+	static std::regex hex2("[0-9a-fA-F]{2}");
+	std::sregex_token_iterator begin(string.cbegin(), string.cend(), hex2, 0);
+	std::sregex_token_iterator end;
+	for(auto& i = begin; i != end; i++) {
+		uint8_t value = (uint8_t)std::stoi(i->str(), nullptr, 16);
+		array.push_back(value);
+	}
+	return array;
+}
+
 
 std::string readFile(const std::string& path) {
 	std::ifstream ifs(path.c_str());
@@ -309,15 +327,15 @@ void  Util::unmapFile(void* page) {
 }
 
 // Time stuff
-uint64_t Util::getSecondsFromEpoch() {
+uint64_t Util::getSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 }
-uint64_t Util::getMilliSecondsFromEpoch() {
+uint64_t Util::getMilliSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
-uint64_t Util::getMicroSecondsFromEpoch() {
+uint64_t Util::getMicroSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }
@@ -326,4 +344,23 @@ void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 	for(int i = 0; i < size; i++) {
 		dest[i] = std::byteswap(source[i]);
 	}
+}
+
+
+void std_vsprintf_(std::string& result, int bufferSize, const char* format, va_list ap) {
+	char* buf = (char*)alloca(bufferSize);
+	int ret = std::vsnprintf(buf, bufferSize, format, ap);
+	if (bufferSize <= ret) {
+		// failure
+		// + 1 for trailing null character
+		std_vsprintf_(result, ret + 1, format, ap);
+	} else {
+		// success
+		result += buf;
+	}
+}
+std::string std_vsprintf(const char* format, va_list ap) {
+	std::string result;
+	std_vsprintf_(result, STD_SPRINTF_DEFAULT_BUFFER_SIZE, format, ap);
+	return result;
 }

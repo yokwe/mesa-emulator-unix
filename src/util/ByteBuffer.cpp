@@ -100,8 +100,8 @@ void ByteBuffer::copyFrom(int len, const uint8_t* data) {
 	myLimit    = myBase + len;
 }
 
-std::string ByteBuffer::toString(int limit) const {
-	return toHexString(limit <= myLimit ? limit : myLimit, myData);
+std::string ByteBuffer::toString(int offset) const {
+	return toHexString(limit() - offset, data() + offset);
 }
 
 void ByteBuffer::limit(int newValue) {
@@ -112,6 +112,7 @@ void ByteBuffer::limit(int newValue) {
 		logger.error("  newValue = %5d", newValue);
 		logger.error("  base     = %5d", myBase);
 		logger.error("  capacity = %5d", myCapacity);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -134,6 +135,7 @@ void ByteBuffer::mark() {
 	} else {
 		logger.error("Unexpected");
 		logger.error("  myMarkPos = %d", myMarkPos);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -161,6 +163,7 @@ void ByteBuffer::read8(const int index, uint8_t& value) const {
 		logger.error("  index    = %5d", index);
 		logger.error("  readSize = %5d", readSize);
 		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -174,6 +177,7 @@ void ByteBuffer::read16(const int index, uint16_t& value) const {
 		logger.error("  index    = %5d", index);
 		logger.error("  readSize = %5d", readSize);
 		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -187,6 +191,7 @@ void ByteBuffer::read32(const int index, uint32_t& value) const {
 		logger.error("  index    = %5d", index);
 		logger.error("  readSize = %5d", readSize);
 		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -202,6 +207,7 @@ void ByteBuffer::read48(const int index, uint64_t& value) const {
 		logger.error("  index    = %5d", index);
 		logger.error("  readSize = %5d", readSize);
 		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -214,6 +220,7 @@ void ByteBuffer::read(const int index, const int readSize, uint8_t* value) const
 		logger.error("  index    = %5d", index);
 		logger.error("  readSize = %5d", readSize);
 		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
 		ERROR();
 	}
 }
@@ -229,6 +236,7 @@ void ByteBuffer::write8(const int index, uint8_t value) {
 		logger.error("  capacity  = %5d", myCapacity);
 		logger.error("  index     = %5d", index);
 		logger.error("  writeSize = %5d", writeSize);
+		logBackTrace();
 		ERROR();
 	}
 	uint8_t* data = myData + index;
@@ -241,6 +249,7 @@ void ByteBuffer::write16(const int index, uint16_t value) {
 		logger.error("  capacity  = %5d", myCapacity);
 		logger.error("  index     = %5d", index);
 		logger.error("  writeSize = %5d", writeSize);
+		logBackTrace();
 		ERROR();
 	}
 	uint8_t* data = myData + index;
@@ -254,6 +263,7 @@ void ByteBuffer::write32(const int index, uint32_t value) {
 		logger.error("  position = %5d", myPosition);
 		logger.error("  limit    = %5d", myLimit);
 		logger.error("  capacity = %5d", myCapacity);
+		logBackTrace();
 		ERROR();
 	}
 	uint8_t* data = myData + index;
@@ -269,6 +279,7 @@ void ByteBuffer::write48(const int index, uint64_t value) {
 		logger.error("  capacity  = %5d", myCapacity);
 		logger.error("  index     = %5d", index);
 		logger.error("  writeSize = %5d", writeSize);
+		logBackTrace();
 		ERROR();
 	}
 	uint8_t* data = myData + index;
@@ -285,10 +296,14 @@ void ByteBuffer::write(const int index, const int writeSize, const uint8_t* valu
 		logger.error("  capacity  = %5d", myCapacity);
 		logger.error("  index     = %5d", index);
 		logger.error("  writeSize = %5d", writeSize);
+		logBackTrace();
 		ERROR();
 	}
 	uint8_t* data = myData + index;
 	memcpy(data, value, writeSize);
 }
 
-
+void ByteBuffer::writeZero(int n) {
+	if (n < 0) ERROR()
+	for(int i = 0; i < n; i++) write8(0);
+}

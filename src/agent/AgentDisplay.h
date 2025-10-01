@@ -62,6 +62,7 @@ public:
 	
 private:
 	DisplayIOFaceGuam::DisplayFCBType *fcb;
+	DisplayIOFaceGuam::LookupTableEntry clt[256];
 
 	// displayMemoryAddress is usded to startingRealPage of E_MAPDISPLAY
 	// displayMemoryAddress is real memory address

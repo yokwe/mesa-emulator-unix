@@ -82,6 +82,13 @@ void initialize(CARD16 type, CARD16 width, CARD16 height) {
 	config.wordsPerLine = wordsPerLine;
 	config.wordSize     = wordSize;
 	config.pageSize     = pageSize;
+
+	logger.info("type         %6d", type);
+	logger.info("width        %6d", width);
+	logger.info("height       %6d", height);
+	logger.info("wordsPerLine %6d", wordsPerLine);
+	logger.info("wordSize     %6d", wordSize);
+	logger.info("pageSize     %6d", pageSize);
 }
 
 }

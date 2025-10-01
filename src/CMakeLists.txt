@@ -28,18 +28,14 @@ set(CMAKE_CXX_FLAGS "-Werror -Wall -Wextra -g -O2 -fPIC")
 set(CMAKE_EXE_LINKER_FLAGS "-g -rdynamic -v")
 
 # prepare data files
-configure_file(../data/log4j-config.xml.in run/log4j-config.xml @ONLY)
-configure_file(../data/setting.json.in     run/setting.json     @ONLY)
-configure_file(../data/mesa.tcl            run/mesa.tcl     COPYONLY)
-
-configure_file(../data/Dawn/Dawn.dsk       run/Dawn.dsk     COPYONLY)
-configure_file(../data/Dawn/Dawn.germ      run/Dawn.germ    COPYONLY)
-configure_file(../data/floppy/floppy144    run/floppy144    COPYONLY)
-configure_file(../data/GVWin/GVWIN.DSK     run/GVWIN.DSK    COPYONLY)
-configure_file(../data/GVWin/GVWIN.GRM     run/GVWIN.GRM    COPYONLY)
-configure_file(../data/GVWin/NSINSTLR.DAT  run/NSINSTLR.DAT COPYONLY)
-configure_file(../data/GVWin21/GVWIN21.DSK run/GVWIN21.DSK  COPYONLY)
-configure_file(../data/GVWin21/GVWIN21.GRM run/GVWIN21.GRM  COPYONLY)
+configure_file(../data/Dawn/Dawn.dsk       run/Dawn.dsk         COPYONLY)
+configure_file(../data/Dawn/Dawn.germ      run/Dawn.germ        COPYONLY)
+configure_file(../data/floppy/floppy144    run/floppy144        COPYONLY)
+configure_file(../data/GVWin/GVWIN.DSK     run/GVWIN.DSK        COPYONLY)
+configure_file(../data/GVWin/GVWIN.GRM     run/GVWIN.GRM        COPYONLY)
+configure_file(../data/GVWin/NSINSTLR.DAT  run/NSINSTLR.DAT     COPYONLY)
+configure_file(../data/GVWin21/GVWIN21.DSK run/GVWIN21.DSK      COPYONLY)
+configure_file(../data/GVWin21/GVWIN21.GRM run/GVWIN21.GRM      COPYONLY)
 
 
 # compile definition
@@ -78,3 +74,5 @@ add_subdirectory (opcode         ../build/opcode)
 add_subdirectory (test           ../build/test)
 add_subdirectory (tclMesa        ../build/tclMesa)
 add_subdirectory (util           ../build/util)
+add_subdirectory (xns2           ../build/xns)
+add_subdirectory (xnsTimeServer  ../build/xnsTimeServer)

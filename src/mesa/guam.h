@@ -37,6 +37,8 @@
 
 #include <string>
 
+#include "Pilot.h"
+
 namespace guam {
 
 struct Config {
@@ -64,10 +66,8 @@ void run(); // don't return until all child thread stopped
 
 int64_t getElapsedTime();
 
-void keyPress     (int keySymNumber, const std::string& keySymString);
-void keyRelease   (int keySymNumber, const std::string& keySymString);
-void buttonPress  (int buttonNumber);
-void buttonRelease(int buttonNumber);
-void motion       (int x, int y);
+void keyPress   (LevelVKeys::KeyName keyName);
+void keyRelease (LevelVKeys::KeyName keyName);
+void setPosition(int x, int y);
 
 }

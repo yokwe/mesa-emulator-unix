@@ -145,7 +145,7 @@ public:
 		keyMapList(that.keyMapList), mouseList(that.mouseList), buttonMapList(that.buttonMapList) {}
 
 	static Setting getInstance() {
-		return getInstance(BUILD_DIR "/run/setting.json");
+		return getInstance("data/setting.json");
 	}
 	static Setting getInstance(const std::string& path);
 	

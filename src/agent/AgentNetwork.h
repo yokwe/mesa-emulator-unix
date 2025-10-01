@@ -39,8 +39,9 @@
 #include <condition_variable>
 #include <deque>
 
+#include "../util/net.h"
+
 #include "Agent.h"
-#include "NetworkPacket.h"
 
 class AgentNetwork : public Agent {
 public:
@@ -48,20 +49,19 @@ public:
 	public:
 		static void stop();
 
-		TransmitThread() {
-			stopThread        = 0;
-			interruptSelector = 0;
-			networkPacket     = 0;
+		TransmitThread() : interruptSelector(0), driver(0) {
+			transmitQueue.clear();
 		}
 
 		void setInterruptSelector(CARD16 interruptSelector_) {
 			interruptSelector = interruptSelector_;
 		}
-		void setNetworkPacket(NetworkPacket* networkPacket_) {
-			networkPacket = networkPacket_;
+		void setDriver(net::Driver* driver_) {
+			driver = driver_;
 		}
 
 		void enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb);
+		void transmit(EthernetIOFaceGuam::EthernetIOCBType* iocb);
 
 		void run();
 		void reset();
@@ -75,14 +75,14 @@ public:
 			Item(const Item& that) : iocb(that.iocb) {}
 		};
 
-		static int        stopThread;
+		static inline int stopThread = 0;
 
-		CARD16            interruptSelector;
-		NetworkPacket*    networkPacket;
+		CARD16                  interruptSelector;
+		net::Driver*            driver;
 
-		std::mutex           transmitMutex;
-		std::condition_variable    transmitCV;
-		std::deque<Item> transmitQueue;
+		std::mutex              transmitMutex;
+		std::condition_variable transmitCV;
+		std::deque<Item>        transmitQueue;
 	};
 	class ReceiveThread {
 	public:
@@ -90,20 +90,20 @@ public:
 
 		static void stop();
 
-		ReceiveThread() {
-			stopThread        = 0;
-			interruptSelector = 0;
-			networkPacket     = 0;
+		ReceiveThread() : interruptSelector(0), driver(0) {
+			receiveQueue.clear();
 		}
 
 		void setInterruptSelector(CARD16 interruptSelector_) {
 			interruptSelector = interruptSelector_;
 		}
-		void setNetworkPacket(NetworkPacket* networkPacket_) {
-			networkPacket = networkPacket_;
+		void setDriver(net::Driver* driver_) {
+			driver = driver_;
 		}
 
 		void enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb);
+		void receive(EthernetIOFaceGuam::EthernetIOCBType* iocb);
+		void discardOnePacket();
 
 		void run();
 		void reset();
@@ -121,10 +121,10 @@ public:
 //			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
 		};
 
-		static int        stopThread;
+		static inline int stopThread = 0;
 
-		CARD16            interruptSelector;
-		NetworkPacket*    networkPacket;
+		CARD16           interruptSelector;
+		net::Driver*     driver;
 
 		std::mutex       receiveMutex;
 		std::deque<Item> receiveQueue;
@@ -136,21 +136,18 @@ public:
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::network;
 	static const inline auto name_ = "Network";
 	static const inline auto fcbSize_ = SIZE(EthernetIOFaceGuam::EthernetFCBType);
-	AgentNetwork() : Agent(index_, name_, fcbSize_) {
-		fcb = 0;
-		networkPacket = 0;
-	}
+	AgentNetwork() : Agent(index_, name_, fcbSize_), fcb(0), driver(0) {}
 
 	void Initialize();
 	void Call();
 
 	void poll();
 
-	void setNetworkPacket(NetworkPacket* networkPacket_) {
-		networkPacket = networkPacket_;
+	void setDriver(net::Driver* driver_) {
+		driver = driver_;
 	}
 
 private:
 	EthernetIOFaceGuam::EthernetFCBType* fcb;
-	NetworkPacket*                       networkPacket;
+	net::Driver*                         driver;
 };

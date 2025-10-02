@@ -63,7 +63,7 @@ int main(int, char **) {
     {
         for(const auto& e: config.host) {
             (void)xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
-            logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address), xns::host::toDecimalString(e.address), e.name);
+            logger.info("config host  %s  %s  %s", net::toHexaDecimalString(e.address), net::toDecimalString(e.address), e.name);
         }
         for(const auto& e: config.net) {
             Routing routing = Routing(e.net, e.delay, e.name);
@@ -73,8 +73,8 @@ int main(int, char **) {
     }
 
     context = Context(config);
-	logger.info("device  %s  %s", context.driver->device.name, xns::host::toHexaDecimalString(context.driver->device.address));
-	logger.info("ME      %s", xns::host::toHexaDecimalString(context.ME));
+	logger.info("device  %s  %s", context.driver->device.name, net::toHexaDecimalString(context.driver->device.address));
+	logger.info("ME      %s", net::toHexaDecimalString(context.ME));
 	logger.info("NET     %d", context.NET);
 
     auto& driver = *context.driver;

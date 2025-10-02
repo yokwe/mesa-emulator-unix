@@ -41,7 +41,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "Ethernet.h"
+#include "../util/net.h"
+
 #include "Config.h"
 
 using json = nlohmann::json;
@@ -53,7 +54,7 @@ namespace xns::config {
 void from_json(const json& j, Server& p) {
 	simple(interface)
     std::string string = j.at("address");
-    p.address = xns::host::fromString(string);
+    p.address = net::fromString(string);
 	simple(net)
 }
 void from_json(const json& j, Net& p) {
@@ -65,7 +66,7 @@ void from_json(const json& j, Host& p) {
 	simple(name)
 
     std::string string = j.at("address");
-    p.address = xns::host::fromString(string);
+    p.address = net::fromString(string);
 }
 void from_json(const json& j, Time& p) {
 	simple(offsetDirection)

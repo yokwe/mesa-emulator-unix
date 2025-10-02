@@ -107,12 +107,12 @@ public:
         logger.info("bpf.bufferSize = %d", bpf.bufferSize);
 
         bpf.setInterface(device.name);
-        bpf.setPromiscuous();
-        bpf.setImmediate(1);
-        bpf.setHeaderComplete(1);
-        bpf.setReadTimeout(1);
-//        bpf.setReadFilter(::BPF::PROGRAM_IP);
-        bpf.setReadFilter(::BPF::PROGRAM_XNS);
+        bpf.setPromiscuous();                         // need to promiscuos mode to see all packet
+        bpf.setImmediate(1);                   // don't wait unitl read buffer full
+        bpf.setHeaderComplete(1);              // need to set 1 for custom source address
+        bpf.setReadTimeout(1);               // read time out in unit of secod
+//        bpf.setReadFilter(::BPF::PROGRAM_IP);  // receive only IPv4 packet
+        bpf.setReadFilter(::BPF::PROGRAM_XNS); // receive only XNS packet
 
         logger.info("bufferSize     = %d", bpf.getBufferSize());
         logger.info("seeSent        = %d", bpf.getSeeSent());

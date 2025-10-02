@@ -47,6 +47,11 @@ class Type : public UINT16 {
 public:
     Type() : UINT16() {}
 
+    uint16_t operator = (uint16_t that) {
+        UINT16::operator =(that);
+        return that;
+    }
+
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
@@ -57,6 +62,8 @@ public:
 
 struct Echo {
     Type  type;
+
+    Echo() {}
 
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb) {
@@ -69,7 +76,11 @@ struct Echo {
     }
 
     Echo(ByteBuffer& bb) {
-        this->fromByteBuffer(bb);
+        type.fromByteBuffer(bb);
+    }
+
+    Echo(uint16_t type_) {
+        type = type_;
     }
 };
 

@@ -47,6 +47,11 @@ class Type : public UINT16 {
 public:
     Type() : UINT16() {}
 
+    uint16_t operator = (uint16_t that) {
+        UINT16::operator =(that);
+        return that;
+    }
+
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
     }
@@ -59,6 +64,14 @@ class Delay : public UINT16 {
     Delay(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
 public:
     Delay() : UINT16() {}
+    Delay(uint16_t value_) : UINT16() {
+        value = value_;
+    }
+
+    uint16_t operator = (uint16_t that) {
+        UINT16::operator =(that);
+        return that;
+    }
 
     void fromByteBuffer(ByteBuffer& bb) {
         fromByteBufferGroup(group, bb);
@@ -70,6 +83,14 @@ public:
 struct NetDelay {
     Net   net;
     Delay delay;
+
+    NetDelay(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
+    NetDelay(uint32_t net_, uint16_t delay_) {
+        net = net_;
+        delay = delay_;
+    }
 
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb) {

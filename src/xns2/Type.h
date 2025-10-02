@@ -576,7 +576,10 @@ class Net : public UINT32 {
     static inline const char* group = "xns::idp::Net";
 public:
     Net(uint32_t value_, const char* name_) : UINT32(group, value_, name_) {}
-    Net() : UINT32("%8X") {}
+    Net() : UINT32("%d") {}
+    Net(uint32_t value_) : UINT32() {
+        value = value_;
+    }
 
     uint32_t operator = (uint32_t that) {
         UINT32::operator =(that);

@@ -36,11 +36,39 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../xns2/RIP.h"
+
 #include "Server.h"
 
+using namespace xns::rip;
+
 void processRIP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)rx;
-    (void)tx;
-    (void)context;
-    logger.info("%s", __FUNCTION__);
+    // build receive
+    RIP receive;
+    receive.fromByteBuffer(rx);
+    logger.info("RiP  %s  %d", -receive.type, receive.table.size());
+    for(auto& e: receive.table) {
+        logger.info("     %s  %s", -e.net, -e.delay);
+    }
+
+    if (receive.type != Type::REQUEST) {
+        logger.warn("Unexpected type  %s", -receive.type);
+        return;       
+    }
+
+    // build transmit
+    RIP transmit;
+    transmit.type = Type::RESPONSE;
+
+    for(auto e: context.config.net) {
+        NetDelay netDelay(e.net, e.delay);
+        transmit.table.push_back(netDelay);
+    }
+    logger.info("RiP  %s  %d", -transmit.type, transmit.table.size());
+    for(auto& e: transmit.table) {
+        logger.info("     !%s!  !%s", -e.net, -e.delay);
+    }
+
+    // write to tx
+    transmit.toByteBuffer(tx);
 }

@@ -89,4 +89,10 @@ std::vector<Device> getDeviceList();
 Device  getDevice(const std::string& name);
 Driver* getDriver(const Device& device);
 
+std::string toOctalString(uint64_t address);
+std::string toDecimalString(uint64_t address);
+std::string toHexaDecimalString(uint64_t address, const std::string& sep = "-");
+
+uint64_t fromString(const std::string& string);
+
 }

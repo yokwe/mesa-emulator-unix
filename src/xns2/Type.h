@@ -590,12 +590,4 @@ public:
     static UINT32 UNKNOWN;
 };
 
-namespace host {
-    std::string toOctalString(uint64_t value);
-    std::string toDecimalString(uint64_t value);
-    std::string toHexaDecimalString(uint64_t value, const std::string& sep = "-");
-
-    uint64_t fromString(const std::string& string);
-}
-
 }

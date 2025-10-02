@@ -105,9 +105,6 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     xns::idp::IDP transmit;
     // build transmit
     {
-        // make data length even
-        if (payload.length() % 1) payload.writeZero(1);
-
         transmit.checksum  = 0;
         transmit.length    = payload.length();
         transmit.control   = 0;
@@ -118,11 +115,15 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         transmit.srcNet    = context.NET;
         transmit.srcHost   = context.ME;
         transmit.srcSocket = receive.dstSocket;
+    }
 
-        // write to tx
+    // write to tx
+    {
         int base = tx.position();
         transmit.toByteBuffer(tx);
         tx.write(payload.limit(), payload.data());
+        // make packet length even
+        if (tx.limit() % 1) tx.writeZero(1);
 
         // update checksum
         uint16_t checksum = xns::idp::computeChecksum(tx, base);

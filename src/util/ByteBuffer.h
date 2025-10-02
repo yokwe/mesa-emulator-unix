@@ -44,9 +44,9 @@ protected:
 	static constexpr int INVALID_POS = -1;
 
 	int      myBase;
-	int      myPosition;
-	int      myLimit;
-	int      myCapacity;
+	int      myPosition;  // read/write offset
+	int      myLimit;     // maximu written offset
+	int      myCapacity;  // size of myData
 	uint8_t* myData;
 	int      myMarkPos;
 
@@ -58,6 +58,8 @@ public:
 	ByteBuffer(const ByteBuffer& that);
 	ByteBuffer& operator =(const ByteBuffer& that);
 	
+	// assume data[0..capacity) has meaningful value
+	// you can read from this ByteBuffer
 	ByteBuffer(int capacity, uint8_t* data);
 
 	bool isNull() {
@@ -78,9 +80,9 @@ public:
 		myPosition = newValue;
 		myMarkPos  = INVALID_POS;
 	}
-	void setBase() {
-		setBase(myPosition);
-	}
+	// void setBase() {
+	// 	setBase(myPosition);
+	// }
 
 	// copy from data to ByteBuffer
 	void copyFrom(int len, const uint8_t* data);
@@ -110,12 +112,14 @@ public:
 		return myData;
 	}
 
+	// returns how many bytes can read
 	int remaining() const {
 		return myLimit - myPosition;
 	}
 	bool hasRemaining() const {
 		return myPosition < myLimit;
 	}
+	// returns size of written data
 	int length() const {
 		return myLimit - myBase;
 	}
@@ -123,7 +127,7 @@ public:
 		return length() == 0;
 	}
 
-	// prepare for read buffer from beginning
+	// prepare for read bufer from beginning
 	void rewind() {
 		myPosition = myBase;
 	}

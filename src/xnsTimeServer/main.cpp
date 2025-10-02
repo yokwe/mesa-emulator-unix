@@ -56,11 +56,22 @@ Context context;
 int main(int, char **) {
 	logger.info("START");
 
+    setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
+
 //    xns::dumpFormatList();
     auto config = xns::config::Config::getInstance();
     logger.info("config network interface  %s", config.server.interface);
     // register constant of host and net from config
     {
+        {
+            auto address = config.server.address;
+            auto name = config.server.name;
+            (void)xns::Host(address, name.c_str()); // regist host name of xns::Host
+            logger.info("config host  %s  %s  %s", net::toHexaDecimalString(address), net::toDecimalString(address), name);
+        }
         for(const auto& e: config.host) {
             (void)xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
             logger.info("config host  %s  %s  %s", net::toHexaDecimalString(e.address), net::toDecimalString(e.address), e.name);

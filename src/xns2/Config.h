@@ -42,6 +42,7 @@ namespace xns::config {
 
 struct Server {
     std::string interface;
+    std::string name;
     uint64_t    address;
     uint32_t    net;
 };

@@ -50,7 +50,7 @@ void initialize() {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void Type::TypeConstantMap::initialize() {
+void Type::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Type, XNS,  0x0600)
     DECL_CLASS_CONSTANT(Type, IP ,  0x0800)
 }

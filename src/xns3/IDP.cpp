@@ -49,10 +49,10 @@ void initialize() {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void Checksum::ChecksumConstantMap::initialize() {
+void Checksum::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Checksum, NOCHECK,  0xFFFF)
 }
-void Type::TypeConstantMap::initialize() {
+void Type::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Type, RIP,    1)
     DECL_CLASS_CONSTANT(Type, ECHO,   2)
     DECL_CLASS_CONSTANT(Type, ERROR_, 3)
@@ -60,7 +60,7 @@ void Type::TypeConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Type, SPP,    5)
     DECL_CLASS_CONSTANT(Type, BOOT,   6)
 }
-void Socket::SocketConstantMap::initialize() {
+void Socket::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Socket, RIP,       1)
     DECL_CLASS_CONSTANT(Socket, ECHO,      2)
     DECL_CLASS_CONSTANT(Socket, ERROR_,    3)

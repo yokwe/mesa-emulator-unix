@@ -47,8 +47,8 @@ void initialize() {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void Type::TypeConstantMap::initialize() {
-    DECL_CLASS_CONSTANT(Type, Request,  1)
+void Type::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
     DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 }
 

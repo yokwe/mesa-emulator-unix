@@ -76,14 +76,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class ErrorNumberConstantMap: public ConstantMap<T> {
-        ErrorNumberConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static ErrorNumberConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 

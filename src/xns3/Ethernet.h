@@ -57,14 +57,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 struct Frame : Base {

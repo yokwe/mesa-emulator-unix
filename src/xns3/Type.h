@@ -294,14 +294,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class HostConstantMap: public ConstantMap<T> {
-        HostConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static HostConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 //
@@ -323,14 +323,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class NetConstantMap: public ConstantMap<T> {
-        NetConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static NetConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 }

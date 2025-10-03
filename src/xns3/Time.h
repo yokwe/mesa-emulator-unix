@@ -56,14 +56,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class VersionConstantMap: public ConstantMap<T> {
-        VersionConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static VersionConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 
@@ -73,7 +73,7 @@ class Type {
 public:
     using T = uint16_t;
 
-    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
     DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 
     static std::string toString(T value) {
@@ -83,14 +83,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 class Direction {
@@ -109,14 +109,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class DirectionConstantMap: public ConstantMap<T> {
-        DirectionConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static DirectionConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 class Tolerance {
@@ -135,20 +135,24 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class ToleranceConstantMap: public ConstantMap<T> {
-        ToleranceConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static ToleranceConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 
 struct Request : Base {
     uint16_t   version; // Version
     uint16_t   type;    // Type
+
+    Request(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
 
     std::string toString() const {
         return std_sprintf("{%s  %s}", Version::toString(version), Type::toString(type));
@@ -181,8 +185,9 @@ struct Response : Base {
     uint32_t toleranceValue;   // supposed time error in unit of millisecond
 
     std::string toString() const {
-        std::string timeString = toStringLocalTime(time);
-        return std_sprintf("{%s  %s  %s  %s  %d:%d  %d-%d  %s-%d}",
+        uint32_t unixTime = Util::toUnixTime(time);
+        std::string timeString = toStringLocalTime(unixTime);
+        return std_sprintf("{%s  %s  %s  %s  %dh%dm  %d-%d  %s-%d}",
             Version::toString(version), Type::toString(type), timeString,
             Direction::toString(offsetDirection), offsetHours, offsetMinutes, dstStart, dstEnd,
             Tolerance::toString(tolerance), toleranceValue);

@@ -52,7 +52,7 @@ class Type {
 public:
     using T = uint16_t;
 
-    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
     DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 
     static std::string toString(T value) {
@@ -62,14 +62,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 

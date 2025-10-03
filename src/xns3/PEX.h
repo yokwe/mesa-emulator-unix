@@ -43,7 +43,7 @@ void initialize();
 
 class Type {
     Type() = delete;
-    inline static const char* FORMAT = "%d";
+    inline static const char* FORMAT = "%04X";
 public:
     using T = uint16_t;
 
@@ -59,18 +59,18 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 struct PEX : Base {
-    uint16_t   id;
+    uint32_t   id;
     uint16_t   type;
 
     PEX() {}
@@ -82,11 +82,11 @@ struct PEX : Base {
         return std_sprintf("{%04X  %s}", id, Type::toString(type));
     }
     void fromByteBuffer(ByteBuffer& bb) {
-        bb.read16(id);
+        bb.read32(id);
         bb.read16(type);
     }
     void toByteBuffer(ByteBuffer& bb) const {
-        bb.write16(id);
+        bb.write32(id);
         bb.write16(type);
     }
 };

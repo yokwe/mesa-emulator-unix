@@ -104,13 +104,13 @@ void STRING::toByteBuffer  (ByteBuffer& bb) const {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void Host::HostConstantMap::initialize() {
+void Host::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Host, BROADCAST, 0xFFFF'FFFF'FFFF)
     DECL_CLASS_CONSTANT(Host, UNKNOWN,   0x0000'0000'0000)
     DECL_CLASS_CONSTANT(Host, BFN_GVWIN, 0x0000'aa00'0e60)
 }
 
-void Net::NetConstantMap::initialize() {
+void Net::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Net, ALL,     0xFFFF'FFFF)
     DECL_CLASS_CONSTANT(Net, UNKNOWN, 0x0000'0000)
 }

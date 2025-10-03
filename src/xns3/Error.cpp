@@ -47,7 +47,7 @@ void initialize() {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void ErrorNumber::ErrorNumberConstantMap::initialize() {
+void ErrorNumber::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(ErrorNumber, UNSPEC,               0)
     DECL_CLASS_CONSTANT(ErrorNumber, BAD_CHECKSUM,         1)
     DECL_CLASS_CONSTANT(ErrorNumber, NO_SOCKET,            2)

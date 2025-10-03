@@ -56,14 +56,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class ChecksumConstantMap: public ConstantMap<T> {
-        ChecksumConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static ChecksumConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 class Type {
@@ -86,14 +86,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 class Socket {
@@ -130,14 +130,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class SocketConstantMap: public ConstantMap<T> {
-        SocketConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static SocketConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne);
@@ -169,7 +169,7 @@ struct IDP : Base {
     std::string toString() const {
         auto dst = std_sprintf("%s-%s-%s", Net::toString(dstNet), Host::toString(dstHost), Socket::toString(dstSocket));
         auto src = std_sprintf("%s-%s-%s", Net::toString(srcNet), Host::toString(srcHost), Socket::toString(srcSocket));
-       return std_sprintf("{%s  %s  %s  %s  %-22s  %-22s}",
+       return std_sprintf("{%s  %d  %d  %s  %s  %s}",
             Checksum::toString(checksum), length, control, Type::toString(type), dst, src);
     }
     void fromByteBuffer(ByteBuffer& bb) {

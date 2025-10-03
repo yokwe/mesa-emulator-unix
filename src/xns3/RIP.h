@@ -47,7 +47,7 @@ class Type {
 public:
     using T = uint16_t;
 
-    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
     DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 
     static std::string toString(T value) {
@@ -57,14 +57,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class TypeConstantMap: public ConstantMap<T> {
-        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static TypeConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 class Delay {
@@ -82,14 +82,14 @@ public:
         constantMap.registerName(value, name);
     }
 private:
-    class DelayConstantMap: public ConstantMap<T> {
-        DelayConstantMap() : ConstantMap<T>(FORMAT) {
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
             initialize();
         }
         void initialize();
     };
 
-    static DelayConstantMap constantMap;
+    static inline MyConstantMap constantMap;
 };
 
 struct NetDelay : Base {
@@ -124,7 +124,7 @@ struct RIP : Base {
     uint16_t              type;  // Type
     std::vector<NetDelay> table;
 
-    std::string toStrign() const {
+    std::string toString() const {
         std::string string;
         for(const auto& e: table) {
             string += std_sprintf(" %s", e.toString());

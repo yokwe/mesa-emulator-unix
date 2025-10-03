@@ -56,18 +56,18 @@ std::string toStringLocalTime(const uint32_t time) {
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-void Version::VersionConstantMap::initialize() {
+void Version::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Version, CURRENT, 2)
 }
-void Type::TypeConstantMap::initialize() {
-    DECL_CLASS_CONSTANT(Type, Request,  1)
+void Type::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
     DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 }
-void Direction::DirectionConstantMap::initialize() {
+void Direction::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Direction, WEST, 0)
     DECL_CLASS_CONSTANT(Direction, EAST, 1)
 }
-void Tolerance::ToleranceConstantMap::initialize() {
+void Tolerance::MyConstantMap::initialize() {
     DECL_CLASS_CONSTANT(Tolerance, UNKNOWN, 0)
     DECL_CLASS_CONSTANT(Tolerance, KNOWN  , 1)
 }

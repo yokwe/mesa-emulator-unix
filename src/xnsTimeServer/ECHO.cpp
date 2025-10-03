@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/Echo.h"
+#include "../xns3/Echo.h"
 
 #include "../util/EthernetPacket.h"
 
@@ -46,7 +46,7 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     (void)context;
     // build receive
     xns::echo::Echo receive(rx);
-    logger.info("ECHO %s  %d", -receive.type, rx.remaining());
+    logger.info("ECHO >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
     if (receive.type != xns::echo::Type::REQUEST) {
         logger.warn("Unexpected type  %s", -receive.type);
@@ -70,4 +70,5 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     // write to tx
     transmit.toByteBuffer(tx);
     tx.write(payload.limit(), payload.data());
+    logger.info("ECHO <<  %s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
 }

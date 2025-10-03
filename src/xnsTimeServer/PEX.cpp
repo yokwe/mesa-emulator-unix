@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/PEX.h"
+#include "../xns3/PEX.h"
 
 #include "../util/EthernetPacket.h"
 
@@ -44,11 +44,11 @@ static const Logger logger(__FILE__);
 
 void processPEX(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     (void)tx; (void)context;
-    logger.info("remaining  %d", rx.remaining());
+//    logger.info("remaining  %d", rx.remaining());
 
     // build receive
     xns::pex::PEX receive(rx);
-    logger.info("PEX  %s  %s  %d  %s", -receive.id, -receive.type, rx.remaining(), rx.toStringFromPosition());
+    logger.info("PEX  >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
     EthernetPacket payload;
     if (receive.type == xns::pex::Type::UNSPEC) {
@@ -64,9 +64,11 @@ void processPEX(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
 
     }
     payload.flip();
-    logger.info("payload  length  %d", payload.length());
-    if (payload.empty()) return;
-
+    // logger.info("payload  length  %d", payload.length());
+    if (payload.empty()) {
+        logger.info("REJECT");
+        return;
+    }
     xns::pex::PEX transmit;
     {
         transmit.id  = receive.id;
@@ -74,4 +76,5 @@ void processPEX(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     }
     transmit.toByteBuffer(tx);
     tx.write(payload.limit(), payload.data());
+    logger.info("PEX  <<  %s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
 }

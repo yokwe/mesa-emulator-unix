@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/IDP.h"
+#include "../xns3/IDP.h"
 
 #include "../util/EthernetPacket.h"
 
@@ -54,7 +54,7 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
 //        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
 
         // FIX length using value of length field
-        if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
+        if (receive.length < xns::idp::IDP::HEADER_LENGTH) {
             logger.error("wrong length  %d", +receive.length);
             ERROR();
         }
@@ -62,13 +62,7 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         rx.limit(newLimit);
 //        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
  
-        {
-            auto dst = std_sprintf("%s-%s-%s", -receive.dstNet, -receive.dstHost, -receive.dstSocket);
-            auto src = std_sprintf("%s-%s-%s", -receive.srcNet, -receive.srcHost, -receive.srcSocket);
-            logger.info("IDP %s  %s  %s  %s  %-22s  %-22s  %d  %s",
-                -receive.checksum, -receive.length, -receive.control, -receive.type,
-                dst, src, rx.remaining(), rx.toStringFromPosition());
-        }
+        logger.info("IDP  >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
         // check checksum
         if (receive.checksum != xns::idp::Checksum::NOCHECK) {
@@ -99,14 +93,16 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         processSPP(rx, payload, context);
     }
     payload.flip();
-    logger.info("payload  length  %d", payload.length());
-    if (payload.empty()) return;
-
+    // logger.info("payload  length  %d", payload.length());
+    if (payload.empty()) {
+        logger.info("REJECT");
+        return;
+    }
     xns::idp::IDP transmit;
     // build transmit
     {
         transmit.checksum  = 0;
-        transmit.length    = payload.length();
+        transmit.length    = xns::idp::IDP::HEADER_LENGTH + payload.length();
         transmit.control   = 0;
         transmit.type      = receive.type;
         transmit.dstNet    = receive.srcNet;
@@ -123,10 +119,15 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         transmit.toByteBuffer(tx);
         tx.write(payload.limit(), payload.data());
         // make packet length even
-        if (tx.limit() % 1) tx.writeZero(1);
-
+        if (tx.limit() % 1) {
+            tx.writeZero(1);
+            transmit.length += 1;
+        }
         // update checksum
         uint16_t checksum = xns::idp::computeChecksum(tx, base);
         tx.write16(base, checksum);
+        transmit.checksum = checksum;
     }
+    logger.info("IDP  <<  %s  (%d) %s", transmit.toString(), payload.remaining(), payload.toStringFromPosition());
+
 }

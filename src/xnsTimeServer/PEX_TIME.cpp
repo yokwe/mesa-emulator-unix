@@ -36,14 +36,14 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/Time.h"
+#include "../xns3/Time.h"
 
 #include "Server.h"
 
 void processPEX_TIME(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     // build receive
     xns::time::Request receive(rx);
-    logger.info("TIME %s  %s", -receive.version, -receive.type);
+    logger.info("TIME >>  %s", receive.toString());
 
     if (receive.version != xns::time::Version::CURRENT) {
         logger.warn("Unexpected version  %s", -receive.version);
@@ -67,4 +67,6 @@ void processPEX_TIME(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     transmit.tolerance        = +xns::time::Tolerance::KNOWN;
     transmit.toleranceValue   = 10;
     transmit.toByteBuffer(tx);
+
+    logger.info("TIME <<  %s", transmit.toString());
 }

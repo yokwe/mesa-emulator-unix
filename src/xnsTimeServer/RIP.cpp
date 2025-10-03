@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/RIP.h"
+#include "../xns3/RIP.h"
 
 #include "Server.h"
 
@@ -46,10 +46,7 @@ void processRIP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     // build receive
     RIP receive;
     receive.fromByteBuffer(rx);
-    logger.info("RiP  %s  %d", -receive.type, receive.table.size());
-    for(auto& e: receive.table) {
-        logger.info("     %s  %s", -e.net, -e.delay);
-    }
+    logger.info("RIP  >>  %s", receive.toString());
 
     if (receive.type != Type::REQUEST) {
         logger.warn("Unexpected type  %s", -receive.type);
@@ -64,10 +61,7 @@ void processRIP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         NetDelay netDelay(e.net, e.delay);
         transmit.table.push_back(netDelay);
     }
-    logger.info("RiP  %s  %d", -transmit.type, transmit.table.size());
-    for(auto& e: transmit.table) {
-        logger.info("     !%s!  !%s", -e.net, -e.delay);
-    }
+    logger.info("RiP  <<  %s", transmit.toString());
 
     // write to tx
     transmit.toByteBuffer(tx);

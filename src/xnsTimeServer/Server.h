@@ -38,7 +38,7 @@
 #include <string>
 #include <map>
 
-#include "../xns2/Config.h"
+#include "../xns3/Config.h"
 #include "../util/net.h"
 
 

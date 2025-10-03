@@ -56,15 +56,15 @@ void processPEX_TIME(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
 
     // build transmit
     xns::time::Response transmit;
-    transmit.version          = +xns::time::Version::CURRENT;
-    transmit.type             = +xns::time::Type::RESPONSE;
+    transmit.version          = xns::time::Version::CURRENT;
+    transmit.type             = xns::time::Type::RESPONSE;
     transmit.time             = Util::getMesaTime();
-    transmit.offsetDirection  = +context.config.time.offsetDirection;
+    transmit.offsetDirection  = context.config.time.offsetDirection;
     transmit.offsetHours      = context.config.time.offsetHours;
     transmit.offsetMinutes    = context.config.time.offsetMinutes;
     transmit.dstStart         = context.config.time.dstStart;
     transmit.dstEnd           = context.config.time.dstEnd;
-    transmit.tolerance        = +xns::time::Tolerance::KNOWN;
+    transmit.tolerance        = xns::time::Tolerance::KNOWN;
     transmit.toleranceValue   = 10;
     transmit.toByteBuffer(tx);
 

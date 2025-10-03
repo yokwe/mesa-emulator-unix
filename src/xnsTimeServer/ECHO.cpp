@@ -65,7 +65,7 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     }
 
     // build transmit
-    xns::echo::Echo transmit(+xns::echo::Type::RESPONSE);
+    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
 
     // write to tx
     transmit.toByteBuffer(tx);

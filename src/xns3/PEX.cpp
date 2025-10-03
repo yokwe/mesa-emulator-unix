@@ -44,9 +44,14 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
-UINT16 Type::UNSPEC     = Type(0, "UNSPEC");
-UINT16 Type::TIME       = Type(1, "TIME");
-UINT16 Type::CHS        = Type(2, "CHS");
-UINT16 Type::TELEDEBUG  = Type(8, "TELEDEBUG");
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
+
+void Type::TypeConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, UNSPEC,    0)
+    DECL_CLASS_CONSTANT(Type, TIME,      1)
+    DECL_CLASS_CONSTANT(Type, CHS,       2)
+    DECL_CLASS_CONSTANT(Type, TELEDEBUG, 8)
+}
 
 }

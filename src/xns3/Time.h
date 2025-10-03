@@ -41,114 +41,177 @@ namespace xns::time {
 
 void initialize();
 
-class Version : public UINT16 {
-    static inline const char* group = "xns::time::Version";
-    Version(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Version {
+    Version() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Version() : UINT16() {}
-    
-    uint16_t operator =(uint16_t that) {
-        this->value = that;
-        return that;
-    }
+    using T = uint16_t;
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    DECL_CLASS_CONSTANT(Type, CURRENT,  2)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    static UINT16 CURRENT;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class VersionConstantMap: public ConstantMap<T> {
+        VersionConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static VersionConstantMap constantMap;
 };
 
-class Type : public UINT16 {
-    static inline const char* group = "xns::time::Type";
-    Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Type() : UINT16() {}
+    using T = uint16_t;
 
-    uint16_t operator =(uint16_t that) {
-        this->value = that;
-        return that;
-    }
+    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    
-    static UINT16 REQUEST;
-    static UINT16 RESPONSE;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class TypeConstantMap: public ConstantMap<T> {
+        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static TypeConstantMap constantMap;
 };
 
-class Direction : public UINT16 {
-    static inline const char* group = "xns::time::Direction";
-    Direction(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Direction {
+    Direction() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Direction() : UINT16() {}
+    using T = uint16_t;
 
-    uint16_t operator =(uint16_t that) {
-        this->value = that;
-        return that;
+    DECL_CLASS_CONSTANT(Direction, WEST, 0)
+    DECL_CLASS_CONSTANT(Direction, EAST, 1)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
     }
+private:
+    class DirectionConstantMap: public ConstantMap<T> {
+        DirectionConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
 
-    static UINT16 WEST;
-    static UINT16 EAST;
+    static DirectionConstantMap constantMap;
 };
 
-class Tolerance : public UINT16 {
-    static inline const char* group = "xns::time::Tolerance";
-    Tolerance(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Tolerance {
+    Tolerance() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Tolerance() : UINT16() {}
-    
-    uint16_t operator =(uint16_t that) {
-        this->value = that;
-        return that;
+    using T = uint16_t;
+
+    DECL_CLASS_CONSTANT(Tolerance, UNKNOWN, 0)
+    DECL_CLASS_CONSTANT(Tolerance, KNOWN,   1)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
+    }
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class ToleranceConstantMap: public ConstantMap<T> {
+        ToleranceConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static ToleranceConstantMap constantMap;
+};
+
+
+struct Request : Base {
+    uint16_t   version; // Version
+    uint16_t   type;    // Type
+
+    std::string toString() const {
+        return std_sprintf("{%s  %s}", Version::toString(version), Type::toString(type));
     }
 
+    // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+        bb.read16(version);
+        bb.read16(type);
     }
-
-    static UINT16 UNKNOWN; // 0
-    static UINT16 KNOWN;   // 1
-};
-
-
-struct Request {
-    Version   version;
-    Type      type;
-
-    Request(ByteBuffer& bb) {
-        version.fromByteBuffer(bb);
-        type.fromByteBuffer(bb);
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write16(version);
+        bb.write16(type);
     }
 };
 
-struct Response {
-    Version   version;
-    Type      type;
-    UINT32    time;             // current time between 12:00:00, 1 Jan. 1968 and 6:28:23, 6 Feb. 2104 inclusive
-    Direction offsetDirection;  // east or west of prime meridian
-    UINT16    offsetHours;
-    UINT16    offsetMinutes;
-    UINT16    dstStart;         // 0 for no DST
-    UINT16    dstEnd;           // 0 for no DST
-    Tolerance tolerance;        // 0 for UNKNOWN  1 for KNOWN
-    UINT32    toleranceValue;   // supposed time error in unit of millisecond
+std::string toStringLocalTime(uint32_t time);
 
-    void toByteBuffer(ByteBuffer& bb) {
-        version.toByteBuffer(bb);
-        type.toByteBuffer(bb);
-        time.toByteBuffer(bb);
-        offsetDirection.toByteBuffer(bb);
-        offsetHours.toByteBuffer(bb);
-        offsetMinutes.toByteBuffer(bb);
-        dstStart.toByteBuffer(bb);
-        dstEnd.toByteBuffer(bb);
-        tolerance.toByteBuffer(bb);
-        toleranceValue.toByteBuffer(bb);
+struct Response : Base {
+    uint16_t version;          // Version
+    uint16_t type;             // Type
+    uint32_t time;             // current time between 12:00:00, 1 Jan. 1968 and 6:28:23, 6 Feb. 2104 inclusive
+    uint16_t offsetDirection;  // Direction
+    uint16_t offsetHours;
+    uint16_t offsetMinutes;
+    uint16_t dstStart;         // 0 for no DST
+    uint16_t dstEnd;           // 0 for no DST
+    uint16_t tolerance;        // 0 for UNKNOWN  1 for KNOWN
+    uint32_t toleranceValue;   // supposed time error in unit of millisecond
+
+    std::string toString() const {
+        std::string timeString = toStringLocalTime(time);
+        return std_sprintf("{%s  %s  %s  %s  %d:%d  %d-%d  %s-%d}",
+            Version::toString(version), Type::toString(type), timeString,
+            Direction::toString(offsetDirection), offsetHours, offsetMinutes, dstStart, dstEnd,
+            Tolerance::toString(tolerance), toleranceValue);
+    }
+    // this <= ByteBuffer
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read16(version);
+        bb.read16(type);
+        bb.read32(time);
+        bb.read16(offsetDirection);
+        bb.read16(offsetHours);
+        bb.read16(offsetMinutes);
+        bb.read16(dstStart);
+        bb.read16(dstEnd);
+        bb.read16(tolerance);
+        bb.read32(toleranceValue);
+    }
+    // ByteBuffer <= this
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write16(version);
+        bb.write16(type);
+        bb.write32(time);
+        bb.write16(offsetDirection);
+        bb.write16(offsetHours);
+        bb.write16(offsetMinutes);
+        bb.write16(dstStart);
+        bb.write16(dstEnd);
+        bb.write16(tolerance);
+        bb.write32(toleranceValue);
     }
 };
 

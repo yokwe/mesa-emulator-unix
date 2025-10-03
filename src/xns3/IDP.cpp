@@ -46,36 +46,42 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
-UINT16 Checksum::NOCHECK = Checksum{0xFFFF, "****"};
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-UINT8 Type::RIP    = Type(1, "RIP");
-UINT8 Type::ECHO   = Type(2, "ECHO");
-UINT8 Type::ERROR_ = Type(3, "ERROR");
-UINT8 Type::PEX    = Type(4, "PEX");
-UINT8 Type::SPP    = Type(5, "SPP");
-UINT8 Type::BOOT   = Type(6, "BOOT");
-
-UINT16 Socket::RIP       = Socket(1, "RIP");
-UINT16 Socket::ECHO      = Socket(2, "ECHO"); 
-UINT16 Socket::ERROR_    = Socket(3, "ERROR"); 
-UINT16 Socket::ENVOY     = Socket(4, "ENVOY");
-UINT16 Socket::COURIER   = Socket(5, "COURIER"); 
-UINT16 Socket::CHS_OLD   = Socket(7, "CHS_OLD"); 
-UINT16 Socket::TIME      = Socket(8, "TIME");
-			
-UINT16 Socket::BOOT      = Socket(10, "BOOT"); 
-UINT16 Socket::DIAG      = Socket(19, "DIAG");
-			
-UINT16 Socket::CHS       = Socket(20, "CHS"); 
-UINT16 Socket::AUTH      = Socket(21, "AUTH"); 
-UINT16 Socket::MAIL      = Socket(22, "MAIL"); 
-UINT16 Socket::NETEXEC   = Socket(23, "NETEXEC"); 
-UINT16 Socket::WSINFO    = Socket(24, "WSINFO"); 
-UINT16 Socket::BINDING   = Socket(28, "BINDING");
-			
-UINT16 Socket::GERM      = Socket(35, "GERM");
-UINT16 Socket::TELEDEBUG = Socket(48, "TELEDEBUG");
-
+void Checksum::ChecksumConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Checksum, NOCHECK,  0xFFFF)
+}
+void Type::TypeConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, RIP,    1)
+    DECL_CLASS_CONSTANT(Type, ECHO,   2)
+    DECL_CLASS_CONSTANT(Type, ERROR_, 3)
+    DECL_CLASS_CONSTANT(Type, PEX,    4)
+    DECL_CLASS_CONSTANT(Type, SPP,    5)
+    DECL_CLASS_CONSTANT(Type, BOOT,   6)
+}
+void Socket::SocketConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Socket, RIP,       1)
+    DECL_CLASS_CONSTANT(Socket, ECHO,      2)
+    DECL_CLASS_CONSTANT(Socket, ERROR_,    3)
+    DECL_CLASS_CONSTANT(Socket, ENVOY,     4)
+    DECL_CLASS_CONSTANT(Socket, COURIER,   5)
+    DECL_CLASS_CONSTANT(Socket, CHS_OLD,   7)
+    DECL_CLASS_CONSTANT(Socket, TIME,      8)
+                
+    DECL_CLASS_CONSTANT(Socket, BOOT,      10)
+    DECL_CLASS_CONSTANT(Socket, DIAG,      19)
+                
+    DECL_CLASS_CONSTANT(Socket, CHS,       20)
+    DECL_CLASS_CONSTANT(Socket, AUTH,      21)
+    DECL_CLASS_CONSTANT(Socket, MAIL,      22)
+    DECL_CLASS_CONSTANT(Socket, NETEXEC,   23)
+    DECL_CLASS_CONSTANT(Socket, WSINFO,    24)
+    DECL_CLASS_CONSTANT(Socket, BINDING,   28)
+                
+    DECL_CLASS_CONSTANT(Socket, GERM,      35)
+    DECL_CLASS_CONSTANT(Socket, TELEDEBUG, 48)
+}
 
 uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne) {
     uint32_t s = 0;
@@ -93,45 +99,6 @@ uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne) {
 		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
     }
     return (uint16_t)s;
-}
-
-void IDP::fromByteBuffer(ByteBuffer& bb) {
-    checksum.fromByteBuffer(bb);
-    length.fromByteBuffer(bb);
-    control.fromByteBuffer(bb);
-    type.fromByteBuffer(bb);
-    dstNet.fromByteBuffer(bb);
-    dstHost.fromByteBuffer(bb);
-    dstSocket.fromByteBuffer(bb);
-    srcNet.fromByteBuffer(bb);
-    srcHost.fromByteBuffer(bb);
-    srcSocket.fromByteBuffer(bb);
-}
-
-void IDP::toByteBuffer(ByteBuffer& bb) {
-    checksum.toByteBuffer(bb);
-    length.toByteBuffer(bb);
-    control.toByteBuffer(bb);
-    type.toByteBuffer(bb);
-    dstNet.toByteBuffer(bb);
-    dstHost.toByteBuffer(bb);
-    dstSocket.toByteBuffer(bb);
-    srcNet.toByteBuffer(bb);
-    srcHost.toByteBuffer(bb);
-    srcSocket.toByteBuffer(bb);
-}
-
-IDP::IDP (ByteBuffer& bb)  {
-    checksum.fromByteBuffer(bb);
-    length.fromByteBuffer(bb);
-    control.fromByteBuffer(bb);
-    type.fromByteBuffer(bb);
-    dstNet.fromByteBuffer(bb);
-    dstHost.fromByteBuffer(bb);
-    dstSocket.fromByteBuffer(bb);
-    srcNet.fromByteBuffer(bb);
-    srcHost.fromByteBuffer(bb);
-    srcSocket.fromByteBuffer(bb);
 }
 
 }

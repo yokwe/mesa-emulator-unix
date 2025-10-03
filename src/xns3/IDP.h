@@ -41,74 +41,103 @@ namespace xns::idp {
 
 void initialize();
 
-class Checksum : public UINT16 {
-    static inline const char* group = "xns::idp::Checksum";
-    Checksum(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Checksum {
+    Checksum() = delete;
+    inline static const char* FORMAT = "%04X";
 public:
-    Checksum() : UINT16("%04X") {}
+    using T = uint16_t;
 
-    UINT16 operator = (UINT16 that) {
-        UINT16::operator =(that);
-        return that;
-    }
-    uint16_t operator = (uint16_t that) {
-        UINT16::operator =(that);
-        return that;
-    }
+    DECL_CLASS_CONSTANT(Checksum, NOCHECK,  0xFFFF)
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    static UINT16 NOCHECK;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class ChecksumConstantMap: public ConstantMap<T> {
+        ChecksumConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static ChecksumConstantMap constantMap;
 };
 
-class Type : public UINT8 {
-    static inline const char* group = "xns::idp::Type";
-    Type(uint8_t value_, const char* name_) : UINT8(group, value_, name_) {}
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Type() : UINT8("%2X") {}
+    using T = uint8_t;
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    DECL_CLASS_CONSTANT(Type, RIP,    1)
+    DECL_CLASS_CONSTANT(Type, ECHO,   2)
+    DECL_CLASS_CONSTANT(Type, ERROR_, 3)
+    DECL_CLASS_CONSTANT(Type, PEX,    4)
+    DECL_CLASS_CONSTANT(Type, SPP,    5)
+    DECL_CLASS_CONSTANT(Type, BOOT,   6)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    static UINT8 RIP;
-    static UINT8 ECHO;
-    static UINT8 ERROR_;
-    static UINT8 PEX;
-    static UINT8 SPP;
-    static UINT8 BOOT;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class TypeConstantMap: public ConstantMap<T> {
+        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static TypeConstantMap constantMap;
 };
 
-class Socket : public UINT16 {
-    static inline const char* group = "xns::idp::Socket";
-    Socket(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Socket {
+    Socket() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Socket() : UINT16("%04X") {}
+    using T = uint16_t;
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    DECL_CLASS_CONSTANT(Socket, RIP,       1)
+    DECL_CLASS_CONSTANT(Socket, ECHO,      2)
+    DECL_CLASS_CONSTANT(Socket, ERROR_,    3)
+    DECL_CLASS_CONSTANT(Socket, ENVOY,     4)
+    DECL_CLASS_CONSTANT(Socket, COURIER,   5)
+    DECL_CLASS_CONSTANT(Socket, CHS_OLD,   7)
+    DECL_CLASS_CONSTANT(Socket, TIME,      8)
+                
+    DECL_CLASS_CONSTANT(Socket, BOOT,      10)
+    DECL_CLASS_CONSTANT(Socket, DIAG,      19)
+                
+    DECL_CLASS_CONSTANT(Socket, CHS,       20)
+    DECL_CLASS_CONSTANT(Socket, AUTH,      21)
+    DECL_CLASS_CONSTANT(Socket, MAIL,      22)
+    DECL_CLASS_CONSTANT(Socket, NETEXEC,   23)
+    DECL_CLASS_CONSTANT(Socket, WSINFO,    24)
+    DECL_CLASS_CONSTANT(Socket, BINDING,   28)
+                
+    DECL_CLASS_CONSTANT(Socket, GERM,      35)
+    DECL_CLASS_CONSTANT(Socket, TELEDEBUG, 48)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class SocketConstantMap: public ConstantMap<T> {
+        SocketConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
 
-    static UINT16 RIP;
-    static UINT16 ECHO;
-    static UINT16 ERROR_;
-    static UINT16 ENVOY;
-    static UINT16 COURIER;
-    static UINT16 CHS_OLD;
-    static UINT16 TIME;
-			
-    static UINT16 BOOT;
-    static UINT16 DIAG;
-			
-    static UINT16 CHS;
-    static UINT16 AUTH;
-    static UINT16 MAIL;
-    static UINT16 NETEXEC;
-    static UINT16 WSINFO;
-    static UINT16 BINDING;
-			
-    static UINT16 GERM;
-	static UINT16 TELEDEBUG;
+    static SocketConstantMap constantMap;
 };
 
 uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne);
@@ -116,27 +145,57 @@ inline uint16_t computeChecksum(const ByteBuffer& bb, int position) { // positio
     return computeChecksum(bb.data(), position + 2, bb.limit());
 }
 
-struct IDP {
+struct IDP : Base {
     static constexpr int HEADER_LENGTH = 30;
 
-    Checksum checksum;
-    UINT16   length;
-    UINT8    control;
-    Type     type;
+    uint16_t checksum;  // Checksum
+    uint16_t length;
+    uint8_t  control;
+    uint8_t  type;      // Type
 
-    Net      dstNet;
-    Host     dstHost;
-    Socket   dstSocket;
+    uint32_t dstNet;    // Net
+    uint64_t dstHost;   // Host
+    uint16_t dstSocket; // Soeckt
 
-    Net      srcNet;
-    Host     srcHost;
-    Socket   srcSocket;
+    uint32_t srcNet;    // Net
+    uint64_t srcHost;   // Host
+    uint16_t srcSocket; // Socket
 
-    IDP(ByteBuffer& bb);
+    IDP(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
     IDP() {}
 
-    void fromByteBuffer(ByteBuffer& bb);
-    void toByteBuffer(ByteBuffer& bb);
+    std::string toString() const {
+        auto dst = std_sprintf("%s-%s-%s", Net::toString(dstNet), Host::toString(dstHost), Socket::toString(dstSocket));
+        auto src = std_sprintf("%s-%s-%s", Net::toString(srcNet), Host::toString(srcHost), Socket::toString(srcSocket));
+       return std_sprintf("{%s  %s  %s  %s  %-22s  %-22s}",
+            Checksum::toString(checksum), length, control, Type::toString(type), dst, src);
+    }
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read16(checksum);
+        bb.read16(length);
+        bb.read8(control);
+        bb.read8(type);
+        bb.read32(dstNet);
+        bb.read48(dstHost);
+        bb.read16(dstSocket);
+        bb.read32(srcNet);
+        bb.read48(srcHost);
+        bb.read16(srcSocket);
+    }
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write16(checksum);
+        bb.write16(length);
+        bb.write8(control);
+        bb.write8(type);
+        bb.write32(dstNet);
+        bb.write48(dstHost);
+        bb.write16(dstSocket);
+        bb.write32(srcNet);
+        bb.write48(srcHost);
+        bb.write16(srcSocket);
+    }
 };
 
 void process(IDP& receive, IDP& transmit);

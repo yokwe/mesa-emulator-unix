@@ -44,13 +44,20 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
-UINT16 Type::REQUEST      = Type(1, "REQUEST");
-UINT16 Type::RESPONSE     = Type(2, "RESPONSE");
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-UINT16 Delay::INFINITY     = Delay(16, "INFINITY");
+void Type::TypeConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
+}
+
+void Delay::DelayConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Delay, INFINITY,  16)
+}
 
 void RIP::fromByteBuffer(ByteBuffer& bb) {
-    type.fromByteBuffer(bb);
+    bb.read16(type);
     while(bb.hasRemaining()) {
         NetDelay entry(bb);
         table.push_back(entry);
@@ -58,7 +65,7 @@ void RIP::fromByteBuffer(ByteBuffer& bb) {
 }
 // ByteBuffer <= this
 void RIP::toByteBuffer(ByteBuffer& bb) const {
-    type.toByteBuffer(bb);
+    bb.write16(type);
     for(const auto& entry: table) {
         entry.toByteBuffer(bb);
     }

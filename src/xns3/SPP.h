@@ -41,4 +41,36 @@ namespace xns::spp {
 
 void initialize();
 
+struct SPP : Base {
+    uint8_t  control; // Control Bit
+    uint8_t  sst;     // Sub System Type
+    uint16_t idSrc;   // connection id of source
+    uint16_t idDst;   // connection id of destination
+    uint16_t seq;     // sequence
+    uint16_t ack;     // acknowledgment
+    uint16_t alloc;   // allocation
+
+    std::string toString() const {
+        return std_sprintf("{%02X  %d  %04X  %04X  %5d  %5d  %5d}", control, sst, idSrc, idDst, seq, ack, alloc);
+    }
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read8(control);
+        bb.read8(sst);
+        bb.read16(idSrc);
+        bb.read16(idDst);
+        bb.read16(seq);
+        bb.read16(ack);
+        bb.read16(alloc);
+    }
+    void toByteBuffer  (ByteBuffer& bb) const {
+        bb.write8(control);
+        bb.write8(sst);
+        bb.write16(idSrc);
+        bb.write16(idDst);
+        bb.write16(seq);
+        bb.write16(ack);
+        bb.write16(alloc);
+    }
+};
+
 }

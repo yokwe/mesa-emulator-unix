@@ -36,6 +36,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include <ctime>
+
 #include "Time.h"
 
 namespace xns::time {
@@ -44,15 +46,30 @@ void initialize() {
     logger.info("%s  intialize", __FUNCTION__);
 }
 
-UINT16 Version::CURRENT   = Version(2, "CURRENT");
+std::string toStringLocalTime(const uint32_t time) {
+    time_t temp = (time_t)time;
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%d-%02d-%02d %02d:%02d:%02d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
 
-UINT16 Type::REQUEST      = Type(1, "REQUEST");
-UINT16 Type::RESPONSE     = Type(2, "RESPONSE");
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-UINT16 Direction::WEST    = Direction(0, "WEST");
-UINT16 Direction::EAST    = Direction(1, "EAST");
-
-UINT16 Tolerance::UNKNOWN = Tolerance(0, "WEST");
-UINT16 Tolerance::KNOWN   = Tolerance(1, "EAST");
+void Version::VersionConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Version, CURRENT, 2)
+}
+void Type::TypeConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, Request,  1)
+    DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
+}
+void Direction::DirectionConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Direction, WEST, 0)
+    DECL_CLASS_CONSTANT(Direction, EAST, 1)
+}
+void Tolerance::ToleranceConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Tolerance, UNKNOWN, 0)
+    DECL_CLASS_CONSTANT(Tolerance, KNOWN  , 1)
+}
 
 }

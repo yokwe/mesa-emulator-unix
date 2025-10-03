@@ -76,7 +76,11 @@ struct Frame : Base {
     uint64_t  source; // Host
     uint16_t  type;   // type
 
-    Frame() : dest(), source(), type() {}
+    Frame() {}
+
+    std::string toString() const {
+        return std_sprintf("{%s  %s  %s}", Host::toString(dest), Host::toString(source), Type::toString(type));
+    }
 
     Frame(ByteBuffer& bb) {
         fromByteBuffer(bb);

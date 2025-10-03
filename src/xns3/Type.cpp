@@ -42,28 +42,27 @@ static const Logger logger(__FILE__);
 
 #include "Type.h"
 
-// #include "Echo.h"
-// #include "Error.h"
-// #include "Ethernet.h"
-// #include "IDP.h"
-// #include "PEX.h"
-// #include "RIP.h"
-// #include "SPP.h"
-// #include "Time.h"
+#include "Echo.h"
+#include "Error.h"
+#include "Ethernet.h"
+#include "IDP.h"
+#include "PEX.h"
+#include "RIP.h"
+#include "SPP.h"
+#include "Time.h"
 
 namespace xns {
 
 void initialize() {
-    // xns::echo::initialize();
-    // xns::error::initialize();
-    // xns::ethernet::initialize();
-    // xns::idp::initialize();
-    // xns::pex::initialize();
-    // xns::rip::initialize();
-    // xns::spp::initialize();
-    // xns::time::initialize();
+    xns::echo::initialize();
+    xns::error::initialize();
+    xns::ethernet::initialize();
+    xns::idp::initialize();
+    xns::pex::initialize();
+    xns::rip::initialize();
+    xns::spp::initialize();
+    xns::time::initialize();
 }
-
 
 void STRING::fromByteBuffer(ByteBuffer& bb) {
 	uint16_t length;

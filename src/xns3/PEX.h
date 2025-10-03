@@ -41,42 +41,53 @@ namespace xns::pex {
 
 void initialize();
 
-class Type : public UINT16 {
-    static inline const char* group = "xns::pex::Type";
-    Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Type() : UINT16("%d") {}
+    using T = uint16_t;
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    DECL_CLASS_CONSTANT(Type, UNSPEC,    0)
+    DECL_CLASS_CONSTANT(Type, TIME,      1)
+    DECL_CLASS_CONSTANT(Type, CHS,       2)
+    DECL_CLASS_CONSTANT(Type, TELEDEBUG, 8)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    static UINT16 UNSPEC;
-    static UINT16 TIME;
-    static UINT16 CHS;
-    static UINT16 TELEDEBUG;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    class TypeConstantMap: public ConstantMap<T> {
+        TypeConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static TypeConstantMap constantMap;
 };
 
-class ID : public UINT32 {
-public:
-    ID() : UINT32("%08X") {}
-};
-
-struct PEX {
-    ID     id;
-    Type   type;
+struct PEX : Base {
+    uint16_t   id;
+    uint16_t   type;
 
     PEX() {}
     PEX(ByteBuffer& bb) {
         fromByteBuffer(bb);
     }
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        id.fromByteBuffer(bb);
-        type.fromByteBuffer(bb);
+    std::string toString() const {
+        return std_sprintf("{%04X  %s}", id, Type::toString(type));
     }
-    void toByteBuffer(ByteBuffer& bb) {
-        id.toByteBuffer(bb);
-        type.toByteBuffer(bb);
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read16(id);
+        bb.read16(type);
+    }
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write16(id);
+        bb.write16(type);
     }
 };
 

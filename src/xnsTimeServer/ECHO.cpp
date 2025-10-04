@@ -46,7 +46,7 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     (void)context;
     // build receive
     xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
     if (receive.type != xns::echo::Type::REQUEST) {
         logger.warn("Unexpected type  %s", -receive.type);
@@ -70,5 +70,5 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     // write to tx
     transmit.toByteBuffer(tx);
     tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
+    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
 }

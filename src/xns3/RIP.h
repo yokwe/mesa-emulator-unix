@@ -130,7 +130,7 @@ struct RIP : Base {
             string += std_sprintf(" %s", e.toString());
         }
 
-        return std_sprintf("{%s  %s}", Type::toString(type), string.empty() ? "{}" : string.substr(1));
+        return std_sprintf("{%-8s  %s}", Type::toString(type), string.empty() ? "{}" : string.substr(1));
     }
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb);

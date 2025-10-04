@@ -101,6 +101,7 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     // build transmit
     {
         transmit.checksum  = 0;
+        // Garbage Byte, which is included in the Checksum, but not in the Length
         transmit.length    = xns::idp::IDP::HEADER_LENGTH + payload.length();
         transmit.control   = 0;
         transmit.type      = receive.type;
@@ -118,11 +119,9 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         transmit.toByteBuffer(tx);
         tx.write(payload.limit(), payload.data());
         // make packet length even
-        if (tx.limit() % 1) {
-            tx.writeZero(1);
-            transmit.length += 1;
-        }
+        if (transmit.length & 1) tx.writeZero(1);
         // update checksum
+        // Garbage Byte, which is included in the Checksum, but not in the Length
         uint16_t checksum = xns::idp::computeChecksum(tx, base);
         tx.write16(base, checksum);
         transmit.checksum = checksum;

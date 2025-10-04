@@ -30,54 +30,19 @@
 
 
  //
- // Server.h
+ // ERROR.cpp
  //
 
-#pragma once
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include <string>
-#include <map>
+#include "../xns3/Error.h"
 
-#include "../xns3/Config.h"
-#include "../util/net.h"
+#include "Server.h"
 
-
-struct Routing {
-    uint32_t    net;
-    uint16_t    delay;
-    std::string name;
-
-    Routing(uint32_t net_, uint16_t delay_, const std::string& name_) : net(net_), delay(delay_), name(name_) {}
-    Routing() : net(0), delay(0), name("") {}
-};
-
-struct Context {
-    xns::config::Config         config;
-    net::Driver*                driver;
-    uint64_t                    ME;
-    uint32_t                    NET;
-    std::map<uint32_t, Routing> routingMap;
-
-    Context(xns::config::Config config_) : config(config_) {
-        auto device = net::getDevice(config.server.interface);
-        driver = net::getDriver(device);
-        ME     = config.server.address;
-        NET    = config.server.net;
-        // build routingMap
-        for(const auto& e: config.net) {
-            Routing routing = Routing(e.net, e.delay, e.name);
-            routingMap[e.net] = routing;
-        }
-    }
-    Context() : config(), driver(0), ME(0), NET(0) {}
-};
-
-void processIDP      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processECHO     (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processPEX      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processPEX_TIME (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processRIP      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processSPP      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-void processERROR    (ByteBuffer& rx, ByteBuffer& tx, Context& context);
-
-
+void processERROR(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
+    (void) tx; (void)context;
+    // build receive
+    xns::error::Error receive(rx);
+    logger.info("ERROR>>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+}

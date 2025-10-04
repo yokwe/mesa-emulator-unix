@@ -55,10 +55,10 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
 
         // FIX length using value of length field
         if (receive.length < xns::idp::IDP::HEADER_LENGTH) {
-            logger.error("wrong length  %d", +receive.length);
+            logger.error("wrong length  %d", receive.length);
             ERROR();
         }
-        int newLimit = base + +receive.length;
+        int newLimit = base + receive.length;
         rx.limit(newLimit);
 //        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
  
@@ -82,22 +82,21 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     EthernetPacket payload;
     if (receive.type == xns::idp::Type::ECHO) {
         processECHO(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::PEX) {
+    } else if (receive.type == xns::idp::Type::PEX) {
        processPEX(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::RIP) {
+    } else if (receive.type == xns::idp::Type::RIP) {
         processRIP(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::SPP) {
+    } else if (receive.type == xns::idp::Type::SPP) {
         processSPP(rx, payload, context);
+    } else if (receive.type == xns::idp::Type::ERROR_) {
+        processERROR(rx, payload, context);
+    } else {
+        logger.error("Unknonw type  %s", xns::idp::Type::toString(receive.type));
+        ERROR()
     }
     payload.flip();
     // logger.info("payload  length  %d", payload.length());
-    if (payload.empty()) {
-        logger.info("REJECT");
-        return;
-    }
+    if (payload.empty()) return;
     xns::idp::IDP transmit;
     // build transmit
     {

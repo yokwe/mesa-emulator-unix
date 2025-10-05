@@ -30,45 +30,76 @@
 
 
  //
- // ECHO.cpp
+ // Ethernet.h
  //
 
-#include "../util/Util.h"
-static const Logger logger(__FILE__);
+#pragma once
 
-#include "../xns3/Echo.h"
+#include "Type.h"
 
-#include "../util/EthernetPacket.h"
+namespace xns::ethernet {
 
-#include "Server.h"
+void initialize();
 
-void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)context;
-    // build receive
-    xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%d";
+public:
+    using T = uint16_t;
 
-    if (receive.type != xns::echo::Type::REQUEST) {
-        logger.warn("Unexpected type  %s", -receive.type);
-        return;       
+    DECL_CLASS_CONSTANT(Type, XNS,  0x0600)
+    DECL_CLASS_CONSTANT(Type, IP ,  0x0800)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-
-    // build payload
-    EthernetPacket payload;
-    {
-        // copy remaaining content of rx to payload
-        uint8_t data;
-        while(rx.hasRemaining()) {
-            rx.read8(data);
-            payload.write8(data);
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
         }
+        void initialize();
+    };
+
+    static inline MyConstantMap constantMap;
+};
+
+struct Frame : public Base {
+    static constexpr int HEADER_LENGTH  = 14;
+    static constexpr int MINIMUM_LENGTH = 64;
+    static constexpr int MAXIMUM_LENGTH = 6 + 6 + 2 + 1500; // 1514
+
+    uint64_t  dest;   // Host
+    uint64_t  source; // Host
+    uint16_t  type;   // type
+
+    Frame() {}
+
+    std::string toString() const {
+        return std_sprintf("{%s  %s  %s}", Host::toString(dest), Host::toString(source), Type::toString(type));
     }
 
-    // build transmit
-    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
+    Frame(ByteBuffer& bb) {
+        fromByteBuffer(bb);
+    }
 
-    // write to tx
-    transmit.toByteBuffer(tx);
-    tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read48(dest);
+        bb.read48(source);
+        bb.read16(type);
+    }
+
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write48(dest);
+        bb.write48(source);
+        bb.write16(type);
+    }
+};
+
+
+void processRequest(const Frame& request, ByteBuffer& response);
+
 }

@@ -30,45 +30,42 @@
 
 
  //
- // ECHO.cpp
+ // Error.cpp
  //
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns3/Echo.h"
+#include "Error.h"
 
-#include "../util/EthernetPacket.h"
+namespace xns::error {
 
-#include "Server.h"
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
+}
 
-void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)context;
-    // build receive
-    xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-    if (receive.type != xns::echo::Type::REQUEST) {
-        logger.warn("Unexpected type  %s", -receive.type);
-        return;       
-    }
+void ErrorNumber::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(ErrorNumber, UNSPEC,               0)
+    DECL_CLASS_CONSTANT(ErrorNumber, BAD_CHECKSUM,         1)
+    DECL_CLASS_CONSTANT(ErrorNumber, NO_SOCKET,            2)
+    DECL_CLASS_CONSTANT(ErrorNumber, RESOURCE_LIMIT,       3)
 
-    // build payload
-    EthernetPacket payload;
-    {
-        // copy remaaining content of rx to payload
-        uint8_t data;
-        while(rx.hasRemaining()) {
-            rx.read8(data);
-            payload.write8(data);
-        }
-    }
+    DECL_CLASS_CONSTANT(ErrorNumber, LISTEN_REJECT,        4)
+    DECL_CLASS_CONSTANT(ErrorNumber, INVALID_PACKET_TYPE,  5)
+    DECL_CLASS_CONSTANT(ErrorNumber, PROTOCOL_VIOLATION,   6)
 
-    // build transmit
-    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
+    DECL_CLASS_CONSTANT(ErrorNumber, UNSPECIFIED_IN_ROUTE, 01000)
+    DECL_CLASS_CONSTANT(ErrorNumber, INCONSISTENT,         01001)
+    DECL_CLASS_CONSTANT(ErrorNumber, CANT_GET_THERE,       01002)
+    DECL_CLASS_CONSTANT(ErrorNumber, EXCESS_HOPS,          01003)
+    DECL_CLASS_CONSTANT(ErrorNumber, TOO_BIG,              01004)
 
-    // write to tx
-    transmit.toByteBuffer(tx);
-    tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
+    DECL_CLASS_CONSTANT(ErrorNumber, CONGESTION_WARNING,   01005)
+    DECL_CLASS_CONSTANT(ErrorNumber, CONGESTION_DISCARD,   01006)
+}
+
+
 }

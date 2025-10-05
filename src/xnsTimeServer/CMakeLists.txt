@@ -12,6 +12,7 @@ target_sources(
     Server.h
   PRIVATE
     ECHO.cpp
+    ERROR.cpp
     IDP.cpp
     main.cpp
     PEX.cpp

@@ -38,7 +38,7 @@
 #include <string>
 #include <map>
 
-#include "../xns2/Config.h"
+#include "../xns3/Config.h"
 #include "../util/net.h"
 
 
@@ -78,5 +78,6 @@ void processPEX      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
 void processPEX_TIME (ByteBuffer& rx, ByteBuffer& tx, Context& context);
 void processRIP      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
 void processSPP      (ByteBuffer& rx, ByteBuffer& tx, Context& context);
+void processERROR    (ByteBuffer& rx, ByteBuffer& tx, Context& context);
 
 

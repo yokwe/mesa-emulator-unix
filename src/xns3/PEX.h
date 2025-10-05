@@ -30,45 +30,65 @@
 
 
  //
- // ECHO.cpp
+ // PEX.h
  //
 
-#include "../util/Util.h"
-static const Logger logger(__FILE__);
+#pragma once
 
-#include "../xns3/Echo.h"
+#include "Type.h"
 
-#include "../util/EthernetPacket.h"
+namespace xns::pex {
 
-#include "Server.h"
+void initialize();
 
-void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)context;
-    // build receive
-    xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%04X";
+public:
+    using T = uint16_t;
 
-    if (receive.type != xns::echo::Type::REQUEST) {
-        logger.warn("Unexpected type  %s", -receive.type);
-        return;       
+    DECL_CLASS_CONSTANT(Type, UNSPEC,    0)
+    DECL_CLASS_CONSTANT(Type, TIME,      1)
+    DECL_CLASS_CONSTANT(Type, CHS,       2)
+    DECL_CLASS_CONSTANT(Type, TELEDEBUG, 8)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-
-    // build payload
-    EthernetPacket payload;
-    {
-        // copy remaaining content of rx to payload
-        uint8_t data;
-        while(rx.hasRemaining()) {
-            rx.read8(data);
-            payload.write8(data);
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
         }
+        void initialize();
+    };
+
+    static inline MyConstantMap constantMap;
+};
+
+struct PEX : public Base {
+    uint32_t   id;
+    uint16_t   type;
+
+    PEX() {}
+    PEX(ByteBuffer& bb) {
+        fromByteBuffer(bb);
     }
 
-    // build transmit
-    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
+    std::string toString() const {
+        return std_sprintf("{%04X  %s}", id, Type::toString(type));
+    }
+    void fromByteBuffer(ByteBuffer& bb) {
+        bb.read32(id);
+        bb.read16(type);
+    }
+    void toByteBuffer(ByteBuffer& bb) const {
+        bb.write32(id);
+        bb.write16(type);
+    }
+};
 
-    // write to tx
-    transmit.toByteBuffer(tx);
-    tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
 }

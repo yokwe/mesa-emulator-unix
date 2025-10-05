@@ -41,48 +41,60 @@ namespace xns::rip {
 
 void initialize();
 
-class Type : public UINT16 {
-    static inline const char* group = "xns::rip::Type";
-    Type(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
+class Type {
+    Type() = delete;
+    inline static const char* FORMAT = "%d";
 public:
-    Type() : UINT16() {}
+    using T = uint16_t;
 
-    uint16_t operator = (uint16_t that) {
-        UINT16::operator =(that);
-        return that;
-    }
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
+    DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
 
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
+    static std::string toString(T value) {
+        return constantMap.toString(value);
     }
-    
-    static UINT16 REQUEST;   // 1
-    static UINT16 RESPONSE;  // 2
-};
-class Delay : public UINT16 {
-    static inline const char* group = "xns::rip::Delay";
-    Delay(uint16_t value_, const char* name_) : UINT16(group, value_, name_) {}
-public:
-    Delay() : UINT16() {}
-    Delay(uint16_t value_) : UINT16() {
-        value = value_;
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
     }
+private:
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
 
-    uint16_t operator = (uint16_t that) {
-        UINT16::operator =(that);
-        return that;
-    }
-
-    void fromByteBuffer(ByteBuffer& bb) {
-        fromByteBufferGroup(group, bb);
-    }
-    
-    static UINT16 INFINITY;   // 16
+    static inline MyConstantMap constantMap;
 };
 
-struct NetDelay {
-    Net   net;
-    Delay delay;
+class Delay {
+    Delay() = delete;
+    inline static const char* FORMAT = "%d";
+public:
+    using T = uint16_t;
+
+    DECL_CLASS_CONSTANT(Delay, INFINITY,  16)
+
+    static std::string toString(T value) {
+        return constantMap.toString(value);
+    }
+    static void registerName(T value, const std::string& name) {
+        constantMap.registerName(value, name);
+    }
+private:
+    struct MyConstantMap: public ConstantMap<T> {
+        MyConstantMap() : ConstantMap<T>(FORMAT) {
+            initialize();
+        }
+        void initialize();
+    };
+
+    static inline MyConstantMap constantMap;
+};
+
+struct NetDelay : public Base {
+    uint32_t net;
+    uint16_t delay;
 
     NetDelay(ByteBuffer& bb) {
         fromByteBuffer(bb);
@@ -92,22 +104,34 @@ struct NetDelay {
         delay = delay_;
     }
 
+    std::string toString() const {
+        return std_sprintf("{%s  %s}", Net::toString(net), Delay::toString(delay));
+    }
+
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb) {
-        net.fromByteBuffer(bb);
-        delay.fromByteBuffer(bb);
+        bb.read32(net);
+        bb.read16(delay);
     }
     // ByteBuffer <= this
     void toByteBuffer(ByteBuffer& bb) const {
-        net.toByteBuffer(bb);
-        delay.toByteBuffer(bb);
+        bb.write32(net);
+        bb.write16(delay);
     }
 };
 
-struct RIP {
-    Type                  type;
+struct RIP : public Base {
+    uint16_t              type;  // Type
     std::vector<NetDelay> table;
 
+    std::string toString() const {
+        std::string string;
+        for(const auto& e: table) {
+            string += std_sprintf(" %s", e.toString());
+        }
+
+        return std_sprintf("{%-8s  %s}", Type::toString(type), string.empty() ? "{}" : string.substr(1));
+    }
     // this <= ByteBuffer
     void fromByteBuffer(ByteBuffer& bb);
     // ByteBuffer <= this

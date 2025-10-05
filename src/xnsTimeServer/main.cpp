@@ -41,9 +41,9 @@ static const Logger logger(__FILE__);
 #include "../util/ByteBuffer.h"
 #include "../util/EthernetPacket.h"
 
-#include "../xns2/Type.h"
-#include "../xns2/Ethernet.h"
-#include "../xns2/Config.h"
+#include "../xns3/Type.h"
+#include "../xns3/Ethernet.h"
+#include "../xns3/Config.h"
 
 #include "Server.h"
 
@@ -56,25 +56,36 @@ Context context;
 int main(int, char **) {
 	logger.info("START");
 
+    setSignalHandler(SIGINT);
+	setSignalHandler(SIGTERM);
+	setSignalHandler(SIGHUP);
+	setSignalHandler(SIGSEGV);
+
 //    xns::dumpFormatList();
     auto config = xns::config::Config::getInstance();
     logger.info("config network interface  %s", config.server.interface);
     // register constant of host and net from config
     {
+        {
+            auto address = config.server.address;
+            auto name = config.server.name;
+            xns::Host::registerName(address, name);
+            logger.info("config host  %s  %s  %s", net::toHexaDecimalString(address), net::toDecimalString(address), name);
+        }
         for(const auto& e: config.host) {
-            (void)xns::Host(e.address, e.name.c_str()); // regist host name of xns::Host
-            logger.info("config host  %s  %s  %s", xns::host::toHexaDecimalString(e.address), xns::host::toDecimalString(e.address), e.name);
+            xns::Host::registerName(e.address, e.name);
+            logger.info("config host  %s  %s  %s", net::toHexaDecimalString(e.address), net::toDecimalString(e.address), e.name);
         }
         for(const auto& e: config.net) {
             Routing routing = Routing(e.net, e.delay, e.name);
-            (void)xns::Net(e.net, e.name.c_str()); // regist net name of xns::Net
+            xns::Net::registerName(e.net, e.name);
             logger.info("config net  %d  %d  %s", e.net, e.delay, e.name);
         }
     }
 
     context = Context(config);
-	logger.info("device  %s  %s", context.driver->device.name, xns::host::toHexaDecimalString(context.driver->device.address));
-	logger.info("ME      %s", xns::host::toHexaDecimalString(context.ME));
+	logger.info("device  %s  %s", context.driver->device.name, net::toHexaDecimalString(context.driver->device.address));
+	logger.info("ME      %s", net::toHexaDecimalString(context.ME));
 	logger.info("NET     %d", context.NET);
 
     auto& driver = *context.driver;
@@ -85,23 +96,23 @@ int main(int, char **) {
         if (receiveDataList.empty()) continue;
 
         for(ByteBuffer rx: receiveDataList) {
-//            logger.info("RX  %4d  %s", rx.length(), rx.toStringFromBase());
+            // logger.info("RX  %4d  %s", rx.length(), rx.toStringFromBase());
             
             // build receive
             xns::ethernet::Frame receive(rx);
-//            logger.info("frame  %4d  %s  %s  %s  %d", rx.length(), -receive.dest, -receive.source, -receive.type, rx.remaining());
-
             if (receive.dest != context.ME && receive.dest != xns::Host::BROADCAST) {
                 // not my address or not broadcast
-                logger.info("frame  %4d  %s  %s  %s  %d", rx.limit(), -receive.dest, -receive.source, -receive.type, rx.remaining());
+                // logger.info("frame  %s  %d", receive.toString(), rx.remaining());
                 continue;
             }
+            logger.info("ETH  >>  %s  %d", receive.toString(), rx.remaining());
+
 
             EthernetPacket payload;
             if (receive.type == xns::ethernet::Type::XNS) processIDP(rx, payload, context);
             // if payload is empty, continue with next received data
             payload.flip();
-            logger.info("payload  length  %d", payload.length());
+            // logger.info("payload  length  %d", payload.length());
             if (payload.empty()) continue;
 
             xns::ethernet::Frame transmit;
@@ -111,6 +122,7 @@ int main(int, char **) {
                 transmit.source = context.ME;
                 transmit.type   = receive.type;
             }
+            logger.info("ETH  <<  %s  %d", transmit.toString(), payload.remaining());
 
             EthernetPacket tx;
             // build tx
@@ -122,8 +134,7 @@ int main(int, char **) {
                 if (length < xns::ethernet::Frame::MINIMUM_LENGTH) {
                     tx.writeZero(xns::ethernet::Frame::MINIMUM_LENGTH - length);
                 }
-                tx.flip();
-                logger.info("TX  length  %d", tx.length());
+                // logger.info("TX  length  %d", tx.length());
             }
             driver.write(tx);
         }

@@ -30,7 +30,7 @@
 
 
  #include <vector>
- #include <vector>
+ #include <regex>
 
 #include <net/bpf.h>
 #include <net/if.h>
@@ -39,13 +39,13 @@
 #include <ifaddrs.h>
 #include <unistd.h>
 
+#include "Util.h"
+static const Logger logger(__FILE__);
+
 #include "ByteBuffer.h"
 #include "BPF.h"
 
 #include "net.h"
-
-#include "Util.h"
-static const Logger logger(__FILE__);
 
 namespace net {
 
@@ -66,15 +66,16 @@ std::vector<Device> getDeviceList() {
 
 				// build device
 				std::string name;
-                uint64_t    address;
 				// copy name
 				for(int i = 0; i < sdl->sdl_nlen; i++) {
 					name += (char)data[i];
 				}
 				// copy address
-				ByteBuffer bb(sdl->sdl_alen, data + sdl->sdl_nlen);
-				bb.read48(address);
-
+                uint64_t address = 0;
+                for(int i = 0; i < sdl->sdl_alen; i++) {
+                    address <<= 8;
+                    address |= data[sdl->sdl_nlen + i];
+                }
                 Device device(name, address);
 
 				list.push_back(device);
@@ -107,12 +108,12 @@ public:
         logger.info("bpf.bufferSize = %d", bpf.bufferSize);
 
         bpf.setInterface(device.name);
-        bpf.setPromiscuous();
-        bpf.setImmediate(1);
-        bpf.setHeaderComplete(1);
-        bpf.setReadTimeout(1);
-//        bpf.setReadFilter(::BPF::PROGRAM_IP);
-        bpf.setReadFilter(::BPF::PROGRAM_XNS);
+        bpf.setPromiscuous();                         // need to promiscuos mode to see all packet
+        bpf.setImmediate(1);                   // don't wait unitl read buffer full
+        bpf.setHeaderComplete(1);              // need to set 1 for custom source address
+        bpf.setReadTimeout(1);               // read time out in unit of secod
+//        bpf.setReadFilter(::BPF::PROGRAM_IP);  // receive only IPv4 packet
+        bpf.setReadFilter(::BPF::PROGRAM_XNS); // receive only XNS packet
 
         logger.info("bufferSize     = %d", bpf.getBufferSize());
         logger.info("seeSent        = %d", bpf.getSeeSent());
@@ -157,6 +158,101 @@ public:
 
 Driver* getDriver(const Device& device) {
     return new Driver_BPF(device);
+}
+
+
+std::string toOctalString(uint64_t address) {
+    return std_sprintf("%lob", address);
+}
+std::string toDecimalString(uint64_t address) {
+    auto n = address;
+    std::string string;
+    for(;;) {
+        if (n == 0) break;
+        auto quotient  = n / 1000;
+        auto remainder = (int)(n % 1000);
+//        string += std_sprintf("-%03d", remainder);
+        string.insert(0, std_sprintf("-%03d", remainder));
+        n = quotient;
+    }
+    return string.substr(1);
+}
+std::string toHexaDecimalString(uint64_t address, const std::string& sep) {
+    std::string string;
+    string = std_sprintf("%02X", ((int)(address >> 40)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(address >> 32)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(address >> 24)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(address >> 16)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(address >>  8)) & 0xFF);
+    string += std_sprintf("%s%02X", sep, ((int)(address >>  0)) & 0xFF);
+    return string;
+}
+
+#define HEXSEP "[-:]?"
+uint64_t fromString(const std::string& string) {
+    static std::regex dec4("([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})");
+    static std::regex dec5("([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})-([0-9]{1,3})");
+    static std::regex hex6("([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])" HEXSEP "([0-9A-Fa-f][0-9A-Fa-f])");
+    static std::regex oct("([0-7]+)b");
+
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, dec4)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1]);
+            ret *= 1000;
+            ret += std::stoi(m[2]);
+            ret *= 1000;
+            ret += std::stoi(m[3]);
+            ret *= 1000;
+            ret += std::stoi(m[4]);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, dec5)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1]);
+            ret *= 1000;
+            ret += std::stoi(m[2]);
+            ret *= 1000;
+            ret += std::stoi(m[3]);
+            ret *= 1000;
+            ret += std::stoi(m[4]);
+            ret *= 1000;
+            ret += std::stoi(m[5]);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, hex6)) {
+            uint64_t ret = 0;
+            ret += std::stoi(m[1], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[2], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[3], nullptr, 16);
+            ret<<= 8;
+            ret += std::stoi(m[4], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[5], nullptr, 16);
+            ret <<= 8;
+            ret += std::stoi(m[6], nullptr, 16);
+            return ret;
+        }
+    }
+    {
+        std::smatch m;
+        if (std::regex_match(string, m, oct)) {
+            return std::stol(m[1], nullptr, 8);
+        }
+    }
+
+    logger.error("Unexpected");
+    logger.error("  string = %s!", string);
+    ERROR();
 }
 
 }

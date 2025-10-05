@@ -30,45 +30,46 @@
 
 
  //
- // ECHO.cpp
+ // Time.cpp
  //
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns3/Echo.h"
+#include <ctime>
 
-#include "../util/EthernetPacket.h"
+#include "Time.h"
 
-#include "Server.h"
+namespace xns::time {
 
-void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)context;
-    // build receive
-    xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+void initialize() {
+    logger.info("%s  intialize", __FUNCTION__);
+}
 
-    if (receive.type != xns::echo::Type::REQUEST) {
-        logger.warn("Unexpected type  %s", -receive.type);
-        return;       
-    }
+std::string toStringLocalTime(const uint32_t time) {
+    time_t temp = (time_t)time;
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%d-%02d-%02d %02d:%02d:%02d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
 
-    // build payload
-    EthernetPacket payload;
-    {
-        // copy remaaining content of rx to payload
-        uint8_t data;
-        while(rx.hasRemaining()) {
-            rx.read8(data);
-            payload.write8(data);
-        }
-    }
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
 
-    // build transmit
-    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
+void Version::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Version, CURRENT, 2)
+}
+void Type::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Type, REQUEST,  1)
+    DECL_CLASS_CONSTANT(Type, RESPONSE, 2)
+}
+void Direction::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Direction, WEST, 0)
+    DECL_CLASS_CONSTANT(Direction, EAST, 1)
+}
+void Tolerance::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Tolerance, UNKNOWN, 0)
+    DECL_CLASS_CONSTANT(Tolerance, KNOWN  , 1)
+}
 
-    // write to tx
-    transmit.toByteBuffer(tx);
-    tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
 }

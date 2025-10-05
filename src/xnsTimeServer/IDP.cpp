@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns2/IDP.h"
+#include "../xns3/IDP.h"
 
 #include "../util/EthernetPacket.h"
 
@@ -54,21 +54,15 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
 //        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
 
         // FIX length using value of length field
-        if (+receive.length < xns::idp::IDP::HEADER_LENGTH) {
-            logger.error("wrong length  %d", +receive.length);
+        if (receive.length < xns::idp::IDP::HEADER_LENGTH) {
+            logger.error("wrong length  %d", receive.length);
             ERROR();
         }
-        int newLimit = base + +receive.length;
+        int newLimit = base + receive.length;
         rx.limit(newLimit);
 //        logger.info("IDP %4d  %s", rx.remaining(), rx.toStringFromPosition());
  
-        {
-            auto dst = std_sprintf("%s-%s-%s", -receive.dstNet, -receive.dstHost, -receive.dstSocket);
-            auto src = std_sprintf("%s-%s-%s", -receive.srcNet, -receive.srcHost, -receive.srcSocket);
-            logger.info("IDP %s  %s  %s  %s  %-22s  %-22s  %d  %s",
-                -receive.checksum, -receive.length, -receive.control, -receive.type,
-                dst, src, rx.remaining(), rx.toStringFromPosition());
-        }
+        logger.info("IDP  >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
         // check checksum
         if (receive.checksum != xns::idp::Checksum::NOCHECK) {
@@ -88,28 +82,27 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     EthernetPacket payload;
     if (receive.type == xns::idp::Type::ECHO) {
         processECHO(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::PEX) {
+    } else if (receive.type == xns::idp::Type::PEX) {
        processPEX(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::RIP) {
+    } else if (receive.type == xns::idp::Type::RIP) {
         processRIP(rx, payload, context);
-    }
-    if (receive.type == xns::idp::Type::SPP) {
+    } else if (receive.type == xns::idp::Type::SPP) {
         processSPP(rx, payload, context);
+    } else if (receive.type == xns::idp::Type::ERROR_) {
+        processERROR(rx, payload, context);
+    } else {
+        logger.error("Unknonw type  %s", xns::idp::Type::toString(receive.type));
+        ERROR()
     }
     payload.flip();
-    logger.info("payload  length  %d", payload.length());
+    // logger.info("payload  length  %d", payload.length());
     if (payload.empty()) return;
-
     xns::idp::IDP transmit;
     // build transmit
     {
-        // make data length even
-        if (payload.length() % 1) payload.writeZero(1);
-
         transmit.checksum  = 0;
-        transmit.length    = payload.length();
+        // Garbage Byte, which is included in the Checksum, but not in the Length
+        transmit.length    = xns::idp::IDP::HEADER_LENGTH + payload.length();
         transmit.control   = 0;
         transmit.type      = receive.type;
         transmit.dstNet    = receive.srcNet;
@@ -118,14 +111,21 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         transmit.srcNet    = context.NET;
         transmit.srcHost   = context.ME;
         transmit.srcSocket = receive.dstSocket;
+    }
 
-        // write to tx
+    // write to tx
+    {
         int base = tx.position();
         transmit.toByteBuffer(tx);
         tx.write(payload.limit(), payload.data());
-
+        // make packet length even
+        if (transmit.length & 1) tx.writeZero(1);
         // update checksum
+        // Garbage Byte, which is included in the Checksum, but not in the Length
         uint16_t checksum = xns::idp::computeChecksum(tx, base);
         tx.write16(base, checksum);
+        transmit.checksum = checksum;
     }
+    logger.info("IDP  <<  %s  (%d) %s", transmit.toString(), payload.remaining(), payload.toStringFromPosition());
+
 }

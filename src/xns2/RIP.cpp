@@ -52,8 +52,7 @@ UINT16 Delay::INFINITY     = Delay(16, "INFINITY");
 void RIP::fromByteBuffer(ByteBuffer& bb) {
     type.fromByteBuffer(bb);
     while(bb.hasRemaining()) {
-        NetDelay entry;
-        entry.fromByteBuffer(bb);
+        NetDelay entry(bb);
         table.push_back(entry);
     }
 }

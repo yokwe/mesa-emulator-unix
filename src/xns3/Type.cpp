@@ -29,46 +29,90 @@
  *******************************************************************************/
 
 
- //
- // ECHO.cpp
- //
+//
+// Type.cpp
+//
+
+#include <string>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../xns3/Echo.h"
+#include "../util/ByteBuffer.h"
 
-#include "../util/EthernetPacket.h"
+#include "Type.h"
 
-#include "Server.h"
+#include "Echo.h"
+#include "Error.h"
+#include "Ethernet.h"
+#include "IDP.h"
+#include "PEX.h"
+#include "RIP.h"
+#include "SPP.h"
+#include "Time.h"
 
-void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
-    (void)context;
-    // build receive
-    xns::echo::Echo receive(rx);
-    logger.info("ECHO >>  %-8s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
+namespace xns {
 
-    if (receive.type != xns::echo::Type::REQUEST) {
-        logger.warn("Unexpected type  %s", -receive.type);
-        return;       
-    }
+void initialize() {
+    xns::echo::initialize();
+    xns::error::initialize();
+    xns::ethernet::initialize();
+    xns::idp::initialize();
+    xns::pex::initialize();
+    xns::rip::initialize();
+    xns::spp::initialize();
+    xns::time::initialize();
+}
 
-    // build payload
-    EthernetPacket payload;
-    {
-        // copy remaaining content of rx to payload
-        uint8_t data;
-        while(rx.hasRemaining()) {
-            rx.read8(data);
-            payload.write8(data);
-        }
-    }
+void STRING::fromByteBuffer(ByteBuffer& bb) {
+	uint16_t length;
+	bb.read16(length);
 
-    // build transmit
-    xns::echo::Echo transmit(xns::echo::Type::RESPONSE);
+	string.clear();
+	for(uint16_t i = 0; i < length; i++) {
+		uint8_t newValue;
+		bb.read8(newValue);
+        string += newValue;
+	}
+	// read padding
+	if (length % 2) {
+		uint8_t newValue;
+		bb.read8(newValue);
+		(void)newValue;
+	}
+}
+void STRING::toByteBuffer  (ByteBuffer& bb) const {
+	int length = string.length();
+	if (MAX_LENGTH < length) {
+		logger.error("Unexpected");
+		logger.error("  MAX_LENGTH = %d", MAX_LENGTH);
+		logger.error("  length     = %d", length);
+		ERROR();
+	}
+	bb.write16((uint16_t)length);
+	for(int i = 0; i < length; i++) {
+        auto newValue = string.at(i);
+		bb.write8((uint8_t)newValue);
+	}
+	// write padding
+	if (length % 2) {
+		bb.write8(0);
+	}
+}
 
-    // write to tx
-    transmit.toByteBuffer(tx);
-    tx.write(payload.limit(), payload.data());
-    logger.info("ECHO <<  %-8s  (%d) %s", transmit.toString(), payload.limit(), payload.toString());
+
+#undef  DECL_CLASS_CONSTANT
+#define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;
+
+void Host::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Host, BROADCAST, 0xFFFF'FFFF'FFFF)
+    DECL_CLASS_CONSTANT(Host, UNKNOWN,   0x0000'0000'0000)
+    DECL_CLASS_CONSTANT(Host, BFN_GVWIN, 0x0000'aa00'0e60)
+}
+
+void Net::MyConstantMap::initialize() {
+    DECL_CLASS_CONSTANT(Net, ALL,     0xFFFF'FFFF)
+    DECL_CLASS_CONSTANT(Net, UNKNOWN, 0x0000'0000)
+}
+
 }

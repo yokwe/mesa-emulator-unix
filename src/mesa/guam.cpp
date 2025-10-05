@@ -71,6 +71,7 @@ static const Logger logger(__FILE__);
 #include "../opcode/opcode.h"
 
 #include "../util/net.h"
+#include "../util/ThreadControl.h"
 
 #include "guam.h"
 
@@ -338,25 +339,6 @@ static void initialize() {
 		setSwitches(request->switches, config.bootSwitch.c_str());
 	}
 }
-
-class ThreadControl {
-public:
-	std::string name;
-	std::function<void()> function;
-	std::thread thread;
-
-	ThreadControl(const char* name_, std::function<void()> function_) : name(name_), function(function_) {}
-
-	void start() {
-		logger.info("thread start   %s", name);
-		thread = std::thread(function);
-	}
-	void stop() {
-		logger.info("thread joining %s", name);
-		thread.join();
-		logger.info("thread joined  %s", name);
-	}
-};
 
 static void boot() {
 	logger.info("boot START");

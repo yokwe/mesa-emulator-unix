@@ -252,14 +252,19 @@ public:
 	ByteBufferArray() : ByteBuffer(N, array) {
 		clear();
 	}
+	// ByteBufferArray
+	ByteBufferArray(const ByteBufferArray& that) : ByteBuffer(N, array) {
+		copyFrom(that);
+	}
+	ByteBufferArray& operator =(const ByteBufferArray& that) {
+		copyFrom(that);
+		return *this;
+	}
+	// ByteBuffer
 	ByteBufferArray(const ByteBuffer& that) : ByteBuffer(N, array) {
 		copyFrom(that);
 	}
 	ByteBufferArray& operator =(const ByteBuffer& that) {
-		copyFrom(that);
-		return *this;
-	}
-	ByteBufferArray& operator =(const ByteBufferArray& that) {
 		copyFrom(that);
 		return *this;
 	}

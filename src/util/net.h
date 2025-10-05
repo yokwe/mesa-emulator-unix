@@ -83,16 +83,17 @@ class Packet : public ByteBufferArray<PACKET_SIZE> {
 public:
     Packet() : ByteBufferArray<PACKET_SIZE>() {}
 
+    // Packet
     Packet(const Packet& that) {
         copyFrom(that);
     }
-    Packet(const ByteBuffer& that) : ByteBufferArray(that) {}
-
-	Packet& operator =(const ByteBuffer& that) {
+	Packet& operator =(const Packet& that) {
         ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
 		return *this;
 	}
-	Packet& operator =(const Packet& that) {
+    // ByteBuffer
+    Packet(const ByteBuffer& that) : ByteBufferArray(that) {}
+	Packet& operator =(const ByteBuffer& that) {
         ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
 		return *this;
 	}

@@ -78,6 +78,26 @@ public:
     virtual ~Driver() {}
 };
 
+constexpr int PACKET_SIZE = 6 + 6 + 2 + 1500; // 1514
+class Packet : public ByteBufferArray<PACKET_SIZE> {
+public:
+    Packet() : ByteBufferArray<PACKET_SIZE>() {}
+
+    Packet(const Packet& that) {
+        copyFrom(that);
+    }
+    Packet(const ByteBuffer& that) : ByteBufferArray(that) {}
+
+	Packet& operator =(const ByteBuffer& that) {
+        ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
+		return *this;
+	}
+	Packet& operator =(const Packet& that) {
+        ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
+		return *this;
+	}
+};
+
 std::vector<Device> getDeviceList();
 
 Device  getDevice(const std::string& name);

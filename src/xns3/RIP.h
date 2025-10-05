@@ -92,7 +92,7 @@ private:
     static inline MyConstantMap constantMap;
 };
 
-struct NetDelay : Base {
+struct NetDelay : public Base {
     uint32_t net;
     uint16_t delay;
 
@@ -120,7 +120,7 @@ struct NetDelay : Base {
     }
 };
 
-struct RIP : Base {
+struct RIP : public Base {
     uint16_t              type;  // Type
     std::vector<NetDelay> table;
 

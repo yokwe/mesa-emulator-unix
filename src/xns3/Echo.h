@@ -73,7 +73,7 @@ private:
 };
 
 
-struct Echo : Base {
+struct Echo : public Base {
     uint16_t  type; // Type
 
     Echo() {}

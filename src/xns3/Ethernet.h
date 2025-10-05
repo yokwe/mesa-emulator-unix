@@ -67,7 +67,7 @@ private:
     static inline MyConstantMap constantMap;
 };
 
-struct Frame : Base {
+struct Frame : public Base {
     static constexpr int HEADER_LENGTH  = 14;
     static constexpr int MINIMUM_LENGTH = 64;
     static constexpr int MAXIMUM_LENGTH = 6 + 6 + 2 + 1500; // 1514

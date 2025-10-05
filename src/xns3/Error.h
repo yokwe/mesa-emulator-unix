@@ -87,7 +87,7 @@ private:
 };
 
 
-struct Error : Base {
+struct Error : public Base {
     uint16_t errorNumber;
     uint16_t errorParameter;
 

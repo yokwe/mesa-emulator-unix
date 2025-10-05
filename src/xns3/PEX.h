@@ -69,7 +69,7 @@ private:
     static inline MyConstantMap constantMap;
 };
 
-struct PEX : Base {
+struct PEX : public Base {
     uint32_t   id;
     uint16_t   type;
 

@@ -145,7 +145,7 @@ inline uint16_t computeChecksum(const ByteBuffer& bb, int position) { // positio
     return computeChecksum(bb.data(), position + 2, bb.limit());
 }
 
-struct IDP : Base {
+struct IDP : public Base {
     static constexpr int HEADER_LENGTH = 30;
 
     uint16_t checksum;  // Checksum

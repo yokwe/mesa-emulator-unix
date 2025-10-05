@@ -146,7 +146,7 @@ private:
 };
 
 
-struct Request : Base {
+struct Request : public Base {
     uint16_t   version; // Version
     uint16_t   type;    // Type
 
@@ -172,7 +172,7 @@ struct Request : Base {
 
 std::string toStringLocalTime(uint32_t time);
 
-struct Response : Base {
+struct Response : public Base {
     uint16_t version;          // Version
     uint16_t type;             // Type
     uint32_t time;             // current time between 12:00:00, 1 Jan. 1968 and 6:28:23, 6 Feb. 2104 inclusive

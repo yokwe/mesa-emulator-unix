@@ -41,7 +41,7 @@ namespace xns::spp {
 
 void initialize();
 
-struct SPP : Base {
+struct SPP : public Base {
     uint8_t  control; // Control Bit
     uint8_t  sst;     // Sub System Type
     uint16_t idSrc;   // connection id of source

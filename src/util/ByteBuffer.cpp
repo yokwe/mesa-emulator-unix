@@ -38,67 +38,27 @@ static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
-void ByteBuffer::copyFrom(const ByteBuffer& that) {
-	this->myBase     = that.myBase;
-	this->myPosition = that.myPosition;
-	this->myLimit    = that.myLimit;
-	this->myCapacity = that.myCapacity;
-	this->myData     = that.myData;
-	this->myMarkPos  = that.myMarkPos;
-}
-
-ByteBuffer::ByteBuffer() {
-	this->myBase     = 0;
-	this->myPosition = 0;
-	this->myLimit    = 0;
-	this->myCapacity = 0;
-	this->myData     = nullptr;
-	this->myMarkPos  = INVALID_POS;
-}
-ByteBuffer::~ByteBuffer() {
-	//
-}
-
-ByteBuffer::ByteBuffer(const ByteBuffer& that) {
-	copyFrom(that);
-}
-
-ByteBuffer& ByteBuffer::operator =(const ByteBuffer& that) {
-	copyFrom(that);
-	return *this;
-}
-
-ByteBuffer::ByteBuffer(int capacity, uint8_t* data) {
-	this->myBase     = 0;
-	this->myPosition = 0;
-	this->myLimit    = capacity;
-	this->myCapacity = capacity;
-	this->myData     = data;
-	this->myMarkPos  = INVALID_POS;
-}
-
-
-void ByteBuffer::copyFrom(int len, const uint8_t* data) {
-	if (len < 0) {
-		logger.error("Too large len");
-		logger.error("  len      = %5d", len);
-		ERROR();
-	}
-	if (myCapacity < (myBase + len)) {
-		logger.error("Exceed capacity");
-		logger.error("  capacity = %5d", myCapacity);
-		logger.error("  base     = %5d", myBase);
-		logger.error("  len      = %5d", len);
-		ERROR();
-	}
-	// clear myData + myBase with zero
-	memset(myData + myBase, 0, (size_t)(myCapacity - myBase));
-	// copy from data to myData + myBase
-	memcpy(myData + myBase, data, (size_t)len);
-	// reset position and limit
-	myPosition = myBase;
-	myLimit    = myBase + len;
-}
+// void ByteBuffer::copyFrom(int len, const uint8_t* data) {
+// 	if (len < 0) {
+// 		logger.error("Too large len");
+// 		logger.error("  len      = %5d", len);
+// 		ERROR();
+// 	}
+// 	if (myCapacity < (myBase + len)) {
+// 		logger.error("Exceed capacity");
+// 		logger.error("  capacity = %5d", myCapacity);
+// 		logger.error("  base     = %5d", myBase);
+// 		logger.error("  len      = %5d", len);
+// 		ERROR();
+// 	}
+// 	// clear myData + myBase with zero
+// 	memset(myData + myBase, 0, (size_t)(myCapacity - myBase));
+// 	// copy from data to myData + myBase
+// 	memcpy(myData + myBase, data, (size_t)len);
+// 	// reset position and limit
+// 	myPosition = myBase;
+// 	myLimit    = myBase + len;
+// }
 
 std::string ByteBuffer::toString(int offset) const {
 	return toHexString(limit() - offset, data() + offset);
@@ -117,17 +77,17 @@ void ByteBuffer::limit(int newValue) {
 	}
 }
 
-void ByteBuffer::position(int newValue) {
-	if (myBase <= newValue && newValue <= myLimit) {
-		myPosition = newValue;
-	} else {
-		logger.error("Exceed limit");
-		logger.error("  newValue = %5d", newValue);
-		logger.error("  base     = %5d", myBase);
-		logger.error("  limit    = %5d", myLimit);
-		ERROR();
-	}
-}
+// void ByteBuffer::position(int newValue) {
+// 	if (myBase <= newValue && newValue <= myLimit) {
+// 		myPosition = newValue;
+// 	} else {
+// 		logger.error("Exceed limit");
+// 		logger.error("  newValue = %5d", newValue);
+// 		logger.error("  base     = %5d", myBase);
+// 		logger.error("  limit    = %5d", myLimit);
+// 		ERROR();
+// 	}
+// }
 
 void ByteBuffer::mark() {
 	if (myMarkPos == INVALID_POS) {

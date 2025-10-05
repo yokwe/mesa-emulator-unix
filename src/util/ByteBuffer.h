@@ -38,6 +38,8 @@
 #include <cstdint>
 #include <string>
 
+#include "Util.h"
+
 
 class ByteBuffer {
 protected:
@@ -50,17 +52,30 @@ protected:
 	uint8_t* myData;
 	int      myMarkPos;
 
-	void copyFrom(const ByteBuffer& that);
-
 public:
-	ByteBuffer();
-	~ByteBuffer();
-	ByteBuffer(const ByteBuffer& that);
-	ByteBuffer& operator =(const ByteBuffer& that);
-	
+	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(0), myMarkPos(INVALID_POS) {}
 	// assume data[0..capacity) has meaningful value
 	// you can read from this ByteBuffer
-	ByteBuffer(int capacity, uint8_t* data);
+	ByteBuffer(int capacity, uint8_t* data) :
+		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
+
+	ByteBuffer(const ByteBuffer& that) :
+		myBase(that.myBase), myPosition(that.myPosition), myLimit(that.myLimit),
+		myCapacity(that.myCapacity), myData(that.myData), myMarkPos(that.myMarkPos) {
+	}
+	ByteBuffer& operator =(const ByteBuffer& that) {
+		this->myBase     = that.myBase;
+		this->myPosition = that.myPosition;
+		this->myLimit    = that.myLimit;
+		this->myCapacity = that.myCapacity;
+		this->myData     = that.myData;
+		this->myMarkPos  = that.myMarkPos;
+		return *this;
+	}
+	
+	// copy from data to ByteBuffer
+	//void copyFrom(int len, const uint8_t* data);
+
 
 	bool isNull() {
 		return myData == nullptr;
@@ -83,9 +98,6 @@ public:
 	// void setBase() {
 	// 	setBase(myPosition);
 	// }
-
-	// copy from data to ByteBuffer
-	void copyFrom(int len, const uint8_t* data);
 
 	// output as hexadecimal string between base and limit
 	std::string toString(int offset = 0) const;
@@ -111,6 +123,9 @@ public:
 	uint8_t* data() const {
 		return myData;
 	}
+	int markPos() const {
+		return myMarkPos;
+	}
 
 	// returns how many bytes can read
 	int remaining() const {
@@ -127,30 +142,30 @@ public:
 		return length() == 0;
 	}
 
-	// prepare for read bufer from beginning
+	// prepare for read from beginning
 	void rewind() {
 		myPosition = myBase;
 	}
-	// prepare for read buffer from beginning after write
+	// prepare for read from beginning after write
 	void flip() {
 		myLimit    = myPosition;
 		myPosition = myBase;
 	}
-	// prepare for write buffer from beginning
+	// prepare for write from beginning
 	void clear() {
 		myPosition = myBase;
 		myLimit    = myBase;
 	}
 
-	// set data
-	void data(uint8_t* data) {
-		myData = data;
-	}
+	// // set data
+	// void data_(uint8_t* data) {
+	// 	myData = data;
+	// }
 	// set limit
 	void limit(int newValue);
 
 	// set position
-	void position(int newValue);
+	// void position(int newValue);
 	// mark current position for reset
 	void mark();
 	// set position to marked position
@@ -216,4 +231,36 @@ public:
 	void write  (const int index, const int writeSize, const uint8_t* value);
 
 	void writeZero(int n);
+};
+
+template<int N>
+class ByteBufferArray : public ByteBuffer {
+	uint8_t array[N];
+protected:
+	void copyFrom(const ByteBuffer& that) {
+		if (N < that.capacity()) ERROR()
+
+		myBase     = that.base();
+		myPosition = that.position();
+		myLimit    = that.limit();
+//		myCapacity = that.capacity();
+		myMarkPos  = that.markPos();
+		// copy content of that.data[0..that.capacity)
+		memcpy(myData, that.data(), that.capacity());
+	}
+public:
+	ByteBufferArray() : ByteBuffer(N, array) {
+		clear();
+	}
+	ByteBufferArray(const ByteBuffer& that) : ByteBuffer(N, array) {
+		copyFrom(that);
+	}
+	ByteBufferArray& operator =(const ByteBuffer& that) {
+		copyFrom(that);
+		return *this;
+	}
+	ByteBufferArray& operator =(const ByteBufferArray& that) {
+		copyFrom(that);
+		return *this;
+	}
 };

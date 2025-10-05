@@ -16,6 +16,7 @@ target_sources(
 		OpcodeInfo.h
 		Perf.h
 		tcl.h
+		ThreadControl.h
     	Util.h
 	PRIVATE
 		BPF.cpp
@@ -25,6 +26,7 @@ target_sources(
 		OpcodeInfo.cpp
 		Perf.cpp
 		tcl.cpp
+		ThreadControl.cpp
 		Util.cpp
 )
 

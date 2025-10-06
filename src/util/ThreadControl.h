@@ -41,12 +41,18 @@
 
 class ThreadControl {
 public:
-	std::string name;
+	std::string           name;
 	std::function<void()> function;
-	std::thread thread;
+	std::thread           thread;
 
+	ThreadControl() {}
 	ThreadControl(const char* name_, std::function<void()> function_) : name(name_), function(function_) {}
 
+	void set(const char* name_, std::function<void()> function_) {
+		name     = name_;
+		function = function_;
+	}
+
 	void start();
-	void stop();
+	void join();
 };

@@ -43,7 +43,7 @@ void ThreadControl::start() {
     thread = std::thread(function);
 }
 
-void ThreadControl::stop() {
+void ThreadControl::join() {
     logger.info("thread joining %s", name);
     thread.join();
     logger.info("thread joined  %s", name);

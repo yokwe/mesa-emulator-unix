@@ -367,12 +367,12 @@ static void boot() {
 
 	std::this_thread::yield();
 	
-	t1.stop();
-	t2.stop();
-	t3.stop();
-	t4.stop();
-	t5.stop();
-	t6.stop();
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
+	t6.join();
 	auto timeStop = Util::getMilliSecondsSinceEpoch();
 
 	elapsedTime = timeStop - timeStart;

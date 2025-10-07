@@ -39,8 +39,6 @@
 
 namespace xns::time {
 
-void initialize();
-
 class Version {
     Version() = delete;
     inline static const char* FORMAT = "%d";

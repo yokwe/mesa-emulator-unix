@@ -39,8 +39,6 @@
 
 namespace xns::idp {
 
-void initialize();
-
 class Checksum {
     Checksum() = delete;
     inline static const char* FORMAT = "%04X";

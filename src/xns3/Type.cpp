@@ -53,17 +53,6 @@ static const Logger logger(__FILE__);
 
 namespace xns {
 
-void initialize() {
-    xns::echo::initialize();
-    xns::error::initialize();
-    xns::ethernet::initialize();
-    xns::idp::initialize();
-    xns::pex::initialize();
-    xns::rip::initialize();
-    xns::spp::initialize();
-    xns::time::initialize();
-}
-
 void STRING::fromByteBuffer(ByteBuffer& bb) {
 	uint16_t length;
 	bb.read16(length);

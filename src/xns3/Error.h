@@ -43,8 +43,6 @@
 
 namespace xns::error {
 
-void initialize();
-
 class ErrorNumber {
     ErrorNumber() = delete;
     inline static const char* FORMAT = "%d";

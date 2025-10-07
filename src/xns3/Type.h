@@ -46,8 +46,6 @@
 
 namespace xns {
 
-void initialize();
-
 // helper macro to invoke fromByteBuufer / toByteBuffer
 #define FROM_BYTE_BUFFER(bb, name) name.fromByteBuffer(bb)
 #define TO_BYTE_BUFFER(bb, name) name.toByteBuffer(bb)

@@ -42,9 +42,6 @@ static const Logger logger(__FILE__);
 
 namespace xns::idp {
 
-void initialize() {
-    logger.info("%s  intialize", __FUNCTION__);
-}
 
 #undef  DECL_CLASS_CONSTANT
 #define DECL_CLASS_CONSTANT(type, name, value) constantMap.map[type :: name ] = #name;

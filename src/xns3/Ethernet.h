@@ -39,8 +39,6 @@
 
 namespace xns::ethernet {
 
-void initialize();
-
 class Type {
     Type() = delete;
     inline static const char* FORMAT = "%d";
@@ -98,8 +96,5 @@ struct Frame : public Base {
         bb.write16(type);
     }
 };
-
-
-void processRequest(const Frame& request, ByteBuffer& response);
 
 }

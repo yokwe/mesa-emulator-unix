@@ -44,8 +44,6 @@
 
 namespace xns::echo {
 
-void initialize();
-
 class Type {
     Type() = delete;
     inline static const char* FORMAT = "%d";

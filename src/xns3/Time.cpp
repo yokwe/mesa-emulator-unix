@@ -42,10 +42,6 @@ static const Logger logger(__FILE__);
 
 namespace xns::time {
 
-void initialize() {
-    logger.info("%s  intialize", __FUNCTION__);
-}
-
 std::string toStringLocalTime(const uint32_t time) {
     time_t temp = (time_t)time;
     struct tm tm;

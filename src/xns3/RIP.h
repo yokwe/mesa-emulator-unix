@@ -39,8 +39,6 @@
 
 namespace xns::rip {
 
-void initialize();
-
 class Type {
     Type() = delete;
     inline static const char* FORMAT = "%d";

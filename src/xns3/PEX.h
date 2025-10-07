@@ -39,8 +39,6 @@
 
 namespace xns::pex {
 
-void initialize();
-
 class Type {
     Type() = delete;
     inline static const char* FORMAT = "%04X";

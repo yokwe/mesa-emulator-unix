@@ -40,8 +40,4 @@ static const Logger logger(__FILE__);
 
 namespace xns::spp {
 
-void initialize() {
-    logger.info("%s  intialize", __FUNCTION__);
-}
-
 }

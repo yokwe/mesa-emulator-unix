@@ -47,10 +47,6 @@ static const Logger logger(__FILE__);
 
 #include "Server.h"
 
-void callInitialize() {
-     xns::initialize();
-}
-
 struct ThreadTransmit : thread_queue::ThreadQueueProcessor<net::Packet> {
     net::Driver& driver;
 
@@ -89,7 +85,6 @@ int main(int, char **) {
 	setSignalHandler(SIGHUP);
 	setSignalHandler(SIGSEGV);
 
-//    xns::dumpFormatList();
     auto config = xns::config::Config::getInstance();
     logger.info("config network interface  %s", config.server.interface);
     // register constant of host and net from config

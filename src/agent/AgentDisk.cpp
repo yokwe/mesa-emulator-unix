@@ -52,9 +52,10 @@ using namespace PilotDiskFace;
 
 static const CARD32 DEBUG_DONT_USE_THREAD = 0;
 
-void AgentDisk::IOThread::process(const Item& data) {
-	auto* iocb = data.iocb;
-	auto* diskFile = data.diskFile;
+void AgentDisk::IOThread::process(const Item& item) {
+	auto iocb = item.iocb;
+	auto diskFile = item.diskFile;
+	auto interruptSelector = item.interruptSelector;
 
 	uint64_t time;
 	(void)time;
@@ -159,7 +160,6 @@ void AgentDisk::Call() {
 		if (fcb->agentStopped) {
 			logger.info("AGENT %s start  %04X", name, fcb->interruptSelector);
 			ioThread.clear();
-			ioThread.setInterruptSelector(fcb->interruptSelector);
 		}
 		fcb->agentStopped = 0;
 	}
@@ -246,7 +246,7 @@ void AgentDisk::Call() {
 				ERROR();
 			}
 		} else {
-			Item item(iocb, diskFile);
+			Item item(iocb, diskFile, fcb->interruptSelector);
 			ioThread.push(item);
 		}
 

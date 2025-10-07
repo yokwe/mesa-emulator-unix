@@ -48,19 +48,15 @@ public:
 	public:
 		DiskIOFaceGuam::DiskIOCBType* iocb;
 		DiskFile*                     diskFile;
+		CARD16                        interruptSelector;
 
-		Item(DiskIOFaceGuam::DiskIOCBType* iocb_, DiskFile* diskFile_) : iocb(iocb_), diskFile(diskFile_) {}
-		Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile) {}
+		Item(DiskIOFaceGuam::DiskIOCBType* iocb_, DiskFile* diskFile_, CARD16 interruptSelector_) : iocb(iocb_), diskFile(diskFile_), interruptSelector(interruptSelector_) {}
+		Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile), interruptSelector(that.interruptSelector) {}
 	};
 
 	class IOThread : public thread_queue::ThreadQueueProcessor<Item> { 
-		CARD16 interruptSelector;
 	public:
-		IOThread() : thread_queue::ThreadQueueProcessor<Item>("IOThread") {}
-
-		void setInterruptSelector(CARD16 interruptSelector_) {
-			interruptSelector = interruptSelector_;
-		}
+		IOThread() : thread_queue::ThreadQueueProcessor<Item>("disk") {}
 		void process(const Item& data);
 	};
 

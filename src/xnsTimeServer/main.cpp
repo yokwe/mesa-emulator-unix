@@ -127,9 +127,7 @@ int main(int, char **) {
     t1.start();
     t2.start();
 
-    for(int i = 0; i < 1000; i++) {
-        logger.info("i  %2d", i);
-
+    for(;;) {
         net::Packet rx;
         threadReceive.pop(rx);
         if (rx.empty()) continue;

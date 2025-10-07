@@ -34,6 +34,7 @@
 //
 
 #include "Util.h"
+#include <chrono>
 static const Logger logger(__FILE__);
 
 #include <sys/types.h>
@@ -136,8 +137,7 @@ void BPF::write(const ByteBuffer& value) {
 
 // for net::Driver
 // no error check
-int  BPF::select  (uint32_t timeout, int& opErrno) {
-	(void)timeout;
+int  BPF::select  (std::chrono::microseconds timeout, int& opErrno) {
 	opErrno = 0;
 	if (readData.empty()) {
 		int ret = getNonBlockingReadBytes();
@@ -148,10 +148,12 @@ int  BPF::select  (uint32_t timeout, int& opErrno) {
 			FD_ZERO(&fds);
 			FD_SET(fd, &fds);
 
-			// 1 second
+			// set tmeval
+			auto count = timeout.count();
+			auto factor = 1000 * 1000; // microseconds per second
 			struct timeval t;
-			t.tv_sec  = timeout;
-			t.tv_usec = 0;
+			t.tv_sec  = count / factor; // unit is second
+			t.tv_usec = count % factor; // unit is microsecond
 
 			ret = ::select(FD_SETSIZE, &fds, NULL, NULL, &t);
 			opErrno = errno;

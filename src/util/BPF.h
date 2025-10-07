@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -82,7 +83,7 @@ public:
 
 	// for net::Driver
 	// no error check
-	int  select  (uint32_t timeout, int& opErrno);
+	int  select  (std::chrono::microseconds timeout, int& opErrno);
 	int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno);
 	int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch = nullptr);
 	void discard ();

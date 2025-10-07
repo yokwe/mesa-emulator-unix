@@ -33,9 +33,6 @@
 // AgentDisk.cpp
 //
 
-#include <mutex>
-#include <condition_variable>
-
 
 #include "../util/Debug.h"
 #include "../util/Util.h"
@@ -45,85 +42,23 @@ static const Logger logger(__FILE__);
 #include "../mesa/memory.h"
 
 #include "../mesa/interrupt_thread.h"
-#include "../mesa/processor_thread.h"
+
+#include "DiskFile.h"
 
 #include "AgentDisk.h"
-#include "DiskFile.h"
 
 using namespace DiskIOFaceGuam;
 using namespace PilotDiskFace;
 
 static const CARD32 DEBUG_DONT_USE_THREAD = 0;
 
-int AgentDisk::IOThread::stopThread = 0;
-void AgentDisk::IOThread::stop() {
-	logger.info("AgentDisk::IOThread::stop");
-	stopThread = 1;
-}
-void AgentDisk::IOThread::run() {
-	logger.info("AgentDisk::IOThread::run START");
+void AgentDisk::IOThread::process(const Item& data) {
+	auto* iocb = data.iocb;
+	auto* diskFile = data.diskFile;
 
 	uint64_t time;
-	stopThread = 0;
-
-	try {
-		for(;;) {
-			if (stopThread) break;
-
-			DiskIOCBType* iocb     = 0;
-			DiskFile*     diskFile = 0;
-			{
-				std::unique_lock<std::mutex> locker(ioMutex);
-				if (ioQueue.empty()) {
-					// if there is no requst, wait
-					for(;;) {
-						ioCV.wait_for(locker, Util::ONE_SECOND);
-						if (stopThread) goto exitLoop;
-						if (ioQueue.empty()) continue;
-						break;
-					}
-				}
-
-				Item item = ioQueue.front();
-				iocb      = item.iocb;
-				diskFile  = item.diskFile;
-				ioQueue.pop_front();
-			}
-
-			if (PERF_ENABLE) time = Util::getMicroSecondsSinceEpoch();
-			process(iocb, diskFile);
-			if (PERF_ENABLE) {
-				uint64_t now = Util::getMicroSecondsSinceEpoch();
-				PERF_ADD(disk, process_time, now - time)
-			}
-			interrupt_thread::notifyInterrupt(interruptSelector);
-			PERF_COUNT(disk, process)
-		}
-	} catch(Abort& e) {
-		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		processor_thread::stop();
-	}
-exitLoop:
-	logger.info("AgentDisk::IOThread::run STOP");
-}
-void AgentDisk::IOThread::reset() {
-	std::unique_lock<std::mutex> locker(ioMutex);
-	ioQueue.clear();
-}
-
-void AgentDisk::IOThread::setInterruptSelector(CARD16 interruptSelector) {
-	this->interruptSelector = interruptSelector;
-}
-
-void AgentDisk::IOThread::enqueue(DiskIOCBType* iocb, DiskFile* diskFile) {
-	std::unique_lock<std::mutex> locker(ioMutex);
-	Item item(iocb, diskFile);
-
-	ioQueue.push_back(item);
-	ioCV.notify_all();
-}
-
-void AgentDisk::IOThread::process(DiskIOCBType* iocb, DiskFile* diskFile) {
+	(void)time;
+	if (PERF_ENABLE) time = Util::getMicroSecondsSinceEpoch();
 	CARD32 block = diskFile->getBlock(iocb);
 
 	//"AGENT %s %d", name, fcb->command
@@ -183,6 +118,14 @@ void AgentDisk::IOThread::process(DiskIOCBType* iocb, DiskFile* diskFile) {
 		ERROR();
 		break;
 	}
+
+	if (PERF_ENABLE) {
+		uint64_t now = Util::getMicroSecondsSinceEpoch();
+		PERF_ADD(disk, process_time, now - time)
+	}
+
+	PERF_COUNT(disk, process)
+	interrupt_thread::notifyInterrupt(interruptSelector);
 }
 
 
@@ -215,7 +158,7 @@ void AgentDisk::Call() {
 	} else {
 		if (fcb->agentStopped) {
 			logger.info("AGENT %s start  %04X", name, fcb->interruptSelector);
-			ioThread.reset();
+			ioThread.clear();
 			ioThread.setInterruptSelector(fcb->interruptSelector);
 		}
 		fcb->agentStopped = 0;
@@ -303,7 +246,8 @@ void AgentDisk::Call() {
 				ERROR();
 			}
 		} else {
-			ioThread.enqueue(iocb, diskFile);
+			Item item(iocb, diskFile);
+			ioThread.push(item);
 		}
 
 		if (iocb->nextIOCB == 0) break;

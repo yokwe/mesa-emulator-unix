@@ -35,49 +35,31 @@
 
 #pragma once
 
-#include <mutex>
-#include <condition_variable>
-#include <deque>
-
 #include "../mesa/Pilot.h"
 
 #include "Agent.h"
 #include "DiskFile.h"
 
+#include "../util/ThreadQueue.h"
+
 class AgentDisk : public Agent {
 public:
-	class IOThread {
+	class Item {
 	public:
-		static void stop();
+		DiskIOFaceGuam::DiskIOCBType* iocb;
+		DiskFile*                     diskFile;
 
-		IOThread() {
-			interruptSelector = 0;
+		Item(DiskIOFaceGuam::DiskIOCBType* iocb_, DiskFile* diskFile_) : iocb(iocb_), diskFile(diskFile_) {}
+		Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile) {}
+	};
+
+	class IOThread : public thread_queue::ThreadQueueProcessor<Item> {
+		CARD16 interruptSelector;
+	public:
+		void setInterruptSelector(CARD16 interruptSelector_) {
+			interruptSelector = interruptSelector_;
 		}
-
-		void run();
-		void reset();
-
-		void setInterruptSelector(CARD16 interruptSelector);
-
-		void enqueue(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile);
-		void process(DiskIOFaceGuam::DiskIOCBType* iocb, DiskFile* diskFile);
-
-	private:
-		class Item {
-		public:
-			DiskIOFaceGuam::DiskIOCBType* iocb;
-			DiskFile*                     diskFile;
-
-			Item(DiskIOFaceGuam::DiskIOCBType* iocb_, DiskFile* diskFile_) : iocb(iocb_), diskFile(diskFile_) {}
-			Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile) {}
-		};
-
-		static int stopThread;
-
-		CARD16                  interruptSelector;
-		std::mutex              ioMutex;
-		std::condition_variable ioCV;
-		std::deque<Item>        ioQueue;
+		void process(const Item& data);
 	};
 
 	IOThread ioThread;

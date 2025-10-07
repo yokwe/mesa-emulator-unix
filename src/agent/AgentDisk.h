@@ -43,20 +43,25 @@
 #include "../util/ThreadQueue.h"
 
 class AgentDisk : public Agent {
+	using DiskFCBType  = DiskIOFaceGuam::DiskFCBType;
+	using DiskDCBType  = DiskIOFaceGuam::DiskDCBType;
+	using DiskIOCBType = DiskIOFaceGuam::DiskIOCBType;
 public:
 	class Item {
 	public:
-		DiskIOFaceGuam::DiskIOCBType* iocb;
-		DiskFile*                     diskFile;
-		CARD16                        interruptSelector;
+		CARD16        interruptSelector;
+		DiskIOCBType* iocb;
+		DiskFile*     diskFile;
 
-		Item(DiskIOFaceGuam::DiskIOCBType* iocb_, DiskFile* diskFile_, CARD16 interruptSelector_) : iocb(iocb_), diskFile(diskFile_), interruptSelector(interruptSelector_) {}
-		Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile), interruptSelector(that.interruptSelector) {}
+		Item(DiskIOCBType* iocb_, DiskFile* diskFile_, CARD16 interruptSelector_) :
+			interruptSelector(interruptSelector_), iocb(iocb_), diskFile(diskFile_) {}
+		Item(const Item& that) :
+			interruptSelector(that.interruptSelector), iocb(that.iocb), diskFile(that.diskFile) {}
 	};
 
 	class IOThread : public thread_queue::ThreadQueueProcessor<Item> { 
 	public:
-		IOThread() : thread_queue::ThreadQueueProcessor<Item>("disk") {}
+		IOThread() : thread_queue::ThreadQueueProcessor<Item>("IOThread") {}
 		void process(const Item& data);
 	};
 
@@ -64,7 +69,7 @@ public:
 
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::disk;
 	static const inline auto name_ = "Disk";
-	static const inline auto fcbSize_ = SIZE(DiskIOFaceGuam::DiskFCBType) + SIZE(DiskIOFaceGuam::DiskDCBType);
+	static const inline auto fcbSize_ = SIZE(DiskFCBType) + SIZE(DiskDCBType);
 	AgentDisk() : Agent(index_, name_, fcbSize_) {
 		fcb      = 0;
 		dcb      = 0;
@@ -79,7 +84,7 @@ public:
 	}
 
 private:
-	DiskIOFaceGuam::DiskFCBType* fcb      = 0;
-	DiskIOFaceGuam::DiskDCBType* dcb      = 0;
-	DiskFile*                    diskFile = 0;;
+	DiskFCBType* fcb      = 0;
+	DiskDCBType* dcb      = 0;
+	DiskFile*    diskFile = 0;
 };

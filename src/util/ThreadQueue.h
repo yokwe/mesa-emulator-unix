@@ -57,6 +57,7 @@ public:
     virtual void process(const T& data) = 0;
 
     static void stop() {
+        logger.info("ThreadQueue stop  %s", name);
         stopThread = true;
     }
     void push(const T& data) {

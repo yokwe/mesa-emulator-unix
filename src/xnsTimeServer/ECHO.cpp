@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../xns3/Echo.h"
 
-#include "../util/EthernetPacket.h"
+#include "../util/net.h"
 
 #include "Server.h"
 
@@ -54,7 +54,7 @@ void processECHO(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     }
 
     // build payload
-    EthernetPacket payload;
+    net::Packet payload;
     {
         // copy remaaining content of rx to payload
         uint8_t data;

@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../xns3/IDP.h"
 
-#include "../util/EthernetPacket.h"
+#include "../util/net.h"
 
 #include "Server.h"
 
@@ -79,7 +79,7 @@ void processIDP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         }
     }
 
-    EthernetPacket payload;
+    net::Packet payload;
     if (receive.type == xns::idp::Type::ECHO) {
         processECHO(rx, payload, context);
     } else if (receive.type == xns::idp::Type::PEX) {

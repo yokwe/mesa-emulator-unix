@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "../xns3/PEX.h"
 
-#include "../util/EthernetPacket.h"
+#include "../util/net.h"
 
 #include "Server.h"
 
@@ -50,7 +50,7 @@ void processPEX(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
     xns::pex::PEX receive(rx);
     logger.info("PEX  >>  %s  (%d) %s", receive.toString(), rx.remaining(), rx.toStringFromPosition());
 
-    EthernetPacket payload;
+    net::Packet payload;
     if (receive.type == xns::pex::Type::UNSPEC) {
         //
     } else if (receive.type == xns::pex::Type::TIME) {

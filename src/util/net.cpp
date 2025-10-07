@@ -132,7 +132,7 @@ public:
     }
     
     // no error checking
-    int  select  (uint32_t timeout, int& opErrno) {
+    int  select  (std::chrono::microseconds timeout, int& opErrno) {
         return bpf.select(timeout, opErrno);
     }
     int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {

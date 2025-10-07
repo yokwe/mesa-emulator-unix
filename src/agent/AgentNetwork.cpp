@@ -254,7 +254,7 @@ void AgentNetwork::ReceiveThread::run() {
 		int opErrno = 0;
 		// Below "1" means 1 second
 		PERF_COUNT(network, select)
-		int ret = driver->select(1, opErrno);
+		int ret = driver->select(Util::ONE_SECOND, opErrno);
 		if (ret == -1) {
 			logger.fatal("%s  %d  select returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
 			ERROR();

@@ -48,19 +48,21 @@ class ThreadQueueProcessor {
     std::mutex              mutex;
     std::condition_variable cv;
     std::deque<T>           queue;
-    bool                    stopThread;
+    static inline bool      stopThread;
 public:
-    ThreadQueueProcessor() : stopThread(false) {}
-
     virtual void process(const T& data) = 0;
 
-    void stop() {
+    static void stop() {
         stopThread = true;
     }
     void push(const T& data) {
         std::unique_lock<std::mutex> lock(mutex);
         queue.push_front(data);
         cv.notify_one();
+    }
+    void clear() {
+        std::unique_lock<std::mutex> lock(mutex);
+        queue.clear();
     }
 
     void run() {
@@ -93,15 +95,17 @@ class ThreadQueueProducer {
     std::mutex                mutex;
     std::condition_variable   cv;
     std::deque<T>             queue;
-    bool                      stopThread;
+    static inline bool        stopThread;
 public:
-    ThreadQueueProducer() : stopThread(false) {}
-
     // produce return true when data has value
     virtual bool produce(T& data, std::chrono::milliseconds timeout) = 0;
 
-    void stop() {
+    static void stop() {
         stopThread = true;
+    }
+    void clear() {
+        std::unique_lock<std::mutex> lock(mutex);
+        queue.clear();
     }
  
     // pop return true when data has value

@@ -87,7 +87,12 @@ public:
     virtual ~Driver() {}
 };
 
-constexpr int PACKET_SIZE = 6 + 6 + 2 + 1500; // 1514
+// From APilot/15.0.1/Base/Friends/IEEE8023.mesa
+constexpr int maxBytesPerEthernetPacket     = 1518; // including 4 bytes CRC  1518 = 1500 + 6 + 6 + 2 + 4
+constexpr int maxDataBytesPerEthernetPacket = 1500;
+constexpr int minBytesPerEthernetPacket     = 60;   // not including CRC-32
+
+constexpr int PACKET_SIZE = maxBytesPerEthernetPacket;
 class Packet : public ByteBufferArray<PACKET_SIZE> {
 public:
     Packet() : ByteBufferArray<PACKET_SIZE>() {}

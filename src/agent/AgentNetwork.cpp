@@ -266,6 +266,13 @@ void AgentNetwork::ReceiveThread::run() {
 
 		if (ret == 0) continue;
 
+		// When data is arrived but noone want to receive, dicards received data
+		if (receiveQueue.empty()) {
+			PERF_COUNT(network, discard)
+			driver->discard();
+			continue;
+		}
+
 		{
 			std::unique_lock<std::mutex> locker(receiveMutex);
 			// data is ready

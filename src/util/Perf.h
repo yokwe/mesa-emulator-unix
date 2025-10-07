@@ -110,6 +110,7 @@ PERF_DECLARE(network, transmit)
 PERF_DECLARE(network, wait_for)
 PERF_DECLARE(network, receive)
 PERF_DECLARE(network, select)
+PERF_DECLARE(network, discard)
 
 // disk
 PERF_DECLARE(disk, process)

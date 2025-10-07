@@ -38,8 +38,8 @@
 static const Logger logger(__FILE__);
 
 #include "../util/net.h"
-#include "../util/ByteBuffer.h"
-#include "../util/EthernetPacket.h"
+#include "../util/ThreadControl.h"
+#include "../util/ThreadQueue.h"
 
 #include "../xns3/Type.h"
 #include "../xns3/Ethernet.h"
@@ -50,6 +50,34 @@ static const Logger logger(__FILE__);
 void callInitialize() {
      xns::initialize();
 }
+
+struct ThreadTransmit : thread_queue::ThreadQueueProcessor<net::Packet> {
+    net::Driver& driver;
+
+    ThreadTransmit(net::Driver& driver_) : driver(driver_) {}
+
+    void process(const net::Packet& data) {
+        driver.write(data);
+    }
+};
+
+struct ThreadReceive : thread_queue::ThreadQueueProducer<net::Packet> {
+    net::Driver& driver;
+
+    ThreadReceive(net::Driver& driver_) : driver(driver_) {}
+
+    bool produce(net::Packet& packet, std::chrono::milliseconds timeout) {
+        packet.clear();
+        int opErrno;
+        if (driver.select(timeout, opErrno)) {
+            int length = driver.receive(packet.data(), packet.capacity(), opErrno);
+            packet.limit(length);
+            return true;
+        }
+        return false;
+    }
+};
+
 
 Context context;
 
@@ -90,55 +118,72 @@ int main(int, char **) {
 
     auto& driver = *context.driver;
 	driver.open();
-	driver.discard();
-    for(;;) {
-        auto receiveDataList = driver.read();
-        if (receiveDataList.empty()) continue;
 
-        for(ByteBuffer rx: receiveDataList) {
-            // logger.info("RX  %4d  %s", rx.length(), rx.toStringFromBase());
-            
-            // build receive
-            xns::ethernet::Frame receive(rx);
-            if (receive.dest != context.ME && receive.dest != xns::Host::BROADCAST) {
-                // not my address or not broadcast
-                // logger.info("frame  %s  %d", receive.toString(), rx.remaining());
-                continue;
-            }
-            logger.info("ETH  >>  %s  %d", receive.toString(), rx.remaining());
+    ThreadReceive  threadReceive(driver);
+    ThreadTransmit threadTransmit(driver);
 
+    std::function<void()> f1 = std::bind(&ThreadReceive::run, &threadReceive);
+    std::function<void()> f2 = std::bind(&ThreadTransmit::run, &threadTransmit);
 
-            EthernetPacket payload;
-            if (receive.type == xns::ethernet::Type::XNS) processIDP(rx, payload, context);
-            // if payload is empty, continue with next received data
-            payload.flip();
-            // logger.info("payload  length  %d", payload.length());
-            if (payload.empty()) continue;
+	ThreadControl t1("threadReceive",  f1);
+	ThreadControl t2("threadTransmit", f2);
 
-            xns::ethernet::Frame transmit;
-            // build transmit
-            {
-                transmit.dest   = receive.source;
-                transmit.source = context.ME;
-                transmit.type   = receive.type;
-            }
-            logger.info("ETH  <<  %s  %d", transmit.toString(), payload.remaining());
+    driver.discard();
+    t1.start();
+    t2.start();
 
-            EthernetPacket tx;
-            // build tx
-            {
-                transmit.toByteBuffer(tx);
-                tx.write(payload.length(), payload.data());
-                // add padding if it is smaller than MINIMUM_LENGTH
-                int length = tx.length();
-                if (length < xns::ethernet::Frame::MINIMUM_LENGTH) {
-                    tx.writeZero(xns::ethernet::Frame::MINIMUM_LENGTH - length);
-                }
-                // logger.info("TX  length  %d", tx.length());
-            }
-            driver.write(tx);
+    for(int i = 0; i < 1000; i++) {
+        logger.info("i  %2d", i);
+
+        net::Packet rx;
+        threadReceive.pop(rx);
+        if (rx.empty()) continue;
+
+        // build receive
+        xns::ethernet::Frame receive(rx);
+        if (receive.dest != context.ME && receive.dest != xns::Host::BROADCAST) {
+            // not my address or not broadcast
+            // logger.info("frame  %s  %d", receive.toString(), rx.remaining());
+            continue;
         }
+        logger.info("ETH  >>  %s  %d", receive.toString(), rx.remaining());
+
+
+        net::Packet payload;
+        if (receive.type == xns::ethernet::Type::XNS) processIDP(rx, payload, context);
+        // if payload is empty, continue with next received data
+        payload.flip();
+        // logger.info("payload  length  %d", payload.length());
+        if (payload.empty()) continue;
+
+        xns::ethernet::Frame transmit;
+        // build transmit
+        {
+            transmit.dest   = receive.source;
+            transmit.source = context.ME;
+            transmit.type   = receive.type;
+        }
+        logger.info("ETH  <<  %s  %d", transmit.toString(), payload.remaining());
+
+        net::Packet tx;
+        // build tx
+        {
+            transmit.toByteBuffer(tx);
+            tx.write(payload.length(), payload.data());
+            // add padding if it is smaller than MINIMUM_LENGTH
+            int length = tx.length();
+            if (length < xns::ethernet::Frame::MINIMUM_LENGTH) {
+                tx.writeZero(xns::ethernet::Frame::MINIMUM_LENGTH - length);
+            }
+            // logger.info("TX  length  %d", tx.length());
+        }
+        threadTransmit.push(tx);
 	}
+
+    threadReceive.stop();
+    threadTransmit.stop();
+    t1.join();
+    t2.join();
 
 	logger.info("STOP");
 }

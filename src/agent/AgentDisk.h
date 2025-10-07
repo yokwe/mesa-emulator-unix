@@ -53,9 +53,11 @@ public:
 		Item(const Item& that) : iocb(that.iocb), diskFile(that.diskFile) {}
 	};
 
-	class IOThread : public thread_queue::ThreadQueueProcessor<Item> {
+	class IOThread : public thread_queue::ThreadQueueProcessor<Item> { 
 		CARD16 interruptSelector;
 	public:
+		IOThread() : thread_queue::ThreadQueueProcessor<Item>("IOThread") {}
+
 		void setInterruptSelector(CARD16 interruptSelector_) {
 			interruptSelector = interruptSelector_;
 		}

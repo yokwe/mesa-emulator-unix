@@ -45,11 +45,15 @@ namespace thread_queue {
 
 template<typename T>
 class ThreadQueueProcessor {
+    std::string             name;
     std::mutex              mutex;
     std::condition_variable cv;
     std::deque<T>           queue;
     static inline bool      stopThread;
 public:
+    ThreadQueueProcessor(const char* name_) : name(name_) {}
+    ThreadQueueProcessor() {}
+
     virtual void process(const T& data) = 0;
 
     static void stop() {
@@ -66,6 +70,7 @@ public:
     }
 
     void run() {
+        logger.info("ThreadQueue start %s", name);
         stopThread = false;
         queue.clear();
 
@@ -86,17 +91,21 @@ public:
             }
         }
     exit:
-        //
+        logger.info("ThreadQueue stop  %s", name);
     }
 };
 
 template<typename T>
 class ThreadQueueProducer {
+    std::string               name;
     std::mutex                mutex;
     std::condition_variable   cv;
     std::deque<T>             queue;
     static inline bool        stopThread;
 public:
+    ThreadQueueProducer(const char* name_) : name(name_) {}
+    ThreadQueueProducer() {}
+
     // produce return true when data has value
     virtual bool produce(T& data, std::chrono::milliseconds timeout) = 0;
 
@@ -124,6 +133,7 @@ public:
     }
 
     void run() {
+        logger.info("ThreadQueue start %s", name);
         stopThread = false;
         queue.clear();
 
@@ -136,6 +146,7 @@ public:
             }
         }
     exit:
+        logger.info("ThreadQueue stop  %s", name);
         //
     }
 

@@ -50,7 +50,7 @@ static const Logger logger(__FILE__);
 struct ThreadTransmit : thread_queue::ThreadQueueProcessor<net::Packet> {
     net::Driver& driver;
 
-    ThreadTransmit(net::Driver& driver_) : driver(driver_) {}
+    ThreadTransmit(net::Driver& driver_) : thread_queue::ThreadQueueProcessor<net::Packet>("ThreadTransmit"), driver(driver_) {}
 
     void process(const net::Packet& data) {
         driver.write(data);
@@ -60,7 +60,7 @@ struct ThreadTransmit : thread_queue::ThreadQueueProcessor<net::Packet> {
 struct ThreadReceive : thread_queue::ThreadQueueProducer<net::Packet> {
     net::Driver& driver;
 
-    ThreadReceive(net::Driver& driver_) : driver(driver_) {}
+    ThreadReceive(net::Driver& driver_) : thread_queue::ThreadQueueProducer<net::Packet>("ThreadReceive"), driver(driver_) {}
 
     bool produce(net::Packet& packet, std::chrono::milliseconds timeout) {
         packet.clear();

@@ -36,16 +36,32 @@
 #pragma once
 
 #include <chrono>
+#include <deque>
 #include <string>
-#include <vector>
+#include <cstdint>
 
-#include <unistd.h>
 #include <sys/time.h>
 #include <net/bpf.h>
 
 #include "ByteBuffer.h"
 
 class BPF {
+	// This ByteBuffer contains whole data that includes struct bpf_hdr.
+	// Buffer.data() returns address of struct bpf_hdr.
+	// Buffer.base() returns index of captured data
+	// Buffer.limit() returns bh_hdrlen + bh_caplen
+	// Received data is stored between base() and limit()
+	// You can get address of struct timeval from data()
+	std::deque<ByteBuffer> readData;
+
+	//
+	// IMPORTANT
+	//
+	// read() is blocking operation. It don't return until data is received.
+	// read() returns std::deque<ByteBuffer> readData.
+	// Backing store of ByteBuffer is member variable readData.
+	const std::deque<ByteBuffer>& read();
+
 public:
 	static const struct bpf_program* PROGRAM_IP;
 	static const struct bpf_program* PROGRAM_XNS;
@@ -55,8 +71,6 @@ public:
 	int         bufferSize;
 	uint8_t*    buffer;
 
-	std::vector<ByteBuffer> readData;
-
 	BPF() : fd(-1), bufferSize(-1), buffer(0) {}
 	~BPF() { close(); }
 
@@ -65,28 +79,16 @@ public:
 	void close();
 
 	// For ByteBuffer
-	void write(const ByteBuffer& value);
-
-	// read() returns std::vector<ByteBuffer> readData.
-	// Backing store of ByteBuffer is member variable buffer.
-	//
-	// IMPORTANT
-	//
-	// This ByteBuffer contains whole data that includes struct bpf_hdr.
-	// Buffer.data() returns address of struct bpf_hdr.
-	// Buffer.base() returns index of captured data
-	// Buffer.limit() returns bh_hdrlen + bh_caplen
-	// So actual received data is stored between base() and limit()
-	// You can get address of struct timeval from data()
-	const std::vector<ByteBuffer>& read();
-
+	int write(const ByteBuffer& value);
+	// if timeout is happend, bb contains empty and returns 0
+	int read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr);
 
 	// for net::Driver
 	// no error check
-	int  select  (std::chrono::microseconds timeout, int& opErrno);
-	int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno);
-	int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch = nullptr);
-	void discard ();
+	int  select  (std::chrono::microseconds timeout);
+	int  transmit(uint8_t* data, uint32_t dataLen);
+	int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr);
+	void clear ();
 
 
 	// BIOCGBLEN

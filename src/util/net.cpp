@@ -131,26 +131,24 @@ public:
 		}
     }
     
-    // no error checking
-    int  select  (std::chrono::microseconds timeout, int& opErrno) {
-        return bpf.select(timeout, opErrno);
+    int  select  (std::chrono::microseconds timeout) {
+        return bpf.select(timeout);
     }
-    int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
-        return bpf.transmit(data, dataLen, opErrno);
+    int  transmit(uint8_t* data, uint32_t dataLen) {
+        return bpf.transmit(data, dataLen);
     }
-    int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* milliSecondsSinceEpoch = nullptr) {
-        return bpf.receive(data, dataLen, opErrno, milliSecondsSinceEpoch);;
+    int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+        return bpf.receive(data, dataLen, timeout, timestamp);
     }
-    void discard() {
-        bpf.discard();
+    void clear() {
+        bpf.clear();
     }
-
-	const std::vector<ByteBuffer>& read() {
-		return bpf.read();
-	}
-	void write(const ByteBuffer& value) {
-		bpf.write(value);
-	}
+    int write(const ByteBuffer& value) {
+        return bpf.write(value);
+    }
+    int read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+        return bpf.read(bb, timeout, timestamp);
+    }
 
     BPF bpf;
 	bool bpfOpen = false;

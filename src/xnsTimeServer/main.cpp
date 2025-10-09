@@ -62,15 +62,11 @@ struct ThreadReceive : thread_queue::ThreadQueueProducer<net::Packet> {
 
     ThreadReceive(net::Driver& driver_) : thread_queue::ThreadQueueProducer<net::Packet>("ThreadReceive"), driver(driver_) {}
 
-    bool produce(net::Packet& packet, std::chrono::milliseconds timeout) {
+    // produce return true when data has value
+    bool produce(net::Packet& packet, std::chrono::milliseconds timeout) override{
         packet.clear();
-        int opErrno;
-        if (driver.select(timeout, opErrno)) {
-            int length = driver.receive(packet.data(), packet.capacity(), opErrno);
-            packet.limit(length);
-            return true;
-        }
-        return false;
+        int ret = driver.read(packet, timeout);
+        return ret;
     }
 };
 
@@ -123,7 +119,7 @@ int main(int, char **) {
 	ThreadControl t1("threadReceive",  f1);
 	ThreadControl t2("threadTransmit", f2);
 
-    driver.discard();
+    driver.clear();
     t1.start();
     t2.start();
 
@@ -131,7 +127,6 @@ int main(int, char **) {
         net::Packet rx;
         threadReceive.pop(rx);
         if (rx.empty()) continue;
-
         // build receive
         xns::ethernet::Frame receive(rx);
         if (receive.dest != context.ME && receive.dest != xns::Host::BROADCAST) {
@@ -140,7 +135,6 @@ int main(int, char **) {
             continue;
         }
         logger.info("ETH  >>  %s  %d", receive.toString(), rx.remaining());
-
 
         net::Packet payload;
         if (receive.type == xns::ethernet::Type::XNS) processIDP(rx, payload, context);

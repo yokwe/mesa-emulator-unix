@@ -33,9 +33,9 @@
 // BPF.cpp
 //
 
-#include "Util.h"
 #include <chrono>
-static const Logger logger(__FILE__);
+#include <cstring>
+#include <deque>
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -46,6 +46,9 @@ static const Logger logger(__FILE__);
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "Util.h"
+static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
@@ -106,9 +109,10 @@ void BPF::close() {
 	fd         = -1;
 	bufferSize = -1;
 	buffer     = 0;
+	readData.clear();
 }
 
-const std::vector<ByteBuffer>& BPF::read() {
+const std::deque<ByteBuffer>& BPF::read() {
 	int validBufferLen;
 	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 
@@ -123,79 +127,69 @@ const std::vector<ByteBuffer>& BPF::read() {
 
 		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
-		readData.push_back(element);
+		readData.push_front(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);
 	}
 
 	return readData;
 }
-void BPF::write(const ByteBuffer& value) {
+int BPF::read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+	bb.clear();
+	if (readData.empty()) {
+		if (getNonBlockingReadBytes() == 0) {
+			select(timeout);
+		}
+		if (getNonBlockingReadBytes() == 0) return 0;
+		read();
+	}
+	const ByteBuffer& bpfData = readData.back();
+	// bpfData hase base value
+	// copy bpfData[base .. limit) to bb
+	bb.write(bpfData.limit() - bpfData.base(), bpfData.data() + bpfData.base());
+	bb.flip();
+	if (timestamp != nullptr) {
+		struct bpf_hdr* p = (struct bpf_hdr*)bb.data();
+		struct BPF_TIMEVAL tstamp = p->bh_tstamp;
+		int64_t time = (int64_t)(tstamp.tv_sec) * 1000'000 + tstamp.tv_usec; // conver to microsecond
+		*timestamp = std::chrono::microseconds(time);
+	}
+	readData.pop_back();
+	return bb.length();
+}
+int BPF::write(const ByteBuffer& value) {
 	int ret;
 	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
+	return ret;
 }
 
 // for net::Driver
 // no error check
-int  BPF::select  (std::chrono::microseconds timeout, int& opErrno) {
-	opErrno = 0;
-	if (readData.empty()) {
-		int ret = getNonBlockingReadBytes();
-
-		if (ret == 0) {
-			// do actual select call
-			fd_set fds;
-			FD_ZERO(&fds);
-			FD_SET(fd, &fds);
-
-			// set tmeval
-			auto count = timeout.count();
-			auto factor = 1000 * 1000; // microseconds per second
-			struct timeval t;
-			t.tv_sec  = count / factor; // unit is second
-			t.tv_usec = count % factor; // unit is microsecond
-
-			ret = ::select(FD_SETSIZE, &fds, NULL, NULL, &t);
-			opErrno = errno;
-		}
-
-		return ret;
-	} else {
-		return readData.front().limit();
-	}
-}
-int  BPF::transmit(uint8_t* data, uint32_t dataLen, int& opErrno) {
+int  BPF::select  (std::chrono::microseconds timeout_) {
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(fd, &fds);
+	// set tmeval
+	auto count = timeout_.count();
+	auto factor = 1000 * 1000;   // microseconds per second
+	struct timeval timeout;
+	timeout.tv_sec  = count / factor; // unit is second
+	timeout.tv_usec = count % factor; // unit is microsecond
 	int ret;
-	LOG_SYSCALL2(ret, opErrno, ::write(fd, data, dataLen));
+	CHECK_SYSCALL(ret, ::select(FD_SETSIZE, &fds, NULL, NULL, &timeout))
 	return ret;
 }
-int  BPF::receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* msecSinceEpoch) {
-	opErrno = 0;
-	// if readData is empty, fill readData
-	if (readData.empty()) read();
-
-	// Take first entry
-	ByteBuffer bb = readData.front();
-	int len = bb.limit() - bb.base();
-	if (dataLen < (uint32_t)len) {
-		logger.error("Unexpected");
-		logger.error("  dataLen %u", dataLen);
-		logger.error("  len     %d", len);
-		ERROR();
-	}
-	// copy bb to data
-	bb.read(bb.base(), len, data);
-
-	// set dateTime
-	if (msecSinceEpoch != nullptr) {
-		struct timeval* p = (struct timeval*)bb.data();
-		*msecSinceEpoch = (p->tv_sec * 1000) + (p->tv_usec / 1000);
-	}
-	// remove first entry
-	readData.pop_back();
-	return len;
+int  BPF::transmit(uint8_t* data, uint32_t dataLen) {
+	ByteBuffer bb(dataLen, data);
+	int ret = write(bb);
+	return ret;
 }
-void BPF::discard() {
+int  BPF::receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+	ByteBuffer bb(dataLen, data);
+	int ret = read(bb, timeout, timestamp);
+	return ret;
+}
+void BPF::clear() {
 	// clear readData
 	readData.clear();
 	// clear buffer

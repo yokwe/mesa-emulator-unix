@@ -64,24 +64,12 @@ public:
     virtual void open()  = 0;
     virtual void close() = 0;
 
-    // no error checking
-    virtual int  select  (std::chrono::microseconds timeout, int& opErrno) = 0;
-    virtual int  transmit(uint8_t* data, uint32_t dataLen, int& opErrno) = 0;
-    virtual int  receive (uint8_t* data, uint32_t dataLen, int& opErrno, uint64_t* milliSecondsSinceEpoch = nullptr) = 0;
-    virtual void discard() = 0;
-
-    int transmit(const ByteBuffer& bb, int& opErrno) {
-        return transmit(bb.data(), bb.limit(), opErrno);
-    }
-    int receive(ByteBuffer& bb, int& opErrno, uint64_t* milliSecondsSinceEpoch = nullptr) {
-        int limit = receive(bb.data(), bb.capacity(), opErrno, milliSecondsSinceEpoch);
-        bb.limit(limit);
-        return limit;
-    }
-
-    // packet base functions
-    virtual const std::vector<ByteBuffer>& read() = 0;
-    virtual void write(const ByteBuffer& value) = 0;
+    virtual int  select  (std::chrono::microseconds timeout) = 0;
+    virtual int  transmit(uint8_t* data, uint32_t dataLen) = 0;
+    virtual int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr) = 0;
+    virtual void clear() = 0;
+    virtual int  write(const ByteBuffer& value) = 0;
+    virtual int  read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr) = 0;
 
     Driver(const Device& device_) : device(device_.name, device_.address) {}
     virtual ~Driver() {}

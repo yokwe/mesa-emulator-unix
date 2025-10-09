@@ -33,6 +33,7 @@
 // AgentNetwork.cpp
 //
 
+#include <chrono>
 #include <condition_variable>
 
 #include "../util/Debug.h"
@@ -83,8 +84,7 @@ void AgentNetwork::TransmitThread::transmit(EthernetIOFaceGuam::EthernetIOCBType
 		for(int i = iocb->bufferLength; i < 64; i++) buffer[i] = 0;
 		dataLen = 64;
 	}
-	int opErrno = 0;
-	int ret = driver->transmit(buffer, dataLen, opErrno);
+	int ret = driver->transmit(buffer, dataLen);
 
 	if (ret == -1) {
 		// set iocb->status if possibble
@@ -96,14 +96,7 @@ void AgentNetwork::TransmitThread::transmit(EthernetIOFaceGuam::EthernetIOCBType
 		//static const CARD16 S_alignmentError          =  16;
 		//static const CARD16 S_packetTooLong           =  32;
 		//static const CARD16 S_bacCRDAndAlignmentError = 128;
-		logger.fatal("%s  %d  sendto returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
 		ERROR();
-
-		switch (opErrno) {
-		default:
-			iocb->status = EthernetIOFaceGuam::S_tooManyCollisions;
-		}
-		return;
 	}
 	if (ret != (int)dataLen) {
 		logger.fatal("%s  %d  ret != dataLen.  ret = %d  dataLen = %d", __FUNCTION__, __LINE__, ret, dataLen);
@@ -202,34 +195,26 @@ void AgentNetwork::ReceiveThread::receive(EthernetIOFaceGuam::EthernetIOCBType* 
 
 	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
 	CARD32 dataLen = iocb->bufferLength;
-	int    opErrno = 0;
 	
 	CARD8 buffer[net::PACKET_SIZE];
-	int ret = driver->receive(buffer, sizeof(buffer), opErrno);
-
-	if (ret == -1) {
-		// set iocb->status if possible
-
-		//static const CARD16 S_inProgress              =   1;
-		//static const CARD16 S_completedOK             =   2;
-		//static const CARD16 S_tooManyCollisions       =   4;
-		//static const CARD16 S_badCRC                  =   8;
-		//static const CARD16 S_alignmentError          =  16;
-		//static const CARD16 S_packetTooLong           =  32;
-		//static const CARD16 S_bacCRDAndAlignmentError = 128;
-		logger.fatal("%s  %d  recv   returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
-		ERROR();
-
-		switch (opErrno) {
-		default:
-			iocb->status = EthernetIOFaceGuam::S_badCRC;
+	int ret;
+	for(;;) {
+		ret = driver->receive(buffer, sizeof(buffer), std::chrono::seconds(60 * 10));
+		if (0 < ret) break;
+		if (ret == 0) {
+			logger.info("AgentNetwork::ReceiveThread receive timeout");
+			continue;
 		}
-		return;
-	}
-	if (ret < 0) {
-		logger.fatal("unknown ret = %d", ret);
+		logger.fatal("ret %d", ret);
 		ERROR();
 	}
+	//static const CARD16 S_inProgress              =   1;
+	//static const CARD16 S_completedOK             =   2;
+	//static const CARD16 S_tooManyCollisions       =   4;
+	//static const CARD16 S_badCRC                  =   8;
+	//static const CARD16 S_alignmentError          =  16;
+	//static const CARD16 S_packetTooLong           =  32;
+	//static const CARD16 S_bacCRDAndAlignmentError = 128;
 
 	if (dataLen < (CARD32)ret) {
 		iocb->status = EthernetIOFaceGuam::S_packetTooLong;
@@ -251,12 +236,10 @@ void AgentNetwork::ReceiveThread::run() {
 	for(;;) {
 		if (stopThread) break;
 
-		int opErrno = 0;
 		// Below "1" means 1 second
 		PERF_COUNT(network, select)
-		int ret = driver->select(Util::ONE_SECOND, opErrno);
+		int ret = driver->select(Util::ONE_SECOND);
 		if (ret == -1) {
-			logger.fatal("%s  %d  select returns -1.  errno = %d", __FUNCTION__, __LINE__, opErrno);
 			ERROR();
 		}
 		if (ret < 0) {
@@ -269,7 +252,7 @@ void AgentNetwork::ReceiveThread::run() {
 		// When data is arrived but noone want to receive, dicards received data
 		if (receiveQueue.empty()) {
 			PERF_COUNT(network, discard)
-			driver->discard();
+			driver->clear();
 			continue;
 		}
 
@@ -298,12 +281,11 @@ void AgentNetwork::ReceiveThread::run() {
 void AgentNetwork::ReceiveThread::reset() {
 	std::unique_lock<std::mutex> locker(receiveMutex);
 	receiveQueue.clear();
-	driver->discard();
+	driver->clear();
 }
 void AgentNetwork::ReceiveThread::discardOnePacket() {
 	net::Packet packet;
-	int opErrno;
-	driver->receive(packet.data(), packet.capacity(), opErrno);
+	driver->receive(packet.data(), packet.capacity(), Util::ONE_SECOND);
 }
 
 
@@ -363,6 +345,7 @@ void AgentNetwork::Call() {
 			if (packetType != EthernetIOFaceGuam::PT_receive) ERROR();
 
 			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receive  status = %04X  nextIOCB = %08X", name, iocb->status + 0, iocb->nextIOCB);
+			iocb->status = EthernetIOFaceGuam::S_inProgress;
 			receiveThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;
@@ -378,6 +361,7 @@ void AgentNetwork::Call() {
 			if (packetType != EthernetIOFaceGuam::PT_transmit) ERROR();
 
 			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  transmit status = %04X  nextIOCB = %08X", name, iocb->status + 0, iocb->nextIOCB);
+			iocb->status = EthernetIOFaceGuam::S_inProgress;
 			transmitThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;

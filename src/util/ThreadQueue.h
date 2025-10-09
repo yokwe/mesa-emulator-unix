@@ -36,6 +36,7 @@
 
 #include <chrono>
 #include <deque>
+#include <functional>
 #include <mutex>
 
 #include "../util/Util.h"
@@ -67,6 +68,10 @@ public:
     void clear() {
         std::unique_lock<std::mutex> lock(mutex);
         queue.clear();
+    }
+    using Predicate = std::function<bool(const T&)>;
+    void erase_if(Predicate pred) {
+        std::erase_if(queue, pred);
     }
 
     void run() {
@@ -112,11 +117,6 @@ public:
     static void stop() {
         stopThread = true;
     }
-    void clear() {
-        std::unique_lock<std::mutex> lock(mutex);
-        queue.clear();
-    }
- 
     // pop return true when data has value
     bool pop(T& data, std::chrono::milliseconds duration = Util::ONE_SECOND) {
         std::unique_lock<std::mutex> lock(mutex);
@@ -130,6 +130,14 @@ public:
             hasData = true;
         }
         return hasData;
+    }
+    void clear() {
+        std::unique_lock<std::mutex> lock(mutex);
+        queue.clear();
+    }
+    using Predicate = std::function<bool(const T&)>;
+    void erase_if(Predicate pred) {
+        std::erase_if(queue, pred);
     }
 
     void run() {

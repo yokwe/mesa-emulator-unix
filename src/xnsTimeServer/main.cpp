@@ -47,17 +47,17 @@ static const Logger logger(__FILE__);
 
 #include "Server.h"
 
-struct ThreadTransmit : thread_queue::ThreadQueueProcessor<net::Packet> {
+struct ThreadTransmit : public thread_queue::ThreadQueueProcessor<net::Packet> {
     net::Driver& driver;
 
     ThreadTransmit(net::Driver& driver_) : thread_queue::ThreadQueueProcessor<net::Packet>("ThreadTransmit"), driver(driver_) {}
 
-    void process(const net::Packet& data) {
+    void process(const net::Packet& data) override {
         driver.write(data);
     }
 };
 
-struct ThreadReceive : thread_queue::ThreadQueueProducer<net::Packet> {
+struct ThreadReceive : public thread_queue::ThreadQueueProducer<net::Packet> {
     net::Driver& driver;
 
     ThreadReceive(net::Driver& driver_) : thread_queue::ThreadQueueProducer<net::Packet>("ThreadReceive"), driver(driver_) {}

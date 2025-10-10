@@ -10,7 +10,6 @@ target_sources(
 		BPF.h
 		ByteBuffer.h
 		Debug.h
-		EthernetPacket.h
 		GuiOP.h
 		net.h
 		OpcodeInfo.h

@@ -42,7 +42,7 @@
 
 
 namespace Module {
-	class LoadmapFile : JSONBase {
+	class LoadmapFile : public JSONBase {
 	public:
 		//Global Frames for Modules in GermGuam.bcd:
 		//			    Frame      Code (* = code links)
@@ -76,7 +76,7 @@ namespace Module {
 		static std::vector<LoadmapFile> loadLoadmapFile(const std::string& path);
 	};
 
-	class MapFile : JSONBase {
+	class MapFile : public JSONBase {
 	public:
 		// Bytes   EVI  Offset    IPC   Module               Procedure
 		//    42B   13   1030B     20B  ProcessorHeadGuam    GetNextAvailableVM

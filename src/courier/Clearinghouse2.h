@@ -107,7 +107,7 @@ namespace Courier::Clearinghouse2 {
 	//		organization: Organization,
 	//		domain: Domain,
 	//		object: Object];
-	class ThreePartName : Base {
+	class ThreePartName : public Base {
 	public:
 		Organization organization;
 		Domain       domain;
@@ -535,7 +535,7 @@ namespace Courier::Clearinghouse2 {
 	public:
 		const bool    USE_BULK = false;
 
-		class Return : Base {
+		class Return : public Base {
 		public:
 			NetworkAddressList address;
 

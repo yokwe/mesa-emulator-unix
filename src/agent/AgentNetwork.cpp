@@ -55,16 +55,16 @@ void AgentNetwork::TransmitThread::stop() {
 	stopThread = 1;
 }
 
-void AgentNetwork::TransmitThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+void AgentNetwork::TransmitThread::enqueue(EthernetIOCBType* iocb) {
 	std::unique_lock<std::mutex> locker(transmitMutex);
 
 	Item item(iocb);
-	transmitQueue.push_back(item);
+	transmitQueue.push_front(item);
 	transmitCV.notify_one();
 
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("TransmitThread receiveQueue.size = %d", transmitQueue.size());
 }
-void AgentNetwork::TransmitThread::transmit(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+void AgentNetwork::TransmitThread::transmit(EthernetIOCBType* iocb) {
 	if (iocb == 0) ERROR();
 	if (iocb->bufferLength == 0) ERROR();
 	if (iocb->bufferAddress == 0) ERROR();
@@ -115,7 +115,7 @@ void AgentNetwork::TransmitThread::run() {
 		for(;;) {
 			if (stopThread) break;
 
-			EthernetIOFaceGuam::EthernetIOCBType* iocb = 0;
+			EthernetIOCBType* iocb = 0;
 
 			// minimize critical section
 			{
@@ -129,9 +129,9 @@ void AgentNetwork::TransmitThread::run() {
 						break;
 					}
 				}
-				Item item = transmitQueue.front();
+				Item item = transmitQueue.back();
 				iocb = item.iocb;
-				transmitQueue.pop_front();
+				transmitQueue.pop_back();
 			}
 
 			transmit(iocb);
@@ -156,7 +156,7 @@ void AgentNetwork::ReceiveThread::stop() {
 	stopThread = 1;
 }
 
-void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+void AgentNetwork::ReceiveThread::enqueue(EthernetIOCBType* iocb) {
 	std::unique_lock<std::mutex> locker(receiveMutex);
 
 	int64_t sec = Util::getSecondsSinceEpoch();
@@ -167,28 +167,28 @@ void AgentNetwork::ReceiveThread::enqueue(EthernetIOFaceGuam::EthernetIOCBType* 
 	{
 
 		// remove too old entry
-		for(;;) {
-			if (receiveQueue.empty()) break;
-			auto& item = receiveQueue.front();
-			if ((item.sec + MAX_WAIT_SEC) < sec) {
-				receiveQueue.pop_front();
-				continue;
-			}
-			break;
-		}
+		// for(;;) {
+		// 	if (receiveQueue.empty()) break;
+		// 	auto& item = receiveQueue.front();
+		// 	if ((item.sec + MAX_WAIT_SEC) < sec) {
+		// 		receiveQueue.pop_back();
+		// 		continue;
+		// 	}
+		// 	break;
+		// }
 
-		CARD32 myBufferAddress = iocb->bufferAddress;
-		for(auto i = receiveQueue.begin(); i != receiveQueue.end(); i++) {
-			const Item& item = *i;
-			if (item.iocb->bufferAddress == myBufferAddress) receiveQueue.erase(i);
-		}
+		// CARD32 myBufferAddress = iocb->bufferAddress;
+		// for(auto i = receiveQueue.begin(); i != receiveQueue.end(); i++) {
+		// 	const Item& item = *i;
+		// 	if (item.iocb->bufferAddress == myBufferAddress) receiveQueue.erase(i);
+		// }
 	}
 	Item item(sec, iocb);
-	receiveQueue.push_back(item);
+	receiveQueue.push_front(item);
 
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("ReceiveThread receiveQueue.size = %d", receiveQueue.size());
 }
-void AgentNetwork::ReceiveThread::receive(EthernetIOFaceGuam::EthernetIOCBType* iocb) {
+void AgentNetwork::ReceiveThread::receive(EthernetIOCBType* iocb) {
 	if (iocb == 0) ERROR();
 	if (iocb->bufferLength == 0) ERROR();
 	if (iocb->bufferAddress == 0) ERROR();
@@ -265,9 +265,9 @@ void AgentNetwork::ReceiveThread::run() {
 			} else {
 				// there is item in queue
 				// remove one item from queue
-				Item& item = receiveQueue.front();
-				EthernetIOFaceGuam::EthernetIOCBType* iocb = item.iocb;
-				receiveQueue.pop_front();
+				Item& item = receiveQueue.back();
+				EthernetIOCBType* iocb = item.iocb;
+				receiveQueue.pop_back();
 
 				// use this iocb to receive packet
 				receive(iocb);
@@ -294,7 +294,7 @@ void AgentNetwork::Initialize() {
 	if (fcbAddress == 0) ERROR();
 	if (driver == 0) ERROR();
 
-	fcb = (EthernetIOFaceGuam::EthernetFCBType *)memory::peek(fcbAddress);
+	fcb = (EthernetFCBType *)memory::peek(fcbAddress);
 
 	fcb->receiveIOCB               = 0;
 	fcb->transmitIOCB              = 0;
@@ -338,7 +338,7 @@ void AgentNetwork::Call() {
 	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  receiveIOCB = %08X  transmitIOCB = %08X", name, fcb->receiveIOCB + 0, fcb->transmitIOCB + 0);
 
 	if (fcb->receiveIOCB) {
-		EthernetIOFaceGuam::EthernetIOCBType* iocb = (EthernetIOFaceGuam::EthernetIOCBType*)Store(fcb->receiveIOCB);
+		EthernetIOCBType* iocb = (EthernetIOCBType*)Store(fcb->receiveIOCB);
 
 		for(;;) {
 			CARD16 packetType= iocb->packetType;
@@ -349,12 +349,12 @@ void AgentNetwork::Call() {
 			receiveThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;
-			iocb = (EthernetIOFaceGuam::EthernetIOCBType*)Store(iocb->nextIOCB);
+			iocb = (EthernetIOCBType*)Store(iocb->nextIOCB);
 		}
 	}
 
 	if (fcb->transmitIOCB) {
-		EthernetIOFaceGuam::EthernetIOCBType* iocb = (EthernetIOFaceGuam::EthernetIOCBType*)Store(fcb->transmitIOCB);
+		EthernetIOCBType* iocb = (EthernetIOCBType*)Store(fcb->transmitIOCB);
 
 		for(;;) {
 			CARD16 packetType= iocb->packetType;
@@ -365,7 +365,7 @@ void AgentNetwork::Call() {
 			transmitThread.enqueue(iocb);
 			//
 			if (iocb->nextIOCB == 0) break;
-			iocb = (EthernetIOFaceGuam::EthernetIOCBType*)Store(iocb->nextIOCB);
+			iocb = (EthernetIOCBType*)Store(iocb->nextIOCB);
 		}
 	}
 }

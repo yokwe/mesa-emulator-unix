@@ -49,68 +49,52 @@ public:
     using EthernetIOCBType = EthernetIOFaceGuam::EthernetIOCBType;
     using EthernetFCBType  = EthernetIOFaceGuam::EthernetFCBType;
 
-	struct TransmitItem {
+	struct Item {
 		CARD16            interruptSelector;
 		EthernetIOCBType* iocb;
-		net::Driver*      driver;
 
-		TransmitItem(CARD16 interruptSelector_, EthernetIOCBType* iocb_, net::Driver* driver_) :
-			interruptSelector(interruptSelector_), iocb(iocb_), driver(driver_) {}
+		Item(CARD16 interruptSelector_, EthernetIOCBType* iocb_) :
+			interruptSelector(interruptSelector_), iocb(iocb_) {}
 		// use default implementation
-		TransmitItem(const TransmitItem& that)            = default;
-		TransmitItem& operator=(const TransmitItem& that) = default;	
-	};
-	struct TransmitThread : public thread_queue::ThreadQueueProcessor<TransmitItem> {
-		static void stop() {
-			thread_queue::ThreadQueueProcessor<TransmitItem>::stop();
-		}
-		void process(const TransmitItem& data);
+		Item(const Item& that)            = default;
+		Item& operator=(const Item& that) = default;	
 	};
 
-	class ReceiveThread {
+	class TransmitThread : public thread_queue::ThreadQueueProcessor<Item> {
+		net::Driver* driver;
 	public:
-		static const CARD32 MAX_WAIT_SEC = 40;
-
-		static void stop();
-
-		ReceiveThread() : interruptSelector(0), driver(0) {
-			receiveQueue.clear();
+		static void stop() {
+			thread_queue::ThreadQueueProcessor<Item>::stop();
 		}
 
-		void setInterruptSelector(CARD16 interruptSelector_) {
-			interruptSelector = interruptSelector_;
-		}
-		void setDriver(net::Driver* driver_) {
+		TransmitThread() : driver(0) {}
+
+		void set(net::Driver* driver_) {
 			driver = driver_;
 		}
 
-		void enqueue(EthernetIOCBType* iocb);
-		void receive(EthernetIOCBType* iocb);
-		void discardOnePacket();
+		void process(const Item& data);
+	};
 
+	class ReceiveThread {
+		static inline bool stopThread;
+		std::mutex         mutex;
+		std::deque<Item>   queue;
+		net::Driver*       driver;
+	public:
+		static void stop() {
+			stopThread = true;
+		}
+
+		ReceiveThread() : driver(0) {}
+
+		void set(net::Driver* driver_) {
+			driver = driver_;
+		}
+
+		void push(const Item& item);
 		void run();
-		void reset();
-
-		uint64_t getSec();
-
-	private:
-		class Item {
-		public:
-			// queued time in second
-			int64_t                                sec;
-			EthernetIOCBType* iocb;
-
-			Item(int64_t sec_, EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
-//			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
-		};
-
-		static inline int stopThread = 0;
-
-		CARD16           interruptSelector;
-		net::Driver*     driver;
-
-		std::mutex       receiveMutex;
-		std::deque<Item> receiveQueue;
+		void process(const Item& item, const ByteBuffer& packet);
 	};
 
 	ReceiveThread  receiveThread;

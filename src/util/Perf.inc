@@ -46,10 +46,9 @@ uint64_t perf::processor::timerFlag     = 0;
 uint64_t perf::processor::timer         = 0;
 uint64_t perf::processor::running       = 0;
 uint64_t perf::network::transmit        = 0;
-uint64_t perf::network::wait_for        = 0;
-uint64_t perf::network::receive         = 0;
-uint64_t perf::network::select          = 0;
-uint64_t perf::network::discard         = 0;
+uint64_t perf::network::receive_request = 0;
+uint64_t perf::network::receive_process = 0;
+uint64_t perf::network::receive_packet  = 0;
 uint64_t perf::disk::process            = 0;
 uint64_t perf::disk::read               = 0;
 uint64_t perf::disk::write              = 0;
@@ -130,10 +129,9 @@ std::vector<perf::Entry> all {
     {"processor::timer"      , perf::processor::timer},
     {"processor::running"    , perf::processor::running},
     {"network::transmit"     , perf::network::transmit},
-    {"network::wait_for"     , perf::network::wait_for},
-    {"network::receive"      , perf::network::receive},
-    {"network::select"       , perf::network::select},
-    {"network::discard"      , perf::network::discard},
+    {"network::receive_request", perf::network::receive_request},
+    {"network::receive_process", perf::network::receive_process},
+    {"network::receive_packet", perf::network::receive_packet},
     {"disk::process"         , perf::disk::process},
     {"disk::read"            , perf::disk::read},
     {"disk::write"           , perf::disk::write},

@@ -107,10 +107,9 @@ PERF_DECLARE(processor, running)
 
 // network
 PERF_DECLARE(network, transmit)
-PERF_DECLARE(network, wait_for)
-PERF_DECLARE(network, receive)
-PERF_DECLARE(network, select)
-PERF_DECLARE(network, discard)
+PERF_DECLARE(network, receive_request)
+PERF_DECLARE(network, receive_process)
+PERF_DECLARE(network, receive_packet)
 
 // disk
 PERF_DECLARE(disk, process)

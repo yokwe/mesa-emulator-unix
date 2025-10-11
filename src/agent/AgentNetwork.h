@@ -45,6 +45,8 @@
 
 class AgentNetwork : public Agent {
 public:
+        using EthernetIOCBType = EthernetIOFaceGuam::EthernetIOCBType;
+        using EthernetFCBType  = EthernetIOFaceGuam::EthernetFCBType;
 	class TransmitThread {
 	public:
 		static void stop();
@@ -60,8 +62,8 @@ public:
 			driver = driver_;
 		}
 
-		void enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb);
-		void transmit(EthernetIOFaceGuam::EthernetIOCBType* iocb);
+		void enqueue(EthernetIOCBType* iocb);
+		void transmit(EthernetIOCBType* iocb);
 
 		void run();
 		void reset();
@@ -69,9 +71,9 @@ public:
 	private:
 		class Item {
 		public:
-			EthernetIOFaceGuam::EthernetIOCBType* iocb;
+			EthernetIOCBType* iocb;
 
-			Item(EthernetIOFaceGuam::EthernetIOCBType* iocb_) : iocb(iocb_) {}
+			Item(EthernetIOCBType* iocb_) : iocb(iocb_) {}
 			Item(const Item& that) : iocb(that.iocb) {}
 		};
 
@@ -101,8 +103,8 @@ public:
 			driver = driver_;
 		}
 
-		void enqueue(EthernetIOFaceGuam::EthernetIOCBType* iocb);
-		void receive(EthernetIOFaceGuam::EthernetIOCBType* iocb);
+		void enqueue(EthernetIOCBType* iocb);
+		void receive(EthernetIOCBType* iocb);
 		void discardOnePacket();
 
 		void run();
@@ -115,9 +117,9 @@ public:
 		public:
 			// queued time in second
 			int64_t                                sec;
-			EthernetIOFaceGuam::EthernetIOCBType* iocb;
+			EthernetIOCBType* iocb;
 
-			Item(int64_t sec_, EthernetIOFaceGuam::EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
+			Item(int64_t sec_, EthernetIOCBType* iocb_) : sec(sec_), iocb(iocb_) {}
 //			Item(const Item& that) : sec(that.sec), iocb(that.iocb) {}
 		};
 
@@ -135,7 +137,7 @@ public:
 
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::network;
 	static const inline auto name_ = "Network";
-	static const inline auto fcbSize_ = SIZE(EthernetIOFaceGuam::EthernetFCBType);
+	static const inline auto fcbSize_ = SIZE(EthernetFCBType);
 	AgentNetwork() : Agent(index_, name_, fcbSize_), fcb(0), driver(0) {}
 
 	void Initialize();
@@ -148,6 +150,6 @@ public:
 	}
 
 private:
-	EthernetIOFaceGuam::EthernetFCBType* fcb;
-	net::Driver*                         driver;
+	EthernetFCBType* fcb;
+	net::Driver*     driver;
 };

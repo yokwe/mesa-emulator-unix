@@ -40,52 +40,33 @@
 #include <deque>
 
 #include "../util/net.h"
+#include "../util/ThreadQueue.h"
 
 #include "Agent.h"
 
 class AgentNetwork : public Agent {
 public:
-        using EthernetIOCBType = EthernetIOFaceGuam::EthernetIOCBType;
-        using EthernetFCBType  = EthernetIOFaceGuam::EthernetFCBType;
-	class TransmitThread {
-	public:
-		static void stop();
+    using EthernetIOCBType = EthernetIOFaceGuam::EthernetIOCBType;
+    using EthernetFCBType  = EthernetIOFaceGuam::EthernetFCBType;
 
-		TransmitThread() : interruptSelector(0), driver(0) {
-			transmitQueue.clear();
-		}
+	struct TransmitItem {
+		CARD16            interruptSelector;
+		EthernetIOCBType* iocb;
+		net::Driver*      driver;
 
-		void setInterruptSelector(CARD16 interruptSelector_) {
-			interruptSelector = interruptSelector_;
-		}
-		void setDriver(net::Driver* driver_) {
-			driver = driver_;
-		}
-
-		void enqueue(EthernetIOCBType* iocb);
-		void transmit(EthernetIOCBType* iocb);
-
-		void run();
-		void reset();
-
-	private:
-		class Item {
-		public:
-			EthernetIOCBType* iocb;
-
-			Item(EthernetIOCBType* iocb_) : iocb(iocb_) {}
-			Item(const Item& that) : iocb(that.iocb) {}
-		};
-
-		static inline int stopThread = 0;
-
-		CARD16                  interruptSelector;
-		net::Driver*            driver;
-
-		std::mutex              transmitMutex;
-		std::condition_variable transmitCV;
-		std::deque<Item>        transmitQueue;
+		TransmitItem(CARD16 interruptSelector_, EthernetIOCBType* iocb_, net::Driver* driver_) :
+			interruptSelector(interruptSelector_), iocb(iocb_), driver(driver_) {}
+		// use default implementation
+		TransmitItem(const TransmitItem& that)            = default;
+		TransmitItem& operator=(const TransmitItem& that) = default;	
 	};
+	struct TransmitThread : public thread_queue::ThreadQueueProcessor<TransmitItem> {
+		static void stop() {
+			thread_queue::ThreadQueueProcessor<TransmitItem>::stop();
+		}
+		void process(const TransmitItem& data);
+	};
+
 	class ReceiveThread {
 	public:
 		static const CARD32 MAX_WAIT_SEC = 40;

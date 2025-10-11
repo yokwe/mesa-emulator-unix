@@ -50,40 +50,26 @@ static const Logger logger(__FILE__);
 #include "AgentNetwork.h"
 
 
-void AgentNetwork::TransmitThread::stop() {
-	logger.info("AgentNetwork::TransmitThread::stop");
-	stopThread = 1;
-}
+void AgentNetwork::TransmitThread::process(const TransmitItem& item) {
+	auto interruptSelector = item.interruptSelector;
+	auto iocb = item.iocb;
+	auto driver = item.driver;
 
-void AgentNetwork::TransmitThread::enqueue(EthernetIOCBType* iocb) {
-	std::unique_lock<std::mutex> locker(transmitMutex);
-
-	Item item(iocb);
-	transmitQueue.push_front(item);
-	transmitCV.notify_one();
-
-	if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("TransmitThread receiveQueue.size = %d", transmitQueue.size());
-}
-void AgentNetwork::TransmitThread::transmit(EthernetIOCBType* iocb) {
 	if (iocb == 0) ERROR();
 	if (iocb->bufferLength == 0) ERROR();
 	if (iocb->bufferAddress == 0) ERROR();
 
 	CARD32 dataLen = iocb->bufferLength;
 	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
-	CARD8 buffer[net::PACKET_SIZE];
+	CARD8  buffer[net::PACKET_SIZE];
 
+	// sanity check for odd byte and minimu packet length
+	if (dataLen & 1 || dataLen < net::minBytesPerEthernetPacket) {
+		logger.fatal("dataLen  %d", dataLen);
+		ERROR()
+	}
+	// byteswap and copy from data to to buffer
 	Util::byteswap((CARD16*)data, (CARD16*)buffer, (dataLen + 1) / 2);
-	// no odd length packet
-	if (dataLen & 1) {
-		buffer[dataLen] = 0;
-		dataLen++;
-	}
-	// minimal packet size is 64
-	if (dataLen < 64) {
-		for(int i = iocb->bufferLength; i < 64; i++) buffer[i] = 0;
-		dataLen = 64;
-	}
 	int ret = driver->transmit(buffer, dataLen);
 
 	if (ret == -1) {
@@ -103,53 +89,8 @@ void AgentNetwork::TransmitThread::transmit(EthernetIOCBType* iocb) {
 		ERROR();
 	}
 	iocb->status = EthernetIOFaceGuam::S_completedOK;
+	interrupt_thread::notifyInterrupt(interruptSelector);
 }
-
-void AgentNetwork::TransmitThread::run() {
-	logger.info("AgentNetwork::TransmitThread::run START");
-	if (driver == 0) ERROR();
-
-	stopThread = 0;
-
-	try {
-		for(;;) {
-			if (stopThread) break;
-
-			EthernetIOCBType* iocb = 0;
-
-			// minimize critical section
-			{
-				std::unique_lock<std::mutex> locker(transmitMutex);
-				if (transmitQueue.empty()) {
-					for(;;) {
-						PERF_COUNT(network, wait_for)
-						transmitCV.wait_for(locker, Util::ONE_SECOND);
-						if (stopThread) goto exitLoop;
-						if (transmitQueue.empty()) continue;
-						break;
-					}
-				}
-				Item item = transmitQueue.back();
-				iocb = item.iocb;
-				transmitQueue.pop_back();
-			}
-
-			transmit(iocb);
-			interrupt_thread::notifyInterrupt(interruptSelector);
-			PERF_COUNT(network, transmit)
-		}
-	} catch(Abort& e) {
-		LogSourceLocation::fatal(logger, e.location, "Unexpected Abort  ");
-		processor_thread::stop();
-	}
-exitLoop:
-	logger.info("AgentNetwork::TransmitThread::run STOP");
-}
-void AgentNetwork::TransmitThread::reset() {
-	std::unique_lock<std::mutex> locker(transmitMutex);
-	transmitQueue.clear();
-}
-
 
 void AgentNetwork::ReceiveThread::stop() {
 	logger.info("AgentNetwork::ReceiveThread::stop");
@@ -311,7 +252,6 @@ void AgentNetwork::Initialize() {
 	fcb->agentBlockSize            = 0;
 
 	receiveThread.setDriver(driver);
-	transmitThread.setDriver(driver);
 }
 
 void AgentNetwork::Call() {
@@ -329,8 +269,6 @@ void AgentNetwork::Call() {
 			logger.info("AGENT %s  start  %04X %04X", name, fcb->transmitInterruptSelector + 0, fcb->receiveInterruptSelector + 0);
 			receiveThread.reset();
 			receiveThread.setInterruptSelector(fcb->receiveInterruptSelector);
-			transmitThread.reset();
-			transmitThread.setInterruptSelector(fcb->transmitInterruptSelector);
 		}
 		fcb->receiveStopped  = 0;
 		fcb->transmitStopped = 0;
@@ -361,8 +299,9 @@ void AgentNetwork::Call() {
 			if (packetType != EthernetIOFaceGuam::PT_transmit) ERROR();
 
 			if (DEBUG_SHOW_AGENT_NETWORK) logger.debug("AGENT %s  transmit status = %04X  nextIOCB = %08X", name, iocb->status + 0, iocb->nextIOCB);
-			iocb->status = EthernetIOFaceGuam::S_inProgress;
-			transmitThread.enqueue(iocb);
+
+			TransmitItem item(fcb->transmitInterruptSelector, iocb, driver);
+			transmitThread.push(item);
 			//
 			if (iocb->nextIOCB == 0) break;
 			iocb = (EthernetIOCBType*)Store(iocb->nextIOCB);

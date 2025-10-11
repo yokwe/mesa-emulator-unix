@@ -82,6 +82,12 @@ uint64_t perf::variable::running_start  = 0;
 uint64_t perf::variable::running_stop   = 0;
 uint64_t perf::variable::time_running   = 0;
 uint64_t perf::variable::time_not_running = 0;
+uint64_t perf::bpf::fillBuffer          = 0;
+uint64_t perf::bpf::fillBuffer_data     = 0;
+uint64_t perf::bpf::read                = 0;
+uint64_t perf::bpf::read_empty          = 0;
+uint64_t perf::bpf::read_select         = 0;
+uint64_t perf::bpf::read_zero           = 0;
 
 namespace perf {
 std::vector<perf::Entry> all {
@@ -165,5 +171,11 @@ std::vector<perf::Entry> all {
     {"variable::running_stop", perf::variable::running_stop},
     {"variable::time_running", perf::variable::time_running},
     {"variable::time_not_running", perf::variable::time_not_running},
+    {"bpf::fillBuffer"       , perf::bpf::fillBuffer},
+    {"bpf::fillBuffer_data"  , perf::bpf::fillBuffer_data},
+    {"bpf::read"             , perf::bpf::read},
+    {"bpf::read_empty"       , perf::bpf::read_empty},
+    {"bpf::read_select"      , perf::bpf::read_select},
+    {"bpf::read_zero"        , perf::bpf::read_zero},
 };
 }

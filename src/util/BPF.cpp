@@ -51,6 +51,7 @@
 static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
+#include "Perf.h"
 
 #include "BPF.h"
 
@@ -109,17 +110,19 @@ void BPF::close() {
 	fd         = -1;
 	bufferSize = -1;
 	buffer     = 0;
-	readData.clear();
+	readBuffer.clear();
 }
 
-const std::deque<ByteBuffer>& BPF::read() {
+const std::deque<ByteBuffer>& BPF::fillBuffer() {
+	PERF_COUNT(bpf, fillBuffer)
 	int validBufferLen;
 	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
 
 //	logger.debug("validBufferLen = %d", validBufferLen);
-	readData.clear();
+	readBuffer.clear();
 
 	for(int i = 0; i < validBufferLen; ) {
+		PERF_COUNT(bpf, fillBuffer_data);
 		struct bpf_hdr* p = (struct bpf_hdr*)(buffer + i);
 		int     caplen = (int)(p->bh_caplen);
 		int     hdrlen = (int)(p->bh_hdrlen);
@@ -127,23 +130,29 @@ const std::deque<ByteBuffer>& BPF::read() {
 
 		ByteBuffer element(hdrlen + caplen, data);
 		element.setBase(hdrlen);
-		readData.push_front(element);
+		readBuffer.push_front(element);
 
 		i += BPF_WORDALIGN(caplen + hdrlen);
 	}
 
-	return readData;
+	return readBuffer;
 }
 int BPF::read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+	PERF_COUNT(bpf, read)
 	bb.clear();
-	if (readData.empty()) {
+	if (readBuffer.empty()) {
+		PERF_COUNT(bpf, read_empty)
 		if (getNonBlockingReadBytes() == 0) {
+			PERF_COUNT(bpf, read_select)
 			select(timeout);
 		}
-		if (getNonBlockingReadBytes() == 0) return 0;
-		read();
+		if (getNonBlockingReadBytes() == 0) {
+			PERF_COUNT(bpf, read_zero)
+			return 0;
+		}
+		fillBuffer();
 	}
-	const ByteBuffer& bpfData = readData.back();
+	const ByteBuffer& bpfData = readBuffer.back();
 	// bpfData hase base value
 	// copy bpfData[base .. limit) to bb
 	bb.write(bpfData.limit() - bpfData.base(), bpfData.data() + bpfData.base());
@@ -154,7 +163,7 @@ int BPF::read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::mi
 		int64_t time = (int64_t)(tstamp.tv_sec) * 1000'000 + tstamp.tv_usec; // conver to microsecond
 		*timestamp = std::chrono::microseconds(time);
 	}
-	readData.pop_back();
+	readBuffer.pop_back();
 	return bb.length();
 }
 int BPF::write(const ByteBuffer& value) {
@@ -191,7 +200,7 @@ int  BPF::receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds ti
 }
 void BPF::clear() {
 	// clear readData
-	readData.clear();
+	readBuffer.clear();
 	// clear buffer
 	flush();
 }

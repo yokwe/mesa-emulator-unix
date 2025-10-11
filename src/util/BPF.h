@@ -52,7 +52,7 @@ class BPF {
 	// Buffer.limit() returns bh_hdrlen + bh_caplen
 	// Received data is stored between base() and limit()
 	// You can get address of struct timeval from data()
-	std::deque<ByteBuffer> readData;
+	std::deque<ByteBuffer> readBuffer;
 
 	//
 	// IMPORTANT
@@ -60,7 +60,7 @@ class BPF {
 	// read() is blocking operation. It don't return until data is received.
 	// read() returns std::deque<ByteBuffer> readData.
 	// Backing store of ByteBuffer is member variable readData.
-	const std::deque<ByteBuffer>& read();
+	const std::deque<ByteBuffer>& fillBuffer();
 
 public:
 	static const struct bpf_program* PROGRAM_IP;

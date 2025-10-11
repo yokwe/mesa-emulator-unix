@@ -47,6 +47,8 @@ static const Logger logger(__FILE__);
 // To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
 //	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
 
+#include "../util/net.h"
+
 int main(int, char**) {
 	logger.info("START");
 
@@ -56,7 +58,8 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 
 	{
-		// write code here.
+		auto a = net::fromString("001-001-001-001");
+		logger.info("%s", net::toHexaDecimalString(a, ":"));
 	}
 
 	logger.info("STOP");

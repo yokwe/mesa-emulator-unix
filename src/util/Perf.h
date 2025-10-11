@@ -150,4 +150,12 @@ PERF_DECLARE(variable, running_stop)
 PERF_DECLARE(variable, time_running)
 PERF_DECLARE(variable, time_not_running)
 
+// bpf
+PERF_DECLARE(bpf, fillBuffer)
+PERF_DECLARE(bpf, fillBuffer_data)
+PERF_DECLARE(bpf, read)
+PERF_DECLARE(bpf, read_empty)
+PERF_DECLARE(bpf, read_select)
+PERF_DECLARE(bpf, read_zero)
+
 }

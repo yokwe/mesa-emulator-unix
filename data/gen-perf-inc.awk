@@ -19,24 +19,27 @@ BEGIN {
 
     GROUP[N] = temp[1];
     NAME[N]  = temp[2];
+    t = length(temp[1]) + length(temp[2])
+    if (L < t) L = t
     N++
 }
 
 END {
+    format = sprintf("uint64_t perf::%%%ds = 0;\n", -(L+2))
     for(i = 0; i < N; i++) {
         # uint64_t a1 = 0;
-        name = "perf::" GROUP[i] "::" NAME[i]
-        printf("uint64_t %-40s = 0;\n", name)
+        name = GROUP[i] "::" NAME[i]
+        printf(format, name)
     }
-    print("")
 
+    format = sprintf("    {%%%ds, %%s},\n", -(L+4))
     print("namespace perf {")
     print("std::vector<perf::Entry> all {");
     for(i = 0; i < N; i++) {
         # {"a1", a1},
         name = GROUP[i] "::" NAME[i]
 
-        printf("    {%-38s, %s},\n", "\"" name "\"", "perf::" name)
+        printf(format, "\"" name "\"", "perf::" name)
     }
     print("};")
     print("}")

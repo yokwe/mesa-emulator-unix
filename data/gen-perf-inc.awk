@@ -26,7 +26,7 @@ END {
     for(i = 0; i < N; i++) {
         # uint64_t a1 = 0;
         name = "perf::" GROUP[i] "::" NAME[i]
-        printf("uint64_t %-30s = 0;\n", name)
+        printf("uint64_t %-40s = 0;\n", name)
     }
     print("")
 
@@ -36,7 +36,7 @@ END {
         # {"a1", a1},
         name = GROUP[i] "::" NAME[i]
 
-        printf("    {%-24s, %s},\n", "\"" name "\"", "perf::" name)
+        printf("    {%-38s, %s},\n", "\"" name "\"", "perf::" name)
     }
     print("};")
     print("}")

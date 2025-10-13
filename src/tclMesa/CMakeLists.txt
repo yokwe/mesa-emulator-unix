@@ -13,12 +13,13 @@ target_sources(
 	PRIVATE
 		keymap.cpp
 		main.cpp
+		MesaBoot.cpp
+		MesaConfig.cpp
+		MesaDisplay.cpp
 		MesaEvent.cpp
-		MesaGuam.cpp
-		MesaGuam_boot.cpp
-		MesaGuam_config.cpp
-		MesaGuam_display.cpp
+		MesaLinkVar.cpp
 		MesaLog.cpp
+		MesaPerf.cpp
 		photo_image.cpp
 )
 

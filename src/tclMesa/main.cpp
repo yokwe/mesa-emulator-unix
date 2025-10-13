@@ -41,6 +41,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/tcl.h"
+
 #include "keymap.h"
 
 #include "tclMesa.h"
@@ -49,15 +51,22 @@ constexpr const char* PACKAGE_NAME    = "Mesa";
 constexpr const char* PACKAGE_VERSION = "1.0.";
 
 extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
-    logger.info("Guam_Init");
+    logger.info("Mesa_Init");
 	/* changed this to check for an error - GPS */
 	if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) == TCL_ERROR) {
         logger.error("Tcl_PkgProvide failed");
 		return TCL_ERROR;
 	}
-	Tcl_CreateObjCommand(interp, "mesa::log",   MesaLog,   NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::guam",  MesaGuam,  NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::event", MesaEvent, NULL, NULL);
+
+	Tcl_CreateObjCommand(interp, "mesa::log",      MesaLog,     NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::event",    MesaEvent,   NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::perf",     MesaPerf,    NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::boot",     MesaBoot,    NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::config",   MesaConfig,  NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::display",  MesaDisplay,  NULL, NULL);
+
+	MesaLinkVar(interp);
+
 	return TCL_OK;
 }
 
@@ -113,4 +122,19 @@ int main(int argc, char *argv[]) {
     // Tcl_Main call ::exit() and so don't reach here
     logger.info("STOP");
 	return 0;
+}
+
+int invalidCommand(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *const objv[]) {
+    (void)cdata;
+    tcl::Interp interp(interp_);
+    if (!interp.hasResult()) {
+        std::string commandString = tcl::toString(objv[0]);
+        for(int i = 1; i < objc; i++) {
+            commandString.append(" ");
+            commandString.append(Tcl_GetString(objv[i]));
+        }
+        auto string = std_sprintf("invalid command name \"%s\"", commandString);
+        interp.result(string);
+    }
+    return TCL_ERROR;
 }

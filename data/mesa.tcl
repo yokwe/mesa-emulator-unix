@@ -6,9 +6,10 @@
 parray tcl_platform
 
 # load config
-mesa::guam config load GVWin
-set displayWidth  [mesa::guam config displayWidth]
-set displayHeight [mesa::guam config displayHeight]
+mesa::config GVWin
+set config [mesa::config]
+set displayWidth  [dict get $config displayWidth]
+set displayHeight [dict get $config displayHeight]
 
 package require Tk
 
@@ -20,7 +21,7 @@ pack  .mesa -fill both -expand 1
 set display [image create photo -width $displayWidth -height $displayHeight]
 # Allocate photo image block for display
 # Save photo image name to update display image from emulator
-mesa::guam display set $display
+mesa::display set $display
 
 label  .mesa.display -image $display -takefocus 1
 pack   .mesa.display -side top

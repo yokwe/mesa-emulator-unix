@@ -40,16 +40,6 @@ static const Logger logger(__FILE__);
 
 #include "Perf.h"
 
-namespace perf {
-
-struct Entry {
-    const char* name;
-    uint64_t&   value;
-    Entry(const char* name_, uint64_t& value_) : name(name_), value(value_) {}
-};
-
-}
-
 #include "Perf.inc"
 
 // output aligned name and value

@@ -28,12 +28,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+
+ //
+ // guam_config.h
+ //
+
 #pragma once
 
 #include <string>
 #include <deque>
 
-class Setting {
+class guam_config {
 public:
 	class Entry {
 	public:
@@ -79,7 +84,6 @@ public:
 			Network() : interface("") {}
 		};
 
-
 		std::string name;
 		Display display;
 		File    file;
@@ -90,64 +94,15 @@ public:
 		Entry() : name(""), display(), file(), boot(), memory(), network() {}
 	};
 
-	class LevelVKeys {
-	public:
-		std::string name;
-		int     keyName;
+	std::deque<guam_config::Entry>  entryList;
 
-		LevelVKeys() : name(""), keyName(0) {}
-	};
+	guam_config() {}
+	guam_config(const guam_config& that) : entryList(that.entryList) {}
 
-	class Keyboard {
-	public:
-		std::string name;
-		int     scanCode;
-
-		Keyboard() : name(""), scanCode(0) {}
-	};
-
-	class KeyMap {
-	public:
-		std::string levelVKeys;
-		std::string keyboard;
-
-		KeyMap() : levelVKeys(""), keyboard("") {}
-	};
-
-	class Mouse {
-	public:
-		std::string name;
-		int     bitMask;
-
-		Mouse() : name(""), bitMask(0) {}
-	};
-
-
-	class ButtonMap {
-	public:
-		std::string levelVKeys;
-		std::string button;
-
-		ButtonMap() : levelVKeys(""), button("") {}
-	};
-
-
-	std::deque<Setting::Entry>      entryList;
-	std::deque<Setting::LevelVKeys> levelVKeysList;
-	std::deque<Setting::Keyboard>   keyboardList;
-	std::deque<Setting::KeyMap>     keyMapList;
-	std::deque<Setting::Mouse>      mouseList;
-	std::deque<Setting::ButtonMap>  buttonMapList;
-
-	Setting() {}
-	Setting(const Setting& that) :
-		entryList(that.entryList), levelVKeysList(that.levelVKeysList), keyboardList(that.keyboardList),
-		keyMapList(that.keyMapList), mouseList(that.mouseList), buttonMapList(that.buttonMapList) {}
-
-	static Setting getInstance() {
-		return getInstance("data/setting.json");
+	static guam_config getInstance() {
+		return getInstance("data/guam-config.json");
 	}
-	static Setting getInstance(const std::string& path);
+	static guam_config getInstance(const std::string& path);
 	
 	Entry getEntry(const std::string& name);
 	bool containsEntry(const std::string& name);

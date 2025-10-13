@@ -42,7 +42,7 @@ static const Logger logger(__FILE__);
 #include "../util/tcl.h"
 
 #include "../mesa/guam.h"
-#include "../mesa/setting.h"
+#include "../mesa/guam_config.h"
 
 #include "tclMesa.h"
 
@@ -68,7 +68,7 @@ std::map<std::string, int*> intMap = {
 
 // mesa::guam config
 // 0          1
-// mesa::guam config nam
+// mesa::guam config name
 // 0          1      2
 // mesa::guam config load name
 // 0          1      2    3
@@ -93,7 +93,7 @@ int MesaGuam_config(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *co
         return TCL_OK;
     }
     if (objc == 3) {
-        // mesa::guam config nam
+        // mesa::guam config name
         // 0          1      2
         std::string subject = tcl::toString(objv[2]);
         if (intMap.contains(subject)) {
@@ -117,14 +117,14 @@ int MesaGuam_config(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *co
         std::string subject = Tcl_GetString(objv[2]);
         if (subject == "load") {
             std::string entryName = Tcl_GetString(objv[3]);
-            auto setting = Setting::getInstance();
-            if (!setting.containsEntry(entryName)) {
+            auto guamConfig = guam_config::getInstance();
+            if (!guamConfig.containsEntry(entryName)) {
                 auto string = std_sprintf("entry \"%s\" is not in setting", entryName);
                 interp.result(string);
                 return TCL_ERROR;
             }
 
-            auto entry   = setting.getEntry(entryName);
+            auto entry   = guamConfig.getEntry(entryName);
             config.diskFilePath     = entry.file.disk;
             config.germFilePath     = entry.file.germ;
             config.bootFilePath     = entry.file.boot;

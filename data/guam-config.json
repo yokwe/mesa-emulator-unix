@@ -1,0 +1,64 @@
+{
+	"entry": [
+		{
+			"name": "GVWin",
+			"display": {
+				"type": "monochrome",
+				"width": 1024,
+				"height": 640},
+			"file": {
+			    "floppy": "build/run/floppy144",
+			    "disk":   "build/run/GVWIN.DSK",
+			    "germ":   "build/run/GVWIN.GRM",
+			    "boot":   "build/run/NSINSTLR.DAT"},
+			"boot": {
+				"switch": "Oy{|}\\200\\346\\347\\350\\377",
+				"device": "DISK"},
+			"memory": {
+				"vmbits": 25,
+				"rmbits": 24},
+			"network": {
+				"interface": "en0"}
+		},
+		{
+			"name": "GVWin21",
+			"display": {
+				"type": "monochrome",
+				"width": 1024,
+				"height": 640},
+			"file": {
+			    "floppy": "build/run/floppy144",
+			    "disk":   "build/run/GVWIN21.DSK",
+			    "germ":   "build/run/GVWIN.GRM",
+			    "boot":   "build/run/NSINSTLR.DAT"},
+			"boot": {
+				"switch": "Oy{|}\\200\\346\\347\\350\\377",
+				"device": "DISK"},
+			"memory": {
+				"vmbits": 25,
+				"rmbits": 24},
+			"network": {
+				"interface": "en0"}
+		},
+		{
+			"name": "Dawn",
+			"display": {
+				"type": "monochrome",
+				"width": 1024,
+				"height": 640},
+			"file": {
+			    "floppy": "build/run/floppy144",
+			    "disk":   "build/run/Dawn.dsk",
+			    "germ":   "build/run/Dawn.germ",
+			    "boot":   "build/run/NSINSTLR.DAT"},
+			"boot": {
+				"switch": "8Wy{|}\\200\\346\\347\\350\\377",
+				"device": "DISK"},
+			"memory": {
+				"vmbits": 25,
+				"rmbits": 24},
+			"network": {
+				"interface": "en0"}
+		}
+	]
+}

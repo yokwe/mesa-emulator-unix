@@ -29,44 +29,47 @@
  *******************************************************************************/
 
 
+ //
+ // Config.cpp
+ //
+
 #include <string>
 #include <fstream>
 
 #include <nlohmann/json.hpp>
 
-#include "setting.h"
+#include "guam_config.h"
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
 using json = nlohmann::json;
 
-
 #define simple(name) p.name = j.at(#name);
 
-void from_json(const json& j, Setting::Entry::Display& p) {
+void from_json(const json& j, guam_config::Entry::Display& p) {
 	simple(type)
 	simple(width)
 	simple(height)
 }
-void from_json(const json& j, Setting::Entry::File& p) {
+void from_json(const json& j, guam_config::Entry::File& p) {
 	simple(disk)
 	simple(germ)
 	simple(boot)
 	simple(floppy)
 }
-void from_json(const json& j, Setting::Entry::Boot& p) {
+void from_json(const json& j, guam_config::Entry::Boot& p) {
 	p.switch_ = j.at("switch");
 	simple(device)
 }
-void from_json(const json& j, Setting::Entry::Memory& p) {
+void from_json(const json& j, guam_config::Entry::Memory& p) {
 	simple(vmbits)
 	simple(rmbits)
 }
-void from_json(const json& j, Setting::Entry::Network& p) {
+void from_json(const json& j, guam_config::Entry::Network& p) {
 	simple(interface)
 }
-void from_json(const json& j, Setting::Entry& p) {
+void from_json(const json& j, guam_config::Entry& p) {
 	simple(name)
 	simple(display)
 	simple(file)
@@ -74,59 +77,23 @@ void from_json(const json& j, Setting::Entry& p) {
 	simple(memory)
 	simple(network)
 }
-void from_json(const json& j, Setting::LevelVKeys& p) {
-	simple(name)
-	p.keyName = toIntMesaNumber(j.at("keyName"));
-}
-void from_json(const json& j, Setting::Keyboard& p) {
-	simple(name)
-	p.scanCode = toIntMesaNumber(j.at("scanCode"));
-}
-void from_json(const json& j, Setting::KeyMap& p) {
-	simple(levelVKeys)
-	simple(keyboard)
-}
-void from_json(const json& j, Setting::Mouse& p) {
-	simple(name)
-	p.bitMask = toIntMesaNumber(j.at("bitMask"));
-}
-void from_json(const json& j, Setting::ButtonMap& p) {
-	simple(levelVKeys)
-	simple(button)
-}
 
 
-Setting Setting::getInstance(const std::string& path) {
+guam_config guam_config::getInstance(const std::string& path) {
 //	logger.info("path  %s", path);
 	std::ifstream f(path);
 	json data = json::parse(f);
 
-	Setting ret;
+	guam_config ret;
 
 	for(auto e: data["entry"]) {
 		ret.entryList.push_back(e.template get<Entry>());
 	}
 
-	for(auto e: data["levelVKeys"]) {
-		ret.levelVKeysList.push_back(e.template get<LevelVKeys>());
-	}
-	for(auto e: data["keyboard"]) {
-		ret.keyboardList.push_back(e.template get<Keyboard>());
-	}
-	for(auto e: data["keyMap"]) {
-		ret.keyMapList.push_back(e.template get<KeyMap>());
-	}
-	for(auto e: data["mouse"]) {
-		ret.mouseList.push_back(e.template get<Mouse>());
-	}
-	for(auto e: data["buttonMap"]) {
-		ret.buttonMapList.push_back(e.template get<ButtonMap>());
-	}
-
 	return ret;
 }
 
-Setting::Entry Setting::getEntry(const std::string& name) {
+guam_config::Entry guam_config::getEntry(const std::string& name) {
 	for(auto e: entryList) {
 		if (e.name == name) return e;
 	}
@@ -135,7 +102,7 @@ Setting::Entry Setting::getEntry(const std::string& name) {
 	ERROR()
 }
 
-bool Setting::containsEntry(const std::string& name) {
+bool guam_config::containsEntry(const std::string& name) {
 	for(auto e: entryList) {
 		if (e.name == name) return true;
 	}

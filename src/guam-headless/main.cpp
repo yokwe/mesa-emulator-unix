@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/guam.h"
 #include "../mesa/processor_thread.h"
-#include "../mesa/setting.h"
+#include "../mesa/guam_config.h"
 
 #include "../opcode/opcode.h"
 
@@ -66,8 +66,8 @@ int main(int /* argc */, char** /* argv */) {
 	auto entryName = "GVWin";
 	logger.info("entryName = %s", entryName);
 
-	auto setting = Setting::getInstance();
-	auto entry   = setting.getEntry(entryName);
+	auto guamConfig = guam_config::getInstance();
+	auto entry = guamConfig.getEntry(entryName);
 
 	guam::Config config;
 	config.diskFilePath     = entry.file.disk;

@@ -51,6 +51,18 @@ inline int toInt(Tcl_Interp* interp, Tcl_Obj* obj, int& status) {
     return ret;
 }
 
+inline Tcl_Obj* toStringObj(const std::string& string) {
+    const char* bytes = string.c_str();
+    int length = string.length();
+    return Tcl_NewStringObj(bytes, length);
+}
+inline Tcl_Obj* toIntObj(int value) {
+    return Tcl_NewIntObj(value);
+}
+inline Tcl_Obj* toWideIntObj(Tcl_WideInt value) {
+    return Tcl_NewWideIntObj(value);
+}
+
 class Interp {
     Tcl_Interp* interp;
 public:

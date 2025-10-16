@@ -82,7 +82,7 @@ int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
         pid <<= 16;
         pid |= PID[3];
 
-        putUINT64(interp, dict, "PID", pid);
+        put(interp, dict, "PID", std_sprintf("0x%lX", pid));
     }
 // //extern CARD16 MP;     // Maintenance Panel
 // VariableMP MP;
@@ -93,12 +93,12 @@ int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 // //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 // //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
 // VariableWP WP;
-    putUINT16(interp, dict, "WP", (CARD16)WP);
+    put(interp, dict, "WP", std_sprintf("0x%04X", (CARD16)WP));
 // //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
 // VariableWDC WDC;
     putUINT16(interp, dict, "WDC", (CARD16)WDC);
 // CARD16 PTC;    // Process timeout counter - 10.4.5
-    putUINT16(interp, dict, "PTC", PTC);
+    put(interp, dict, "PTC", std_sprintf("0x%04X", PTC));
 // CARD16 XTS;    // Xfer trap status - 9.5.5
     putUINT16(interp, dict, "XTS", XTS);
 // // 3.3.1 Control Registers
@@ -106,25 +106,26 @@ int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
     putUINT16(interp, dict, "PSB", (CARD16)PSB);
 // //extern MdsHandle         MDS;
 // VariableMDS       MDS;
-    putUINT32(interp, dict, "MDS", (CARD32)MDS);
+    put(interp, dict, "MDS", std_sprintf("0x%04X", ((CARD32)MDS) >> 16));
+    put(interp, dict, "MDS", std_sprintf("0x%X", (CARD32)MDS));
 // //LocalFrameHandle  LF;  // POINTER TO LocalVariables
 // VariableLF        LF;
-    putUINT16(interp, dict, "LF", (CARD16)LF);
+    put(interp, dict, "LF", std_sprintf("0x%04X", (CARD16)LF));
 // //GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
 // VariableGF        GF;
-    putUINT32(interp, dict, "GF", (CARD32)GF);
+    put(interp, dict, "GF", std_sprintf("0x%08X", (CARD32)GF));
 // //CARD32            CB;  // LONG POINTER TO CodeSegment
 // VariableCB        CB;
-    putUINT32(interp, dict, "CB", (CARD32)CB);
+    put(interp, dict, "CB", std_sprintf("0x%08X", (CARD32)CB));
 // CARD16            PC;
-    putUINT16(interp, dict, "PC", PC);
+    put(interp, dict, "PC", std_sprintf("0x%04X", PC));
 // GFTHandle         GFI;
-    putUINT16(interp, dict, "GFI", GFI);
+    put(interp, dict, "GFI", std_sprintf("0x%04X", GFI));
 // // 4.5 Instruction Execution
 // CARD8  breakByte;
-    putUINT16(interp, dict, "breakByte", breakByte);
+    put(interp, dict, "breakByte", std_sprintf("0x%02X", breakByte));
 // CARD16 savedPC;
-    putUINT16(interp, dict, "savedPC", savedPC);
+    put(interp, dict, "savedPC", std_sprintf("0x%04X", savedPC));
 // CARD16 savedSP;
     putUINT16(interp, dict, "savedSP", savedSP);
 // // 10.4.1 Scheduler

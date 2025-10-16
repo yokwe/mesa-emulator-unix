@@ -50,15 +50,15 @@ static int memoryConfig(Tcl_Interp* interp) {
 
     auto config = memory::getConfig();
 
-    putUINT32(interp, dict, "rpSIze", config.rpSize);
-    putUINT32(interp, dict, "vpSize", config.vpSize);
+    put(interp, dict, "rpSize", std_sprintf("0x%X", config.rpSize));
+    put(interp, dict, "vpSize", std_sprintf("0x%X", config.vpSize));
 
     {
         auto display = Tcl_NewDictObj();
 
         putINT32(interp, display, "pageSize", config.display.pageSize);
-        putINT32(interp, display, "vp", config.display.vp);
-        putINT32(interp, display, "rp", config.display.rp);
+        put(interp, display, "vp", std_sprintf("0x%X", config.display.vp));
+        put(interp, display, "rp", std_sprintf("0x%X", config.display.rp));
         put(interp, dict, "display", display);
     }
 

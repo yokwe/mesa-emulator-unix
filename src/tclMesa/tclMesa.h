@@ -39,13 +39,13 @@
 
 #include "../mesa/guam.h"
 
-int MesaLog     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaGuam    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaEvent   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaPerf    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaBoot    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaConfig  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int MesaDisplay (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaBoot     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaConfig   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaDisplay  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaEvent    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaLog      (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaPerf     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaVariable (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
 void refreshDisplay();
 

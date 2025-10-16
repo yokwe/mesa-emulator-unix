@@ -58,12 +58,13 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 		return TCL_ERROR;
 	}
 
-	Tcl_CreateObjCommand(interp, "mesa::log",      MesaLog,     NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::event",    MesaEvent,   NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::perf",     MesaPerf,    NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::boot",     MesaBoot,    NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::config",   MesaConfig,  NULL, NULL);
-	Tcl_CreateObjCommand(interp, "mesa::display",  MesaDisplay,  NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::boot",     MesaBoot,      NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::config",   MesaConfig,    NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::display",  MesaDisplay,   NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::event",    MesaEvent,     NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::log",      MesaLog,       NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::perf",     MesaPerf,      NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::variable", MesaVariable,  NULL, NULL);
 
 	MesaLinkVar(interp);
 

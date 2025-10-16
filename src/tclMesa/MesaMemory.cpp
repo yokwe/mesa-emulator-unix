@@ -87,9 +87,12 @@ static int memoryMap(Tcl_Interp* interp, int address) {
     return TCL_OK;
 }
 static int memoryRead(Tcl_Interp* interp_, int address) {
-    int intValue = *memory::peek(address);
     tcl::Interp interp(interp_);
-    interp.result(intValue);
+    if (memory::isVacant(address)) {
+        interp.result(-1);
+    } else {
+        interp.result(*memory::peek(address));
+    }
     return TCL_OK;
 }
 static int memoryVacant(Tcl_Interp* interp_, int address) {

@@ -67,10 +67,6 @@ static void DictPut(Tcl_Interp *interp, Tcl_Obj* dict, const std::string& key_, 
 #define DICT_PUT(name) DictPut(interp, dict, #name, config.name);
 
 int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata; (void)objv;
-
-    Tcl_Obj* result = 0;
-
     // mesa::config
     // 0
     if (objc == 1) {
@@ -93,7 +89,7 @@ int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const ob
         Tcl_SetObjResult(interp, dict);
         return TCL_OK;
     }
-    // mesa::config XXX
+    // mesa::config entryName
     // 0            1
     if (objc == 2) {
         std::string entryName = Tcl_GetString(objv[1]);
@@ -120,8 +116,5 @@ int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const ob
         return TCL_OK;
     }
 
-    result = Tcl_ObjPrintf("Unexpected objc = %d", objc);
-    logger.error(Tcl_GetString(result));
-    Tcl_SetObjResult(interp, result);
-    return TCL_ERROR;
+    return invalidCommand(cdata, interp, objc, objv);
 }

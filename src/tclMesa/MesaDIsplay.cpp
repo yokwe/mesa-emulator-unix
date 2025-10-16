@@ -56,12 +56,8 @@ void refreshDisplay() {
 }
 
 // mesa::display set imageName
-// 0     1       2   3
-
-int MesaDisplay(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata;
-    tcl::Interp interp(interp_);
-
+// 0             1   2
+int MesaDisplay(ClientData cdata, Tcl_Interp* interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 3) {
         // mesa::display set imageName
         // 0             1   2
@@ -75,8 +71,5 @@ int MesaDisplay(ClientData cdata, Tcl_Interp* interp_, int objc, Tcl_Obj *const 
         }
     }
 
-    Tcl_Obj* result = Tcl_ObjPrintf("Unexpected objc = %d", objc);
-    logger.error(Tcl_GetString(result));
-    Tcl_SetObjResult(interp, result);
-    return TCL_ERROR;
+    return invalidCommand(cdata, interp, objc, objv);
 }

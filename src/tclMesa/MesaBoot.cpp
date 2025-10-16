@@ -56,28 +56,21 @@ static const Logger logger(__FILE__);
 // mesa::boot
 // 0
 int MesaBoot(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata; (void)objv;
-    Tcl_Obj* result = 0;
+    if (objc == 1) {
+        guam::setConfig(config);
 
-    if (objc != 1) {
-        result = Tcl_ObjPrintf("Unexpected objc is not equals to 1  objc = %d", objc);
-        logger.error(Tcl_GetString(result));
-        Tcl_SetObjResult(interp, result);
-        return TCL_ERROR;
+        GuiOp::setContext(new NullGuiOp);
+        MP.addObserver(GuiOp::setMP);
+
+        // stop at MP 8000
+        processor_thread::stopAtMP( 915);
+
+        logger.info("guam thread start");
+        auto thread = std::thread(guam::run);
+        thread.detach();
+        logger.info("guam thread detached");
+        return TCL_OK;
     }
 
-    guam::setConfig(config);
-
-    GuiOp::setContext(new NullGuiOp);
-    MP.addObserver(GuiOp::setMP);
-
-    // stop at MP 8000
-    processor_thread::stopAtMP( 915);
-//      processor_thread::stopAtMP(8000);
-
-    logger.info("guam thread start");
-    auto thread = std::thread(guam::run);
-    thread.detach();
-    logger.info("guam thread detached");
-    return TCL_OK;
+    return invalidCommand(cdata, interp, objc, objv);
 }

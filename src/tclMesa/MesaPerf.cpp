@@ -43,29 +43,25 @@ static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
 
+// mesa::perf
+// 0
 int MesaPerf(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata; (void)objv;
+    if (objc == 1) {
+        // mesa::perf
+        // 0
+        auto dict = Tcl_NewDictObj();
 
-    Tcl_Obj* result = 0;
+        for(const auto& e: perf::all) {
+            auto key = Tcl_NewStringObj(e.name, strlen(e.name));
+            auto value = Tcl_NewWideIntObj(e.value);
 
-    if (objc != 1) {
-        result = Tcl_ObjPrintf("Unexpected objc is not equals to 1  objc = %d", objc);
-        logger.error(Tcl_GetString(result));
-        Tcl_SetObjResult(interp, result);
-        return TCL_ERROR;
-    }
-    // mesa::perf
-    auto dict = Tcl_NewDictObj();
+            int ret = Tcl_DictObjPut(interp, dict, key, value);
+            if (ret != TCL_OK) ERROR()
+        }
 
-    for(const auto& e: perf::all) {
-        auto key = Tcl_NewStringObj(e.name, strlen(e.name));
-        auto value = Tcl_NewWideIntObj(e.value);
-
-        int ret = Tcl_DictObjPut(interp, dict, key, value);
-        if (ret != TCL_OK) ERROR()
+        Tcl_SetObjResult(interp, dict);
+        return TCL_OK;
     }
 
-    Tcl_SetObjResult(interp, dict);
-
-    return TCL_OK;
+    return invalidCommand(cdata, interp, objc, objv);
 }

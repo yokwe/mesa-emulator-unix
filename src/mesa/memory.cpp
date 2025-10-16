@@ -236,7 +236,7 @@ CARD16* StorePage(CARD32 vp) {
 	return page->word ;
 }
 CARD16* peek(CARD32 va) {
-	PERF_COUNT(memory, GetAddress)
+	PERF_COUNT(memory, peek)
 	const CARD32 vp = va / PageSize;
 	const CARD32 of = va % PageSize;
 	if (config.vpSize <= vp) ERROR()
@@ -250,6 +250,12 @@ CARD16* peek(CARD32 va) {
 	if (page == 0) ERROR();
 	//
 	return page->word + of;
+}
+bool isVacant(CARD32 va) {
+	const CARD32 vp = va / PageSize;
+	if (config.vpSize <= vp) ERROR()
+	Map map = maps[vp];
+	return map.mf.isVacant();
 }
 
 void setReferencedFlag(CARD32 vp) {

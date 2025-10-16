@@ -111,6 +111,7 @@ void    initialize(int vmBits, int rmBits, CARD16 ioRegionPage);
 void    finalize();
 
 CARD16* peek(CARD32 va);
+bool    isVacant(CARD32 va); // not virtual page but virtual address
 //
 void    setReferencedFlag(CARD32 vp);
 void    setReferencedDirtyFlag(CARD32 vp);

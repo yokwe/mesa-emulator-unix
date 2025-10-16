@@ -52,11 +52,7 @@ int MesaPerf(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
         auto dict = Tcl_NewDictObj();
 
         for(const auto& e: perf::all) {
-            auto key = Tcl_NewStringObj(e.name, strlen(e.name));
-            auto value = Tcl_NewWideIntObj(e.value);
-
-            int ret = Tcl_DictObjPut(interp, dict, key, value);
-            if (ret != TCL_OK) ERROR()
+            putUINT64(interp, dict, e.name, e.value);
         }
 
         Tcl_SetObjResult(interp, dict);

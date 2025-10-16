@@ -49,42 +49,28 @@ static const Logger logger(__FILE__);
 
 guam::Config config;
 
-static void DictPut(Tcl_Interp *interp, Tcl_Obj* dict, const std::string& key_, const std::string& value_) {
-    auto key = tcl::toStringObj(key_);
-    auto value = tcl::toStringObj(value_);
-
-    int ret = Tcl_DictObjPut(interp, dict, key, value);
-    if (ret != TCL_OK) ERROR()
-}
-static void DictPut(Tcl_Interp *interp, Tcl_Obj* dict, const std::string& key_, int value_) {
-    auto key = tcl::toStringObj(key_);
-    auto value = tcl::toIntObj(value_);
-
-    int ret = Tcl_DictObjPut(interp, dict, key, value);
-    if (ret != TCL_OK) ERROR()
-}
-
-#define DICT_PUT(name) DictPut(interp, dict, #name, config.name);
+#define PUT_STRING(name) put(interp, dict, #name, config.name);
+#define PUT_INT(name) putINT32(interp, dict, #name, config.name);
 
 int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     // mesa::config
     // 0
     if (objc == 1) {
         auto dict = Tcl_NewDictObj();
+        
+        PUT_STRING(diskFilePath)
+        PUT_STRING(germFilePath)
+        PUT_STRING(bootFilePath)
+        PUT_STRING(floppyFilePath)
+        PUT_STRING(networkInterface)
+        PUT_STRING(bootSwitch)
+        PUT_STRING(bootDevice)
+        PUT_STRING(displayType)
 
-        DICT_PUT(diskFilePath)
-        DICT_PUT(germFilePath)
-        DICT_PUT(bootFilePath)
-        DICT_PUT(floppyFilePath)
-        DICT_PUT(networkInterface)
-        DICT_PUT(bootSwitch)
-        DICT_PUT(bootDevice)
-        DICT_PUT(displayType)
-
-        DICT_PUT(displayWidth)
-        DICT_PUT(displayHeight)
-        DICT_PUT(vmBits)
-        DICT_PUT(rmBits)
+        PUT_INT(displayWidth)
+        PUT_INT(displayHeight)
+        PUT_INT(vmBits)
+        PUT_INT(rmBits)
 
         Tcl_SetObjResult(interp, dict);
         return TCL_OK;

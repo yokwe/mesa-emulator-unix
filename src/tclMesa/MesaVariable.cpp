@@ -43,30 +43,6 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Variable.h"
 
-
-static void dictPut(Tcl_Interp* interp, Tcl_Obj* dict, const char* name, int32_t value_) {
-    auto key = Tcl_NewStringObj(name, strlen(name));
-    auto value = Tcl_NewIntObj(value_);
-
-    int ret = Tcl_DictObjPut(interp, dict, key, value);
-    if (ret != TCL_OK) ERROR()
-}
-static void dictPut(Tcl_Interp* interp, Tcl_Obj* dict, const char* name, uint32_t value_) {
-    auto key = Tcl_NewStringObj(name, strlen(name));
-    auto value = Tcl_NewIntObj(value_);
-
-    int ret = Tcl_DictObjPut(interp, dict, key, value);
-    if (ret != TCL_OK) ERROR()
-}
-static void dictPut(Tcl_Interp* interp, Tcl_Obj* dict, const char* name, uint64_t value_) {
-    auto key = Tcl_NewStringObj(name, strlen(name));
-    auto value = Tcl_NewWideIntObj(value_);
-
-    int ret = Tcl_DictObjPut(interp, dict, key, value);
-    if (ret != TCL_OK) ERROR()
-}
-
-
 int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     (void)cdata; (void)objv;
 
@@ -95,7 +71,7 @@ int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
         if (ret != TCL_OK) ERROR()
     }
 // CARD16 SP;
-    dictPut(interp, dict, "SP", SP);
+    putUINT16(interp, dict, "SP", SP);
 
 // // 3.3.3 Data and Status Registers
 // CARD16 PID[4]; // Processor ID
@@ -106,54 +82,54 @@ int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
         pid <<= 16;
         pid |= PID[3];
 
-        dictPut(interp, dict, "PID", pid);
+        putUINT64(interp, dict, "PID", pid);
     }
 // //extern CARD16 MP;     // Maintenance Panel
 // VariableMP MP;
-    dictPut(interp, dict, "MP", (CARD16)MP);
+    putUINT16(interp, dict, "MP", (CARD16)MP);
 // //extern CARD32 IT;     // Interval Timer
 // VariableIT IT;
 
 // //extern CARD16 WM;     // Wakeup mask register - 10.4.4
 // //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
 // VariableWP WP;
-    dictPut(interp, dict, "WP", (CARD16)WP);
+    putUINT16(interp, dict, "WP", (CARD16)WP);
 // //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
 // VariableWDC WDC;
-    dictPut(interp, dict, "WDC", (CARD16)WDC);
+    putUINT16(interp, dict, "WDC", (CARD16)WDC);
 // CARD16 PTC;    // Process timeout counter - 10.4.5
-    dictPut(interp, dict, "PTC", PTC);
+    putUINT16(interp, dict, "PTC", PTC);
 // CARD16 XTS;    // Xfer trap status - 9.5.5
-    dictPut(interp, dict, "XTS", XTS);
+    putUINT16(interp, dict, "XTS", XTS);
 // // 3.3.1 Control Registers
 // VariablePSB       PSB; // PsbIndex - 10.1.1
-    dictPut(interp, dict, "PSB", (CARD16)PSB);
+    putUINT16(interp, dict, "PSB", (CARD16)PSB);
 // //extern MdsHandle         MDS;
 // VariableMDS       MDS;
-    dictPut(interp, dict, "MDS", (CARD32)MDS);
+    putUINT32(interp, dict, "MDS", (CARD32)MDS);
 // //LocalFrameHandle  LF;  // POINTER TO LocalVariables
 // VariableLF        LF;
-    dictPut(interp, dict, "LF", (CARD16)LF);
+    putUINT16(interp, dict, "LF", (CARD16)LF);
 // //GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
 // VariableGF        GF;
-    dictPut(interp, dict, "GF", (CARD32)GF);
+    putUINT32(interp, dict, "GF", (CARD32)GF);
 // //CARD32            CB;  // LONG POINTER TO CodeSegment
 // VariableCB        CB;
-    dictPut(interp, dict, "CB", (CARD32)CB);
+    putUINT32(interp, dict, "CB", (CARD32)CB);
 // CARD16            PC;
-    dictPut(interp, dict, "PC", PC);
+    putUINT16(interp, dict, "PC", PC);
 // GFTHandle         GFI;
-    dictPut(interp, dict, "GFI", GFI);
+    putUINT16(interp, dict, "GFI", GFI);
 // // 4.5 Instruction Execution
 // CARD8  breakByte;
-    dictPut(interp, dict, "breakByte", breakByte);
+    putUINT16(interp, dict, "breakByte", breakByte);
 // CARD16 savedPC;
-    dictPut(interp, dict, "savedPC", savedPC);
+    putUINT16(interp, dict, "savedPC", savedPC);
 // CARD16 savedSP;
-    dictPut(interp, dict, "savedSP", savedSP);
+    putUINT16(interp, dict, "savedSP", savedSP);
 // // 10.4.1 Scheduler
 // VariableRunning running;
-    dictPut(interp, dict, "running", running ? 1 : 0);
+    putUINT16(interp, dict, "running", running ? 1 : 0);
 
 
     Tcl_SetObjResult(interp, dict);

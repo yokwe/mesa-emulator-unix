@@ -63,6 +63,7 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 	Tcl_CreateObjCommand(interp, "mesa::display",  MesaDisplay,   NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::event",    MesaEvent,     NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::log",      MesaLog,       NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::memory",   MesaMemory,    NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::perf",     MesaPerf,      NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::variable", MesaVariable,  NULL, NULL);
 
@@ -138,4 +139,31 @@ int invalidCommand(ClientData cdata, Tcl_Interp *interp_, int objc, Tcl_Obj *con
         interp.result(string);
     }
     return TCL_ERROR;
+}
+
+void put(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, Tcl_Obj* value) {
+    int ret = Tcl_DictObjPut(interp, dict, tcl::toStringObj(key), value);
+    if (ret != TCL_OK) ERROR()
+}
+void put(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, const std::string& value) {
+    put(interp, dict, key, tcl::toStringObj(value));
+}
+
+void putINT16(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int16_t value) {
+    put(interp, dict, key, tcl::toIntObj(value));
+}
+void putUINT16(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint16_t value) {
+    put(interp, dict, key, tcl::toIntObj(value));
+}
+void putINT32(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int32_t value) {
+    put(interp, dict, key, tcl::toIntObj(value));
+}
+void putUINT32(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint32_t value) {
+    put(interp, dict, key, tcl::toIntObj(value));
+}
+void putINT64(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int64_t value) {
+    put(interp, dict, key, tcl::toWideIntObj(value));
+}
+void putUINT64(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint64_t value) {
+    put(interp, dict, key, tcl::toWideIntObj(value));
 }

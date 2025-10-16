@@ -19,6 +19,7 @@ target_sources(
 		MesaEvent.cpp
 		MesaLinkVar.cpp
 		MesaLog.cpp
+		MesaMemory.cpp
 		MesaPerf.cpp
 		MesaVariable.cpp
 		photo_image.cpp

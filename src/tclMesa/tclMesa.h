@@ -44,6 +44,7 @@ int MesaConfig   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
 int MesaDisplay  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaEvent    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaLog      (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaMemory   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaPerf     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaVariable (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
@@ -51,11 +52,23 @@ void refreshDisplay();
 
 extern guam::Config config;
 
-int invalidCommand  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-
 // LinkVAr
 void PerfLinkVar(Tcl_Interp* interp);
 
 inline void MesaLinkVar(Tcl_Interp *interp) {
     PerfLinkVar(interp);
 }
+
+// utility method
+int invalidCommand  (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+
+void put(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, Tcl_Obj* value);
+void put(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, const std::string& value);
+
+void putINT16(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int16_t value);
+void putUINT16(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint16_t value);
+void putINT32(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int32_t value);
+void putUINT32(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint32_t value);
+void putINT64(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, int64_t value);
+void putUINT64(Tcl_Interp *interp, Tcl_Obj* dict, const char* key, uint64_t value);
+

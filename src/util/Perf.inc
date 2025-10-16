@@ -15,7 +15,7 @@ uint64_t perf::memory::StoreByte                 = 0;
 uint64_t perf::memory::ReadField                 = 0;
 uint64_t perf::memory::WriteField                = 0;
 uint64_t perf::memory::WriteMap                  = 0;
-uint64_t perf::memory::GetAddress                = 0;
+uint64_t perf::memory::peek                      = 0;
 uint64_t perf::memory::FetchPda                  = 0;
 uint64_t perf::memory::StorePda                  = 0;
 uint64_t perf::memory::FetchPage                 = 0;
@@ -103,7 +103,7 @@ std::vector<perf::Entry> all {
     {"memory::ReadField"                , perf::memory::ReadField},
     {"memory::WriteField"               , perf::memory::WriteField},
     {"memory::WriteMap"                 , perf::memory::WriteMap},
-    {"memory::GetAddress"               , perf::memory::GetAddress},
+    {"memory::peek"                     , perf::memory::peek},
     {"memory::FetchPda"                 , perf::memory::FetchPda},
     {"memory::StorePda"                 , perf::memory::StorePda},
     {"memory::FetchPage"                , perf::memory::FetchPage},

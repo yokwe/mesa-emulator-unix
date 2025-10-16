@@ -5,6 +5,11 @@
 # show tcl information
 parray tcl_platform
 
+proc formatWithCommas {num {sep ,}} {
+    while {[regsub {^([-+]?\d+)(\d\d\d)} $num "\\1$sep\\2" num]} {}
+    return $num
+}
+
 # load config
 mesa::config GVWin
 set config [mesa::config]

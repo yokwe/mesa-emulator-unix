@@ -56,6 +56,9 @@ inline Tcl_Obj* toStringObj(const std::string& string) {
     int length = string.length();
     return Tcl_NewStringObj(bytes, length);
 }
+inline Tcl_Obj* toStringObj(const char* string) {
+    return Tcl_NewStringObj(string, strlen(string));
+}
 inline Tcl_Obj* toIntObj(int value) {
     return Tcl_NewIntObj(value);
 }

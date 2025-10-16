@@ -33,9 +33,6 @@
 // MasaPerf.cpp
 //
 
-#include <string>
-#include <regex>
-
 #include <tcl.h>
 #include <tclDecls.h>
 

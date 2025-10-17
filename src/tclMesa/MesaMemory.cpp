@@ -66,6 +66,13 @@ static int memoryConfig(Tcl_Interp* interp) {
     return TCL_OK;
 }
 static int memoryMap(Tcl_Interp* interp, int address) {
+    // sanity check
+    if (memory::getConfig().vpSize == 0) {
+        const char* message = "memory is not initialized";
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(message, strlen(message)));
+        return TCL_ERROR;
+    }
+
     auto dict = Tcl_NewDictObj();
 
     const CARD32 vp = (CARD32)address / PageSize;
@@ -87,6 +94,13 @@ static int memoryMap(Tcl_Interp* interp, int address) {
     return TCL_OK;
 }
 static int memoryRead(Tcl_Interp* interp_, int address) {
+    // sanity check
+    if (memory::getConfig().vpSize == 0) {
+        const char* message = "memory is not initialized";
+        Tcl_SetObjResult(interp_, Tcl_NewStringObj(message, strlen(message)));
+        return TCL_ERROR;
+    }
+
     tcl::Interp interp(interp_);
     if (memory::isVacant(address)) {
         interp.result(-1);
@@ -96,6 +110,13 @@ static int memoryRead(Tcl_Interp* interp_, int address) {
     return TCL_OK;
 }
 static int memoryVacant(Tcl_Interp* interp_, int address) {
+    // sanity check
+    if (memory::getConfig().vpSize == 0) {
+        const char* message = "memory is not initialized";
+        Tcl_SetObjResult(interp_, Tcl_NewStringObj(message, strlen(message)));
+        return TCL_ERROR;
+    }
+
     auto intValue = memory::isVacant(address) ? 1 : 0;
     tcl::Interp interp(interp_);
     interp.result(intValue);

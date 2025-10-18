@@ -65,6 +65,7 @@ extern "C" int DLLEXPORT Mesa_Init(Tcl_Interp *interp) {
 	Tcl_CreateObjCommand(interp, "mesa::log",      MesaLog,       NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::memory",   MesaMemory,    NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::perf",     MesaPerf,      NULL, NULL);
+	Tcl_CreateObjCommand(interp, "mesa::trace",    MesaTrace,      NULL, NULL);
 	Tcl_CreateObjCommand(interp, "mesa::variable", MesaVariable,  NULL, NULL);
 
 	MesaLinkVar(interp);

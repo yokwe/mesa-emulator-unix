@@ -21,6 +21,7 @@ target_sources(
 		MesaLog.cpp
 		MesaMemory.cpp
 		MesaPerf.cpp
+		MesaTrace.cpp
 		MesaVariable.cpp
 		photo_image.cpp
 )

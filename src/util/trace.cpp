@@ -34,13 +34,19 @@
 //
 
 #include "Util.h"
+#include <algorithm>
+#include <functional>
+#include <iterator>
+#include <vector>
 static const Logger logger(__FILE__);
 
 #include "trace.h"
 
 namespace trace {
 
-std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
+#include "trace.inc"
+
+static std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
     time_t temp = std::chrono::system_clock::to_time_t(time);
 	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count() % 1'000'000;
 
@@ -48,9 +54,11 @@ std::string toStringLocalTime(const std::chrono::system_clock::time_point time) 
     localtime_r(&temp, &tm);
     return std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%06d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
 }
-
-#include "trace.inc"
-
+std::string Event::toString() const {
+    auto sourceString = LogSourceLocation::toString(location);
+    auto timeString = toStringLocalTime(time);
+    return std_sprintf("{%s  %s}", timeString, sourceString);
+}
 void clear() {
     for(auto& e: map) {
        e.second->clear();
@@ -58,10 +66,7 @@ void clear() {
 }
 void dump(const EventQueue* queue) {
     for(const auto& e: *queue) {
-        auto source = LogSourceLocation::toString(e.location);
-        auto time = toStringLocalTime(e.time);
-
-        logger.info("%s  %s", time, source);
+        logger.info(e.toString());
     }
 }
 void dump(const char* name) {
@@ -69,6 +74,16 @@ void dump(const char* name) {
         dump(map[name]);
     } else {
         logger.warn("unexpected name  %s!", name);
+    }
+}
+void dump() {
+    std::vector<Event> vector;
+    for(const auto& e: map) {
+        std::copy(e.second->cbegin(), e.second->cend(), std::back_inserter(vector));
+    }
+    std::sort(vector.begin(), vector.end(), std::less<Event>{});
+    for(const auto& e: vector) {
+        logger.info(e.toString());
     }
 }
 

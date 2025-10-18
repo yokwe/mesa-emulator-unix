@@ -39,6 +39,7 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
+#include "../util/trace.h"
 
 #include "Variable.h"
 #include "processor_thread.h"
@@ -56,6 +57,7 @@ void stop() {
 }
 
 void run() {
+	TRACE_RECORD(interrupt)
 	logger.info("interrup_thread::run START");
 	stopThread = false;
 	
@@ -66,28 +68,40 @@ void run() {
 
 		// wait until interrupt is arrived
 		for(;;) {
+			TRACE_RECORD(interrupt)
 			cvWP.wait_for(locker, Util::ONE_SECOND);
+			TRACE_RECORD(interrupt)
 			if (stopThread) goto exitLoop;
+			TRACE_RECORD(interrupt)
 			if (WP.pending()) break;
+			TRACE_RECORD(interrupt)
 		}
 		PERF_COUNT(interrupt, request)
+		TRACE_RECORD(interrupt)
 		processor_thread::requestRescheduleInterrupt();
+		TRACE_RECORD(interrupt)
 	}
 exitLoop:
+	TRACE_RECORD(interrupt)
 	logger.info("interrupt_thread::run STOP");
 }
 
 void notifyInterrupt(CARD16 interruptSelector) {
 	PERF_COUNT(interrupt, notify)
+	TRACE_RECORD(notifyInterrupt)
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
 	if (interruptSelector && (oldValue & interruptSelector) == 0) {
+		TRACE_RECORD(notifyInterrupt)
 		std::unique_lock<std::mutex> locker(mutexWP);
+		TRACE_RECORD(notifyInterrupt)
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
+		TRACE_RECORD(notifyInterrupt)
 		PERF_COUNT(interrupt, wakeup)
 	}
+	TRACE_RECORD(notifyInterrupt)
 }
 
 }

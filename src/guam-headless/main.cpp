@@ -40,6 +40,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
 #include "../util/GuiOp.h"
+#include "../util/trace.h"
 
 #include "../mesa/guam.h"
 #include "../mesa/processor_thread.h"
@@ -100,6 +101,8 @@ int main(int /* argc */, char** /* argv */) {
 	PERF_LOG();
 	memory::cache::stats();
 	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
+
+	trace::dump();
 
 	// {
 	// 	guam::initialize();

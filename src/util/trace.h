@@ -40,7 +40,9 @@
 
 #include "Util.h"
 
-#define TRACE_RECORD(name) { Event event; trace::group::name.push(event); }
+static const constexpr bool TRACE_ENABLE = true;
+
+#define TRACE_RECORD(name) { if (TRACE_ENABLE) { trace::Event event;  trace::name.push_back(event); }  }
 
 namespace trace {
 
@@ -52,6 +54,19 @@ struct Event {
         std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now(),
         std::source_location location_ = std::source_location::current()) :
         time(time_), location(location_) {}
+    Event(Event&& that) = default;
+    Event(const Event& that) = default;
+    Event& operator =(const Event& that) = default;
+    
+    std::strong_ordering operator <=>(const Event& that) const {
+        return this->time <=> that.time;
+    }
+
+    static inline std::strong_ordering comparator(const Event& left, const Event& right) {
+        return left <=> right;
+    }
+
+    std::string toString() const;
 };
 
 inline constexpr int QUEUE_SIZE = 20;
@@ -60,13 +75,22 @@ using EventQueue = fixed_queue<Event, QUEUE_SIZE>;
 extern std::map<const char*, EventQueue*> map;
 
 void clear();
+void dump();
 void dump(const char* name);
 
-#define TRACE_DECLARE(name) namespace group { extern EventQueue name; }
+#define TRACE_DECLARE(name) extern EventQueue name;
 
 TRACE_DECLARE(guam)
+//
 TRACE_DECLARE(processor)
+TRACE_DECLARE(requestRescheduleTimer)
+TRACE_DECLARE(requestRescheduleInterrupt)
+TRACE_DECLARE(checkRequestReschedule)
+//
 TRACE_DECLARE(interrupt)
+TRACE_DECLARE(notifyInterrupt)
+//
 TRACE_DECLARE(timer)
+TRACE_DECLARE(processTimeout)
 
 }

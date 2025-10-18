@@ -163,7 +163,7 @@ private:
 	}
 public:
 	static std::string toString(std::source_location location, const char* prefix = "") {
-		return std_sprintf("%a%5d  %s  --  %s", prefix, location.line(), to_simple_path(location.file_name()), location.function_name());
+		return std_sprintf("%s%5d  %s  --  %s", prefix, location.line(), to_simple_path(location.file_name()), location.function_name());
 	}
 	static void debug(const Logger& logger, std::source_location location, const char* prefix = "") {
 		logger.debug(toString(location, prefix));

@@ -34,16 +34,11 @@
 
 #pragma once
 
-#include <cstdio>
 #include <string>
-#include <cstring>
 #include <cstdint>
 #include <set>
 #include <source_location>
-#include <locale>
-#include <sstream>
-
-#include <alloca.h>
+#include <deque>
 
 #include <log4cxx/logger.h>
 
@@ -166,24 +161,24 @@ private:
 		auto pos = strstr(path, "/src");
 		return (pos == NULL) ? path : pos + 1;
 	}
-	static std::string log_message(std::source_location location, const char* prefix) {
-		return std_sprintf("%s%5d  %s  --  %s", prefix, location.line(), to_simple_path(location.file_name()), location.function_name());
-	}
 public:
+	static std::string toString(std::source_location location, const char* prefix = "") {
+		return std_sprintf("%a%5d  %s  --  %s", prefix, location.line(), to_simple_path(location.file_name()), location.function_name());
+	}
 	static void debug(const Logger& logger, std::source_location location, const char* prefix = "") {
-		logger.debug(log_message(location, prefix));
+		logger.debug(toString(location, prefix));
 	}
 	static void info(const Logger& logger, std::source_location location, const char* prefix = "") {
-		logger.info(log_message(location, prefix));
+		logger.info(toString(location, prefix));
 	}
 	static void warn(const Logger& logger, std::source_location location, const char* prefix = "") {
-		logger.warn(log_message(location, prefix));
+		logger.warn(toString(location, prefix));
 	}
 	static void error(const Logger& logger, std::source_location location, const char* prefix = "") {
-		logger.error(log_message(location, prefix));
+		logger.error(toString(location, prefix));
 	}
 	static void fatal(const Logger& logger, std::source_location location, const char* prefix = "") {
-		logger.fatal(log_message(location, prefix));
+		logger.fatal(toString(location, prefix));
 	}
 
 	static void trace(const Logger& logger, std::source_location location = std::source_location::current()) {
@@ -216,6 +211,26 @@ public:
 };
 #define ERROR_RequestReschedule() { throw RequestReschedule(); }
 
+// https://stackoverflow.com/questions/56334492/c-create-fixed-size-queue
+template <typename T, int MAX_SIZE>
+class fixed_queue : public std::deque<T> {
+public:
+	fixed_queue() : std::deque<T>() {}
+	fixed_queue(const fixed_queue& that) = default;
+
+    void push_front(const T& value) {
+        if (this->size() == MAX_SIZE) {
+           this->pop_back();
+        }
+        std::deque<T>::push_front(value);
+    }
+    void push_back(const T& value) {
+        if (this->size() == MAX_SIZE) {
+           this->pop_front();
+        }
+        std::deque<T>::push_back(value);
+    }
+};
 
 void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);

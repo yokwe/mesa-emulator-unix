@@ -40,11 +40,13 @@ static const Logger logger(__FILE__);
 
 #include "Perf.h"
 
+namespace perf {
+
 #include "Perf.inc"
 
 // output aligned name and value
 // value can be very large number. output with thousands separator
-void perf::dump() {
+void dump() {
     std::vector<std::pair<std::string, std::string>> outputs;
     for(const auto& e: all) {
         auto value = formatWithCommas(e.value);
@@ -63,8 +65,10 @@ void perf::dump() {
     }
 }
 
-void perf::clear() {
+void clear() {
     for(const auto& e: all) {
         e.value = 0;
     }
+}
+
 }

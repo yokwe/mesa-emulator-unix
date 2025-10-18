@@ -25,22 +25,21 @@ BEGIN {
 }
 
 END {
-    format = sprintf("uint64_t perf::%%%ds = 0;\n", -(L+2))
+    format = sprintf("uint64_t %%%ds = 0;\n", -(L+2))
     for(i = 0; i < N; i++) {
         # uint64_t a1 = 0;
         name = GROUP[i] "::" NAME[i]
         printf(format, name)
     }
-
+    print("")
+    
     format = sprintf("    {%%%ds, %%s},\n", -(L+4))
-    print("namespace perf {")
-    print("std::vector<perf::Entry> all {");
+    print("std::vector<Entry> all {");
     for(i = 0; i < N; i++) {
         # {"a1", a1},
         name = GROUP[i] "::" NAME[i]
 
-        printf(format, "\"" name "\"", "perf::" name)
+        printf(format, "\"" name "\"", name)
     }
     print("};")
-    print("}")
 }

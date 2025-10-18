@@ -36,7 +36,7 @@ cmake: distclean-cmake
 src/util/Perf.inc: src/util/Perf.h data/gen-perf-inc.awk
 	awk -f data/gen-perf-inc.awk src/util/Perf.h >src/util/Perf.inc
 
-src/util/trace.inc: src/util/Perf.h data/gen-trace-inc.awk
+src/util/trace.inc: src/util/trace.h data/gen-trace-inc.awk
 	awk -f data/gen-trace-inc.awk src/util/trace.h >src/util/trace.inc
 
 build: src/util/Perf.inc src/util/trace.inc

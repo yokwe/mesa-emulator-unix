@@ -15,6 +15,7 @@ target_sources(
 		OpcodeInfo.h
 		Perf.h
 		tcl.h
+		trace.h
 		ThreadControl.h
     	Util.h
 	PRIVATE
@@ -25,6 +26,7 @@ target_sources(
 		OpcodeInfo.cpp
 		Perf.cpp
 		tcl.cpp
+		trace.cpp
 		ThreadControl.cpp
 		Util.cpp
 )

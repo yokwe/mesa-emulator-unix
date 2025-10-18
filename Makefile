@@ -36,7 +36,10 @@ cmake: distclean-cmake
 src/util/Perf.inc: src/util/Perf.h data/gen-perf-inc.awk
 	awk -f data/gen-perf-inc.awk src/util/Perf.h >src/util/Perf.inc
 
-build: src/util/Perf.inc
+src/util/trace.inc: src/util/Perf.h data/gen-trace-inc.awk
+	awk -f data/gen-trace-inc.awk src/util/trace.h >src/util/trace.inc
+
+build: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build ${BUILD_DIR}
 
 distclean: distclean-cmake distclean-macos
@@ -47,13 +50,13 @@ distclean-cmake:
 distclean-macos:
 	find . -type f -name '._*' -print -delete
 
-main: src/util/Perf.inc
+main: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target main
 	
-test: src/util/Perf.inc
+test: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target test
 
-guam-headless: src/util/Perf.inc
+guam-headless: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target guam-headless
 
 tclMesa:

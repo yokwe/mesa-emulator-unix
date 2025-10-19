@@ -48,35 +48,58 @@ static const Logger logger(__FILE__);
 // 0
 // mesa::perf group
 // 0          1
+// mesa::perf dump
+// 0          1
+// mesa::perf clear
+// 0          1
+// mesa::perf dump group
+// 0          1    2
 int MesaPerf(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 1) {
         // mesa::perf
         // 0
-        // auto dict = Tcl_NewDictObj();
+        auto dict = Tcl_NewDictObj();
 
-        // for(const auto& e: perf::all) {
-        //     putUINT64(interp, dict, e.name.c_str(), e.value);
-        // }
+        for(const auto& e: perf::all) {
+            putUINT64(interp, dict, e.name.c_str(), e.value);
+        }
 
-        // Tcl_SetObjResult(interp, dict);
-        perf::dump();
-        return TCL_OK;
+        Tcl_SetObjResult(interp, dict);
     }
     if (objc == 2) {
+        // mesa::perf dump
+        // mesa::perf clear
         // mesa::perf group
         // 0          1
         auto group = tcl::toString(objv[1]);
-        perf::dump(group);
-        // auto dict = Tcl_NewDictObj();
+        if (group == "dump") {
+            perf::dump();
+            return TCL_OK;
+        }
+        if (group == "clear") {
+            perf::clear();
+            return TCL_OK;
+        }
 
-        // for(const auto& e: perf::all) {
-        //     if (e.group == group) {
-        //         putUINT64(interp, dict, e.name.c_str(), e.value);
-        //     }
-        // }
+        auto dict = Tcl_NewDictObj();
 
-        // Tcl_SetObjResult(interp, dict);
+        for(const auto& e: perf::all) {
+            if (e.group == group) {
+                putUINT64(interp, dict, e.name.c_str(), e.value);
+            }
+        }
+
+        Tcl_SetObjResult(interp, dict);
         return TCL_OK;
+    }
+    if (objc == 3) {
+        auto subCommand = tcl::toString(objv[1]);
+        auto group = tcl::toString(objv[2]);
+
+        if (subCommand == "dump") {
+            perf::dump(group);
+            return TCL_OK;
+        }
     }
 
     return invalidCommand(cdata, interp, objc, objv);

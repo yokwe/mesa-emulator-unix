@@ -21,6 +21,8 @@ BEGIN {
     NAME[N]  = temp[2];
     t = length(temp[1]) + length(temp[2])
     if (L < t) L = t
+    t = length(temp[1])
+    if (G < t) G = t;
     N++
 }
 
@@ -33,13 +35,13 @@ END {
     }
     print("")
     
-    format = sprintf("    {%%%ds, %%s},\n", -(L+4))
+    format = sprintf("    {%%%ds, %%%ds, %%s},\n", -(G+2), -(L+4))
     print("std::vector<Entry> all {");
     for(i = 0; i < N; i++) {
         # {"a1", a1},
         name = GROUP[i] "::" NAME[i]
 
-        printf(format, "\"" name "\"", name)
+        printf(format, "\"" GROUP[i] "\"", "\"" name "\"", name)
     }
     print("};")
 }

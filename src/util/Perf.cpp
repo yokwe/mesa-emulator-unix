@@ -64,6 +64,25 @@ void dump() {
         logger.info(format.c_str(), e.first, e.second);
     }
 }
+void dump(const std::string& group) {
+    std::vector<std::pair<std::string, std::string>> outputs;
+    for(const auto& e: all) {
+        if (e.group != group) continue;
+        auto value = formatWithCommas(e.value);
+        outputs.push_back(std::make_pair(e.name, value));
+    }
+
+    size_t firstLen  = 0;
+    size_t secondLen = 0;
+    for(auto& e: outputs) {
+        firstLen  = std::max(firstLen, e.first.length());
+        secondLen = std::max(secondLen, e.second.length());
+    }
+    std::string format = std_sprintf("%%-%ds = %%%ds", firstLen, secondLen);
+    for(auto& e: outputs) {
+        logger.info(format.c_str(), e.first, e.second);
+    }
+}
 
 void clear() {
     for(const auto& e: all) {

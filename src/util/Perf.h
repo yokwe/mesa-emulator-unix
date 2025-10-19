@@ -37,6 +37,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #define PERF_DECLARE(group, name) namespace group { extern uint64_t name; }
 
@@ -51,14 +52,16 @@ static const bool PERF_ENABLE = true;
 namespace perf {
 
 struct Entry {
-    const char* name;
+    std::string group;
+    std::string name;
     uint64_t&   value;
-    Entry(const char* name_, uint64_t& value_) : name(name_), value(value_) {}
+    Entry(const char* group_, const char* name_, uint64_t& value_) : group(group_), name(name_), value(value_) {}
 };
 
 extern std::vector<perf::Entry> all;
 
 void dump();
+void dump(const std::string& group);
 void clear();
 
 // memory

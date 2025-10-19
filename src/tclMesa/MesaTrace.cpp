@@ -44,9 +44,10 @@ static const Logger logger(__FILE__);
 #include "../util/trace.h"
 #include "../util/tcl.h"
 
-// mesa::perf
+// mesa::trace
 // 0
-// mesa::perf group
+// mesa::trace clear
+// mesa::trace group
 // 0          1
 int MesaTrace(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 1) {
@@ -59,6 +60,10 @@ int MesaTrace(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const obj
         // mesa::trace group
         // 0          1
         auto group = tcl::toString(objv[1]);
+        if (group == "clear") {
+            trace::clear();
+            return TCL_OK;
+        }
         trace::dump(group);
         return TCL_OK;
     }

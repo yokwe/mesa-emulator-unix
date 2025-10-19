@@ -35,105 +35,161 @@
 
 #include <tcl.h>
 #include <tclDecls.h>
+#include <utility>
 
 #include "tclMesa.h"
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/tcl.h"
+
 #include "../mesa/Variable.h"
 
-int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    (void)cdata; (void)objv;
+struct Values {
+    CARD16 PID[4]; // Processor ID
+    CARD16 MP;     // Maintenance Panel
+    CARD16 WP;     // Wakeup pending register - 10.4.4.1
+    CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
+    CARD16 PTC;    // Process timeout counter - 10.4.5
+    CARD16 XTS;    // Xfer trap status - 9.5.5
+    CARD16 PSB;    // PsbIndex - 10.1.1
+    CARD32 MDS;    // Main Data Space
+    CARD16 LF;     // POINTER TO LocalVariables
+    CARD32 GF;     // LONG POINTER TO GlobalVarables
+    CARD32 CB;     // LONG POINTER TO CodeSegment
+    CARD16 GFI;
+    CARD16 PC;
+    CARD16 SP;
+    CARD16 savedPC;
+    CARD16 savedSP;
+    CARD16 stack[StackDepth]; // Evaluation Stack - 3.3.2
+    CARD8  breakByte;
+    bool   running;
 
-    Tcl_Obj* result = 0;
-
-    if (objc != 1) {
-        result = Tcl_ObjPrintf("Unexpected objc is not equals to 1  objc = %d", objc);
-        logger.error(Tcl_GetString(result));
-        Tcl_SetObjResult(interp, result);
-        return TCL_ERROR;
+    void set() {
+        for(int i = 0; i < 4; i++) PID[i] = ::PID[i];
+        MP  = ::MP;
+        WP  = ::WP;
+        WDC = ::WDC;
+        PTC = ::PTC;
+        XTS = ::XTS;
+        PSB = ::PSB;
+        MDS = ::MDS;
+        LF  = ::LF;
+        GF  = ::GF;
+        CB  = ::CB;
+        GFI = ::GFI;
+        PC  = ::PC;
+        SP  = ::SP;
+        savedPC   = ::savedPC;
+        savedSP   = ::savedSP;
+        for(int i = 0; i < StackDepth; i++) stack[i] = ::stack[i];
+        breakByte = ::breakByte;
+        running   = ::running;
     }
-    // mesa::perf
-    auto dict = Tcl_NewDictObj();
+};
 
-// // 3.3.2 Evaluation Stack
-// VariableStack stack;
-    {
-        auto name = "stack";
-        auto key = Tcl_NewStringObj(name, strlen(name));
-        auto value = Tcl_NewListObj(0, 0);
-        for(int i = 0; i < StackDepth; i++) {
-            auto ret = Tcl_ListObjAppendElement(interp, value, Tcl_NewIntObj(stack[i]));
-            if (ret != TCL_OK) ERROR()
+static Values values;
+
+// mesa::variable
+// mesa::variable dump
+
+int returnDict(Tcl_Interp* interp) {
+        values.set();
+        auto dict = Tcl_NewDictObj();
+
+        {
+            uint64_t value = (uint64_t)values.PID[1] << 32 | values.PID[2] << 16 | values.PID[3];
+            put(interp, dict, "PID", std_sprintf("0x%lX", value));
         }
-        int ret = Tcl_DictObjPut(interp, dict, key, value);
-        if (ret != TCL_OK) ERROR()
+        put(interp, dict, "WP", std_sprintf("0x%04X", values.WP));
+        put(interp, dict, "WDC", std_sprintf("%d", values.WDC));
+        put(interp, dict, "PTC", std_sprintf("0x%04X", values.PTC));
+        put(interp, dict, "XTS", std_sprintf("%d", values.XTS));
+        put(interp, dict, "PSB", std_sprintf("%d", values.PSB));
+        put(interp, dict, "MDS", std_sprintf("0x%04X", values.MDS >> 16));
+        put(interp, dict, "LF", std_sprintf("0x%04X", values.LF));
+        put(interp, dict, "GF", std_sprintf("0x%08X", values.GF));
+        put(interp, dict, "CB", std_sprintf("0x%08X", values.CB));
+        put(interp, dict, "GFI", std_sprintf("0x%04X", values.GFI));
+        put(interp, dict, "PC", std_sprintf("0x%04X", values.PC));
+        put(interp, dict, "SP", std_sprintf("%d", values.SP));
+        put(interp, dict, "savedPC", std_sprintf("0x%04X", values.savedPC));
+        put(interp, dict, "savedSP", std_sprintf("%d", values.savedSP));
+        {
+            auto value = Tcl_NewListObj(0, 0);
+            for(int i = 0; i < StackDepth; i++) {
+                std::string string = std_sprintf("0x%04X", values.stack[i]);
+                auto ret = Tcl_ListObjAppendElement(interp, value, Tcl_NewStringObj(string.c_str(), string.length()));
+                if (ret != TCL_OK) ERROR()
+            }
+            put(interp, dict, "stack", value);
+        }
+        put(interp, dict, "breakByte", std_sprintf("0x%02X", values.breakByte));
+        put(interp, dict, "running", values.running ? "1" : "0");
+
+        Tcl_SetObjResult(interp, dict);
+
+        return TCL_OK;
+}
+
+int dump(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+    values.set();
+    auto subCommand = tcl::toString(objv[1]);
+
+    if (subCommand == "dump") {
+        std::vector<std::pair<std::string, std::string>> output;
+
+        output.push_back(std::make_pair("PID", std_sprintf("0x%lX", (uint64_t)values.PID[1] << 32 | values.PID[2] << 16 | values.PID[3])));
+        output.push_back(std::make_pair("WP", std_sprintf("0x%04X", values.WP)));
+
+        output.push_back(std::make_pair("WDC", std_sprintf("%d", values.WDC)));
+        output.push_back(std::make_pair("PTC", std_sprintf("0x%04X", values.PTC)));
+        output.push_back(std::make_pair("XTS", std_sprintf("%d", values.XTS)));
+        output.push_back(std::make_pair("PSB", std_sprintf("%d", values.PSB)));
+        output.push_back(std::make_pair("MDS", std_sprintf("0x%04X", values.MDS >> 16)));
+        output.push_back(std::make_pair("LF", std_sprintf("0x%04X", values.LF)));
+        output.push_back(std::make_pair("GF", std_sprintf("0x%08X", values.GF)));
+        output.push_back(std::make_pair("CB", std_sprintf("0x%08X", values.CB)));
+        output.push_back(std::make_pair("GFI", std_sprintf("0x%04X", values.GFI)));
+        output.push_back(std::make_pair("PC", std_sprintf("0x%04X", values.PC)));
+        output.push_back(std::make_pair("SP", std_sprintf("%d", values.SP)));
+        output.push_back(std::make_pair("savedPC", std_sprintf("0x%04X", values.savedPC)));
+        output.push_back(std::make_pair("savedSP", std_sprintf("%d", values.savedSP)));
+
+        {
+            std::string string;
+            for(int i = 0; i < StackDepth; i++) {
+                string += std_sprintf(" 0x%04X", values.stack[i]);
+            }
+            output.push_back(std::make_pair("stack", string.substr(1)));
+        }
+
+        output.push_back(std::make_pair("breakByte", std_sprintf("0x%02X", values.breakByte)));
+        output.push_back(std::make_pair("running", values.running ? "1" : "0"));
+
+        size_t firstLen  = 0;
+        size_t secondLen = 0;
+        for(auto& e: output) {
+            firstLen  = std::max(firstLen, e.first.length());
+            secondLen = std::max(secondLen, e.second.length());
+        }
+        secondLen = 14;
+        std::string format = std_sprintf("%%-%ds = %%%ds", firstLen, secondLen);
+        for(auto& e: output) {
+            logger.info(format.c_str(), e.first, e.second);
+        }
+
+        return TCL_OK;
     }
-// CARD16 SP;
-    putUINT16(interp, dict, "SP", SP);
 
-// // 3.3.3 Data and Status Registers
-// CARD16 PID[4]; // Processor ID
-    {
-        uint64_t pid = PID[1];
-        pid <<= 16;
-        pid |= PID[2];
-        pid <<= 16;
-        pid |= PID[3];
+    return invalidCommand(cdata, interp, objc, objv);
+}
 
-        put(interp, dict, "PID", std_sprintf("0x%lX", pid));
-    }
-// //extern CARD16 MP;     // Maintenance Panel
-// VariableMP MP;
-    putUINT16(interp, dict, "MP", (CARD16)MP);
-// //extern CARD32 IT;     // Interval Timer
-// VariableIT IT;
+int MesaVariable(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+    if (objc == 1) return returnDict(interp);
+    if (objc == 2) return dump(cdata, interp, objc, objv);
 
-// //extern CARD16 WM;     // Wakeup mask register - 10.4.4
-// //extern CARD16 WP;     // Wakeup pending register - 10.4.4.1
-// VariableWP WP;
-    put(interp, dict, "WP", std_sprintf("0x%04X", (CARD16)WP));
-// //extern CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
-// VariableWDC WDC;
-    putUINT16(interp, dict, "WDC", (CARD16)WDC);
-// CARD16 PTC;    // Process timeout counter - 10.4.5
-    put(interp, dict, "PTC", std_sprintf("0x%04X", PTC));
-// CARD16 XTS;    // Xfer trap status - 9.5.5
-    putUINT16(interp, dict, "XTS", XTS);
-// // 3.3.1 Control Registers
-// VariablePSB       PSB; // PsbIndex - 10.1.1
-    putUINT16(interp, dict, "PSB", (CARD16)PSB);
-// //extern MdsHandle         MDS;
-// VariableMDS       MDS;
-    put(interp, dict, "MDS", std_sprintf("0x%04X", ((CARD32)MDS) >> 16));
-    put(interp, dict, "MDS", std_sprintf("0x%X", (CARD32)MDS));
-// //LocalFrameHandle  LF;  // POINTER TO LocalVariables
-// VariableLF        LF;
-    put(interp, dict, "LF", std_sprintf("0x%04X", (CARD16)LF));
-// //GlobalFrameHandle GF;  // LONG POINTER TO GlobalVarables
-// VariableGF        GF;
-    put(interp, dict, "GF", std_sprintf("0x%08X", (CARD32)GF));
-// //CARD32            CB;  // LONG POINTER TO CodeSegment
-// VariableCB        CB;
-    put(interp, dict, "CB", std_sprintf("0x%08X", (CARD32)CB));
-// CARD16            PC;
-    put(interp, dict, "PC", std_sprintf("0x%04X", PC));
-// GFTHandle         GFI;
-    put(interp, dict, "GFI", std_sprintf("0x%04X", GFI));
-// // 4.5 Instruction Execution
-// CARD8  breakByte;
-    put(interp, dict, "breakByte", std_sprintf("0x%02X", breakByte));
-// CARD16 savedPC;
-    put(interp, dict, "savedPC", std_sprintf("0x%04X", savedPC));
-// CARD16 savedSP;
-    putUINT16(interp, dict, "savedSP", savedSP);
-// // 10.4.1 Scheduler
-// VariableRunning running;
-    putUINT16(interp, dict, "running", running ? 1 : 0);
-
-
-    Tcl_SetObjResult(interp, dict);
-
-    return TCL_OK;
+    return invalidCommand(cdata, interp, objc, objv);
 }

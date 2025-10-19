@@ -57,7 +57,7 @@ void stop() {
 }
 
 void run() {
-	TRACE_RECORD(interrupt)
+	TRACE_RECORD(interrupt, run)
 	logger.info("interrup_thread::run START");
 	stopThread = false;
 	
@@ -68,40 +68,40 @@ void run() {
 
 		// wait until interrupt is arrived
 		for(;;) {
-			TRACE_RECORD(interrupt)
+			TRACE_RECORD(interrupt, run)
 			cvWP.wait_for(locker, Util::ONE_SECOND);
-			TRACE_RECORD(interrupt)
+			TRACE_RECORD(interrupt, run)
 			if (stopThread) goto exitLoop;
-			TRACE_RECORD(interrupt)
+			TRACE_RECORD(interrupt, run)
 			if (WP.pending()) break;
-			TRACE_RECORD(interrupt)
+			TRACE_RECORD(interrupt, run)
 		}
 		PERF_COUNT(interrupt, request)
-		TRACE_RECORD(interrupt)
+		TRACE_RECORD(interrupt, run)
 		processor_thread::requestRescheduleInterrupt();
-		TRACE_RECORD(interrupt)
+		TRACE_RECORD(interrupt, run)
 	}
 exitLoop:
-	TRACE_RECORD(interrupt)
+	TRACE_RECORD(interrupt, run)
 	logger.info("interrupt_thread::run STOP");
 }
 
 void notifyInterrupt(CARD16 interruptSelector) {
 	PERF_COUNT(interrupt, notify)
-	TRACE_RECORD(notifyInterrupt)
+	TRACE_RECORD(interrupt, notifyInterrupt)
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
 	if (interruptSelector && (oldValue & interruptSelector) == 0) {
-		TRACE_RECORD(notifyInterrupt)
+		TRACE_RECORD(interrupt, notifyInterrupt)
 		std::unique_lock<std::mutex> locker(mutexWP);
-		TRACE_RECORD(notifyInterrupt)
+		TRACE_RECORD(interrupt, notifyInterrupt)
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
-		TRACE_RECORD(notifyInterrupt)
+		TRACE_RECORD(interrupt, notifyInterrupt)
 		PERF_COUNT(interrupt, wakeup)
 	}
-	TRACE_RECORD(notifyInterrupt)
+	TRACE_RECORD(interrupt, notifyInterrupt)
 }
 
 }

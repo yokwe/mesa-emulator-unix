@@ -13,25 +13,31 @@ BEGIN {
 /TRACE_DECLARE/ {
     a = index($0, "(");
     b = index($0, ")");
-    name = substr($0, a + 1, b - a - 1)
-    NAME[N]  = name
-    t = length(name)
+    names = substr($0, a + 1, b - a - 1)
+    gsub(" ", "", names)
+    split(names, temp, ",")
+
+    GROUP[N] = temp[1];
+    NAME[N]  = temp[2];
+    t = length(temp[1]) + length(temp[2])
     if (L < t) L = t
+    t = length(temp[1])
+    if (G < t) G = t;
     N++
 }
 
 END {
     for(i = 0; i < N; i++) {
-        printf("EventQueue %s;\n", NAME[i])
+        printf("EventQueue %s::%s;\n", GROUP[i], NAME[i])
     }
     print("")
-    format = sprintf("    {%%%ds, &%%s},\n", -(L + 2))
-    print("std::map<const char*, EventQueue*> map {")
+    format = sprintf("    {%%%ds, %%%ds, &%%s},\n", -(G + 2), -(L + 4))
+    print("std::vector<Entry> all {")
     for(i = 0; i < N; i++) {
         # {"a1", a1},
-        name = NAME[i]
+        name = GROUP[i] "::" NAME[i]
 
-        printf(format, "\"" name "\"", name)
+        printf(format, "\"" GROUP[i] "\"", "\"" name "\"", name)
     }
     print("};")
 }

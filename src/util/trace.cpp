@@ -36,7 +36,7 @@
 #include "Util.h"
 #include <algorithm>
 #include <functional>
-#include <iterator>
+#include <utility>
 #include <vector>
 static const Logger logger(__FILE__);
 
@@ -60,26 +60,16 @@ std::string Event::toString() const {
     return std_sprintf("{%s  %s}", timeString, sourceString);
 }
 void clear() {
-    for(auto& e: map) {
-       e.second->clear();
+    for(auto& e: all) {
+       e.queue->clear();
     }
 }
-void dump(const EventQueue* queue) {
-    for(const auto& e: *queue) {
-        logger.info(e.toString());
-    }
-}
-void dump(const char* name) {
-    if (map.contains(name)) {
-        dump(map[name]);
-    } else {
-        logger.warn("unexpected name  %s!", name);
-    }
-}
-void dump() {
+void dump(const std::string& group) {
     std::vector<Event> vector;
-    for(const auto& e: map) {
-        std::copy(e.second->cbegin(), e.second->cend(), std::back_inserter(vector));
+    for(const auto& e: all) {
+        if (group == "" || group == e.group) {
+            std::copy(e.queue->cbegin(), e.queue->cend(), std::back_inserter(vector));
+        }
     }
     std::sort(vector.begin(), vector.end(), std::less<Event>{});
     for(const auto& e: vector) {

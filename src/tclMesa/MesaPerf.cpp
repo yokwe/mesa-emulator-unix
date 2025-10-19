@@ -42,20 +42,40 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
+#include "../util/tcl.h"
 
 // mesa::perf
 // 0
+// mesa::perf group
+// 0          1
 int MesaPerf(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 1) {
         // mesa::perf
         // 0
-        auto dict = Tcl_NewDictObj();
+        // auto dict = Tcl_NewDictObj();
 
-        for(const auto& e: perf::all) {
-            putUINT64(interp, dict, e.name, e.value);
-        }
+        // for(const auto& e: perf::all) {
+        //     putUINT64(interp, dict, e.name.c_str(), e.value);
+        // }
 
-        Tcl_SetObjResult(interp, dict);
+        // Tcl_SetObjResult(interp, dict);
+        perf::dump();
+        return TCL_OK;
+    }
+    if (objc == 2) {
+        // mesa::perf group
+        // 0          1
+        auto group = tcl::toString(objv[1]);
+        perf::dump(group);
+        // auto dict = Tcl_NewDictObj();
+
+        // for(const auto& e: perf::all) {
+        //     if (e.group == group) {
+        //         putUINT64(interp, dict, e.name.c_str(), e.value);
+        //     }
+        // }
+
+        // Tcl_SetObjResult(interp, dict);
         return TCL_OK;
     }
 

@@ -42,7 +42,7 @@
 
 static const constexpr bool TRACE_ENABLE = true;
 
-#define TRACE_RECORD(name) { if (TRACE_ENABLE) { trace::Event event;  trace::name.push_back(event); }  }
+#define TRACE_RECORD(group, name) { if (TRACE_ENABLE) { trace::Event event;  trace::group::name.push_back(event); }  }
 
 namespace trace {
 
@@ -72,25 +72,30 @@ struct Event {
 inline constexpr int QUEUE_SIZE = 20;
 using EventQueue = fixed_queue<Event, QUEUE_SIZE>;
 
-extern std::map<const char*, EventQueue*> map;
+struct Entry {
+    std::string group;
+    std::string name;
+    EventQueue* queue;
+    Entry(const char* group_, const char* name_, EventQueue* queue_) : group(group_), name(name_), queue(queue_) {}
+};
+
+extern std::vector<Entry> all;
 
 void clear();
-void dump();
-void dump(const char* name);
+void dump(const std::string& group = "");
 
-#define TRACE_DECLARE(name) extern EventQueue name;
+#define TRACE_DECLARE(group, name) namespace group { extern EventQueue name; }
 
-TRACE_DECLARE(guam)
-//
-TRACE_DECLARE(processor)
-TRACE_DECLARE(requestRescheduleTimer)
-TRACE_DECLARE(requestRescheduleInterrupt)
-TRACE_DECLARE(checkRequestReschedule)
-//
-TRACE_DECLARE(interrupt)
-TRACE_DECLARE(notifyInterrupt)
-//
-TRACE_DECLARE(timer)
-TRACE_DECLARE(processTimeout)
+// processor_thread
+TRACE_DECLARE(processor, run)
+TRACE_DECLARE(processor, requestRescheduleTimer)
+TRACE_DECLARE(processor, requestRescheduleInterrupt)
+TRACE_DECLARE(processor, checkRequestReschedule)
+// interrupt_thread
+TRACE_DECLARE(interrupt, run)
+TRACE_DECLARE(interrupt, notifyInterrupt)
+// timer_thread
+TRACE_DECLARE(timer, run)
+TRACE_DECLARE(timer, processTimeout)
 
 }

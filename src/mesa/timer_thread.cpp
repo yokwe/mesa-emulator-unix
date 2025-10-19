@@ -59,7 +59,7 @@ void stop() {
 }
 
 void run() {
-	TRACE_RECORD(timer)
+	TRACE_RECORD(timer, run)
 	logger.info("timer_thread::run START");
 	stopThread = false;
 	
@@ -67,7 +67,7 @@ void run() {
 	auto time = std::chrono::system_clock::now();
 	std::unique_lock<std::mutex> locker(mutexTimer);
 	for(;;) {
-		TRACE_RECORD(timer)
+		TRACE_RECORD(timer, run)
 		PERF_COUNT(timer, timer)
 		auto nextTime = time + tick;
 		std::this_thread::sleep_until(nextTime);
@@ -77,23 +77,23 @@ void run() {
 		{
 			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
 			// Then TimerThread::processTimeout() will notify cvTimer
-			TRACE_RECORD(timer)
+			TRACE_RECORD(timer, run)
 			processor_thread::requestRescheduleTimer();
-			TRACE_RECORD(timer)
+			TRACE_RECORD(timer, run)
 			// wait procesTimeout is invoked
 			for(;;) {
-				TRACE_RECORD(timer)
+				TRACE_RECORD(timer, run)
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
-				TRACE_RECORD(timer)
+				TRACE_RECORD(timer, run)
 				if (stopThread) goto exitLoop;
-				TRACE_RECORD(timer)
+				TRACE_RECORD(timer, run)
 				if (status == std::cv_status::no_timeout) break;
-				TRACE_RECORD(timer)
+				TRACE_RECORD(timer, run)
 			}
 		}
 	}
 exitLoop:
-	TRACE_RECORD(timer)
+	TRACE_RECORD(timer, run)
 	logger.info("timer_thread::run STOP");
 }
 
@@ -104,23 +104,23 @@ bool processTimeout() {
 	PERF_COUNT(timer, timeout)
 	{
 		// start next timer
-		TRACE_RECORD(processTimeout)
+		TRACE_RECORD(timer, processTimeout)
 		std::unique_lock<std::mutex> locker(mutexTimer);
-		TRACE_RECORD(processTimeout)
+		TRACE_RECORD(timer, processTimeout)
 		cvTimer.notify_one();
-		TRACE_RECORD(processTimeout)
+		TRACE_RECORD(timer, processTimeout)
 	}
 
 	bool requeue;
 	if (InterruptsEnabled()) {
-		TRACE_RECORD(processTimeout)
+		TRACE_RECORD(timer, processTimeout)
 		PERF_COUNT(timer, updatePTC)
 		PTC = PTC + 1;
 		if (PTC == 0) PTC = PTC + 1;
 
 		requeue = TimeoutScan();
 	} else {
-		TRACE_RECORD(processTimeout)
+		TRACE_RECORD(timer, processTimeout)
 		requeue = false;
 	}
 	return requeue;

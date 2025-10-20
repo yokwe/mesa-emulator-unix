@@ -33,11 +33,11 @@
 // trace.cpp
 //
 
-#include "Util.h"
 #include <algorithm>
-#include <functional>
-#include <utility>
+#include <iterator>
 #include <vector>
+
+#include "Util.h"
 static const Logger logger(__FILE__);
 
 #include "trace.h"
@@ -70,14 +70,16 @@ void clear() {
     }
 }
 void dump(const std::string& group) {
-    std::vector<Event> vector;
+    std::vector<Event> result;
     for(const auto& e: all) {
         if (group == "" || group == e.group) {
-            std::copy(e.queue->cbegin(), e.queue->cend(), std::back_inserter(vector));
+            std::vector<Event> temp;
+            std::merge(result.begin(), result.end(), e.queue->begin(), e.queue->end(), std::back_inserter(temp));
+            result.clear();
+            std::copy(temp.cbegin(), temp.cend(), std::back_inserter(result));
         }
     }
-    std::sort(vector.begin(), vector.end(), std::less<Event>{});
-    for(const auto& e: vector) {
+    for(const auto& e: result) {
         logger.info(e.toString());
     }
 }

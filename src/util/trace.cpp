@@ -46,6 +46,10 @@ namespace trace {
 
 #include "trace.inc"
 
+static const char* toSimplePath(const char* path) {
+    auto pos = strstr(path, "/src");
+    return (pos == NULL) ? path : pos + 1;
+}
 static std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
     time_t temp = std::chrono::system_clock::to_time_t(time);
 	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count() % 1'000'000;
@@ -55,9 +59,10 @@ static std::string toStringLocalTime(const std::chrono::system_clock::time_point
     return std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%06d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
 }
 std::string Event::toString() const {
-    auto sourceString = LogSourceLocation::toString(location);
     auto timeString = toStringLocalTime(time);
-    return std_sprintf("{%s  %s}", timeString, sourceString);
+    auto nameString = std_sprintf("%s::%s", group, name);
+    auto locationString = std_sprintf("%5d  %s", location.line(), toSimplePath(location.file_name()));
+    return std_sprintf("{%s  %-38s  %s}", timeString, nameString, locationString);
 }
 void clear() {
     for(auto& e: all) {

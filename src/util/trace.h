@@ -42,18 +42,22 @@
 
 static const constexpr bool TRACE_ENABLE = true;
 
-#define TRACE_RECORD(group, name) { if (TRACE_ENABLE) { trace::Event event;  trace::group::name.push_back(event); }  }
+#define TRACE_RECORD(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name);  trace::group::name.push_back(event); }  }
 
 namespace trace {
 
 struct Event {
+    const char*                           group;
+    const char*                           name;
     std::chrono::system_clock::time_point time;
     std::source_location                  location;
 
     Event(
+        const char* group_,
+        const char* name_,
         std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now(),
         std::source_location location_ = std::source_location::current()) :
-        time(time_), location(location_) {}
+        group(group_), name(name_), time(time_), location(location_) {}
     Event(Event&& that) = default;
     Event(const Event& that) = default;
     Event& operator =(const Event& that) = default;

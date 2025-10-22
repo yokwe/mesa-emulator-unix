@@ -40,6 +40,7 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
+#include "../util/trace.h"
 
 #include "../mesa/Type.h"
 #include "../mesa/memory.h"
@@ -248,6 +249,8 @@ void Reschedule(int preemption) {
 BusyWait:
 	if (!InterruptsEnabled()) RescheduleError();
 	if (running) {
+		PERF_COUNT(processor, busyWait)
+		TRACE_RECORD(processor, reschedule)
 		if (DEBUG_SHOW_RUNNING) logger.debug("stop  running");
 		running = false;
 		ERROR_RequestReschedule();

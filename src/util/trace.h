@@ -73,7 +73,7 @@ struct Event {
     std::string toString() const;
 };
 
-inline constexpr int QUEUE_SIZE = 20;
+inline constexpr int QUEUE_SIZE = 80;
 using EventQueue = fixed_queue<Event, QUEUE_SIZE>;
 
 struct Entry {
@@ -101,5 +101,6 @@ TRACE_DECLARE(interrupt, notifyInterrupt)
 // timer_thread
 TRACE_DECLARE(timer, run)
 TRACE_DECLARE(timer, processTimeout)
-
+// Opcode_process
+TRACE_DECLARE(processor, reschedule)
 }

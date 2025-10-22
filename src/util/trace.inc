@@ -10,6 +10,7 @@ EventQueue interrupt::run;
 EventQueue interrupt::notifyInterrupt;
 EventQueue timer::run;
 EventQueue timer::processTimeout;
+EventQueue processor::reschedule;
 
 std::vector<Entry> all {
     {"processor", "processor::run"                       , &processor::run},
@@ -20,4 +21,5 @@ std::vector<Entry> all {
     {"interrupt", "interrupt::notifyInterrupt"           , &interrupt::notifyInterrupt},
     {"timer"    , "timer::run"                           , &timer::run},
     {"timer"    , "timer::processTimeout"                , &timer::processTimeout},
+    {"processor", "processor::reschedule"                , &processor::reschedule},
 };

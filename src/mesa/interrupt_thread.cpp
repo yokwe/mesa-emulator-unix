@@ -72,14 +72,11 @@ void run() {
 			cvWP.wait_for(locker, Util::ONE_SECOND);
 			TRACE_RECORD(interrupt, run)
 			if (stopThread) goto exitLoop;
-			TRACE_RECORD(interrupt, run)
 			if (WP.pending()) break;
-			TRACE_RECORD(interrupt, run)
 		}
 		PERF_COUNT(interrupt, request)
 		TRACE_RECORD(interrupt, run)
 		processor_thread::requestRescheduleInterrupt();
-		TRACE_RECORD(interrupt, run)
 	}
 exitLoop:
 	TRACE_RECORD(interrupt, run)
@@ -88,7 +85,6 @@ exitLoop:
 
 void notifyInterrupt(CARD16 interruptSelector) {
 	PERF_COUNT(interrupt, notify)
-	TRACE_RECORD(interrupt, notifyInterrupt)
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
@@ -98,10 +94,8 @@ void notifyInterrupt(CARD16 interruptSelector) {
 		TRACE_RECORD(interrupt, notifyInterrupt)
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();
-		TRACE_RECORD(interrupt, notifyInterrupt)
 		PERF_COUNT(interrupt, wakeup)
 	}
-	TRACE_RECORD(interrupt, notifyInterrupt)
 }
 
 }

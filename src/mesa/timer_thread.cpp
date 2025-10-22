@@ -79,16 +79,13 @@ void run() {
 			// Then TimerThread::processTimeout() will notify cvTimer
 			TRACE_RECORD(timer, run)
 			processor_thread::requestRescheduleTimer();
-			TRACE_RECORD(timer, run)
 			// wait procesTimeout is invoked
 			for(;;) {
 				TRACE_RECORD(timer, run)
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
 				TRACE_RECORD(timer, run)
 				if (stopThread) goto exitLoop;
-				TRACE_RECORD(timer, run)
 				if (status == std::cv_status::no_timeout) break;
-				TRACE_RECORD(timer, run)
 			}
 		}
 	}
@@ -108,7 +105,6 @@ bool processTimeout() {
 		std::unique_lock<std::mutex> locker(mutexTimer);
 		TRACE_RECORD(timer, processTimeout)
 		cvTimer.notify_one();
-		TRACE_RECORD(timer, processTimeout)
 	}
 
 	bool requeue;
@@ -120,7 +116,6 @@ bool processTimeout() {
 
 		requeue = TimeoutScan();
 	} else {
-		TRACE_RECORD(timer, processTimeout)
 		requeue = false;
 	}
 	return requeue;

@@ -98,7 +98,7 @@ exitLoop:
 bool processTimeout() {
 	// this method is called from processor thread
 	//logger.debug("processTimeout START");
-	PERF_COUNT(timer, timeout)
+	PERF_COUNT(timer, processTimeout_ENTER)
 	{
 		// start next timer
 		TRACE_RECORD(timer, processTimeout)
@@ -118,6 +118,7 @@ bool processTimeout() {
 	} else {
 		requeue = false;
 	}
+	PERF_COUNT(timer, processTimeout_ENTER)
 	return requeue;
 }
 

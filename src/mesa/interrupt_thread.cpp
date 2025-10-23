@@ -84,7 +84,7 @@ exitLoop:
 }
 
 void notifyInterrupt(CARD16 interruptSelector) {
-	PERF_COUNT(interrupt, notify)
+	PERF_COUNT(interrupt, notifyInterrupt_ENTER)
 
 	auto oldValue = WP.fetch_or(interruptSelector);
 
@@ -96,6 +96,7 @@ void notifyInterrupt(CARD16 interruptSelector) {
 		cvWP.notify_one();
 		PERF_COUNT(interrupt, wakeup)
 	}
+	PERF_COUNT(interrupt, notifyInterrupt_EXIT)
 }
 
 }

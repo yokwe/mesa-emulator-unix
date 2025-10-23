@@ -83,39 +83,44 @@ void mp_observer(CARD16 mp) {
 
 void requestRescheduleTimer() {
 //	TRACE_RECORD(processor, requestRescheduleTimer)
+	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
     rescheduleTimerFlag.set();
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleTimer)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 		TRACE_RECORD(processor, requestRescheduleTimer)
 		cvRunning.notify_one();
+		TRACE_RECORD(processor, requestRescheduleTimer)
 	}
+	PERF_COUNT(processor, requestRescheduleTimer_EXIT)
 }
 void requestRescheduleInterrupt() {
 //	TRACE_RECORD(processor, requestRescheduleInterrupt)
+	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
 	rescheduleInterruptFlag.set();
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleInterrupt)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 		TRACE_RECORD(processor, requestRescheduleInterrupt)
 		cvRunning.notify_one();
+		TRACE_RECORD(processor, requestRescheduleInterrupt)
 	}
+	PERF_COUNT(processor, requestRescheduleInterrupt_EXIT)
 }
 
 void checkRequestReschedule() {
 //	TRACE_RECORD(processor, checkRequestReschedule)
-    PERF_COUNT(processor, checkRequestReschedule)
+    PERF_COUNT(processor, checkRequestReschedule_ENTER)
     if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
-        PERF_COUNT(processor, rescheduleRequest_YES)
+        PERF_COUNT(processor, checkRequestReschedule_YES)
 		TRACE_RECORD(processor, checkRequestReschedule)
         ERROR_RequestReschedule();
-    } else {
-        PERF_COUNT(processor, rescheduleRequest_NO)
 	}
     // if stopThread is true, throw RequestReschedule
     if (stopThread) {
         ERROR_RequestReschedule();
     }
+    PERF_COUNT(processor, checkRequestReschedule_EXIT)
 }
 
 void run() {

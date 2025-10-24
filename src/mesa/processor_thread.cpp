@@ -59,6 +59,7 @@ namespace processor_thread {
 
 bool                    stopThread;
 std::condition_variable cvRunning;
+std::mutex              mutexFlags;
 std::mutex              mutexRequestReschedule;
 VariableAtomicFlag      rescheduleInterruptFlag;
 VariableAtomicFlag      rescheduleTimerFlag;
@@ -84,7 +85,10 @@ void mp_observer(CARD16 mp) {
 void requestRescheduleTimer() {
 //	TRACE_RECORD(processor, requestRescheduleTimer)
 	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
-    rescheduleTimerFlag.set();
+	{
+		std::unique_lock<std::mutex> locker(mutexFlags);
+    	rescheduleTimerFlag.set();
+	}
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleTimer)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
@@ -97,7 +101,10 @@ void requestRescheduleTimer() {
 void requestRescheduleInterrupt() {
 //	TRACE_RECORD(processor, requestRescheduleInterrupt)
 	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
-	rescheduleInterruptFlag.set();
+	{
+		std::unique_lock<std::mutex> locker(mutexFlags);
+		rescheduleInterruptFlag.set();
+	}
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleInterrupt)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
@@ -174,46 +181,50 @@ void run() {
 							TRACE_RECORD(processor, run)
 							if (stopThread) goto exitLoop;
 							if (rescheduleInterruptFlag) break;
-							if (rescheduleTimerFlag) break;
+							if (rescheduleTimerFlag)     break;
 							//logger.debug("waitRunning WAITING");
 						}
 						TRACE_RECORD(processor, run)
 						//logger.debug("waitRunning FINISH");
 					}
 					// Do reschedule.
+					bool interruptFlag;
+					bool timerFlag;
 					{
-						//logger.debug("reschedule START");
-						bool needReschedule = false;
-						if (rescheduleInterruptFlag) {
-							PERF_COUNT(processor, interruptFlag)
-							//logger.debug("reschedule INTERRUPT");
-							// process interrupt
-							if (Interrupt()) {
-								PERF_COUNT(processor, interrupt)
-								needReschedule = true;
-							}
-						}
-						if (rescheduleTimerFlag) {
-							PERF_COUNT(processor, timerFlag)
-							//logger.debug("reschedule TIMER");
-							// process timeout
-							if (timer_thread::processTimeout()) {
-								PERF_COUNT(processor, timer)
-								needReschedule = true;
-							}
-						}
-						if (needReschedule) {
-							PERF_COUNT(processor, needReschedule_YES)
-							TRACE_RECORD(processor, run)
-							Reschedule(1);
-							TRACE_RECORD(processor, run)
-						} else {
-							PERF_COUNT(processor, needReschedule_NO)
-						}
-						TRACE_RECORD(processor, run)
+						std::unique_lock<std::mutex> locker(mutexFlags);
+						interruptFlag = (bool)rescheduleInterruptFlag;
+						timerFlag     = (bool)rescheduleTimerFlag;
 						rescheduleInterruptFlag.clear();
 						rescheduleTimerFlag.clear();
-						//logger.debug("reschedule FINISH");
+					}
+
+					//logger.debug("reschedule START");
+					bool needReschedule = false;
+					if (interruptFlag) {
+						PERF_COUNT(processor, interruptFlag)
+						//logger.debug("reschedule INTERRUPT");
+						// process interrupt
+						if (Interrupt()) {
+							PERF_COUNT(processor, interrupt)
+							needReschedule = true;
+						}
+					}
+					if (timerFlag) {
+						PERF_COUNT(processor, timerFlag)
+						//logger.debug("reschedule TIMER");
+						// process timeout
+						if (timer_thread::processTimeout()) {
+							PERF_COUNT(processor, timer)
+							needReschedule = true;
+						}
+					}
+					if (needReschedule) {
+						PERF_COUNT(processor, needReschedule_YES)
+						TRACE_RECORD(processor, run)
+						Reschedule(1);
+						TRACE_RECORD(processor, run)
+					} else {
+						PERF_COUNT(processor, needReschedule_NO)
 					}
 					TRACE_RECORD(processor, run)
 					// It still not running, continue loop again

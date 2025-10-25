@@ -59,10 +59,10 @@ namespace processor_thread {
 
 bool                    stopThread;
 std::condition_variable cvRunning;
-std::mutex              mutexFlags;
 std::mutex              mutexRequestReschedule;
-VariableAtomicFlag      rescheduleInterruptFlag;
-VariableAtomicFlag      rescheduleTimerFlag;
+std::mutex              mutexFlags;
+bool                    rescheduleInterruptFlag;
+bool                    rescheduleTimerFlag;
 std::set<CARD16>        stopAtMPSet;
 
 
@@ -87,7 +87,7 @@ void requestRescheduleTimer() {
 	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
 	{
 		std::unique_lock<std::mutex> locker(mutexFlags);
-    	rescheduleTimerFlag.set();
+    	rescheduleTimerFlag = true;
 	}
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleTimer)
@@ -103,7 +103,7 @@ void requestRescheduleInterrupt() {
 	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
 	{
 		std::unique_lock<std::mutex> locker(mutexFlags);
-		rescheduleInterruptFlag.set();
+		rescheduleInterruptFlag = true;
 	}
 	if (!running) {
 		TRACE_RECORD(processor, requestRescheduleInterrupt)
@@ -133,9 +133,9 @@ void checkRequestReschedule() {
 void run() {
 	TRACE_RECORD(processor, run)
 	logger.info("processor_thread::run START");
-	stopThread = 0;
-	rescheduleInterruptFlag.clear();
-	rescheduleTimerFlag.clear();
+	stopThread              = false;
+	rescheduleInterruptFlag = false;
+	rescheduleTimerFlag     = false;
 
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 	XFER(bootLink.u, 0, XferType::call, 0);
@@ -192,10 +192,10 @@ void run() {
 					bool timerFlag;
 					{
 						std::unique_lock<std::mutex> locker(mutexFlags);
-						interruptFlag = (bool)rescheduleInterruptFlag;
-						timerFlag     = (bool)rescheduleTimerFlag;
-						rescheduleInterruptFlag.clear();
-						rescheduleTimerFlag.clear();
+						interruptFlag = rescheduleInterruptFlag;
+						timerFlag     = rescheduleTimerFlag;
+						rescheduleInterruptFlag = false;
+						rescheduleTimerFlag     = false;
 					}
 
 					//logger.debug("reschedule START");

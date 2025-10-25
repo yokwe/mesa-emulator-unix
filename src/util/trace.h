@@ -40,7 +40,7 @@
 
 #include "Util.h"
 
-static const constexpr bool TRACE_ENABLE = true;
+static const constexpr bool TRACE_ENABLE = false;
 
 #define TRACE_RECORD(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name);  trace::group::name.push_back(event); }  }
 
@@ -73,7 +73,7 @@ struct Event {
     std::string toString() const;
 };
 
-inline constexpr int QUEUE_SIZE = 80;
+inline constexpr int QUEUE_SIZE = 100000;
 using EventQueue = fixed_queue<Event, QUEUE_SIZE>;
 
 struct Entry {

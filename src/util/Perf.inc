@@ -42,12 +42,14 @@ uint64_t processor::requestReschedule_ENTER          = 0;
 uint64_t processor::requestReschedule_EXIT           = 0;
 uint64_t processor::running_A_YES                    = 0;
 uint64_t processor::running_A_NO                     = 0;
+uint64_t processor::interruptFlag_YES                = 0;
+uint64_t processor::interruptFlag_NO                 = 0;
+uint64_t processor::interrupt                        = 0;
+uint64_t processor::timerFlag_YES                    = 0;
+uint64_t processor::timerFlag_NO                     = 0;
+uint64_t processor::timer                            = 0;
 uint64_t processor::needReschedule_YES               = 0;
 uint64_t processor::needReschedule_NO                = 0;
-uint64_t processor::interruptFlag                    = 0;
-uint64_t processor::interrupt                        = 0;
-uint64_t processor::timerFlag                        = 0;
-uint64_t processor::timer                            = 0;
 uint64_t processor::running_B_YES                    = 0;
 uint64_t processor::running_B_NO                     = 0;
 uint64_t processor::busyWait                         = 0;
@@ -143,12 +145,14 @@ std::vector<Entry> all {
     {"processor", "processor::requestReschedule_EXIT"          , processor::requestReschedule_EXIT},
     {"processor", "processor::running_A_YES"                   , processor::running_A_YES},
     {"processor", "processor::running_A_NO"                    , processor::running_A_NO},
+    {"processor", "processor::interruptFlag_YES"               , processor::interruptFlag_YES},
+    {"processor", "processor::interruptFlag_NO"                , processor::interruptFlag_NO},
+    {"processor", "processor::interrupt"                       , processor::interrupt},
+    {"processor", "processor::timerFlag_YES"                   , processor::timerFlag_YES},
+    {"processor", "processor::timerFlag_NO"                    , processor::timerFlag_NO},
+    {"processor", "processor::timer"                           , processor::timer},
     {"processor", "processor::needReschedule_YES"              , processor::needReschedule_YES},
     {"processor", "processor::needReschedule_NO"               , processor::needReschedule_NO},
-    {"processor", "processor::interruptFlag"                   , processor::interruptFlag},
-    {"processor", "processor::interrupt"                       , processor::interrupt},
-    {"processor", "processor::timerFlag"                       , processor::timerFlag},
-    {"processor", "processor::timer"                           , processor::timer},
     {"processor", "processor::running_B_YES"                   , processor::running_B_YES},
     {"processor", "processor::running_B_NO"                    , processor::running_B_NO},
     {"processor", "processor::busyWait"                        , processor::busyWait},

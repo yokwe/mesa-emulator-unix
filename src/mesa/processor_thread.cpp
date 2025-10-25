@@ -201,22 +201,26 @@ void run() {
 					//logger.debug("reschedule START");
 					bool needReschedule = false;
 					if (interruptFlag) {
-						PERF_COUNT(processor, interruptFlag)
+						PERF_COUNT(processor, interruptFlag_YES)
 						//logger.debug("reschedule INTERRUPT");
 						// process interrupt
 						if (Interrupt()) {
 							PERF_COUNT(processor, interrupt)
 							needReschedule = true;
 						}
+					} else {
+						PERF_COUNT(processor, interruptFlag_NO)
 					}
 					if (timerFlag) {
-						PERF_COUNT(processor, timerFlag)
+						PERF_COUNT(processor, timerFlag_YES)
 						//logger.debug("reschedule TIMER");
 						// process timeout
 						if (timer_thread::processTimeout()) {
 							PERF_COUNT(processor, timer)
 							needReschedule = true;
 						}
+					} else {
+						PERF_COUNT(processor, timerFlag_NO)
 					}
 					if (needReschedule) {
 						PERF_COUNT(processor, needReschedule_YES)

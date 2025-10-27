@@ -41,6 +41,8 @@
 #include "Util.h"
 static const Logger logger(__FILE__);
 
+#include "ThreadControl.h"
+
 #include "trace.h"
 
 namespace trace {
@@ -63,8 +65,10 @@ std::string Event::toString(int length_group, int length_name) const {
     auto timeString = toStringLocalTime(time);
     auto nameString = std_sprintf("%s  %s", group, name);
     auto locationString = std_sprintf("%5d  %s", line, toSimplePath(file));
-    auto format = std_sprintf("{%%s  %%-%ds  %%-%ds  %%s}", length_group, length_name);
-    return std_sprintf(format.c_str(), timeString, group, name, locationString);
+    auto threadName = ThreadControl::getName(id);
+
+    auto format = std_sprintf("{%%s  %%-10s  %%-%ds  %%-%ds  %%s}", length_group, length_name);
+    return std_sprintf(format.c_str(), timeString, threadName, group, name, locationString);
 }
 void clear() {
     for(auto& e: all) {

@@ -38,9 +38,10 @@
 #include <chrono>
 #include <deque>
 #include <mutex>
+#include <thread>
 #include <vector>
 
-static const constexpr bool TRACE_ENABLE = false;
+static const constexpr bool TRACE_ENABLE = true;
 
 #define TRACE_REC_(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name, __FILE__, __LINE__);  trace::group.push_back(event); } }
 
@@ -86,14 +87,17 @@ struct Event {
     const char*                           file;
     uint32_t                              line;
     std::chrono::system_clock::time_point time;
+    std::thread::id                       id;
 
     Event(
         const char* group_,
         const char* name_,
         const char* file_,
         uint32_t    line_,
-        std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now()) :
-            group(group_), name(name_), file(file_), line(line_), time(time_) {}
+        std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now(),
+        std::thread::id id_ = std::this_thread::get_id()
+    ) :
+            group(group_), name(name_), file(file_), line(line_), time(time_), id(id_) {}
     // Event(Event&& that) = default;
     // Event(const Event& that) = default;
     // Event& operator =(const Event& that) = default;

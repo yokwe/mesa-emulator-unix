@@ -37,10 +37,16 @@
 #include <string>
 #include <thread>
 #include <functional>
+#include <map>
 
 
 class ThreadControl {
+	static std::map<std::thread::id, std::string> map;
 public:
+	static std::string getName(const std::thread::id& id) {
+		return map.contains(id) ? map[id] : "???";
+	}
+
 	std::string           name;
 	std::function<void()> function;
 	std::thread           thread;

@@ -33,14 +33,20 @@
 // ThreadConrol.cpp
 //
 
+#include <map>
+#include <thread>
+
 #include "Util.h"
 static const Logger logger(__FILE__);
 
 #include "ThreadControl.h"
 
+std::map<std::thread::id, std::string> ThreadControl::map;
+
 void ThreadControl::start() {
     logger.info("thread start   %s", name);
     thread = std::thread(function);
+    map[thread.get_id()] = this->name;
 }
 
 void ThreadControl::join() {

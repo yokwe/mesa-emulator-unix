@@ -88,14 +88,19 @@ uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne) {
 
 		// add w to s
 		s += w;
-		// if there is overflow, increment t
+		// if there is overflow, increment s
 		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
 		// shift left
 		s <<= 1;
-		// if there is overflow, increment t
+		// if there is overflow, increment s
 		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
     }
-    return (uint16_t)s;
+
+    // From page 21 of INTERN TRANSPORT PROTOCOLS
+    // If the result of the checksumming operation is the one's complement value "minus zero" (177777 octal),
+    // it should be converted to "plus zero" (0 octal).
+    uint16_t result = (uint16_t)s;
+    return (result == 0xFFFFU) ? 0 : result;
 }
 
 }

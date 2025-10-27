@@ -86,30 +86,35 @@ void requestRescheduleTimer() {
 	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
 	TRACE_REC_(processor, requestRescheduleTimer_ENTER)
 	{
+		TRACE_REC_(processor, mutexFlags_locking)
 		std::unique_lock<std::mutex> locker(mutexFlags);
 		TRACE_REC_(processor, mutexFlags_locked)
     	rescheduleTimerFlag = true;
 	}
 	if (!running) {
-		TRACE_REC_(processor, mutexRequestReschedule_locing)
+		TRACE_REC_(processor, mutexRequestReschedule_locking)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
 		TRACE_REC_(processor, mutexRequestReschedule_locked)
+		TRACE_REC_(processor, cvRunning_notifying)
 		cvRunning.notify_one();
 		TRACE_REC_(processor, cvRunning_notified)
 	}
 	PERF_COUNT(processor, requestRescheduleTimer_EXIT)
-	TRACE_REC_(processor, requestRescheduleTimer_ENTER)
+	TRACE_REC_(processor, requestRescheduleTimer_EXIT)
 }
 void requestRescheduleInterrupt() {
 	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
 	TRACE_REC_(processor, requestRescheduleInterrupt_ENTER)
 	{
+		TRACE_REC_(processor, mutexFlags_locking)
 		std::unique_lock<std::mutex> locker(mutexFlags);
+		TRACE_REC_(processor, mutexFlags_locked)
 		rescheduleInterruptFlag = true;
 	}
 	if (!running) {
 		TRACE_REC_(processor, mutexRequestReschedule_locking)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
+		TRACE_REC_(processor, mutexRequestReschedule_locked)
 		TRACE_REC_(processor, cvRunning_notifying)
 		cvRunning.notify_one();
 		TRACE_REC_(processor, cvRunning_notified)
@@ -122,7 +127,7 @@ void checkRequestReschedule() {
     PERF_COUNT(processor, checkRequestReschedule_ENTER)
 //    TRACE_REC_(processor, checkRequestReschedule_ENTER)
     if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
-        PERF_COUNT(processor, checkRequestReschedule_YES)
+        PERF_COUNT(processor, throw_RequestReschedule)
 		TRACE_REC_(processor, throw_RequestReschedule)
         ERROR_RequestReschedule();
 	}
@@ -180,6 +185,7 @@ void run() {
 						for(;;) {
 							TRACE_REC_(processor, mutexRequestReschedule_locking)
 							std::unique_lock<std::mutex> locker(mutexRequestReschedule);
+							TRACE_REC_(processor, mutexRequestReschedule_locked)
 							TRACE_REC_(processor, cvRunning_wait_for_calling)
 							cvRunning.wait_for(locker, Util::ONE_SECOND);
 							TRACE_REC_(processor, cvRunning_wait_for_called)
@@ -195,7 +201,9 @@ void run() {
 					bool interruptFlag;
 					bool timerFlag;
 					{
+						TRACE_REC_(processor, mutexFlags_locking)
 						std::unique_lock<std::mutex> locker(mutexFlags);
+						TRACE_REC_(processor, mutexFlags_locked)
 						interruptFlag = rescheduleInterruptFlag;
 						timerFlag     = rescheduleTimerFlag;
 						rescheduleInterruptFlag = false;
@@ -209,7 +217,10 @@ void run() {
 						TRACE_REC_(processor, interruptFlag_YES)
 						//logger.debug("reschedule INTERRUPT");
 						// process interrupt
-						if (Interrupt()) {
+						TRACE_REC_(processor, Interrupt_calling)
+						auto result = Interrupt();
+						TRACE_REC_(processor, Interrupt_called)
+						if (result) {
 							PERF_COUNT(processor, interrupt)
 							needReschedule = true;
 						}
@@ -222,6 +233,7 @@ void run() {
 						TRACE_REC_(processor, timerFlag_YES)
 						//logger.debug("reschedule TIMER");
 						// process timeout
+						TRACE_REC_(processor, processTimeout_calling)
 						auto result = timer_thread::processTimeout();
 						TRACE_REC_(processor, processTimeout_called)
 						if (result) {
@@ -240,7 +252,6 @@ void run() {
 					} else {
 						PERF_COUNT(processor, needReschedule_NO)
 					}
-					TRACE_REC_(processor, run)
 					// It still not running, continue loop again
 					if (running) {
 						PERF_COUNT(processor, running_B_YES)

@@ -69,6 +69,7 @@ void run() {
 		for(;;) {
 			TRACE_REC_(interrupt, mutexWP_locking)
 			std::unique_lock<std::mutex> locker(mutexWP);
+			TRACE_REC_(interrupt, mutexWP_locked)
 			TRACE_REC_(interrupt, cvWP_wait_for calling)
 			cvWP.wait_for(locker, Util::ONE_SECOND);
 			TRACE_REC_(interrupt, cvWP_wait_for_called)
@@ -93,6 +94,7 @@ void notifyInterrupt(CARD16 interruptSelector) {
 	if (interruptSelector && (oldValue & interruptSelector) == 0) {
 		TRACE_REC_(interrupt, mutexWP_locking)
 		std::unique_lock<std::mutex> locker(mutexWP);
+		TRACE_REC_(interrupt, mutexWP_locked)
 		TRACE_REC_(interrupt, cvWP_notify)
 		// start interrupt, wake waiting thread
 		cvWP.notify_one();

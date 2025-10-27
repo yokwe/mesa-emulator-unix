@@ -250,7 +250,7 @@ BusyWait:
 	if (!InterruptsEnabled()) RescheduleError();
 	if (running) {
 		PERF_COUNT(processor, busyWait)
-		TRACE_RECORD(processor, reschedule)
+		TRACE_REC_(processor, busyWait)
 		if (DEBUG_SHOW_RUNNING) logger.debug("stop  running");
 		running = false;
 		ERROR_RequestReschedule();

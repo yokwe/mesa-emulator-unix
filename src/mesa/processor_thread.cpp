@@ -83,44 +83,47 @@ void mp_observer(CARD16 mp) {
 }
 
 void requestRescheduleTimer() {
-//	TRACE_RECORD(processor, requestRescheduleTimer)
 	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
+	TRACE_REC_(processor, requestRescheduleTimer_ENTER)
 	{
 		std::unique_lock<std::mutex> locker(mutexFlags);
+		TRACE_REC_(processor, mutexFlags_locked)
     	rescheduleTimerFlag = true;
 	}
 	if (!running) {
-		TRACE_RECORD(processor, requestRescheduleTimer)
+		TRACE_REC_(processor, mutexRequestReschedule_locing)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-		TRACE_RECORD(processor, requestRescheduleTimer)
+		TRACE_REC_(processor, mutexRequestReschedule_locked)
 		cvRunning.notify_one();
-		TRACE_RECORD(processor, requestRescheduleTimer)
+		TRACE_REC_(processor, cvRunning_notified)
 	}
 	PERF_COUNT(processor, requestRescheduleTimer_EXIT)
+	TRACE_REC_(processor, requestRescheduleTimer_ENTER)
 }
 void requestRescheduleInterrupt() {
-//	TRACE_RECORD(processor, requestRescheduleInterrupt)
 	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
+	TRACE_REC_(processor, requestRescheduleInterrupt_ENTER)
 	{
 		std::unique_lock<std::mutex> locker(mutexFlags);
 		rescheduleInterruptFlag = true;
 	}
 	if (!running) {
-		TRACE_RECORD(processor, requestRescheduleInterrupt)
+		TRACE_REC_(processor, mutexRequestReschedule_locking)
 		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-		TRACE_RECORD(processor, requestRescheduleInterrupt)
+		TRACE_REC_(processor, cvRunning_notifying)
 		cvRunning.notify_one();
-		TRACE_RECORD(processor, requestRescheduleInterrupt)
+		TRACE_REC_(processor, cvRunning_notified)
 	}
 	PERF_COUNT(processor, requestRescheduleInterrupt_EXIT)
+	TRACE_REC_(processor, requestRescheduleInterrupt_EXIT)
 }
 
 void checkRequestReschedule() {
-//	TRACE_RECORD(processor, checkRequestReschedule)
     PERF_COUNT(processor, checkRequestReschedule_ENTER)
+//    TRACE_REC_(processor, checkRequestReschedule_ENTER)
     if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
         PERF_COUNT(processor, checkRequestReschedule_YES)
-		TRACE_RECORD(processor, checkRequestReschedule)
+		TRACE_REC_(processor, throw_RequestReschedule)
         ERROR_RequestReschedule();
 	}
     // if stopThread is true, throw RequestReschedule
@@ -128,10 +131,10 @@ void checkRequestReschedule() {
         ERROR_RequestReschedule();
     }
     PERF_COUNT(processor, checkRequestReschedule_EXIT)
+//    TRACE_REC_(processor, checkRequestReschedule_EXIT)
 }
 
 void run() {
-	TRACE_RECORD(processor, run)
 	logger.info("processor_thread::run START");
 	stopThread              = false;
 	rescheduleInterruptFlag = false;
@@ -150,11 +153,11 @@ void run() {
 				if (DEBUG_STOP_AT_NOT_RUNNING) {
 					if (!running) ERROR();
 				}
-//				TRACE_RECORD(processor, run)
+//				TRACE_REC_(processor, run)
 				Execute();
-//				TRACE_RECORD(processor, run)
+//				TRACE_REC_(processor, run)
 			} catch(RequestReschedule& e) {
-				TRACE_RECORD(processor, run)
+				TRACE_REC_(processor, catch_RequestReschedule)
 				// Only ERROR_RequestReschedule throws RequestReschedule.
 				// ERROR_RequestReschedule is called from Reschedule() and processor::checkRequestReschedule().
 				// In above both case, RequestReschedule will thrown while interrupt is enabled.
@@ -162,29 +165,30 @@ void run() {
 				PERF_COUNT(processor, requestReschedule_ENTER)
 				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
 				for(;;) {
-					TRACE_RECORD(processor, run)
+					TRACE_REC_(processor, for_loop_start)
 					// break if OP_STOPEMULATOR is called
 					if (stopThread) goto exitLoop;
 
 					// If not running, wait interrupts or timeouts
 					if (running) {
-						TRACE_RECORD(processor, run)
 						PERF_COUNT(processor, running_A_YES)
+						TRACE_REC_(processor, running_A_YES)
 					} else {
 						PERF_COUNT(processor, running_A_NO)
+						TRACE_REC_(processor, running_A_NO)
 						//logger.debug("waitRunning START");
 						for(;;) {
-							TRACE_RECORD(processor, run)
+							TRACE_REC_(processor, mutexRequestReschedule_locking)
 							std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-							TRACE_RECORD(processor, run)
+							TRACE_REC_(processor, cvRunning_wait_for_calling)
 							cvRunning.wait_for(locker, Util::ONE_SECOND);
-							TRACE_RECORD(processor, run)
+							TRACE_REC_(processor, cvRunning_wait_for_called)
 							if (stopThread) goto exitLoop;
 							if (rescheduleInterruptFlag) break;
 							if (rescheduleTimerFlag)     break;
 							//logger.debug("waitRunning WAITING");
 						}
-						TRACE_RECORD(processor, run)
+						TRACE_REC_(processor, exit_inner_for_loop)
 						//logger.debug("waitRunning FINISH");
 					}
 					// Do reschedule.
@@ -202,6 +206,7 @@ void run() {
 					bool needReschedule = false;
 					if (interruptFlag) {
 						PERF_COUNT(processor, interruptFlag_YES)
+						TRACE_REC_(processor, interruptFlag_YES)
 						//logger.debug("reschedule INTERRUPT");
 						// process interrupt
 						if (Interrupt()) {
@@ -210,38 +215,43 @@ void run() {
 						}
 					} else {
 						PERF_COUNT(processor, interruptFlag_NO)
+						TRACE_REC_(processor, interruptFlag_NO)
 					}
 					if (timerFlag) {
 						PERF_COUNT(processor, timerFlag_YES)
+						TRACE_REC_(processor, timerFlag_YES)
 						//logger.debug("reschedule TIMER");
 						// process timeout
-						if (timer_thread::processTimeout()) {
+						auto result = timer_thread::processTimeout();
+						TRACE_REC_(processor, processTimeout_called)
+						if (result) {
 							PERF_COUNT(processor, timer)
 							needReschedule = true;
 						}
 					} else {
 						PERF_COUNT(processor, timerFlag_NO)
+						TRACE_REC_(processor, timerFlag_NO)
 					}
 					if (needReschedule) {
 						PERF_COUNT(processor, needReschedule_YES)
-						TRACE_RECORD(processor, run)
+						TRACE_REC_(processor, Reschedule_calling)
 						Reschedule(1);
-						TRACE_RECORD(processor, run)
+						TRACE_REC_(processor, Reschedule_called)
 					} else {
 						PERF_COUNT(processor, needReschedule_NO)
 					}
-					TRACE_RECORD(processor, run)
+					TRACE_REC_(processor, run)
 					// It still not running, continue loop again
 					if (running) {
 						PERF_COUNT(processor, running_B_YES)
-						TRACE_RECORD(processor, run)
+						TRACE_REC_(processor, running_B_YES)
 						break;
 					} else {
 						PERF_COUNT(processor, running_B_NO)
-						TRACE_RECORD(processor, run)
+						TRACE_REC_(processor, running_B_NO)
 					}
 				}
-				TRACE_RECORD(processor, run)
+				TRACE_REC_(processor, requestReschedule_EXIT)
 				PERF_COUNT(processor, requestReschedule_EXIT)
 			} catch(Abort& e) {
 				PERF_COUNT(processor, abort)
@@ -256,7 +266,6 @@ void run() {
 
 exitLoop:
 	running.timeStop();
-	TRACE_RECORD(processor, run)
 
 	// stop relevant thread
 	AgentNetwork::ReceiveThread::stop();

@@ -59,16 +59,15 @@ void stop() {
 }
 
 void run() {
-	TRACE_RECORD(timer, run)
+	TRACE_REC_(timer, run)
 	logger.info("timer_thread::run START");
 	stopThread = false;
 	
 	auto tick = std::chrono::milliseconds(cTick);
 	auto time = std::chrono::system_clock::now();
-	std::unique_lock<std::mutex> locker(mutexTimer);
 	for(;;) {
-		TRACE_RECORD(timer, run)
 		PERF_COUNT(timer, timer)
+		TRACE_REC_(timer, timer)
 		auto nextTime = time + tick;
 		std::this_thread::sleep_until(nextTime);
 		time = nextTime;
@@ -77,20 +76,22 @@ void run() {
 		{
 			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
 			// Then TimerThread::processTimeout() will notify cvTimer
-			TRACE_RECORD(timer, run)
+			TRACE_REC_(timer, requestRescheduleTimer_calling)
 			processor_thread::requestRescheduleTimer();
+			TRACE_REC_(timer, requestRescheduleTimer_called)
 			// wait procesTimeout is invoked
 			for(;;) {
-				TRACE_RECORD(timer, run)
+				TRACE_REC_(timer, mutexTimer_locking)
+				std::unique_lock<std::mutex> locker(mutexTimer);
+				TRACE_REC_(timer, cvTimer_wait_for_calling)
 				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
-				TRACE_RECORD(timer, run)
+				TRACE_REC_(timer, cvTimer_wait_for_called)
 				if (stopThread) goto exitLoop;
 				if (status == std::cv_status::no_timeout) break;
 			}
 		}
 	}
 exitLoop:
-	TRACE_RECORD(timer, run)
 	logger.info("timer_thread::run STOP");
 }
 
@@ -99,26 +100,32 @@ bool processTimeout() {
 	// this method is called from processor thread
 	//logger.debug("processTimeout START");
 	PERF_COUNT(timer, processTimeout_ENTER)
+	TRACE_REC_(timer, processTimeout_ENTER)
 	{
 		// start next timer
-		TRACE_RECORD(timer, processTimeout)
+		TRACE_REC_(timer, mutexTimer_locking)
 		std::unique_lock<std::mutex> locker(mutexTimer);
-		TRACE_RECORD(timer, processTimeout)
+		TRACE_REC_(timer, cvTimer_notifying)
 		cvTimer.notify_one();
+		TRACE_REC_(timer, cvTimer_notified)
 	}
 
 	bool requeue;
+	TRACE_REC_(timer, Interrupt)
 	if (InterruptsEnabled()) {
-		TRACE_RECORD(timer, processTimeout)
 		PERF_COUNT(timer, updatePTC)
+		TRACE_REC_(timer, updatePTC)
 		PTC = PTC + 1;
 		if (PTC == 0) PTC = PTC + 1;
 
+		TRACE_REC_(timer, TimeoutScan_calling)
 		requeue = TimeoutScan();
+		TRACE_REC_(timer, TimeoutScan_called)
 	} else {
 		requeue = false;
 	}
 	PERF_COUNT(timer, processTimeout_ENTER)
+	TRACE_REC_(timer, processTimeout_ENTER)
 	return requeue;
 }
 

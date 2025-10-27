@@ -33,9 +33,10 @@
 // trace.cpp
 //
 
-#include <algorithm>
 #include <iterator>
 #include <vector>
+#include <algorithm>
+#include <cstring>
 
 #include "Util.h"
 static const Logger logger(__FILE__);
@@ -58,11 +59,12 @@ static std::string toStringLocalTime(const std::chrono::system_clock::time_point
     localtime_r(&temp, &tm);
     return std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%06d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
 }
-std::string Event::toString() const {
+std::string Event::toString(int length_group, int length_name) const {
     auto timeString = toStringLocalTime(time);
-    auto nameString = std_sprintf("%s::%s", group, name);
-    auto locationString = std_sprintf("%5d  %s", location.line(), toSimplePath(location.file_name()));
-    return std_sprintf("{%s  %-38s  %s}", timeString, nameString, locationString);
+    auto nameString = std_sprintf("%s  %s", group, name);
+    auto locationString = std_sprintf("%5d  %s", line, toSimplePath(file));
+    auto format = std_sprintf("{%%s  %%-%ds  %%-%ds  %%s}", length_group, length_name);
+    return std_sprintf(format.c_str(), timeString, group, name, locationString);
 }
 void clear() {
     for(auto& e: all) {
@@ -70,7 +72,12 @@ void clear() {
     }
 }
 void dump(const std::string& group) {
+    size_t size = 0;
+    for(const auto& e: all) {
+        size += e.queue->size();
+    }
     std::vector<Event> result;
+    result.reserve(size);
     for(const auto& e: all) {
         if (group == "" || group == e.group) {
             std::vector<Event> temp;
@@ -79,9 +86,20 @@ void dump(const std::string& group) {
             std::copy(temp.cbegin(), temp.cend(), std::back_inserter(result));
         }
     }
+    int length_group = 0;
+    int length_name  = 0;
     for(const auto& e: result) {
-        logger.info(e.toString());
+        int length;
+
+        length = strlen(e.group);
+        if (length_group < length) length_group = length;
+        length = strlen(e.name);
+        if (length_name< length) length_name = length;
     }
+    for(const auto& e: result) {
+        logger.info(e.toString(length_group, length_name));
+    }
+    logger.info("size  %d", size);
 }
 
 }

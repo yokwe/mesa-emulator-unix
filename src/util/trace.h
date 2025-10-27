@@ -36,41 +36,80 @@
 #pragma once
 
 #include <chrono>
-#include <source_location>
-
-#include "Util.h"
+#include <deque>
+#include <mutex>
+#include <vector>
 
 static const constexpr bool TRACE_ENABLE = false;
 
-#define TRACE_RECORD(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name);  trace::group::name.push_back(event); }  }
+#define TRACE_REC_(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name, __FILE__, __LINE__);  trace::group.push_back(event); } }
 
 namespace trace {
+
+// https://stackoverflow.com/questions/56334492/c-create-fixed-size-queue
+template <typename T, int MAX_SIZE>
+class fixed_queue : public std::deque<T> {
+    // needs mutex for using under multi threads
+	std::mutex mutex;
+public:
+	fixed_queue() : std::deque<T>() {}
+	fixed_queue(const fixed_queue& that) = default;
+
+	void pop_back() {
+		std::unique_lock<std::mutex> lock(mutex);
+		std::deque<T>::pop_back();
+	}
+	void pop_front() {
+		std::deque<T>::pop_front();
+	}
+
+    void push_front(const T& value) {
+		std::unique_lock<std::mutex> lock(mutex);
+        if (this->size() == MAX_SIZE) {
+           std::deque<T>::pop_back();
+        }
+        std::deque<T>::push_front(value);
+    }
+    void push_back(const T& value) {
+		std::unique_lock<std::mutex> lock(mutex);
+        if (this->size() == MAX_SIZE) {
+           std::deque<T>::pop_front();
+        }
+        std::deque<T>::push_back(value);
+    }
+};
+
 
 struct Event {
     const char*                           group;
     const char*                           name;
+    const char*                           file;
+    uint32_t                              line;
     std::chrono::system_clock::time_point time;
-    std::source_location                  location;
 
     Event(
         const char* group_,
         const char* name_,
-        std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now(),
-        std::source_location location_ = std::source_location::current()) :
-        group(group_), name(name_), time(time_), location(location_) {}
-    Event(Event&& that) = default;
-    Event(const Event& that) = default;
-    Event& operator =(const Event& that) = default;
+        const char* file_,
+        uint32_t    line_,
+        std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now()) :
+            group(group_), name(name_), file(file_), line(line_), time(time_) {}
+    // Event(Event&& that) = default;
+    // Event(const Event& that) = default;
+    // Event& operator =(const Event& that) = default;
     
     std::strong_ordering operator <=>(const Event& that) const {
         return this->time <=> that.time;
     }
-
-    static inline std::strong_ordering comparator(const Event& left, const Event& right) {
-        return left <=> right;
+    bool operator < (const Event& that) const {
+        return this->time < that.time;
     }
 
-    std::string toString() const;
+    // static inline std::strong_ordering comparator(const Event& left, const Event& right) {
+    //     return left <=> right;
+    // }
+
+    std::string toString(int length_group = 9, int length_name = 26) const;
 };
 
 inline constexpr int QUEUE_SIZE = 100000;
@@ -78,9 +117,8 @@ using EventQueue = fixed_queue<Event, QUEUE_SIZE>;
 
 struct Entry {
     std::string group;
-    std::string name;
     EventQueue* queue;
-    Entry(const char* group_, const char* name_, EventQueue* queue_) : group(group_), name(name_), queue(queue_) {}
+    Entry(const char* group_, EventQueue* queue_) : group(group_), queue(queue_) {}
 };
 
 extern std::vector<Entry> all;
@@ -88,19 +126,13 @@ extern std::vector<Entry> all;
 void clear();
 void dump(const std::string& group = "");
 
-#define TRACE_DECLARE(group, name) namespace group { extern EventQueue name; }
+#define TRACE_DECLARE(group) extern EventQueue group;
 
 // processor_thread
-TRACE_DECLARE(processor, run)
-TRACE_DECLARE(processor, requestRescheduleTimer)
-TRACE_DECLARE(processor, requestRescheduleInterrupt)
-TRACE_DECLARE(processor, checkRequestReschedule)
+TRACE_DECLARE(processor)
 // interrupt_thread
-TRACE_DECLARE(interrupt, run)
-TRACE_DECLARE(interrupt, notifyInterrupt)
+TRACE_DECLARE(interrupt)
 // timer_thread
-TRACE_DECLARE(timer, run)
-TRACE_DECLARE(timer, processTimeout)
-// Opcode_process
-TRACE_DECLARE(processor, reschedule)
+TRACE_DECLARE(timer)
+
 }

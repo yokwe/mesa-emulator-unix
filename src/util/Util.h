@@ -38,7 +38,6 @@
 #include <cstdint>
 #include <set>
 #include <source_location>
-#include <deque>
 
 #include <log4cxx/logger.h>
 
@@ -210,27 +209,6 @@ public:
 	RequestReschedule(std::source_location location_ = std::source_location::current()) : location(location_) {}
 };
 #define ERROR_RequestReschedule() { throw RequestReschedule(); }
-
-// https://stackoverflow.com/questions/56334492/c-create-fixed-size-queue
-template <typename T, int MAX_SIZE>
-class fixed_queue : public std::deque<T> {
-public:
-	fixed_queue() : std::deque<T>() {}
-	fixed_queue(const fixed_queue& that) = default;
-
-    void push_front(const T& value) {
-        if (this->size() == MAX_SIZE) {
-           this->pop_back();
-        }
-        std::deque<T>::push_front(value);
-    }
-    void push_back(const T& value) {
-        if (this->size() == MAX_SIZE) {
-           this->pop_front();
-        }
-        std::deque<T>::push_back(value);
-    }
-};
 
 void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);

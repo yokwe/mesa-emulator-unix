@@ -54,7 +54,7 @@ uint64_t processor::running_B_YES                    = 0;
 uint64_t processor::running_B_NO                     = 0;
 uint64_t processor::busyWait                         = 0;
 uint64_t processor::checkRequestReschedule_ENTER     = 0;
-uint64_t processor::checkRequestReschedule_YES       = 0;
+uint64_t processor::throw_RequestReschedule          = 0;
 uint64_t processor::checkRequestReschedule_EXIT      = 0;
 uint64_t processor::requestRescheduleTimer_ENTER     = 0;
 uint64_t processor::requestRescheduleTimer_EXIT      = 0;
@@ -157,7 +157,7 @@ std::vector<Entry> all {
     {"processor", "processor::running_B_NO"                    , processor::running_B_NO},
     {"processor", "processor::busyWait"                        , processor::busyWait},
     {"processor", "processor::checkRequestReschedule_ENTER"    , processor::checkRequestReschedule_ENTER},
-    {"processor", "processor::checkRequestReschedule_YES"      , processor::checkRequestReschedule_YES},
+    {"processor", "processor::throw_RequestReschedule"         , processor::throw_RequestReschedule},
     {"processor", "processor::checkRequestReschedule_EXIT"     , processor::checkRequestReschedule_EXIT},
     {"processor", "processor::requestRescheduleTimer_ENTER"    , processor::requestRescheduleTimer_ENTER},
     {"processor", "processor::requestRescheduleTimer_EXIT"     , processor::requestRescheduleTimer_EXIT},

@@ -96,7 +96,7 @@ uint16_t computeChecksum(const uint8_t* data, int start, int endPlusOne) {
 		if (0x10000U <= s) s = (s + 1) & 0xFFFFU;
     }
 
-    // From page 21 of INTERN TRANSPORT PROTOCOLS
+    // From page 21 of INTERNET TRANSPORT PROTOCOLS
     // If the result of the checksumming operation is the one's complement value "minus zero" (177777 octal),
     // it should be converted to "plus zero" (0 octal).
     uint16_t result = (uint16_t)s;

@@ -33,6 +33,7 @@
 // timer_thread.cpp
 //
 
+#include <atomic>
 #include <chrono>
 #include <thread>
 
@@ -52,6 +53,8 @@ namespace timer_thread {
 bool                    stopThread;
 std::mutex              mutexTimer;
 std::condition_variable cvTimer;
+std::atomic_bool        cvTimerFlag;
+
 
 void stop() {
 	logger.info("timer_thread::stop");
@@ -62,6 +65,7 @@ void run() {
 	TRACE_REC_(timer, run)
 	logger.info("timer_thread::run START");
 	stopThread = false;
+	cvTimerFlag = false;
 	
 	auto tick = std::chrono::milliseconds(cTick);
 	auto time = std::chrono::system_clock::now();
@@ -69,27 +73,30 @@ void run() {
 		PERF_COUNT(timer, timer)
 		TRACE_REC_(timer, timer)
 		auto nextTime = time + tick;
+		TRACE_REC_(timer, sleep_until_start)
 		std::this_thread::sleep_until(nextTime);
+		TRACE_REC_(timer, sleep_until_stop)
 		time = nextTime;
 		if (stopThread) break;
 
-		{
-			// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
-			// Then TimerThread::processTimeout() will notify cvTimer
-			TRACE_REC_(timer, requestRescheduleTimer_calling)
-			processor_thread::requestRescheduleTimer();
-			TRACE_REC_(timer, requestRescheduleTimer_called)
-			// wait procesTimeout is invoked
-			for(;;) {
-				TRACE_REC_(timer, mutexTimer_locking)
-				std::unique_lock<std::mutex> locker(mutexTimer);
-				TRACE_REC_(timer, cvTimer_wait_for_calling)
-				auto status = cvTimer.wait_for(locker, Util::ONE_SECOND);
-				TRACE_REC_(timer, cvTimer_wait_for_called)
-				if (stopThread) goto exitLoop;
-				if (status == std::cv_status::no_timeout) break;
-			}
+		// processor::requestRescheduleTimer() will call TimerThread::processTimeout() eventually
+		// Then TimerThread::processTimeout() will notify cvTimer
+		TRACE_REC_(timer, requestRescheduleTimer_calling)
+		processor_thread::requestRescheduleTimer();
+		TRACE_REC_(timer, requestRescheduleTimer_called)
+		// wait procesTimeout is invoked
+		for(;;) {
+			TRACE_REC_(timer, mutexTimer_locking)
+			std::unique_lock<std::mutex> locker(mutexTimer);
+			TRACE_REC_(timer, mutexTimer_locked)
+			TRACE_REC_(timer, cvTimer_wait_for_calling)
+			cvTimer.wait_for(locker, Util::ONE_SECOND);
+			TRACE_REC_(timer, cvTimer_wait_for_called)
+			if (stopThread) goto exitLoop;
+			if (cvTimerFlag) break;
 		}
+		TRACE_REC_(timer, exit_inner_for_loop)
+		cvTimerFlag = false;
 	}
 exitLoop:
 	logger.info("timer_thread::run STOP");
@@ -105,6 +112,8 @@ bool processTimeout() {
 		// start next timer
 		TRACE_REC_(timer, mutexTimer_locking)
 		std::unique_lock<std::mutex> locker(mutexTimer);
+		cvTimerFlag = true;
+		TRACE_REC_(timer, mutexTimer_locked)
 		TRACE_REC_(timer, cvTimer_notifying)
 		cvTimer.notify_one();
 		TRACE_REC_(timer, cvTimer_notified)
@@ -124,8 +133,8 @@ bool processTimeout() {
 	} else {
 		requeue = false;
 	}
-	PERF_COUNT(timer, processTimeout_ENTER)
-	TRACE_REC_(timer, processTimeout_ENTER)
+	PERF_COUNT(timer, processTimeout_EXIT)
+	TRACE_REC_(timer, processTimeout_EXIT)
 	return requeue;
 }
 

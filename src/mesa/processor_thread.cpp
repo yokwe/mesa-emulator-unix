@@ -65,6 +65,8 @@ bool                    rescheduleInterruptFlag;
 bool                    rescheduleTimerFlag;
 std::set<CARD16>        stopAtMPSet;
 
+static uint64_t         time_0900;
+static uint64_t         time_8000;
 
 void stop() {
 	logger.info("timer::stop");
@@ -80,6 +82,48 @@ void mp_observer(CARD16 mp) {
 		logger.info("stop at MP %4d", mp);
 		stop();
 	}
+	if (mp ==  900) time_0900 = Util::getMilliSecondsSinceEpoch();
+	if (mp == 8000) time_8000 = Util::getMilliSecondsSinceEpoch();
+}
+
+std::string getBootTime() {
+	if (time_0900 == 0 || time_8000 == 0) return "No boot";
+
+	std::string bootAt;
+	{
+		auto microsecond = time_0900 % 1000;
+		time_t time = time_0900 / 1'000;
+		struct tm tm;
+		localtime_r(&time, &tm);
+
+		bootAt = std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
+	}
+	std::string bootDuration;
+	{
+		auto time = time_8000 - time_0900;
+		auto seconds = time / 1'000;
+		auto milliSeconds = time % 1'000;
+		bootDuration = std_sprintf("%d.%03d", seconds, milliSeconds);
+	}
+	auto ret = std_sprintf("Boot starts at %s  It takes %s seconds", bootAt, bootDuration);
+	return ret;
+}
+std::string getElapsedTime() {
+	if (time_0900 == 0) return "No boot";
+	auto time = Util::getMilliSecondsSinceEpoch() - time_0900;
+	auto seconds = time / 1'000;
+	auto minutes = seconds / 60;
+	auto hours = minutes / 60;
+
+	seconds %= 60;
+	minutes %= 60;
+
+	std::string timeString;
+	if (minutes == 0) timeString = std_sprintf("%d seconds", seconds);
+	else if (hours == 0) timeString = std_sprintf("%d:%02d", minutes, seconds);
+	else timeString =  std_sprintf("Elapsed time is %d:%02d:%02d", hours, minutes, seconds);
+
+	return std_sprintf("Elaples time is %s", timeString);
 }
 
 void requestRescheduleTimer() {
@@ -144,6 +188,8 @@ void run() {
 	stopThread              = false;
 	rescheduleInterruptFlag = false;
 	rescheduleTimerFlag     = false;
+	time_0900               = 0;
+	time_8000               = 0;
 
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 	XFER(bootLink.u, 0, XferType::call, 0);

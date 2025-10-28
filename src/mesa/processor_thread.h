@@ -35,6 +35,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "MesaBasic.h"
 
 namespace processor_thread {
@@ -43,6 +45,9 @@ void stop();
 
 void stopAtMP(CARD16 mp);
 void mp_observer(CARD16 mp);
+
+std::string getBootTime();     // time between 0900 and 8000
+std::string getElapsedTime();  // elaplsed time from 0900
 
 void requestRescheduleTimer();
 void requestRescheduleInterrupt();

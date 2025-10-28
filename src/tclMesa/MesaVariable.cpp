@@ -42,6 +42,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../opcode/opcode.h"
+
 #include "../util/tcl.h"
 
 #include "../mesa/Variable.h"
@@ -128,6 +130,7 @@ int returnDict(Tcl_Interp* interp) {
         }
         put(interp, dict, "breakByte", std_sprintf("0x%02X", values.breakByte));
         put(interp, dict, "running", values.running ? "1" : "0");
+        put(interp, dict, "lastOpcode", opcode::lastOpcodeName());
 
         Tcl_SetObjResult(interp, dict);
 
@@ -168,6 +171,7 @@ int dump(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) 
 
         output.push_back(std::make_pair("breakByte", std_sprintf("0x%02X", values.breakByte)));
         output.push_back(std::make_pair("running", values.running ? "1" : "0"));
+        output.push_back(std::make_pair("lastOpcode", opcode::lastOpcodeName()));
 
         size_t firstLen  = 0;
         size_t secondLen = 0;

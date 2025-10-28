@@ -46,6 +46,7 @@ int MesaEvent    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const
 int MesaLog      (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaMemory   (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaPerf     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int MesaTime     (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaTrace    (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int MesaVariable (ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 

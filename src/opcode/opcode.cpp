@@ -80,8 +80,8 @@ void initialize() {
     opMop.fill(nullptr);
     statsMop.fill(0);
     statsEsc.fill(0);
-    lastMop = 0;
-    lastEsc = 0;
+    lastMop = -1;
+    lastEsc = -1;
     
     registerOpcode();
     
@@ -121,6 +121,12 @@ void stats() {
 	}
 }
 
+std::string lastOpcodeName() {
+    if (lastEsc == -1 && lastMop == -1) return "*NONE*";
+    if (lastEsc != -1) return nameEsc[lastEsc];
+    if (lastMop != -1) return nameMop[lastMop];
+    ERROR();
+}
 
 //
 // registration of opcode

@@ -67,6 +67,9 @@ extern int lastEsc;
 
 void initialize();
 void stats();
+
+std::string lastOpcodeName();
+
 }
 
 #define OPCODE_STATS_COUNT_BEFORE 
@@ -79,7 +82,7 @@ inline void DispatchEsc(uint8_t code) {
 #endif
     opcode::lastEsc = code;
     opcode::opEsc[code]();
-    opcode::lastEsc = 0;
+    opcode::lastEsc = -1;
 #ifndef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter after execution. We don't count ABORTED instruction.
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsEsc[code]++;
@@ -95,7 +98,7 @@ inline void Dispatch(uint8_t code) {
 #endif
     opcode::lastMop = code;
     opcode::opMop[code]();
-    opcode::lastMop = 0;
+    opcode::lastMop = -1;
 #ifndef OPCODE_STATS_COUNT_BEFORE
 	// increment stat counter after execution. We don't count ABORTED instruction.
 	if (DEBUG_SHOW_OPCODE_STATS) opcode::statsMop[code]++;

@@ -105,7 +105,7 @@ std::string getBootTime() {
 		auto milliSeconds = time % 1'000;
 		bootDuration = std_sprintf("%d.%03d", seconds, milliSeconds);
 	}
-	auto ret = std_sprintf("Boot starts at %s  It takes %s seconds", bootAt, bootDuration);
+	auto ret = std_sprintf("Boot started at %s  It took %s seconds", bootAt, bootDuration);
 	return ret;
 }
 std::string getElapsedTime() {
@@ -121,7 +121,7 @@ std::string getElapsedTime() {
 	std::string timeString;
 	if (minutes == 0) timeString = std_sprintf("%d seconds", seconds);
 	else if (hours == 0) timeString = std_sprintf("%d:%02d", minutes, seconds);
-	else timeString =  std_sprintf("Elapsed time is %d:%02d:%02d", hours, minutes, seconds);
+	else timeString =  std_sprintf("%d:%02d:%02d", hours, minutes, seconds);
 
 	return std_sprintf("Elaples time is %s", timeString);
 }

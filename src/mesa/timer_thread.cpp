@@ -68,7 +68,15 @@ void run() {
 	cvTimerFlag = false;
 	
 	auto tick = std::chrono::milliseconds(cTick);
-	auto time = std::chrono::system_clock::now();
+	std::chrono::time_point<std::chrono::system_clock> time;
+	{
+		const uint64_t unit = 200;
+		auto t1 = Util::getMilliSecondsSinceEpoch();
+		auto t2 = ((t1 + unit - 1) / unit) * unit;
+		time = std::chrono::time_point<std::chrono::system_clock>{std::chrono::milliseconds(t2)};
+	}
+	std::this_thread::sleep_until(time);
+
 	for(;;) {
 		PERF_COUNT(timer, timer)
 		TRACE_REC_(timer, timer)

@@ -35,7 +35,9 @@ uint64_t interrupt::interrupt                        = 0;
 uint64_t interrupt::request                          = 0;
 uint64_t timer::timer                                = 0;
 uint64_t timer::processTimeout_ENTER                 = 0;
+uint64_t timer::InterruptsEnabled_YES                = 0;
 uint64_t timer::updatePTC                            = 0;
+uint64_t timer::InterruptsEnabled_NO                 = 0;
 uint64_t timer::processTimeout_EXIT                  = 0;
 uint64_t processor::abort                            = 0;
 uint64_t processor::requestReschedule_ENTER          = 0;
@@ -138,7 +140,9 @@ std::vector<Entry> all {
     {"interrupt", "interrupt::request"                         , interrupt::request},
     {"timer"    , "timer::timer"                               , timer::timer},
     {"timer"    , "timer::processTimeout_ENTER"                , timer::processTimeout_ENTER},
+    {"timer"    , "timer::InterruptsEnabled_YES"               , timer::InterruptsEnabled_YES},
     {"timer"    , "timer::updatePTC"                           , timer::updatePTC},
+    {"timer"    , "timer::InterruptsEnabled_NO"                , timer::InterruptsEnabled_NO},
     {"timer"    , "timer::processTimeout_EXIT"                 , timer::processTimeout_EXIT},
     {"processor", "processor::abort"                           , processor::abort},
     {"processor", "processor::requestReschedule_ENTER"         , processor::requestReschedule_ENTER},

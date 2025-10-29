@@ -104,7 +104,9 @@ PERF_DECLARE(interrupt, request)
 // timer
 PERF_DECLARE(timer, timer)
 PERF_DECLARE(timer, processTimeout_ENTER)
+PERF_DECLARE(timer, InterruptsEnabled_YES)
 PERF_DECLARE(timer, updatePTC)
+PERF_DECLARE(timer, InterruptsEnabled_NO)
 PERF_DECLARE(timer, processTimeout_EXIT)
 
 // processor

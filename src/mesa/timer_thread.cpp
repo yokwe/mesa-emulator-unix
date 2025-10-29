@@ -122,6 +122,7 @@ bool processTimeout() {
 	bool requeue;
 	TRACE_REC_(timer, Interrupt)
 	if (InterruptsEnabled()) {
+		PERF_COUNT(timer, InterruptsEnabled_YES)
 		PERF_COUNT(timer, updatePTC)
 		TRACE_REC_(timer, updatePTC)
 		PTC = PTC + 1;
@@ -131,6 +132,7 @@ bool processTimeout() {
 		requeue = TimeoutScan();
 		TRACE_REC_(timer, TimeoutScan_called)
 	} else {
+		PERF_COUNT(timer, InterruptsEnabled_NO)
 		requeue = false;
 	}
 	PERF_COUNT(timer, processTimeout_EXIT)

@@ -33,6 +33,7 @@
 // watchdog.cpp
 //
 
+#include <chrono>
 #include <cstring>
 #include <mutex>
 #include <deque>
@@ -45,6 +46,8 @@ static const Logger logger(__FILE__);
 #include "watchdog.h"
 
 namespace watchdog {
+
+std::chrono::milliseconds HARD_THRESHOLD{2000};
 
 std::mutex             mutex;
 std::deque<Watchdog*> all;
@@ -68,14 +71,18 @@ void run() {
         std::this_thread::sleep_for(Util::ONE_SECOND);
         if (enableScan) {
             std::unique_lock<std::mutex> lock(mutex);
-            auto time = std::chrono::system_clock::now();
-            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
+            auto now = std::chrono::system_clock::now();
 
             for(auto e: all) {
-                auto elapsedTime = now - e->updateTime;
+                auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - e->updateTime);
                 if (e->threshold < elapsedTime) {
-                    logger.info("callAction  %s  %s  %d", toStringLocalTime(time), e->name, elapsedTime);
-                    e->action();
+                    logger.info("");
+                    logger.info("");
+                    logger.info("==========");
+                    logger.info("callAction  %s  elapsed time  %ld", toStringLocalTime(now), elapsedTime.count());
+                    logger.info("            %s  %s", toStringLocalTime(e->updateTime), e->name);
+                    logger.info("==========");
+                    if (HARD_THRESHOLD < elapsedTime) e->action();
                 }
             }
         }

@@ -38,6 +38,7 @@
 #include <condition_variable>
 
 #include "../util/Util.h"
+#include "Constant.h"
 static const Logger logger(__FILE__);
 
 #include "../agent/AgentDisk.h"
@@ -53,6 +54,7 @@ static const Logger logger(__FILE__);
 #include "../util/Debug.h"
 #include "../util/Perf.h"
 #include "../util/trace.h"
+#include "../util/watchdog.h"
 
 
 namespace processor_thread {
@@ -183,6 +185,14 @@ void checkRequestReschedule() {
 //    TRACE_REC_(processor, checkRequestReschedule_EXIT)
 }
 
+void watchdogAction() {
+    trace::dump();
+	variable::dump();
+	perf::dump();
+	// stop processor thread
+	stop();
+}
+
 void run() {
 	logger.info("processor_thread::run START");
 	stopThread              = false;
@@ -197,6 +207,9 @@ void run() {
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
 
+	watchdog::Watchdog watchdog("processor", cTick * 2, watchdogAction);
+	watchdog::insert(&watchdog);
+
 	running.timeStart();
 	try {
 		for(;;) {
@@ -209,6 +222,7 @@ void run() {
 //				TRACE_REC_(processor, run)
 			} catch(RequestReschedule& e) {
 				TRACE_REC_(processor, catch_RequestReschedule)
+				watchdog.update();
 				// Only ERROR_RequestReschedule throws RequestReschedule.
 				// ERROR_RequestReschedule is called from Reschedule() and processor::checkRequestReschedule().
 				// In above both case, RequestReschedule will thrown while interrupt is enabled.
@@ -323,6 +337,7 @@ void run() {
 
 exitLoop:
 	running.timeStop();
+	watchdog::remove(&watchdog);
 
 	// stop relevant thread
 	AgentNetwork::ReceiveThread::stop();

@@ -54,18 +54,27 @@ bool enableScan = false;
 bool scanThreadRunning = false;
 std::thread scanThread;
 
+static std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
+    time_t temp = std::chrono::system_clock::to_time_t(time);
+	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count() % 1'000'000;
+
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%06d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
+}
+
 void run() {
     for(;;) {
         std::this_thread::sleep_for(Util::ONE_SECOND);
         if (enableScan) {
             std::unique_lock<std::mutex> lock(mutex);
-            auto duration = std::chrono::system_clock::now().time_since_epoch();
-            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            auto time = std::chrono::system_clock::now();
+            auto now = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count();
 
             for(auto e: all) {
                 auto elapsedTime = now - e->updateTime;
                 if (e->threshold < elapsedTime) {
-                    logger.info("callAction  %s  %d", e->name, elapsedTime);
+                    logger.info("callAction  %s  %s  %d", toStringLocalTime(time), e->name, elapsedTime);
                     e->action();
                 }
             }

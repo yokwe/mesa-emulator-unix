@@ -18,6 +18,7 @@ target_sources(
 		trace.h
 		ThreadControl.h
     	Util.h
+		watchdog.h
 	PRIVATE
 		BPF.cpp
 		ByteBuffer.cpp
@@ -29,6 +30,7 @@ target_sources(
 		trace.cpp
 		ThreadControl.cpp
 		Util.cpp
+		watchdog.cpp
 )
 
 target_link_libraries(util log4cxx)

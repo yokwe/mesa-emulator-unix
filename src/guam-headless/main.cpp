@@ -96,13 +96,17 @@ int main(int /* argc */, char** /* argv */) {
 	thread.join();
 	logger.info("thread joined");
 	
+	trace::dump();
+
 	// output stats
 	opcode::stats();
 	PERF_LOG();
+	variable::dump();
 	memory::cache::stats();
-	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
 
-	trace::dump();
+	logger.info(processor_thread::getBootTime());
+    logger.info(processor_thread::getElapsedTime());
+
 
 	// {
 	// 	guam::initialize();

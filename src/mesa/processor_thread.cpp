@@ -33,9 +33,11 @@
 // processor.cpp
 //
 
+#include <chrono>
 #include <set>
 #include <mutex>
 #include <condition_variable>
+#include <thread>
 
 #include "../util/Util.h"
 #include "Constant.h"
@@ -71,7 +73,8 @@ static uint64_t         time_0900;
 static uint64_t         time_8000;
 
 void stop() {
-	logger.info("timer::stop");
+	logger.info("processor_thread::stop");
+	TRACE_REC_(processor, stop)
     stopThread = true;
 }
 
@@ -186,11 +189,18 @@ void checkRequestReschedule() {
 }
 
 void watchdogAction() {
+	logger.info("watchdogAction_ENTER");
+	TRACE_REC_(processor, watchdogAction_ENTER)
+	// stop processor thread
+	stop();
+	std::this_thread::sleep_for(Util::ONE_SECOND);
+	std::this_thread::sleep_for(Util::ONE_SECOND);
+	TRACE_REC_(processor, trace_dump)
     trace::dump();
 	variable::dump();
 	perf::dump();
-	// stop processor thread
-	stop();
+	logger.info("watchdogAction_EXIT");
+	TRACE_REC_(processor, watchdogAction_EXIT)
 }
 
 void run() {
@@ -207,7 +217,7 @@ void run() {
 	logger.info("GFI = %04X  CB  = %08X  GF  = %08X", GFI, CB, GF);
 	logger.info("LF  = %04X  PC  = %04X      MDS = %08X", LF, PC, MDS);
 
-	watchdog::Watchdog watchdog("processor", cTick * 2, watchdogAction);
+	watchdog::Watchdog watchdog("processor", std::chrono::milliseconds(cTick * 2), watchdogAction);
 	watchdog::insert(&watchdog);
 
 	running.timeStart();
@@ -336,6 +346,7 @@ void run() {
 	}
 
 exitLoop:
+	TRACE_REC_(processor, exitLoop)
 	running.timeStop();
 	watchdog::remove(&watchdog);
 

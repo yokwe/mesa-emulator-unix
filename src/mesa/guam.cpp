@@ -72,12 +72,12 @@ static const Logger logger(__FILE__);
 
 #include "../util/net.h"
 #include "../util/ThreadControl.h"
+#include "../util/watchdog.h"
 
 #include "guam.h"
 
 namespace guam {
 
-int64_t        elapsedTime;
 Config         config;
 
 DiskFile       diskFile;
@@ -223,13 +223,10 @@ static void initialize() {
 	logger.info("rmBits         %4d", config.rmBits);
 
 	// start initialize
-	elapsedTime = 0;
 	memory::initialize(config.vmBits, config.rmBits, agent::ioRegionPage);
 	opcode::initialize();
 	variable::initialize();
 	agent::initialize();
-
-	elapsedTime = 0;
 
 	const memory::Config& memoryConfig = memory::getConfig();
 
@@ -357,7 +354,6 @@ static void boot() {
 	ThreadControl t5("disk", f5);
 	ThreadControl t6("processor", f6);
 
-	auto timeStart = Util::getMilliSecondsSinceEpoch();
 	t1.start();
 	t2.start();
 	t3.start();
@@ -366,6 +362,9 @@ static void boot() {
 	t6.start();
 
 	std::this_thread::yield();
+
+	watchdog::start();
+	watchdog::enable();
 	
 	t1.join();
 	t2.join();
@@ -373,9 +372,8 @@ static void boot() {
 	t4.join();
 	t5.join();
 	t6.join();
-	auto timeStop = Util::getMilliSecondsSinceEpoch();
 
-	elapsedTime = timeStop - timeStart;
+	watchdog::disable();
 
 	logger.info("boot STOP");
 }
@@ -395,10 +393,6 @@ void run() {
 	initialize();
 	boot();
 	finalize();
-}
-
-int64_t getElapsedTime() {
-    return elapsedTime;
 }
 
 void keyPress   (LevelVKeys::KeyName keyName) {

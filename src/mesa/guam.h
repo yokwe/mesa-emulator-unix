@@ -64,8 +64,6 @@ void getConfig(Config& config);
 
 void run(); // don't return until all child thread stopped
 
-int64_t getElapsedTime();
-
 void keyPress   (LevelVKeys::KeyName keyName);
 void keyRelease (LevelVKeys::KeyName keyName);
 void setPosition(int x, int y);

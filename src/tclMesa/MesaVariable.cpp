@@ -42,57 +42,15 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../mesa/Variable.h"
+
 #include "../opcode/opcode.h"
 
 #include "../util/tcl.h"
 
 #include "../mesa/Variable.h"
 
-struct Values {
-    CARD16 PID[4]; // Processor ID
-    CARD16 MP;     // Maintenance Panel
-    CARD16 WP;     // Wakeup pending register - 10.4.4.1
-    CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
-    CARD16 PTC;    // Process timeout counter - 10.4.5
-    CARD16 XTS;    // Xfer trap status - 9.5.5
-    CARD16 PSB;    // PsbIndex - 10.1.1
-    CARD32 MDS;    // Main Data Space
-    CARD16 LF;     // POINTER TO LocalVariables
-    CARD32 GF;     // LONG POINTER TO GlobalVarables
-    CARD32 CB;     // LONG POINTER TO CodeSegment
-    CARD16 GFI;
-    CARD16 PC;
-    CARD16 SP;
-    CARD16 savedPC;
-    CARD16 savedSP;
-    CARD16 stack[StackDepth]; // Evaluation Stack - 3.3.2
-    CARD8  breakByte;
-    bool   running;
-
-    void set() {
-        for(int i = 0; i < 4; i++) PID[i] = ::PID[i];
-        MP  = ::MP;
-        WP  = ::WP;
-        WDC = ::WDC;
-        PTC = ::PTC;
-        XTS = ::XTS;
-        PSB = ::PSB;
-        MDS = ::MDS;
-        LF  = ::LF;
-        GF  = ::GF;
-        CB  = ::CB;
-        GFI = ::GFI;
-        PC  = ::PC;
-        SP  = ::SP;
-        savedPC   = ::savedPC;
-        savedSP   = ::savedSP;
-        for(int i = 0; i < StackDepth; i++) stack[i] = ::stack[i];
-        breakByte = ::breakByte;
-        running   = ::running;
-    }
-};
-
-static Values values;
+static variable::Values values;
 
 // mesa::variable
 // mesa::variable dump
@@ -138,53 +96,10 @@ int returnDict(Tcl_Interp* interp) {
 }
 
 int dump(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-    values.set();
     auto subCommand = tcl::toString(objv[1]);
 
     if (subCommand == "dump") {
-        std::vector<std::pair<std::string, std::string>> output;
-
-        output.push_back(std::make_pair("PID", std_sprintf("0x%lX", (uint64_t)values.PID[1] << 32 | values.PID[2] << 16 | values.PID[3])));
-        output.push_back(std::make_pair("WP", std_sprintf("0x%04X", values.WP)));
-
-        output.push_back(std::make_pair("WDC", std_sprintf("%d", values.WDC)));
-        output.push_back(std::make_pair("PTC", std_sprintf("0x%04X", values.PTC)));
-        output.push_back(std::make_pair("XTS", std_sprintf("%d", values.XTS)));
-        output.push_back(std::make_pair("PSB", std_sprintf("%d", values.PSB)));
-        output.push_back(std::make_pair("MDS", std_sprintf("0x%04X", values.MDS >> 16)));
-        output.push_back(std::make_pair("LF", std_sprintf("0x%04X", values.LF)));
-        output.push_back(std::make_pair("GF", std_sprintf("0x%08X", values.GF)));
-        output.push_back(std::make_pair("CB", std_sprintf("0x%08X", values.CB)));
-        output.push_back(std::make_pair("GFI", std_sprintf("0x%04X", values.GFI)));
-        output.push_back(std::make_pair("PC", std_sprintf("0x%04X", values.PC)));
-        output.push_back(std::make_pair("SP", std_sprintf("%d", values.SP)));
-        output.push_back(std::make_pair("savedPC", std_sprintf("0x%04X", values.savedPC)));
-        output.push_back(std::make_pair("savedSP", std_sprintf("%d", values.savedSP)));
-
-        {
-            std::string string;
-            for(int i = 0; i < StackDepth; i++) {
-                string += std_sprintf(" 0x%04X", values.stack[i]);
-            }
-            output.push_back(std::make_pair("stack", string.substr(1)));
-        }
-
-        output.push_back(std::make_pair("breakByte", std_sprintf("0x%02X", values.breakByte)));
-        output.push_back(std::make_pair("running", values.running ? "1" : "0"));
-        output.push_back(std::make_pair("lastOpcode", opcode::lastOpcodeName()));
-
-        size_t firstLen  = 0;
-        size_t secondLen = 0;
-        for(auto& e: output) {
-            firstLen  = std::max(firstLen, e.first.length());
-            secondLen = std::max(secondLen, e.second.length());
-        }
-        secondLen = 14;
-        std::string format = std_sprintf("%%-%ds = %%%ds", firstLen, secondLen);
-        for(auto& e: output) {
-            logger.info(format.c_str(), e.first, e.second);
-        }
-
+        variable::dump();
         return TCL_OK;
     }
 

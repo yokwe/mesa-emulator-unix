@@ -49,6 +49,7 @@
 
 namespace variable {
     extern void initialize();
+    extern void dump();
 }
 
 
@@ -495,3 +496,33 @@ extern CARD16 savedSP;
 
 // 10.4.1 Scheduler
 extern VariableRunning running;
+
+namespace variable {
+
+struct Values {
+    CARD16 PID[4]; // Processor ID
+    CARD16 MP;     // Maintenance Panel
+    CARD16 WP;     // Wakeup pending register - 10.4.4.1
+    CARD16 WDC;    // Wakeup disable counter - 10.4.4.3
+    CARD16 PTC;    // Process timeout counter - 10.4.5
+    CARD16 XTS;    // Xfer trap status - 9.5.5
+    CARD16 PSB;    // PsbIndex - 10.1.1
+    CARD32 MDS;    // Main Data Space
+    CARD16 LF;     // POINTER TO LocalVariables
+    CARD32 GF;     // LONG POINTER TO GlobalVarables
+    CARD32 CB;     // LONG POINTER TO CodeSegment
+    CARD16 GFI;
+    CARD16 PC;
+    CARD16 SP;
+    CARD16 savedPC;
+    CARD16 savedSP;
+    CARD16 stack[StackDepth]; // Evaluation Stack - 3.3.2
+    CARD8  breakByte;
+    bool   running;
+    
+    std::string lastOpcode;
+
+    void set();
+};
+
+}

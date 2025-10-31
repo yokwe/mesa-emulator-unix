@@ -256,6 +256,13 @@ std::string readFile(const std::string& path) {
 	return buffer.str();
 }
 
+static std::chrono::system_clock::time_point system_base_ = std::chrono::system_clock::now();
+static std::chrono::steady_clock::time_point steady_base_ = std::chrono::steady_clock::now();
+std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point steady_time) {
+	return system_base_ + std::chrono::duration_cast<std::chrono::microseconds>(steady_time - steady_base_);
+}
+
+
 uint16_t bitField(uint16_t word, int startBit, int stopBit) {
 	const int MAX_BIT = 15;
 

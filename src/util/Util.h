@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <string>
 #include <cstdint>
 #include <set>
@@ -231,10 +232,8 @@ std::string formatWithCommas(T value) {
 
 std::string readFile(const std::string& path);
 
-inline constexpr int multipleOf(int number, int base) {
-    int rem = number % base;
-    return (rem == 0) ? number : number + (base - rem);
-}
+// https://stackoverflow.com/questions/18361638/converting-steady-clocktime-point-to-time-t
+std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point steady_time);
 
 
 // convert to utf8

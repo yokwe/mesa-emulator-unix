@@ -2,7 +2,7 @@
 	"server" : {
 		"interface": "en0",
 		"name":      "XNSServer",
-		"address":   "00:00:3B:AA:10:29",
+		"address":   "001-001-00",
 		"net":       1
 	},
 	"net": [
@@ -11,7 +11,8 @@
 		{"net": 3, "delay": 2, "name" : "THREE"}
 	],
 	"host": [
-		{"name": "MacStudio2023", "address": "9c:76:0e:4a:08:f0"}
+		{"name": "MacStudio2023", "address": "9c:76:0e:4a:08:f0"},
+		{"name": "GVWin", "address": "001-001-001-002"}
 	],
 	"time" : {
 		"offsetDirection" : 1,

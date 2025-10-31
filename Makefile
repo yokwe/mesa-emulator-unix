@@ -72,17 +72,20 @@ prepare-log:
 	mkdir -p ${BUILD_DIR}/run
 	/bin/echo -n >${BUILD_DIR}/run/debug.log
 
-run-main: main prepare-log
-	/usr/bin/time ${BUILD_DIR}/main/main
-
-run-guam-headless: guam-headless prepare-log
-	/usr/bin/time ${BUILD_DIR}/guam-headless/guam-headless
-
 run-test: test prepare-log
 	${BUILD_DIR}/test/test
 
-run-tclMesa: tclMesa prepare-log
-	${BUILD_DIR}/tclMesa/tclMesa
+run-main: main prepare-log
+	/usr/bin/time ${BUILD_DIR}/main/main
 
-run-xnsTimeServer: xnsTimeServer prepare-log
-	${BUILD_DIR}/xnsTimeServer/xnsTimeServer
+run-guam-headless: guam-headless
+	/bin/echo -n >${BUILD_DIR}/run/guam-headless.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-guam-headless.xml /usr/bin/time ${BUILD_DIR}/guam-headless/guam-headless
+
+run-tclMesa: tclMesa
+	/bin/echo -n >${BUILD_DIR}/run/tclMesa.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-tclMesa.xml ${BUILD_DIR}/tclMesa/tclMesa
+
+run-xnsTimeServer: xnsTimeServer
+	/bin/echo -n >${BUILD_DIR}/run/xnsTimeServer.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-xnsTimeServer.xml ${BUILD_DIR}/xnsTimeServer/xnsTimeServer

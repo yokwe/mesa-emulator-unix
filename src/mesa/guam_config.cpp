@@ -68,6 +68,7 @@ void from_json(const json& j, guam_config::Entry::Memory& p) {
 }
 void from_json(const json& j, guam_config::Entry::Network& p) {
 	simple(interface)
+	simple(address)
 }
 void from_json(const json& j, guam_config::Entry& p) {
 	simple(name)

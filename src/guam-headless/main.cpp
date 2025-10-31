@@ -76,6 +76,7 @@ int main(int /* argc */, char** /* argv */) {
     config.bootFilePath     = entry.file.boot;
     config.floppyFilePath   = entry.file.floppy;
     config.networkInterface = entry.network.interface;
+    config.networkAddress   = entry.network.address;
     config.bootSwitch       = entry.boot.switch_;
     config.bootDevice       = entry.boot.device;
     config.displayType      = entry.display.type;
@@ -96,7 +97,7 @@ int main(int /* argc */, char** /* argv */) {
 	thread.join();
 	logger.info("thread joined");
 	
-	trace::dump();
+//	trace::dump();
 
 	// output stats
 	opcode::stats();

@@ -80,8 +80,9 @@ public:
 		class Network {
 		public:
 			std::string interface;
+  			std::string address;
 
-			Network() : interface("") {}
+			Network() : interface(""), address("") {}
 		};
 
 		std::string name;

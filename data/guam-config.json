@@ -18,7 +18,9 @@
 				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
-				"interface": "en0"}
+				"interface": "en0",
+				"address": "001-001-001-002"
+			}
 		},
 		{
 			"name": "GVWin21",
@@ -38,7 +40,9 @@
 				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
-				"interface": "en0"}
+				"interface": "en0",
+				"address": "001-001-001-002"
+			}
 		},
 		{
 			"name": "Dawn",
@@ -58,7 +62,9 @@
 				"vmbits": 25,
 				"rmbits": 24},
 			"network": {
-				"interface": "en0"}
+				"interface": "en0",
+				"address": "001-001-001-002"
+			}
 		}
 	]
 }

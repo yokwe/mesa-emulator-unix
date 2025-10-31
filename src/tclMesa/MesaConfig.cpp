@@ -63,6 +63,7 @@ int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const ob
         PUT_STRING(bootFilePath)
         PUT_STRING(floppyFilePath)
         PUT_STRING(networkInterface)
+        PUT_STRING(networkAddress)
         PUT_STRING(bootSwitch)
         PUT_STRING(bootDevice)
         PUT_STRING(displayType)
@@ -92,6 +93,7 @@ int MesaConfig(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const ob
         config.bootFilePath     = entry.file.boot;
         config.floppyFilePath   = entry.file.floppy;
         config.networkInterface = entry.network.interface;
+        config.networkAddress   = entry.network.address;
         config.bootSwitch       = entry.boot.switch_;
         config.bootDevice       = entry.boot.device;
         config.displayType      = entry.display.type;

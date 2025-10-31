@@ -42,6 +42,7 @@ static const Logger logger(__FILE__);
 
 #include "MesaBasic.h"
 #include "memory.h"
+#include "Variable.h"
 #include "Pilot.h"
 
 #include "interrupt_thread.h"
@@ -213,6 +214,7 @@ static void initialize() {
 	logger.info("bootFilePath      %s", config.bootFilePath);
 	logger.info("floppyFilePath    %s", config.floppyFilePath);
 	logger.info("networkInterface  %s", config.networkInterface);
+	logger.info("networkAddress    %s", config.networkAddress);
 	logger.info("bootSwitch        %s", config.bootSwitch);
 	logger.info("bootDevice        %s", config.bootDevice);
 	logger.info("displayType       %s", config.displayType);
@@ -228,6 +230,17 @@ static void initialize() {
 	variable::initialize();
 	agent::initialize();
 
+	// after variable initialize, set PID from config.networkAddress
+	{
+		// get PID from config.networkAddress
+		uint64_t address = net::fromString(config.networkAddress);
+		PID[0] = 0;
+		PID[1] = (CARD16)(address >> 32);
+		PID[2] = (CARD16)(address >> 16);
+		PID[3] = (CARD16)(address >>  0);
+		logger.info("PID               %04X-%04X-%04X  %012lX", PID[1], PID[2], PID[3], address);
+	}
+
 	const memory::Config& memoryConfig = memory::getConfig();
 
 	{
@@ -238,10 +251,6 @@ static void initialize() {
 
 	{
 		auto device = net::getDevice(config.networkInterface);
-		device.getAddress(PID[1], PID[2], PID[3]);
-		// get PID from network adapter
-		logger.info("PID               %04X-%04X-%04X", PID[1], PID[2], PID[3]);
-
 		netDriver = net::getDriver(device);
 		netDriver->open();
 	}

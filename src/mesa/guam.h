@@ -47,6 +47,7 @@ struct Config {
     std::string bootFilePath;
     std::string floppyFilePath;
     std::string networkInterface;
+    std::string networkAddress;
     std::string bootSwitch;
     std::string bootDevice;
     std::string displayType;

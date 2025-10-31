@@ -2,7 +2,7 @@
 	"server" : {
 		"interface": "en0",
 		"name":      "XNSServer",
-		"address":   "001-001-00",
+		"address":   "001-001-001-001",
 		"net":       1
 	},
 	"net": [

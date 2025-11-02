@@ -253,10 +253,7 @@ BusyWait:
 		TRACE_REC_(processor, busyWait)
 		if (DEBUG_SHOW_RUNNING) logger.debug("stop  running");
 		running = false;
-		ERROR_RequestReschedule();
 	}
-//	running = 0;
-//	processor::stopRunning();
 }
 
 
@@ -441,6 +438,20 @@ void WriteProtectFault(LONG_POINTER ptr) {
 }
 
 // 10.4.5 Timeouts
+
+// CheckForTimeouts: PROCEDURE RETURNS [BOOLEAN]
+bool CheckForTimeouts() {
+	static CARD32 timeout_time = 0;
+	CARD32 temp = (CARD32)IT;
+	if (InterruptsEnabled() && (timeout_time + cTick) <= temp) {
+		timeout_time = temp;
+		PTC++;
+		if (PTC == 0) PTC++;
+		return TimeoutScan();
+	} else {
+		return false;
+	}
+}
 
 // TimeoutScan: PROC RETURNS [BOOLEAN]
 bool TimeoutScan() {

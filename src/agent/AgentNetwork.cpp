@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
-#include "../mesa/interrupt_thread.h"
+#include "../mesa/processor_thread.h"
 
 #include "AgentNetwork.h"
 
@@ -87,7 +87,7 @@ void AgentNetwork::TransmitThread::process(const Item& item) {
 		ERROR();
 	}
 	iocb->status = EthernetIOFaceGuam::S_completedOK;
-	interrupt_thread::notifyInterrupt(interruptSelector);
+	processor_thread::notifyInterrupt(interruptSelector);
 }
 
 void AgentNetwork::ReceiveThread::push(const Item& item) {
@@ -142,7 +142,7 @@ void AgentNetwork::ReceiveThread::process(const Item& item, const ByteBuffer& pa
 	} else {
 		iocb->status = EthernetIOFaceGuam::S_packetTooLong;
 	}
-	interrupt_thread::notifyInterrupt(interruptSelector);
+	processor_thread::notifyInterrupt(interruptSelector);
 	// {
 	// 	auto status = iocb->status;
 	// 	logger.info("ReceiveThread  dequeue  %8X  %4d  %d", iocb->bufferAddress, iocb->bufferLength, status);

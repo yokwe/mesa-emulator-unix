@@ -39,7 +39,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
-#include "../mesa/interrupt_thread.h"
+#include "../mesa/processor_thread.h"
 
 #include "AgentFloppy.h"
 
@@ -250,5 +250,5 @@ void AgentFloppy::Call() {
 
 	// notify with interrupt
 	//WP |= fcb->interruptSelector;
-	interrupt_thread::notifyInterrupt(fcb->interruptSelector);
+	processor_thread::notifyInterrupt(fcb->interruptSelector);
 }

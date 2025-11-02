@@ -49,11 +49,8 @@ void mp_observer(CARD16 mp);
 std::string getBootTime();     // time between 0900 and 8000
 std::string getElapsedTime();  // elaplsed time from 0900
 
-void requestRescheduleTimer();
-void requestRescheduleInterrupt();
-
-void checkRequestReschedule();
-
 void run();
+
+void notifyInterrupt(CARD16 value);
 
 }

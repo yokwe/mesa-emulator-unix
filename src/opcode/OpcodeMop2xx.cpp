@@ -56,8 +56,6 @@ void E_CATCH() {
 inline void E_J_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  J %5d", savedPC, arg);
 	PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 #define Jn(n) \
 void E_J##n () { \
@@ -91,8 +89,6 @@ inline void E_JUE_(CARD16 arg0, INT16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUE %3d %3d", savedPC, arg0, arg1);
 	UNSPEC data = Pop();
 	if (data == arg0) PC = savedPC + arg1;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0212  ASSIGN_MOP(z, JEP)
 void E_JEP() {
@@ -106,8 +102,6 @@ inline void E_JEB_(INT16 arg) {
 	UNSPEC v = Pop();
 	UNSPEC u = Pop();
 	if (u == v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0213  ASSIGN_MOP(z, JEB)
 void E_JEB() {
@@ -125,8 +119,6 @@ inline void E_JUNE_(CARD16 arg0, INT16 arg1) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JUNE %3d %3d", savedPC, arg0, arg1);
 	UNSPEC data = Pop();
 	if (data != arg0) PC = savedPC + arg1;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0215  ASSIGN_MOP(z, JNEP)
 void E_JNEP() {
@@ -140,8 +132,6 @@ inline void E_JNE_(INT16 arg) {
 	UNSPEC v = Pop();
 	UNSPEC u = Pop();
 	if (u != v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0216  ASSIGN_MOP(z, JNEB)
 void E_JNEB() {
@@ -161,8 +151,6 @@ inline void E_JL_(INT16 arg) {
 	INT16 k = Pop();
 	INT16 j = Pop();
 	if (j < k) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 void E_JLB() {
 	E_JL_(SignExtend(GetCodeByte()));
@@ -175,8 +163,6 @@ inline void E_JGE_(INT16 arg) {
 	INT16 k = Pop();
 	INT16 j = Pop();
 	if (j >= k) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 void E_JGEB() {
 	E_JGE_(SignExtend(GetCodeByte()));
@@ -188,8 +174,6 @@ inline void E_JG_(INT16 arg) {
 	INT16 k = Pop();
 	INT16 j = Pop();
 	if (j > k) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0222  ASSIGN_MOP(z, JGB)
 void E_JGB() {
@@ -202,8 +186,6 @@ inline void E_JLE_(INT16 arg) {
 	INT16 k = Pop();
 	INT16 j = Pop();
 	if (j <= k) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0223  ASSIGN_MOP(z, JLEB)
 void E_JLEB() {
@@ -216,8 +198,6 @@ inline void E_JUL_(INT16 arg) {
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
 	if (u < v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0224  ASSIGN_MOP(z, JULB)
 void E_JULB() {
@@ -230,8 +210,6 @@ inline void E_JUGE_(INT16 arg) {
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
 	if (u >= v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0225  ASSIGN_MOP(z, JUGEB)
 void E_JUGEB() {
@@ -244,8 +222,6 @@ inline void E_JUG_(INT16 arg) {
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
 	if (u > v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0226  ASSIGN_MOP(z, JUGB)
 void E_JUGB() {
@@ -258,8 +234,6 @@ inline void E_JULE_(INT16 arg) {
 	CARDINAL v = Pop();
 	CARDINAL u = Pop();
 	if (u <= v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0227  ASSIGN_MOP(z, JULEB)
 void E_JULEB() {
@@ -271,8 +245,6 @@ inline void E_JZ_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JZ %3d", savedPC, arg);
 	UNSPEC u = Pop();
 	if (u == 0) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 #define JZn(n) \
 void E_JZ##n () { \
@@ -292,8 +264,6 @@ inline void E_JNZ_(INT16 arg) {
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  JNZ %3d", savedPC, arg);
 	UNSPEC u = Pop();
 	if (u != 0) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 #define JNZn(n) \
 void E_JNZ##n () { \
@@ -314,8 +284,6 @@ inline void E_JDE_(INT16 arg) {
 	LONG_UNSPEC v = PopLong();
 	LONG_UNSPEC u = PopLong();
 	if (u == v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0236  ASSIGN_MOP(z, JDEB)
 void E_JDEB() {
@@ -328,8 +296,6 @@ inline void E_JDNE_(INT16 arg) {
 	LONG_UNSPEC v = PopLong();
 	LONG_UNSPEC u = PopLong();
 	if (u != v) PC = savedPC + arg;
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0237  ASSIGN_MOP(z, JDNEB)
 void E_JDNEB() {
@@ -345,8 +311,6 @@ inline void E_JIB_(CARD16 arg) {
 		BytePair disp = {ReadCode(arg + index / 2)};
 		PC = savedPC + (((index % 2) == 0) ? disp.left : disp.right);
 	}
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0240  ASSIGN_MOP(z, JIB)
 void E_JIB() {
@@ -362,8 +326,6 @@ inline void E_JIW_(CARD16 arg) {
 		CARDINAL disp = ReadCode(arg + index);
 		PC = savedPC + disp;
 	}
-	// processor::checkRequestReschedule must be placed at very end of implementation of opcode.
-	processor_thread::checkRequestReschedule();
 }
 // 0241  ASSIGN_MOP(z, JIW)
 void E_JIW() {

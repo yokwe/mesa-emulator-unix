@@ -45,8 +45,6 @@ static const Logger logger(__FILE__);
 #include "Variable.h"
 #include "Pilot.h"
 
-#include "interrupt_thread.h"
-#include "timer_thread.h"
 #include "processor_thread.h"
 #include "display.h"
 
@@ -349,22 +347,22 @@ static void initialize() {
 static void boot() {
 	logger.info("boot START");
 
-	std::function<void()> f1 = std::function<void()>(interrupt_thread::run);
-	std::function<void()> f2 = std::function<void()>(timer_thread::run);
+//	std::function<void()> f1 = std::function<void()>(interrupt_thread::run);
+//	std::function<void()> f2 = std::function<void()>(timer_thread::run);
 	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
 	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
 	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
 	std::function<void()> f6 = std::function<void()>(processor_thread::run);
 
-	ThreadControl t1("interrupt", f1);
-	ThreadControl t2("timer", f2);
+//	ThreadControl t1("interrupt", f1);
+//	ThreadControl t2("timer", f2);
 	ThreadControl t3("receive", f3);
 	ThreadControl t4("transmit", f4);
 	ThreadControl t5("disk", f5);
 	ThreadControl t6("processor", f6);
 
-	t1.start();
-	t2.start();
+//	t1.start();
+//	t2.start();
 	t3.start();
 	t4.start();
 	t5.start();
@@ -375,8 +373,8 @@ static void boot() {
 	watchdog::start();
 	watchdog::enable();
 	
-	t1.join();
-	t2.join();
+//	t1.join();
+//	t2.join();
 	t3.join();
 	t4.join();
 	t5.join();

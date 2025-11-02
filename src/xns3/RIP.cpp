@@ -49,7 +49,7 @@ void Type::MyConstantMap::initialize() {
 }
 
 void Delay::MyConstantMap::initialize() {
-    DECL_CLASS_CONSTANT(Delay, INFINITY,  16)
+    DECL_CLASS_CONSTANT(Delay, INFINITY_,  16)
 }
 
 void RIP::fromByteBuffer(ByteBuffer& bb) {

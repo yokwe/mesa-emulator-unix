@@ -71,7 +71,7 @@ class Delay {
 public:
     using T = uint16_t;
 
-    DECL_CLASS_CONSTANT(Delay, INFINITY,  16)
+    DECL_CLASS_CONSTANT(Delay, INFINITY_,  16)
 
     static std::string toString(T value) {
         return constantMap.toString(value);

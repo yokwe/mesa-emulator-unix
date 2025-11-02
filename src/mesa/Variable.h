@@ -168,9 +168,8 @@ public:
         PERF_COUNT(variable, WP_exchange)
         return storage.exchange(value);
     }
-    CARD16 fetch_or(CARD16 value) {
-        PERF_COUNT(variable, WP_fetch_or)
-        return storage.fetch_or(value);
+    CARD16 operator |=(CARD16 value) {
+        return storage |= value;
     }
     bool pending() {
         return storage.load() != 0;

@@ -28,7 +28,8 @@ target_sources(
         guam.cpp
         Pilot.cpp
 #        processor_thread.cpp
-        processor_thread_A.cpp
+#        processor_thread_A.cpp
+        processor_thread_B.cpp
 #        timer_thread.cpp
         Type.cpp
         Variable.cpp

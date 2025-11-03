@@ -128,12 +128,13 @@ std::string getElapsedTime() {
 void watchdogAction() {
 	logger.info("watchdogAction_ENTER");
 	TRACE_REC_(processor, watchdogAction_ENTER)
+	variable::dump();
+	perf::dump();
+	variable::dump();
+	perf::dump();
+    trace::dump();
 	// stop processor thread
 	stop();
-	std::this_thread::sleep_for(Util::ONE_SECOND);
-	std::this_thread::sleep_for(Util::ONE_SECOND);
-	TRACE_REC_(processor, trace_dump)
-    trace::dump();
 	variable::dump();
 	perf::dump();
 	logger.info("watchdogAction_EXIT");
@@ -175,31 +176,35 @@ void run() {
 		for(;;) {
 			PERF_COUNT(processor, for_loop)
 			if (stopThread) goto exitLoop;
-			if ((interruptFlag || timeoutFlag) && InterruptsEnabled()) {
-				PERF_COUNT(processor, reschedule)
+			if (interruptFlag || timeoutFlag) {
+				if (InterruptsEnabled()) {
+					PERF_COUNT(processor, interruptEnabled_YES)
 
-				bool interruptFlagCopy = interruptFlag.exchange(false);
-				bool timeoutFlagCopy = timeoutFlag.exchange(false);
+					bool interruptFlagCopy = interruptFlag.exchange(false);
+					bool timeoutFlagCopy = timeoutFlag.exchange(false);
 
-				bool interrupt = false;
-				bool timeout   = false;
-				if (interruptFlagCopy) {
-					interrupt = CheckForInterrupt();
-					PERF_COUNT(processor, interruptFlag)
-				}
-				if (timeoutFlagCopy) {
-					PERF_COUNT(processor, timeoutFlag)
-					timeout = CheckForTimeouts_();
-				}
+					bool interrupt = false;
+					bool timeout   = false;
+					if (interruptFlagCopy) {
+						interrupt = CheckForInterrupt();
+						PERF_COUNT(processor, interruptFlag)
+					}
+					if (timeoutFlagCopy) {
+						PERF_COUNT(processor, timeoutFlag)
+						timeout = CheckForTimeouts_();
+					}
 
-				if (interrupt || timeout) {
-					PERF_COUNT(processor, reschedule_YES)
-					watchdog.update();
-					Reschedule(true);
+					if (interrupt || timeout) {
+						PERF_COUNT(processor, reschedule_YES)
+						watchdog.update();
+						Reschedule(true);
+					} else {
+						PERF_COUNT(processor, reschedule_NO)
+					}
+					continue;
 				} else {
-					PERF_COUNT(processor, reschedule_NO)
+					PERF_COUNT(processor, interruptEnabled_NO)
 				}
-				continue;
 			}
 			if (running) {
 				PERF_COUNT(processor, running_YES)
@@ -266,6 +271,7 @@ bool CheckForTimeouts_() {
 	static CARD32 timeout_time = 0;
 	CARD32 temp = (CARD32)IT;
 	if (InterruptsEnabled() && (timeout_time + cTick) <= temp) {
+		PERF_COUNT(processor, updatePTC)
 		timeout_time = temp;
 		PTC++;
 		if (PTC == 0) PTC++;

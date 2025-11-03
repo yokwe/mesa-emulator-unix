@@ -96,7 +96,8 @@ PERF_DECLARE(opcode, UnboundTrap)
 
 // processor
 PERF_DECLARE(processor, for_loop)
-PERF_DECLARE(processor, reschedule)
+PERF_DECLARE(processor, interruptEnabled_YES)
+PERF_DECLARE(processor, interruptEnabled_NO)
 PERF_DECLARE(processor, interruptFlag)
 PERF_DECLARE(processor, timeoutFlag)
 PERF_DECLARE(processor, reschedule_YES)
@@ -107,6 +108,7 @@ PERF_DECLARE(processor, abort)
 PERF_DECLARE(processor, busyWait)
 PERF_DECLARE(processor, interruptRequest)
 PERF_DECLARE(processor, timeoutRequest)
+PERF_DECLARE(processor, updatePTC)
 
 // network
 PERF_DECLARE(network, transmit)

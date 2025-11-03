@@ -268,11 +268,8 @@ void timer_run() {
 }
 
 bool CheckForTimeouts_() {
-	static CARD32 timeout_time = 0;
-	CARD32 temp = (CARD32)IT;
-	if (InterruptsEnabled() && (timeout_time + cTick) <= temp) {
+	if (InterruptsEnabled()) {
 		PERF_COUNT(processor, updatePTC)
-		timeout_time = temp;
 		PTC++;
 		if (PTC == 0) PTC++;
 		return TimeoutScan();

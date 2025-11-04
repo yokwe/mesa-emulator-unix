@@ -256,10 +256,10 @@ std::string readFile(const std::string& path) {
 	return buffer.str();
 }
 
-static std::chrono::system_clock::time_point system_base_ = std::chrono::system_clock::now();
-static std::chrono::steady_clock::time_point steady_base_ = std::chrono::steady_clock::now();
-std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point steady_time) {
-	return system_base_ + std::chrono::duration_cast<std::chrono::microseconds>(steady_time - steady_base_);
+std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point time_steady) {
+	static auto base_system_ = std::chrono::system_clock::now();
+	static auto base_steady_ = std::chrono::steady_clock::now();
+	return base_system_ + std::chrono::duration_cast<std::chrono::microseconds>(time_steady - base_steady_);
 }
 
 
@@ -337,14 +337,6 @@ void  Util::unmapFile(void* page) {
 uint64_t Util::getSecondsSinceEpoch() {
 	auto duration = std::chrono::system_clock::now().time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-}
-uint64_t Util::getMilliSecondsSinceEpoch() {
-	auto duration = std::chrono::system_clock::now().time_since_epoch();
-	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-}
-uint64_t Util::getMicroSecondsSinceEpoch() {
-	auto duration = std::chrono::system_clock::now().time_since_epoch();
-	return std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 }
 
 void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {

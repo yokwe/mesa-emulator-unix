@@ -283,8 +283,6 @@ public:
 
 	// misc functions
 	static uint64_t getSecondsSinceEpoch();
-	static uint64_t getMilliSecondsSinceEpoch();
-	static uint64_t getMicroSecondsSinceEpoch();
 
 	static uint32_t getUnixTime() {
 		return (uint32_t)getSecondsSinceEpoch();

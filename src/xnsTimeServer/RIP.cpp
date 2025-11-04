@@ -61,7 +61,7 @@ void processRIP(ByteBuffer& rx, ByteBuffer& tx, Context& context) {
         NetDelay netDelay(e.net, e.delay);
         transmit.table.push_back(netDelay);
     }
-    logger.info("RiP  <<  %s", transmit.toString());
+    logger.info("RIP  <<  %s", transmit.toString());
 
     // write to tx
     transmit.toByteBuffer(tx);

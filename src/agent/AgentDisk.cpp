@@ -36,6 +36,7 @@
 
 #include "../util/Debug.h"
 #include "../util/Util.h"
+#include <chrono>
 static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
@@ -57,9 +58,9 @@ void AgentDisk::IOThread::process(const Item& item) {
 	auto diskFile = item.diskFile;
 	auto interruptSelector = item.interruptSelector;
 
-	uint64_t time;
-	(void)time;
-	if (PERF_ENABLE) time = Util::getMicroSecondsSinceEpoch();
+	std::chrono::steady_clock::time_point time_start;
+	if (PERF_ENABLE) time_start = std::chrono::steady_clock::now();
+
 	CARD32 block = diskFile->getBlock(iocb);
 
 	//"AGENT %s %d", name, fcb->command
@@ -121,8 +122,9 @@ void AgentDisk::IOThread::process(const Item& item) {
 	}
 
 	if (PERF_ENABLE) {
-		uint64_t now = Util::getMicroSecondsSinceEpoch();
-		PERF_ADD(disk, process_time, now - time)
+		auto time_stop = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_stop - time_start).count();
+		PERF_ADD(disk, process_time, duration)
 	}
 
 	PERF_COUNT(disk, process)

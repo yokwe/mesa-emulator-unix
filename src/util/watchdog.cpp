@@ -57,9 +57,10 @@ bool enableScan = false;
 bool scanThreadRunning = false;
 std::thread scanThread;
 
-static std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
-    time_t temp = std::chrono::system_clock::to_time_t(time);
-	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count() % 1'000'000;
+static std::string toStringLocalTime(const std::chrono::steady_clock::time_point time_steady) {
+    auto time_system = to_system_clock(time_steady);
+    time_t temp = std::chrono::system_clock::to_time_t(time_system);
+	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time_system.time_since_epoch()).count() % 1'000'000;
 
     struct tm tm;
     localtime_r(&temp, &tm);
@@ -71,7 +72,7 @@ void run() {
         std::this_thread::sleep_for(Util::ONE_SECOND);
         if (enableScan) {
             std::unique_lock<std::mutex> lock(mutex);
-            auto now = std::chrono::system_clock::now();
+            auto now = std::chrono::steady_clock::now();
 
             for(auto e: all) {
                 auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - e->updateTime);

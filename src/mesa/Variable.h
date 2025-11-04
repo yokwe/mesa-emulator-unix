@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <vector>
 #include <atomic>
 
@@ -43,7 +44,6 @@
 #include "MesaBasic.h"
 #include "Type.h"
 
-#include "../util/Util.h"
 #include "../util/Perf.h"
 
 
@@ -184,7 +184,7 @@ public:
     static const CARD16 MillisecondsPerTick          = cTick;
     operator CARD32() {
         PERF_COUNT(variable, IT)
-        return (CARD32)Util::getMicroSecondsSinceEpoch();
+        return (CARD32)std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     }
 };
 
@@ -192,21 +192,21 @@ public:
 class VariableRunning {
     bool storage;
     bool timeEnable = false;
-    uint64_t timeChange = 0;
-    uint64_t now        = 0;
+    std::chrono::steady_clock::time_point timeChange = std::chrono::steady_clock::now();
 public:
     void timeStart() {
-        if (PERF_ENABLE) timeChange = Util::getMicroSecondsSinceEpoch();
         timeEnable = true;
+        if (PERF_ENABLE) timeChange = std::chrono::steady_clock::now();
     }
     void timeStop() {
         timeEnable = false;
         if (PERF_ENABLE) {
-            now = Util::getMicroSecondsSinceEpoch();
+            auto now = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - timeChange).count();
             if (storage) {
-                PERF_ADD(variable, time_running, (now - timeChange))
+                PERF_ADD(variable, time_running, duration)
             } else {
-                PERF_ADD(variable, time_not_running, (now - timeChange))
+                PERF_ADD(variable, time_not_running, duration)
             }
         }
     }
@@ -217,13 +217,14 @@ public:
         storage = newValue;
 
         if (PERF_ENABLE) {
-            now = Util::getMicroSecondsSinceEpoch();
+            auto now = std::chrono::steady_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - timeChange).count();
             if (newValue) {
                 PERF_COUNT(variable, running_start)
-                if (timeEnable) PERF_ADD(variable, time_not_running, (now - timeChange))
+                if (timeEnable) PERF_ADD(variable, time_not_running, duration)
             } else {
                 PERF_COUNT(variable, running_stop)
-                if (timeEnable) PERF_ADD(variable, time_running, (now - timeChange))
+                if (timeEnable) PERF_ADD(variable, time_running, duration)
             }
             timeChange = now;
         }

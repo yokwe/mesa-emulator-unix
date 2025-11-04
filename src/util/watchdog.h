@@ -52,7 +52,7 @@ struct Watchdog {
     std::chrono::milliseconds threshold;
     std::function<void()>     action;
 
-    std::chrono::system_clock::time_point updateTime;
+    std::chrono::steady_clock::time_point updateTime;
     
     Watchdog(const char* name_, std::chrono::milliseconds threshold_, std::function<void()> action_) :
         name(name_), threshold(threshold_), action(action_) {
@@ -60,7 +60,7 @@ struct Watchdog {
     }
 
     void update() {
-        updateTime = std::chrono::system_clock::now();
+        updateTime = std::chrono::steady_clock::now();
     }
 };
 

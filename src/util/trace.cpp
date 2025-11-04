@@ -53,7 +53,8 @@ static const char* toSimplePath(const char* path) {
     auto pos = strstr(path, "/src");
     return (pos == NULL) ? path : pos + 1;
 }
-static std::string toStringLocalTime(const std::chrono::system_clock::time_point time) {
+static std::string toStringLocalTime(const std::chrono::steady_clock::time_point time_steady) {
+    auto time = to_system_clock(time_steady);
     time_t temp = std::chrono::system_clock::to_time_t(time);
 	auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(time.time_since_epoch()).count() % 1'000'000;
 

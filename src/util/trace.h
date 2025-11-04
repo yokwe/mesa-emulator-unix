@@ -41,7 +41,7 @@
 #include <thread>
 #include <vector>
 
-static const constexpr bool TRACE_ENABLE = true;
+static const constexpr bool TRACE_ENABLE = false;
 
 #define TRACE_REC_(group, name) { if (TRACE_ENABLE) { trace::Event event(#group, #name, __FILE__, __LINE__);  trace::group.push_back(event); } }
 
@@ -86,7 +86,7 @@ struct Event {
     const char*                           name;
     const char*                           file;
     uint32_t                              line;
-    std::chrono::system_clock::time_point time;
+    std::chrono::steady_clock::time_point time;
     std::thread::id                       id;
 
     Event(
@@ -94,7 +94,7 @@ struct Event {
         const char* name_,
         const char* file_,
         uint32_t    line_,
-        std::chrono::system_clock::time_point time_ = std::chrono::system_clock::now(),
+        std::chrono::steady_clock::time_point time_ = std::chrono::steady_clock::now(),
         std::thread::id id_ = std::this_thread::get_id()
     ) :
             group(group_), name(name_), file(file_), line(line_), time(time_), id(id_) {}

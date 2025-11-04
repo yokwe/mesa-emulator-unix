@@ -347,38 +347,35 @@ static void initialize() {
 static void boot() {
 	logger.info("boot START");
 
-//	std::function<void()> f1 = std::function<void()>(interrupt_thread::run);
-//	std::function<void()> f2 = std::function<void()>(timer_thread::run);
-	std::function<void()> f3 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
-	std::function<void()> f4 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
-	std::function<void()> f5 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
-	std::function<void()> f6 = std::function<void()>(processor_thread::run);
+	std::function<void()> f1 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
+	std::function<void()> f2 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
+	std::function<void()> f3 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
+	std::function<void()> f4 = std::function<void()>(processor_thread::run_timer);
+	std::function<void()> f5 = std::function<void()>(processor_thread::run_processor);
 
-//	ThreadControl t1("interrupt", f1);
-//	ThreadControl t2("timer", f2);
-	ThreadControl t3("receive", f3);
-	ThreadControl t4("transmit", f4);
-	ThreadControl t5("disk", f5);
-	ThreadControl t6("processor", f6);
+	ThreadControl t1("receive", f1);
+	ThreadControl t2("transmit", f2);
+	ThreadControl t3("disk", f3);
+	ThreadControl t4("timer", f4);
+	ThreadControl t5("processor", f5);
 
 //	t1.start();
-//	t2.start();
+	t1.start();
+	t2.start();
 	t3.start();
 	t4.start();
 	t5.start();
-	t6.start();
 
 	std::this_thread::yield();
 
 	watchdog::start();
 	watchdog::enable();
 	
-//	t1.join();
-//	t2.join();
+	t1.join();
+	t2.join();
 	t3.join();
 	t4.join();
 	t5.join();
-	t6.join();
 
 	watchdog::disable();
 

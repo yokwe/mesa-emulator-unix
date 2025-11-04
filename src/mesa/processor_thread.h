@@ -49,7 +49,8 @@ void mp_observer(CARD16 mp);
 std::string getBootTime();     // time between 0900 and 8000
 std::string getElapsedTime();  // elaplsed time from 0900
 
-void run();
+void run_processor();
+void run_timer();
 
 void notifyInterrupt(CARD16 value);
 

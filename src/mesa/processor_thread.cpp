@@ -30,17 +30,19 @@
 
 
 //
-// processor.cpp
+// processor_thread.cpp
 //
 
+#include <atomic>
 #include <chrono>
-#include <set>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <set>
 #include <thread>
 
 #include "../util/Util.h"
 #include "Constant.h"
+#include "Function.h"
 static const Logger logger(__FILE__);
 
 #include "../agent/AgentDisk.h"
@@ -49,11 +51,8 @@ static const Logger logger(__FILE__);
 #include "../opcode/opcode.h"
 
 #include "processor_thread.h"
-#include "timer_thread.h"
-#include "interrupt_thread.h"
 #include "Variable.h"
 
-#include "../util/Debug.h"
 #include "../util/Perf.h"
 #include "../util/trace.h"
 #include "../util/watchdog.h"
@@ -62,15 +61,11 @@ static const Logger logger(__FILE__);
 namespace processor_thread {
 
 bool                    stopThread;
-std::condition_variable cvRunning;
-std::mutex              mutexRequestReschedule;
-std::mutex              mutexFlags;
-bool                    rescheduleInterruptFlag;
-bool                    rescheduleTimerFlag;
 std::set<CARD16>        stopAtMPSet;
 
-static uint64_t         time_0900;
-static uint64_t         time_8000;
+static std::chrono::steady_clock::time_point NO_TIME = std::chrono::steady_clock::time_point::min();
+static std::chrono::steady_clock::time_point time_0900 = NO_TIME;
+static std::chrono::steady_clock::time_point time_8000 = NO_TIME;
 
 void stop() {
 	logger.info("processor_thread::stop");
@@ -87,129 +82,79 @@ void mp_observer(CARD16 mp) {
 		logger.info("stop at MP %4d", mp);
 		stop();
 	}
-	if (mp ==  900) time_0900 = Util::getMilliSecondsSinceEpoch();
-	if (mp == 8000) time_8000 = Util::getMilliSecondsSinceEpoch();
+	if (mp ==  900) time_0900 = std::chrono::steady_clock::now();
+	if (mp == 8000) time_8000 = std::chrono::steady_clock::now();
 }
 
 std::string getBootTime() {
-	if (time_0900 == 0 || time_8000 == 0) return "No boot";
+	if (time_0900 == NO_TIME || time_8000 == NO_TIME) return "Before boot";
 
 	std::string bootAt;
 	{
-		auto microsecond = time_0900 % 1000;
-		time_t time = time_0900 / 1'000;
+		auto time_system = to_system_clock(time_0900);
+		auto milliSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(time_system.time_since_epoch()).count() % 1000;
+
+		time_t time = std::chrono::system_clock::to_time_t(time_system);
 		struct tm tm;
 		localtime_r(&time, &tm);
 
-		bootAt = std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, microsecond);
+		bootAt = std_sprintf("%d-%02d-%02d %02d:%02d:%02d.%03d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, milliSeconds);
 	}
 	std::string bootDuration;
 	{
-		auto time = time_8000 - time_0900;
-		auto seconds = time / 1'000;
-		auto milliSeconds = time % 1'000;
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(time_8000 - time_0900).count();
+		auto seconds = duration / 1'000;
+		auto milliSeconds = duration % 1'000;
 		bootDuration = std_sprintf("%d.%03d", seconds, milliSeconds);
 	}
 	auto ret = std_sprintf("Boot started at %s  It took %s seconds", bootAt, bootDuration);
 	return ret;
 }
 std::string getElapsedTime() {
-	if (time_0900 == 0) return "No boot";
-	auto time = Util::getMilliSecondsSinceEpoch() - time_0900;
-	auto seconds = time / 1'000;
+	if (time_0900 == NO_TIME) return "Before boot";
+	auto milliSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - time_0900).count();
+	auto seconds = milliSeconds / 1'000;
 	auto minutes = seconds / 60;
 	auto hours = minutes / 60;
 
+	milliSeconds %= 1000;
 	seconds %= 60;
 	minutes %= 60;
 
 	std::string timeString;
-	if (minutes == 0) timeString = std_sprintf("%d seconds", seconds);
+	if (minutes == 0) timeString = std_sprintf("%d.%03d seconds", seconds, milliSeconds);
 	else if (hours == 0) timeString = std_sprintf("%d:%02d", minutes, seconds);
 	else timeString =  std_sprintf("%d:%02d:%02d", hours, minutes, seconds);
 
 	return std_sprintf("Elaples time is %s", timeString);
 }
 
-void requestRescheduleTimer() {
-	PERF_COUNT(processor, requestRescheduleTimer_ENTER)
-	TRACE_REC_(processor, requestRescheduleTimer_ENTER)
-	{
-		TRACE_REC_(processor, mutexFlags_locking)
-		std::unique_lock<std::mutex> locker(mutexFlags);
-		TRACE_REC_(processor, mutexFlags_locked)
-    	rescheduleTimerFlag = true;
-	}
-	if (!running) {
-		TRACE_REC_(processor, mutexRequestReschedule_locking)
-		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-		TRACE_REC_(processor, mutexRequestReschedule_locked)
-		TRACE_REC_(processor, cvRunning_notifying)
-		cvRunning.notify_one();
-		TRACE_REC_(processor, cvRunning_notified)
-	}
-	PERF_COUNT(processor, requestRescheduleTimer_EXIT)
-	TRACE_REC_(processor, requestRescheduleTimer_EXIT)
-}
-void requestRescheduleInterrupt() {
-	PERF_COUNT(processor, requestRescheduleInterrupt_ENTER)
-	TRACE_REC_(processor, requestRescheduleInterrupt_ENTER)
-	{
-		TRACE_REC_(processor, mutexFlags_locking)
-		std::unique_lock<std::mutex> locker(mutexFlags);
-		TRACE_REC_(processor, mutexFlags_locked)
-		rescheduleInterruptFlag = true;
-	}
-	if (!running) {
-		TRACE_REC_(processor, mutexRequestReschedule_locking)
-		std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-		TRACE_REC_(processor, mutexRequestReschedule_locked)
-		TRACE_REC_(processor, cvRunning_notifying)
-		cvRunning.notify_one();
-		TRACE_REC_(processor, cvRunning_notified)
-	}
-	PERF_COUNT(processor, requestRescheduleInterrupt_EXIT)
-	TRACE_REC_(processor, requestRescheduleInterrupt_EXIT)
-}
-
-void checkRequestReschedule() {
-    PERF_COUNT(processor, checkRequestReschedule_ENTER)
-//    TRACE_REC_(processor, checkRequestReschedule_ENTER)
-    if (InterruptsEnabled() && (rescheduleTimerFlag || rescheduleInterruptFlag)) {
-        PERF_COUNT(processor, throw_RequestReschedule)
-		TRACE_REC_(processor, throw_RequestReschedule)
-        ERROR_RequestReschedule();
-	}
-    // if stopThread is true, throw RequestReschedule
-    if (stopThread) {
-        ERROR_RequestReschedule();
-    }
-    PERF_COUNT(processor, checkRequestReschedule_EXIT)
-//    TRACE_REC_(processor, checkRequestReschedule_EXIT)
-}
-
-void watchdogAction() {
+static void watchdogAction() {
 	logger.info("watchdogAction_ENTER");
 	TRACE_REC_(processor, watchdogAction_ENTER)
+	variable::dump();
+	perf::dump();
+	variable::dump();
+	perf::dump();
+    trace::dump();
 	// stop processor thread
 	stop();
-	std::this_thread::sleep_for(Util::ONE_SECOND);
-	std::this_thread::sleep_for(Util::ONE_SECOND);
-	TRACE_REC_(processor, trace_dump)
-    trace::dump();
 	variable::dump();
 	perf::dump();
 	logger.info("watchdogAction_EXIT");
 	TRACE_REC_(processor, watchdogAction_EXIT)
 }
 
-void run() {
+std::mutex              reschuduleMutex;
+std::condition_variable rescheduleCV;
+std::atomic_bool        timeoutFlag;
+std::atomic_bool        interruptFlag;
+
+void run_processor() {
 	logger.info("processor_thread::run START");
 	stopThread              = false;
-	rescheduleInterruptFlag = false;
-	rescheduleTimerFlag     = false;
-	time_0900               = 0;
-	time_8000               = 0;
+	time_0900               = NO_TIME;
+	time_8000               = NO_TIME;
 
 	TaggedControlLink bootLink = {SD + OFFSET_SD(sBoot)};
 	XFER(bootLink.u, 0, XferType::call, 0);
@@ -220,123 +165,63 @@ void run() {
 	watchdog::Watchdog watchdog("processor", std::chrono::milliseconds(cTick * 2), watchdogAction);
 	watchdog::insert(&watchdog);
 
+	interruptFlag = false;
+	timeoutFlag = false;
+
 	running.timeStart();
 	try {
 		for(;;) {
-			try {
-				if (DEBUG_STOP_AT_NOT_RUNNING) {
-					if (!running) ERROR();
+			PERF_COUNT(processor, for_loop)
+			if (stopThread) goto exitLoop;
+			if (interruptFlag || timeoutFlag) {
+				if (InterruptsEnabled()) {
+					PERF_COUNT(processor, interruptEnabled_YES)
+
+					bool interruptFlagCopy = interruptFlag.exchange(false);
+					bool timeoutFlagCopy = timeoutFlag.exchange(false);
+
+					bool interrupt = false;
+					bool timeout   = false;
+					if (interruptFlagCopy) {
+						PERF_COUNT(processor, interruptFlag)
+						if (WP.pending()) interrupt = Interrupt();
+					}
+					if (timeoutFlagCopy) {
+						PERF_COUNT(processor, timeoutFlag)
+						PERF_COUNT(processor, updatePTC)
+						PTC++;
+						if (PTC == 0) PTC++;
+						timeout = TimeoutScan();
+					}
+
+					if (interrupt || timeout) {
+						PERF_COUNT(processor, reschedule_YES)
+						watchdog.update();
+						Reschedule(true);
+					} else {
+						PERF_COUNT(processor, reschedule_NO)
+					}
+					continue;
+				} else {
+					PERF_COUNT(processor, interruptEnabled_NO)
 				}
-//				TRACE_REC_(processor, run)
-				Execute();
-//				TRACE_REC_(processor, run)
-			} catch(RequestReschedule& e) {
-				TRACE_REC_(processor, catch_RequestReschedule)
-				watchdog.update();
-				// Only ERROR_RequestReschedule throws RequestReschedule.
-				// ERROR_RequestReschedule is called from Reschedule() and processor::checkRequestReschedule().
-				// In above both case, RequestReschedule will thrown while interrupt is enabled.
-				// Also above both case, call is from ProcessorThread
-				PERF_COUNT(processor, requestReschedule_ENTER)
-				//logger.debug("Reschedule %-20s  %8d", e.func, rescheduleCount);
+			}
+			if (running) {
+				PERF_COUNT(processor, running_YES)
+				try {
+					Execute();
+				} catch (Abort& e) {
+					PERF_COUNT(processor, abort)
+				}
+			} else {
+				PERF_COUNT(processor, running_NO)
+				std::unique_lock<std::mutex> lock(reschuduleMutex);
 				for(;;) {
-					TRACE_REC_(processor, for_loop_start)
-					// break if OP_STOPEMULATOR is called
+					rescheduleCV.wait_for(lock, Util::ONE_SECOND);
 					if (stopThread) goto exitLoop;
-
-					// If not running, wait interrupts or timeouts
-					if (running) {
-						PERF_COUNT(processor, running_A_YES)
-						TRACE_REC_(processor, running_A_YES)
-					} else {
-						PERF_COUNT(processor, running_A_NO)
-						TRACE_REC_(processor, running_A_NO)
-						//logger.debug("waitRunning START");
-						for(;;) {
-							TRACE_REC_(processor, mutexRequestReschedule_locking)
-							std::unique_lock<std::mutex> locker(mutexRequestReschedule);
-							TRACE_REC_(processor, mutexRequestReschedule_locked)
-							TRACE_REC_(processor, cvRunning_wait_for_calling)
-							cvRunning.wait_for(locker, Util::ONE_SECOND);
-							TRACE_REC_(processor, cvRunning_wait_for_called)
-							if (stopThread) goto exitLoop;
-							if (rescheduleInterruptFlag) break;
-							if (rescheduleTimerFlag)     break;
-							//logger.debug("waitRunning WAITING");
-						}
-						TRACE_REC_(processor, exit_inner_for_loop)
-						//logger.debug("waitRunning FINISH");
-					}
-					// Do reschedule.
-					bool interruptFlag;
-					bool timerFlag;
-					{
-						TRACE_REC_(processor, mutexFlags_locking)
-						std::unique_lock<std::mutex> locker(mutexFlags);
-						TRACE_REC_(processor, mutexFlags_locked)
-						interruptFlag = rescheduleInterruptFlag;
-						timerFlag     = rescheduleTimerFlag;
-						rescheduleInterruptFlag = false;
-						rescheduleTimerFlag     = false;
-					}
-
-					//logger.debug("reschedule START");
-					bool needReschedule = false;
-					if (interruptFlag) {
-						PERF_COUNT(processor, interruptFlag_YES)
-						TRACE_REC_(processor, interruptFlag_YES)
-						//logger.debug("reschedule INTERRUPT");
-						// process interrupt
-						TRACE_REC_(processor, Interrupt_calling)
-						auto result = Interrupt();
-						TRACE_REC_(processor, Interrupt_called)
-						if (result) {
-							PERF_COUNT(processor, interrupt)
-							needReschedule = true;
-						}
-					} else {
-						PERF_COUNT(processor, interruptFlag_NO)
-						TRACE_REC_(processor, interruptFlag_NO)
-					}
-					if (timerFlag) {
-						PERF_COUNT(processor, timerFlag_YES)
-						TRACE_REC_(processor, timerFlag_YES)
-						//logger.debug("reschedule TIMER");
-						// process timeout
-						TRACE_REC_(processor, processTimeout_calling)
-						auto result = timer_thread::processTimeout();
-						TRACE_REC_(processor, processTimeout_called)
-						if (result) {
-							PERF_COUNT(processor, timer)
-							needReschedule = true;
-						}
-					} else {
-						PERF_COUNT(processor, timerFlag_NO)
-						TRACE_REC_(processor, timerFlag_NO)
-					}
-					if (needReschedule) {
-						PERF_COUNT(processor, needReschedule_YES)
-						TRACE_REC_(processor, Reschedule_calling)
-						Reschedule(1);
-						TRACE_REC_(processor, Reschedule_called)
-					} else {
-						PERF_COUNT(processor, needReschedule_NO)
-					}
-					// It still not running, continue loop again
-					if (running) {
-						PERF_COUNT(processor, running_B_YES)
-						TRACE_REC_(processor, running_B_YES)
-						break;
-					} else {
-						PERF_COUNT(processor, running_B_NO)
-						TRACE_REC_(processor, running_B_NO)
-					}
+					if (interruptFlag) break;
+					if (timeoutFlag) break;
 				}
-				TRACE_REC_(processor, requestReschedule_EXIT)
-				PERF_COUNT(processor, requestReschedule_EXIT)
-			} catch(Abort& e) {
-				PERF_COUNT(processor, abort)
-				//logger.debug("Abort %-20s  %8d", e.func, abortCount);
 			}
 		}
 	} catch (ErrorError& e) {
@@ -354,10 +239,32 @@ exitLoop:
 	AgentNetwork::ReceiveThread::stop();
 	AgentNetwork::TransmitThread::stop();
 	AgentDisk::IOThread::stop();
-	timer_thread::stop();
-	interrupt_thread::stop();
 
 	logger.info("processor_thread::run STOP");
+}
+
+void run_timer() {
+	auto tick = std::chrono::milliseconds(cTick);
+	auto time = std::chrono::steady_clock::now();
+
+	for(;;) {
+		if (stopThread) break;
+		auto nextTime = time + tick;
+		std::this_thread::sleep_until(nextTime);
+		time = nextTime;
+		std::unique_lock<std::mutex> lock(reschuduleMutex);
+		PERF_COUNT(processor, timeoutRequest)
+		timeoutFlag = true;
+		rescheduleCV.notify_one();
+	}
+}
+
+void notifyInterrupt(CARD16 value) {
+	PERF_COUNT(processor, interruptRequest)
+    WP |= value;
+	std::unique_lock<std::mutex> lock(reschuduleMutex);
+	interruptFlag = true;
+	rescheduleCV.notify_one();
 }
 
 }

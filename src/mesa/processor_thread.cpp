@@ -170,60 +170,72 @@ void run_processor() {
 
 	running.timeStart();
 	try {
-		for(;;) {
-			PERF_COUNT(processor, for_loop)
-			if (stopThread) goto exitLoop;
-			if (interruptFlag || timeoutFlag) {
-				if (InterruptsEnabled()) {
-					PERF_COUNT(processor, interruptEnabled_YES)
+		if ((timeoutFlag || interruptFlag) && InterruptsEnabled()) goto reschedule;
+		if (running) goto execute;
+		else goto wait;
 
-					bool interruptFlagCopy = interruptFlag.exchange(false);
-					bool timeoutFlagCopy = timeoutFlag.exchange(false);
+reschedule:
+		PERF_COUNT(processor, reschedule)
+reschedule_continue:
+		PERF_COUNT(processor, reschedule_cont)
+		if (stopThread) goto exitLoop;
+		{
 
-					bool interrupt = false;
-					bool timeout   = false;
-					if (interruptFlagCopy) {
-						PERF_COUNT(processor, interruptFlag)
-						if (WP.pending()) interrupt = Interrupt();
-					}
-					if (timeoutFlagCopy) {
-						PERF_COUNT(processor, timeoutFlag)
-						PERF_COUNT(processor, updatePTC)
-						PTC++;
-						if (PTC == 0) PTC++;
-						timeout = TimeoutScan();
-					}
+			bool interruptFlagCopy = interruptFlag.exchange(false);
+			bool timeoutFlagCopy = timeoutFlag.exchange(false);
 
-					if (interrupt || timeout) {
-						PERF_COUNT(processor, reschedule_YES)
-						watchdog.update();
-						Reschedule(true);
-					} else {
-						PERF_COUNT(processor, reschedule_NO)
-					}
-					continue;
-				} else {
-					PERF_COUNT(processor, interruptEnabled_NO)
-				}
+			bool interrupt = false;
+			bool timeout   = false;
+			if (interruptFlagCopy) {
+				PERF_COUNT(processor, interruptFlag)
+				if (WP.pending()) interrupt = Interrupt();
 			}
-			if (running) {
-				PERF_COUNT(processor, running_YES)
-				try {
-					Execute();
-				} catch (Abort& e) {
-					PERF_COUNT(processor, abort)
-				}
+			if (timeoutFlagCopy) {
+				PERF_COUNT(processor, timeoutFlag)
+				PERF_COUNT(processor, updatePTC)
+				PTC++;
+				if (PTC == 0) PTC++;
+				timeout = TimeoutScan();
+			}
+			if (interrupt || timeout) {
+				PERF_COUNT(processor, reschedule_YES)
+				watchdog.update();
+				Reschedule(true);
 			} else {
-				PERF_COUNT(processor, running_NO)
-				std::unique_lock<std::mutex> lock(reschuduleMutex);
-				for(;;) {
-					rescheduleCV.wait_for(lock, Util::ONE_SECOND);
-					if (stopThread) goto exitLoop;
-					if (interruptFlag) break;
-					if (timeoutFlag) break;
-				}
+				PERF_COUNT(processor, reschedule_NO)
 			}
+			if ((timeoutFlag || interruptFlag) && InterruptsEnabled()) goto reschedule_continue;
+			if (running) goto execute;
+			else goto wait;
 		}
+
+execute:
+		PERF_COUNT(processor, execute)
+execute_continue:
+		PERF_COUNT(processor, execute_cont)
+		if (stopThread) goto exitLoop;
+		try {
+			Execute();
+		} catch (Abort& e) {
+			PERF_COUNT(processor, abort)
+		}
+		if ((timeoutFlag || interruptFlag) && InterruptsEnabled()) goto reschedule;
+		if (running) goto execute_continue;
+		else goto wait;
+
+wait:
+		PERF_COUNT(processor, wait)
+wait_continue:
+		PERF_COUNT(processor, wait_cont)
+		if (stopThread) goto exitLoop;
+		{
+			std::unique_lock<std::mutex> lock(reschuduleMutex);
+			rescheduleCV.wait_for(lock, Util::ONE_SECOND);
+		}
+		if ((timeoutFlag || interruptFlag) && InterruptsEnabled()) goto reschedule;
+		if (running) goto execute;
+		else goto wait_continue;
+
 	} catch (ErrorError& e) {
 		LogSourceLocation::fatal(logger, e.location, "Error  ");
 		// Output for postmortem  examination

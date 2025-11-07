@@ -241,42 +241,6 @@ public:
 };
 
 
-class VariableAtomicFlag {
-    std::atomic_flag storage;
-public:
-    VariableAtomicFlag() {
-        storage.clear();
-    }
-
-    void set() {
-        storage.test_and_set();
-    }
-    void clear() {
-        storage.clear();
-    }
-    operator bool() {
-        return storage.test();
-    }
-};
-class VariableAtomicBool {
-    std::atomic<bool> storage;
-public:
-    VariableAtomicBool() {
-        storage.store(false);
-    }
-
-    void set() {
-        storage.store(true);
-    }
-    void clear() {
-        storage.store(false);
-    }
-    operator bool() {
-        return storage.load();
-    }
-};
-
-
 extern CARD16 SP;
 class VariableStack {
     CARD16 storage[StackDepth];

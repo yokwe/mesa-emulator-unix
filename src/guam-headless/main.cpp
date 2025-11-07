@@ -43,7 +43,7 @@ static const Logger logger(__FILE__);
 #include "../util/trace.h"
 
 #include "../mesa/guam.h"
-#include "../mesa/processor_thread.h"
+#include "../mesa/processor.h"
 #include "../mesa/guam_config.h"
 
 #include "../opcode/opcode.h"
@@ -88,8 +88,8 @@ int main(int /* argc */, char** /* argv */) {
 	guam::setConfig(config);
 
 	// stop at MP 8000
-	processor_thread::stopAtMP( 915);
-	processor_thread::stopAtMP(8000);
+	processor::stopAtMP( 915);
+	processor::stopAtMP(8000);
 
 	logger.info("thread start");
 	auto thread = std::thread(guam::run);
@@ -105,27 +105,8 @@ int main(int /* argc */, char** /* argv */) {
 	variable::dump();
 	memory::cache::stats();
 
-	logger.info(processor_thread::getBootTime());
-    logger.info(processor_thread::getElapsedTime());
-
-
-	// {
-	// 	guam::initialize();
-	// 	guam::boot();
-	// 	guam::finalize();
-		
-	// 	opcode::stats();
-	// 	PERF_LOG();
-	// 	memory::cache::stats();
-	// 	logger.info("elapsedTime = %lld msec", guam::getElapsedTime());
-	// }
-
-
-	//extern void MonoBlt_MemoryCache_stats();
-	//MonoBlt_MemoryCache_stats();
-
-	//extern void MonoBlt_stats();
-	//MonoBlt_stats();
+	logger.info(processor::getBootTime());
+    logger.info(processor::getElapsedTime());
 
 	logger.info("STOP");
 	return 0;

@@ -30,7 +30,7 @@
 
 
 //
-// processor_thread::
+// processor.h
 //
 
 #pragma once
@@ -39,7 +39,7 @@
 
 #include "MesaBasic.h"
 
-namespace processor_thread {
+namespace processor {
 
 void stop();
 

@@ -45,7 +45,7 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/guam.h"
-#include "../mesa/processor_thread.h"
+#include "../mesa/processor.h"
 #include "../mesa/Variable.h"
 
 #include "../util/GuiOp.h"
@@ -63,7 +63,7 @@ int MesaBoot(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv
         MP.addObserver(GuiOp::setMP);
 
         // stop at MP 8000
-        processor_thread::stopAtMP( 915);
+        processor::stopAtMP( 915);
 
         logger.info("guam thread start");
         auto thread = std::thread(guam::run);

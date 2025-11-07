@@ -15,7 +15,7 @@ PUBLIC
         MesaBasic.h
         guam.h
         Pilot.h
-        processor_thread.h
+        processor.h
         Type.h
         Variable.h
 PRIVATE
@@ -24,7 +24,7 @@ PRIVATE
         memory.cpp
         guam.cpp
         Pilot.cpp
-        processor_thread.cpp
+        processor.cpp
         Type.cpp
         Variable.cpp
 )

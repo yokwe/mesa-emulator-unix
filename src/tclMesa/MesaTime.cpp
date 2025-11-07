@@ -39,15 +39,15 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../mesa/processor_thread.h"
+#include "../mesa/processor.h"
 
 #include "tclMesa.h"
 
 // mesa::time
 int MesaTime(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 1) {
-        logger.info(processor_thread::getBootTime());
-        logger.info(processor_thread::getElapsedTime());
+        logger.info(processor::getBootTime());
+        logger.info(processor::getElapsedTime());
         return TCL_OK;
     }
 

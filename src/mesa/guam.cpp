@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 #include "Variable.h"
 #include "Pilot.h"
 
-#include "processor_thread.h"
+#include "processor.h"
 #include "display.h"
 
 #include "../agent/Agent.h"
@@ -350,8 +350,8 @@ static void boot() {
 	std::function<void()> f1 = std::bind(&AgentNetwork::ReceiveThread::run, &network.receiveThread);
 	std::function<void()> f2 = std::bind(&AgentNetwork::TransmitThread::run, &network.transmitThread);
 	std::function<void()> f3 = std::bind(&AgentDisk::IOThread::run, &disk.ioThread);
-	std::function<void()> f4 = std::function<void()>(processor_thread::run_timer);
-	std::function<void()> f5 = std::function<void()>(processor_thread::run_processor);
+	std::function<void()> f4 = std::function<void()>(processor::run_timer);
+	std::function<void()> f5 = std::function<void()>(processor::run_processor);
 
 	ThreadControl t1("receive", f1);
 	ThreadControl t2("transmit", f2);

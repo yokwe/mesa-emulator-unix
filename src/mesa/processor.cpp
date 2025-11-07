@@ -30,7 +30,7 @@
 
 
 //
-// processor_thread.cpp
+// processor.cpp
 //
 
 #include <atomic>
@@ -50,7 +50,7 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/opcode.h"
 
-#include "processor_thread.h"
+#include "processor.h"
 #include "Variable.h"
 
 #include "../util/Perf.h"
@@ -58,7 +58,7 @@ static const Logger logger(__FILE__);
 #include "../util/watchdog.h"
 
 
-namespace processor_thread {
+namespace processor {
 
 bool                    stopThread;
 std::set<CARD16>        stopAtMPSet;
@@ -68,7 +68,7 @@ static std::chrono::steady_clock::time_point time_0900 = NO_TIME;
 static std::chrono::steady_clock::time_point time_8000 = NO_TIME;
 
 void stop() {
-	logger.info("processor_thread::stop");
+	logger.info("processor::stop");
 	TRACE_REC_(processor, stop)
     stopThread = true;
 }
@@ -151,7 +151,7 @@ std::atomic_bool        timeoutFlag;
 std::atomic_bool        interruptFlag;
 
 void run_processor() {
-	logger.info("processor_thread::run START");
+	logger.info("processor::run START");
 	stopThread              = false;
 	time_0900               = NO_TIME;
 	time_8000               = NO_TIME;
@@ -252,7 +252,7 @@ exitLoop:
 	AgentNetwork::TransmitThread::stop();
 	AgentDisk::IOThread::stop();
 
-	logger.info("processor_thread::run STOP");
+	logger.info("processor::run STOP");
 }
 
 void run_timer() {

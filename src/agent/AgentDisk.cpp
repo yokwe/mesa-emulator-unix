@@ -42,7 +42,7 @@ static const Logger logger(__FILE__);
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
 
-#include "../mesa/processor_thread.h"
+#include "../mesa/processor.h"
 
 #include "DiskFile.h"
 
@@ -128,7 +128,7 @@ void AgentDisk::IOThread::process(const Item& item) {
 	}
 
 	PERF_COUNT(disk, process)
-	processor_thread::notifyInterrupt(interruptSelector);
+	processor::notifyInterrupt(interruptSelector);
 }
 
 
@@ -259,10 +259,10 @@ void AgentDisk::Call() {
 	}
 
 	if (DEBUG_DONT_USE_THREAD) {
-		processor_thread::notifyInterrupt(fcb->interruptSelector);
+		processor::notifyInterrupt(fcb->interruptSelector);
 	}
 
 	// notify with interrupt
 	//WP |= fcb->interruptSelector;
-	//processor_thread::notifyInterrupt(fcb->interruptSelector);
+	//processor::notifyInterrupt(fcb->interruptSelector);
 }

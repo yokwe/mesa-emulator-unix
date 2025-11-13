@@ -291,6 +291,8 @@ public:
 		return toMesaTime(getUnixTime());
 	}
 
+	static std::string toString(uint32_t unixTime);
+
 	static void*   mapFile  (const std::string& path, uint32_t& mapSize);
 	static void    unmapFile(void* page);
 

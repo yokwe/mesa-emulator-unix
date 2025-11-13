@@ -339,6 +339,13 @@ uint64_t Util::getSecondsSinceEpoch() {
 	return std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 }
 
+std::string toString(uint32_t unixTime) {
+	time_t temp = unixTime;
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%d-%02d-%02d %02d:%02d:%02d", 1900 + tm.tm_year, tm.tm_mon, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
+
 void Util::byteswap(uint16_t* source, uint16_t* dest, int size) {
 	for(int i = 0; i < size; i++) {
 		dest[i] = std::byteswap(source[i]);

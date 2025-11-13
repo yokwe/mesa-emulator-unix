@@ -40,8 +40,6 @@ static const Logger logger(__FILE__);
 #include "../mesa/Pilot.h"
 #include "../mesa/memory.h"
 
-#include "../util/GuiOp.h"
-
 #include "AgentDisplay.h"
 
 // TODO Implements colorType == DisplayIOFaceGuam::T_monochrome and DisplayIOFaceGuam::T_byteColor
@@ -139,11 +137,7 @@ void AgentDisplay::Call() {
 		break;
 	case DisplayIOFaceGuam::C_setCursorPattern:
 		if (DEBUG_SHOW_AGENT_DISPLAY) logger.debug("AGENT %s setCursorPattern", name);
-		{
-			GuiOp::CursorPattern data;
-			Util::byteswap(fcb->cursorPattern.word, data.data, ELEMENTSOF(data.data));
-			GuiOp::setCursorPattern(&data);
-		}
+		// FIXME change cursor patternn
 		break;
 	case DisplayIOFaceGuam::C_updateRectangle:
 		logger.fatal("AGENT %s updateRectangle", name);

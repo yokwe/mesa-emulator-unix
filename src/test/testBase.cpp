@@ -36,8 +36,6 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/GuiOp.h"
-
 #include "testBase.h"
 
 #include "../mesa/Pilot.h"
@@ -227,8 +225,6 @@ void testBase::setUp() {
 	memory::initialize(22, 20, (CARD16)0x00a0);
 	opcode::initialize();
 	variable::initialize();
-
-	GuiOp::setContext(new NullGuiOp);
 
 	// mPDA = 0x0001000
 	// mGFT = 0x0002000

@@ -39,7 +39,6 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Debug.h"
-#include "../util/GuiOp.h"
 #include "../util/Perf.h"
 
 #include "../mesa/MesaBasic.h"
@@ -677,44 +676,8 @@ void E_COLORBLT() {
 		POINTER ptr = Pop();
 		MonoBlt::FetchColorBltTable(ptr, &arg);
 
-//		int updateRect = 0;
-//		GuiOp::Rect rect;
-//
-//		if (arg.flags.dstType == ColorBlt::PT_display) {
-//			rect.width  = arg.width;
-//			rect.height = arg.height;
-//
-//			CARD32 base = memory::getDisplayVirtualPage() * PageSize;
-//			CARD32 size = memory::getDisplayPageSize() * PageSize;
-//
-//			ColorBlt::Address address = arg.dst;
-//			MonoBlt::Bump(address, 0);
-//
-//			if (base <= address.word && address.word < (base + size)) {
-//				CARD32 displayWorsdPerLine = memory::getDisplayBytesPerLine() / 2;
-//
-//				if (arg.dstPpl != (displayWorsdPerLine * WordSize)) {
-//					logger.fatal("arg.dstPpl = %d  displayWordPerLine = %d", arg.dstPpl, displayWorsdPerLine);
-//					ERROR();
-//				}
-//
-//				CARD32 offset = address.word - base;
-//				rect.y = offset / displayWorsdPerLine;
-//				rect.x = (offset % displayWorsdPerLine) * WordSize + address.pixel;
-//				updateRect = 1;
-//			}
-//		}
-
 		std::unique_ptr<MonoBlt> blt(MonoBlt::getInstance(arg));
 		blt->process();
-
-//		if (updateRect) {
-//			logger.debug("updateDisplay %4d %4d %4d %4d", rect.x, rect.y, rect.width, rect.height);
-//			GuiOp::updateDisplay(&rect);
-//		}
-
-		GuiOp::Rect rect(0, 0, 0, 0);
-		GuiOp::updateDisplay(&rect);
 	} else {
 		logger.fatal("SP = %d", SP);
 		ERROR();
@@ -732,9 +695,6 @@ void E_BITBLT() {
 
 		std::unique_ptr<MonoBlt> blt(MonoBlt::getInstance(arg));
 		blt->process();
-
-		GuiOp::Rect rect(0, 0, 0, 0);
-		GuiOp::updateDisplay(&rect);
 
 	} else {
 		logger.fatal("SP = %d", SP);

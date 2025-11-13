@@ -46,9 +46,6 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/guam.h"
 #include "../mesa/processor.h"
-#include "../mesa/Variable.h"
-
-#include "../util/GuiOp.h"
 
 #include "tclMesa.h"
  
@@ -58,9 +55,6 @@ static const Logger logger(__FILE__);
 int MesaBoot(ClientData cdata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
     if (objc == 1) {
         guam::setConfig(config);
-
-        GuiOp::setContext(new NullGuiOp);
-        MP.addObserver(GuiOp::setMP);
 
         // stop at MP 8000
         processor::stopAtMP( 915);

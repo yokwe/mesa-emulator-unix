@@ -39,7 +39,6 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
-#include "../util/GuiOp.h"
 #include "../util/trace.h"
 
 #include "../mesa/guam.h"
@@ -55,8 +54,6 @@ int main(int /* argc */, char** /* argv */) {
 	setSignalHandler(SIGTERM);
 	setSignalHandler(SIGHUP);
 	setSignalHandler(SIGSEGV);
-
-	GuiOp::setContext(new NullGuiOp);
 
 	// sanity check
 	// if (argc != 2) {

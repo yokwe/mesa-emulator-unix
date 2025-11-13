@@ -10,9 +10,7 @@ target_sources(
 		BPF.h
 		ByteBuffer.h
 		Debug.h
-		GuiOP.h
 		net.h
-		OpcodeInfo.h
 		Perf.h
 		tcl.h
 		trace.h
@@ -22,9 +20,7 @@ target_sources(
 	PRIVATE
 		BPF.cpp
 		ByteBuffer.cpp
-		GuiOp.cpp
 		net.cpp
-		OpcodeInfo.cpp
 		Perf.cpp
 		tcl.cpp
 		trace.cpp

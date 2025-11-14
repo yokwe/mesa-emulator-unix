@@ -44,7 +44,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/processor.h"
 
-#include "DiskFile.h"
+#include "../util/DiskFile.h"
 
 #include "AgentDisk.h"
 

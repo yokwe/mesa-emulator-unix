@@ -38,7 +38,7 @@
 #include "../mesa/Pilot.h"
 
 #include "Agent.h"
-#include "DiskFile.h"
+#include "../util/DiskFile.h"
 
 #include "../util/ThreadQueue.h"
 

@@ -36,7 +36,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "DiskFile.h"
+#include "../util/DiskFile.h"
 
 void DiskFile::readPage(CARD32 block, CARD16 *buffer, CARD32 sizeInWord) {
 	if (maxBlock <= block) {

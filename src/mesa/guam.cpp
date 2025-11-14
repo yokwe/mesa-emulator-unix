@@ -59,8 +59,6 @@ static const Logger logger(__FILE__);
 #include "../agent/AgentStream.h"
 #include "../agent/AgentDisplay.h"
 
-#include "../agent/DiskFile.h"
-
 #include "../agent/StreamBoot.h"
 #include "../agent/StreamCopyPaste.h"
 #include "../agent/StreamPCFA.h"
@@ -69,6 +67,7 @@ static const Logger logger(__FILE__);
 
 #include "../opcode/opcode.h"
 
+#include "../util/DiskFile.h"
 #include "../util/net.h"
 #include "../util/ThreadControl.h"
 #include "../util/watchdog.h"

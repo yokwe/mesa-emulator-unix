@@ -13,6 +13,6 @@ target_sources(
     main.cpp
 )
 
-add_dependencies(floppy agent util)
+add_dependencies(floppy util)
 
-target_link_libraries (floppy agent util)
+target_link_libraries (floppy util)

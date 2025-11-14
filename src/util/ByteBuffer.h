@@ -45,23 +45,35 @@ class ByteBuffer {
 protected:
 	static constexpr int INVALID_POS = -1;
 
-	int      myBase;
+	int      myBase;      // base offset
 	int      myPosition;  // read/write offset
-	int      myLimit;     // maximu written offset
+	int      myLimit;     // maximum written offset
 	int      myCapacity;  // size of myData
 	uint8_t* myData;
 	int      myMarkPos;
 
+	uint8_t* myStorage;
+
+	void read8 (const int index, uint8_t&  value) const;
+	void read16(const int index, uint16_t& value) const;
+	void read32(const int index, uint32_t& value) const;  // not network oder. but mesa long order (low word, high word)
+	void write  (const int index, const int writeSize, const uint8_t* value);
+
 public:
-	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(0), myMarkPos(INVALID_POS) {}
+	ByteBuffer() : myBase(0), myPosition(0), myLimit(0), myCapacity(0), myData(0), myMarkPos(INVALID_POS), myStorage(0) {}
 	// assume data[0..capacity) has meaningful value
 	// you can read from this ByteBuffer
 	ByteBuffer(int capacity, uint8_t* data) :
-		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS) {}
+		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS), myStorage(0) {}
+	ByteBuffer(int capacity) :
+		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(new uint8_t[capacity]), myMarkPos(INVALID_POS), myStorage(myData) {}
+	~ByteBuffer() {
+		delete myStorage;
+	}
 
 	ByteBuffer(const ByteBuffer& that) :
 		myBase(that.myBase), myPosition(that.myPosition), myLimit(that.myLimit),
-		myCapacity(that.myCapacity), myData(that.myData), myMarkPos(that.myMarkPos) {
+		myCapacity(that.myCapacity), myData(that.myData), myMarkPos(that.myMarkPos), myStorage(0) {
 	}
 	ByteBuffer& operator =(const ByteBuffer& that) {
 		this->myBase     = that.myBase;
@@ -70,6 +82,7 @@ public:
 		this->myCapacity = that.myCapacity;
 		this->myData     = that.myData;
 		this->myMarkPos  = that.myMarkPos;
+		this->myStorage  = 0;
 		return *this;
 	}
 	
@@ -185,52 +198,12 @@ public:
 		read32(myPosition, value);
 		myPosition += 4;
 	}
-	void read48(uint64_t& value) {
-		read48(myPosition, value);
-		myPosition += 6;
-	}
-
-	void read  (const int readSize, uint8_t* value) {
-		read(myPosition, readSize, value);
-		myPosition += readSize;
-	}
-
-	void read8 (const int index, uint8_t&  value) const;
-	void read16(const int index, uint16_t& value) const;
-	void read32(const int index, uint32_t& value) const;
-	void read48(const int index, uint64_t& value) const;
-	void read  (const int index, const int readSize, uint8_t* value) const;
-
-	// write to ByteBuffer
-	void write8 (uint8_t  value) {
-		write8(myPosition, value);
-		myLimit = myPosition += 1;
-	}
-	void write16(uint16_t value) {
-		write16(myPosition, value);
-		myLimit = myPosition += 2;
-	}
-	void write32(uint32_t value) {
-		write32(myPosition, value);
-		myLimit = myPosition += 4;
-	}
-	void write48(uint64_t value) {
-		write48(myPosition, value);
-		myLimit = myPosition += 6;
-	}
 
 	void write  (const int writeSize, const uint8_t* value) {
 		write(myPosition, writeSize, value);
 		myLimit = myPosition += writeSize;
 	}
 
-	void write8 (const int index, uint8_t  value);
-	void write16(const int index, uint16_t value);
-	void write32(const int index, uint32_t value);
-	void write48(const int index, uint64_t value);
-	void write  (const int index, const int writeSize, const uint8_t* value);
-
-	void writeZero(int n);
 };
 
 template<int N>

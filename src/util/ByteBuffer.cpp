@@ -77,18 +77,6 @@ void ByteBuffer::limit(int newValue) {
 	}
 }
 
-// void ByteBuffer::position(int newValue) {
-// 	if (myBase <= newValue && newValue <= myLimit) {
-// 		myPosition = newValue;
-// 	} else {
-// 		logger.error("Exceed limit");
-// 		logger.error("  newValue = %5d", newValue);
-// 		logger.error("  base     = %5d", myBase);
-// 		logger.error("  limit    = %5d", myLimit);
-// 		ERROR();
-// 	}
-// }
-
 void ByteBuffer::mark() {
 	if (myMarkPos == INVALID_POS) {
 		myMarkPos = myPosition;
@@ -145,36 +133,10 @@ void ByteBuffer::read32(const int index, uint32_t& value) const {
 	const int readSize = 4;
 	if ((index + readSize) <= myLimit) {
 		const uint8_t* data = myData + index;
-		value = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3] << 0);
-	} else {
-		logger.error("Exceed limit");
-		logger.error("  index    = %5d", index);
-		logger.error("  readSize = %5d", readSize);
-		logger.error("  limit    = %5d", myLimit);
-		logBackTrace();
-		ERROR();
-	}
-}
-void ByteBuffer::read48(const int index, uint64_t& value) const {
-	const int readSize = 6;
-	if ((index + readSize) <= myLimit) {
-		const uint8_t* data = myData + index;
-		value = ((uint64_t)data[0] << 40) | ((uint64_t)data[1] << 32) |
-				((uint64_t)data[2] << 24) | ((uint64_t)data[3] << 16) |
-				((uint64_t)data[4] <<  8) | ((uint64_t)data[5] <<  0);
-	} else {
-		logger.error("Exceed limit");
-		logger.error("  index    = %5d", index);
-		logger.error("  readSize = %5d", readSize);
-		logger.error("  limit    = %5d", myLimit);
-		logBackTrace();
-		ERROR();
-	}
-}
-void ByteBuffer::read(const int index, const int readSize, uint8_t* value) const {
-	if ((index + readSize) <= myLimit) {
-		const uint8_t* data = myData + index;
-		memcpy(value, data, readSize);
+//      Network order
+//		value = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3] << 0);
+//      Mesa Long order  low half, high half
+		value = (data[0] << 8) | (data[1] << 0) | (data[2] << 24) | (data[3] << 16); // FIXME
 	} else {
 		logger.error("Exceed limit");
 		logger.error("  index    = %5d", index);
@@ -189,67 +151,6 @@ void ByteBuffer::read(const int index, const int readSize, uint8_t* value) const
 //
 // ByteBuffer::write
 //
-void ByteBuffer::write8(const int index, uint8_t value) {
-	const int writeSize = 1;
-	if (myCapacity < (index + writeSize)) {
-		logger.error("Exceed capacity");
-		logger.error("  capacity  = %5d", myCapacity);
-		logger.error("  index     = %5d", index);
-		logger.error("  writeSize = %5d", writeSize);
-		logBackTrace();
-		ERROR();
-	}
-	uint8_t* data = myData + index;
-	data[0] = value;
-}
-void ByteBuffer::write16(const int index, uint16_t value) {
-	const int writeSize = 2;
-	if (myCapacity < (index + writeSize)) {
-		logger.error("Exceed capacity");
-		logger.error("  capacity  = %5d", myCapacity);
-		logger.error("  index     = %5d", index);
-		logger.error("  writeSize = %5d", writeSize);
-		logBackTrace();
-		ERROR();
-	}
-	uint8_t* data = myData + index;
-	data[0] = (uint8_t)(value >> 8);
-	data[1] = (uint8_t)(value);
-}
-void ByteBuffer::write32(const int index, uint32_t value) {
-	const int writeSize = 4;
-	if (myCapacity < (index + writeSize)) {
-		logger.error("Exceed capacity");
-		logger.error("  position = %5d", myPosition);
-		logger.error("  limit    = %5d", myLimit);
-		logger.error("  capacity = %5d", myCapacity);
-		logBackTrace();
-		ERROR();
-	}
-	uint8_t* data = myData + index;
-	data[0] = (uint8_t)(value >> 24);
-	data[1] = (uint8_t)(value >> 16);
-	data[2] = (uint8_t)(value >>  8);
-	data[3] = (uint8_t)(value >>  0);
-}
-void ByteBuffer::write48(const int index, uint64_t value) {
-	const int writeSize = 6;
-	if (myCapacity < (index + writeSize)) {
-		logger.error("Exceed capacity");
-		logger.error("  capacity  = %5d", myCapacity);
-		logger.error("  index     = %5d", index);
-		logger.error("  writeSize = %5d", writeSize);
-		logBackTrace();
-		ERROR();
-	}
-	uint8_t* data = myData + index;
-	data[0] = (uint8_t)(value >> 40);
-	data[1] = (uint8_t)(value >> 32);
-	data[2] = (uint8_t)(value >> 24);
-	data[3] = (uint8_t)(value >> 16);
-	data[4] = (uint8_t)(value >>  8);
-	data[5] = (uint8_t)(value >>  0);
-}
 void ByteBuffer::write(const int index, const int writeSize, const uint8_t* value) {
 	if (myCapacity < (index + writeSize)) {
 		logger.error("Exceed capacity");
@@ -261,9 +162,4 @@ void ByteBuffer::write(const int index, const int writeSize, const uint8_t* valu
 	}
 	uint8_t* data = myData + index;
 	memcpy(data, value, writeSize);
-}
-
-void ByteBuffer::writeZero(int n) {
-	if (n < 0) ERROR()
-	for(int i = 0; i < n; i++) write8(0);
 }

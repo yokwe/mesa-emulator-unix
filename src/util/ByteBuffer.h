@@ -65,6 +65,7 @@ public:
 	// you can read from this ByteBuffer
 	ByteBuffer(int capacity, uint8_t* data) :
 		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS), myStorage(0) {}
+		
 	ByteBuffer(int capacity) :
 		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(new uint8_t[capacity]), myMarkPos(INVALID_POS), myStorage(myData) {}
 	~ByteBuffer() {
@@ -186,18 +187,27 @@ public:
 
 
 	// read from ByteBuffer
-	void read8 (uint8_t&  value) {
+	ByteBuffer& read(int& value) = delete;
+
+	ByteBuffer& read(uint8_t&  value) {
 		read8(myPosition, value);
 		myPosition += 1;
+		return *this;
 	}
-	void read16(uint16_t& value) {
+	ByteBuffer& read(uint16_t& value) {
 		read16(myPosition, value);
 		myPosition += 2;
+		return *this;
 	}
-	void read32(uint32_t& value) {
+	ByteBuffer& read(uint32_t& value) {
 		read32(myPosition, value);
 		myPosition += 4;
+		return *this;
 	}
+
+	uint8_t  get8();
+	uint16_t get16();
+	uint32_t get32();
 
 	void write  (const int writeSize, const uint8_t* value) {
 		write(myPosition, writeSize, value);

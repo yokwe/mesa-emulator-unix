@@ -147,6 +147,57 @@ void ByteBuffer::read32(const int index, uint32_t& value) const {
 	}
 }
 
+uint8_t  ByteBuffer::get8() {
+	const int readSize = 1;
+	if ((myPosition + readSize) <= myLimit) {
+		const uint8_t* data = myData + myPosition;
+		uint8_t value = data[0];
+		myPosition += readSize; // increment position
+		return value;
+	} else {
+		logger.error("Exceed limit");
+		logger.error("  position = %5d", myPosition);
+		logger.error("  readSize = %5d", readSize);
+		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
+		ERROR();
+	}
+}
+uint16_t ByteBuffer::get16() {
+	const int readSize = 2;
+	if ((myPosition + readSize) <= myLimit) {
+		const uint8_t* data = myData + myPosition;
+		uint16_t value = (data[0] << 8) | (data[1] << 0);
+		myPosition += readSize; // increment position
+		return value;
+	} else {
+		logger.error("Exceed limit");
+		logger.error("  position = %5d", myPosition);
+		logger.error("  readSize = %5d", readSize);
+		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
+		ERROR();
+	}
+}
+uint32_t ByteBuffer::get32() {
+	const int readSize = 4;
+	if ((myPosition + readSize) <= myLimit) {
+		const uint8_t* data = myData + myPosition;
+//      Mesa Long order  low half, high half
+		uint32_t value = (data[0] << 8) | (data[1] << 0) | (data[2] << 24) | (data[3] << 16);
+		myPosition += readSize; // increment position
+		return value;
+	} else {
+		logger.error("Exceed limit");
+		logger.error("  position = %5d", myPosition);
+		logger.error("  readSize = %5d", readSize);
+		logger.error("  limit    = %5d", myLimit);
+		logBackTrace();
+		ERROR();
+	}
+}
+
+
 
 //
 // ByteBuffer::write

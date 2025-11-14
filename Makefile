@@ -62,8 +62,8 @@ guam-headless: src/util/Perf.inc src/util/trace.inc
 tclMesa:
 	/usr/bin/time cmake --build build --target tclMesa
 
-xnsTimeServer:
-	/usr/bin/time cmake --build build --target xnsTimeServer
+floppy:
+	/usr/bin/time cmake --build build --target floppy
 	
 #
 # run-XXX
@@ -86,6 +86,6 @@ run-tclMesa: tclMesa
 	/bin/echo -n >${BUILD_DIR}/run/tclMesa.log
 	LOG4CXX_CONFIGURATION=data/log4j-config-tclMesa.xml ${BUILD_DIR}/tclMesa/tclMesa
 
-run-xnsTimeServer: xnsTimeServer
-	/bin/echo -n >${BUILD_DIR}/run/xnsTimeServer.log
-	LOG4CXX_CONFIGURATION=data/log4j-config-xnsTimeServer.xml ${BUILD_DIR}/xnsTimeServer/xnsTimeServer
+run-floppy: floppy
+	/bin/echo -n >${BUILD_DIR}/run/floppy.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-floppy.xml ${BUILD_DIR}/floppy/floppy

@@ -67,6 +67,7 @@ endif()
 
 # add subdirectory
 add_subdirectory (agent	         ../build/agent)
+add_subdirectory (floppy      	 ../build/floppy)
 add_subdirectory (guam-headless	 ../build/guam-headless)
 add_subdirectory (main	         ../build/main)
 add_subdirectory (mesa           ../build/mesa)

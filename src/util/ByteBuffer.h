@@ -187,8 +187,6 @@ public:
 
 
 	// read from ByteBuffer
-	ByteBuffer& read(int& value) = delete;
-
 	ByteBuffer& read(uint8_t&  value) {
 		read8(myPosition, value);
 		myPosition += 1;
@@ -205,13 +203,15 @@ public:
 		return *this;
 	}
 
-	ByteBuffer& readAll() {
+	ByteBuffer& read() {
 		return *this;
 	}
 	template <class Head, class... Tail>
-	ByteBuffer& readAll(Head&& head, Tail&&... tail) {
+	ByteBuffer& read(Head&& head, Tail&&... tail) {
+		// restirct to uint8_t&, uint16_t& or uint32_t& for head
+		static_assert(std::is_same_v<Head, uint8_t&> || std::is_same_v<Head, uint16_t&> || std::is_same_v<Head, uint32_t&>, "head must be uint8_t&, uint1t_t& or uint32_t&");
 		read(head);
-		return readAll(std::forward<Tail>(tail)...);
+		return read(std::forward<Tail>(tail)...);
 	}
 
 	uint8_t  get8();

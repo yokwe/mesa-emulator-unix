@@ -81,10 +81,11 @@ int main(int /*argc*/, char** /*argv*/) {
 		// create file in floppyDir
         auto path = floppyDir / name;
         auto contents = leaderPage.contents;
+		//logger.info("  path    %s", path.c_str());
 
-        std::ofstream of(path, std::ios::out | std::ios::binary);
-        of.write((char*)contents.data(), contents.size());
-        of.close();
+        std::ofstream ofs(path, std::ios::out | std::ios::binary);
+        ofs.write((char*)contents.data(), contents.size());
+        ofs.close();
 	}
 
 	return 0;

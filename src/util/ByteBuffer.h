@@ -37,6 +37,7 @@
 
 #include <cstdint>
 #include <string>
+#include <type_traits>
 
 #include "Util.h"
 
@@ -203,14 +204,38 @@ public:
 		return *this;
 	}
 
+	struct Readable {
+		virtual ByteBuffer& read(ByteBuffer& bb) = 0;
+	};
+
 	ByteBuffer& read() {
 		return *this;
 	}
 	template <class Head, class... Tail>
 	ByteBuffer& read(Head&& head, Tail&&... tail) {
-		// restirct to uint8_t&, uint16_t& or uint32_t& for head
-		static_assert(std::is_same_v<Head, uint8_t&> || std::is_same_v<Head, uint16_t&> || std::is_same_v<Head, uint32_t&>, "head must be uint8_t&, uint1t_t& or uint32_t&");
-		read(head);
+		constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
+		constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
+		constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
+		constexpr auto is_class    = std::is_class_v<std::remove_reference_t<Head>>;
+
+//		logger.info("read head  %s!  %d  |  %d  %d  %d  |  %d", demangle(typeid(head).name()), sizeof(head), is_uint8_t, is_uint16_t, is_uint32_t, is_class);
+
+		if constexpr (is_uint8_t || is_uint16_t || is_uint32_t) {
+			read(head);
+		} else {
+			if constexpr (is_class) {
+				constexpr auto is_Readable = std::is_base_of_v<Readable, std::remove_reference_t<Head>>;
+				if constexpr (is_Readable) {
+					head.read(*this);
+				} else {
+					logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+					ERROR()
+				}
+			} else {
+				logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+				ERROR()
+			}
+		}
 		return read(std::forward<Tail>(tail)...);
 	}
 

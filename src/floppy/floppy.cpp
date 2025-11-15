@@ -56,13 +56,7 @@ SectorNine::SectorNine(FloppyDisk& floppyDisk) {
     ByteBuffer bb(Environment::bytesPerPage);
     floppyDisk.readSector(9, bb);
 
-    bb.
-    read(seal).
-    read(version).
-    read(cylinders).
-    read(tracksPerCylinder).
-    read(sectorsPerTrack);
-
+    bb.readAll(seal, version, cylinders, tracksPerCylinder, sectorsPerTrack);
     // sanity check
     if (seal != SEAL) {
         logger.fatal("seal = %6o  SEAL = %6o", seal, SEAL);
@@ -85,21 +79,9 @@ SectorNine::SectorNine(FloppyDisk& floppyDisk) {
         ERROR();
     }
 
-    bb.
-    read(fileList).
-    read(fileListID).
-    read(fileListSize).
-    read(rootFile).
-    read(alternateMicrocode).
-    read(pilotMicrocode).
-    read(diagnosticMicrocode).
-    read(germ).
-    read(pilotBootFile).
-    read(firstAlternateSector).
-    read(countBadSectors).
-    read(nextUnusedFileID).
-    read(changing).
-    read(labelSize);
+    bb.readAll(
+        fileList, fileListID, fileListSize, rootFile, alternateMicrocode, pilotMicrocode,diagnosticMicrocode,
+        germ, pilotBootFile, firstAlternateSector, countBadSectors, nextUnusedFileID, changing, labelSize);
     for(int i = 0; i < labelSize; i++) {
         label += bb.get8();
     }
@@ -131,11 +113,7 @@ void SectorNine::dump() {
 
 
 FileList::Entry::Entry(ByteBuffer& bb) {
-    bb.
-    read(file).
-    read(type).
-    read(location).
-    read(size);
+    bb.readAll(file, type, location, size);
 }
 void FileList::Entry::dump() const {
     logger.info("file      %6d", file);
@@ -150,9 +128,7 @@ FileList::FileList(FloppyDisk& floppyDisk, uint32_t fileList, uint32_t fileListS
     ByteBuffer bb(dataSize);
     floppyDisk.readSector(fileList, bb, fileListSize);
 
-    bb.
-    read(seal).
-    read(version);
+    bb.readAll(seal, version);
     // sanity check
     if (seal != SEAL) {
         logger.fatal("seal = %6o  SEL = %6o", seal, SEAL);
@@ -162,9 +138,8 @@ FileList::FileList(FloppyDisk& floppyDisk, uint32_t fileList, uint32_t fileListS
         logger.fatal("version = %6d  VERSIO = %6d", version, VERSION);
         ERROR();
     }
-    bb.
-    read(count).
-    read(maxEntries);
+
+    bb.readAll(count, maxEntries);
     for(int i = 0; i < count; i++) {
         Entry* entry = new Entry(bb);
         files.push_back(entry);
@@ -190,11 +165,8 @@ FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry
     floppyDisk.readSector(entry.location, bb, entry.size);
 
     bb.
-	// Identity attributes
-    read(seal).
-    read(version).
-    read(type);
-
+    // Identity attributes
+    readAll(seal, version, type);
     // sanity check
     if (seal != SEAL) {
         logger.fatal("seal = %6o  SEAL = %6o", seal, SEAL);
@@ -207,16 +179,11 @@ FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry
 
     bb.
 	// Activity attributes
-    read(createData).
-    read(lastWrittenData).
+    readAll(createData, lastWrittenData).
 	// File attributes
-    read(size).
-    read(offset).
-    read(totalSize).
-    read(totalSizeInBytes).
+    readAll(size, offset, totalSize, totalSizeInBytes).
 	//Name attributes
-    read(nameLength).
-    read(nameMaxLength);
+    readAll(nameLength, nameMaxLength);
     for(int i = 0; i < nameMaxLength; i++) {
         uint8_t c = bb.get8();
         if (i < nameLength) name += c;
@@ -224,9 +191,7 @@ FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry
 
 	//Client attributes
     bb.
-    read(clientDataLength).
-    read(clientDataMaxLength);
-
+    readAll(clientDataLength, clientDataMaxLength);
     for(uint16_t i = 0; i < clientDataMaxLength; i++) {
         uint16_t w = bb.get16();
         if (i < clientDataLength) clientData.push_back(w);

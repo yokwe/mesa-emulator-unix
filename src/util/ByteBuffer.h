@@ -65,7 +65,7 @@ public:
 	// you can read from this ByteBuffer
 	ByteBuffer(int capacity, uint8_t* data) :
 		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(data), myMarkPos(INVALID_POS), myStorage(0) {}
-		
+
 	ByteBuffer(int capacity) :
 		myBase(0), myPosition(0), myLimit(capacity), myCapacity(capacity), myData(new uint8_t[capacity]), myMarkPos(INVALID_POS), myStorage(myData) {}
 	~ByteBuffer() {
@@ -203,6 +203,15 @@ public:
 		read32(myPosition, value);
 		myPosition += 4;
 		return *this;
+	}
+
+	ByteBuffer& readAll() {
+		return *this;
+	}
+	template <class Head, class... Tail>
+	ByteBuffer& readAll(Head&& head, Tail&&... tail) {
+		read(head);
+		return readAll(std::forward<Tail>(tail)...);
 	}
 
 	uint8_t  get8();

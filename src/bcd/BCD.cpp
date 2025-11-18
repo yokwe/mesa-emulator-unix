@@ -130,7 +130,7 @@ uint16_t BCD::getIndex(int pos, int offset, int limit) {
     return index;
 }
 
-void BCD::initializeNameRecord(ByteBuffer& bb) {
+void BCD::readTableSS(ByteBuffer& bb) {
 	int offset = ssOffset;
 	int limit  = ssLimit;
 
@@ -149,67 +149,33 @@ void BCD::initializeNameRecord(ByteBuffer& bb) {
             value += bb.get8();
         }
         int ssIndex = pos - (offset * 2) - 3;
-//        logger.info("ss   %5d  \"%s\"", ssIndex, value);
-
         std::string* p = new std::string;
         *p = value;
         NameRecord::addValue(ssIndex, p);
     }
-
-	// Add special
-    // {
-    //     std::string* p = new std::string;
-    //     *p = "#NULL#";
-    //     NameRecord::addValue(NameRecord::NULL_NAME, p);
-    // }
 }
-void BCD::initializeFTRecord(ByteBuffer& bb) {
-    int offset = ftOffset;
-    int limit  = ftLimit;
 
+template<class R, class I>
+static void readTable(ByteBuffer& bb, int offset, int limit) {
     bb.position(offset * 2);
     for(;;) {
-        uint16_t index = getIndex(bb.position(), offset, limit);
+        uint16_t index = BCD::getIndex(bb.position(), offset, limit);
         if (limit <= index) break;
 
-        FTRecord entry;
+        R entry;
         entry.read(bb);
-//        logger.info("ft  %5d  %s", index, entry.toString());
-
-        FTIndex::addValue(index, new FTRecord(entry));
+        I::addValue(index, new R(entry));
     }
 }
-void BCD::initializeSGRecord(ByteBuffer& bb) {
-    int offset = sgOffset;
-    int limit  = sgLimit;
 
-    bb.position(offset * 2);
-    for(;;) {
-        uint16_t index = getIndex(bb.position(), offset, limit);
-        if (limit <= index) break;
-
-        SGRecord entry;
-        entry.read(bb);
-//        logger.info("sg  %5d  %s", index, entry.toString());
-
-        SGIndex::addValue(index, new SGRecord(entry));
-    }
+void BCD::readTableFT(ByteBuffer& bb) {
+    readTable<FTRecord, FTIndex>(bb, ftOffset, ftLimit);
 }
-void BCD::initializeENRecord(ByteBuffer& bb) {
-    int offset = enOffset;
-    int limit  = enLimit;
-
-    bb.position(offset * 2);
-    for(;;) {
-        uint16_t index = getIndex(bb.position(), offset, limit);
-        if (limit <= index) break;
-
-        ENRecord entry;
-        entry.read(bb);
-//        logger.info("sg  %5d  %s", index, entry.toString());
-
-        ENIndex::addValue(index, new ENRecord(entry));
-    }
+void BCD::readTableSG(ByteBuffer& bb) {
+    readTable<SGRecord, SGIndex>(bb, sgOffset, sgLimit);
+}
+void BCD::readTableEN(ByteBuffer& bb) {
+    readTable<ENRecord, ENIndex>(bb, enOffset, enLimit);
 }
 
 
@@ -223,8 +189,6 @@ ByteBuffer& SGRecord::read(ByteBuffer& bb) {
 
     return bb;
 }
-
-
 // CODE, SYMBOLS, AC_MAP, OTHER,
 static std::map<SGRecord::SegClass, std::string> segClassMap = {
     {SGRecord::SegClass::CODE,    "CODE"},

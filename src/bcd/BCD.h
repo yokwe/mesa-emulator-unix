@@ -200,10 +200,10 @@ struct BCD : public ByteBuffer::Readable {
 
     void dump();
 
-    uint16_t getIndex(int pos, int offset, int limit);
+    static uint16_t getIndex(int pos, int offset, int limit);
 
-    void initializeNameRecord(ByteBuffer& bb);
-    void initializeFTRecord(ByteBuffer& bb);
-    void initializeSGRecord(ByteBuffer& bb);
-    void initializeENRecord(ByteBuffer& bb);
+    void readTableSS(ByteBuffer& bb);
+    void readTableFT(ByteBuffer& bb);
+    void readTableSG(ByteBuffer& bb);
+    void readTableEN(ByteBuffer& bb);
 };

@@ -130,9 +130,10 @@ uint16_t BCD::getIndex(int pos, int offset, int limit) {
     return index;
 }
 
-void BCD::readTableSS(ByteBuffer& bb) {
+void BCD::buildSSTable(ByteBuffer& bb) {
 	int offset = ssOffset;
 	int limit  = ssLimit;
+    auto& table = ssTable;
 
 	if (limit == 0) return;
 
@@ -149,34 +150,50 @@ void BCD::readTableSS(ByteBuffer& bb) {
             value += bb.get8();
         }
         int ssIndex = pos - (offset * 2) - 3;
-        NameRecord::addValue(ssIndex, value);
-    }
+
+        if (table.contains(ssIndex)) {
+            // not expect this
+            logger.error("Duplicate key");
+            logger.error("  index   %d", index);
+            ERROR()
+        } else {
+            table[ssIndex] = value;
+        }
+   }
 }
 
 template<class R, class I>
-static void readTable(ByteBuffer& bb, int offset, int limit) {
+static void buildTable(ByteBuffer& bb, int offset, int limit, std::map<uint16_t, R>& table) {
     bb.position(offset * 2);
     for(;;) {
         uint16_t index = BCD::getIndex(bb.position(), offset, limit);
         if (limit <= index) break;
 
-        R entry;
-        entry.read(bb);
-        I::addValue(index, entry);
+        R value;
+        value.read(bb);
+
+        if (table.contains(index)) {
+            // not expect this
+            logger.error("Duplicate key");
+            logger.error("  index   %d", index);
+            ERROR()
+        } else {
+            table[index] = value;
+        }
     }
 }
 
-void BCD::readTableFT(ByteBuffer& bb) {
-    readTable<FTRecord, FTIndex>(bb, ftOffset, ftLimit);
+void BCD::buildFTTable(ByteBuffer& bb) {
+    buildTable<FTRecord, FTIndex>(bb, ftOffset, ftLimit, ftTable);
 }
-void BCD::readTableSG(ByteBuffer& bb) {
-    readTable<SGRecord, SGIndex>(bb, sgOffset, sgLimit);
+void BCD::buildSGTable(ByteBuffer& bb) {
+    buildTable<SGRecord, SGIndex>(bb, sgOffset, sgLimit, sgTable);
 }
-void BCD::readTableEN(ByteBuffer& bb) {
-    readTable<ENRecord, ENIndex>(bb, enOffset, enLimit);
+void BCD::buildENTable(ByteBuffer& bb) {
+    buildTable<ENRecord, ENIndex>(bb, enOffset, enLimit, enTable);
 }
-void BCD::readTableMT(ByteBuffer& bb) {
-    readTable<MTRecord, MTIndex>(bb, mtOffset, mtLimit);
+void BCD::buildMTTable(ByteBuffer& bb) {
+    buildTable<MTRecord, MTIndex>(bb, mtOffset, mtLimit, mtTable);
 }
 
 
@@ -240,7 +257,6 @@ ByteBuffer& MTRecord::read(ByteBuffer& bb) {
     spare2         = (bool)bitField(u8, 14, 14);
     spare3         = (bool)bitField(u8, 15, 15);
 
-    logger.info("XX  %s", this->toString());
     return bb;
 }
 std::string MTRecord::toString() const {

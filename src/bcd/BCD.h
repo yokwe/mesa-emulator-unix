@@ -282,15 +282,21 @@ struct BCD : public ByteBuffer::Readable {
     BCD_TABLE(at)  // atom table
     BCD_TABLE(ap)  // atom print table
 
+    std::map<uint16_t, std::string> ssTable;
+    std::map<uint16_t, FTRecord>    ftTable;
+    std::map<uint16_t, SGRecord>    sgTable;
+    std::map<uint16_t, ENRecord>    enTable;
+    std::map<uint16_t, MTRecord>    mtTable;
+
     ByteBuffer& read(ByteBuffer& bb) override;
 
     void dump();
 
     static uint16_t getIndex(int pos, int offset, int limit);
 
-    void readTableSS(ByteBuffer& bb);
-    void readTableFT(ByteBuffer& bb);
-    void readTableSG(ByteBuffer& bb);
-    void readTableEN(ByteBuffer& bb);
-    void readTableMT(ByteBuffer& bb);
+    void buildSSTable(ByteBuffer& bb);
+    void buildFTTable(ByteBuffer& bb);
+    void buildSGTable(ByteBuffer& bb);
+    void buildENTable(ByteBuffer& bb);
+    void buildMTTable(ByteBuffer& bb);
 };

@@ -36,47 +36,174 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "../util/ByteBuffer.h"
+#include "../util/Util.h"
 
+#include "Index.h"
+#include "Timestamp.h"
 
-// Stamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
-// Null: Stamp = Stamp[net: 0, host: 0, time: 0];
-class Stamp : public ByteBuffer::Readable {
-    std::string string;
-public:
-    uint8_t  net;
-    uint8_t  host;
-    uint32_t time;
+constexpr const uint16_t T_LIMIT = 0177777;
 
-    ByteBuffer& read(ByteBuffer& bb) override {
-        bb.read(net, host, time);
-
-        auto dateString = Util::toString(Util::toUnixTime(time));
-        string = isNull() ? "#NULL#" : std_sprintf("%s#%03d#%03d", dateString, net, host);
-
-        return bb;
-    }
+// NameRecord: TYPE = RECORD [CARDINAL];
+// NullName: NameRecord = [1];
+struct NameRecord : public Index<"ss", std::string> {
+    static const constexpr uint16_t NULL_NAME = 1;
 
     bool isNull() {
-        return net == 0 && host == 0 && time == 0;
+        return index == NULL_NAME;
     }
-
-    std::string toString() {
-        return string;
+    std::string toString() override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
     }
 };
 
 
-struct BCD {
-    static constexpr uint16_t VersionID = 6103;
+// FTRecord: TYPE = RECORD [name: NameRecord, version: VersionStamp];
+struct FTRecord : public ByteBuffer::Readable, public HasToString {
+    NameRecord name;
+    Timestamp version;
 
-	uint16_t versionIdent;
-	Stamp    version;
-	Stamp    creator;
-
-    ByteBuffer& read(ByteBuffer& bb) {
-        bb.read(versionIdent, version, creator);
+    ByteBuffer& read(ByteBuffer& bb) override {
+        bb.read(name, version);
         return bb;
     }
+
+    std::string toString() override {
+        return std_sprintf("%s#%s", version.toString(), name.toString());
+    }
+};
+// FTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO FTRecord;
+// FTNull: FTIndex = LAST[FTIndex];
+// FTSelf: FTIndex = LAST[FTIndex] - 1;
+struct FTIndex : public Index<"ft", FTRecord> {
+    static const constexpr uint16_t FT_NULL = T_LIMIT;
+    static const constexpr uint16_t FT_SELF = T_LIMIT - 1;
+
+    bool isNull() {
+        return index == FT_NULL;
+    }
+    bool isSelf() {
+        return index == FT_SELF;
+    }
+    std::string toString() override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        if (isSelf()) return std_sprintf("%s-SELF", prefix);
+        return Index::toString();
+    }
+};
+
+
+// SGRecord: TYPE = RECORD [
+//   file: FTIndex, base: CARDINAL,
+//   pages: [0..256), extraPages: [0..64), class: SegClass];
+struct SGRecord : public ByteBuffer::Readable, public HasToString {
+	// SegClass: TYPE = {code, symbols, acMap, other};
+	enum class SegClass {
+		CODE, SYMBOLS, AC_MAP, OTHER,
+	};
+
+    FTIndex     file;
+    uint16_t    base;
+    uint16_t    pages;
+    uint16_t    extraPages;
+    SegClass    segClass;
+
+    ByteBuffer& read(ByteBuffer& bb) override;
+    std::string toString() override;
+};
+// SGIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO SGRecord;
+// SGNull: SGIndex = LAST[SGIndex];
+struct SGIndex : public Index<"sg", SGRecord> {
+    static const constexpr uint16_t SG_NULL = T_LIMIT;
+
+    bool isNull() {
+        return index == SG_NULL;
+    }
+    std::string toString() override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
+    }
+};
+
+
+//ENRecord: TYPE = RECORD [
+//   nEntries: CARDINAL, initialPC: ARRAY [0..0) OF PrincOps.BytePC];
+struct ENRecord : public ByteBuffer::Readable, public HasToString {
+    std::vector<uint16_t> initialPC;
+
+    ByteBuffer& read(ByteBuffer& bb) override;
+    std::string toString() override;
+};
+//ENIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO ENRecord;
+//ENNull: ENIndex = LAST[ENIndex];
+struct ENIndex : public Index<"en", ENRecord> {
+    static const constexpr uint16_t EN_NULL = T_LIMIT;
+
+    bool isNull() {
+        return index == EN_NULL;
+    }
+    std::string toString() override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
+    }
+};
+
+
+struct BCD : public ByteBuffer::Readable {
+    static constexpr uint16_t VersionID = 6103;
+
+	uint16_t  versionIdent;
+	Timestamp version;
+	Timestamp creator;
+
+    FTIndex   sourceFile;
+    FTIndex   unpackagedFile;
+
+    uint16_t  nConfigs;
+	uint16_t  nModules;
+	uint16_t  nImports;
+	uint16_t  nExports;
+	uint16_t  nPages;
+	bool      definitions;
+	bool      repackaged;
+	bool      typeExported;
+	bool      tableCompiled;
+	uint16_t  spare4;
+	uint16_t  firstDummy;
+	uint16_t  nDummies;
+
+    #undef BCD_TABLE
+    #define BCD_TABLE(prefix) uint16_t prefix##Offset; uint16_t prefix##Limit;
+
+    BCD_TABLE(ss)  // string table
+    BCD_TABLE(ct)  // config table
+    BCD_TABLE(mt)  // module table
+    BCD_TABLE(imp) // import table
+    BCD_TABLE(exp) // export table
+    BCD_TABLE(en)  // entry table
+    BCD_TABLE(sg)  // segment table
+    BCD_TABLE(ft)  // file table
+    BCD_TABLE(sp)  // space table
+    BCD_TABLE(nt)  // name table
+    BCD_TABLE(typ) // type table
+    BCD_TABLE(tm)  // type map table
+    BCD_TABLE(fp)  // frame pack table
+    BCD_TABLE(lf)  // link fragment table
+    BCD_TABLE(at)  // atom table
+    BCD_TABLE(ap)  // atom print table
+
+    ByteBuffer& read(ByteBuffer& bb) override;
+
+    void dump();
+
+    uint16_t getIndex(int pos, int offset, int limit);
+
+    void initializeNameRecord(ByteBuffer& bb);
+    void initializeFTRecord(ByteBuffer& bb);
+    void initializeSGRecord(ByteBuffer& bb);
+    void initializeENRecord(ByteBuffer& bb);
 };

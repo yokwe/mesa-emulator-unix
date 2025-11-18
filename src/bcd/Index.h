@@ -54,7 +54,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
                 continue;
             }
             if (valueMap.contains(index)) {
-                p->value = valueMap[index];
+                p->value   = valueMap[index];
                 p->noValue = false;
             }
         }
@@ -123,7 +123,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         return bb;
     }
     std::string toString() const override {
-        if (hasValue()) return std_sprintf("%s-%d", prefix, index);
+        if (noValue) return std_sprintf("%s-%d", prefix, index);
         constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
         if constexpr(is_string) {
             return value;

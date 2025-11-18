@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <set>
 #include <source_location>
+#include <concepts>
 
 #include <log4cxx/logger.h>
 
@@ -275,6 +276,35 @@ inline uint16_t bitField(uint16_t word, int startBit) {
 inline const char* getBuildDir() {
 	return BUILD_DIR;
 }
+
+//
+// for use const char* as template parameter
+//
+// template <StringLiteral PRIFIX, class T>
+// struct Index {
+//     static inline const char* prefix = PRIFIX;
+// };
+template<size_t N>
+struct StringLiteral {
+    constexpr StringLiteral(const char (&str)[N]) {
+        std::copy_n(str, N, value);
+    }
+
+	operator const std::string&() const {
+		return value;
+	}
+	operator const char*() const {
+		return value;
+	}
+    char value[N];
+};
+
+struct HasToString {
+    virtual std::string toString() = 0;
+};
+template <typename T>
+concept Stringable = std::derived_from<T, HasToString>;
+
 
 class Util {
 public:

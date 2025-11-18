@@ -152,6 +152,92 @@ struct ENIndex : public Index<"en", ENRecord> {
     }
 };
 
+//   CodeDesc: TYPE = RECORD [
+//     sgi: SGIndex, offset, length: CARDINAL];
+struct CodeDesc: public ByteBuffer::Readable, public HasToString {
+    SGIndex  sgi;
+    uint16_t offset;
+    uint16_t length;
+
+    ByteBuffer& read(ByteBuffer& bb) override {
+        bb.read(sgi, offset, length);
+        return bb;
+    }
+
+    std::string toString() const override {
+        return std_sprintf("[%s  %5d  %5d]", sgi.toString(), offset, length);
+    }
+};
+
+// LinkLocation: TYPE = {frame, code, dontcare};
+enum class LinkLocation {
+	FRAME, CODE, DONTCARE,
+};
+std::string toString(LinkLocation value);
+// MTRecord: TYPE = --MACHINE DEPENDENT-- RECORD [
+//     name: NameRecord,
+//     file: FTIndex,
+//     config: CTIndex,
+//     code: CodeDesc,
+//     sseg: SGIndex,
+//     links: LFIndex,
+//     linkLoc: LinkLocation,
+//     namedInstance, initial: BOOLEAN, 
+//     boundsChecks, nilChecks: BOOLEAN,
+//     tableCompiled, residentFrame, crossJumped, packageable: BOOLEAN,
+//     packed: BOOLEAN, linkspace: BOOLEAN,
+//     spare: PACKED ARRAY [0..4) OF BOOLEAN,
+//     framesize: [0..PrincOps.MaxFrameSize),
+//     entries: ENIndex,
+//     atoms: ATIndex];
+struct MTRecord : public ByteBuffer::Readable, public HasToString {
+    // LinkLocation: TYPE = {frame, code, dontcare};
+    enum class LinkLocation {
+        FRAME, CODE, DONTCARE,
+    };
+
+    NameRecord   name;
+    FTIndex      file;
+    uint16_t     config;
+    CodeDesc     code;
+    SGIndex      sseg;
+    uint16_t     links;
+    LinkLocation linkLoc;        //  01
+    bool         namedInstance;  //  2
+    bool         initial;        //  3
+    bool         boundsChecks;   //  4
+    bool         nilChecks;      //  5
+    bool         tableCompiled;  //  6
+    bool         residentFrame;  //  7
+    bool         crossJumped;    //  8
+    bool         packageable;    //  9
+    bool         packed;         // 10
+    bool         linkspace;      // 11
+    bool         spare0;         // 12
+    bool         spare1;          // 13
+    bool         spare2;         // 14
+    bool         spare3;         // 15
+    uint16_t     frameSize;
+    ENIndex      entries;
+    uint16_t     atoms;
+
+    ByteBuffer& read(ByteBuffer& bb) override;
+    std::string toString() const override;
+};
+//MTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO MTRecord;
+//MTNull: MTIndex = LAST[MTIndex];
+struct MTIndex : public Index<"mt", MTRecord> {
+    static const constexpr uint16_t MT_NULL = T_LIMIT;
+
+    bool isNull() const {
+        return index == MT_NULL;
+    }
+    std::string toString() const override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
+    }
+};
+
 
 struct BCD : public ByteBuffer::Readable {
     static constexpr uint16_t VersionID = 6103;
@@ -206,4 +292,5 @@ struct BCD : public ByteBuffer::Readable {
     void readTableFT(ByteBuffer& bb);
     void readTableSG(ByteBuffer& bb);
     void readTableEN(ByteBuffer& bb);
+    void readTableMT(ByteBuffer& bb);
 };

@@ -13,7 +13,6 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static inline const char* prefix = PREFIX;
 
     static inline std::set<Index*>      indexSet;
-    static inline std::map<uint16_t, T> valueMap;
 
     static void addIndex(Index* index) {
         if (indexSet.contains(index)) {
@@ -31,28 +30,14 @@ struct Index : public ByteBuffer::Readable, public HasToString {
             indexSet.erase(reference);
         }
     }
-    static void addValue(uint16_t index, T value) {
-        if (valueMap.contains(index)) {
-            // not expect this
-            logger.error("Duplicate key");
-            logger.error("  index   %d", index);
-            ERROR()
-        } else {
-            valueMap[index] = value;
-        }
-    }
     static void clearMap() {
         indexSet.clear();
-        valueMap.clear();
     }
-    static void setValue() {
+    static void setValue(std::map<uint16_t, T>& valueMap) {
         for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
             Index* p = *i;
+            if (p->noIndex) continue;
             auto index = p->index;
-            if (index == -1) {
-                logger.info("index = -1");
-                continue;
-            }
             if (valueMap.contains(index)) {
                 p->value   = valueMap[index];
                 p->noValue = false;
@@ -60,39 +45,35 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         }
     }
     static void dump() {
-        constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
         for(const auto& e: indexSet) {
+            if (e->noIndex) continue;
             logger.info("dump  index  %s  %s", prefix, e->toString());
-        }
-        for(const auto& e: valueMap) {
-            if constexpr (is_string) {
-                logger.info("dump  value  %s  %d  %s", prefix, e.first, e.second);
-            } else {
-                logger.info("dump  value  %s  %d  %s", prefix, e.first, e.second.toString());
-            }
         }
     }
 
     uint16_t index;
-    bool     noValue;
     T        value;
+    bool     noIndex;
+    bool     noValue;
 
     // default constructor
-    Index() : ByteBuffer::Readable(), index(-1), noValue(true), value() {
+    Index() : ByteBuffer::Readable(), index(55555), value(), noIndex(true), noValue(true) {
         addIndex(this);
     }
     // copy constructor
     Index(const Index& that) {
         this->index   = that.index;
-        this->noValue = that.noValue;
         this->value   = that.value;
-        addIndex(this);
+        this->noIndex = that.noIndex;
+        this->noValue = that.noValue;
+       addIndex(this);
     }
     // move constructor
     Index(Index&& that) {
         this->index   = that.index;
-        this->noValue = that.noValue;
         this->value   = that.value;
+        this->noIndex = that.noIndex;
+        this->noValue = that.noValue;
         addIndex(this);
     }
     ~Index() {
@@ -101,16 +82,14 @@ struct Index : public ByteBuffer::Readable, public HasToString {
 
     Index& operator=(const Index& that) {
         this->index   = that.index;
-        this->noValue = that.noValue;
         this->value   = that.value;
+        this->noIndex = that.noIndex;
+        this->noValue = that.noValue;
         return *this;
     }
 
-    bool hasValue() const {
-        return !noValue;
-    }
     const T& getValue() {
-        if (hasValue()) return value;
+        if (!noValue) return value;
         logger.error("index has no value");
         logger.error("  %s-%d", prefix, index);
         ERROR()
@@ -120,6 +99,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     }
     ByteBuffer& read(ByteBuffer& bb) override {
         bb.read(index);
+        noIndex = false;
         return bb;
     }
     std::string toString() const override {

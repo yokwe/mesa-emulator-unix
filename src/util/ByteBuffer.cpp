@@ -76,7 +76,17 @@ void ByteBuffer::limit(int newValue) {
 		ERROR();
 	}
 }
-
+void ByteBuffer::position(int newValue) {
+	if (myBase <= newValue && newValue <= myLimit) {
+		myPosition = newValue;
+	} else {
+		logger.error("Exceed limit");
+		logger.error("  newValue = %5d", newValue);
+		logger.error("  base     = %5d", myBase);
+		logger.error("  limit    = %5d", myLimit);
+		ERROR();
+	}
+}
 void ByteBuffer::mark() {
 	if (myMarkPos == INVALID_POS) {
 		myMarkPos = myPosition;

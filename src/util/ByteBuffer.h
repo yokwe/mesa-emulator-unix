@@ -180,7 +180,7 @@ public:
 	void limit(int newValue);
 
 	// set position
-	// void position(int newValue);
+	void position(int newValue);
 	// mark current position for reset
 	void mark();
 	// set position to marked position

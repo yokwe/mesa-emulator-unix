@@ -52,10 +52,10 @@ constexpr const uint16_t T_LIMIT = 0177777;
 struct NameRecord : public Index<"ss", std::string> {
     static const constexpr uint16_t NULL_NAME = 1;
 
-    bool isNull() {
+    bool isNull() const {
         return index == NULL_NAME;
     }
-    std::string toString() override {
+    std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         return Index::toString();
     }
@@ -72,7 +72,7 @@ struct FTRecord : public ByteBuffer::Readable, public HasToString {
         return bb;
     }
 
-    std::string toString() override {
+    std::string toString() const override {
         return std_sprintf("%s#%s", version.toString(), name.toString());
     }
 };
@@ -83,13 +83,13 @@ struct FTIndex : public Index<"ft", FTRecord> {
     static const constexpr uint16_t FT_NULL = T_LIMIT;
     static const constexpr uint16_t FT_SELF = T_LIMIT - 1;
 
-    bool isNull() {
+    bool isNull() const {
         return index == FT_NULL;
     }
-    bool isSelf() {
+    bool isSelf() const {
         return index == FT_SELF;
     }
-    std::string toString() override {
+    std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         if (isSelf()) return std_sprintf("%s-SELF", prefix);
         return Index::toString();
@@ -113,17 +113,17 @@ struct SGRecord : public ByteBuffer::Readable, public HasToString {
     SegClass    segClass;
 
     ByteBuffer& read(ByteBuffer& bb) override;
-    std::string toString() override;
+    std::string toString() const override;
 };
 // SGIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO SGRecord;
 // SGNull: SGIndex = LAST[SGIndex];
 struct SGIndex : public Index<"sg", SGRecord> {
     static const constexpr uint16_t SG_NULL = T_LIMIT;
 
-    bool isNull() {
+    bool isNull() const {
         return index == SG_NULL;
     }
-    std::string toString() override {
+    std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         return Index::toString();
     }
@@ -136,17 +136,17 @@ struct ENRecord : public ByteBuffer::Readable, public HasToString {
     std::vector<uint16_t> initialPC;
 
     ByteBuffer& read(ByteBuffer& bb) override;
-    std::string toString() override;
+    std::string toString() const override;
 };
 //ENIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO ENRecord;
 //ENNull: ENIndex = LAST[ENIndex];
 struct ENIndex : public Index<"en", ENRecord> {
     static const constexpr uint16_t EN_NULL = T_LIMIT;
 
-    bool isNull() {
+    bool isNull() const {
         return index == EN_NULL;
     }
-    std::string toString() override {
+    std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         return Index::toString();
     }

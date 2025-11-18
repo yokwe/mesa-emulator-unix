@@ -118,7 +118,7 @@ void BCD::dump() {
 }
 
 uint16_t BCD::getIndex(int pos, int offset, int limit) {
-    uint16_t index = (pos / 2) -  offset;
+    uint16_t index = ((pos + 1) / 2) -  offset;
     if (index < 0 || limit < index) {
         logger.error("Unexpected index");
         logger.error("  pos     %5d", pos);
@@ -149,9 +149,7 @@ void BCD::readTableSS(ByteBuffer& bb) {
             value += bb.get8();
         }
         int ssIndex = pos - (offset * 2) - 3;
-        std::string* p = new std::string;
-        *p = value;
-        NameRecord::addValue(ssIndex, p);
+        NameRecord::addValue(ssIndex, value);
     }
 }
 
@@ -164,7 +162,7 @@ static void readTable(ByteBuffer& bb, int offset, int limit) {
 
         R entry;
         entry.read(bb);
-        I::addValue(index, new R(entry));
+        I::addValue(index, entry);
     }
 }
 
@@ -196,7 +194,7 @@ static std::map<SGRecord::SegClass, std::string> segClassMap = {
     {SGRecord::SegClass::AC_MAP,  "AC_MAP"},
     {SGRecord::SegClass::OTHER,   "OTHER"},
 };
-std::string SGRecord::toString() {
+std::string SGRecord::toString() const {
     return std_sprintf("%s#%d#%d#%d#%s", file.toString(), base, pages, extraPages, segClassMap[segClass]);
 }
 
@@ -210,7 +208,7 @@ ByteBuffer& ENRecord::read(ByteBuffer& bb) {
     }
     return bb;
 }
-std::string ENRecord::toString() {
+std::string ENRecord::toString() const {
     std::string tmp;
     for(size_t i = 0; i < initialPC.size(); i++) {
         tmp += std_sprintf(" %d", initialPC[i]);

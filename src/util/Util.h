@@ -300,7 +300,7 @@ struct StringLiteral {
 };
 
 struct HasToString {
-    virtual std::string toString() = 0;
+    virtual std::string toString() const = 0;
 };
 template <typename T>
 concept Stringable = std::derived_from<T, HasToString>;

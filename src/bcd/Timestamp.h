@@ -2,9 +2,10 @@
 #include <cstdint>
 #include <string>
 
+#include "../util/Util.h"
 #include "../util/ByteBuffer.h"
 
-class Timestamp : public ByteBuffer::Readable {
+class Timestamp : public ByteBuffer::Readable, public HasToString {
     uint8_t  net;
     uint8_t  host;
     uint32_t time;
@@ -19,7 +20,7 @@ public:
 
     ByteBuffer& read(ByteBuffer& bb) override;
 
-    std::string toString() {
+    std::string toString() const override{
         return string;
     }
     

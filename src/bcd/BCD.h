@@ -214,7 +214,7 @@ struct MTRecord : public ByteBuffer::Readable, public HasToString {
     bool         packed;         // 10
     bool         linkspace;      // 11
     bool         spare0;         // 12
-    bool         spare1;          // 13
+    bool         spare1;         // 13
     bool         spare2;         // 14
     bool         spare3;         // 15
     uint16_t     frameSize;

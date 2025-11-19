@@ -47,7 +47,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static void dump() {
         for(const auto& e: indexSet) {
             if (e->noIndex) continue;
-            logger.info("dump  index  %s  %s", prefix, e->toString());
+            logger.info("dump  %-8s  %s", e->toStringIndex(), e->toString());
         }
     }
 
@@ -110,5 +110,8 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         } else {
             return value.toString();
         }
+    }
+    std::string toStringIndex() const {
+        return std_sprintf("%s-%d", prefix, index);
     }
 };

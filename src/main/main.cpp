@@ -28,25 +28,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+#include <string>
+
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-//#include "../mesa/Type.h"
-//#include "../trace/Trace.h"
-//
-//// Define PageFault and WriteProtectFault for Memory.h
-//void PageFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//	ERROR();
-//}
-//void WriteProtectFault(CARD32 ptr) {
-//	logger.fatal("%s %X", __FUNCTION__, ptr);
-//	ERROR();
-//}
-
-// To use JNI library, set LD_LIBRARY_PATH to access libjvm.so
-//	 LD_LIBRARY_PATH=/usr/local/openjdk11/lib/server tmp/build/main/main | c++filt
-
+#include "../bcd/BCDFile.h"
+#include "../bcd/BCD.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -57,7 +45,48 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 
 	{
-		// write code here
+//		std::string path = "tmp/bcd/MesaRuntime.symbols";
+//		std::string path = "tmp/bcd/File.bcd";
+		std::string path = "tmp/bcd/FileImpl.bcd";
+
+		BCDFile bcdFile(path);
+		ByteBuffer bb = bcdFile.getByteBuffer();
+		BCD bcd;
+		bcd.read(bb);
+		bcd.dump();
+		bcd.buildSSTable(bb);
+		bcd.buildFTTable(bb);
+		bcd.buildSGTable(bb);
+		bcd.buildENTable(bb);
+		bcd.buildMTTable(bb);
+
+		NameRecord::setValue(bcd.ssTable);
+		FTIndex::setValue(bcd.ftTable);
+		SGIndex::setValue(bcd.sgTable);
+		ENIndex::setValue(bcd.enTable);
+		MTIndex::setValue(bcd.mtTable);
+
+		NameRecord::dump();
+		FTIndex::dump();
+		SGIndex::dump();
+		ENIndex::dump();
+		MTIndex::dump();
+
+		logger.info("ssTable  %d", bcd.ssTable.size());
+		logger.info("ftTable  %d", bcd.ftTable.size());
+		logger.info("sgTable  %d", bcd.sgTable.size());
+		logger.info("enTable  %d", bcd.enTable.size());
+		logger.info("mtTable  %d", bcd.mtTable.size());
+
+		logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
+		logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());
+		logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
+		logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
+		logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
+
+		for(const auto& e: bcd.mtTable) {
+			logger.info("mt  %5d  %s", e.first, e.second.toString());
+		}
 	}
 
 	logger.info("STOP");

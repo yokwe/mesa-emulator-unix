@@ -33,6 +33,7 @@
 // BCDFile.cpp
 //
 
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -80,6 +81,18 @@ BCDFile::BCDFile(const std::string& path_) {
 }
 
 std::vector<uint8_t> BCDFile::readFile(const std::string& path) {
+    // sanity check
+    if (!std::filesystem::exists(path)) {
+        logger.error("The path doesn't exist");
+        logger.error("  path %s!", path);
+        ERROR();
+    }
+    if (!std::filesystem::is_regular_file(path)) {
+        logger.error("The path is not regular file");
+        logger.error("  path %s!", path);
+        ERROR();
+    }
+
     std::ifstream ifs(path, std::ios::binary);
 
     // Stop eating new lines in binary mode!!!

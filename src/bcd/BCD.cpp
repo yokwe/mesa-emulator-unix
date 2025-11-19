@@ -262,3 +262,18 @@ ByteBuffer& MTRecord::read(ByteBuffer& bb) {
 std::string MTRecord::toString() const {
     return std_sprintf("[%s  %s  %s  %s]", name.toString(), file.toString(), code.toString(), sseg.toString());
 }
+
+
+Timestamp Timestamp::getNull() {
+    static Timestamp ret(0, 0, 0);
+    return ret;
+}
+static std::string toTimestamp(uint32_t unixTime) {
+	time_t temp = unixTime;
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%04d%02d%02d#%02d%02d%02d", 1900 + tm.tm_year, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
+std::string Timestamp::toString() const {
+    return isNull() ? "#NULL" : std_sprintf("%s#%03d#%03d", toTimestamp(Util::toUnixTime(time)), net, host);
+}

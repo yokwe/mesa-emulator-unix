@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <compare>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -43,9 +44,41 @@
 #include "../util/Util.h"
 
 #include "Index.h"
-#include "Timestamp.h"
 
 constexpr const uint16_t T_LIMIT = 0177777;
+
+// TimeStamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
+// Null: TimeStamp = TimeStamp[net: 0, host: 0, time: 0];
+class Timestamp : public ByteBuffer::Readable, public HasToString {
+    uint8_t  net;
+    uint8_t  host;
+    uint32_t time;
+public:
+    static Timestamp getNull();
+
+    Timestamp(uint8_t net_, uint8_t host_, uint32_t time_) :  net(net_), host(host_), time(time_) {}
+    Timestamp() : net(0), host(0), time(0) {}
+
+    ByteBuffer& read(ByteBuffer& bb) override {
+        bb.read(net, host, time);
+        return bb;
+    }
+    std::string toString() const override;
+    
+    bool isNull() const {
+        return net == 0 && host == 0 && time == 0;
+    }
+
+    inline auto operator<=>(const Timestamp& that) const {
+        auto ret = this->time <=> that.time;
+        if (ret == std::strong_ordering::equal) ret = this->net <=> that.net;
+        if (ret == std::strong_ordering::equal) ret = this->host <=> that.host;
+        return ret;
+    }
+    inline auto operator==(const Timestamp& that) const {
+        return this->time == that.time && this->net == that.net && this->host == that.host;
+    }
+};
 
 // NameRecord: TYPE = RECORD [CARDINAL];
 // NullName: NameRecord = [1];

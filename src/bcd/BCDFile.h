@@ -46,7 +46,6 @@ class BCDFile {
     std::vector<uint8_t> contents;
 
     bool                 bcdFile;
-    bool                 symbolsFile;
     ByteBuffer           bb;
 public:
     static std::vector<uint8_t> readFile(const std::string& path);
@@ -58,9 +57,6 @@ public:
     }
     bool isBCDFile() const {
         return bcdFile;
-    }
-    bool isSymbolsFile() const {
-        return symbolsFile;
     }
     ByteBuffer getByteBuffer() const {
         return bb;

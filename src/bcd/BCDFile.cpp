@@ -58,14 +58,10 @@ BCDFile::BCDFile(const std::string& path_) {
     bb.position(0);
     auto wordBCD = bb.get16();
 
-    bb.position(Environment::bytesPerPage * Symbols::ALTO_BIAS);
-    auto wordSYM = bb.get16();
-
     // logger.info("wordBCD  %d", wordBCD);
     // logger.info("wrodSYM  %d", wordSYM);
 
     bcdFile     = (wordBCD == BCD::VersionID);
-    symbolsFile = (wordSYM == Symbols::VersionID);
     bb.rewind();
 
     logger.info("path     %s", path);
@@ -74,9 +70,6 @@ BCDFile::BCDFile(const std::string& path_) {
     } else {
         logger.error("This is not bcd file");
         ERROR();
-    }
-    if (symbolsFile) {
-        logger.info("This is symbol file.");
     }
 }
 

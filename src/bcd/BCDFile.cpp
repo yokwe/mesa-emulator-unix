@@ -61,10 +61,10 @@ BCDFile::BCDFile(const std::string& path_) {
     bb.position(Environment::bytesPerPage * Symbols::ALTO_BIAS);
     auto wordSYM = bb.get16();
 
-    logger.info("wordBCD  %d", wordBCD);
-    logger.info("wrodSYM  %d", wordSYM);
+    // logger.info("wordBCD  %d", wordBCD);
+    // logger.info("wrodSYM  %d", wordSYM);
 
-    bcdFile = (wordBCD == BCD::VersionID);
+    bcdFile     = (wordBCD == BCD::VersionID);
     symbolsFile = (wordSYM == Symbols::VersionID);
     bb.rewind();
 

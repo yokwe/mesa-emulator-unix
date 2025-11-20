@@ -272,8 +272,45 @@ struct MTIndex : public Index<"mt", MTRecord> {
 };
 
 
-struct BCD : public ByteBuffer::Readable {
+class BCD : public ByteBuffer::Readable {
+    ByteBuffer& read(ByteBuffer& bb) override;
+
+    void buildSSTable(ByteBuffer& bb);
+    void buildFTTable(ByteBuffer& bb);
+    void buildSGTable(ByteBuffer& bb);
+    void buildENTable(ByteBuffer& bb);
+    void buildMTTable(ByteBuffer& bb);
+
+public:
     static constexpr uint16_t VersionID = 6103;
+
+    static BCD getInstance(ByteBuffer& bb) {
+        NameRecord::clear();
+        FTIndex::clear();
+        SGIndex::clear();
+        ENIndex::clear();
+        MTIndex::clear();
+        
+		BCD bcd;
+
+		bcd.read(bb);
+
+		bcd.buildSSTable(bb);
+		bcd.buildFTTable(bb);
+		bcd.buildSGTable(bb);
+		bcd.buildENTable(bb);
+		bcd.buildMTTable(bb);
+
+		NameRecord::setValue(bcd.ssTable);
+		FTIndex::setValue(bcd.ftTable);
+		SGIndex::setValue(bcd.sgTable);
+		ENIndex::setValue(bcd.enTable);
+		MTIndex::setValue(bcd.mtTable);
+
+        return bcd;
+    }
+
+    static uint16_t getIndex(int pos, int offset, int limit);
 
 	uint16_t  versionIdent;
 	Timestamp version;
@@ -315,21 +352,13 @@ struct BCD : public ByteBuffer::Readable {
     BCD_TABLE(at)  // atom table
     BCD_TABLE(ap)  // atom print table
 
+    // contents of above table
     std::map<uint16_t, std::string> ssTable;
     std::map<uint16_t, FTRecord>    ftTable;
     std::map<uint16_t, SGRecord>    sgTable;
     std::map<uint16_t, ENRecord>    enTable;
     std::map<uint16_t, MTRecord>    mtTable;
 
-    ByteBuffer& read(ByteBuffer& bb) override;
-
     void dump();
-
-    static uint16_t getIndex(int pos, int offset, int limit);
-
-    void buildSSTable(ByteBuffer& bb);
-    void buildFTTable(ByteBuffer& bb);
-    void buildSGTable(ByteBuffer& bb);
-    void buildENTable(ByteBuffer& bb);
-    void buildMTTable(ByteBuffer& bb);
+    void dumpTable();
 };

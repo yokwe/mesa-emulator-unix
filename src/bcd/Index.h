@@ -65,7 +65,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
             indexSet.erase(reference);
         }
     }
-    static void clearMap() {
+    static void clear() {
         indexSet.clear();
     }
     static void setValue(std::map<uint16_t, T>& valueMap) {
@@ -123,13 +123,19 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         return *this;
     }
 
-    const T& getValue() {
+    const T& getValue() const {
         if (!noValue) return value;
         logger.error("index has no value");
         logger.error("  %s-%d", prefix, index);
         ERROR()
     }
-    operator uint16_t() {
+    const T& operator*() const noexcept {
+        if (!noValue) return value;
+        logger.error("index has no value");
+        logger.error("  %s-%d", prefix, index);
+        ERROR()
+    }
+    operator uint16_t() const {
         return index;
     }
     ByteBuffer& read(ByteBuffer& bb) override {

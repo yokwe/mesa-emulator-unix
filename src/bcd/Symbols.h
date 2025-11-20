@@ -37,11 +37,101 @@
 
 #include <cstdint>
 
-struct Symbols {
+#include "../util/ByteBuffer.h"
+
+#include "BCD.h"
+
+//   WordOffset: TYPE = CARDINAL;
+//   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
+struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
+	uint16_t offset;
+	uint16_t size;
+
+	BlockDescriptor(): offset(0), size(0) {}
+
+	ByteBuffer& read(ByteBuffer& bb) override {
+		bb.read(offset, size);
+		return bb;
+	}
+	std::string toString() const override {
+		return std_sprintf("[%5d %5d]", offset, size);
+	}
+};
+
+//   STHeader: TYPE = RECORD [
+//     versionIdent: CARDINAL,
+//     version: TimeStamp.Stamp,
+//     creator: TimeStamp.Stamp,
+//     sourceVersion: TimeStamp.Stamp,
+//     definitionsFile: BOOLEAN,
+//     directoryCtx, importCtx, outerCtx: Symbols.CTXIndex,
+//     hvBlock: BlockDescriptor,
+//     htBlock: BlockDescriptor,
+//     ssBlock: BlockDescriptor,
+//     outerPackBlock: BlockDescriptor,
+//     innerPackBlock: BlockDescriptor,
+//     constBlock: BlockDescriptor,
+//     seBlock: BlockDescriptor,
+//     ctxBlock: BlockDescriptor,
+//     mdBlock: BlockDescriptor,
+//     bodyBlock: BlockDescriptor,
+//     extBlock: BlockDescriptor,
+//     treeBlock: BlockDescriptor,
+//     litBlock: BlockDescriptor,
+//     sLitBlock: BlockDescriptor,
+//     epMapBlock: BlockDescriptor,
+//     spareBlock: BlockDescriptor,
+//     fgRelPgBase: CARDINAL,
+//     fgPgCount: [0..256]];
+struct Symbols : public ByteBuffer::Readable {
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
 	static const uint16_t VersionID = 8140;
 
-    	//  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
+    //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
 	static const uint16_t ALTO_BIAS = 1;
 
+	using CTXIndex = uint16_t;
+
+	uint16_t        versionIndent;
+	Timestamp       version;
+	Timestamp       creator;
+	Timestamp       sourceVersion;
+	bool            definitionsFile;
+	CTXIndex        directoryCtx;
+	CTXIndex        importCtx;
+	CTXIndex        outerCtx;
+	BlockDescriptor hvBlock;
+	BlockDescriptor htBlock;
+	BlockDescriptor ssBlock;
+	BlockDescriptor outerPackBlock;
+	BlockDescriptor innerPackBlock;
+	BlockDescriptor constBlock;
+	BlockDescriptor seBlock;
+	BlockDescriptor ctxBlock;
+	BlockDescriptor mdBlock;
+	BlockDescriptor bodyBlock;
+	BlockDescriptor extBlock;
+	BlockDescriptor treeBlock;
+	BlockDescriptor litBlock;
+	BlockDescriptor sLitBlock;
+	BlockDescriptor epMapBlock;
+	BlockDescriptor spareBlock;
+	uint16_t        fgRelPgBase;
+	uint16_t        fgPgCount;
+
+	ByteBuffer& read(ByteBuffer& bb) {
+		uint16_t u10;
+
+		bb.read(versionIndent, version, creator, sourceVersion, u10, importCtx, outerCtx);
+		bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
+		bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
+		bb.read(fgRelPgBase, fgPgCount);
+
+		definitionsFile = bitField(u10, 15);
+		directoryCtx    = bitField(u10, 1, 15);
+
+		return bb;
+	}
+
+	void dump();
 };

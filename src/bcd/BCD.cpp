@@ -41,6 +41,7 @@ static const Logger logger(__FILE__);
 #include "BCD.h"
 
 ByteBuffer& BCD::read(ByteBuffer& bb) {
+    bb.rewind();
     bb.read(versionIdent);
     // sanity check
     if (versionIdent != VersionID) ERROR();
@@ -116,6 +117,25 @@ void BCD::dump() {
     BCD_TABLE(at)  // atom table
     BCD_TABLE(ap)  // atom print table
 }
+void BCD::dumpTable() {
+    NameRecord::dump();
+    FTIndex::dump();
+    SGIndex::dump();
+    ENIndex::dump();
+    MTIndex::dump();
+
+    logger.info("ssTable  %d", ssTable.size());
+    logger.info("ftTable  %d", ftTable.size());
+    logger.info("sgTable  %d", sgTable.size());
+    logger.info("enTable  %d", enTable.size());
+    logger.info("mtTable  %d", mtTable.size());
+
+    logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
+    logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());
+    logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
+    logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
+    logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
+}
 
 uint16_t BCD::getIndex(int pos, int offset, int limit) {
     uint16_t index = ((pos + 1) / 2) -  offset;
@@ -131,9 +151,9 @@ uint16_t BCD::getIndex(int pos, int offset, int limit) {
 }
 
 void BCD::buildSSTable(ByteBuffer& bb) {
-	int offset = ssOffset;
-	int limit  = ssLimit;
-    auto& table = ssTable;
+	int   offset = ssOffset;
+	int   limit  = ssLimit;
+    auto& table  = ssTable;
 
 	if (limit == 0) return;
 
@@ -162,7 +182,7 @@ void BCD::buildSSTable(ByteBuffer& bb) {
    }
 }
 
-template<class R, class I>
+template<class R>
 static void buildTable(ByteBuffer& bb, int offset, int limit, std::map<uint16_t, R>& table) {
     bb.position(offset * 2);
     for(;;) {
@@ -184,16 +204,16 @@ static void buildTable(ByteBuffer& bb, int offset, int limit, std::map<uint16_t,
 }
 
 void BCD::buildFTTable(ByteBuffer& bb) {
-    buildTable<FTRecord, FTIndex>(bb, ftOffset, ftLimit, ftTable);
+    buildTable<FTRecord>(bb, ftOffset, ftLimit, ftTable);
 }
 void BCD::buildSGTable(ByteBuffer& bb) {
-    buildTable<SGRecord, SGIndex>(bb, sgOffset, sgLimit, sgTable);
+    buildTable<SGRecord>(bb, sgOffset, sgLimit, sgTable);
 }
 void BCD::buildENTable(ByteBuffer& bb) {
-    buildTable<ENRecord, ENIndex>(bb, enOffset, enLimit, enTable);
+    buildTable<ENRecord>(bb, enOffset, enLimit, enTable);
 }
 void BCD::buildMTTable(ByteBuffer& bb) {
-    buildTable<MTRecord, MTIndex>(bb, mtOffset, mtLimit, mtTable);
+    buildTable<MTRecord>(bb, mtOffset, mtLimit, mtTable);
 }
 
 

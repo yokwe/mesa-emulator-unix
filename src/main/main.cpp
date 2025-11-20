@@ -51,41 +51,15 @@ int main(int, char**) {
 
 		BCDFile bcdFile(path);
 		ByteBuffer bb = bcdFile.getByteBuffer();
-		BCD bcd;
-		bcd.read(bb);
+		BCD bcd = BCD::getInstance(bb);
+
 		bcd.dump();
-		bcd.buildSSTable(bb);
-		bcd.buildFTTable(bb);
-		bcd.buildSGTable(bb);
-		bcd.buildENTable(bb);
-		bcd.buildMTTable(bb);
+//		bcd.dumpTable();
 
-		NameRecord::setValue(bcd.ssTable);
-		FTIndex::setValue(bcd.ftTable);
-		SGIndex::setValue(bcd.sgTable);
-		ENIndex::setValue(bcd.enTable);
-		MTIndex::setValue(bcd.mtTable);
-
-		NameRecord::dump();
-		FTIndex::dump();
-		SGIndex::dump();
-		ENIndex::dump();
-		MTIndex::dump();
-
-		logger.info("ssTable  %d", bcd.ssTable.size());
-		logger.info("ftTable  %d", bcd.ftTable.size());
-		logger.info("sgTable  %d", bcd.sgTable.size());
-		logger.info("enTable  %d", bcd.enTable.size());
-		logger.info("mtTable  %d", bcd.mtTable.size());
-
-		logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
-		logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());
-		logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
-		logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
-		logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
-
-		for(const auto& e: bcd.mtTable) {
-			logger.info("mt  %5d  %s", e.first, e.second.toString());
+		logger.info("sourceFile      %s", bcd.sourceFile.toString());
+		logger.info("unpackagedFile  %s", bcd.unpackagedFile.toString());
+		for(const auto& e: bcd.sgTable) {
+			logger.info("sg-%d  %s", e.first, e.second.toString());
 		}
 	}
 

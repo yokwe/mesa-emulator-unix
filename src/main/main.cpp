@@ -35,6 +35,7 @@ static const Logger logger(__FILE__);
 
 #include "../bcd/BCDFile.h"
 #include "../bcd/BCD.h"
+#include "../bcd/Symbols.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -60,6 +61,11 @@ int main(int, char**) {
 		logger.info("unpackagedFile  %s", bcd.unpackagedFile.toString());
 		for(const auto& e: bcd.sgTable) {
 			logger.info("sg-%d  %s", e.first, e.second.toString());
+		}
+
+		if (bcd.hasSymbol()) {
+			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset());
+			symbols.dump();
 		}
 	}
 

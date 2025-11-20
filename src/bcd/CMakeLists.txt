@@ -11,10 +11,12 @@ target_sources(
 		BCDFile.h
 		Index.h
 		Symbols.h
+		Timestamp.h
 	PRIVATE
 		BCD.cpp
 		BCDFile.cpp
 		Symbols.cpp
+		Timestamp.cpp
 )
 
 target_link_libraries(bcd util)

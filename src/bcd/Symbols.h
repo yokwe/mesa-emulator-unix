@@ -58,6 +58,7 @@ struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
 	}
 };
 
+// AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
 //   STHeader: TYPE = RECORD [
 //     versionIdent: CARDINAL,
 //     version: TimeStamp.Stamp,
@@ -90,9 +91,11 @@ struct Symbols : public ByteBuffer::Readable {
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
 	static const uint16_t ALTO_BIAS = 1;
 
+	static Symbols getInstance(ByteBuffer& bb, int offset);
+
 	using CTXIndex = uint16_t;
 
-	uint16_t        versionIndent;
+	uint16_t        versionIdent;
 	Timestamp       version;
 	Timestamp       creator;
 	Timestamp       sourceVersion;
@@ -122,7 +125,7 @@ struct Symbols : public ByteBuffer::Readable {
 	ByteBuffer& read(ByteBuffer& bb) {
 		uint16_t u10;
 
-		bb.read(versionIndent, version, creator, sourceVersion, u10, importCtx, outerCtx);
+		bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
 		bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
 		bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
 		bb.read(fgRelPgBase, fgPgCount);

@@ -37,9 +37,9 @@
 
 #include <cstdint>
 
-#include "../util/ByteBuffer.h"
+#include "Timestamp.h"
 
-#include "BCD.h"
+#include "../util/ByteBuffer.h"
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];

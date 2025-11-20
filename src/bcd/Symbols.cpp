@@ -33,3 +33,28 @@
 // Symbols.cpp
 //
 
+
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
+
+#include "Symbols.h"
+
+Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
+    Symbols symbols;
+
+    bb.position(offset);
+    symbols.read(bb);
+
+    // FIXME
+
+    return symbols;
+}
+
+void Symbols::dump() {
+    logger.info("versionIdent   %5d", versionIdent);
+	logger.info("version            %s", version.toString());
+	logger.info("creator            %s", creator.toString());
+	logger.info("sourceVersion      %s", creator.toString());
+
+
+}

@@ -52,8 +52,26 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
     return symbols;
 }
 
+ByteBuffer& Symbols::read(ByteBuffer& bb) {
+	symbolBase = bb.position();
+
+	uint16_t u10;
+
+	bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
+	bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
+	bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
+	bb.read(fgRelPgBase, fgPgCount);
+
+	definitionsFile = bitField(u10, 15);
+	directoryCtx    = bitField(u10, 1, 15);
+
+	initializeHT(bb);
+
+	return bb;
+}
+
 void Symbols::dump() {
-    logger.info("offset          %5d  %5d", offset, offset / Environment::bytesPerPage);
+    logger.info("symbolBase      %5d  %5d", symbolBase, symbolBase / Environment::bytesPerPage);
     logger.info("versionIdent    %5d", versionIdent);
 	logger.info("version            %s", version.toString());
 	logger.info("creator            %s", creator.toString());
@@ -81,4 +99,74 @@ void Symbols::dump() {
 	logger.info("spareBlock      %5d  %5d", spareBlock.offset, spareBlock.size);
 	logger.info("fgRelPgBase     %5d", fgRelPgBase);
 	logger.info("fgPgCount       %5d", fgPgCount);
+
+	logger.info("ht              %5d", ht.size());
+}
+
+template<class T>
+const T& getRecord(uint16_t index, const std::map<uint16_t, T>& map) {
+	if (map.contains(index)) return map.at(index);
+	logger.error("Unexpeced index");
+	logger.error("  index  %d", index);
+	ERROR()
+}
+
+HTRecord Symbols::getHTRecord(uint16_t index) {
+	return getRecord<HTRecord>(index, ht);
+}
+
+
+
+
+std::string Symbols::getSS(ByteBuffer& bb) {
+	BlockDescriptor& block = ssBlock;
+    uint16_t offset = symbolBase + block.offset * 2;
+    uint16_t limit  = block.size * 2;
+
+	uint16_t length;
+	uint16_t maxLength;
+
+    bb.position(offset);
+	bb.read(length, maxLength);
+
+	std::string ss;
+    for(int i = 0; i < maxLength; i++) {
+		uint8_t c = bb.get8();
+		if (i < length) ss += c;
+    }
+
+	if (bb.position() != (offset + limit)) {
+		logger.error("Unexpected length");
+		logger.error("  offset     %5d", offset);
+		logger.error("  limit      %5d", limit);
+		logger.error("  length     %5d", length);
+		logger.error("  maxLength  %5d", maxLength);
+	}
+
+	return ss;
+}
+void Symbols::initializeHT(ByteBuffer& bb) {
+	std::string ss = getSS(bb);
+
+	BlockDescriptor& block = htBlock;
+    uint16_t offset = symbolBase + block.offset * 2;
+    uint16_t limit  = offset + block.size * 2;
+
+    uint16_t lastSSIndex = 0;
+    uint16_t index = 0;
+    bb.position(offset);
+
+    for(;;) {
+        int pos = bb.position();
+        if (limit <= pos) break;
+
+		HTRecord record;
+		record.read(bb, lastSSIndex, ss);
+        ht[index] = record;
+
+//        logger.info("ht %4d %s", index, record.toString());
+        index++;
+        lastSSIndex = record.ssIndex;
+    }
+
 }

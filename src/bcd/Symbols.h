@@ -41,6 +41,8 @@
 
 #include "../util/ByteBuffer.h"
 
+#include "HTRecord.h"
+
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
 struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
@@ -57,7 +59,6 @@ struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
 		return std_sprintf("[%5d %5d]", offset, size);
 	}
 };
-
 // AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
 //   STHeader: TYPE = RECORD [
 //     versionIdent: CARDINAL,
@@ -84,7 +85,12 @@ struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
 //     spareBlock: BlockDescriptor,
 //     fgRelPgBase: CARDINAL,
 //     fgPgCount: [0..256]];
-struct Symbols : public ByteBuffer::Readable {
+class Symbols : public ByteBuffer::Readable {
+	std::map<uint16_t, HTRecord>   ht;
+
+	std::string getSS(ByteBuffer& bb);
+	void initializeHT(ByteBuffer& bb);
+public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
 	static const uint16_t VersionID = 8140;
 
@@ -95,7 +101,7 @@ struct Symbols : public ByteBuffer::Readable {
 
 	using CTXIndex = uint16_t;
 
-	uint32_t        offset;
+	uint32_t        symbolBase;
 
 	uint16_t        versionIdent;
 	Timestamp       version;
@@ -124,21 +130,8 @@ struct Symbols : public ByteBuffer::Readable {
 	uint16_t        fgRelPgBase;
 	uint16_t        fgPgCount;
 
-	ByteBuffer& read(ByteBuffer& bb) {
-		offset = bb.position();
-
-		uint16_t u10;
-
-		bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
-		bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
-		bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
-		bb.read(fgRelPgBase, fgPgCount);
-
-		definitionsFile = bitField(u10, 15);
-		directoryCtx    = bitField(u10, 1, 15);
-
-		return bb;
-	}
-
+	ByteBuffer& read(ByteBuffer& bb);
 	void dump();
+
+	HTRecord getHTRecord(uint16_t index);
 };

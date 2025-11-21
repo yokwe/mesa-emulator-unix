@@ -95,6 +95,8 @@ struct Symbols : public ByteBuffer::Readable {
 
 	using CTXIndex = uint16_t;
 
+	uint32_t        offset;
+
 	uint16_t        versionIdent;
 	Timestamp       version;
 	Timestamp       creator;
@@ -123,6 +125,8 @@ struct Symbols : public ByteBuffer::Readable {
 	uint16_t        fgPgCount;
 
 	ByteBuffer& read(ByteBuffer& bb) {
+		offset = bb.position();
+
 		uint16_t u10;
 
 		bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);

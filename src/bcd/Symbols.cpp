@@ -37,6 +37,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../mesa/Pilot.h"
+
 #include "Symbols.h"
 
 Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
@@ -51,6 +53,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 }
 
 void Symbols::dump() {
+    logger.info("offset          %5d  %5d", offset, offset / Environment::bytesPerPage);
     logger.info("versionIdent    %5d", versionIdent);
 	logger.info("version            %s", version.toString());
 	logger.info("creator            %s", creator.toString());

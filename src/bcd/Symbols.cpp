@@ -42,12 +42,16 @@ static const Logger logger(__FILE__);
 #include "Symbols.h"
 
 Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
+	HTIndex::clear();
+
     Symbols symbols;
 
     bb.position(offset);
     symbols.read(bb);
 
-    // FIXME
+    symbols.initializeHT(bb);
+
+	HTIndex::setValue(symbols.htTable);
 
     return symbols;
 }
@@ -100,8 +104,25 @@ void Symbols::dump() {
 	logger.info("fgRelPgBase     %5d", fgRelPgBase);
 	logger.info("fgPgCount       %5d", fgPgCount);
 
-	logger.info("ht              %5d", ht.size());
+	logger.info("htTable         %5d", htTable.size());
 }
+
+void Symbols::dumpTable() {
+    for(const auto& e: htTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "ht", key), value.toString());
+    }
+
+    logger.info("htTable  %d", htTable.size());
+}
+void Symbols::dumpIndex() {
+    HTIndex::dump();
+
+    logger.info("HTIndex    indexSet  %d", HTIndex::indexSet.size());
+}
+
+
 
 template<class T>
 const T& getRecord(uint16_t index, const std::map<uint16_t, T>& map) {
@@ -112,7 +133,7 @@ const T& getRecord(uint16_t index, const std::map<uint16_t, T>& map) {
 }
 
 HTRecord Symbols::getHTRecord(uint16_t index) {
-	return getRecord<HTRecord>(index, ht);
+	return getRecord<HTRecord>(index, htTable);
 }
 
 
@@ -135,6 +156,7 @@ std::string Symbols::getSS(ByteBuffer& bb) {
 		if (i < length) ss += c;
     }
 
+	// sanity check
 	if (bb.position() != (offset + limit)) {
 		logger.error("Unexpected length");
 		logger.error("  offset     %5d", offset);
@@ -142,7 +164,6 @@ std::string Symbols::getSS(ByteBuffer& bb) {
 		logger.error("  length     %5d", length);
 		logger.error("  maxLength  %5d", maxLength);
 	}
-
 	return ss;
 }
 void Symbols::initializeHT(ByteBuffer& bb) {
@@ -162,7 +183,7 @@ void Symbols::initializeHT(ByteBuffer& bb) {
 
 		HTRecord record;
 		record.read(bb, lastSSIndex, ss);
-        ht[index] = record;
+        htTable[index] = record;
 
 //        logger.info("ht %4d %s", index, record.toString());
         index++;

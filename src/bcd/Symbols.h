@@ -86,8 +86,6 @@ struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
 //     fgRelPgBase: CARDINAL,
 //     fgPgCount: [0..256]];
 class Symbols : public ByteBuffer::Readable {
-	std::map<uint16_t, HTRecord>   ht;
-
 	std::string getSS(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
 public:
@@ -130,8 +128,14 @@ public:
 	uint16_t        fgRelPgBase;
 	uint16_t        fgPgCount;
 
+    // contents of above table
+    std::map<uint16_t, HTRecord>    htTable;
+
+
 	ByteBuffer& read(ByteBuffer& bb);
 	void dump();
+    void dumpTable();
+    void dumpIndex();
 
 	HTRecord getHTRecord(uint16_t index);
 };

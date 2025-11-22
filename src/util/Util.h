@@ -196,7 +196,7 @@ struct ErrorError {
 	ErrorError(std::source_location location_ = std::source_location::current()) : location(location_) {}
 };
 
-#define ERROR() { ErrorError errorError; LogSourceLocation::fatal(logger, errorError.location, "ERROR  "); throw errorError; }
+#define ERROR() { logBackTrace(); ErrorError errorError; LogSourceLocation::fatal(logger, errorError.location, "ERROR  "); throw errorError; }
 
 class Abort {
 public:

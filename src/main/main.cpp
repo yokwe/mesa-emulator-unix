@@ -59,14 +59,8 @@ int main(int, char**) {
 		bcd.dumpTable();
 //		bcd.dumpIndex();
 
-		logger.info("sourceFile      %s", bcd.sourceFile.toString());
-		logger.info("unpackagedFile  %s", bcd.unpackagedFile.toString());
-		for(const auto& e: bcd.sgTable) {
-			logger.info("sg-%d  %s", e.first, e.second.toString());
-		}
-
 		if (bcd.hasSymbol()) {
-			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset(), bcd);
+			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset());
 			symbols.dump();
 			symbols.dumpTable();
 			symbols.dumpIndex();

@@ -118,11 +118,21 @@ ByteBuffer& BCD::read(ByteBuffer& bb) {
 
 void BCD::setSymbolOffset(ByteBuffer& bb) {
     symbolOffset = 0;
-    if (sgOffset && sgLimit) {
-        // try symbol segemtn
+    if (nModules == 0) {
+        // try Symbols::ALTO_BIAS
+        auto offset = Symbols::ALTO_BIAS * Environment::bytesPerPage;;
+        bb.position(offset);
+        auto word = bb.get16();
+        if (word == Symbols::VersionID) symbolOffset = offset;
+        // sanity check
+        if (symbolOffset == 0) ERROR()
+    } else if (nModules == 1) {
+         // try symbol segemtn
         int count = 0;
         for(const auto& e: sgTable) {
             const SGRecord& sgRecord = e.second;
+            if (!sgRecord.file.isSelf()) continue;
+            
             if (sgRecord.segClass == SGRecord::SegClass::SYMBOLS) {
                 auto offset = (sgRecord.base - Symbols::ALTO_BIAS) * Environment::bytesPerPage;
                 bb.position(offset);
@@ -131,6 +141,7 @@ void BCD::setSymbolOffset(ByteBuffer& bb) {
                 count++;
             }
         }
+        // sanity check
         if (count != 1) {
             logger.error("Unexpected count");
             logger.error("sgOffset %d", sgOffset);
@@ -139,13 +150,7 @@ void BCD::setSymbolOffset(ByteBuffer& bb) {
             ERROR()
         }
     } else {
-        // or try Symbols::ALTO_BIAS
-        auto offset = Symbols::ALTO_BIAS * Environment::bytesPerPage;;
-        bb.position(offset);
-        auto word = bb.get16();
-        if (word == Symbols::VersionID) symbolOffset = offset;
-
-        if (symbolOffset == 0) ERROR()
+        // more than one module
     }
 }
 
@@ -189,15 +194,18 @@ void BCD::dump() {
 
 }
 void BCD::dumpTable() {
-    for(const auto& e: ssTable) {
-        auto key = e.first;
-        auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
-    }
-    for(const auto& e: ftTable) {
-        auto key = e.first;
-        auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ft", key), value.toString());
+    // for(const auto& e: ssTable) {
+    //     auto key = e.first;
+    //     auto value = e.second;
+    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
+    // }
+    {
+        int fileIndex = 0;
+        for(const auto& e: ftTable) {
+            auto key = e.first;
+            auto value = e.second;
+            logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value.toString());
+        }
     }
     for(const auto& e: sgTable) {
         auto key = e.first;
@@ -222,7 +230,7 @@ void BCD::dumpTable() {
     logger.info("mtTable  %d", mtTable.size());
 }
 void BCD::dumpIndex() {
-    NameRecord::dump();
+//    NameRecord::dump();
     FTIndex::dump();
     SGIndex::dump();
     ENIndex::dump();
@@ -284,14 +292,13 @@ template<class T>
 static void buildTable(ByteBuffer& bb, int offset, int limit_, std::map<uint16_t, T>& table) {
     int base  = offset * 2;
     int limit = base + limit_ * 2;
-    int index = 0;
     bb.position(base);
     for(;;) {
         if (limit <= bb.position()) break;
+        int index = BCD::getIndex(bb.position(), offset, limit);
         T value;
         value.read(bb);
         table[index] = value;
-        index++;
     }
 	// sanity check
 	if (bb.position() != limit) {

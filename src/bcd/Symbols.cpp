@@ -39,13 +39,11 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 
-#include "BCD.h"
-
 #include "MDRecord.h"
 #include "Symbols.h"
 
 
-Symbols Symbols::getInstance(ByteBuffer &bb, int offset, const BCD& bcd) {
+Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	HTIndex::clear();
 
     Symbols symbols;
@@ -55,8 +53,6 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset, const BCD& bcd) {
 
     symbols.initializeHT(bb);
 	symbols.initializeMD(bb);
-
-	bcd.setValue();
 
 	HTIndex::setValue(symbols.htTable);
 	MDIndex::setValue(symbols.mdTable);
@@ -227,24 +223,4 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
 void Symbols::initializeMD(ByteBuffer& bb) {
 	BlockDescriptor& block = mdBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, mdTable);
-
-    // uint16_t base  = symbolBase + block.offset * 2;
-    // uint16_t limit = base + block.size * 2;
-	// uint16_t index = 0;
-	// bb.position(base);
-	// for(;;) {
-    //     if (limit <= bb.position()) break;
-
-	// 	MDRecord record;
-	// 	record.read(bb);
-    //     mdTable[index] = record;
-	// 	index++;
-	// }
-	// // sanity check
-	// if (bb.position() != (limit)) {
-	// 	logger.error("Unexpected length");
-	// 	logger.error("  pos        %5d", bb.position());
-	// 	logger.error("  base       %5d", base);
-	// 	logger.error("  limit      %5d", limit);
-	// }
 }

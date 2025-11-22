@@ -102,7 +102,7 @@ public:
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
 	static const uint16_t ALTO_BIAS = 1;
 
-	static Symbols getInstance(ByteBuffer& bb, int offset, const BCD& bcd);
+	static Symbols getInstance(ByteBuffer& bb, int offset);
 
 	using CTXIndex = uint16_t;
 

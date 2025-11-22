@@ -80,11 +80,11 @@ struct MDRecord : public HasToString {
     bool       exported;
     CTXIndex   ctx;
     CTXIndex   defaultImport;
-    FTIndex    file;
+    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
 
     void read(ByteBuffer& bb) {
         uint16_t word;
-        bb.read(stamp, moduleId, word, ctx, defaultImport, file);
+        bb.read(stamp, moduleId, word, ctx, defaultImport, fileIndex);
 
         fileId.setIndex(bitField(word, 0, 12));
         shared   = bitField(word, 13);
@@ -95,8 +95,8 @@ struct MDRecord : public HasToString {
         auto moduleId_ = moduleId.toValue();
         auto fileId_ = fileId.getValue();
     
-        return std_sprintf("[[%s]  %s  %s  %s%s  %5d  %5d  [%s]]",
+        return std_sprintf("[[%s]  %s  %s  %s%s  %5d  %5d  %5d]",
             stamp.toString(), moduleId.toValue(), fileId.toValue(),
-            shared ? "S" : "", exported ? "E" : "", ctx, defaultImport, file.toString());
+            shared ? "S" : "", exported ? "E" : "", ctx, defaultImport, fileIndex);
     }
 };

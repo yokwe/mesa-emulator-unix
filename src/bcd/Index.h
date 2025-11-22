@@ -111,6 +111,18 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         removeIndex(this);
     }
 
+    void setIndex(uint16_t index_) {
+        if (noIndex) {
+            index   = index_;
+            noIndex = false;
+        } else {
+            logger.error("index already has value");
+            logger.error("  %s-%d", prefix, index);
+            logger.error("  index_  %d", index_);
+            ERROR()
+        }
+    }
+
     Index& operator=(const Index& that) {
         this->index   = that.index;
         this->value   = that.value;

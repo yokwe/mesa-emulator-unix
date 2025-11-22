@@ -55,7 +55,8 @@ int main(int, char**) {
 		BCD bcd = BCD::getInstance(bb);
 
 		bcd.dump();
-//		bcd.dumpTable();
+		bcd.dumpTable();
+//		bcd.dumpIndex();
 
 		logger.info("sourceFile      %s", bcd.sourceFile.toString());
 		logger.info("unpackagedFile  %s", bcd.unpackagedFile.toString());

@@ -85,10 +85,12 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         }
     }
 
+protected:
     uint16_t index;
     T*       value;
     bool     noIndex;
 
+public:
     // default constructor
     Index() : ByteBuffer::Readable(), index(55555), value(0), noIndex(true) {
         addIndex(this);
@@ -111,6 +113,13 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         removeIndex(this);
     }
 
+    Index& operator=(const Index& that) {
+        this->index   = that.index;
+        this->value   = that.value;
+        this->noIndex = that.noIndex;
+        return *this;
+    }
+
     void setIndex(uint16_t index_) {
         if (noIndex) {
             index   = index_;
@@ -122,12 +131,13 @@ struct Index : public ByteBuffer::Readable, public HasToString {
             ERROR()
         }
     }
-
-    Index& operator=(const Index& that) {
-        this->index   = that.index;
-        this->value   = that.value;
-        this->noIndex = that.noIndex;
-        return *this;
+    uint16_t getIndex() const {
+        if (noIndex) {
+            logger.error("index has no value");
+            ERROR()
+        } else {
+            return index;
+        }
     }
 
     const T& getValue() const {

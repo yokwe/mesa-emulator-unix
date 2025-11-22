@@ -145,17 +145,44 @@ void BCD::dump() {
 
 }
 void BCD::dumpTable() {
-    NameRecord::dump();
-    FTIndex::dump();
-    SGIndex::dump();
-    ENIndex::dump();
-    MTIndex::dump();
+    for(const auto& e: ssTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
+    }
+    for(const auto& e: ftTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "ft", key), value.toString());
+    }
+    for(const auto& e: sgTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "sg", key), value.toString());
+    }
+    for(const auto& e: enTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "en", key), value.toString());
+    }
+    for(const auto& e: mtTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
+    }
 
     logger.info("ssTable  %d", ssTable.size());
     logger.info("ftTable  %d", ftTable.size());
     logger.info("sgTable  %d", sgTable.size());
     logger.info("enTable  %d", enTable.size());
     logger.info("mtTable  %d", mtTable.size());
+}
+void BCD::dumpIndex() {
+    NameRecord::dump();
+    FTIndex::dump();
+    SGIndex::dump();
+    ENIndex::dump();
+    MTIndex::dump();
 
     logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
     logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());

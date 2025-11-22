@@ -334,6 +334,7 @@ public:
 
     void dump();
     void dumpTable();
+    void dumpIndex();
 
     bool hasSymbol() {
         return symbolOffset;

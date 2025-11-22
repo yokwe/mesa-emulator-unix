@@ -65,7 +65,7 @@ struct HTIndex : public Index<"ht", HTRecord> {
 struct HTRecord : public HasToString {
     bool        anyInternal;
     bool        anyPublic;
-    uint16_t    link;
+    HTIndex     link;
     uint16_t    ssIndex;
     std::string value;
 
@@ -75,11 +75,13 @@ struct HTRecord : public HasToString {
         bb.read(u0, ssIndex);
         anyInternal = bitField(u0, 0);
         anyPublic   = bitField(u0, 1);
-        link        = bitField(u0, 2, 15);
+
+        link.setIndex(bitField(u0, 2, 15));
 
         value       = ss.substr(lastSSIndex, ssIndex - lastSSIndex);
     }
     std::string toString() const override {
-        return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link, ssIndex, value);
+        return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link.getIndex(), ssIndex, value);
+//        return std_sprintf("[%d  %d  %s  %5d  %s]", anyInternal, anyPublic, link.toString(), ssIndex, value);
     }
 };

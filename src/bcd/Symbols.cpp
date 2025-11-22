@@ -132,12 +132,6 @@ const T& getRecord(uint16_t index, const std::map<uint16_t, T>& map) {
 	ERROR()
 }
 
-HTRecord Symbols::getHTRecord(uint16_t index) {
-	return getRecord<HTRecord>(index, htTable);
-}
-
-
-
 
 std::string Symbols::getSS(ByteBuffer& bb) {
 	BlockDescriptor& block = ssBlock;

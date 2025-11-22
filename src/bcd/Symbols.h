@@ -86,8 +86,11 @@ struct BlockDescriptor : public ByteBuffer::Readable, public HasToString {
 //     fgRelPgBase: CARDINAL,
 //     fgPgCount: [0..256]];
 class Symbols : public ByteBuffer::Readable {
+	ByteBuffer& read(ByteBuffer& bb);
+
 	std::string getSS(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
+
 public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
 	static const uint16_t VersionID = 8140;
@@ -131,11 +134,7 @@ public:
     // contents of above table
     std::map<uint16_t, HTRecord>    htTable;
 
-
-	ByteBuffer& read(ByteBuffer& bb);
 	void dump();
     void dumpTable();
     void dumpIndex();
-
-	HTRecord getHTRecord(uint16_t index);
 };

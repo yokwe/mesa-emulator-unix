@@ -67,6 +67,8 @@ int main(int, char**) {
 		if (bcd.hasSymbol()) {
 			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset());
 			symbols.dump();
+			symbols.dumpTable();
+			symbols.dumpIndex();
 		}
 	}
 

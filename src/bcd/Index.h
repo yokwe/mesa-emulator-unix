@@ -74,8 +74,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
             if (p->noIndex) continue;
             auto index = p->index;
             if (valueMap.contains(index)) {
-                p->value   = valueMap[index];
-                p->noValue = false;
+                p->value   = &valueMap[index];
             }
         }
     }
@@ -87,12 +86,11 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     }
 
     uint16_t index;
-    T        value;
+    T*       value;
     bool     noIndex;
-    bool     noValue;
 
     // default constructor
-    Index() : ByteBuffer::Readable(), index(55555), value(), noIndex(true), noValue(true) {
+    Index() : ByteBuffer::Readable(), index(55555), value(0), noIndex(true) {
         addIndex(this);
     }
     // copy constructor
@@ -100,7 +98,6 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         this->index   = that.index;
         this->value   = that.value;
         this->noIndex = that.noIndex;
-        this->noValue = that.noValue;
        addIndex(this);
     }
     // move constructor
@@ -108,7 +105,6 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         this->index   = that.index;
         this->value   = that.value;
         this->noIndex = that.noIndex;
-        this->noValue = that.noValue;
         addIndex(this);
     }
     ~Index() {
@@ -119,18 +115,17 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         this->index   = that.index;
         this->value   = that.value;
         this->noIndex = that.noIndex;
-        this->noValue = that.noValue;
         return *this;
     }
 
     const T& getValue() const {
-        if (!noValue) return value;
+        if (value) return *value;
         logger.error("index has no value");
         logger.error("  %s-%d", prefix, index);
         ERROR()
     }
     const T& operator*() const noexcept {
-        if (!noValue) return value;
+        if (value) return *value;
         logger.error("index has no value");
         logger.error("  %s-%d", prefix, index);
         ERROR()
@@ -144,13 +139,15 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         return bb;
     }
     std::string toString() const override {
-        if (noValue) return std_sprintf("%s-%d", prefix, index);
-        constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-        if constexpr(is_string) {
-            return value;
-        } else {
-            return value.toString();
+        if (value) {
+            constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
+            if constexpr(is_string) {
+                return *value;
+            } else {
+                return value->toString();
+            }
         }
+        return std_sprintf("%s-%d", prefix, index);
     }
     std::string toStringIndex() const {
         return std_sprintf("%s-%d", prefix, index);

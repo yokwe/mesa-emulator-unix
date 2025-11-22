@@ -39,9 +39,13 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 
+#include "BCD.h"
+
+#include "MDRecord.h"
 #include "Symbols.h"
 
-Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
+
+Symbols Symbols::getInstance(ByteBuffer &bb, int offset, const BCD& bcd) {
 	HTIndex::clear();
 
     Symbols symbols;
@@ -50,8 +54,12 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
     symbols.read(bb);
 
     symbols.initializeHT(bb);
+	symbols.initializeMD(bb);
+
+	bcd.setValue();
 
 	HTIndex::setValue(symbols.htTable);
+	MDIndex::setValue(symbols.mdTable);
 
     return symbols;
 }
@@ -108,18 +116,26 @@ void Symbols::dump() {
 }
 
 void Symbols::dumpTable() {
-    for(const auto& e: htTable) {
+    // for(const auto& e: htTable) {
+    //     auto key = e.first;
+    //     auto value = e.second;
+    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ht", key), value.toString());
+    // }
+    for(const auto& e: mdTable) {
         auto key = e.first;
         auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ht", key), value.toString());
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value.toString());
     }
 
     logger.info("htTable  %d", htTable.size());
+    logger.info("mdTable  %d", mdTable.size());
 }
 void Symbols::dumpIndex() {
-    HTIndex::dump();
+//    HTIndex::dump();
+	MDIndex::dump();
 
     logger.info("HTIndex    indexSet  %d", HTIndex::indexSet.size());
+    logger.info("MDIndex    indexSet  %d", MDIndex::indexSet.size());
 }
 
 
@@ -164,13 +180,12 @@ void Symbols::initializeHT(ByteBuffer& bb) {
 	std::string ss = getSS(bb);
 
 	BlockDescriptor& block = htBlock;
-    uint16_t offset = symbolBase + block.offset * 2;
-    uint16_t limit  = offset + block.size * 2;
+    uint16_t base  = symbolBase + block.offset * 2;
+    uint16_t limit = base + block.size * 2;
 
     uint16_t lastSSIndex = 0;
     uint16_t index = 0;
-    bb.position(offset);
-
+    bb.position(base);
     for(;;) {
         int pos = bb.position();
         if (limit <= pos) break;
@@ -183,5 +198,53 @@ void Symbols::initializeHT(ByteBuffer& bb) {
         index++;
         lastSSIndex = record.ssIndex;
     }
+}
 
+template<class T>
+static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T>& table) {
+    int base  = symbolBase + offset * 2;
+    int limit = base + limit_ * 2;
+    int index = 0;
+    bb.position(base);
+    for(;;) {
+        if (limit <= bb.position()) break;
+        T value;
+        value.read(bb);
+        table[index] = value;
+        index++;
+    }
+	// sanity check
+	if (bb.position() != (limit)) {
+		logger.error("Unexpected length");
+		logger.error("  pos        %5d", bb.position());
+		logger.error("  base       %5d", base);
+		logger.error("  limit      %5d", limit);
+		logger.error("  index      %5d", index);
+	}
+}
+
+
+void Symbols::initializeMD(ByteBuffer& bb) {
+	BlockDescriptor& block = mdBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, mdTable);
+
+    // uint16_t base  = symbolBase + block.offset * 2;
+    // uint16_t limit = base + block.size * 2;
+	// uint16_t index = 0;
+	// bb.position(base);
+	// for(;;) {
+    //     if (limit <= bb.position()) break;
+
+	// 	MDRecord record;
+	// 	record.read(bb);
+    //     mdTable[index] = record;
+	// 	index++;
+	// }
+	// // sanity check
+	// if (bb.position() != (limit)) {
+	// 	logger.error("Unexpected length");
+	// 	logger.error("  pos        %5d", bb.position());
+	// 	logger.error("  base       %5d", base);
+	// 	logger.error("  limit      %5d", limit);
+	// }
 }

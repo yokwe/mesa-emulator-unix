@@ -47,6 +47,7 @@ int main(int, char**) {
 
 	{
 //		std::string path = "tmp/bcd/MesaRuntime.symbols";
+//		std::string path = "tmp/bcd/UnpackedPilotKernel.bcd";
 //		std::string path = "tmp/bcd/File.bcd";
 		std::string path = "tmp/bcd/FileImpl.bcd";
 
@@ -65,7 +66,7 @@ int main(int, char**) {
 		}
 
 		if (bcd.hasSymbol()) {
-			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset());
+			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset(), bcd);
 			symbols.dump();
 			symbols.dumpTable();
 			symbols.dumpIndex();

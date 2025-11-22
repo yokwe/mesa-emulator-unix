@@ -60,15 +60,19 @@ BCD BCD::getInstance(ByteBuffer& bb) {
     bcd.buildENTable(bb);
     bcd.buildMTTable(bb);
 
-    NameRecord::setValue(bcd.ssTable);
-    FTIndex::setValue(bcd.ftTable);
-    SGIndex::setValue(bcd.sgTable);
-    ENIndex::setValue(bcd.enTable);
-    MTIndex::setValue(bcd.mtTable);
+    bcd.setValue();
 
     bcd.setSymbolOffset(bb);
 
     return bcd;
+}
+
+void BCD::setValue() const {
+    NameRecord::setValue(ssTable);
+    FTIndex::setValue(ftTable);
+    SGIndex::setValue(sgTable);
+    ENIndex::setValue(enTable);
+    MTIndex::setValue(mtTable);
 }
 
 ByteBuffer& BCD::read(ByteBuffer& bb) {
@@ -114,7 +118,7 @@ ByteBuffer& BCD::read(ByteBuffer& bb) {
 
 void BCD::setSymbolOffset(ByteBuffer& bb) {
     symbolOffset = 0;
-    if (sgOffset) {
+    if (sgOffset && sgLimit) {
         // try symbol segemtn
         int count = 0;
         for(const auto& e: sgTable) {
@@ -129,7 +133,9 @@ void BCD::setSymbolOffset(ByteBuffer& bb) {
         }
         if (count != 1) {
             logger.error("Unexpected count");
-            logger.error("count %d", count);
+            logger.error("sgOffset %d", sgOffset);
+            logger.error("sgListm  %d", sgLimit);
+            logger.error("count    %d", count);
             ERROR()
         }
     } else {
@@ -274,25 +280,27 @@ void BCD::buildSSTable(ByteBuffer& bb) {
    }
 }
 
-template<class R>
-static void buildTable(ByteBuffer& bb, int offset, int limit, std::map<uint16_t, R>& table) {
-    bb.position(offset * 2);
+template<class T>
+static void buildTable(ByteBuffer& bb, int offset, int limit_, std::map<uint16_t, T>& table) {
+    int base  = offset * 2;
+    int limit = base + limit_ * 2;
+    int index = 0;
+    bb.position(base);
     for(;;) {
-        uint16_t index = BCD::getIndex(bb.position(), offset, limit);
-        if (limit <= index) break;
-
-        R value;
+        if (limit <= bb.position()) break;
+        T value;
         value.read(bb);
-
-        if (table.contains(index)) {
-            // not expect this
-            logger.error("Duplicate key");
-            logger.error("  index   %d", index);
-            ERROR()
-        } else {
-            table[index] = value;
-        }
+        table[index] = value;
+        index++;
     }
+	// sanity check
+	if (bb.position() != limit) {
+		logger.error("Unexpected length");
+		logger.error("  pos        %5d", bb.position());
+		logger.error("  base       %5d", base);
+		logger.error("  limit      %5d", limit);
+		logger.error("  index      %5d", index);
+	}
 }
 
 void BCD::buildFTTable(ByteBuffer& bb) {

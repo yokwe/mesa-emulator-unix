@@ -45,8 +45,6 @@
 #include "Index.h"
 #include "Timestamp.h"
 
-constexpr const uint16_t T_LIMIT = 0177777;
-
 // NameRecord: TYPE = RECORD [CARDINAL];
 // NullName: NameRecord = [1];
 struct NameRecord : public Index<"ss", std::string> {
@@ -305,6 +303,8 @@ public:
     std::map<uint16_t, SGRecord>    sgTable;
     std::map<uint16_t, ENRecord>    enTable;
     std::map<uint16_t, MTRecord>    mtTable;
+
+    void setValue() const;
 
     void dump();
     void dumpTable();

@@ -42,6 +42,7 @@
 
 #include "../util/ByteBuffer.h"
 
+constexpr const uint16_t T_LIMIT = 0177777;
 
 template <StringLiteral PREFIX, class T>
 struct Index : public ByteBuffer::Readable, public HasToString {
@@ -68,13 +69,13 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static void clear() {
         indexSet.clear();
     }
-    static void setValue(std::map<uint16_t, T>& valueMap) {
+    static void setValue(const std::map<uint16_t, T>& valueMap) {
         for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
             Index* p = *i;
             if (p->noIndex) continue;
             auto index = p->index;
             if (valueMap.contains(index)) {
-                p->value   = &valueMap[index];
+                p->value   = &valueMap.at(index);
             }
         }
     }
@@ -87,7 +88,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
 
 protected:
     uint16_t index;
-    T*       value;
+    const T* value;
     bool     noIndex;
 
 public:

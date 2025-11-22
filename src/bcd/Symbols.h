@@ -42,6 +42,9 @@
 #include "../util/ByteBuffer.h"
 
 #include "HTRecord.h"
+#include "MDRecord.h"
+
+class BCD;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -90,6 +93,7 @@ class Symbols : public ByteBuffer::Readable {
 
 	std::string getSS(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
+	void initializeMD(ByteBuffer& bb);
 
 public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
@@ -98,7 +102,7 @@ public:
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
 	static const uint16_t ALTO_BIAS = 1;
 
-	static Symbols getInstance(ByteBuffer& bb, int offset);
+	static Symbols getInstance(ByteBuffer& bb, int offset, const BCD& bcd);
 
 	using CTXIndex = uint16_t;
 
@@ -133,6 +137,7 @@ public:
 
     // contents of above table
     std::map<uint16_t, HTRecord>    htTable;
+    std::map<uint16_t, MDRecord>    mdTable;
 
 	void dump();
     void dumpTable();

@@ -40,6 +40,23 @@
 
 #include "Index.h"
 
+// forward declaration
+struct HTRecord;
+
+//HTIndex: TYPE = CARDINAL [0..Limit/2);
+//HTNull: HTIndex = FIRST[HTIndex];
+struct HTIndex : public Index<"ht", HTRecord> {
+    static const constexpr uint16_t HT_NULL = 0;
+    
+    bool isNull() const {
+        return index == HT_NULL;
+    }
+    std::string toString() const override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
+    }
+};
+
 
 //HTRecord: TYPE = RECORD [
 //  anyInternal, anyPublic: BOOLEAN,
@@ -64,19 +81,5 @@ struct HTRecord : public HasToString {
     }
     std::string toString() const override {
         return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link, ssIndex, value);
-    }
-};
-
-//HTIndex: TYPE = CARDINAL [0..Limit/2);
-//HTNull: HTIndex = FIRST[HTIndex];
-struct HTIndex : public Index<"ht", HTRecord> {
-    static const constexpr uint16_t HT_NULL = 0;
-
-    bool isNull() const {
-        return index == HT_NULL;
-    }
-    std::string toString() const override {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
     }
 };

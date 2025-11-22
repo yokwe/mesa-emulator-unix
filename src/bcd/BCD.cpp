@@ -43,6 +43,34 @@ static const Logger logger(__FILE__);
 #include "Symbols.h"
 #include "BCD.h"
 
+BCD BCD::getInstance(ByteBuffer& bb) {
+    NameRecord::clear();
+    FTIndex::clear();
+    SGIndex::clear();
+    ENIndex::clear();
+    MTIndex::clear();
+    
+    BCD bcd;
+
+    bcd.read(bb);
+
+    bcd.buildSSTable(bb);
+    bcd.buildFTTable(bb);
+    bcd.buildSGTable(bb);
+    bcd.buildENTable(bb);
+    bcd.buildMTTable(bb);
+
+    NameRecord::setValue(bcd.ssTable);
+    FTIndex::setValue(bcd.ftTable);
+    SGIndex::setValue(bcd.sgTable);
+    ENIndex::setValue(bcd.enTable);
+    MTIndex::setValue(bcd.mtTable);
+
+    bcd.setSymbolOffset(bb);
+
+    return bcd;
+}
+
 ByteBuffer& BCD::read(ByteBuffer& bb) {
     bb.rewind();
     bb.read(versionIdent);
@@ -87,6 +115,8 @@ ByteBuffer& BCD::read(ByteBuffer& bb) {
 void BCD::setSymbolOffset(ByteBuffer& bb) {
     symbolOffset = 0;
     if (sgOffset) {
+        // try symbol segemtn
+        int count = 0;
         for(const auto& e: sgTable) {
             const SGRecord& sgRecord = e.second;
             if (sgRecord.segClass == SGRecord::SegClass::SYMBOLS) {
@@ -94,14 +124,22 @@ void BCD::setSymbolOffset(ByteBuffer& bb) {
                 bb.position(offset);
                 auto word = bb.get16();
                 if (word == Symbols::VersionID) symbolOffset = offset;
-                break;
+                count++;
             }
         }
+        if (count != 1) {
+            logger.error("Unexpected count");
+            logger.error("count %d", count);
+            ERROR()
+        }
     } else {
+        // or try Symbols::ALTO_BIAS
         auto offset = Symbols::ALTO_BIAS * Environment::bytesPerPage;;
         bb.position(offset);
         auto word = bb.get16();
         if (word == Symbols::VersionID) symbolOffset = offset;
+
+        if (symbolOffset == 0) ERROR()
     }
 }
 

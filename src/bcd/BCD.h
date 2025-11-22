@@ -255,33 +255,7 @@ class BCD : public ByteBuffer::Readable {
 public:
     static constexpr uint16_t VersionID = 6103;
 
-    static BCD getInstance(ByteBuffer& bb) {
-        NameRecord::clear();
-        FTIndex::clear();
-        SGIndex::clear();
-        ENIndex::clear();
-        MTIndex::clear();
-        
-		BCD bcd;
-
-		bcd.read(bb);
-
-		bcd.buildSSTable(bb);
-		bcd.buildFTTable(bb);
-		bcd.buildSGTable(bb);
-		bcd.buildENTable(bb);
-		bcd.buildMTTable(bb);
-
-		NameRecord::setValue(bcd.ssTable);
-		FTIndex::setValue(bcd.ftTable);
-		SGIndex::setValue(bcd.sgTable);
-		ENIndex::setValue(bcd.enTable);
-		MTIndex::setValue(bcd.mtTable);
-
-        bcd.setSymbolOffset(bb);
-
-        return bcd;
-    }
+    static BCD getInstance(ByteBuffer& bb);
 
     static uint16_t getIndex(int pos, int offset, int limit);
 

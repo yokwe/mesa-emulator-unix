@@ -30,7 +30,7 @@
 
 
 //
-// BCD.cpp
+// HTRecord.cpp
 //
 
 #include <string>
@@ -41,6 +41,28 @@ static const Logger logger(__FILE__);
 #include "HTRecord.h"
 
 
+std::string HTIndex::toString() const {
+    if (isNull()) return std_sprintf("%s-NULL", prefix);
+    return value()->toString();
+}
+
 std::string HTIndex::toValue() const {
-    return getValue().toValue();
+    return value()->toValue();
+}
+
+void HTRecord::read(ByteBuffer& bb, uint16_t lastSSIndex, const std::string& ss) {
+    uint16_t u0;
+
+    bb.read(u0, ssIndex);
+    anyInternal = bitField(u0, 0);
+    anyPublic   = bitField(u0, 1);
+
+    link.index(bitField(u0, 2, 15));
+
+    value       = ss.substr(lastSSIndex, ssIndex - lastSSIndex);
+}
+
+std::string HTRecord::toString() const {
+    return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link.index(), ssIndex, value);
+//        return std_sprintf("[%d  %d  %s  %5d  %s]", anyInternal, anyPublic, link.toString(), ssIndex, value);
 }

@@ -44,6 +44,7 @@
 struct HTRecord;
 struct MDRecord;
 struct CTXRecord;
+struct CTXIndex;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -93,6 +94,7 @@ class Symbols : public ByteBuffer::Readable {
 	std::string getSS(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
 	void initializeMD(ByteBuffer& bb);
+	void initializeCTX(ByteBuffer& bb);
 
 public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
@@ -103,8 +105,6 @@ public:
 
 	static Symbols getInstance(ByteBuffer& bb, int offset);
 
-	using CTXIndex = uint16_t;
-
 	uint32_t        symbolBase;
 
 	uint16_t        versionIdent;
@@ -112,9 +112,9 @@ public:
 	Timestamp       creator;
 	Timestamp       sourceVersion;
 	bool            definitionsFile;
-	CTXIndex        directoryCtx;
-	CTXIndex        importCtx;
-	CTXIndex        outerCtx;
+	CTXIndex*       directoryCtx;
+	CTXIndex*       importCtx;
+	CTXIndex*       outerCtx;
 	BlockDescriptor hvBlock;
 	BlockDescriptor htBlock;
 	BlockDescriptor ssBlock;

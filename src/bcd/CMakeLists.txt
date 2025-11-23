@@ -9,14 +9,18 @@ target_sources(
 	PUBLIC
 		BCD.h
 		BCDFile.h
+		CTXRecord.h
 		HTRecord.h
 		Index.h
+		MDRecord.h
 		Symbols.h
 		Timestamp.h
 	PRIVATE
 		BCD.cpp
 		BCDFile.cpp
+		CTXRecord.cpp
 		HTRecord.cpp
+		MDRecord.cpp
 		Symbols.cpp
 		Timestamp.cpp
 )

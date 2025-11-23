@@ -57,9 +57,11 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 
     symbols.initializeHT(bb);
 	symbols.initializeMD(bb);
+	symbols.initializeCTX(bb);
 
 	HTIndex::setValue(symbols.htTable);
 	MDIndex::setValue(symbols.mdTable);
+	CTXIndex::setValue(symbols.ctxTable);
 
     return symbols;
 }
@@ -68,16 +70,18 @@ ByteBuffer& Symbols::read(ByteBuffer& bb) {
 	symbolBase = bb.position();
 
 	uint16_t u10;
+	directoryCtx = new CTXIndex;
+	importCtx    = new CTXIndex;
+	outerCtx     = new CTXIndex;
 
-	bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
+	bb.read(versionIdent, version, creator, sourceVersion, u10, *importCtx, *outerCtx);
 	bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
 	bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
 	bb.read(fgRelPgBase, fgPgCount);
 
 	definitionsFile = bitField(u10, 15);
-	directoryCtx    = bitField(u10, 1, 15);
 
-	initializeHT(bb);
+	directoryCtx->index(bitField(u10, 1, 15));
 
 	return bb;
 }
@@ -89,9 +93,9 @@ void Symbols::dump() {
 	logger.info("creator            %s", creator.toString());
 	logger.info("sourceVersion      %s", creator.toString());
 	logger.info("definitionsFile    %s", definitionsFile ? "YES" : "NO");
-	logger.info("directoryCtx    %5d", directoryCtx);
-	logger.info("importCtx       %5d", importCtx);
-	logger.info("outerCtx        %5d", outerCtx);
+	logger.info("directoryCtx       %s", directoryCtx->Index::toString());
+	logger.info("importCtx          %s", importCtx->Index::toString());
+	logger.info("outerCtx           %s", outerCtx->Index::toString());
 
 	logger.info("hvBlock         %5d  %5d", hvBlock.offset, hvBlock.size);
 	logger.info("htBlock         %5d  %5d", htBlock.offset, htBlock.size);
@@ -116,19 +120,24 @@ void Symbols::dump() {
 }
 
 void Symbols::dumpTable() {
+    logger.info("htTable   %d", htTable.size());
     // for(const auto& e: htTable) {
     //     auto key = e.first;
     //     auto value = e.second;
     //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ht", key), value.toString());
     // }
+    logger.info("mdTable   %d", mdTable.size());
     for(const auto& e: mdTable) {
         auto key = e.first;
         auto value = e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value->toString());
     }
-
-    logger.info("htTable  %d", htTable.size());
-    logger.info("mdTable  %d", mdTable.size());
+    logger.info("ctxTable  %d", ctxTable.size());
+    for(const auto& e: ctxTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "ctx", key), value->toString());
+    }
 }
 void Symbols::dumpIndex() {
 //    HTIndex::dump();
@@ -200,18 +209,30 @@ void Symbols::initializeHT(ByteBuffer& bb) {
     }
 }
 
+uint16_t getIndex(int pos, int offset, int limit) {
+    uint16_t index = ((pos + 1) / 2) -  offset;
+    if (index < 0 || limit < index) {
+        logger.error("Unexpected index");
+        logger.error("  pos     %5d", pos);
+        logger.error("  offset  %5d", offset);
+        logger.error("  limit   %5d", limit);
+        logger.error("  index   %5d", index);
+        ERROR()
+    }
+    return index;
+}
+
 template<class T>
 static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table) {
     int base  = symbolBase + offset * 2;
     int limit = base + limit_ * 2;
-    int index = 0;
     bb.position(base);
     for(;;) {
+        int index = getIndex(bb.position() - symbolBase, offset, limit_);
         if (limit <= bb.position()) break;
 		T* value = new T;
         value->read(bb);
         table[index] = value;
-        index++;
     }
 	// sanity check
 	if (bb.position() != (limit)) {
@@ -227,4 +248,8 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
 void Symbols::initializeMD(ByteBuffer& bb) {
 	BlockDescriptor& block = mdBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, mdTable);
+}
+void Symbols::initializeCTX(ByteBuffer& bb) {
+	BlockDescriptor& block = ctxBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, ctxTable);
 }

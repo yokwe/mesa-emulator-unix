@@ -51,11 +51,11 @@ struct NameRecord : public Index<"ss", std::string> {
     static const constexpr uint16_t NULL_NAME = 1;
 
     bool isNull() const {
-        return index == NULL_NAME;
+        return index() == NULL_NAME;
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+        return *value();
     }
 };
 
@@ -82,10 +82,10 @@ struct FTIndex : public Index<"ft", FTRecord> {
     static const constexpr uint16_t FT_SELF = T_LIMIT - 1;
 
     bool isNull() const {
-        return index == FT_NULL;
+        return index() == FT_NULL;
     }
     bool isSelf() const {
-        return index == FT_SELF;
+        return index() == FT_SELF;
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
@@ -119,11 +119,11 @@ struct SGIndex : public Index<"sg", SGRecord> {
     static const constexpr uint16_t SG_NULL = T_LIMIT;
 
     bool isNull() const {
-        return index == SG_NULL;
+        return index() == SG_NULL;
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+        return value()->toString();
     }
 };
 
@@ -142,11 +142,11 @@ struct ENIndex : public Index<"en", ENRecord> {
     static const constexpr uint16_t EN_NULL = T_LIMIT;
 
     bool isNull() const {
-        return index == EN_NULL;
+        return index() == EN_NULL;
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+        return value()->toString();
     }
 };
 
@@ -228,11 +228,11 @@ struct MTIndex : public Index<"mt", MTRecord> {
     static const constexpr uint16_t MT_NULL = T_LIMIT;
 
     bool isNull() const {
-        return index == MT_NULL;
+        return index() == MT_NULL;
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+        return value()->toString();
     }
 };
 

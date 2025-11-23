@@ -30,54 +30,40 @@
 
 
 //
-// MDRecord.h
+// MDRecord.cpp
 //
 
-#pragma once
-
-#include <cstdint>
 #include <string>
 
-#include "Index.h"
-#include "Timestamp.h"
-#include "HTRecord.h"
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-// forward declaration
-struct MDRecord;
-//MDIndex: TYPE = Base RELATIVE ORDERED POINTER [0..Limit) TO MDRecord;
-//MDNull: MDIndex = LAST[MDIndex];
-//OwnMdi: MDIndex = FIRST[MDIndex];
-struct MDIndex : public Index<"md", MDRecord> {
-    static const constexpr uint16_t MD_NULL = T_LIMIT;
-    
-    bool isNull() const {
-        return index() == MD_NULL;
-    }
-    std::string toString() const override;
-};
+#include "MDRecord.h"
 
-//MDRecord: TYPE = RECORD [
-//  stamp: TimeStamp.Stamp,
-//  moduleId: HTIndex,		-- hash entry for module name
-//  fileId: HTIndex,		-- hash entry for file name
-//  shared: BOOLEAN,		-- overrides PRIVATE, etc.
-//  exported: BOOLEAN,
-//  ctx: IncludedCTXIndex,	-- context of copied entries
-//  defaultImport: CTXIndex,	-- unnamed imported instance
-//  file: FileIndex];		-- associated file
-struct MDRecord : public ByteBuffer::Readable, public HasToString {
-    using CTXIndex = uint16_t; // FIXME
+//
+// MDIndex
+//
+std::string MDIndex::toString() const {
+    if (isNull()) return std_sprintf("%s-NULL", prefix);
+    return value()->toString();
+}
 
-    Timestamp  stamp;
-    HTIndex    moduleId;
-    HTIndex    fileId;
-    bool       shared;
-    bool       exported;
-    CTXIndex   ctx;
-    CTXIndex   defaultImport;
-    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
 
-    ByteBuffer& read(ByteBuffer& bb) override;
+//
+// MDRecord
+//
+ByteBuffer& MDRecord::read(ByteBuffer& bb) {
+    uint16_t word;
+    bb.read(stamp, moduleId, word, ctx, defaultImport, fileIndex);
 
-    std::string toString() const override;
-};
+    fileId.index(bitField(word, 0, 12));
+    shared   = bitField(word, 13);
+    exported = bitField(word, 14, 15);
+
+    return bb;
+}
+std::string MDRecord::toString() const {
+    return std_sprintf("[[%s]  %s  %s  %s%s  %5d  %5d  %5d]",
+        stamp.toString(), moduleId.toValue(), fileId.toValue(),
+        shared ? "S" : "", exported ? "E" : "", ctx, defaultImport, fileIndex);
+}

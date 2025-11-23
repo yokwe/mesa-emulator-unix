@@ -40,21 +40,16 @@
 
 #include "Index.h"
 
-// forward declaration
 struct HTRecord;
-
 //HTIndex: TYPE = CARDINAL [0..Limit/2);
 //HTNull: HTIndex = FIRST[HTIndex];
 struct HTIndex : public Index<"ht", HTRecord> {
     static const constexpr uint16_t HT_NULL = 0;
     
     bool isNull() const {
-        return index == HT_NULL;
+        return index() == HT_NULL;
     }
-    std::string toString() const override {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
-    }
+    std::string toString() const override;
     std::string toValue() const;
 };
 
@@ -70,21 +65,8 @@ struct HTRecord : public HasToString {
     uint16_t    ssIndex;
     std::string value;
 
-    void read(ByteBuffer& bb, uint16_t lastSSIndex, const std::string& ss) {
-        uint16_t u0;
-
-        bb.read(u0, ssIndex);
-        anyInternal = bitField(u0, 0);
-        anyPublic   = bitField(u0, 1);
-
-        link.setIndex(bitField(u0, 2, 15));
-
-        value       = ss.substr(lastSSIndex, ssIndex - lastSSIndex);
-    }
-    std::string toString() const override {
-        return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link.getIndex(), ssIndex, value);
-//        return std_sprintf("[%d  %d  %s  %5d  %s]", anyInternal, anyPublic, link.toString(), ssIndex, value);
-    }
+    void read(ByteBuffer& bb, uint16_t lastSSIndex, const std::string& ss);
+    std::string toString() const override;
     std::string toValue() const {
         return value;
     }

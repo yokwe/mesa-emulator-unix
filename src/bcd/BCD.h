@@ -298,11 +298,11 @@ public:
     BCD_TABLE(ap)  // atom print table
 
     // contents of above table
-    std::map<uint16_t, std::string> ssTable;
-    std::map<uint16_t, FTRecord>    ftTable;
-    std::map<uint16_t, SGRecord>    sgTable;
-    std::map<uint16_t, ENRecord>    enTable;
-    std::map<uint16_t, MTRecord>    mtTable;
+    std::map<uint16_t, std::string*> ssTable;
+    std::map<uint16_t, FTRecord*>    ftTable;
+    std::map<uint16_t, SGRecord*>    sgTable;
+    std::map<uint16_t, ENRecord*>    enTable;
+    std::map<uint16_t, MTRecord*>    mtTable;
 
     void setValue() const;
 

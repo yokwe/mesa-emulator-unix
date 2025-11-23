@@ -69,13 +69,13 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static void clear() {
         indexSet.clear();
     }
-    static void setValue(const std::map<uint16_t, T>& valueMap) {
+    static void setValue(const std::map<uint16_t, T*>& valueMap) {
         for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
             Index* p = *i;
             if (p->noIndex) continue;
             auto index = p->index;
             if (valueMap.contains(index)) {
-                p->value   = &valueMap.at(index);
+                p->value   = valueMap.at(index);
             }
         }
     }

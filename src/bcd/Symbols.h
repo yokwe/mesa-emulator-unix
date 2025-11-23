@@ -41,10 +41,9 @@
 
 #include "../util/ByteBuffer.h"
 
-#include "HTRecord.h"
-#include "MDRecord.h"
-
-class BCD;
+struct HTRecord;
+struct MDRecord;
+struct CTXRecord;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -136,8 +135,9 @@ public:
 	uint16_t        fgPgCount;
 
     // contents of above table
-    std::map<uint16_t, HTRecord>    htTable;
-    std::map<uint16_t, MDRecord>    mdTable;
+    std::map<uint16_t, HTRecord*>    htTable;
+    std::map<uint16_t, MDRecord*>    mdTable;
+    std::map<uint16_t, CTXRecord*>   ctxTable;
 
 	void dump();
     void dumpTable();

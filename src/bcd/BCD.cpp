@@ -130,7 +130,7 @@ void BCD::setSymbolOffset(ByteBuffer& bb) {
          // try symbol segemtn
         int count = 0;
         for(const auto& e: sgTable) {
-            const SGRecord& sgRecord = e.second;
+            const SGRecord& sgRecord = *e.second;
             if (!sgRecord.file.isSelf()) continue;
             
             if (sgRecord.segClass == SGRecord::SegClass::SYMBOLS) {
@@ -203,23 +203,23 @@ void BCD::dumpTable() {
         int fileIndex = 0;
         for(const auto& e: ftTable) {
             auto key = e.first;
-            auto value = e.second;
+            auto& value = *e.second;
             logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value.toString());
         }
     }
     for(const auto& e: sgTable) {
         auto key = e.first;
-        auto value = e.second;
+        auto& value = *e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "sg", key), value.toString());
     }
     for(const auto& e: enTable) {
         auto key = e.first;
-        auto value = e.second;
+        auto& value = *e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "en", key), value.toString());
     }
     for(const auto& e: mtTable) {
         auto key = e.first;
-        auto value = e.second;
+        auto& value = *e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
     }
 
@@ -270,10 +270,10 @@ void BCD::buildSSTable(ByteBuffer& bb) {
         uint16_t index = getIndex(pos, offset, limit);
         if (limit <= index) break;
 
-        std::string value;
+        std::string* value = new std::string;
         auto length = bb.get8();
         for(int i = 0; i < length; i++) {
-            value += bb.get8();
+            *value += bb.get8();
         }
         int ssIndex = pos - (offset * 2) - 3;
 
@@ -289,15 +289,15 @@ void BCD::buildSSTable(ByteBuffer& bb) {
 }
 
 template<class T>
-static void buildTable(ByteBuffer& bb, int offset, int limit_, std::map<uint16_t, T>& table) {
+static void buildTable(ByteBuffer& bb, int offset, int limit_, std::map<uint16_t, T*>& table) {
     int base  = offset * 2;
     int limit = base + limit_ * 2;
     bb.position(base);
     for(;;) {
         if (limit <= bb.position()) break;
         int index = BCD::getIndex(bb.position(), offset, limit);
-        T value;
-        value.read(bb);
+        T* value = new T;
+        value->read(bb);
         table[index] = value;
     }
 	// sanity check

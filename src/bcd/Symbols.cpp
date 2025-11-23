@@ -39,7 +39,11 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 
+#include "HTRecord.h"
 #include "MDRecord.h"
+#include "CTXRecord.h"
+
+
 #include "Symbols.h"
 
 
@@ -120,7 +124,7 @@ void Symbols::dumpTable() {
     for(const auto& e: mdTable) {
         auto key = e.first;
         auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value.toString());
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value->toString());
     }
 
     logger.info("htTable  %d", htTable.size());
@@ -186,26 +190,26 @@ void Symbols::initializeHT(ByteBuffer& bb) {
         int pos = bb.position();
         if (limit <= pos) break;
 
-		HTRecord record;
-		record.read(bb, lastSSIndex, ss);
+		HTRecord* record = new HTRecord;
+		record->read(bb, lastSSIndex, ss);
         htTable[index] = record;
 
 //        logger.info("ht %4d %s", index, record.toString());
         index++;
-        lastSSIndex = record.ssIndex;
+        lastSSIndex = record->ssIndex;
     }
 }
 
 template<class T>
-static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T>& table) {
+static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table) {
     int base  = symbolBase + offset * 2;
     int limit = base + limit_ * 2;
     int index = 0;
     bb.position(base);
     for(;;) {
         if (limit <= bb.position()) break;
-        T value;
-        value.read(bb);
+		T* value = new T;
+        value->read(bb);
         table[index] = value;
         index++;
     }

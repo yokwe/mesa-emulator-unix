@@ -82,7 +82,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static void dump() {
         for(const auto& e: indexSet) {
             if (e->noIndex) continue;
-            logger.info("dump  %-8s  %s", e->toStringIndex(), e->toString());
+            logger.info("dump  %s", e->toString());
         }
     }
 
@@ -162,17 +162,17 @@ public:
         return bb;
     }
     std::string toString() const override {
-        if (value) {
-            constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-            if constexpr(is_string) {
-                return *value;
-            } else {
-                return value->toString();
-            }
-        }
         return std_sprintf("%s-%d", prefix, index);
     }
-    std::string toStringIndex() const {
-        return std_sprintf("%s-%d", prefix, index);
-    }
+    // std::string toString() const override {
+    //     if (value) {
+    //         constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
+    //         if constexpr(is_string) {
+    //             return *value;
+    //         } else {
+    //             return value->toString();
+    //         }
+    //     }
+    //     return std_sprintf("%s-%d", prefix, index);
+    // }
 };

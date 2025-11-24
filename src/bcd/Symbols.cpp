@@ -55,13 +55,25 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
     bb.position(offset);
     symbols.read(bb);
 
+//	symbols.initializeBT(bb);
 	symbols.initializeCTX(bb);
-    symbols.initializeHT(bb);
+//	symbols.initializeEXT(bb);
+	symbols.initializeHT(bb);
+//	symbols.initializeLT(bb);
 	symbols.initializeMD(bb);
+//	symbols.initializeSE(bb);
+//	symbols.initializeTree(bb);
 
+
+//	BTIndex::setValue(symbols.btTable);
 	CTXIndex::setValue(symbols.ctxTable);
+//	EXTIndex::setValue(symbols.extTable);
 	HTIndex::setValue(symbols.htTable);
+//	LTIndex::setValue(symbols.ltTable);
 	MDIndex::setValue(symbols.mdTable);
+//	SEIndex::setValue(symbols.seTable);
+//	TreeIndex::setValue(symbols.treeTable);
+
 
     return symbols;
 }
@@ -113,36 +125,63 @@ void Symbols::dump() {
 	logger.info("fgRelPgBase     %5d", fgRelPgBase);
 	logger.info("fgPgCount       %5d", fgPgCount);
 
+	logger.info("btTable         %5d", btTable.size());
+	logger.info("ctxTable        %5d", ctxTable.size());
+	logger.info("extTable        %5d", extTable.size());
 	logger.info("htTable         %5d", htTable.size());
+	logger.info("ltTable         %5d", ltTable.size());
+	logger.info("mdTable         %5d", mdTable.size());
+	logger.info("mtTable         %5d", mtTable.size());
+	logger.info("seTable         %5d", seTable.size());
+	logger.info("treeTable       %5d", treeTable.size());
 }
 
-void Symbols::dumpTable() {
-    logger.info("ctxTable  %d", ctxTable.size());
-    for(const auto& e: ctxTable) {
+template <class T>
+void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
+    for(const auto& e: map) {
         auto key = e.first;
         auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ctx", key), value->toString());
-    }
-    logger.info("htTable   %d", htTable.size());
-    // for(const auto& e: htTable) {
-    //     auto key = e.first;
-    //     auto value = e.second;
-    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ht", key), value.toString());
-    // }
-    logger.info("mdTable   %d", mdTable.size());
-    for(const auto& e: mdTable) {
-        auto key = e.first;
-        auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value->toString());
+        logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
     }
 }
+void Symbols::dumpTable() {
+//	::dumpTable("bt", btTable);
+//	::dumpTable("ctx", ctxTable);
+//	::dumpTable("ext", extTable);
+//	::dumpTable("ht", htTable);
+//	::dumpTable("lt", ltTable);
+//	::dumpTable("md", mdTable);
+//	::dumpTable("mt", mtTable);
+//	::dumpTable("se", seTable);
+//	::dumpTable("tree", treeTable);
+}
 void Symbols::dumpIndex() {
+//	logger.info("BTIndex    indexSet  %d", BTIndex::indexSet.size());
+//	BTIndex::dump();
+
     logger.info("CTXIndex   indexSet  %d", CTXIndex::indexSet.size());
 //	CTXIndex::dump();
+
+//	logger.info("EXTIndex   indexSet  %d", EXTIndex::indexSet.size());
+//	HTIndex::dump();
+
     logger.info("HTIndex    indexSet  %d", HTIndex::indexSet.size());
-//    HTIndex::dump();
-    logger.info("MDIndex    indexSet  %d", MDIndex::indexSet.size());
+//	EXTIndex::dump();
+
+//	logger.info("LTIndex    indexSet  %d", LTIndex::indexSet.size());
+//	LTIndex::dump();
+
+	logger.info("MDIndex    indexSet  %d", MDIndex::indexSet.size());
 //	MDIndex::dump();
+
+//	logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
+//	MTIndex::dump();
+
+//	logger.info("SEIndex    indexSet  %d", SEIndex::indexSet.size());
+//	SEIndex::dump();
+
+//	logger.info("TreeIndex  indexSet  %d", TreeIndex::indexSet.size());
+//	TreeIndex::dump();
 }
 
 

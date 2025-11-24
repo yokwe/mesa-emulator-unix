@@ -43,9 +43,14 @@
 
 #include "SymbolsIndex.h"
 
+struct BTRecord;
 struct CTXRecord;
+struct EXTRecord;
 struct HTRecord;
+struct LTRecord;
 struct MDRecord;
+struct SERecord;
+struct TreeNode;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -93,9 +98,15 @@ class Symbols : public ByteBuffer::Readable {
 	ByteBuffer& read(ByteBuffer& bb);
 
 	std::string getSS(ByteBuffer& bb);
+
+	void initializeBT(ByteBuffer& bb);
 	void initializeCTX(ByteBuffer& bb);
+	void initializeEXT(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
+	void initializeLT(ByteBuffer& bb);
 	void initializeMD(ByteBuffer& bb);
+	void initializeSE(ByteBuffer& bb);
+	void initializeTree(ByteBuffer& bb);
 
 public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
@@ -109,7 +120,7 @@ public:
 	uint32_t        symbolBase;
 
 	uint16_t        versionIdent;
-	Timestamp       version;
+	Timestamp       version; 
 	Timestamp       creator;
 	Timestamp       sourceVersion;
 	bool            definitionsFile;
@@ -136,9 +147,17 @@ public:
 	uint16_t        fgPgCount;
 
     // contents of above table
-    std::map<uint16_t, CTXRecord*>   ctxTable;
-    std::map<uint16_t, HTRecord*>    htTable;
-    std::map<uint16_t, MDRecord*>    mdTable;
+	std::map<uint16_t, BTRecord*>   btTable;
+	std::map<uint16_t, CTXRecord*>  ctxTable;
+	std::map<uint16_t, EXTRecord*>  extTable;
+	std::map<uint16_t, HTRecord*>   htTable;
+	std::map<uint16_t, LTRecord*>   ltTable;
+	std::map<uint16_t, LTRecord*>   mtTable;
+	std::map<uint16_t, MDRecord*>   mdTable;
+	std::map<uint16_t, SERecord*>   seTable;
+	std::map<uint16_t, TreeNode*>   treeTable;
+struct TreeNode;
+
 
 	void dump();
     void dumpTable();

@@ -41,23 +41,7 @@
 
 #include "../util/Util.h"
 
-#include "Index.h"
-#include "MDRecord.h"
-
-//
-// CTXIndex
-//
-struct CTXRecord;
-//CTXIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO CTXRecord;
-//CTXNull: CTXIndex = FIRST[CTXIndex];
-struct CTXIndex : public Index<"ctx", CTXRecord> {
-    static const constexpr uint16_t CTX_NULL = 0;
-    
-    bool isNull() const {
-        return index() == CTX_NULL;
-    }
-    std::string toString() const override;
-};
+#include "SymbolsIndex.h"
 
 
 //CTXRecord: TYPE = RECORD [

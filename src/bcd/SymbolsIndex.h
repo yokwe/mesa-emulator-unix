@@ -30,7 +30,7 @@
 
 
 //
-// MDRecord.h
+// SymbolsIndex.h
 //
 
 #pragma once
@@ -38,30 +38,53 @@
 #include <cstdint>
 #include <string>
 
-#include "Timestamp.h"
-#include "SymbolsIndex.h"
+#include "../util/Util.h"
 
+#include "Index.h"
 
-//MDRecord: TYPE = RECORD [
-//  stamp: TimeStamp.Stamp,
-//  moduleId: HTIndex,		-- hash entry for module name
-//  fileId: HTIndex,		-- hash entry for file name
-//  shared: BOOLEAN,		-- overrides PRIVATE, etc.
-//  exported: BOOLEAN,
-//  ctx: IncludedCTXIndex,	-- context of copied entries
-//  defaultImport: CTXIndex,	-- unnamed imported instance
-//  file: FileIndex];		-- associated file
-struct MDRecord : public ByteBuffer::Readable, public HasToString {
-    Timestamp  stamp;
-    HTIndex    moduleId;
-    HTIndex    fileId;
-    bool       shared;
-    bool       exported;
-    CTXIndex   ctx;
-    CTXIndex   defaultImport;
-    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
+//
+// CTXIndex
+//
+struct CTXRecord;
+//CTXIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO CTXRecord;
+//CTXNull: CTXIndex = FIRST[CTXIndex];
+struct CTXIndex : public Index<"ctx", CTXRecord> {
+    static const constexpr uint16_t CTX_NULL = 0;
+    
+    bool isNull() const {
+        return index() == CTX_NULL;
+    }
+    std::string toString() const override;
+};
 
-    ByteBuffer& read(ByteBuffer& bb) override;
+//
+// HTIndex
+//
+struct HTRecord;
+//HTIndex: TYPE = CARDINAL [0..Limit/2);
+//HTNull: HTIndex = FIRST[HTIndex];
+struct HTIndex : public Index<"ht", HTRecord> {
+    static const constexpr uint16_t HT_NULL = 0;
+    
+    bool isNull() const {
+        return index() == HT_NULL;
+    }
+    std::string toString() const override;
+    std::string toValue() const;
+};
 
+//
+// MDIndex
+//
+struct MDRecord;
+//MDIndex: TYPE = Base RELATIVE ORDERED POINTER [0..Limit) TO MDRecord;
+//MDNull: MDIndex = LAST[MDIndex];
+//OwnMdi: MDIndex = FIRST[MDIndex];
+struct MDIndex : public Index<"md", MDRecord> {
+    static const constexpr uint16_t MD_NULL = T_LIMIT;
+    
+    bool isNull() const {
+        return index() == MD_NULL;
+    }
     std::string toString() const override;
 };

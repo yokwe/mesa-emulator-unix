@@ -63,7 +63,7 @@ ByteBuffer& MDRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string MDRecord::toString() const {
-    return std_sprintf("[[%s]  %s  %s  %s%s  %5d  %5d  %5d]",
+    return std_sprintf("[[%s]  %s  %s  %s%s  %s  %s  %5d]",
         stamp.toString(), moduleId.toValue(), fileId.toValue(),
-        shared ? "S" : "", exported ? "E" : "", ctx, defaultImport, fileIndex);
+        shared ? "S" : "", exported ? "E" : "", ctx.Index::toString(), defaultImport.Index::toString(), fileIndex);
 }

@@ -55,13 +55,13 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
     bb.position(offset);
     symbols.read(bb);
 
+	symbols.initializeCTX(bb);
     symbols.initializeHT(bb);
 	symbols.initializeMD(bb);
-	symbols.initializeCTX(bb);
 
+	CTXIndex::setValue(symbols.ctxTable);
 	HTIndex::setValue(symbols.htTable);
 	MDIndex::setValue(symbols.mdTable);
-	CTXIndex::setValue(symbols.ctxTable);
 
     return symbols;
 }
@@ -70,18 +70,15 @@ ByteBuffer& Symbols::read(ByteBuffer& bb) {
 	symbolBase = bb.position();
 
 	uint16_t u10;
-	directoryCtx = new CTXIndex;
-	importCtx    = new CTXIndex;
-	outerCtx     = new CTXIndex;
 
-	bb.read(versionIdent, version, creator, sourceVersion, u10, *importCtx, *outerCtx);
+	bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
 	bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
 	bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
 	bb.read(fgRelPgBase, fgPgCount);
 
 	definitionsFile = bitField(u10, 15);
 
-	directoryCtx->index(bitField(u10, 1, 15));
+	directoryCtx.index(bitField(u10, 1, 15));
 
 	return bb;
 }
@@ -93,9 +90,9 @@ void Symbols::dump() {
 	logger.info("creator            %s", creator.toString());
 	logger.info("sourceVersion      %s", creator.toString());
 	logger.info("definitionsFile    %s", definitionsFile ? "YES" : "NO");
-	logger.info("directoryCtx       %s", directoryCtx->Index::toString());
-	logger.info("importCtx          %s", importCtx->Index::toString());
-	logger.info("outerCtx           %s", outerCtx->Index::toString());
+	logger.info("directoryCtx       %s", directoryCtx.Index::toString());
+	logger.info("importCtx          %s", importCtx.Index::toString());
+	logger.info("outerCtx           %s", outerCtx.Index::toString());
 
 	logger.info("hvBlock         %5d  %5d", hvBlock.offset, hvBlock.size);
 	logger.info("htBlock         %5d  %5d", htBlock.offset, htBlock.size);
@@ -120,6 +117,12 @@ void Symbols::dump() {
 }
 
 void Symbols::dumpTable() {
+    logger.info("ctxTable  %d", ctxTable.size());
+    for(const auto& e: ctxTable) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "ctx", key), value->toString());
+    }
     logger.info("htTable   %d", htTable.size());
     // for(const auto& e: htTable) {
     //     auto key = e.first;
@@ -132,19 +135,14 @@ void Symbols::dumpTable() {
         auto value = e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "md", key), value->toString());
     }
-    logger.info("ctxTable  %d", ctxTable.size());
-    for(const auto& e: ctxTable) {
-        auto key = e.first;
-        auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ctx", key), value->toString());
-    }
 }
 void Symbols::dumpIndex() {
-//    HTIndex::dump();
-	MDIndex::dump();
-
+    logger.info("CTXIndex   indexSet  %d", CTXIndex::indexSet.size());
+//	CTXIndex::dump();
     logger.info("HTIndex    indexSet  %d", HTIndex::indexSet.size());
+//    HTIndex::dump();
     logger.info("MDIndex    indexSet  %d", MDIndex::indexSet.size());
+//	MDIndex::dump();
 }
 
 

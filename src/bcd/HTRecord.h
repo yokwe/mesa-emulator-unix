@@ -38,20 +38,7 @@
 #include <cstdint>
 #include <string>
 
-#include "Index.h"
-
-struct HTRecord;
-//HTIndex: TYPE = CARDINAL [0..Limit/2);
-//HTNull: HTIndex = FIRST[HTIndex];
-struct HTIndex : public Index<"ht", HTRecord> {
-    static const constexpr uint16_t HT_NULL = 0;
-    
-    bool isNull() const {
-        return index() == HT_NULL;
-    }
-    std::string toString() const override;
-    std::string toValue() const;
-};
+#include "SymbolsIndex.h"
 
 
 //HTRecord: TYPE = RECORD [

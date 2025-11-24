@@ -41,10 +41,11 @@
 
 #include "../util/ByteBuffer.h"
 
+#include "SymbolsIndex.h"
+
+struct CTXRecord;
 struct HTRecord;
 struct MDRecord;
-struct CTXRecord;
-struct CTXIndex;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -92,9 +93,9 @@ class Symbols : public ByteBuffer::Readable {
 	ByteBuffer& read(ByteBuffer& bb);
 
 	std::string getSS(ByteBuffer& bb);
+	void initializeCTX(ByteBuffer& bb);
 	void initializeHT(ByteBuffer& bb);
 	void initializeMD(ByteBuffer& bb);
-	void initializeCTX(ByteBuffer& bb);
 
 public:
 	// VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
@@ -112,9 +113,9 @@ public:
 	Timestamp       creator;
 	Timestamp       sourceVersion;
 	bool            definitionsFile;
-	CTXIndex*       directoryCtx;
-	CTXIndex*       importCtx;
-	CTXIndex*       outerCtx;
+	CTXIndex        directoryCtx;
+	CTXIndex        importCtx;
+	CTXIndex        outerCtx;
 	BlockDescriptor hvBlock;
 	BlockDescriptor htBlock;
 	BlockDescriptor ssBlock;
@@ -135,9 +136,9 @@ public:
 	uint16_t        fgPgCount;
 
     // contents of above table
+    std::map<uint16_t, CTXRecord*>   ctxTable;
     std::map<uint16_t, HTRecord*>    htTable;
     std::map<uint16_t, MDRecord*>    mdTable;
-    std::map<uint16_t, CTXRecord*>   ctxTable;
 
 	void dump();
     void dumpTable();

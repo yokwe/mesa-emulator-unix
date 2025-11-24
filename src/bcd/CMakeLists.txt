@@ -14,6 +14,7 @@ target_sources(
 		Index.h
 		MDRecord.h
 		Symbols.h
+		SymbolsIndex.h
 		Timestamp.h
 	PRIVATE
 		BCD.cpp

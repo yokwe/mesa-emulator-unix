@@ -40,6 +40,7 @@
 #include <set>
 #include <source_location>
 #include <concepts>
+#include <variant>
 
 #include <log4cxx/logger.h>
 
@@ -305,6 +306,11 @@ struct HasToString {
 template <typename T>
 concept Stringable = std::derived_from<T, HasToString>;
 
+// use this template function to call toString method of the class in std::varinat
+template<class T>
+std::string toString(T a) {
+	return std::visit([](auto& x) -> std::string { return x.toString(); }, a);
+}
 
 class Util {
 public:

@@ -13,6 +13,7 @@ target_sources(
 		HTRecord.h
 		Index.h
 		MDRecord.h
+		SERecord.h
 		Symbols.h
 		SymbolsIndex.h
 		Timestamp.h
@@ -22,6 +23,7 @@ target_sources(
 		CTXRecord.cpp
 		HTRecord.cpp
 		MDRecord.cpp
+		SERecord.cpp
 		Symbols.cpp
 		Timestamp.cpp
 )

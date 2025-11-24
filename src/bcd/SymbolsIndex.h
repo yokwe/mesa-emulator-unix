@@ -88,3 +88,18 @@ struct MDIndex : public Index<"md", MDRecord> {
     }
     std::string toString() const override;
 };
+
+//
+// SEIndex
+//
+struct SERecord;
+//SEIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO SERecord;
+//SENull: SEIndex = FIRST[SEIndex];
+struct SEIndex : public Index<"md", SERecord> {
+    static const constexpr uint16_t SE_NULL = 0;
+    
+    bool isNull() const {
+        return index() == SE_NULL;
+    }
+    std::string toString() const override;
+};

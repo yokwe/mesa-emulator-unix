@@ -89,7 +89,7 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         }
     }
 
-protected:
+private:
     uint16_t _index;
     const T* _value;
     bool     noIndex;

@@ -42,14 +42,15 @@ static const Logger logger(__FILE__);
 #include "CTXRecord.h"
 
 #undef MAP_ENTRY
-#define MAP_ENTRY(enum,value) {enum::value, #value},
+#define MAP_ENTRY(value) {T::value, #value},
 
 #define ENUM_CLASS CTXRecord::ContextLevel
 std::string CTXRecord::toString(ENUM_CLASS value) {
-    static std::map<ENUM_CLASS, std::string> map {
-        MAP_ENTRY(ENUM_CLASS, LZ)
-        MAP_ENTRY(ENUM_CLASS, LG)
-        MAP_ENTRY(ENUM_CLASS, LL)
+    using T = ENUM_CLASS;
+    static std::map<T, std::string> map {
+        MAP_ENTRY(LZ)
+        MAP_ENTRY(LG)
+        MAP_ENTRY(LL)
     };
 
     if (map.contains(value)) return map[value];
@@ -62,11 +63,12 @@ std::string CTXRecord::toString(ENUM_CLASS value) {
 #undef ENUM_CLASS
 #define ENUM_CLASS CTXRecord::Closure
 std::string CTXRecord::toString(ENUM_CLASS value) {
-    static std::map<ENUM_CLASS, std::string> map {
-        MAP_ENTRY(ENUM_CLASS, NONE)
-        MAP_ENTRY(ENUM_CLASS, UNIT)
-        MAP_ENTRY(ENUM_CLASS, RC)
-        MAP_ENTRY(ENUM_CLASS, FULL)
+    using T = ENUM_CLASS;
+    static std::map<T, std::string> map {
+        MAP_ENTRY(NONE)
+        MAP_ENTRY(UNIT)
+        MAP_ENTRY(RC)
+        MAP_ENTRY(FULL)
     };
 
     if (map.contains(value)) return map[value];
@@ -78,11 +80,12 @@ std::string CTXRecord::toString(ENUM_CLASS value) {
 #undef ENUM_CLASS
 #define ENUM_CLASS CTXRecord::Type
 std::string CTXRecord::toString(ENUM_CLASS value) {
-    static std::map<ENUM_CLASS, std::string> map {
-        MAP_ENTRY(ENUM_CLASS, SIMPLE)
-        MAP_ENTRY(ENUM_CLASS, INCLUDED)
-        MAP_ENTRY(ENUM_CLASS, IMPORTED)
-        MAP_ENTRY(ENUM_CLASS, NIL)
+    using T = ENUM_CLASS;
+    static std::map<T, std::string> map {
+        MAP_ENTRY(SIMPLE)
+        MAP_ENTRY(INCLUDED)
+        MAP_ENTRY(IMPORTED)
+        MAP_ENTRY(NIL)
     };
 
     if (map.contains(value)) return map[value];

@@ -228,6 +228,11 @@ void BCD::dumpTable() {
     logger.info("sgTable  %d", sgTable.size());
     logger.info("enTable  %d", enTable.size());
     logger.info("mtTable  %d", mtTable.size());
+
+    FTIndex::stats();
+    SGIndex::stats();
+    ENIndex::stats();
+    MTIndex::stats();
 }
 void BCD::dumpIndex() {
 //    NameRecord::dump();

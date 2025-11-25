@@ -73,14 +73,19 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         indexSet.clear();
     }
     static void setValue(const std::map<uint16_t, T*>& valueMap) {
+        int countHasIndex = 0;
+        int countSetValue = 0;
         for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
             Index* p = *i;
             if (p->noIndex) continue;
+            countHasIndex++;
             auto index = p->_index;
             if (valueMap.contains(index)) {
                 p->_value   = valueMap.at(index);
+                countSetValue++;
             }
         }
+        logger.info("setValue  %-3s  %5d / %5d", prefix, countSetValue, countHasIndex);
     }
     static void dump() {
         for(const auto& e: indexSet) {

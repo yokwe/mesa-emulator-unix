@@ -39,11 +39,13 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "Index.h"
+
 #include "SERecord.h"
 
 
-#undef MAP_ENTRY
-#define MAP_ENTRY(value) {T::value, #value},
+#undef  MAP_ENTRY_TYPE
+#define MAP_ENTRY_TYPE(value) {Type::value, #value},
 
 //
 // SEIndex
@@ -55,37 +57,13 @@ std::string SEIndex::toString() const {
 
 
 //
-// SERecord
-//
-
-#undef ENUM_CLASS
-#define ENUM_CLASS SERecord::Type
-std::string SERecord::toString(ENUM_CLASS value) { // 01
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(ID)
-        MAP_ENTRY(CONS)
-    };
-
-    if (map.contains(value)) return map[value];
-    logger.error("Unexpected value");
-    logger.error("  value  %d", (uint16_t)value);
-    ERROR();
-}
-
-
-//
 // SERecord::ID
 //
-
-#undef ENUM_CLASS
-#define ENUM_CLASS SERecord::ID::Type
-std::string SERecord::ID::toString(ENUM_CLASS value) { // 02
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(TERMINAL)
-        MAP_ENTRY(SEQUENTIAL)
-        MAP_ENTRY(LINKED)
+std::string SERecord::ID::toString(Type value) {
+    static std::map<Type, std::string> map {
+        MAP_ENTRY_TYPE(TERMINAL)
+        MAP_ENTRY_TYPE(SEQUENTIAL)
+        MAP_ENTRY_TYPE(LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -129,20 +107,20 @@ void SERecord::ID::read(uint16_t u0, ByteBuffer& bb) {
 
 std::string SERecord::ID::toString() const {
     std::string flags = std_sprintf("%s%s%s%s%s",
-        extended ? "X" : "",
-        public_ ? "P" : "",
-        immutable ? "I" : "",
-        constant ? "C" : "",
-        linkSpace ? "L" : ""
+        extended  ? "E" : "_",
+        public_   ? "P" : "_",
+        immutable ? "I" : "_",
+        constant  ? "C" : "_",
+        linkSpace ? "L" : "_"
     );
 
     std::string ctxLinkString = ::toString(ctxLink);
 
     return
-        std_sprintf("[%s  [%s]  %s  %5d  %5d  %s  %s  %s]",
+        std_sprintf("[%s  [%s]  %-8s  %5d  %5d  %s  %s  %s]",
             idCtx.Index::toString(),
             flags,
-            idType.toString(),
+            idType.Index::toString(),
             idInfo,
             idValue,
             hash.toValue(),
@@ -152,37 +130,46 @@ std::string SERecord::ID::toString() const {
 
 
 //
-// SERecord::CONS
+// SERecord::CONS::BASIC
 //
+void SERecord::CONS::BASIC::read(uint16_t u0, ByteBuffer& bb) {
+    ordered = bitField(u0, 8);
+    code    = bitField(9, 15);
+    bb.read(length);
+}
+std::string SERecord::CONS::BASIC::toString() const {
+    return std_sprintf("[%d  %d  %d]", ordered, code, length);
+}
 
-#undef ENUM_CLASS
-#define ENUM_CLASS SERecord::CONS::Type
-std::string SERecord::CONS::toString(ENUM_CLASS value) {
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(MODE)
-        MAP_ENTRY(BASIC)
-        MAP_ENTRY(ENUMERATED)
-        MAP_ENTRY(RECORD)
-        MAP_ENTRY(REF)
-        //
-        MAP_ENTRY(ARRAY)
-        MAP_ENTRY(ARRAYDESC)
-        MAP_ENTRY(TRANSFER)
-        MAP_ENTRY(DEFINITION)
-        MAP_ENTRY(UNION)
-        //
-        MAP_ENTRY(SEQUENCE)
-        MAP_ENTRY(RELATIVE)
-        MAP_ENTRY(SUBRANGE)
-        MAP_ENTRY(LONG)
-        MAP_ENTRY(REAL)
-        //
-        MAP_ENTRY(OPAQUE)
-        MAP_ENTRY(ZONE)
-        MAP_ENTRY(ANY)
-        MAP_ENTRY(NIL)
-        MAP_ENTRY(BITS)
+
+//
+// SERecord::CONS::ENUMERATED
+//
+void SERecord::CONS::ENUMERATED::read(uint16_t u0, ByteBuffer& bb) {
+    ordered    = bitField(u0,  8);
+    machineDep = bitField(u0,  9);
+    unpainted  = bitField(u0, 10);
+    sparse     = bitField(u0, 11, 15);
+    bb.read(valueCtx, nValues);
+}
+std::string SERecord::CONS::ENUMERATED::toString() const {
+    std::string flags = std_sprintf("%s%s%s%s",
+        ordered    ? "O" : "_",
+        machineDep ? "M" : "_",
+        unpainted  ? "U" : "_",
+        sparse     ? "S" : "_");
+    return std_sprintf("[[%s]  %s  %d]",
+        flags, valueCtx.Index::toString(), nValues);
+}
+
+
+//
+// SERecord::CONS::RECORD
+//
+std::string SERecord::CONS::RECORD::toString(Type value) {
+    static std::map<Type, std::string> map {
+        MAP_ENTRY_TYPE(NOT_LINKED)
+        MAP_ENTRY_TYPE(LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -190,4 +177,429 @@ std::string SERecord::CONS::toString(ENUM_CLASS value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
+void SERecord::CONS::RECORD::read(uint16_t u0, ByteBuffer& bb) {
+    uint16_t u2;
 
+    hints      = bitField(u0, 8, 15);
+    bb.read(length, u2);
+    argument   = bitField(u2,  0);
+    monitored  = bitField(u2,  1);
+    machindDep = bitField(u2,  2);
+    painted    = bitField(u2,  3);
+    fieldCtx.index(bitField(u2, 4, 14));
+    linkTag    = (Type)bitField(u2, 15);
+    switch (linkTag) {
+    case Type::NOT_LINKED:
+        linkPart = NOT_LINKED{};
+        break;
+    case Type::LINKED:
+    {
+        LINKED linked;
+        bb.read(linked);
+        linkPart = linked;
+    }
+        break;
+    default:
+        ERROR()
+    }
+}
+std::string SERecord::CONS::RECORD::toString() const {
+    std::string flags = std_sprintf("%02X %s%s%s%s",
+        hints,
+        argument   ? "A" : "_",
+        monitored  ? "m" : "_",
+        machindDep ? "M" : "_",
+        painted    ? "P" : "_");
+
+    std::string linkPartString = ::toString(linkPart);
+    return std_sprintf("[[%s] %d  %s  %s]",
+        flags, length, fieldCtx.Index::toString(), linkPartString);
+}
+
+//
+// SERecord::CONS::RECORD::LINKED
+//
+ByteBuffer& SERecord::CONS::RECORD::LINKED::read(ByteBuffer& bb) {
+    bb.read(linkType);
+    return bb;
+}
+std::string SERecord::CONS::RECORD::LINKED::toString() const {
+    return std_sprintf("[%s]", linkType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::REF
+//
+void SERecord::CONS::REF::read(uint16_t u0, ByteBuffer& bb) {
+    counted  = bitField(u0,  8);
+    ordered  = bitField(u0,  9);
+    readOnly = bitField(u0, 10);
+    list     = bitField(u0, 11);
+    var      = bitField(u0, 12);
+    basing   = bitField(u0, 13, 15);
+    bb.read(refType);
+}
+std::string SERecord::CONS::REF::toString() const {
+    std::string flags = std_sprintf("%s%s%s%s%s",
+        counted ? "C" : "_",
+        ordered ? "O" : "_",
+        readOnly ? "R" : "_",
+        list ? "L" : "_",
+        var ? "V" : "_",
+        basing ? "B" : "_");
+    return std_sprintf("[[%s]  %s]",
+        flags, refType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::ARRAY
+//
+void SERecord::CONS::ARRAY::read(uint16_t u0, ByteBuffer& bb) {
+    packed = bitField(u0, 8, 15);
+    bb.read(indexType, componentType);
+}
+std::string SERecord::CONS::ARRAY::toString() const {
+    return std_sprintf("[%d  %s  %s]", packed, indexType.Index::toString(), componentType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::ARRAYDESC
+//
+void SERecord::CONS::ARRAYDESC::read(uint16_t u0, ByteBuffer& bb) {
+    var = bitField(u0, 8);
+    readOnly = bitField(u0, 9, 15);
+    bb.read(describedType);
+}
+std::string SERecord::CONS::ARRAYDESC::toString() const {
+    std::string flags = std_sprintf("%s%s",
+        var      ? "V" : "_",
+        readOnly ? "R" : "_"
+    );
+    return std_sprintf("[[%s]  %s]", flags, describedType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::TRANSFER
+//
+std::string SERecord::CONS::TRANSFER::toString(Type value) {
+    static std::map<Type, std::string> map {
+        MAP_ENTRY_TYPE(PROC)
+        MAP_ENTRY_TYPE(PORT)
+        MAP_ENTRY_TYPE(SIGNAL)
+        MAP_ENTRY_TYPE(ERROR_)
+        MAP_ENTRY_TYPE(PROCESS)
+        MAP_ENTRY_TYPE(PROGRAM)
+        MAP_ENTRY_TYPE(NONE)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+void SERecord::CONS::TRANSFER::read(uint16_t u0, ByteBuffer& bb) {
+    safe = bitField(u0, 8);
+    mode = (Type)bitField(u0, 9, 15);
+    bb.read(typeIn, typeOut);
+}
+std::string SERecord::CONS::TRANSFER::toString() const {
+    return std_sprintf("[%s  %s  %s  %s]",
+        safe ? "S" : "_", toString(mode), typeIn.Index::toString(), typeOut.Index::toString());
+}
+
+
+//
+// SERecord::CONS::DEFINITION
+//
+void SERecord::CONS::DEFINITION::read(uint16_t u0, ByteBuffer& bb) {
+    named = bitField(u0, 8, 15);
+    bb.read(defCtx);
+}
+std::string SERecord::CONS::DEFINITION::toString() const {
+    return std_sprintf("[%s  %s]", named ? "N" : "_", defCtx.Index::toString());
+}
+
+
+//
+// SERecord::CONS::UNION
+//
+void SERecord::CONS::UNION::read(uint16_t u0, ByteBuffer& bb) {
+    hints      = bitField(u0,  8, 11);
+    overlaid   = bitField(u0, 12);
+    controlled = bitField(u0, 13);
+    machineDep = bitField(u0, 14, 15);
+    bb.read(caseCtx, tagSei);
+}
+std::string SERecord::CONS::UNION::toString() const {
+    std::string flags = std_sprintf("%02X %s%s%s",
+        hints,
+        overlaid   ? "O" : "_",
+        controlled ? "C" : "_",
+        machineDep ? "M" : "_"
+    );
+    return std_sprintf("[[%s]  %s  %s]",
+        flags, caseCtx.Index::toString(), tagSei.Index::toString());
+}
+
+
+//
+// SERecord::CONS::SEQUENCE
+//
+void SERecord::CONS::SEQUENCE::read(uint16_t u0, ByteBuffer& bb) {
+    packed     = bitField(u0, 8);
+    controlled = bitField(u0, 9);
+    machindDep = bitField(u0, 10, 15);
+    bb.read(tagSei, componentType);
+}
+std::string SERecord::CONS::SEQUENCE::toString() const {
+    std::string flags = std_sprintf("%s%s%s",
+        packed ? "P" : "_",
+        controlled ? "C" : "_",
+        machindDep ? "M" : "_");
+    return std_sprintf("[[%s]  %s  %s]",
+        flags, tagSei.Index::toString(), componentType.Index::toString());
+}
+
+//
+// SERecord::CONS::RELATIVE
+//
+void SERecord::CONS::RELATIVE::read(uint16_t u0, ByteBuffer& bb) {
+    (void)u0;
+    bb.read(baseType, offsetType, resultType);
+}
+std::string SERecord::CONS::RELATIVE::toString() const {
+    return std_sprintf("[%s  %s  %s]",
+        baseType.Index::toString(), offsetType.Index::toString(), resultType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::SUBRANGE
+//
+void SERecord::CONS::SUBRANGE::read(uint16_t u0, ByteBuffer& bb) {
+    filled = bitField(u0, 8);
+    empty  = bitField(u0, 9, 15);
+    uint16_t uorigin;
+    bb.read(rangeType, uorigin, range);
+    origin = (int16_t)uorigin;
+}
+std::string SERecord::CONS::SUBRANGE::toString() const {
+    std::string flags = std_sprintf("%s%s",
+        filled ? "F" : "_",
+        empty  ? "E" : "_"
+    );
+    return std_sprintf("[[%s]  %s  %d  %d]",
+        flags, rangeType.Index::toString(), origin, range);
+}
+
+
+//
+// SERecord::CONS::LONG
+//
+void SERecord::CONS::LONG::read(uint16_t u0, ByteBuffer& bb) {
+    (void)u0;
+    bb.read(rangeType);
+}
+std::string SERecord::CONS::LONG::toString() const {
+    return std_sprintf("[%s]", rangeType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::REAL
+//
+void SERecord::CONS::REAL::read(uint16_t u0, ByteBuffer& bb) {
+    (void)u0;
+    bb.read(rangeType);
+}
+std::string SERecord::CONS::REAL::toString() const {
+    return std_sprintf("[%s]", rangeType.Index::toString());
+}
+
+
+//
+// SERecord::CONS::OPAQUE
+//
+void SERecord::CONS::OPAQUE::read(uint16_t u0, ByteBuffer& bb) {
+    lengthKnown = bitField(u0, 8, 15);
+    bb.read(length, id);
+}
+std::string SERecord::CONS::OPAQUE::toString() const {
+    return std_sprintf("[%d  %d  %s]",
+        lengthKnown, length, id.Index::toString());
+}
+
+
+//
+// SERecord::CONS::ZONE
+//
+void SERecord::CONS::ZONE::read(uint16_t u0, ByteBuffer& bb) {
+    (void)bb;
+    counted = bitField(u0, 8);
+    mds     = bitField(u0, 9, 15);
+}
+std::string SERecord::CONS::ZONE::toString() const {
+    return std_sprintf("[%s%s]",
+        counted ? "C" : "_",
+        mds     ? "M" : "_");
+}
+
+
+//
+// SERecord::CONS
+//
+std::string SERecord::CONS::toString(Type value) {
+    static std::map<Type, std::string> map {
+        MAP_ENTRY_TYPE(MODE)
+        MAP_ENTRY_TYPE(BASIC)
+        MAP_ENTRY_TYPE(ENUMERATED)
+        MAP_ENTRY_TYPE(RECORD)
+        MAP_ENTRY_TYPE(REF)
+        //
+        MAP_ENTRY_TYPE(ARRAY)
+        MAP_ENTRY_TYPE(ARRAYDESC)
+        MAP_ENTRY_TYPE(TRANSFER)
+        MAP_ENTRY_TYPE(DEFINITION)
+        MAP_ENTRY_TYPE(UNION)
+        //
+        MAP_ENTRY_TYPE(SEQUENCE)
+        MAP_ENTRY_TYPE(RELATIVE)
+        MAP_ENTRY_TYPE(SUBRANGE)
+        MAP_ENTRY_TYPE(LONG)
+        MAP_ENTRY_TYPE(REAL)
+        //
+        MAP_ENTRY_TYPE(OPAQUE)
+        MAP_ENTRY_TYPE(ZONE)
+        MAP_ENTRY_TYPE(ANY)
+        MAP_ENTRY_TYPE(NIL)
+        MAP_ENTRY_TYPE(BITS)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+#define CASE_BODY(typeName) { typeName value; value.read(u0, bb); typeInfo = value; }
+void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
+    typeTag = (Type)bitField(u0, 3, 7);
+    switch(typeTag) {
+        
+    case Type::MODE:
+        typeInfo = MODE{};
+        break;
+    case Type::BASIC:
+        CASE_BODY(BASIC)
+        break;
+    case Type::ENUMERATED:
+        CASE_BODY(ENUMERATED)
+        break;
+    case Type::RECORD:
+        CASE_BODY(RECORD)
+        break;
+    case Type::REF:
+        CASE_BODY(REF)
+        break;
+    case Type::ARRAY:
+        CASE_BODY(ARRAY)
+        break;
+    case Type::ARRAYDESC:
+        CASE_BODY(ARRAYDESC)
+        break;
+    case Type::TRANSFER:
+        CASE_BODY(TRANSFER)
+        break;
+    case Type::DEFINITION:
+        CASE_BODY(DEFINITION)
+        break;
+    case Type::UNION:
+        CASE_BODY(UNION)
+        break;
+    case Type::SEQUENCE:
+        CASE_BODY(SEQUENCE)
+        break;
+    case Type::RELATIVE:
+        CASE_BODY(RELATIVE)
+        break;
+    case Type::SUBRANGE:
+        CASE_BODY(SUBRANGE)
+        break;
+    case Type::LONG:
+        CASE_BODY(LONG)
+        break;
+    case Type::REAL:
+        CASE_BODY(REAL)
+        break;
+    case Type::OPAQUE:
+        CASE_BODY(OPAQUE)
+        break;
+    case Type::ZONE:
+        CASE_BODY(ZONE)
+        break;
+    case Type::ANY:
+        typeInfo = ANY{};
+        break;
+    case Type::NIL:
+        typeInfo = NIL{};
+        break;
+    case Type::BITS:
+        CASE_BODY(BITS)
+        break;
+    default:
+        ERROR()
+    }
+}
+std::string SERecord::CONS::toString() const {
+    return std_sprintf("[%s  %s]", toString(typeTag), ::toString(typeInfo));
+}
+
+
+
+//
+// SERecord
+//
+std::string SERecord::toString(Type value) {
+    static std::map<Type, std::string> map {
+        MAP_ENTRY_TYPE(ID)
+        MAP_ENTRY_TYPE(CONS)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+ByteBuffer& SERecord::read(ByteBuffer& bb) {
+    uint16_t u0;
+
+    bb.read(u0);
+
+    seTag = (Type)bitField(u0, 2);
+    switch(seTag) {
+    case Type::ID:
+    {
+        ID id;
+        id.read(u0, bb);
+        body = id;
+    }
+        break;
+    case Type::CONS:
+    {
+        CONS cons;
+        cons.read(u0, bb);
+        body = cons;
+    }
+        break;
+    default:
+        ERROR()
+    }
+
+    return bb;
+}
+std::string SERecord::toString() const {
+    return std_sprintf("[%s  %s]", toString(seTag), ::toString(body));
+}

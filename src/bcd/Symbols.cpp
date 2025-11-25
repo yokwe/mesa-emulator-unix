@@ -39,10 +39,14 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 
-#include "HTRecord.h"
-#include "MDRecord.h"
+//#include "BTRecord.h"
 #include "CTXRecord.h"
-
+//#include "EXTRecord.h"
+#include "HTRecord.h"
+//#include "LTRecord.h"
+#include "MDRecord.h"
+#include "SERecord.h"
+//#include "Tree.h"
 
 #include "Symbols.h"
 
@@ -61,7 +65,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	symbols.initializeHT(bb);
 //	symbols.initializeLT(bb);
 	symbols.initializeMD(bb);
-//	symbols.initializeSE(bb);
+	symbols.initializeSE(bb);
 //	symbols.initializeTree(bb);
 
 
@@ -71,7 +75,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	HTIndex::setValue(symbols.htTable);
 //	LTIndex::setValue(symbols.ltTable);
 	MDIndex::setValue(symbols.mdTable);
-//	SEIndex::setValue(symbols.seTable);
+	SEIndex::setValue(symbols.seTable);
 //	TreeIndex::setValue(symbols.treeTable);
 
 
@@ -239,8 +243,6 @@ void Symbols::initializeHT(ByteBuffer& bb) {
 		HTRecord* record = new HTRecord;
 		record->read(bb, lastSSIndex, ss);
         htTable[index] = record;
-
-//        logger.info("ht %4d %s", index, record.toString());
         index++;
         lastSSIndex = record->ssIndex;
     }
@@ -260,7 +262,7 @@ uint16_t getIndex(int pos, int offset, int limit) {
 }
 
 template<class T>
-static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table) {
+static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table, const char* prefix) {
     int base  = symbolBase + offset * 2;
     int limit = base + limit_ * 2;
     bb.position(base);
@@ -274,6 +276,7 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
 	// sanity check
 	if (bb.position() != (limit)) {
 		logger.error("Unexpected length");
+		logger.error("  prefix     %s", prefix);
 		logger.error("  pos        %5d", bb.position());
 		logger.error("  base       %5d", base);
 		logger.error("  limit      %5d", limit);
@@ -284,9 +287,13 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
 
 void Symbols::initializeMD(ByteBuffer& bb) {
 	BlockDescriptor& block = mdBlock;
-	buildTable(bb, symbolBase, block.offset, block.size, mdTable);
+	buildTable(bb, symbolBase, block.offset, block.size, mdTable, "md");
 }
 void Symbols::initializeCTX(ByteBuffer& bb) {
 	BlockDescriptor& block = ctxBlock;
-	buildTable(bb, symbolBase, block.offset, block.size, ctxTable);
+	buildTable(bb, symbolBase, block.offset, block.size, ctxTable, "ctx");
+}
+void Symbols::initializeSE(ByteBuffer& bb) {
+	BlockDescriptor& block = seBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, seTable, "se");
 }

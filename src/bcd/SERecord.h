@@ -138,13 +138,7 @@
 //    ENDCASE];
 
 struct SERecord : public ByteBuffer::Readable, public HasToString {
-    enum class Type : uint16_t {ID, CONS};
-    static std::string toString(Type value); // 01
-
     struct ID : public HasToString {
-        enum class Type : uint16_t {TERMINAL, SEQUENTIAL, LINKED};
-        static std::string toString(Type value); // 02
-
         struct TERMINAL : public HasToString  {
             std::string toString() const override {
                 return "";
@@ -162,9 +156,12 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
                 return bb.read(link);
             }
             std::string toString() const override {
-                return std_sprintf("%s", link.toString());
+                return std_sprintf("%s", link.Index::toString());
             }
         };
+
+        enum class Type : uint16_t {TERMINAL, SEQUENTIAL, LINKED};
+        static std::string toString(Type value);
 
         bool     extended;
         bool     public_;
@@ -185,14 +182,6 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         std::string toString() const override;
     };
     struct CONS : public HasToString {
-        enum class Type : uint16_t {
-            MODE, BASIC, ENUMERATED, RECORD, REF,
-            ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
-            SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
-            OPAQUE, ZONE, ANY, NIL, BITS
-        };
-        static std::string toString(Type value);
-
         struct MODE : public HasToString {
             std::string toString() const override {
                 return "";
@@ -224,9 +213,15 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
                 }
             };
             struct LINKED : public ByteBuffer::Readable, public HasToString {
+                SEIndex linkType;
+
                 ByteBuffer& read(ByteBuffer& bb) override;
                 std::string toString() const override;
             };
+
+            enum class Type : uint16_t {NOT_LINKED, LINKED};
+            static std::string toString(Type value);
+            
             uint16_t hints;
             uint16_t length;
             bool     argument;
@@ -254,7 +249,7 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         };
         struct ARRAY : public HasToString {
             bool    packed;
-            SEIndex idnexType;
+            SEIndex indexType;
             SEIndex componentType;
             
             void read(uint16_t u0, ByteBuffer& bb);
@@ -270,13 +265,13 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         };
         struct TRANSFER : public HasToString {
             // TransferMode: TYPE = {proc, port, signal, error, process, program, none};
-            enum class TransferMode : uint16_t {
+            enum class Type : uint16_t {
                 PROC, PORT, SIGNAL, ERROR_, PROCESS, PROGRAM, NONE,
             };
-            static std::string toString(TransferMode value);
+            static std::string toString(Type value);
 
-            bool safe;
-            TransferMode mode;
+            bool    safe;
+            Type    mode;
             SEIndex typeIn;
             SEIndex typeOut;
             
@@ -302,9 +297,9 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             std::string toString() const override;
         };
         struct SEQUENCE : public HasToString {
-            bool packed;
-            bool controlled;
-            bool machindDep;
+            bool    packed;
+            bool    controlled;
+            bool    machindDep;
             SEIndex tagSei;
             SEIndex componentType;
 
@@ -369,13 +364,37 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         struct BITS : public HasToString {
             u_int16_t length;
 
-            void read(uint16_t u0, ByteBuffer& bb);
-            std::string toString() const override;
+            void read(uint16_t u0, ByteBuffer& bb) {
+                (void)u0;
+                bb.read(length);
+            }
+            std::string toString() const override {
+                return std_sprintf("%d", length);
+            }
         };
         
+        enum class Type : uint16_t {
+            MODE, BASIC, ENUMERATED, RECORD, REF,
+            ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
+            SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
+            OPAQUE, ZONE, ANY, NIL, BITS
+        };
+        static std::string toString(Type value);
+
+        Type typeTag;
+        std::variant<
+            MODE, BASIC, ENUMERATED, RECORD, REF,
+            ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
+            SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
+            OPAQUE, ZONE, ANY, NIL, BITS
+        > typeInfo;
+
         void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
     };
+
+    enum class Type : uint16_t {ID, CONS};
+    static std::string toString(Type value); // 01
 
     Type                   seTag;
     std::variant<ID, CONS> body;

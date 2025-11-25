@@ -95,7 +95,7 @@ struct MDIndex : public Index<"md", MDRecord> {
 struct SERecord;
 //SEIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO SERecord;
 //SENull: SEIndex = FIRST[SEIndex];
-struct SEIndex : public Index<"md", SERecord> {
+struct SEIndex : public Index<"se", SERecord> {
     static const constexpr uint16_t SE_NULL = 0;
     
     bool isNull() const {

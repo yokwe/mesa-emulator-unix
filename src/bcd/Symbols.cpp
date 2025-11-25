@@ -135,7 +135,6 @@ void Symbols::dump() {
 	logger.info("htTable         %5d", htTable.size());
 	logger.info("ltTable         %5d", ltTable.size());
 	logger.info("mdTable         %5d", mdTable.size());
-	logger.info("mtTable         %5d", mtTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
 
@@ -145,7 +144,6 @@ void Symbols::dump() {
 	HTIndex::stats();
 //	LTIndex::stats();
 	MDIndex::stats();
-//	MTIndex::stats();
 	SEIndex::stats();
 //	TreeLInk::stats();
 }
@@ -165,7 +163,6 @@ void Symbols::dumpTable() {
 //	::dumpTable("ht", htTable);
 //	::dumpTable("lt", ltTable);
 //	::dumpTable("md", mdTable);
-//	::dumpTable("mt", mtTable);
 //	::dumpTable("se", seTable);
 //	::dumpTable("tree", treeTable);
 }
@@ -176,7 +173,6 @@ void Symbols::dumpIndex() {
 //	EXTIndex::dump();
 //	LTIndex::dump();
 //	MDIndex::dump();
-//	MTIndex::dump();
 //	SEIndex::dump();
 //	TreeIndex::dump();
 }

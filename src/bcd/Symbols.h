@@ -152,11 +152,9 @@ public:
 	std::map<uint16_t, EXTRecord*>  extTable;
 	std::map<uint16_t, HTRecord*>   htTable;
 	std::map<uint16_t, LTRecord*>   ltTable;
-	std::map<uint16_t, LTRecord*>   mtTable;
 	std::map<uint16_t, MDRecord*>   mdTable;
 	std::map<uint16_t, SERecord*>   seTable;
 	std::map<uint16_t, TreeNode*>   treeTable;
-struct TreeNode;
 
 
 	void dump();

@@ -138,6 +138,16 @@ void Symbols::dump() {
 	logger.info("mtTable         %5d", mtTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
+
+//	BTIndex::stats();
+	CTXIndex::stats();
+//	EXTIndex::stats();
+	HTIndex::stats();
+//	LTIndex::stats();
+	MDIndex::stats();
+//	MTIndex::stats();
+	SEIndex::stats();
+//	TreeLInk::stats();
 }
 
 template <class T>
@@ -160,31 +170,14 @@ void Symbols::dumpTable() {
 //	::dumpTable("tree", treeTable);
 }
 void Symbols::dumpIndex() {
-//	logger.info("BTIndex    indexSet  %d", BTIndex::indexSet.size());
 //	BTIndex::dump();
-
-    logger.info("CTXIndex   indexSet  %d", CTXIndex::indexSet.size());
 //	CTXIndex::dump();
-
-//	logger.info("EXTIndex   indexSet  %d", EXTIndex::indexSet.size());
 //	HTIndex::dump();
-
-    logger.info("HTIndex    indexSet  %d", HTIndex::indexSet.size());
 //	EXTIndex::dump();
-
-//	logger.info("LTIndex    indexSet  %d", LTIndex::indexSet.size());
 //	LTIndex::dump();
-
-	logger.info("MDIndex    indexSet  %d", MDIndex::indexSet.size());
 //	MDIndex::dump();
-
-//	logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
 //	MTIndex::dump();
-
-//	logger.info("SEIndex    indexSet  %d", SEIndex::indexSet.size());
 //	SEIndex::dump();
-
-//	logger.info("TreeIndex  indexSet  %d", TreeIndex::indexSet.size());
 //	TreeIndex::dump();
 }
 

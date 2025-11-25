@@ -48,7 +48,7 @@ template <StringLiteral PREFIX, class T>
 struct Index : public ByteBuffer::Readable, public HasToString {
     static inline const char* prefix = PREFIX;
 
-    static inline std::set<Index*>      indexSet;
+    static inline std::set<Index*> indexSet;
 
     static void addIndex(Index* index) {
         if (indexSet.contains(index)) {
@@ -73,25 +73,31 @@ struct Index : public ByteBuffer::Readable, public HasToString {
         indexSet.clear();
     }
     static void setValue(const std::map<uint16_t, T*>& valueMap) {
-        int countHasIndex = 0;
-        int countSetValue = 0;
         for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
             Index* p = *i;
             if (p->noIndex) continue;
-            countHasIndex++;
             auto index = p->_index;
             if (valueMap.contains(index)) {
                 p->_value   = valueMap.at(index);
-                countSetValue++;
             }
         }
-        logger.info("setValue  %-3s  %5d / %5d", prefix, countSetValue, countHasIndex);
     }
     static void dump() {
         for(const auto& e: indexSet) {
             if (e->noIndex) continue;
             logger.info("dump  %s", e->Index::toString());
         }
+    }
+    static void stats() {
+        int countHasIndex = 0;
+        int countHasValue = 0;
+        for(const auto& e: indexSet) {
+            if (e->noIndex) continue;
+            countHasIndex++;
+            if (e->_value) countHasValue++;
+        }
+
+        logger.info("index  %-3s  %5d / %5d / %5d", prefix, countHasValue, countHasIndex, indexSet.size());
     }
 
 private:
@@ -170,15 +176,4 @@ public:
     std::string toString() const override {
         return std_sprintf("%s-%d", prefix, _index);
     }
-    // std::string toString() const override {
-    //     if (value) {
-    //         constexpr auto is_string  = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, std::string>::value;
-    //         if constexpr(is_string) {
-    //             return *value;
-    //         } else {
-    //             return value->toString();
-    //         }
-    //     }
-    //     return std_sprintf("%s-%d", prefix, index);
-    // }
 };

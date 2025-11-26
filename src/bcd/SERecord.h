@@ -160,7 +160,11 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             }
         };
 
-        enum class Type : uint16_t {TERMINAL, SEQUENTIAL, LINKED};
+        enum class Type : uint16_t {
+            ENUM_VALUE(Type, TERMINAL)
+            ENUM_VALUE(Type, SEQUENTIAL)
+            ENUM_VALUE(Type, LINKED)
+        };
         static std::string toString(Type value);
 
         bool     extended;
@@ -266,7 +270,13 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         struct TRANSFER : public HasToString {
             // TransferMode: TYPE = {proc, port, signal, error, process, program, none};
             enum class Type : uint16_t {
-                PROC, PORT, SIGNAL, ERROR_, PROCESS, PROGRAM, NONE,
+                ENUM_VALUE(Type, PROC)
+                ENUM_VALUE(Type, PORT)
+                ENUM_VALUE(Type, SIGNAL)
+                ENUM_VALUE(Type, ERROR_)
+                ENUM_VALUE(Type, PROCESS)
+                ENUM_VALUE(Type, PROGRAM)
+                ENUM_VALUE(Type, NONE)
             };
             static std::string toString(Type value);
 
@@ -374,10 +384,29 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         };
         
         enum class Type : uint16_t {
-            MODE, BASIC, ENUMERATED, RECORD, REF,
-            ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
-            SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
-            OPAQUE, ZONE, ANY, NIL, BITS
+            ENUM_VALUE(Type, MODE)
+            ENUM_VALUE(Type, BASIC)
+            ENUM_VALUE(Type, ENUMERATED)
+            ENUM_VALUE(Type, RECORD)
+            ENUM_VALUE(Type, REF)
+            //
+            ENUM_VALUE(Type, ARRAY)
+            ENUM_VALUE(Type, ARRAYDESC)
+            ENUM_VALUE(Type, TRANSFER)
+            ENUM_VALUE(Type, DEFINITION)
+            ENUM_VALUE(Type, UNION)
+            //
+            ENUM_VALUE(Type, SEQUENCE)
+            ENUM_VALUE(Type, RELATIVE)
+            ENUM_VALUE(Type, SUBRANGE)
+            ENUM_VALUE(Type, LONG) 
+            ENUM_VALUE(Type, REAL)
+            //
+            ENUM_VALUE(Type, OPAQUE)
+            ENUM_VALUE(Type, ZONE)
+            ENUM_VALUE(Type, ANY)
+            ENUM_VALUE(Type, NIL)
+            ENUM_VALUE(Type, BITS)
         };
         static std::string toString(Type value);
 
@@ -393,7 +422,10 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         std::string toString() const override;
     };
 
-    enum class Type : uint16_t {ID, CONS};
+    enum class Type : uint16_t {
+        ENUM_VALUE(Type, ID)
+        ENUM_VALUE(Type, CONS)
+    };
     static std::string toString(Type value); // 01
 
     Type                   seTag;

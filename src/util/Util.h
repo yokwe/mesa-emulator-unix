@@ -238,9 +238,6 @@ std::string readFile(const std::string& path);
 std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point steady_time);
 
 
-// convert to utf8
-#define TO_CSTRING(e) (e).toUtf8().constData()
-
 // helper macro for syscall
 #define LOG_ERRNO(errNo)               { logger.error( "errno = %d  \"%s\"", errNo, strerror(errNo)); }
 #define LOG_SYSCALL(retVar, syscall)   { retVar = syscall; if (retVar < 0) { int errNo = errno; logger.error("%s = %d", #syscall, retVar);  LOG_ERRNO(errNo)         } }
@@ -263,6 +260,10 @@ std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock:
 		ERROR(); \
 		return std_sprintf("%d", (int)value); \
 	}
+
+// Helper macro for enum
+//#define ENUM_VALUE(enum,value) {enum::value, #value},
+#define ENUM_VALUE(enum,value) value,
 
 // bitFiled is used in symbols
 uint16_t bitField(uint16_t word, int startBit, int stopBit);

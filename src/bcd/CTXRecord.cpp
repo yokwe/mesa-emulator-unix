@@ -30,7 +30,7 @@
 
 
 //
-// CTCRecord.cpp
+// CTXRecord.cpp
 //
 
 #include <string>
@@ -41,16 +41,14 @@ static const Logger logger(__FILE__);
 
 #include "CTXRecord.h"
 
-#undef MAP_ENTRY
-#define MAP_ENTRY(value) {T::value, #value},
+#undef  ENUM_VALUE
+#define ENUM_VALUE(enum,value) {enum::value, #value},
 
-#define ENUM_CLASS CTXRecord::ContextLevel
-std::string CTXRecord::toString(ENUM_CLASS value) {
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(LZ)
-        MAP_ENTRY(LG)
-        MAP_ENTRY(LL)
+std::string CTXRecord::toString(ContextLevel value) {
+    static std::map<ContextLevel, std::string> map {
+        ENUM_VALUE(ContextLevel, LZ)
+        ENUM_VALUE(ContextLevel, LG)
+        ENUM_VALUE(ContextLevel, LL)
     };
 
     if (map.contains(value)) return map[value];
@@ -60,15 +58,12 @@ std::string CTXRecord::toString(ENUM_CLASS value) {
     // ERROR();
 }
 
-#undef ENUM_CLASS
-#define ENUM_CLASS CTXRecord::Closure
-std::string CTXRecord::toString(ENUM_CLASS value) {
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(NONE)
-        MAP_ENTRY(UNIT)
-        MAP_ENTRY(RC)
-        MAP_ENTRY(FULL)
+std::string CTXRecord::toString(Closure value) {
+    static std::map<Closure, std::string> map {
+        ENUM_VALUE(Closure, NONE)
+        ENUM_VALUE(Closure, UNIT)
+        ENUM_VALUE(Closure, RC)
+        ENUM_VALUE(Closure, FULL)
     };
 
     if (map.contains(value)) return map[value];
@@ -77,15 +72,12 @@ std::string CTXRecord::toString(ENUM_CLASS value) {
     ERROR();
 }
 
-#undef ENUM_CLASS
-#define ENUM_CLASS CTXRecord::Type
-std::string CTXRecord::toString(ENUM_CLASS value) {
-    using T = ENUM_CLASS;
-    static std::map<T, std::string> map {
-        MAP_ENTRY(SIMPLE)
-        MAP_ENTRY(INCLUDED)
-        MAP_ENTRY(IMPORTED)
-        MAP_ENTRY(NIL)
+std::string CTXRecord::toString(Type value) {
+    static std::map<Type, std::string> map {
+        ENUM_VALUE(Type, SIMPLE)
+        ENUM_VALUE(Type, INCLUDED)
+        ENUM_VALUE(Type, IMPORTED)
+        ENUM_VALUE(Type, NIL)
     };
 
     if (map.contains(value)) return map[value];

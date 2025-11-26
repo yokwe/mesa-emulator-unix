@@ -44,8 +44,8 @@ static const Logger logger(__FILE__);
 #include "SERecord.h"
 
 
-#undef  MAP_ENTRY_TYPE
-#define MAP_ENTRY_TYPE(value) {Type::value, #value},
+#undef  ENUM_VALUE
+#define ENUM_VALUE(enum,value) {enum::value, #value},
 
 //
 // SEIndex
@@ -61,9 +61,9 @@ std::string SEIndex::toString() const {
 //
 std::string SERecord::ID::toString(Type value) {
     static std::map<Type, std::string> map {
-        MAP_ENTRY_TYPE(TERMINAL)
-        MAP_ENTRY_TYPE(SEQUENTIAL)
-        MAP_ENTRY_TYPE(LINKED)
+        ENUM_VALUE(Type, TERMINAL)
+        ENUM_VALUE(Type, SEQUENTIAL)
+        ENUM_VALUE(Type, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -168,8 +168,8 @@ std::string SERecord::CONS::ENUMERATED::toString() const {
 //
 std::string SERecord::CONS::RECORD::toString(Type value) {
     static std::map<Type, std::string> map {
-        MAP_ENTRY_TYPE(NOT_LINKED)
-        MAP_ENTRY_TYPE(LINKED)
+        ENUM_VALUE(Type, NOT_LINKED)
+        ENUM_VALUE(Type, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -287,13 +287,13 @@ std::string SERecord::CONS::ARRAYDESC::toString() const {
 //
 std::string SERecord::CONS::TRANSFER::toString(Type value) {
     static std::map<Type, std::string> map {
-        MAP_ENTRY_TYPE(PROC)
-        MAP_ENTRY_TYPE(PORT)
-        MAP_ENTRY_TYPE(SIGNAL)
-        MAP_ENTRY_TYPE(ERROR_)
-        MAP_ENTRY_TYPE(PROCESS)
-        MAP_ENTRY_TYPE(PROGRAM)
-        MAP_ENTRY_TYPE(NONE)
+        ENUM_VALUE(Type, PROC)
+        ENUM_VALUE(Type, PORT)
+        ENUM_VALUE(Type, SIGNAL)
+        ENUM_VALUE(Type, ERROR_)
+        ENUM_VALUE(Type, PROCESS)
+        ENUM_VALUE(Type, PROGRAM)
+        ENUM_VALUE(Type, NONE)
     };
 
     if (map.contains(value)) return map[value];
@@ -454,29 +454,29 @@ std::string SERecord::CONS::ZONE::toString() const {
 //
 std::string SERecord::CONS::toString(Type value) {
     static std::map<Type, std::string> map {
-        MAP_ENTRY_TYPE(MODE)
-        MAP_ENTRY_TYPE(BASIC)
-        MAP_ENTRY_TYPE(ENUMERATED)
-        MAP_ENTRY_TYPE(RECORD)
-        MAP_ENTRY_TYPE(REF)
+        ENUM_VALUE(Type, MODE)
+        ENUM_VALUE(Type, BASIC)
+        ENUM_VALUE(Type, ENUMERATED)
+        ENUM_VALUE(Type, RECORD)
+        ENUM_VALUE(Type, REF)
         //
-        MAP_ENTRY_TYPE(ARRAY)
-        MAP_ENTRY_TYPE(ARRAYDESC)
-        MAP_ENTRY_TYPE(TRANSFER)
-        MAP_ENTRY_TYPE(DEFINITION)
-        MAP_ENTRY_TYPE(UNION)
+        ENUM_VALUE(Type, ARRAY)
+        ENUM_VALUE(Type, ARRAYDESC)
+        ENUM_VALUE(Type, TRANSFER)
+        ENUM_VALUE(Type, DEFINITION)
+        ENUM_VALUE(Type, UNION)
         //
-        MAP_ENTRY_TYPE(SEQUENCE)
-        MAP_ENTRY_TYPE(RELATIVE)
-        MAP_ENTRY_TYPE(SUBRANGE)
-        MAP_ENTRY_TYPE(LONG)
-        MAP_ENTRY_TYPE(REAL)
+        ENUM_VALUE(Type, SEQUENCE)
+        ENUM_VALUE(Type, RELATIVE)
+        ENUM_VALUE(Type, SUBRANGE)
+        ENUM_VALUE(Type, LONG) 
+        ENUM_VALUE(Type, REAL)
         //
-        MAP_ENTRY_TYPE(OPAQUE)
-        MAP_ENTRY_TYPE(ZONE)
-        MAP_ENTRY_TYPE(ANY)
-        MAP_ENTRY_TYPE(NIL)
-        MAP_ENTRY_TYPE(BITS)
+        ENUM_VALUE(Type, OPAQUE)
+        ENUM_VALUE(Type, ZONE)
+        ENUM_VALUE(Type, ANY)
+        ENUM_VALUE(Type, NIL)
+        ENUM_VALUE(Type, BITS)
     };
 
     if (map.contains(value)) return map[value];
@@ -564,8 +564,8 @@ std::string SERecord::CONS::toString() const {
 //
 std::string SERecord::toString(Type value) {
     static std::map<Type, std::string> map {
-        MAP_ENTRY_TYPE(ID)
-        MAP_ENTRY_TYPE(CONS)
+        ENUM_VALUE(Type, ID)
+        ENUM_VALUE(Type, CONS)
     };
 
     if (map.contains(value)) return map[value];

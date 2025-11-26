@@ -66,11 +66,20 @@ struct CTXRecord : public ByteBuffer::Readable, public HasToString {
     //     lZ: ContextLevel = 0;	-- context level of non-frame records
     //     lG: ContextLevel = 1;	-- context level of global frame
     //     lL: ContextLevel = lG+1;	-- context level of outer procedures
-    enum class ContextLevel : uint16_t {LZ, LG, LL};
+    enum class ContextLevel : uint16_t {
+        ENUM_VALUE(ContextLevel, LZ)
+        ENUM_VALUE(ContextLevel, LG)
+        ENUM_VALUE(ContextLevel, LL)
+    };
     static std::string toString(ContextLevel valeu);
 
     //Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
-    enum class Closure : uint16_t {NONE, UNIT, RC, FULL};
+    enum class Closure : uint16_t {
+        ENUM_VALUE(Closure, NONE)
+        ENUM_VALUE(Closure, UNIT)
+        ENUM_VALUE(Closure, RC)
+        ENUM_VALUE(Closure, FULL)
+    };
     static std::string toString(Closure value);
 
     struct simple : public HasToString {
@@ -102,7 +111,12 @@ struct CTXRecord : public ByteBuffer::Readable, public HasToString {
         }
     };
 
-    enum class Type {SIMPLE, INCLUDED, IMPORTED, NIL};
+    enum class Type {
+        ENUM_VALUE(Type, SIMPLE)
+        ENUM_VALUE(Type, INCLUDED)
+        ENUM_VALUE(Type, IMPORTED)
+        ENUM_VALUE(Type, NIL)
+    };
     static std::string toString(Type value);
 
     bool         mark;

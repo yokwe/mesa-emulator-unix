@@ -192,6 +192,16 @@ void BCD::dump() {
 
 	logger.info("symbolOffset   %5d", symbolOffset);
 
+    logger.info("ssTable  %d", ssTable.size());
+    logger.info("ftTable  %d", ftTable.size());
+    logger.info("sgTable  %d", sgTable.size());
+    logger.info("enTable  %d", enTable.size());
+    logger.info("mtTable  %d", mtTable.size());
+
+    FTIndex::stats();
+    SGIndex::stats();
+    ENIndex::stats();
+    MTIndex::stats();
 }
 void BCD::dumpTable() {
     // for(const auto& e: ssTable) {
@@ -222,17 +232,6 @@ void BCD::dumpTable() {
         auto& value = *e.second;
         logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
     }
-
-    logger.info("ssTable  %d", ssTable.size());
-    logger.info("ftTable  %d", ftTable.size());
-    logger.info("sgTable  %d", sgTable.size());
-    logger.info("enTable  %d", enTable.size());
-    logger.info("mtTable  %d", mtTable.size());
-
-    FTIndex::stats();
-    SGIndex::stats();
-    ENIndex::stats();
-    MTIndex::stats();
 }
 void BCD::dumpIndex() {
 //    NameRecord::dump();

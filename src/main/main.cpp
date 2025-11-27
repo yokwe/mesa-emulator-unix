@@ -56,7 +56,7 @@ int main(int, char**) {
 		BCD bcd = BCD::getInstance(bb);
 
 		bcd.dump();
-		bcd.dumpTable();
+//		bcd.dumpTable();
 //		bcd.dumpIndex();
 
 		if (bcd.hasSymbol()) {

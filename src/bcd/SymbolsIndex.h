@@ -43,6 +43,22 @@
 #include "Index.h"
 
 //
+// BTIndex
+//
+struct BTRecord;
+//BTIndex: TYPE = Base RELATIVE POINTER [0..Limit) TO BodyRecord;
+//BTNull: BTIndex = LAST[BTIndex];
+struct BTIndex : public Index<"bt", BTRecord> {
+//    static const constexpr uint16_t BT_NULL = T_LIMIT;
+    static const constexpr uint16_t BT_NULL = 0x3FFF;
+    
+    bool isNull() const {
+        return index() == BT_NULL;
+    }
+    std::string toString() const override;
+};
+
+//
 // CTXIndex
 //
 struct CTXRecord;
@@ -58,9 +74,24 @@ struct CTXIndex : public Index<"ctx", CTXRecord> {
 };
 
 //
+// ExtIndex
+//
+struct EXTRecord;
+//ExtIndex: TYPE = Base RELATIVE POINTER [0..Limit) TO ExtRecord;
+//ExtNull: ExtIndex = LAST[ExtIndex];
+struct EXTIndex : public Index<"ext", EXTRecord> {
+    static const constexpr uint16_t EXT_NULL = T_LIMIT - 1;
+    
+    bool isNull() const {
+        return index() == EXT_NULL;
+    }
+    std::string toString() const override;
+};
+
+//
 // HTIndex
 //
-struct HTRecord;
+struct HTRecord; 
 //HTIndex: TYPE = CARDINAL [0..Limit/2);
 //HTNull: HTIndex = FIRST[HTIndex];
 struct HTIndex : public Index<"ht", HTRecord> {
@@ -72,6 +103,22 @@ struct HTIndex : public Index<"ht", HTRecord> {
     std::string toString() const override;
     std::string toValue() const;
 };
+
+//
+// LTIndex
+//
+struct LTRecord;
+//LTIndex: TYPE = Base RELATIVE POINTER [0..Limit) TO LTRecord;
+//LTNull: LTIndex = LAST[LTIndex];
+struct LTIndex : public Index<"lt", LTRecord> {
+    static const constexpr uint16_t LT_NULL = T_LIMIT;
+    
+    bool isNull() const {
+        return index() == LT_NULL;
+    }
+    std::string toString() const override;
+};
+
 
 //
 // MDIndex
@@ -100,6 +147,21 @@ struct SEIndex : public Index<"se", SERecord> {
     
     bool isNull() const {
         return index() == SE_NULL;
+    }
+    std::string toString() const override;
+};
+
+//
+// TreeIndex
+//
+struct TreeNode;
+//Index: TYPE = Base RELATIVE POINTER [0..Limit) TO Tree.Node;
+//NullIndex: Tree.Index = FIRST[Tree.Index];
+struct TreeIndex : public Index<"tree", TreeNode> {
+    static const constexpr uint16_t TreeIndex_NULL = 0;
+    
+    bool isNull() const {
+        return index() == TreeIndex_NULL;
     }
     std::string toString() const override;
 };

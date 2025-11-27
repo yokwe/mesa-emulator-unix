@@ -41,11 +41,12 @@ static const Logger logger(__FILE__);
 
 //#include "BTRecord.h"
 #include "CTXRecord.h"
-//#include "EXTRecord.h"
+#include "EXTRecord.h"
 #include "HTRecord.h"
-//#include "LTRecord.h"
+#include "LTRecord.h"
 #include "MDRecord.h"
 #include "SERecord.h"
+#include "EXTRecord.h"
 //#include "Tree.h"
 
 #include "Symbols.h"
@@ -61,9 +62,9 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 
 //	symbols.initializeBT(bb);
 	symbols.initializeCTX(bb);
-//	symbols.initializeEXT(bb);
+	symbols.initializeEXT(bb);
 	symbols.initializeHT(bb);
-//	symbols.initializeLT(bb);
+	symbols.initializeLT(bb);
 	symbols.initializeMD(bb);
 	symbols.initializeSE(bb);
 //	symbols.initializeTree(bb);
@@ -71,13 +72,21 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 
 //	BTIndex::setValue(symbols.btTable);
 	CTXIndex::setValue(symbols.ctxTable);
-//	EXTIndex::setValue(symbols.extTable);
+	EXTIndex::setValue(symbols.extTable);
 	HTIndex::setValue(symbols.htTable);
-//	LTIndex::setValue(symbols.ltTable);
+	LTIndex::setValue(symbols.ltTable);
 	MDIndex::setValue(symbols.mdTable);
 	SEIndex::setValue(symbols.seTable);
 //	TreeIndex::setValue(symbols.treeTable);
 
+//	BTIndex::stats();
+	CTXIndex::stats();
+	EXTIndex::stats();
+	HTIndex::stats();
+	LTIndex::stats();
+	MDIndex::stats();
+	SEIndex::stats();
+//	TreeLInk::stats();
 
     return symbols;
 }
@@ -137,15 +146,6 @@ void Symbols::dump() {
 	logger.info("mdTable         %5d", mdTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
-
-//	BTIndex::stats();
-	CTXIndex::stats();
-//	EXTIndex::stats();
-	HTIndex::stats();
-//	LTIndex::stats();
-	MDIndex::stats();
-	SEIndex::stats();
-//	TreeLInk::stats();
 }
 
 template <class T>
@@ -251,8 +251,8 @@ uint16_t getIndex(int pos, int offset, int limit) {
 }
 
 template<class T>
-static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table, const char* prefix) {
-    int base  = symbolBase + offset * 2;
+static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table, std::string prefix) {
+	int base  = symbolBase + offset * 2;
     int limit = base + limit_ * 2;
     bb.position(base);
     for(;;) {
@@ -274,6 +274,10 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
 }
 
 
+void Symbols::initializeLT(ByteBuffer& bb) {
+	BlockDescriptor& block = litBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, ltTable, "lt");
+}
 void Symbols::initializeMD(ByteBuffer& bb) {
 	BlockDescriptor& block = mdBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, mdTable, "md");
@@ -285,4 +289,76 @@ void Symbols::initializeCTX(ByteBuffer& bb) {
 void Symbols::initializeSE(ByteBuffer& bb) {
 	BlockDescriptor& block = seBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, seTable, "se");
+}
+void Symbols::initializeEXT(ByteBuffer& bb) {
+	BlockDescriptor& block = extBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, extTable, "ext");
+}
+
+
+#undef  ENUM_VALUE
+#define ENUM_VALUE(enum,value) {enum::value, #value},
+
+std::string toString(ContextLevel value) {
+    static std::map<ContextLevel, std::string> map {
+        ENUM_VALUE(ContextLevel, LZ)
+        ENUM_VALUE(ContextLevel, LG)
+        ENUM_VALUE(ContextLevel, LL)
+    };
+
+    if (map.contains(value)) return map[value];
+    return std_sprintf("%2d", (uint16_t)value);
+    // logger.error("Unexpected value");
+    // logger.error("  value  %d", (uint16_t)value);
+    // ERROR();
+}
+
+std::string toString(ExtensionType value) {
+    static std::map<ExtensionType, std::string> map {
+		ENUM_VALUE(ExtensionType, VALUE)
+		ENUM_VALUE(ExtensionType, FORM)
+		ENUM_VALUE(ExtensionType, DEFAULT)
+		ENUM_VALUE(ExtensionType, NONE)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+
+std::string toString(TypeClass value) {
+    static std::map<TypeClass, std::string> map {
+        ENUM_VALUE(TypeClass, MODE)
+        ENUM_VALUE(TypeClass, BASIC)
+        ENUM_VALUE(TypeClass, ENUMERATED)
+        ENUM_VALUE(TypeClass, RECORD)
+        ENUM_VALUE(TypeClass, REF)
+        //
+        ENUM_VALUE(TypeClass, ARRAY)
+        ENUM_VALUE(TypeClass, ARRAYDESC)
+        ENUM_VALUE(TypeClass, TRANSFER)
+        ENUM_VALUE(TypeClass, DEFINITION)
+        ENUM_VALUE(TypeClass, UNION)
+        //
+        ENUM_VALUE(TypeClass, SEQUENCE)
+        ENUM_VALUE(TypeClass, RELATIVE)
+        ENUM_VALUE(TypeClass, SUBRANGE)
+        ENUM_VALUE(TypeClass, LONG) 
+        ENUM_VALUE(TypeClass, REAL)
+        //
+        ENUM_VALUE(TypeClass, OPAQUE)
+        ENUM_VALUE(TypeClass, ZONE)
+        ENUM_VALUE(TypeClass, ANY)
+        ENUM_VALUE(TypeClass, NIL)
+        ENUM_VALUE(TypeClass, BITS)
+        ENUM_VALUE(TypeClass, BITS)
+		//
+		ENUM_VALUE(TypeClass, FIXEDSEQUENCE)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
 }

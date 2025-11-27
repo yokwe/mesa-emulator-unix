@@ -30,37 +30,16 @@
 
 
 //
-// MDRecord.h
+// EXTRecord.cpp
 //
-
-#pragma once
 
 #include <cstdint>
 #include <string>
 
-#include "Timestamp.h"
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
+
 #include "SymbolsIndex.h"
 
+#include "EXTRecord.h"
 
-//MDRecord: TYPE = RECORD [
-//  stamp: TimeStamp.Stamp,
-//  moduleId: HTIndex,		-- hash entry for module name
-//  fileId: HTIndex,		-- hash entry for file name
-//  shared: BOOLEAN,		-- overrides PRIVATE, etc.
-//  exported: BOOLEAN,
-//  ctx: IncludedCTXIndex,	-- context of copied entries
-//  defaultImport: CTXIndex,	-- unnamed imported instance
-//  file: FileIndex];		-- associated file
-struct MDRecord : public ByteBuffer::Readable, public HasToString {
-    Timestamp  stamp;
-    HTIndex    moduleId;
-    HTIndex    fileId;
-    bool       shared;
-    bool       exported;
-    CTXIndex   ctx;
-    CTXIndex   defaultImport;
-    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
-
-    ByteBuffer& read(ByteBuffer& bb) override;
-    std::string toString() const override;
-};

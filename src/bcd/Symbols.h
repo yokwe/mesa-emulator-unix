@@ -43,6 +43,62 @@
 
 #include "SymbolsIndex.h"
 
+
+//
+// Common type used in Symbols
+//
+
+//   ContextLevel: TYPE = [0..7];
+//     lZ: ContextLevel = 0;	-- context level of non-frame records
+//     lG: ContextLevel = 1;	-- context level of global frame
+//     lL: ContextLevel = lG+1;	-- context level of outer procedures
+enum class ContextLevel : uint16_t {
+	ENUM_VALUE(ContextLevel, LZ)
+	ENUM_VALUE(ContextLevel, LG)
+	ENUM_VALUE(ContextLevel, LL)
+};
+std::string toString(ContextLevel valeu);
+
+//  ExtensionType: TYPE = {value, form, default, none};
+enum class ExtensionType {
+	ENUM_VALUE(ExtensionType, VALUE)
+	ENUM_VALUE(ExtensionType, FORM)
+	ENUM_VALUE(ExtensionType, DEFAULT)
+	ENUM_VALUE(ExtensionType, NONE)
+};
+std::string toString(ExtensionType value);
+
+enum class TypeClass : uint16_t {
+	ENUM_VALUE(TypeClass, MODE)
+	ENUM_VALUE(TypeClass, BASIC)
+	ENUM_VALUE(TypeClass, ENUMERATED)
+	ENUM_VALUE(TypeClass, RECORD)
+	ENUM_VALUE(TypeClass, REF)
+	//
+	ENUM_VALUE(TypeClass, ARRAY)
+	ENUM_VALUE(TypeClass, ARRAYDESC)
+	ENUM_VALUE(TypeClass, TRANSFER)
+	ENUM_VALUE(TypeClass, DEFINITION)
+	ENUM_VALUE(TypeClass, UNION)
+	//
+	ENUM_VALUE(TypeClass, SEQUENCE)
+	ENUM_VALUE(TypeClass, RELATIVE)
+	ENUM_VALUE(TypeClass, SUBRANGE)
+	ENUM_VALUE(TypeClass, LONG) 
+	ENUM_VALUE(TypeClass, REAL)
+	//
+	ENUM_VALUE(TypeClass, OPAQUE)
+	ENUM_VALUE(TypeClass, ZONE)
+	ENUM_VALUE(TypeClass, ANY)
+	ENUM_VALUE(TypeClass, NIL)
+	ENUM_VALUE(TypeClass, BITS)
+	//
+	ENUM_VALUE(TypeClass, FIXEDSEQUENCE)
+};
+std::string toString(TypeClass value);
+
+
+
 struct BTRecord;
 struct CTXRecord;
 struct EXTRecord;

@@ -30,37 +30,41 @@
 
 
 //
-// MDRecord.h
+// EXTRecord.h
 //
 
 #pragma once
 
 #include <cstdint>
 #include <string>
+#include <variant>
+#include <vector>
 
-#include "Timestamp.h"
+#include "../util/Util.h"
+
+#include "Symbols.h"
 #include "SymbolsIndex.h"
 
+#include "Tree.h"
 
-//MDRecord: TYPE = RECORD [
-//  stamp: TimeStamp.Stamp,
-//  moduleId: HTIndex,		-- hash entry for module name
-//  fileId: HTIndex,		-- hash entry for file name
-//  shared: BOOLEAN,		-- overrides PRIVATE, etc.
-//  exported: BOOLEAN,
-//  ctx: IncludedCTXIndex,	-- context of copied entries
-//  defaultImport: CTXIndex,	-- unnamed imported instance
-//  file: FileIndex];		-- associated file
-struct MDRecord : public ByteBuffer::Readable, public HasToString {
-    Timestamp  stamp;
-    HTIndex    moduleId;
-    HTIndex    fileId;
-    bool       shared;
-    bool       exported;
-    CTXIndex   ctx;
-    CTXIndex   defaultImport;
-    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
+//ExtRecord: PUBLIC TYPE = RECORD [
+//  type (0:0..1): Symbols.ExtensionType[value..default],
+//  sei (0:2..15): Symbols.ISEIndex,
+//  tree (1:0..15): Tree.Link]
+struct EXTRecord : public ByteBuffer::Readable, public HasToString {
+    ExtensionType type;
+    SEIndex       sei;
+    TreeLink      tree;
+    
+    ByteBuffer& read(ByteBuffer& bb) override {
+        uint16_t u0;
+        bb.read(u0, tree);
 
-    ByteBuffer& read(ByteBuffer& bb) override;
-    std::string toString() const override;
+        type = (ExtensionType)bitField(u0, 0, 1);
+        sei.index(bitField(u0, 2, 15));
+        return bb;
+    }
+    std::string toString() const override {
+        return std_sprintf("[%s  %s  %s]", ::toString(type), sei.Index::toString(), tree.toString());
+    }
 };

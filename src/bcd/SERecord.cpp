@@ -452,101 +452,69 @@ std::string SERecord::CONS::ZONE::toString() const {
 //
 // SERecord::CONS
 //
-std::string SERecord::CONS::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, MODE)
-        ENUM_VALUE(Type, BASIC)
-        ENUM_VALUE(Type, ENUMERATED)
-        ENUM_VALUE(Type, RECORD)
-        ENUM_VALUE(Type, REF)
-        //
-        ENUM_VALUE(Type, ARRAY)
-        ENUM_VALUE(Type, ARRAYDESC)
-        ENUM_VALUE(Type, TRANSFER)
-        ENUM_VALUE(Type, DEFINITION)
-        ENUM_VALUE(Type, UNION)
-        //
-        ENUM_VALUE(Type, SEQUENCE)
-        ENUM_VALUE(Type, RELATIVE)
-        ENUM_VALUE(Type, SUBRANGE)
-        ENUM_VALUE(Type, LONG) 
-        ENUM_VALUE(Type, REAL)
-        //
-        ENUM_VALUE(Type, OPAQUE)
-        ENUM_VALUE(Type, ZONE)
-        ENUM_VALUE(Type, ANY)
-        ENUM_VALUE(Type, NIL)
-        ENUM_VALUE(Type, BITS)
-    };
-
-    if (map.contains(value)) return map[value];
-    logger.error("Unexpected value");
-    logger.error("  value  %d", (uint16_t)value);
-    ERROR();
-}
 #define CASE_BODY(typeName) { typeName value; value.read(u0, bb); typeInfo = value; }
 void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
-    typeTag = (Type)bitField(u0, 3, 7);
+    typeTag = (TypeClass)bitField(u0, 3, 7);
     switch(typeTag) {
         
-    case Type::MODE:
+    case TypeClass::MODE:
         typeInfo = MODE{};
         break;
-    case Type::BASIC:
+    case TypeClass::BASIC:
         CASE_BODY(BASIC)
         break;
-    case Type::ENUMERATED:
+    case TypeClass::ENUMERATED:
         CASE_BODY(ENUMERATED)
         break;
-    case Type::RECORD:
+    case TypeClass::RECORD:
         CASE_BODY(RECORD)
         break;
-    case Type::REF:
+    case TypeClass::REF:
         CASE_BODY(REF)
         break;
-    case Type::ARRAY:
+    case TypeClass::ARRAY:
         CASE_BODY(ARRAY)
         break;
-    case Type::ARRAYDESC:
+    case TypeClass::ARRAYDESC:
         CASE_BODY(ARRAYDESC)
         break;
-    case Type::TRANSFER:
+    case TypeClass::TRANSFER:
         CASE_BODY(TRANSFER)
         break;
-    case Type::DEFINITION:
+    case TypeClass::DEFINITION:
         CASE_BODY(DEFINITION)
         break;
-    case Type::UNION:
+    case TypeClass::UNION:
         CASE_BODY(UNION)
         break;
-    case Type::SEQUENCE:
+    case TypeClass::SEQUENCE:
         CASE_BODY(SEQUENCE)
         break;
-    case Type::RELATIVE:
+    case TypeClass::RELATIVE:
         CASE_BODY(RELATIVE)
         break;
-    case Type::SUBRANGE:
+    case TypeClass::SUBRANGE:
         CASE_BODY(SUBRANGE)
         break;
-    case Type::LONG:
+    case TypeClass::LONG:
         CASE_BODY(LONG)
         break;
-    case Type::REAL:
+    case TypeClass::REAL:
         CASE_BODY(REAL)
         break;
-    case Type::OPAQUE:
+    case TypeClass::OPAQUE:
         CASE_BODY(OPAQUE)
         break;
-    case Type::ZONE:
+    case TypeClass::ZONE:
         CASE_BODY(ZONE)
         break;
-    case Type::ANY:
+    case TypeClass::ANY:
         typeInfo = ANY{};
         break;
-    case Type::NIL:
+    case TypeClass::NIL:
         typeInfo = NIL{};
         break;
-    case Type::BITS:
+    case TypeClass::BITS:
         CASE_BODY(BITS)
         break;
     default:
@@ -554,7 +522,7 @@ void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
     }
 }
 std::string SERecord::CONS::toString() const {
-    return std_sprintf("[%s  %s]", toString(typeTag), ::toString(typeInfo));
+    return std_sprintf("[%s  %s]", ::toString(typeTag), ::toString(typeInfo));
 }
 
 

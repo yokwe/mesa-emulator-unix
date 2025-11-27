@@ -41,6 +41,7 @@
 
 #include "../util/Util.h"
 
+#include "Symbols.h"
 #include "SymbolsIndex.h"
 
 
@@ -61,18 +62,6 @@
 //    nil => []
 //    ENDCASE];
 struct CTXRecord : public ByteBuffer::Readable, public HasToString {
-    using SEIndex = uint16_t; // FIXME
-    //   ContextLevel: TYPE = [0..7];
-    //     lZ: ContextLevel = 0;	-- context level of non-frame records
-    //     lG: ContextLevel = 1;	-- context level of global frame
-    //     lL: ContextLevel = lG+1;	-- context level of outer procedures
-    enum class ContextLevel : uint16_t {
-        ENUM_VALUE(ContextLevel, LZ)
-        ENUM_VALUE(ContextLevel, LG)
-        ENUM_VALUE(ContextLevel, LL)
-    };
-    static std::string toString(ContextLevel valeu);
-
     //Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
     enum class Closure : uint16_t {
         ENUM_VALUE(Closure, NONE)

@@ -39,24 +39,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "Symbols.h"
 #include "CTXRecord.h"
 
 #undef  ENUM_VALUE
 #define ENUM_VALUE(enum,value) {enum::value, #value},
-
-std::string CTXRecord::toString(ContextLevel value) {
-    static std::map<ContextLevel, std::string> map {
-        ENUM_VALUE(ContextLevel, LZ)
-        ENUM_VALUE(ContextLevel, LG)
-        ENUM_VALUE(ContextLevel, LL)
-    };
-
-    if (map.contains(value)) return map[value];
-    return std_sprintf("%2d", (uint16_t)value);
-    // logger.error("Unexpected value");
-    // logger.error("  value  %d", (uint16_t)value);
-    // ERROR();
-}
 
 std::string CTXRecord::toString(Closure value) {
     static std::map<Closure, std::string> map {
@@ -153,8 +140,8 @@ ByteBuffer& CTXRecord::read(ByteBuffer& bb) {
 
     mark        = bitField(u0, 0);
     varUpdated  = bitField(u0, 1);
-//        seList.setIndex(bitField(u0, 2, 15));
-    seList      = bitField(u0, 2, 15);
+    seList.index(bitField(u0, 2, 15));
+//    seList      = bitField(u0, 2, 15);
     level       = (ContextLevel)bitField(u1, 0,  2);
     ctxType     = (Type)bitField(u1, 3, 4);
     switch(ctxType) {
@@ -180,5 +167,5 @@ std::string CTXRecord::toString() const {
     std::string extString = std::visit([](auto& x) { return x.toString(); }, extension);
     return std_sprintf("[%s%s  %5d  %s  %s  %s]",
         mark ? "M" : " ", varUpdated ? "V" : " ",
-        seList, toString(level), toString(ctxType), extString);
+        seList.Index::toString(), ::toString(level), toString(ctxType), extString);
 }

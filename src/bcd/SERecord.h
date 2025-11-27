@@ -40,6 +40,7 @@
 #include <sys/_types/_u_int16_t.h>
 #include <variant>
 
+#include "Symbols.h"
 #include "SymbolsIndex.h"
 
 
@@ -383,34 +384,7 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             }
         };
         
-        enum class Type : uint16_t {
-            ENUM_VALUE(Type, MODE)
-            ENUM_VALUE(Type, BASIC)
-            ENUM_VALUE(Type, ENUMERATED)
-            ENUM_VALUE(Type, RECORD)
-            ENUM_VALUE(Type, REF)
-            //
-            ENUM_VALUE(Type, ARRAY)
-            ENUM_VALUE(Type, ARRAYDESC)
-            ENUM_VALUE(Type, TRANSFER)
-            ENUM_VALUE(Type, DEFINITION)
-            ENUM_VALUE(Type, UNION)
-            //
-            ENUM_VALUE(Type, SEQUENCE)
-            ENUM_VALUE(Type, RELATIVE)
-            ENUM_VALUE(Type, SUBRANGE)
-            ENUM_VALUE(Type, LONG) 
-            ENUM_VALUE(Type, REAL)
-            //
-            ENUM_VALUE(Type, OPAQUE)
-            ENUM_VALUE(Type, ZONE)
-            ENUM_VALUE(Type, ANY)
-            ENUM_VALUE(Type, NIL)
-            ENUM_VALUE(Type, BITS)
-        };
-        static std::string toString(Type value);
-
-        Type typeTag;
+        TypeClass typeTag;
         std::variant<
             MODE, BASIC, ENUMERATED, RECORD, REF,
             ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,

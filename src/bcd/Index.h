@@ -144,6 +144,10 @@ public:
         }
     }
 
+    bool hasValue() const {
+        return _value;
+    }
+
     const T* value() const {
         if (_value) return _value;
         logger.error("index has no value");
@@ -174,6 +178,7 @@ public:
         return bb;
     }
     std::string toString() const override {
-        return std_sprintf("%s-%d", prefix, _index);
+        std::string mark = (hasValue()) ? "-" : "?";
+        return std_sprintf("%s%s%d", prefix, mark, _index);
     }
 };

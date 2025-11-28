@@ -157,7 +157,7 @@ struct SEIndex : public Index<"se", SERecord> {
 struct TreeNode;
 //Index: TYPE = Base RELATIVE POINTER [0..Limit) TO Tree.Node;
 //NullIndex: Tree.Index = FIRST[Tree.Index];
-struct TreeIndex : public Index<"tree", TreeNode> {
+struct TreeIndex : public Index<"tr", TreeNode> {
     static const constexpr uint16_t TreeIndex_NULL = 0;
     
     bool isNull() const {

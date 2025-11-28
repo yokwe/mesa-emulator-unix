@@ -99,6 +99,9 @@ struct LTRecord : public ByteBuffer::Readable, public HasToString {
     std::string toString() const override;
 };
 
+// NORICE
+//   size of LitRecod is 14 bits
+//   needs to shift 2 bit for 16 bit aligned data
 //LitRecord: TYPE = RECORD [
 //  SELECT litTag(0:0..0): * FROM
 //    word => [index(0:1..13): LTIndex],

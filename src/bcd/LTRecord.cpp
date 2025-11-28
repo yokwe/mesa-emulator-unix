@@ -127,7 +127,11 @@ std::string LitRecord::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
+// NORICE
+//   size of LitRecod is 14 bits
+//   needs to shift 2 bit for 16 bit aligned data
 void LitRecord::read(uint16_t u0) {
+    u0 <<= 2;
     litTag = (Tag)bitField(u0, 0);
     WORD   wordValue;
     STRING stringValue;

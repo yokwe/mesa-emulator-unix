@@ -13,6 +13,7 @@ target_sources(
 		DiskFile.h
 		net.h
 		Perf.h
+		StringPrinter.h
 		tcl.h
 		trace.h
 		ThreadControl.h
@@ -24,6 +25,7 @@ target_sources(
 		DiskFile.cpp
 		net.cpp
 		Perf.cpp
+		StringPrinter.cpp
 		tcl.cpp
 		trace.cpp
 		ThreadControl.cpp

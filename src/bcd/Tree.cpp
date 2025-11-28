@@ -39,7 +39,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "Index.h"
+#include "Symbols.h"
+#include "SymbolsIndex.h"
 
 #include "Tree.h"
 
@@ -56,8 +57,70 @@ std::string TreeIndex::toString() const {
     return value()->toString();
 }
 
+//
+// TreeLink
+//
+std::string TreeLink::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, SUBTREE)
+        ENUM_VALUE(Tag, HASH)
+        ENUM_VALUE(Tag, SYMBOL)
+        ENUM_VALUE(Tag, LITERAL)
+    };
+    
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+ByteBuffer& TreeLink::read(ByteBuffer& bb) {
+    uint16_t u0;
 
+    bb.read(u0);
+    tag = (Tag)bitField(u0, 0, 1);
+    switch(tag) {
+    case Tag::SUBTREE:
+    {
+        SUBTREE value_;
+        value_.read(u0);
+        value = value_;
+    }
+        break;
+    case Tag::HASH:
+    {
+        HASH value_;
+        value_.read(u0);
+        value = value_;
+    }
+        break;
+    case Tag::SYMBOL:
+    {
+        SYMBOL value_;
+        value_.read(u0);
+        value = value_;
+    }
+        break;
+    case Tag::LITERAL:
+    {
+        LITERAL value_;
+        value_.read(u0);
+        value = value_;
+    }
+        break;
+    default:
+        ERROR()
+    }
 
+    return bb;
+}
+std::string TreeLink::toString() const {
+    std::string valueString = ::toString(value);
+    return std_sprintf("[%s  %s]", toString(tag), valueString);
+}
+
+//
+// NodeName
+//
 std::string toString(NodeName value) {
     static std::map<NodeName, std::string> map {
         ENUM_VALUE(NodeName, LIST)
@@ -268,66 +331,43 @@ std::string toString(NodeName value) {
     ERROR();
 }
 
-std::string TreeLink::toString(Tag value) {
-    static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, SUBTREE)
-        ENUM_VALUE(Tag, HASH)
-        ENUM_VALUE(Tag, SYMBOL)
-        ENUM_VALUE(Tag, LITERAL)
-    };
-    
-    if (map.contains(value)) return map[value];
-    logger.error("Unexpected value");
-    logger.error("  value  %d", (uint16_t)value);
-    ERROR();
-}
-
-
 //
-// TreeLink
+// TreeNode
 //
-ByteBuffer& TreeLink::read(ByteBuffer& bb) {
+ByteBuffer& TreeNode::read(ByteBuffer& bb) {
     uint16_t u0;
+    bb.read(u0, info);
 
-    bb.read(u0);
-    tag = (Tag)bitField(u0, 0, 1);
-    switch(tag) {
-    case Tag::SUBTREE:
-    {
-        SUBTREE value_;
-        value_.read(u0);
-        value = value_;
-    }
-        break;
-    case Tag::HASH:
-    {
-        HASH value_;
-        value_.read(u0);
-        value = value_;
-    }
-        break;
-    case Tag::SYMBOL:
-    {
-        SYMBOL value_;
-        value_.read(u0);
-        value = value_;
-    }
-        break;
-    case Tag::LITERAL:
-    {
-        LITERAL value_;
-        value_.read(u0);
-        value = value_;
-    }
-        break;
-    default:
-        ERROR()
-    }
+    free   = bitField(u0,  0);
+    name   = (NodeName)bitField(u0,  1, 8);
+    attr1  = bitField(u0,  9);
+    attr2  = bitField(u0, 10);
+    attr3  = bitField(u0, 11);
+    shared = bitField(u0, 12);
+    nSons  = bitField(u0, 13, 15);
 
+    logger.info("XX  %d  %s", nSons, ::toString(name));
+
+    for(int i = 0; i < nSons; i++) {
+        TreeLink value;
+        bb.read(value);
+        son.push_back(value);
+    }
 
     return bb;
 }
-std::string TreeLink::toString() const {
-    std::string valueString = ::toString(value);
-    return std_sprintf("[%s  %s]", toString(tag), valueString);
+std::string TreeNode::toString() const {
+    std::string flags = std_sprintf("[%s%s%s%s%s]",
+        free   ? "F" : "_",
+        shared ? "S" : "_",
+        attr1  ? "1" : "_",
+        attr2  ? "2" : "_",
+        attr3  ? "3" : "_");
+    std::string sonString;
+    for(const auto& e: son) {
+        sonString += std_sprintf(" %s", e.toString());
+    }
+    if (!sonString.empty()) sonString = sonString.substr(1);
+    return std_sprintf("[%s  %-8s  %5d  (%d)[%s]]",
+        flags, ::toString(name), info, nSons, sonString);
 }

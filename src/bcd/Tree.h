@@ -55,7 +55,7 @@
 //    symbol => [index(0:2..15): Symbols.ISEIndex],
 //    literal => [info(0:2..15): Literals.LitRecord]
 //    ENDCASE];
-struct TreeLink : public ByteBuffer::Readable, public HasToString {
+struct TreeLink final : public ByteBuffer::Readable, public HasToString {
     enum class Tag : uint16_t {
         ENUM_VALUE(Tag, SUBTREE)
         ENUM_VALUE(Tag, HASH)
@@ -98,8 +98,7 @@ struct TreeLink : public ByteBuffer::Readable, public HasToString {
         LitRecord index;
 
         void read(uint16_t u0) {
-            // need to align bit 0 position of LitRecord
-            index.read(bitField(u0, 2, 15) << 2);
+            index.read(bitField(u0, 2, 15));
         }
         std::string toString() const {
             return std_sprintf("[%s]", index.toString());
@@ -108,6 +107,8 @@ struct TreeLink : public ByteBuffer::Readable, public HasToString {
 
     Tag tag;
     std::variant<SUBTREE, HASH, SYMBOL, LITERAL> value;
+
+    TreeLink() : tag(Tag::SUBTREE), value(SUBTREE{}) {}
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;

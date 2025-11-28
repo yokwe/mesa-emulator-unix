@@ -47,7 +47,7 @@ static const Logger logger(__FILE__);
 #include "MDRecord.h"
 #include "SERecord.h"
 #include "EXTRecord.h"
-//#include "Tree.h"
+#include "Tree.h"
 
 #include "Symbols.h"
 
@@ -67,7 +67,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	symbols.initializeLT(bb);
 	symbols.initializeMD(bb);
 	symbols.initializeSE(bb);
-//	symbols.initializeTree(bb);
+	symbols.initializeTree(bb);
 
 
 	BTIndex::setValue(symbols.btTable);
@@ -77,7 +77,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	LTIndex::setValue(symbols.ltTable);
 	MDIndex::setValue(symbols.mdTable);
 	SEIndex::setValue(symbols.seTable);
-//	TreeIndex::setValue(symbols.treeTable);
+	TreeIndex::setValue(symbols.treeTable);
 
     return symbols;
 }
@@ -145,7 +145,7 @@ void Symbols::dump() {
 	LTIndex::stats();
 	MDIndex::stats();
 	SEIndex::stats();
-//	TreeLInk::stats();
+	TreeIndex::stats();
 }
 
 template <class T>
@@ -301,6 +301,10 @@ void Symbols::initializeEXT(ByteBuffer& bb) {
 void Symbols::initializeBT(ByteBuffer& bb) {
 	BlockDescriptor& block = bodyBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, btTable, "bt");
+}
+void Symbols::initializeTree(ByteBuffer& bb) {
+	BlockDescriptor& block = treeBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, treeTable, "tr");
 }
 
 

@@ -9,7 +9,7 @@ target_sources(
 	PUBLIC
 		BCD.h
 		BCDFile.h
-#		BTRecord.h
+		BTRecord.h
 		CTXRecord.h
 		EXTRecord.h
 		HTRecord.h
@@ -24,7 +24,7 @@ target_sources(
 	PRIVATE
 		BCD.cpp
 		BCDFile.cpp
-#		BTRecord.cpp
+		BTRecord.cpp
 		CTXRecord.cpp
 		EXTRecord.cpp
 		HTRecord.cpp

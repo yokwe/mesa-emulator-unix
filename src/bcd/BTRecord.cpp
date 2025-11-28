@@ -53,7 +53,7 @@ static const Logger logger(__FILE__);
 //BTNull: BTIndex = LAST[BTIndex];
 std::string BTIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    else return std_sprintf("%s%s", hasValue() ? "" : "?", Index::toString());
+    else return Index::toString();
 }
 
 //
@@ -167,7 +167,6 @@ std::string BTRecord::toString(Kind value) {
 void BTRecord::CALLABLE::OUTER::read(uint16_t u11, ByteBuffer& bb) {
     (void)u11;
     (void)bb;
-//    bb.get16(); // 12
 }
 
 //
@@ -176,7 +175,9 @@ void BTRecord::CALLABLE::OUTER::read(uint16_t u11, ByteBuffer& bb) {
 void BTRecord::CALLABLE::INNER::read(uint16_t u11, ByteBuffer& bb) {
     frameOffset = bitField(u11, 2, 15);
     (void)bb;
-//    bb.get16(); // 12
+    // NOTICE
+    //   below get16() is needed practically
+    bb.get16(); // 12
 }
 
 //
@@ -184,7 +185,7 @@ void BTRecord::CALLABLE::INNER::read(uint16_t u11, ByteBuffer& bb) {
 //
 void BTRecord::CALLABLE::CATCH::read(uint16_t u11, ByteBuffer& bb) {
     (void)u11;
-    bb.read(index);
+    bb.read(index); // 12
 }
 //
 // BTRecord::CALLABLE
@@ -216,8 +217,6 @@ void BTRecord::CALLABLE::read(uint16_t u8, ByteBuffer& bb) {
     entryIndex = bitField(u10, 3, 10);
     hints      = bitField(u10, 11, 15);
     nesting    = (Nesting)bitField(u11, 0);
-
-    logger.info("BT CALLABLE  %s", toString(nesting));
 
     switch(nesting) {
     case Nesting::OUTER:
@@ -268,13 +267,8 @@ std::string BTRecord::CALLABLE::toString() const {
 // BTRecord::OTHER
 //
 void BTRecord::OTHER::read(uint16_t u8, ByteBuffer& bb) {
-    logger.info("BT OTHER");
     relOffset = bitField(u8, 1, 15);
     (void)bb;
-    // bb.get16(); // 9
-    // bb.get16(); // 10
-    // bb.get16(); // 11
-    // bb.get16(); // 12
 }
 std::string BTRecord::OTHER::toString() const {
     return std_sprintf("[%d]", relOffset);
@@ -284,13 +278,9 @@ std::string BTRecord::OTHER::toString() const {
 // BTRecord
 //
 ByteBuffer& BTRecord::read(ByteBuffer& bb) {
-    int sizeExpect;
-    int posStart = bb.position();
-    logger.info("BT  %d", bb.position());
-
     uint16_t u3, u8;
-
     bb.read(link, firstSon, type, u3, sourceIndex, info, u8);
+
     localCtx.index(bitField(u3,0, 10));
     level = (ContextLevel)bitField(u3, 11, 15);
     kind = (Kind)bitField(u8, 0);
@@ -300,20 +290,6 @@ ByteBuffer& BTRecord::read(ByteBuffer& bb) {
         CALLABLE value;
         value.read(u8, bb);
         extension = value;
-
-        switch(value.nesting) {
-        case CALLABLE::Nesting::OUTER:
-            sizeExpect = 12;
-            break;
-        case CALLABLE::Nesting::INNER:
-            sizeExpect = 12;
-            break;
-        case CALLABLE::Nesting::CATCH:
-            sizeExpect = 13;
-            break;
-        default:
-            ERROR()
-        }
     }
         break;
     case Kind::OTHER:
@@ -321,18 +297,11 @@ ByteBuffer& BTRecord::read(ByteBuffer& bb) {
         OTHER value;
         value.read(u8, bb);
         extension = value;
-
-        sizeExpect = 9;
     }
         break;
     default:
         ERROR()
     }
-
-    int posStop = bb.position();
-    int sizeActual = (posStop - posStart) / 2;
-    logger.info("BT  size  %d  %d", sizeExpect, sizeActual);
-    if (sizeExpect != sizeActual) ERROR()
     return bb;
 }
 std::string BTRecord::toString() const {

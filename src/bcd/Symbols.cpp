@@ -39,7 +39,7 @@ static const Logger logger(__FILE__);
 
 #include "../mesa/Pilot.h"
 
-//#include "BTRecord.h"
+#include "BTRecord.h"
 #include "CTXRecord.h"
 #include "EXTRecord.h"
 #include "HTRecord.h"
@@ -60,7 +60,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
     bb.position(offset);
     symbols.read(bb);
 
-//	symbols.initializeBT(bb);
+	symbols.initializeBT(bb);
 	symbols.initializeCTX(bb);
 	symbols.initializeEXT(bb);
 	symbols.initializeHT(bb);
@@ -70,7 +70,7 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 //	symbols.initializeTree(bb);
 
 
-//	BTIndex::setValue(symbols.btTable);
+	BTIndex::setValue(symbols.btTable);
 	CTXIndex::setValue(symbols.ctxTable);
 	EXTIndex::setValue(symbols.extTable);
 	HTIndex::setValue(symbols.htTable);
@@ -78,15 +78,6 @@ Symbols Symbols::getInstance(ByteBuffer &bb, int offset) {
 	MDIndex::setValue(symbols.mdTable);
 	SEIndex::setValue(symbols.seTable);
 //	TreeIndex::setValue(symbols.treeTable);
-
-//	BTIndex::stats();
-	CTXIndex::stats();
-	EXTIndex::stats();
-	HTIndex::stats();
-	LTIndex::stats();
-	MDIndex::stats();
-	SEIndex::stats();
-//	TreeLInk::stats();
 
     return symbols;
 }
@@ -146,6 +137,15 @@ void Symbols::dump() {
 	logger.info("mdTable         %5d", mdTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
+
+	BTIndex::stats();
+	CTXIndex::stats();
+	EXTIndex::stats();
+	HTIndex::stats();
+	LTIndex::stats();
+	MDIndex::stats();
+	SEIndex::stats();
+//	TreeLInk::stats();
 }
 
 template <class T>
@@ -237,8 +237,11 @@ void Symbols::initializeHT(ByteBuffer& bb) {
     }
 }
 
-uint16_t getIndex(int pos, int offset, int limit) {
-    uint16_t index = ((pos + 1) / 2) -  offset;
+uint16_t getIndex(int symbolBase, int pos, int offset, int limit) {
+	if (pos % 2) ERROR()
+//    uint16_t index = ((pos + 1) / 2) -  offset;
+    uint16_t index = (pos - symbolBase) / 2 - offset;
+	// sanity check
     if (index < 0 || limit < index) {
         logger.error("Unexpected index");
         logger.error("  pos     %5d", pos);
@@ -251,12 +254,12 @@ uint16_t getIndex(int pos, int offset, int limit) {
 }
 
 template<class T>
-static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limit_, std::map<uint16_t, T*>& table, std::string prefix) {
-	int base  = symbolBase + offset * 2;
+static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset_, int limit_, std::map<uint16_t, T*>& table, std::string prefix) {
+	int base  = symbolBase + offset_ * 2;
     int limit = base + limit_ * 2;
     bb.position(base);
     for(;;) {
-        int index = getIndex(bb.position() - symbolBase, offset, limit_);
+        int index = getIndex(symbolBase, bb.position(), offset_, limit_);
         if (limit <= bb.position()) break;
 		T* value = new T;
         value->read(bb);
@@ -264,12 +267,13 @@ static void buildTable(ByteBuffer& bb, uint32_t symbolBase, int offset, int limi
     }
 	// sanity check
 	if (bb.position() != (limit)) {
-		logger.error("Unexpected length");
+		logger.error("Unexpected position");
 		logger.error("  prefix     %s", prefix);
 		logger.error("  pos        %5d", bb.position());
 		logger.error("  base       %5d", base);
 		logger.error("  limit      %5d", limit);
 		logger.error("  index      %5d", index);
+		ERROR()
 	}
 }
 
@@ -293,6 +297,10 @@ void Symbols::initializeSE(ByteBuffer& bb) {
 void Symbols::initializeEXT(ByteBuffer& bb) {
 	BlockDescriptor& block = extBlock;
 	buildTable(bb, symbolBase, block.offset, block.size, extTable, "ext");
+}
+void Symbols::initializeBT(ByteBuffer& bb) {
+	BlockDescriptor& block = bodyBlock;
+	buildTable(bb, symbolBase, block.offset, block.size, btTable, "bt");
 }
 
 

@@ -50,6 +50,9 @@ int main(int, char**) {
 //		std::string path = "tmp/bcd/UnpackedPilotKernel.bcd";
 //		std::string path = "tmp/bcd/File.bcd";
 		std::string path = "tmp/bcd/FileImpl.bcd";
+//		std::string path = "tmp/bcd/LoaderCoreImplA.bcd";
+//		std::string path = "tmp/bcd/LoaderCoreImplB.bcd";
+//		std::string path = "tmp/bcd/LoaderCoreImplC.bcd";
 
 		BCDFile bcdFile(path);
 		ByteBuffer bb = bcdFile.getByteBuffer();

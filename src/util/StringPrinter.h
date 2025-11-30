@@ -47,6 +47,7 @@ class StringPrinter final {
     static const inline char* TAB = "    ";
 
     std::string buffer;
+    std::string line;
     int tabLevel = 0;
 public:
     StringPrinter() {
@@ -57,6 +58,7 @@ public:
         tabLevel = 0;
         buffer.clear();
         buffer.reserve(BUFFER_RESERVE);
+        line.clear();
     }
     const std::string& toString() const {
         return buffer;
@@ -72,38 +74,28 @@ public:
     //
     // tab
     //
-    StringPrinter& indent();
-    StringPrinter& unindent();
-    StringPrinter& tab();
+    StringPrinter& nest();
+    StringPrinter& unnest();
 
     //
     // print
     //
-    StringPrinter& print(const std::string& value) {
-        buffer += value;
-        return *this;
+    StringPrinter& print(const std::string& value);
+    StringPrinter& print(const char* value) {
+        std::string string{value};
+        return print(string);
     }
+    
+    //
+    // print with format
+    //
     template <typename T>
     StringPrinter& print_(const char* format, T value) {
         return print(std_sprintf(format, value));
     }
     template<typename ... Args>
-    StringPrinter& print_(const char* format, Args&& ... args) {
+    StringPrinter& print(const char* format, Args&& ... args) {
         return print(std_sprintf(format, args ...));
-    }
-    // unsigned
-    StringPrinter& print(uint16_t value) {
-        return print_("%u", value);
-    }
-    StringPrinter& print(uint32_t value) {
-        return print_("%u", value);
-    }
-    // signed
-    StringPrinter& print(int16_t value) {
-        return print_("%d", value);
-    }
-    StringPrinter& print(int32_t value) {
-        return print_("%d", value);
     }
     // string
     StringPrinter& print(const char* format, const std::string& value) {
@@ -113,22 +105,21 @@ public:
     //
     // println
     //
+    StringPrinter& println() {
+        return newLine();
+    }
+    //
+    // pritnln with format
+    //
+    template<typename ... Args>
+    StringPrinter& println(const char* format, Args&& ... args) {
+        return print(std_sprintf(format, args ...)).newLine();
+    }
     StringPrinter& println(const std::string& value) {
         return print(value).newLine();
     }
-    // unsigned
-    StringPrinter& println(uint16_t value) {
-        return print_("%u", value).newLine();
-    }
-    StringPrinter& println(uint32_t value) {
-        return print_("%u", value).newLine();
-    }
-    // signed
-    StringPrinter& println(int16_t value) {
-        return print_("%d", value).newLine();
-    }
-    StringPrinter& println(int32_t value) {
-        return print_("%d", value).newLine();
+    StringPrinter& println(const char* value) {
+        return print(value).newLine();
     }
     // string
     StringPrinter& println(const char* format, const std::string& value) {

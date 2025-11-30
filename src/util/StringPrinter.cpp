@@ -34,8 +34,6 @@
 //
 
 #include <string>
-#include <filesystem>
-#include <fstream>
 
 #include "Util.h"
 static const Logger logger(__FILE__);
@@ -43,35 +41,47 @@ static const Logger logger(__FILE__);
 #include "StringPrinter.h"
 
 void StringPrinter::save(const std::string& path) {
-    std::filesystem::create_directories(path);
-
-    std::ofstream ofs;
-    ofs.open(path);
-    ofs << buffer;
-    ofs.close();
+    writeFile(path, buffer);
 }
 
 
 StringPrinter& StringPrinter::newLine() {
-    buffer += NEW_LINE;
     // maintain bufffer capacity
     if (buffer.capacity() < MINIMU_CAPACITY) buffer.reserve(BUFFER_RESERVE);
+
+    std::string wholeLine;
+
+    // add line to buffer
+    // add TAB
+    for(int i = 0; i < tabLevel; i++) wholeLine += TAB;
+    // add line
+    wholeLine += line;
+
+    logger.info("XX %s", wholeLine);
+
+    buffer += wholeLine;
+    buffer += NEW_LINE;
+    line.clear();
+
     return *this;
 }
 
 
-StringPrinter& StringPrinter::indent() {
+StringPrinter& StringPrinter::nest() {
     tabLevel++;
     return *this;
 }
-StringPrinter& StringPrinter::unindent() {
+StringPrinter& StringPrinter::unnest() {
     tabLevel--;
     if (tabLevel < 0) ERROR()
     return *this;
 }
-StringPrinter& StringPrinter::tab() {
-    for(int i = 0; i < tabLevel; i++) {
-        buffer += TAB;
-    }
+
+
+StringPrinter& StringPrinter::print(const std::string& value) {
+    // FIXME call indent/unindent using content of value
+    //   if value contains '{', call indent()   except not in string literal 
+    //   if value contains '}', call unindent() except not in string literal
+    line += value;
     return *this;
 }

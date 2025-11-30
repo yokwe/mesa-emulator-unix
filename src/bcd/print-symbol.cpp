@@ -188,8 +188,8 @@ void printSym(Context& context, const SEIndex sei, std::string colonString) {
             } else {
                 if (sei.value().toID().extended) {
                     // FIXME failed at inside toEXTIndex()
-                    // const EXTRecord& ext = symbols.toEXTIndex(sei).value();
-                    // printTreeLink(context, ext.tree, vf, 0, false);
+                    const EXTRecord& ext = symbols.toEXTIndex(sei).value();
+                    printTreeLink(context, ext.tree, vf, 0, false);
                     out.print("*extended*");
                 } else {
                     const auto underTypeSei = symbols.underType(typeSei);

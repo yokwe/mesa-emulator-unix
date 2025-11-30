@@ -54,7 +54,7 @@ static const Logger logger(__FILE__);
 //
 std::string TreeIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+    return value().toString();
 }
 
 //
@@ -345,8 +345,6 @@ ByteBuffer& TreeNode::read(ByteBuffer& bb) {
     attr3  = bitField(u0, 11);
     shared = bitField(u0, 12);
     nSons  = bitField(u0, 13, 15);
-
-    logger.info("XX  %d  %s", nSons, ::toString(name));
 
     for(int i = 0; i < nSons; i++) {
         TreeLink value;

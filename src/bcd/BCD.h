@@ -55,7 +55,7 @@ struct NameRecord : public Index<"ss", std::string> {
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return *value();
+        return value();
     }
 };
 
@@ -123,7 +123,7 @@ struct SGIndex : public Index<"sg", SGRecord> {
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return value()->toString();
+        return value().toString();
     }
 };
 
@@ -146,7 +146,7 @@ struct ENIndex : public Index<"en", ENRecord> {
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return value()->toString();
+        return value().toString();
     }
 };
 
@@ -232,7 +232,7 @@ struct MTIndex : public Index<"mt", MTRecord> {
     }
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return value()->toString();
+        return value().toString();
     }
 };
 

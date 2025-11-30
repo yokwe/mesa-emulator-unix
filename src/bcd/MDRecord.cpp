@@ -45,7 +45,7 @@ static const Logger logger(__FILE__);
 //
 std::string MDIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+    return value().toString();
 }
 
 

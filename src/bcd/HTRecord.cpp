@@ -43,11 +43,11 @@ static const Logger logger(__FILE__);
 
 std::string HTIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+    return value().toString();
 }
 
 std::string HTIndex::toValue() const {
-    return value()->toValue();
+    return value().toValue();
 }
 
 void HTRecord::read(ByteBuffer& bb, uint16_t lastSSIndex, const std::string& ss) {

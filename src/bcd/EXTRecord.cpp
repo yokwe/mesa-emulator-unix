@@ -43,3 +43,7 @@ static const Logger logger(__FILE__);
 
 #include "EXTRecord.h"
 
+std::string EXTIndex::toString() const {
+    if (isNull()) return std_sprintf("%s-NULL", prefix);
+    return value().toString();
+}

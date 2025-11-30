@@ -92,10 +92,10 @@ std::string BodyLink::toString() const {
 //
 // BodyInfo
 //
-std::string BodyInfo::toString(Mark value) {
-    static std::map<Mark, std::string> map {
-        ENUM_VALUE(Mark, INTERNAL)
-        ENUM_VALUE(Mark, EXTERNAL)
+std::string BodyInfo::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, INTERNAL)
+        ENUM_VALUE(Tag, EXTERNAL)
     };
 
     if (map.contains(value)) return map[value];
@@ -120,20 +120,20 @@ std::string BodyInfo::EXTERNAL::toString() const {
 ByteBuffer& BodyInfo::read(ByteBuffer& bb) {
     uint16_t u0;
     bb.read(u0);
-    mark = (Mark)bitField(u0, 0);
-    switch(mark) {
-    case Mark::INTERNAL:
+    tag = (Tag)bitField(u0, 0);
+    switch(tag) {
+    case Tag::INTERNAL:
     {
         INTERNAL value;
         value.read(u0, bb);
-        info = value;
+        variant = value;
     }
         break;
-    case Mark::EXTERNAL:
+    case Tag::EXTERNAL:
     {
         EXTERNAL value;
         value.read(u0, bb);
-        info = value;
+        variant = value;
     }
         break;
     default:
@@ -142,17 +142,17 @@ ByteBuffer& BodyInfo::read(ByteBuffer& bb) {
     return bb;
 }
 std::string BodyInfo::toString() const {
-    std::string variantString = ::toString(info);
-    return std_sprintf("[%s  %s]", toString(mark), variantString);
+    std::string variantString = ::toString(variant);
+    return std_sprintf("[%s  %s]", toString(tag), variantString);
 }
 
 //
 // BTRecord = BodyRecord
 //
-std::string BTRecord::toString(Kind value) {
-    static std::map<Kind, std::string> map {
-        ENUM_VALUE(Kind, CALLABLE)
-        ENUM_VALUE(Kind, OTHER)
+std::string BTRecord::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, CALLABLE)
+        ENUM_VALUE(Tag, OTHER)
     };
 
     if (map.contains(value)) return map[value];
@@ -190,11 +190,11 @@ void BTRecord::CALLABLE::CATCH::read(uint16_t u11, ByteBuffer& bb) {
 //
 // BTRecord::CALLABLE
 //
-std::string BTRecord::CALLABLE::toString(Nesting value) {
-    static std::map<Nesting, std::string> map {
-        ENUM_VALUE(Nesting, OUTER)
-        ENUM_VALUE(Nesting, INNER)
-        ENUM_VALUE(Nesting, CATCH)
+std::string BTRecord::CALLABLE::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, OUTER)
+        ENUM_VALUE(Tag, INNER)
+        ENUM_VALUE(Tag, CATCH)
     };
 
     if (map.contains(value)) return map[value];
@@ -216,28 +216,28 @@ void BTRecord::CALLABLE::read(uint16_t u8, ByteBuffer& bb) {
     internal   = bitField(u10, 2);
     entryIndex = bitField(u10, 3, 10);
     hints      = bitField(u10, 11, 15);
-    nesting    = (Nesting)bitField(u11, 0);
+    tag        = (Tag)bitField(u11, 0);
 
-    switch(nesting) {
-    case Nesting::OUTER:
+    switch(tag) {
+    case Tag::OUTER:
     {
         OUTER value;
         value.read(u11, bb);
-        closure = value;
+        variant = value;
     }
         break;
-    case Nesting::INNER:
+    case Tag::INNER:
     {
         INNER value;
         value.read(u11, bb);
-        closure = value;
+        variant = value;
     }
         break;
-    case Nesting::CATCH:
+    case Tag::CATCH:
     {
         CATCH value;
         value.read(u11, bb);
-        closure = value;
+        variant = value;
     }
         break;
     default:
@@ -245,7 +245,7 @@ void BTRecord::CALLABLE::read(uint16_t u8, ByteBuffer& bb) {
     }
 }
 std::string BTRecord::CALLABLE::toString() const {
-    std::string closureString = ::toString(closure);
+    std::string variantString = ::toString(variant);
     std::string flags = std_sprintf("[%s%s%s%s%s%s %X]",
         inline_   ? "I" : "_",
         monitored ? "M" : "_",
@@ -259,8 +259,18 @@ std::string BTRecord::CALLABLE::toString() const {
         ioType.Index::toString(),
         entryIndex,
         flags,
-        toString(nesting),
-        closureString);
+        toString(tag),
+        variantString);
+}
+
+BTRecord::CALLABLE::OUTER BTRecord::CALLABLE::toOUTER() {
+    return std::get<BTRecord::CALLABLE::OUTER>(variant);
+}
+BTRecord::CALLABLE::INNER BTRecord::CALLABLE::toINNER() {
+    return std::get<BTRecord::CALLABLE::INNER>(variant);
+}
+BTRecord::CALLABLE::CATCH BTRecord::CALLABLE::toCATCH() {
+    return std::get<BTRecord::CALLABLE::CATCH>(variant);
 }
 
 //
@@ -283,20 +293,20 @@ ByteBuffer& BTRecord::read(ByteBuffer& bb) {
 
     localCtx.index(bitField(u3,0, 10));
     level = (ContextLevel)bitField(u3, 11, 15);
-    kind = (Kind)bitField(u8, 0);
-    switch(kind) {
-    case Kind::CALLABLE:
+    tag   = (Tag)bitField(u8, 0);
+    switch(tag) {
+    case Tag::CALLABLE:
     {
         CALLABLE value;
         value.read(u8, bb);
-        extension = value;
+        variant = value;
     }
         break;
-    case Kind::OTHER:
+    case Tag::OTHER:
     {
         OTHER value;
         value.read(u8, bb);
-        extension = value;
+        variant = value;
     }
         break;
     default:
@@ -305,7 +315,7 @@ ByteBuffer& BTRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string BTRecord::toString() const {
-    std::string extensionString = ::toString(extension);
+    std::string variantString = ::toString(variant);
     return std_sprintf("[%s  %s  %s  %s  %s  %d  %s  %s  %s]",
         link.toString(),
         firstSon.toString(),
@@ -314,6 +324,12 @@ std::string BTRecord::toString() const {
         ::toString(level),
         sourceIndex,
         info.toString(),
-        toString(kind),
-        extensionString);
+        toString(tag),
+        variantString);
+}
+BTRecord::CALLABLE BTRecord::toCALLABLE() const {
+    return std::get<BTRecord::CALLABLE>(variant);
+}
+BTRecord::OTHER BTRecord::toOTHER() const {
+    return std::get<BTRecord::OTHER>(variant);
 }

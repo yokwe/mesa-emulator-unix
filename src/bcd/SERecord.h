@@ -161,12 +161,12 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             }
         };
 
-        enum class Type : uint16_t {
+        enum class Tag : uint16_t {
             ENUM_VALUE(Type, TERMINAL)
             ENUM_VALUE(Type, SEQUENTIAL)
             ENUM_VALUE(Type, LINKED)
         };
-        static std::string toString(Type value);
+        static std::string toString(Tag value);
 
         bool     extended;
         bool     public_;
@@ -178,10 +178,10 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
         uint16_t idValue;
         HTIndex  hash;
         bool     linkSpace;
-        Type     linkTag;
-        std::variant<TERMINAL, SEQUENTIAL, LINKED> ctxLink;
+        Tag      tag;
+        std::variant<TERMINAL, SEQUENTIAL, LINKED> variant;
 
-        ID() : linkTag(Type::TERMINAL), ctxLink(TERMINAL{}) {}
+        ID() : tag(Tag::TERMINAL), variant(TERMINAL{}) {}
 
         void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
@@ -224,8 +224,8 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
                 std::string toString() const override;
             };
 
-            enum class Type : uint16_t {NOT_LINKED, LINKED};
-            static std::string toString(Type value);
+            enum class Tag : uint16_t {NOT_LINKED, LINKED};
+            static std::string toString(Tag value);
             
             uint16_t hints;
             uint16_t length;
@@ -234,8 +234,8 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             bool     machindDep;
             bool     painted;
             CTXIndex fieldCtx;
-            Type     linkTag;
-            std::variant<NOT_LINKED, LINKED> linkPart;
+            Tag      tag;
+            std::variant<NOT_LINKED, LINKED> variant;
 
             void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
@@ -269,22 +269,10 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             std::string toString() const override;
         };
         struct TRANSFER : public HasToString {
-            // TransferMode: TYPE = {proc, port, signal, error, process, program, none};
-            enum class Type : uint16_t {
-                ENUM_VALUE(Type, PROC)
-                ENUM_VALUE(Type, PORT)
-                ENUM_VALUE(Type, SIGNAL)
-                ENUM_VALUE(Type, ERROR_)
-                ENUM_VALUE(Type, PROCESS)
-                ENUM_VALUE(Type, PROGRAM)
-                ENUM_VALUE(Type, NONE)
-            };
-            static std::string toString(Type value);
-
-            bool    safe;
-            Type    mode;
-            SEIndex typeIn;
-            SEIndex typeOut;
+            bool         safe;
+            TransferMode mode;
+            SEIndex      typeIn;
+            SEIndex      typeOut;
             
             void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
@@ -384,28 +372,34 @@ struct SERecord : public ByteBuffer::Readable, public HasToString {
             }
         };
         
-        TypeClass typeTag;
+        TypeClass tag;
         std::variant<
             MODE, BASIC, ENUMERATED, RECORD, REF,
             ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
             SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
             OPAQUE, ZONE, ANY, NIL, BITS
-        > typeInfo;
+        > variant;
 
         void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
+
+        TRANSFER toTRANSFER() const;
+        SUBRANGE toSUBRANGE() const;
     };
 
-    enum class Type : uint16_t {
-        ENUM_VALUE(Type, ID)
-        ENUM_VALUE(Type, CONS)
+    enum class Tag : uint16_t {
+        ENUM_VALUE(Tag, ID)
+        ENUM_VALUE(Tag, CONS)
     };
-    static std::string toString(Type value); // 01
+    static std::string toString(Tag value); // 01
 
-    Type                   seTag;
+    Tag                   tag;
     std::variant<ID, CONS> body;
 
-    SERecord() : seTag(Type::ID), body(ID{}) {}
+    SERecord() : tag(Tag::ID), body(ID{}) {}
+
+    ID   toID()   const;
+    CONS toCONS() const;
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;

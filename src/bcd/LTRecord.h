@@ -57,11 +57,11 @@
 //      value(3): WordSequence]
 //    ENDCASE];
 struct LTRecord : public ByteBuffer::Readable, public HasToString {
-    enum class Kind : uint16_t {
+    enum class Tag : uint16_t {
         ENUM_VALUE(Kind, SHORT)
         ENUM_VALUE(Kind, LONG)
     };
-    static std::string toString(Kind);
+    static std::string toString(Tag);
 
     struct SHORT : public ByteBuffer::Readable, public HasToString {
         uint16_t value;
@@ -92,11 +92,14 @@ struct LTRecord : public ByteBuffer::Readable, public HasToString {
     //   ----
 	//   Remove declaration from LTRecord
     // LTIndex link;
-    Kind    kind;
-    std::variant<SHORT, LONG> datum;
+    Tag                       tag;
+    std::variant<SHORT, LONG> variant;
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
+
+    SHORT toSHORT();
+    LONG  toLONG();
 };
 
 // NORICE
@@ -134,9 +137,12 @@ struct LitRecord : public HasToString {
             return std_sprintf("[%d]", index);
         }
     };
-    Tag litTag;
-    std::variant<WORD, STRING> value;
+    Tag                        tag;
+    std::variant<WORD, STRING> variant;
 
     void read(uint16_t u0);
     std::string toString() const override;
+
+    WORD   toWORD();
+    STRING toSTRING();
 };

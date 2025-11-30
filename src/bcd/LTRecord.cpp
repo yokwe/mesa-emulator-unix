@@ -52,16 +52,16 @@ static const Logger logger(__FILE__);
 //
 std::string LTIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+    return value().toString();
 }
 
 //
 // LTRecord
 //
-std::string LTRecord::toString(Kind value) {
-    static std::map<Kind, std::string> map {
-        ENUM_VALUE(Kind, SHORT)
-        ENUM_VALUE(Kind, LONG)
+std::string LTRecord::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, SHORT)
+        ENUM_VALUE(Tag, LONG)
     };
 
     if (map.contains(value)) return map[value];
@@ -87,18 +87,18 @@ std::string LTRecord::LONG::toString() const {
 ByteBuffer& LTRecord::read(ByteBuffer& bb) {
     uint16_t u0;
     bb.read(u0);
-    kind = (Kind)bitField(u0, 13, 15);
+    tag = (Tag)bitField(u0, 13, 15);
 
     SHORT shortValue;
     LONG  longValue;
-    switch(kind) {
-    case Kind::SHORT:
+    switch(tag) {
+    case Tag::SHORT:
         bb.read(shortValue);
-        datum = shortValue;
+        variant = shortValue;
         break;
-    case Kind::LONG:
+    case Tag::LONG:
         bb.read(longValue);
-        datum = longValue;
+        variant = longValue;
         break;
     default:
         ERROR()
@@ -107,11 +107,18 @@ ByteBuffer& LTRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string LTRecord::toString() const {
-    std::string datumString = ::toString(datum);
+    std::string variantString = ::toString(variant);
     return std_sprintf("[%s %s]",
-        toString(kind),
-        datumString);
+        toString(tag),
+        variantString);
 }
+LTRecord::SHORT LTRecord::toSHORT() {
+    return std::get<LTRecord::SHORT>(variant);
+}
+LTRecord::LONG  LTRecord::toLONG() {
+    return std::get<LTRecord::LONG>(variant);
+}
+
 
 //
 // LitRecord
@@ -132,23 +139,29 @@ std::string LitRecord::toString(Tag value) {
 //   needs to shift 2 bit for 16 bit aligned data
 void LitRecord::read(uint16_t u0) {
     u0 <<= 2;
-    litTag = (Tag)bitField(u0, 0);
+    tag = (Tag)bitField(u0, 0);
     WORD   wordValue;
     STRING stringValue;
-    switch(litTag) {
+    switch(tag) {
     case Tag::WORD:
         wordValue.read(u0);
-        value = wordValue;
+        variant = wordValue;
         break;
     case Tag::STRING:
         stringValue.read(u0);
-        value = stringValue;
+        variant = stringValue;
         break;
     default:
         ERROR()
     }
 }
 std::string LitRecord::toString() const {
-    std::string varintString = ::toString(value);
-    return std_sprintf("[%s  %s]", toString(litTag), varintString);
+    std::string varintString = ::toString(variant);
+    return std_sprintf("[%s  %s]", toString(tag), varintString);
+}
+LitRecord::WORD   LitRecord::toWORD() {
+    return std::get<LitRecord::WORD>(variant);
+}
+LitRecord::STRING LitRecord::toSTRING() {
+    return std::get<LitRecord::STRING>(variant);
 }

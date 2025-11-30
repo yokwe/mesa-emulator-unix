@@ -78,11 +78,11 @@ struct BodyLink : public ByteBuffer::Readable, public HasToString {
 //      startIndex(1:0..15), indexLength(2:0..15): CARDINAL]
 //    ENDCASE];
 struct BodyInfo : public ByteBuffer::Readable, public HasToString {
-    enum class Mark {
-        ENUM_VALUE(Mark, INTERNAL)
-        ENUM_VALUE(Makr, EXTERNAL)
+    enum class Tag {
+        ENUM_VALUE(Tag, INTERNAL)
+        ENUM_VALUE(Tag, EXTERNAL)
     };
-    static std::string toString(Mark);
+    static std::string toString(Tag);
 
     struct INTERNAL : public HasToString {
         TreeIndex bodyTree;
@@ -101,8 +101,8 @@ struct BodyInfo : public ByteBuffer::Readable, public HasToString {
         std::string toString() const override;
     };
 
-    Mark mark;
-    std::variant<INTERNAL, EXTERNAL> info;
+    Tag tag;
+    std::variant<INTERNAL, EXTERNAL> variant;
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
@@ -136,19 +136,19 @@ struct BodyInfo : public ByteBuffer::Readable, public HasToString {
 //    ENDCASE];
 
 struct BTRecord : public ByteBuffer::Readable, public HasToString {
-    enum class Kind {
-        ENUM_VALUE(Kind, CALLABLE)
-        ENUM_VALUE(Kind, OTHER)
+    enum class Tag {
+        ENUM_VALUE(Tag, CALLABLE)
+        ENUM_VALUE(Tag, OTHER)
     };
-    static std::string toString(Kind);
+    static std::string toString(Tag);
 
     struct CALLABLE : public HasToString {
-        enum class Nesting : uint16_t {
-            ENUM_VALUE(Nesting, OUTER)
-            ENUM_VALUE(Nesting, INNER)
-            ENUM_VALUE(Nesting, CATCH)
+        enum class Tag : uint16_t {
+            ENUM_VALUE(Tag, OUTER)
+            ENUM_VALUE(Tag, INNER)
+            ENUM_VALUE(Tag, CATCH)
         };
-        static std::string toString(Nesting);
+        static std::string toString(Tag);
 
         struct OUTER : public HasToString {
             void read(uint16_t u11, ByteBuffer& bb);
@@ -183,11 +183,15 @@ struct BTRecord : public ByteBuffer::Readable, public HasToString {
         bool     internal;
         uint16_t entryIndex;
         uint16_t hints;
-        Nesting  nesting;
-        std::variant<OUTER, INNER, CATCH> closure;
+        Tag      tag;
+        std::variant<OUTER, INNER, CATCH> variant;
 
         void read(uint16_t u8, ByteBuffer& bb);
         std::string toString() const override;
+
+        OUTER toOUTER();
+        INNER toINNER();
+        CATCH toCATCH();
     };
     struct OTHER : public HasToString {
         uint16_t relOffset;
@@ -203,9 +207,12 @@ struct BTRecord : public ByteBuffer::Readable, public HasToString {
     ContextLevel level;
     uint16_t     sourceIndex;
     BodyInfo     info;
-    Kind         kind;
-    std::variant<CALLABLE, OTHER> extension;
+    Tag          tag;
+    std::variant<CALLABLE, OTHER> variant;
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
+
+    CALLABLE toCALLABLE() const;
+    OTHER    toOTHER() const;
 };

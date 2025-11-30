@@ -71,13 +71,13 @@ struct CTXRecord : public ByteBuffer::Readable, public HasToString {
     };
     static std::string toString(Closure value);
 
-    struct simple : public HasToString {
+    struct SIMPLE : public HasToString {
         CTXIndex ctxNew;
 
-        simple(uint16_t u1);
+        SIMPLE(uint16_t u1);
         std::string toString() const override;
     };
-    struct included : public HasToString {
+    struct INCLUDED : public HasToString {
         CTXIndex chain;
         Closure  copied;
         MDIndex  module;
@@ -85,38 +85,43 @@ struct CTXRecord : public ByteBuffer::Readable, public HasToString {
         bool     closed, complete, restricted;
         bool     reset;
         
-        included(uint16_t u1, ByteBuffer& bb);
+        INCLUDED(uint16_t u1, ByteBuffer& bb);
         std::string toString() const override;
     };
-    struct imported : public HasToString {
+    struct IMPORTED : public HasToString {
         CTXIndex includeIndex;
 
-        imported(uint16_t u1);
+        IMPORTED(uint16_t u1);
         std::string toString() const override ;
     };
-    struct nil : public HasToString {
+    struct NIL : public HasToString {
         std::string toString() const override {
             return "{}";
         }
     };
 
-    enum class Type {
+    enum class Tag {
         ENUM_VALUE(Type, SIMPLE)
         ENUM_VALUE(Type, INCLUDED)
         ENUM_VALUE(Type, IMPORTED)
         ENUM_VALUE(Type, NIL)
     };
-    static std::string toString(Type value);
+    static std::string toString(Tag value);
 
     bool         mark;
     bool         varUpdated;
     SEIndex      seList;
     ContextLevel level;
-    Type         ctxType;
-    std::variant<simple, included, imported, nil> extension;
+    Tag          tag;
+    std::variant<SIMPLE, INCLUDED, IMPORTED, NIL> variant;
 
-    CTXRecord() : mark(false), varUpdated(false), seList(), level(ContextLevel::LZ), ctxType(Type::NIL), extension(nil{}) {}
+    CTXRecord() : mark(false), varUpdated(false), seList(), level(ContextLevel::LZ), tag(Tag::NIL), variant(NIL{}) {}
 
     ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
+
+    SIMPLE   toSIMPLE();
+    INCLUDED toINCLUDED();
+    IMPORTED toIMPORTED();
+    NIL      toNIL();
 };

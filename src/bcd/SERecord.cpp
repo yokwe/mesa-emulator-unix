@@ -39,6 +39,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "SymbolsIndex.h"
 #include "Index.h"
 
 #include "SERecord.h"
@@ -52,18 +53,21 @@ static const Logger logger(__FILE__);
 //
 std::string SEIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+    if (isType()) return std_sprintf("%s-TYPE", prefix);
+    if (isAny()) return std_sprintf("%s-ANY", prefix);
+    return Index::toString();
+//    return value().toString();
 }
 
 
 //
 // SERecord::ID
 //
-std::string SERecord::ID::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, TERMINAL)
-        ENUM_VALUE(Type, SEQUENTIAL)
-        ENUM_VALUE(Type, LINKED)
+std::string SERecord::ID::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, TERMINAL)
+        ENUM_VALUE(Tag, SEQUENTIAL)
+        ENUM_VALUE(Tag, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -85,19 +89,19 @@ void SERecord::ID::read(uint16_t u0, ByteBuffer& bb) {
     idType.index(bitField(u1, 2, 15));
     hash.index(bitField(u4, 0, 12));
     linkSpace = bitField(u4, 13);
-    linkTag   = (Type)bitField(u4, 14, 15);
-    switch(linkTag) {
-        case Type::TERMINAL:
-            ctxLink = TERMINAL{};
+    tag   = (Tag)bitField(u4, 14, 15);
+    switch(tag) {
+        case Tag::TERMINAL:
+            variant = TERMINAL{};
             break;
-        case Type::SEQUENTIAL:
-            ctxLink = SEQUENTIAL{};
+        case Tag::SEQUENTIAL:
+            variant = SEQUENTIAL{};
             break;
-        case Type::LINKED:
+        case Tag::LINKED:
         {
             LINKED linked;
             bb.read(linked);
-            ctxLink = linked;
+            variant = linked;
         }
             break;
         default:
@@ -114,17 +118,17 @@ std::string SERecord::ID::toString() const {
         linkSpace ? "L" : "_"
     );
 
-    std::string ctxLinkString = ::toString(ctxLink);
+    std::string ctxLinkString = ::toString(variant);
 
     return
-        std_sprintf("[%s  [%s]  %-8s  %5d  %5d  %s  %s  %s]",
+        std_sprintf("[%s  [%s]  %-8s  %5d  %5d  %-24s  %s  %s]",
             idCtx.Index::toString(),
             flags,
-            idType.Index::toString(),
+            idType.toString(),
             idInfo,
             idValue,
             hash.toValue(),
-            toString(linkTag),
+            toString(tag),
             ctxLinkString);
 }
 
@@ -166,10 +170,10 @@ std::string SERecord::CONS::ENUMERATED::toString() const {
 //
 // SERecord::CONS::RECORD
 //
-std::string SERecord::CONS::RECORD::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, NOT_LINKED)
-        ENUM_VALUE(Type, LINKED)
+std::string SERecord::CONS::RECORD::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, NOT_LINKED)
+        ENUM_VALUE(Tag, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -187,16 +191,16 @@ void SERecord::CONS::RECORD::read(uint16_t u0, ByteBuffer& bb) {
     machindDep = bitField(u2,  2);
     painted    = bitField(u2,  3);
     fieldCtx.index(bitField(u2, 4, 14));
-    linkTag    = (Type)bitField(u2, 15);
-    switch (linkTag) {
-    case Type::NOT_LINKED:
-        linkPart = NOT_LINKED{};
+    tag    = (Tag)bitField(u2, 15);
+    switch (tag) {
+    case Tag::NOT_LINKED:
+        variant = NOT_LINKED{};
         break;
-    case Type::LINKED:
+    case Tag::LINKED:
     {
         LINKED linked;
         bb.read(linked);
-        linkPart = linked;
+        variant = linked;
     }
         break;
     default:
@@ -211,7 +215,7 @@ std::string SERecord::CONS::RECORD::toString() const {
         machindDep ? "M" : "_",
         painted    ? "P" : "_");
 
-    std::string linkPartString = ::toString(linkPart);
+    std::string linkPartString = ::toString(variant);
     return std_sprintf("[[%s] %d  %s  %s]",
         flags, length, fieldCtx.Index::toString(), linkPartString);
 }
@@ -285,30 +289,14 @@ std::string SERecord::CONS::ARRAYDESC::toString() const {
 //
 // SERecord::CONS::TRANSFER
 //
-std::string SERecord::CONS::TRANSFER::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, PROC)
-        ENUM_VALUE(Type, PORT)
-        ENUM_VALUE(Type, SIGNAL)
-        ENUM_VALUE(Type, ERROR_)
-        ENUM_VALUE(Type, PROCESS)
-        ENUM_VALUE(Type, PROGRAM)
-        ENUM_VALUE(Type, NONE)
-    };
-
-    if (map.contains(value)) return map[value];
-    logger.error("Unexpected value");
-    logger.error("  value  %d", (uint16_t)value);
-    ERROR();
-}
 void SERecord::CONS::TRANSFER::read(uint16_t u0, ByteBuffer& bb) {
     safe = bitField(u0, 8);
-    mode = (Type)bitField(u0, 9, 15);
+    mode = (TransferMode)bitField(u0, 9, 15);
     bb.read(typeIn, typeOut);
 }
 std::string SERecord::CONS::TRANSFER::toString() const {
     return std_sprintf("[%s  %s  %s  %s]",
-        safe ? "S" : "_", toString(mode), typeIn.Index::toString(), typeOut.Index::toString());
+        safe ? "S" : "_", ::toString(mode), typeIn.Index::toString(), typeOut.Index::toString());
 }
 
 
@@ -452,13 +440,13 @@ std::string SERecord::CONS::ZONE::toString() const {
 //
 // SERecord::CONS
 //
-#define CASE_BODY(typeName) { typeName value; value.read(u0, bb); typeInfo = value; }
+#define CASE_BODY(typeName) { typeName value; value.read(u0, bb); variant = value; }
 void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
-    typeTag = (TypeClass)bitField(u0, 3, 7);
-    switch(typeTag) {
+    tag = (TypeClass)bitField(u0, 3, 7);
+    switch(tag) {
         
     case TypeClass::MODE:
-        typeInfo = MODE{};
+        variant = MODE{};
         break;
     case TypeClass::BASIC:
         CASE_BODY(BASIC)
@@ -509,10 +497,10 @@ void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
         CASE_BODY(ZONE)
         break;
     case TypeClass::ANY:
-        typeInfo = ANY{};
+        variant = ANY{};
         break;
     case TypeClass::NIL:
-        typeInfo = NIL{};
+        variant = NIL{};
         break;
     case TypeClass::BITS:
         CASE_BODY(BITS)
@@ -522,18 +510,23 @@ void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
     }
 }
 std::string SERecord::CONS::toString() const {
-    return std_sprintf("[%s  %s]", ::toString(typeTag), ::toString(typeInfo));
+    return std_sprintf("[%s  %s]", ::toString(tag), ::toString(variant));
 }
-
+SERecord::CONS::TRANSFER SERecord::CONS::toTRANSFER() const {
+    return std::get<SERecord::CONS::TRANSFER>(variant);
+}
+SERecord::CONS::SUBRANGE SERecord::CONS::toSUBRANGE() const {
+    return std::get<SERecord::CONS::SUBRANGE>(variant);
+}
 
 
 //
 // SERecord
 //
-std::string SERecord::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, ID)
-        ENUM_VALUE(Type, CONS)
+std::string SERecord::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, ID)
+        ENUM_VALUE(Tag, CONS)
     };
 
     if (map.contains(value)) return map[value];
@@ -546,16 +539,16 @@ ByteBuffer& SERecord::read(ByteBuffer& bb) {
 
     bb.read(u0);
 
-    seTag = (Type)bitField(u0, 2);
-    switch(seTag) {
-    case Type::ID:
+    tag = (Tag)bitField(u0, 2);
+    switch(tag) {
+    case Tag::ID:
     {
         ID id;
         id.read(u0, bb);
         body = id;
     }
         break;
-    case Type::CONS:
+    case Tag::CONS:
     {
         CONS cons;
         cons.read(u0, bb);
@@ -569,5 +562,14 @@ ByteBuffer& SERecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string SERecord::toString() const {
-    return std_sprintf("[%s  %s]", toString(seTag), ::toString(body));
+    return std_sprintf("[%s  %s]", toString(tag), ::toString(body));
+}
+
+SERecord::ID   SERecord::toID() const {
+    if (tag != Tag::ID) ERROR()
+    return std::get<SERecord::ID>(body);
+}
+SERecord::CONS SERecord::toCONS() const {
+    if (tag != Tag::CONS) ERROR()
+    return std::get<SERecord::CONS>(body);
 }

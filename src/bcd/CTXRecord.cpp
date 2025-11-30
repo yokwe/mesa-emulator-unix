@@ -59,12 +59,12 @@ std::string CTXRecord::toString(Closure value) {
     ERROR();
 }
 
-std::string CTXRecord::toString(Type value) {
-    static std::map<Type, std::string> map {
-        ENUM_VALUE(Type, SIMPLE)
-        ENUM_VALUE(Type, INCLUDED)
-        ENUM_VALUE(Type, IMPORTED)
-        ENUM_VALUE(Type, NIL)
+std::string CTXRecord::toString(Tag value) {
+    static std::map<Tag, std::string> map {
+        ENUM_VALUE(Tag, SIMPLE)
+        ENUM_VALUE(Tag, INCLUDED)
+        ENUM_VALUE(Tag, IMPORTED)
+        ENUM_VALUE(Tag, NIL)
     };
 
     if (map.contains(value)) return map[value];
@@ -79,24 +79,25 @@ std::string CTXRecord::toString(Type value) {
 //
 std::string CTXIndex::toString() const {
     if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value()->toString();
+//    return value().toString();
+    return Index::toString();
 }
 
 
 //
 // CTXRecord::simple
 //
-CTXRecord::simple::simple(uint16_t u1) {
+CTXRecord::SIMPLE::SIMPLE(uint16_t u1) {
     ctxNew.index(bitField(u1, 5, 15));
 }
-std::string CTXRecord::simple::toString() const {
+std::string CTXRecord::SIMPLE::toString() const {
     return ctxNew.toString();
 }
 
 //
 // CTXRecord::included
 //
-CTXRecord::included::included(uint16_t u1, ByteBuffer& bb) {
+CTXRecord::INCLUDED::INCLUDED(uint16_t u1, ByteBuffer& bb) {
     uint16_t u2;
     uint16_t u3;
 
@@ -110,7 +111,7 @@ CTXRecord::included::included(uint16_t u1, ByteBuffer& bb) {
     restricted = bitField(u3, 13);
     reset      = bitField(u3, 14, 15);
 }
-std::string CTXRecord::included::toString() const {
+std::string CTXRecord::INCLUDED::toString() const {
     return std_sprintf("[%s  %s  %s %s%s%s%s]",
         chain.Index::toString(),
         CTXRecord::toString(copied),
@@ -124,10 +125,10 @@ std::string CTXRecord::included::toString() const {
 //
 // CTXRecord::imported
 //
-CTXRecord::imported::imported(uint16_t u1) {
+CTXRecord::IMPORTED::IMPORTED(uint16_t u1) {
     includeIndex.index(bitField(u1, 5, 15));
 }
-std::string CTXRecord::imported::toString() const {
+std::string CTXRecord::IMPORTED::toString() const {
     return includeIndex.Index::toString();
 }
 
@@ -143,19 +144,19 @@ ByteBuffer& CTXRecord::read(ByteBuffer& bb) {
     seList.index(bitField(u0, 2, 15));
 //    seList      = bitField(u0, 2, 15);
     level       = (ContextLevel)bitField(u1, 0,  2);
-    ctxType     = (Type)bitField(u1, 3, 4);
-    switch(ctxType) {
-    case Type::SIMPLE:
-        extension = simple(u1);
+    tag         = (Tag)bitField(u1, 3, 4);
+    switch(tag) {
+    case Tag::SIMPLE:
+        variant = SIMPLE(u1);
         break;
-    case Type::INCLUDED:
-        extension = included(u1, bb);
+    case Tag::INCLUDED:
+        variant = INCLUDED(u1, bb);
         break;
-    case Type::IMPORTED:
-        extension = imported(u1);
+    case Tag::IMPORTED:
+        variant = IMPORTED(u1);
         break;
-    case Type::NIL:
-        extension = nil();
+    case Tag::NIL:
+        variant = NIL();
         break;
     default:
         ERROR();
@@ -164,8 +165,23 @@ ByteBuffer& CTXRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string CTXRecord::toString() const {
-    std::string extString = std::visit([](auto& x) { return x.toString(); }, extension);
-    return std_sprintf("[%s%s  %5d  %s  %s  %s]",
-        mark ? "M" : " ", varUpdated ? "V" : " ",
-        seList.Index::toString(), ::toString(level), toString(ctxType), extString);
+    std::string flags = std_sprintf("[%s%s]",
+        mark       ? "M" : "_",
+        varUpdated ? "V" : "_");
+
+    std::string variantString = std::visit([](auto& x) { return x.toString(); }, variant);
+    return std_sprintf("[%s  %s  %s  %s  %s]",
+        flags, seList.Index::toString(), ::toString(level), toString(tag), variantString);
+}
+CTXRecord::SIMPLE   CTXRecord::toSIMPLE() {
+    return std::get<CTXRecord::SIMPLE>(variant);
+}
+CTXRecord::INCLUDED CTXRecord::toINCLUDED() {
+    return std::get<CTXRecord::INCLUDED>(variant);
+}
+CTXRecord::IMPORTED CTXRecord::toIMPORTED() {
+    return std::get<CTXRecord::IMPORTED>(variant);
+}
+CTXRecord::NIL      CTXRecord::toNIL() {
+    return std::get<CTXRecord::NIL>(variant);
 }

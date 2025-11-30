@@ -64,7 +64,10 @@ tclMesa:
 
 floppy:
 	/usr/bin/time cmake --build build --target floppy
-	
+
+print-symbol: src/util/Perf.inc src/util/trace.inc
+	/usr/bin/time cmake --build build --target print-symbol
+
 #
 # run-XXX
 #
@@ -89,3 +92,8 @@ run-tclMesa: tclMesa
 run-floppy: floppy
 	/bin/echo -n >${BUILD_DIR}/run/floppy.log
 	LOG4CXX_CONFIGURATION=data/log4j-config-floppy.xml ${BUILD_DIR}/floppy/floppy
+
+run-print-symbol: print-symbol
+	/bin/echo -n >${BUILD_DIR}/run/print-symbol.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-print-symbol.xml /usr/bin/time ${BUILD_DIR}/print-symbol/print-symbol
+

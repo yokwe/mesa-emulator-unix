@@ -159,11 +159,11 @@ void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
 void Symbols::dumpTable() {
 //	::dumpTable("bt", btTable);
 //	::dumpTable("ctx", ctxTable);
-//	::dumpTable("ext", extTable);
+	::dumpTable("ext", extTable);
 //	::dumpTable("ht", htTable);
 //	::dumpTable("lt", ltTable);
 //	::dumpTable("md", mdTable);
-//	::dumpTable("se", seTable);
+	::dumpTable("se", seTable);
 //	::dumpTable("tree", treeTable);
 }
 void Symbols::dumpIndex() {
@@ -373,4 +373,130 @@ std::string toString(TypeClass value) {
     logger.error("Unexpected value");
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
+}
+
+std::string toString(TransferMode value) {
+    static std::map<TransferMode, std::string> map {
+		ENUM_VALUE(TransferMode, PROC)
+		ENUM_VALUE(TransferMode, PORT)
+		ENUM_VALUE(TransferMode, SIGNAL)
+		ENUM_VALUE(TransferMode, ERROR_)
+		ENUM_VALUE(TransferMode, PROCESS)
+		ENUM_VALUE(TransferMode, PROGRAM)
+		ENUM_VALUE(TransferMode, NONE)
+    };
+
+    if (map.contains(value)) return map[value];
+    logger.error("Unexpected value");
+    logger.error("  value  %d", (uint16_t)value);
+    ERROR();
+}
+
+SEIndex Symbols::toSEIndex(uint16_t index) {
+	if (seTable.contains(index)) {
+		return SEIndex(index, seTable.at(index));
+	} else {
+		return SEIndex(index);
+	}
+}
+BTIndex Symbols::toBTIndex(uint16_t index) {
+	if (btTable.contains(index)) {
+		return BTIndex(index, btTable.at(index));
+	} else {
+		return BTIndex(index);
+	}
+}
+EXTIndex Symbols::toEXTIndex(SEIndex sei) {
+	for(const auto& e: extTable) {
+		auto key = e.first;
+		auto value = e.second;
+		if (value->sei == sei) {
+			return EXTIndex(key, value);
+		}
+	}
+	logger.error("Unexpected sei");
+	logger.error("  sei  %s", sei.toString());
+	ERROR()
+}
+
+
+
+SEIndex Symbols::sequential(SEIndex sei) {
+	// sanity check
+	if (!sei.hasValue()) ERROR()
+	const SERecord& my = sei.value();
+	if (my.tag != SERecord::Tag::ID) ERROR();
+
+	uint16_t index = sei.index() + 5; // 5 is word size of SERecord ID SEQUENTIAL
+	if (!seTable.contains(index)) ERROR()
+	return toSEIndex(index);
+}
+
+static SEIndex seNull{SEIndex::SE_NULL, 0};
+SEIndex Symbols::nextSei(SEIndex sei) {
+	// sanity check
+	if (!sei.hasValue()) ERROR()
+	const SERecord& my = sei.value();
+	if (my.tag != SERecord::Tag::ID) ERROR();
+
+    using ID = SERecord::ID;
+
+    if (sei.isNull()) return seNull;
+    const ID id = std::get<ID>(my.body);
+
+	SEIndex ret;
+    switch(id.tag) {
+    case ID::Tag::TERMINAL:
+        ret =  seNull;
+		break;
+    case ID::Tag::SEQUENTIAL:
+        ret = sequential(sei);
+		break;
+    case ID::Tag::LINKED:
+        ret = std::get<SERecord::ID::LINKED>(id.variant).link;
+		break;
+    default:
+        ERROR()
+    }
+	return ret;
+}
+
+//UnderType: PROC [h: Handle, type: SEIndex] RETURNS [CSEIndex] = {
+//  sei: SEIndex � type;
+//  WHILE sei # SENull DO
+//    WITH se: h.seb[sei] SELECT FROM
+//      id => {IF se.idType # typeTYPE THEN ERROR; sei � SymbolOps.ToSei[se.idInfo]};
+//      ENDCASE => EXIT;
+//    ENDLOOP;
+//  RETURN [LOOPHOLE[sei, CSEIndex]]};
+SEIndex Symbols::underType(SEIndex type) {
+	SEIndex sei = type;
+	while(!sei.isNull()) {
+		const SERecord& se = sei.value();
+		if (se.tag == SERecord::Tag::ID) {
+			SERecord::ID id = se.toID();
+			if (id.idType.index() == SEIndex::TYPE_TYPE) {
+				if (!seTable.contains(id.idInfo)) ERROR()
+				sei = toSEIndex(id.idInfo);
+			} else {
+				ERROR()
+			}
+		} else {
+			break;
+		}
+	}
+	return sei;
+}
+//XferMode: PROC [h: Handle, type: SEIndex] RETURNS [TransferMode] = {
+//  sei: CSEIndex = UnderType[h, type];
+//  RETURN [WITH t: h.seb[sei] SELECT FROM transfer => t.mode, ENDCASE => none]};
+TransferMode Symbols::xferMode(SEIndex type) {
+	SEIndex sei = underType(type);
+	const auto& cons = sei.value().toCONS();
+	switch(cons.tag) {
+	case TypeClass::TRANSFER:
+		return cons.toTRANSFER().mode;
+	default:
+		return TransferMode::NONE;
+	}
 }

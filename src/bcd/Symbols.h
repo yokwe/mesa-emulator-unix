@@ -97,6 +97,18 @@ enum class TypeClass : uint16_t {
 };
 std::string toString(TypeClass value);
 
+// TransferMode: TYPE = {proc, port, signal, error, process, program, none};
+enum class TransferMode : uint16_t {
+	ENUM_VALUE(TransferMode, PROC)
+	ENUM_VALUE(TransferMode, PORT)
+	ENUM_VALUE(TransferMode, SIGNAL)
+	ENUM_VALUE(TransferMode, ERROR_)
+	ENUM_VALUE(TransferMode, PROCESS)
+	ENUM_VALUE(TransferMode, PROGRAM)
+	ENUM_VALUE(TransferMode, NONE)
+};
+std::string toString(TransferMode value);
+
 
 
 struct BTRecord;
@@ -216,4 +228,14 @@ public:
 	void dump();
     void dumpTable();
     void dumpIndex();
+
+	SEIndex  toSEIndex(uint16_t index);
+	BTIndex  toBTIndex(uint16_t index);
+	EXTIndex toEXTIndex(SEIndex sei);
+
+	SEIndex nextSei(SEIndex sei);
+	SEIndex sequential(SEIndex sei);
+
+	TransferMode xferMode(SEIndex sei);
+	SEIndex underType(SEIndex sei);
 };

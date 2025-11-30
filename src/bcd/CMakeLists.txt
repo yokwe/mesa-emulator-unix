@@ -16,6 +16,7 @@ target_sources(
 		Index.h
 		LTRecord.h
 		MDRecord.h
+		print-symbol.h
 		SERecord.h
 		Symbols.h
 		SymbolsIndex.h
@@ -30,6 +31,7 @@ target_sources(
 		HTRecord.cpp
 		LTRecord.cpp
 		MDRecord.cpp
+		print-symbol.cpp
 		SERecord.cpp
 		Symbols.cpp
 		Timestamp.cpp

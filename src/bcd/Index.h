@@ -63,10 +63,10 @@ struct Index : public ByteBuffer::Readable, public HasToString {
     static void removeIndex(Index* index) {
         if (indexSet.contains(index)) {
             indexSet.erase(index);
-        } else {
-            logger.error("Unexpected index");
-            logger.error("  index   %s  %s", index->toString(), index);
-            ERROR()
+        // } else {
+        //     logger.error("Unexpected index");
+        //     logger.error("  index   %s  %p", index->toString(), index->_value);
+        //     ERROR()
         }
     }
     static void clear() {
@@ -107,20 +107,23 @@ private:
 
 public:
     // default constructor
-    Index() : ByteBuffer::Readable(), _index(55555), _value(0), noIndex(true) {
+    Index() : _index(55555), _value(0), noIndex(true) {
         addIndex(this);
     }
+    Index(uint16_t index_, const T* value_) : _index(index_), _value(value_), noIndex(value_ == 0) {}
+    Index(uint16_t index_) : Index(index_, 0) {}
+
     // copy constructor
     Index(const Index& that) {
-        this->_index   = that._index;
-        this->_value   = that._value;
+        this->_index  = that._index;
+        this->_value  = that._value;
         this->noIndex = that.noIndex;
        addIndex(this);
     }
     // move constructor
     Index(Index&& that) {
-        this->_index   = that._index;
-        this->_value   = that._value;
+        this->_index  = that._index;
+        this->_value  = that._value;
         this->noIndex = that.noIndex;
         addIndex(this);
     }
@@ -128,13 +131,22 @@ public:
         removeIndex(this);
     }
 
+    //
+    // operator
+    //
     Index& operator=(const Index& that) {
-        this->_index   = that._index;
-        this->_value   = that._value;
+        this->_index  = that._index;
+        this->_value  = that._value;
         this->noIndex = that.noIndex;
         return *this;
     }
+    bool operator==(const Index& that) const {
+        return this->_index == that._index && this->_value == that._value;
+    }
 
+    //
+    // index
+    //
     uint16_t index() const {
         if (noIndex) {
             logger.error("index has no value");
@@ -142,23 +154,6 @@ public:
         } else {
             return _index;
         }
-    }
-
-    bool hasValue() const {
-        return _value;
-    }
-
-    const T* value() const {
-        if (_value) return _value;
-        logger.error("index has no value");
-        logger.error("  %s", toString());
-        ERROR()
-    }
-    const T* operator*() const noexcept {
-        if (_value) return _value;
-        logger.error("index has no value");
-        logger.error("  %s", toString());
-        ERROR()
     }
     void index(uint16_t index) {
         if (noIndex) {
@@ -171,6 +166,24 @@ public:
             ERROR()
         }
     }
+
+    //
+    // value
+    //
+    bool hasValue() const {
+        return _value;
+    }
+    const T& value() const {
+        if (hasValue()) {
+            return *_value;
+        } else {
+            logger.error("value has no value");
+            logger.error("  %s", toString());
+            logger.error("  index  %d", _index);
+            ERROR()
+        }
+    }
+
     ByteBuffer& read(ByteBuffer& bb) override {
         uint16_t newValue;
         bb.read(newValue);

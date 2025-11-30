@@ -255,6 +255,14 @@ std::string readFile(const std::string& path) {
 	buffer << ifs.rdbuf();
 	return buffer.str();
 }
+void writeFile(const std::string& path, const std::string& string) {
+	std::filesystem::create_directories(path);
+    std::ofstream ofs;
+    ofs.open(path);
+    ofs << string;
+    ofs.close();
+}
+
 
 std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock::time_point time_steady) {
 	static auto base_system_ = std::chrono::system_clock::now();

@@ -48,8 +48,6 @@ class BCDFile {
     bool                 bcdFile;
     ByteBuffer           bb;
 public:
-    static std::vector<uint8_t> readFile(const std::string& path);
-
     BCDFile(const std::string& path);
 
     std::string getPath() const {

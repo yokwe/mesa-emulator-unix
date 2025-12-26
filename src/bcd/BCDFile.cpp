@@ -33,11 +33,8 @@
 // BCDFile.cpp
 //
 
-#include <filesystem>
 #include <string>
 #include <vector>
-#include <fstream>
-#include <iterator>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
@@ -51,7 +48,7 @@ static const Logger logger(__FILE__);
 
 BCDFile::BCDFile(const std::string& path_) {
     path = path_;
-    contents = readFile(path);
+    ::readFile(path, contents);
 
     bb = ByteBuffer(contents.size(), contents.data());
 
@@ -71,41 +68,4 @@ BCDFile::BCDFile(const std::string& path_) {
         logger.error("This is not bcd file");
         ERROR();
     }
-}
-
-std::vector<uint8_t> BCDFile::readFile(const std::string& path) {
-    // sanity check
-    if (!std::filesystem::exists(path)) {
-        logger.error("The path doesn't exist");
-        logger.error("  path %s!", path);
-        ERROR();
-    }
-    if (!std::filesystem::is_regular_file(path)) {
-        logger.error("The path is not regular file");
-        logger.error("  path %s!", path);
-        ERROR();
-    }
-
-    std::ifstream ifs(path, std::ios::binary);
-
-    // Stop eating new lines in binary mode!!!
-    ifs.unsetf(std::ios::skipws);
-
-    // get its size:
-    std::streampos fileSize;
-
-    ifs.seekg(0, std::ios::end);
-    fileSize = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-    // reserve capacity
-    std::vector<uint8_t> ret;
-    ret.reserve(fileSize);
-
-    // read the data:
-    std::copy(
-        std::istream_iterator<uint8_t>(ifs),
-        std::istream_iterator<uint8_t>(),
-        std::back_inserter(ret));
-    return ret;
 }

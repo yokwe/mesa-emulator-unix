@@ -42,6 +42,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <iterator>
 #include <bit>
 
 #include <execinfo.h>
@@ -261,6 +262,42 @@ void writeFile(const std::string& path, const std::string& string) {
     ofs.open(path);
     ofs << string;
     ofs.close();
+}
+
+void readFile(const std::string& path, std::vector<uint8_t>& data) {
+	// sanity check
+    if (!std::filesystem::exists(path)) {
+        logger.error("The path doesn't exist");
+        logger.error("  path %s!", path);
+        ERROR();
+    }
+    if (!std::filesystem::is_regular_file(path)) {
+        logger.error("The path is not regular file");
+        logger.error("  path %s!", path);
+        ERROR();
+    }
+
+    std::ifstream ifs(path, std::ios::binary);
+
+    // Stop eating new lines in binary mode!!!
+    ifs.unsetf(std::ios::skipws);
+
+    // get its size:
+    std::streampos fileSize;
+
+    ifs.seekg(0, std::ios::end);
+    fileSize = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    // reserve capacity
+	data.clear();
+    data.reserve(fileSize);
+
+    // read the data:
+    std::copy(
+        std::istream_iterator<uint8_t>(ifs),
+        std::istream_iterator<uint8_t>(),
+        std::back_inserter(data));
 }
 
 

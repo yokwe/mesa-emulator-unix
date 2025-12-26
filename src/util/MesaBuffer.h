@@ -43,24 +43,32 @@
 
 
 class MesaBuffer {
-    std::span<uint16_t> span;
-    uint32_t            myPos;
+    std::span<uint8_t> myData;
+    uint32_t           myPos;
 
 public:
     static MesaBuffer getInstance(const std::string& path);
 
-    MesaBuffer(const std::span<uint16_t>& span_) : span(span_), myPos(0) {}
-    MesaBuffer(uint8_t data[], uint32_t size) : span((uint16_t*)data, size / 2), myPos(0) {}
+    MesaBuffer(const std::span<uint8_t>& span_) : myData(span_), myPos(0) {}
+    MesaBuffer(uint8_t data[], uint32_t size) : myData(data, size), myPos(0) {}
 
     uint32_t size() {
-        return span.size();
+        return myData.size();
     }
-    uint16_t* data() {
-        return span.data();
+    uint8_t* data() {
+        return myData.data();
     }
 
-    void pos(uint32_t newValue);
-    uint32_t pos();
+    void bytePos(uint32_t newValue);
+    uint32_t bytePos() {
+        return myPos;
+    }
+    void wordPos(uint32_t newValue) {
+        bytePos(newValue * 2);
+    }
+    uint32_t wordPos() {
+        return (bytePos() + 1) / 2;
+    }
 
     uint16_t get16();
     uint32_t get32();

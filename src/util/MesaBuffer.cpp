@@ -38,52 +38,47 @@ static const Logger logger(__FILE__);
 
 #include "MesaBuffer.h"
 
-void MesaBuffer::pos(uint32_t newValue) {
-    if (newValue <= span.size()) {
+void MesaBuffer::bytePos(uint32_t newValue) {
+    if (newValue <= myData.size()) {
         myPos = newValue;
     } else {
         logger.error("Unexpected newValue");
         logger.error("  newValue  %u", newValue);
-        logger.error("  size      %u", span.size());
+        logger.error("  size      %u", myData.size());
         ERROR();
     }
 }
-uint32_t MesaBuffer::pos() {
-    return myPos;
-}
 
 uint16_t MesaBuffer::get16() {
-    const int readSize = 1;
+    const int readSize = 2;
 
-    if ((myPos + readSize) <= span.size()) {
-        uint8_t* data = (uint8_t*)span.data() + (myPos * 2);
+    if ((myPos + readSize) <= myData.size()) {
+        uint16_t ret = (myData[myPos + 0] << 8) | (myData[myPos + 1] << 0);  // mesa use big endian
         myPos += readSize;
-        uint16_t ret = (data[0] << 8) | (data[1] << 0);  // mesa data is big endian
         return ret;
     } else {
         logger.error("Unexpected position  %s", __FUNCTION__);
         logger.error("  pos       %u", myPos);
         logger.error("  readSize  %u", readSize);
-        logger.error("  size      %u", span.size());
+        logger.error("  size      %u", myData.size());
         ERROR(); 
     }
 }
 uint32_t MesaBuffer::get32() {
-    const int readSize = 2;
+    const int readSize = 4;
 
-    if ((myPos + readSize) <= span.size()) {
-        uint8_t* data = (uint8_t*)span.data() + (myPos * 2);
-        myPos += readSize;
+    if ((myPos + readSize) <= myData.size()) {
 //      Network order
-//		uint32_t ret = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | (data[3] << 0);
+//		uint32_t ret = (span[myPos + 0] << 24) | (span[myPos + 1] << 16) | (span[myPos + 2] << 8) | (span[myPos + 3] << 0);
 //      Mesa Long order  low half, high half
-		uint32_t ret = (data[0] << 8) | (data[1] << 0) | (data[2] << 24) | (data[3] << 16);
+		uint32_t ret = (myData[myPos + 0] << 8) | (myData[myPos + 1] << 0) | (myData[myPos + 2] << 24) | (myData[myPos + 3] << 16);
+        myPos += readSize;
         return ret;
     } else {
         logger.error("Unexpected position  %s", __FUNCTION__);
         logger.error("  pos       %u", myPos);
         logger.error("  readSize  %u", readSize);
-        logger.error("  size      %u", span.size());
+        logger.error("  size      %u", myData.size());
         ERROR();
     }
 }

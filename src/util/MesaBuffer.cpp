@@ -39,47 +39,85 @@ static const Logger logger(__FILE__);
 #include "MesaBuffer.h"
 
 void MesaBuffer::bytePos(uint32_t newValue) {
-    if (newValue <= myData.size()) {
-        myPos = newValue;
+    if (newValue <= myBytePos) {
+        myBytePos = newValue;
     } else {
-        logger.error("Unexpected newValue");
+        logger.error("Unexpected values  %s", __FUNCTION__);
         logger.error("  newValue  %u", newValue);
-        logger.error("  size      %u", myData.size());
+        logger.error("  byteSize  %u", myByteSize);
         ERROR();
     }
 }
 
-uint16_t MesaBuffer::get16() {
-    const int readSize = 2;
+uint8_t MesaBuffer::get8() {
+    const int readSize = 1;
 
-    if ((myPos + readSize) <= myData.size()) {
-        uint16_t ret = (myData[myPos + 0] << 8) | (myData[myPos + 1] << 0);  // mesa use big endian
-        myPos += readSize;
+    if ((myBytePos + readSize) <= myByteSize) {
+        uint8_t ret = myData[myBytePos + 0];
+        myBytePos += readSize;
         return ret;
     } else {
         logger.error("Unexpected position  %s", __FUNCTION__);
-        logger.error("  pos       %u", myPos);
+        logger.error("  bytePos   %u", myBytePos);
         logger.error("  readSize  %u", readSize);
-        logger.error("  size      %u", myData.size());
+        logger.error("  byteSize  %u", myByteSize);
+        ERROR(); 
+    }
+}
+uint16_t MesaBuffer::get16() {
+    const int readSize = 2;
+
+    if ((myBytePos + readSize) <= myByteSize) {
+        uint16_t ret = (myData[myBytePos + 0] << 8) | (myData[myBytePos + 1] << 0);  // mesa use big endian
+        myBytePos += readSize;
+        return ret;
+    } else {
+        logger.error("Unexpected values  %s", __FUNCTION__);
+        logger.error("  bytePos   %u", myBytePos);
+        logger.error("  readSize  %u", readSize);
+        logger.error("  byteSize  %u", myByteSize);
         ERROR(); 
     }
 }
 uint32_t MesaBuffer::get32() {
     const int readSize = 4;
 
-    if ((myPos + readSize) <= myData.size()) {
+    if ((myBytePos + readSize) <= myByteSize) {
 //      Network order
 //		uint32_t ret = (span[myPos + 0] << 24) | (span[myPos + 1] << 16) | (span[myPos + 2] << 8) | (span[myPos + 3] << 0);
 //      Mesa Long order  low half, high half
-		uint32_t ret = (myData[myPos + 0] << 8) | (myData[myPos + 1] << 0) | (myData[myPos + 2] << 24) | (myData[myPos + 3] << 16);
-        myPos += readSize;
+		uint32_t ret = (myData[myBytePos + 0] << 8) | (myData[myBytePos + 1] << 0) | (myData[myBytePos + 2] << 24) | (myData[myBytePos + 3] << 16);
+        myBytePos += readSize;
         return ret;
     } else {
-        logger.error("Unexpected position  %s", __FUNCTION__);
-        logger.error("  pos       %u", myPos);
+        logger.error("Unexpected values  %s", __FUNCTION__);
+        logger.error("  bytePos   %u", myBytePos);
         logger.error("  readSize  %u", readSize);
-        logger.error("  size      %u", myData.size());
+        logger.error("  byteSize  %u", myByteSize);
         ERROR();
     }
 }
 
+MesaBuffer MesaBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
+    auto newByteOffset = wordOffset * 2;
+    auto newByteSize = wordSize * 2;
+
+    // sanity check
+    auto oldByteSize = myByteSize;
+    if (oldByteSize <= newByteOffset || oldByteSize < (newByteOffset + newByteSize || newByteSize == 0)) {
+        logger.error("Unexpected values  %s", __FUNCTION__);
+        logger.error("  newByteOffset  %u", newByteOffset);
+        logger.error("  newByteSize    %u", newByteSize);
+        logger.error("  oldByteSize    %u", oldByteSize);
+        ERROR()
+    }
+    return MesaBuffer(myData + newByteOffset, newByteSize);
+}
+
+
+MesaBufferFile MesaBufferFile::getInstance(const std::string& path) {
+    std::vector<uint8_t> vector;
+    ::readFile(path, vector);
+    MesaBufferFile ret{path, vector};
+    return ret;
+}

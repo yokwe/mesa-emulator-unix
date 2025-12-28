@@ -35,41 +35,44 @@
 
 #pragma once
 
-#include <span>
+#include <memory>
 #include <cstdint>
 #include <type_traits>
+#include <string>
 
 #include "../util/Util.h"
 
 
 class MesaBuffer {
-    std::span<uint8_t> myData;
-    uint32_t           myPos;
+protected:
+    uint8_t*  myData;
+    uint32_t  myByteSize;
+    uint32_t  myBytePos;
 
 public:
-    static MesaBuffer getInstance(const std::string& path);
-
-    MesaBuffer(const std::span<uint8_t>& span_) : myData(span_), myPos(0) {}
-    MesaBuffer(uint8_t data[], uint32_t size) : myData(data, size), myPos(0) {}
-
-    uint32_t size() {
-        return myData.size();
+    static uint8_t highByte(uint16_t value) {
+        return (uint8_t)(value >> 8);
     }
-    uint8_t* data() {
-        return myData.data();
+    static uint8_t lowByte(uint16_t value) {
+        return (uint8_t)(value >> 0);
     }
+
+    MesaBuffer(uint8_t* data, uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
+
+    MesaBuffer range(uint32_t wordOffset, uint32_t WordSize);
 
     void bytePos(uint32_t newValue);
     uint32_t bytePos() {
-        return myPos;
+        return myBytePos;
     }
-    void wordPos(uint32_t newValue) {
-        bytePos(newValue * 2);
+    void pos(uint32_t wordPos) {
+        bytePos(wordPos * 2);
     }
-    uint32_t wordPos() {
+    uint32_t pos() {
         return (bytePos() + 1) / 2;
     }
 
+    uint8_t  get8();
     uint16_t get16();
     uint32_t get32();
 
@@ -81,13 +84,14 @@ public:
     }
     template <class Head, class... Tail>
     MesaBuffer& read(Head&& head, Tail&&... tail) {
+        constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
         constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
         constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
         constexpr auto is_class    = std::is_class_v<std::remove_reference_t<Head>>;
 
     //		logger.info("read head  %s!  %d  |  %d  %d  |  %d", demangle(typeid(head).name()), sizeof(head), is_uint16_t, is_uint32_t, is_class);
 
-        if constexpr (is_uint16_t || is_uint32_t) {
+        if constexpr (is_uint8_t || is_uint16_t || is_uint32_t) {
             read(head);
         } else {
             if constexpr (is_class) {
@@ -106,6 +110,10 @@ public:
         return read(std::forward<Tail>(tail)...);
     }
 
+    MesaBuffer& read(uint8_t& value) {
+        value = get8();
+        return *this;
+    }
     MesaBuffer& read(uint16_t& value) {
         value = get16();
         return *this;
@@ -115,3 +123,27 @@ public:
         return *this;
     }
 };
+
+class MesaBufferArray : public MesaBuffer {
+protected:
+    std::shared_ptr<uint8_t> myPointer;
+
+public:
+    MesaBufferArray(std::vector<uint8_t>& vector) : MesaBuffer(new uint8_t[vector.size()], vector.size()), myPointer(std::shared_ptr<uint8_t>(myData)) {
+        std::copy(vector.begin(), vector.end(), myData); // copy vector to myData
+    }
+};
+
+class MesaBufferFile : public MesaBufferArray {
+    std::string myPath;
+
+public:
+    static MesaBufferFile getInstance(const std::string& path);
+
+    MesaBufferFile(const std::string& path, std::vector<uint8_t>& vector) : MesaBufferArray(vector), myPath(path) {}
+
+    const std::string& path() {
+        return myPath;
+    }
+};
+

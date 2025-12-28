@@ -39,56 +39,54 @@
 #include <deque>
 #include <string>
 #include <cstdint>
+#include <span>
+#include <vector>
 
 #include <sys/time.h>
 #include <net/bpf.h>
 
-#include "ByteBuffer.h"
 
-class BPF {
-	// This ByteBuffer contains whole data that includes struct bpf_hdr.
-	// Buffer.data() returns address of struct bpf_hdr.
-	// Buffer.base() returns index of captured data
-	// Buffer.limit() returns bh_hdrlen + bh_caplen
-	// Received data is stored between base() and limit()
-	// You can get address of struct timeval from data()
-	std::deque<ByteBuffer> readBuffer;
+struct BPF {
+	using data_type = std::span<uint8_t>;
+	using microseconds = std::chrono::microseconds;
+
+	static const struct bpf_program* PROGRAM_IP;
+	static const struct bpf_program* PROGRAM_XNS;
+
+	struct ReadData {
+		bpf_hdr*  header;
+
+		ReadData(bpf_hdr* header_) : header(header_) {}
+
+		microseconds toTimestamp();
+		data_type toData();
+	};
+
+	std::string            path;
+	int                    fd;
+	std::vector<uint8_t>   buffer;
+	std::deque<ReadData>   readBuffer;
+
+
+	BPF() : fd(-1) {}
+	~BPF() { close(); }
+
+	// open sets fd
+	void open();
+	void close();
 
 	//
 	// IMPORTANT
 	//
-	// read() is blocking operation. It don't return until data is received.
-	// read() returns std::deque<ByteBuffer> readData.
-	// Backing store of ByteBuffer is member variable readData.
-	const std::deque<ByteBuffer>& fillBuffer();
+	// fillReadBufffer() is blocking operation. It don't return until data is received.
+	void fillReadBuffer();
+	
 
-public:
-	static const struct bpf_program* PROGRAM_IP;
-	static const struct bpf_program* PROGRAM_XNS;
-
-	int         fd;
-	std::string path;
-	int         bufferSize;
-	uint8_t*    buffer;
-
-	BPF() : fd(-1), bufferSize(-1), buffer(0) {}
-	~BPF() { close(); }
-
-	// openDevice sets fd and path
-	void open();
-	void close();
-
-	// For ByteBuffer
-	int write(const ByteBuffer& value);
-	// if timeout is happend, bb contains empty and returns 0
-	int read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr);
-
-	// for net::Driver
-	// no error check
+	void clear (); // clear readBuffer
 	int  select  (std::chrono::microseconds timeout);
-	int  transmit(uint8_t* data, uint32_t dataLen);
-	int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr);
-	void clear ();
+	
+	int  receive(data_type& data, std::chrono::microseconds timeout, microseconds* timestamp = 0);
+	int  transmit(const data_type& data);
 
 
 	// BIOCGBLEN

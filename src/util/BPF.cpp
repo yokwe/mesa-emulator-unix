@@ -50,7 +50,6 @@
 #include "Util.h"
 static const Logger logger(__FILE__);
 
-#include "ByteBuffer.h"
 #include "Perf.h"
 
 #include "BPF.h"
@@ -86,7 +85,7 @@ void BPF::open() {
 	char tempPath[sizeof("/dev/bpf00") + 1];
 	int  tempFD;
 
-	for(int i = 0; i < 256; i++) {
+	for(int i = 0; i < 99; i++) {
 		snprintf(tempPath, sizeof(tempPath), "/dev/bpf%d", i);
 //		LOG_SYSCALL(tempFD, ::open(tempPath, O_RDWR));
 		tempFD = ::open(tempPath, O_RDWR);
@@ -96,8 +95,9 @@ void BPF::open() {
 	if (tempFD <0) ERROR()
 	path       = tempPath;
 	fd         = tempFD;
-	bufferSize = getBufferSize();
-	buffer     = new uint8_t[bufferSize];
+	auto bufferSize = getBufferSize();
+	buffer.reserve(bufferSize); // reserve buffer for size bufferSize
+	buffer.resize(bufferSize); // set size of buffer to bufferSize
 }
 void BPF::close() {
 	if (0 <= fd) {
@@ -105,41 +105,29 @@ void BPF::close() {
 		LOG_SYSCALL(ret, ::close(fd))
 		fd = -1;
 	}
-	delete buffer;
-	path.clear();
-	fd         = -1;
-	bufferSize = -1;
-	buffer     = 0;
-	readBuffer.clear();
 }
 
-const std::deque<ByteBuffer>& BPF::fillBuffer() {
+ void BPF::fillReadBuffer() {
 	PERF_COUNT(bpf, fillBuffer)
 	int validBufferLen;
-	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer, bufferSize))
+	CHECK_SYSCALL(validBufferLen, ::read(fd, buffer.data(), buffer.size()))
 
 //	logger.debug("validBufferLen = %d", validBufferLen);
 	readBuffer.clear();
 
 	for(int i = 0; i < validBufferLen; ) {
 		PERF_COUNT(bpf, fillBuffer_data);
-		struct bpf_hdr* p = (struct bpf_hdr*)(buffer + i);
-		int     caplen = (int)(p->bh_caplen);
-		int     hdrlen = (int)(p->bh_hdrlen);
-		uint8_t* data   = buffer + i;
+		
+		auto header = (struct bpf_hdr*)(buffer.data() + i);
+		readBuffer.emplace_front(header);
 
-		ByteBuffer element(hdrlen + caplen, data);
-		element.setBase(hdrlen);
-		readBuffer.push_front(element);
+//		logger.info("fillBuffer  %d  %d", i, header->bh_caplen);
 
-		i += BPF_WORDALIGN(caplen + hdrlen);
+		i += BPF_WORDALIGN(header->bh_caplen + header->bh_hdrlen);
 	}
-
-	return readBuffer;
 }
-int BPF::read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+int BPF::receive(data_type& data, std::chrono::microseconds timeout, microseconds* timestamp) {
 	PERF_COUNT(bpf, read)
-	bb.clear();
 	if (readBuffer.empty()) {
 		PERF_COUNT(bpf, read_empty)
 		if (getNonBlockingReadBytes() == 0) {
@@ -148,27 +136,22 @@ int BPF::read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::mi
 		}
 		if (getNonBlockingReadBytes() == 0) {
 			PERF_COUNT(bpf, read_zero)
+			data = std::span<uint8_t>{};
 			return 0;
 		}
-		fillBuffer();
+		fillReadBuffer();
 	}
-	const ByteBuffer& bpfData = readBuffer.back();
-	// bpfData hase base value
-	// copy bpfData[base .. limit) to bb
-	bb.write(bpfData.limit() - bpfData.base(), bpfData.data() + bpfData.base());
-	bb.flip();
-	if (timestamp != nullptr) {
-		struct bpf_hdr* p = (struct bpf_hdr*)bb.data();
-		struct BPF_TIMEVAL tstamp = p->bh_tstamp;
-		int64_t time = (int64_t)(tstamp.tv_sec) * 1000'000 + tstamp.tv_usec; // conver to microsecond
-		*timestamp = std::chrono::microseconds(time);
-	}
+
+	ReadData readData = readBuffer.back();
 	readBuffer.pop_back();
-	return bb.length();
+
+	data = readData.toData();
+	if (timestamp) *timestamp = readData.toTimestamp();
+	return data.size();
 }
-int BPF::write(const ByteBuffer& value) {
+int BPF::transmit(const data_type& data) {
 	int ret;
-	LOG_SYSCALL(ret, ::write(fd, value.data(), value.limit()))
+	LOG_SYSCALL(ret, ::write(fd, data.data(), data.size()))
 	return ret;
 }
 
@@ -188,22 +171,23 @@ int  BPF::select  (std::chrono::microseconds timeout_) {
 	CHECK_SYSCALL(ret, ::select(FD_SETSIZE, &fds, NULL, NULL, &timeout))
 	return ret;
 }
-int  BPF::transmit(uint8_t* data, uint32_t dataLen) {
-	ByteBuffer bb(dataLen, data);
-	int ret = write(bb);
-	return ret;
-}
-int  BPF::receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
-	ByteBuffer bb(dataLen, data);
-	int ret = read(bb, timeout, timestamp);
-	return ret;
-}
 void BPF::clear() {
-	// clear readData
+	// clear readBuffer
 	readBuffer.clear();
-	// clear buffer
+	// Flushes the buffer	of incoming packets
 	flush();
 }
+
+BPF::microseconds BPF::ReadData::toTimestamp() {
+	int64_t microseconds = (int64_t)(header->bh_tstamp.tv_sec) * 1000'000 + header->bh_tstamp.tv_usec; // convert to microseconds
+	return std::chrono::microseconds(microseconds);
+}
+
+BPF::data_type BPF::ReadData::toData() {
+	uint8_t* base = (uint8_t*)header;
+	return data_type{base + header->bh_hdrlen, header->bh_caplen};
+}
+
 
 // BIOCGBLEN
 //   Returns the required buffer length	for reads on bpf files

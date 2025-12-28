@@ -38,8 +38,8 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-
-#include "ByteBuffer.h"
+#include <span>
+#include <chrono>
 
 
 namespace net {
@@ -59,17 +59,17 @@ public:
 
 class Driver {
 public:
+    using data_type = std::span<uint8_t>;
+
     const Device device;
 
     virtual void open()  = 0;
     virtual void close() = 0;
 
     virtual int  select  (std::chrono::microseconds timeout) = 0;
-    virtual int  transmit(uint8_t* data, uint32_t dataLen) = 0;
-    virtual int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr) = 0;
+	virtual int  transmit(const data_type& data) = 0;
+    virtual int  receive(data_type& data, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = 0) = 0;
     virtual void clear() = 0;
-    virtual int  write(const ByteBuffer& value) = 0;
-    virtual int  read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = nullptr) = 0;
 
     Driver(const Device& device_) : device(device_.name, device_.address) {}
     virtual ~Driver() {}
@@ -81,25 +81,6 @@ constexpr int maxDataBytesPerEthernetPacket = 1500;
 constexpr int minBytesPerEthernetPacket     = 60;   // not including CRC-32
 
 constexpr int PACKET_SIZE = maxBytesPerEthernetPacket;
-class Packet : public ByteBufferArray<PACKET_SIZE> {
-public:
-    Packet() : ByteBufferArray<PACKET_SIZE>() {}
-
-    // Packet
-    Packet(const Packet& that) {
-        copyFrom(that);
-    }
-	Packet& operator =(const Packet& that) {
-        ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
-		return *this;
-	}
-    // ByteBuffer
-    Packet(const ByteBuffer& that) : ByteBufferArray(that) {}
-	Packet& operator =(const ByteBuffer& that) {
-        ByteBufferArray::operator=(that); // call ByteBufferArray::operator=
-		return *this;
-	}
-};
 
 std::vector<Device> getDeviceList();
 

@@ -33,6 +33,8 @@
 // AgentNetwork.cpp
 //
 
+#include <span>
+
 #include "../util/Debug.h"
 
 #include "../util/Util.h"
@@ -68,7 +70,9 @@ void AgentNetwork::TransmitThread::process(const Item& item) {
 	}
 	// byteswap and copy from data to buffer
 	Util::byteswap((CARD16*)data, (CARD16*)buffer, (dataLen + 1) / 2);
-	int ret = driver->transmit(buffer, dataLen);
+
+	std::span<uint8_t> span{buffer, dataLen};
+	int ret = driver->transmit(span);
 
 	if (ret == -1) {
 		// set iocb->status if possibble
@@ -105,21 +109,21 @@ void AgentNetwork::ReceiveThread::run() {
 	stopThread = false;
 	for(;;) {
 		if (stopThread) break;
-		net::Packet packet;
-		if (driver->read(packet, Util::ONE_SECOND)) {
+		std::span<uint8_t> span;
+		if (driver->receive(span, Util::ONE_SECOND)) {
 			PERF_COUNT(network, receive_packet)
 			std::unique_lock<std::mutex> lock(mutex);
 			if (!queue.empty()) {
 				const auto& item = queue.back();
 				// process item
-				process(item, packet);
+				process(item, span);
 				queue.pop_back();
 			}
 		}
 	}
 }
 
-void AgentNetwork::ReceiveThread::process(const Item& item, const ByteBuffer& packet) {
+void AgentNetwork::ReceiveThread::process(const Item& item, const std::span<uint8_t>& span) {
 	PERF_COUNT(network, receive_process)
 	auto interruptSelector = item.interruptSelector;
 	auto iocb = item.iocb;
@@ -131,8 +135,8 @@ void AgentNetwork::ReceiveThread::process(const Item& item, const ByteBuffer& pa
 	CARD8* data    = (CARD8*)memory::peek(iocb->bufferAddress);
 	CARD32 dataLen = iocb->bufferLength;
 	
-	CARD8* buffer    = packet.data();
-	CARD32 bufferLen = packet.length();
+	CARD8* buffer    = span.data();
+	CARD32 bufferLen = span.size();
 
 	if (bufferLen < dataLen) {
 		// byteswap and copy from buffer to data

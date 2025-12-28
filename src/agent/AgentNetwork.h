@@ -93,7 +93,7 @@ public:
 
 		void push(const Item& item);
 		void run();
-		void process(const Item& item, const ByteBuffer& packet);
+		void process(const Item& item, const std::span<uint8_t>& span);
 	};
 
 	ReceiveThread  receiveThread;

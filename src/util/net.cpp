@@ -42,7 +42,6 @@
 #include "Util.h"
 static const Logger logger(__FILE__);
 
-#include "ByteBuffer.h"
 #include "BPF.h"
 
 #include "net.h"
@@ -105,7 +104,7 @@ public:
 		bpfOpen = true;
         logger.info("bpf.fd         = %d", bpf.fd);
         logger.info("bpf.path       = %s", bpf.path);
-        logger.info("bpf.bufferSize = %d", bpf.bufferSize);
+        logger.info("bpf.bufferSize = %d", bpf.buffer.size());
 
         bpf.setInterface(device.name);
         bpf.setPromiscuous();                         // need to promiscuos mode to see all packet
@@ -121,7 +120,7 @@ public:
         logger.info("interface      = %s", bpf.getInterface());
         logger.info("nbrb           = %d", bpf.getNonBlockingReadBytes());
         logger.info("timeout        = %d", bpf.getReadTimeout());
-        logger.info("buffer         = %p", bpf.buffer);
+        logger.info("buffer         = %p", bpf.buffer.data());
     }
 
     void close() {
@@ -134,20 +133,15 @@ public:
     int  select  (std::chrono::microseconds timeout) {
         return bpf.select(timeout);
     }
-    int  transmit(uint8_t* data, uint32_t dataLen) {
-        return bpf.transmit(data, dataLen);
-    }
-    int  receive (uint8_t* data, uint32_t dataLen, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
-        return bpf.receive(data, dataLen, timeout, timestamp);
-    }
     void clear() {
         bpf.clear();
     }
-    int write(const ByteBuffer& value) {
-        return bpf.write(value);
+
+    int  transmit(const data_type& data) {
+        return bpf.transmit(data);
     }
-    int read(ByteBuffer& bb, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
-        return bpf.read(bb, timeout, timestamp);
+    int  receive (data_type& data, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp) {
+        return bpf.receive(data, timeout, timestamp);
     }
 
     BPF bpf;

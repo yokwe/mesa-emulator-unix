@@ -68,6 +68,9 @@ floppy:
 print-symbol: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target print-symbol
 
+bcdFile: src/util/Perf.inc src/util/trace.inc
+	/usr/bin/time cmake --build build --target bcdFile
+
 #
 # run-XXX
 #

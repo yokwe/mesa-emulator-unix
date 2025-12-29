@@ -68,6 +68,7 @@ endif()
 # add subdirectory
 add_subdirectory (agent	         ../build/agent)
 add_subdirectory (bcd            ../build/bcd)
+add_subdirectory (bcdFile        ../build/bcdFile)
 add_subdirectory (floppy      	 ../build/floppy)
 add_subdirectory (guam-headless	 ../build/guam-headless)
 add_subdirectory (main	         ../build/main)

@@ -39,7 +39,7 @@ static const Logger logger(__FILE__);
 #include "MesaBuffer.h"
 
 void MesaBuffer::bytePos(uint32_t newValue) {
-    if (newValue <= myBytePos) {
+    if (newValue <= myByteSize) {
         myBytePos = newValue;
     } else {
         logger.error("Unexpected values  %s", __FUNCTION__);

@@ -57,10 +57,17 @@ public:
         return (uint8_t)(value >> 0);
     }
 
+    MesaBuffer() : myData(0), myByteSize(0), myBytePos(0) {}
     MesaBuffer(uint8_t* data, uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
 
     MesaBuffer range(uint32_t wordOffset, uint32_t WordSize);
 
+    uint32_t byteSize() {
+        return myByteSize;
+    }
+    uint32_t size() {
+        return (byteSize() + 1) / 2;
+    }
     void bytePos(uint32_t newValue);
     uint32_t bytePos() {
         return myBytePos;
@@ -76,7 +83,7 @@ public:
     uint16_t get16();
     uint32_t get32();
 
-    struct Readable {
+    struct HasRead {
         virtual MesaBuffer& read(MesaBuffer& bb) = 0;
     };
     MesaBuffer& read() {
@@ -95,8 +102,8 @@ public:
             read(head);
         } else {
             if constexpr (is_class) {
-                constexpr auto is_Readable = std::is_base_of_v<Readable, std::remove_reference_t<Head>>;
-                if constexpr (is_Readable) {
+                constexpr auto has_read = std::is_base_of_v<HasRead, std::remove_reference_t<Head>>;
+                if constexpr (has_read) {
                     head.read(*this);
                 } else {
                     logger.error("Unexptected type  %s", demangle(typeid(head).name()));

@@ -59,16 +59,17 @@ public:
 
 class Driver {
 public:
-    using data_type = std::span<uint8_t>;
+using data_type = std::span<uint8_t>;
+using microseconds = std::chrono::microseconds;
 
     const Device device;
 
     virtual void open()  = 0;
     virtual void close() = 0;
 
-    virtual int  select  (std::chrono::microseconds timeout) = 0;
+    virtual int  select  (microseconds timeout) = 0;
 	virtual int  transmit(const data_type& data) = 0;
-    virtual int  receive(data_type& data, std::chrono::microseconds timeout, std::chrono::microseconds* timestamp = 0) = 0;
+    virtual int  receive(data_type& data, microseconds timeout, microseconds* timestamp = 0) = 0;
     virtual void clear() = 0;
 
     Driver(const Device& device_) : device(device_.name, device_.address) {}
@@ -76,9 +77,9 @@ public:
 };
 
 // From APilot/15.0.1/Base/Friends/IEEE8023.mesa
-constexpr int maxBytesPerEthernetPacket     = 1518; // including 4 bytes CRC  1518 = 1500 + 6 + 6 + 2 + 4
 constexpr int maxDataBytesPerEthernetPacket = 1500;
-constexpr int minBytesPerEthernetPacket     = 60;   // not including CRC-32
+constexpr int maxBytesPerEthernetPacket     = 1518; // 6 + 6 + 2 + 1500 + 4  includes 4 bytes CRC
+constexpr int minBytesPerEthernetPacket     = 60;   // 6 + 6 + 2 + 46
 
 constexpr int PACKET_SIZE = maxBytesPerEthernetPacket;
 

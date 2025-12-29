@@ -113,11 +113,3 @@ MesaBuffer MesaBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
     }
     return MesaBuffer(myData + newByteOffset, newByteSize);
 }
-
-
-MesaBufferFile MesaBufferFile::getInstance(const std::string& path) {
-    std::vector<uint8_t> vector;
-    ::readFile(path, vector);
-    MesaBufferFile ret{path, vector};
-    return ret;
-}

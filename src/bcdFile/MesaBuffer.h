@@ -37,15 +37,15 @@
 
 #include <cstdint>
 #include <type_traits>
-#include <string>
 
 #include "../util/Util.h"
 
 
 class MesaBuffer {
 protected:
-    uint8_t*  myData;
-    uint32_t  myByteSize;
+    const uint8_t*  myData;
+    const uint32_t  myByteSize;
+    
     uint32_t  myBytePos;
 
 public:
@@ -56,12 +56,11 @@ public:
         return (uint8_t)(value >> 0);
     }
 
-    MesaBuffer() : myData(0), myByteSize(0), myBytePos(0) {}
-    MesaBuffer(uint8_t* data, uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
+    MesaBuffer(const uint8_t* data, const uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
 
     MesaBuffer range(uint32_t wordOffset, uint32_t WordSize);
 
-    uint8_t* data() {
+    const uint8_t* data() {
         return myData;
     }
 
@@ -133,27 +132,3 @@ public:
         return *this;
     }
 };
-
-class MesaBufferArray : public MesaBuffer {
-protected:
-    uint8_t* myPointer;
-
-public:
-    MesaBufferArray(std::vector<uint8_t>& vector) : MesaBuffer(new uint8_t[vector.size()], vector.size()), myPointer(myData) {
-        std::copy(vector.begin(), vector.end(), myData); // copy vector to myData
-    }
-};
-
-class MesaBufferFile : public MesaBufferArray {
-    std::string myPath;
-
-public:
-    static MesaBufferFile getInstance(const std::string& path);
-
-    MesaBufferFile(const std::string& path, std::vector<uint8_t>& vector) : MesaBufferArray(vector), myPath(path) {}
-
-    const std::string& path() {
-        return myPath;
-    }
-};
-

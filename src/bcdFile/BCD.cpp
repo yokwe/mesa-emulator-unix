@@ -240,6 +240,19 @@ void BCD::dumpTable() {
     }
 }
 
+void BCD::dumpIndex() {
+//    NameRecord::dump();
+    FTIndex::dump();
+    SGIndex::dump();
+    ENIndex::dump();
+    MTIndex::dump();
+
+    logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
+    logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());
+    logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
+    logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
+    logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
+}
 
 void BCD::setSymbolOffset(MesaBuffer& bb) {
     mySymbolOffset = 0;

@@ -38,7 +38,7 @@
 #include <cstdint>
 #include <string>
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 #include "../util/Util.h"
 
 

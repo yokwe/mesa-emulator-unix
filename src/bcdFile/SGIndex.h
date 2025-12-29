@@ -52,5 +52,8 @@ struct SGIndex : public Index<"sg", SGRecord> {
     bool isNull() const {
         return index() == SG_NULL;
     }
-    std::string toString() const override;
+    std::string toString() const override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();    
+    }
 };

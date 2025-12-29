@@ -30,25 +30,25 @@
 
 
 //
-// BCDFile.h
+// ENRecord.h
 //
 
 #pragma once
 
+#include <cstdint>
+#include <vector>
 #include <string>
+
+#include "../util/Util.h"
 
 #include "MesaBuffer.h"
 
-class BCDFile {
-    MesaBuffer mb;
-    bool       bcdFile;
-public:
-    BCDFile(const std::string& path);
 
-    bool isBCDFile() const {
-        return bcdFile;
-    }
-    const MesaBuffer& mesaBuffer() const {
-        return mb;
-    }
+// ENRecord: TYPE = RECORD [
+//   nEntries: CARDINAL, initialPC: ARRAY [0..0) OF PrincOps.BytePC];
+struct ENRecord : public MesaBuffer::HasRead, public HasToString {
+    std::vector<uint16_t> initialPC;
+
+    MesaBuffer& read(MesaBuffer& bb) override;
+    std::string toString() const override;
 };

@@ -39,7 +39,7 @@
 
 #include "../util/Util.h"
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 #include "FTIndex.h"
 

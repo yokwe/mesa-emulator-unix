@@ -52,6 +52,6 @@ struct NameRecord : public Index<"ss", std::string> {
     std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         if (hasValue()) return value();
-        return "*NOVALUE*";
+        return Index::toString();
     }
 };

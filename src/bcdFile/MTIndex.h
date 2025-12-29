@@ -30,17 +30,30 @@
 
 
 //
-// SGIndex.cpp
+// MTIndex.h
 //
 
+#pragma once
+
+#include <cstdint>
+
 #include "../util/Util.h"
-static const Logger logger(__FILE__);
 
-#include "SGRecord.h"
+#include "Index.h"
 
-#include "SGIndex.h"
+// forward declaration
+struct MTRecord;
 
-std::string SGIndex::toString() const {
-    if (isNull()) return std_sprintf("%s-NULL", prefix);
-    return value().toString();
-}
+//MTIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO MTRecord;
+//MTNull: MTIndex = LAST[MTIndex];
+struct MTIndex : public Index<"mt", MTRecord> {
+    static const constexpr uint16_t MT_NULL = T_LIMIT;
+
+    bool isNull() const {
+        return index() == MT_NULL;
+    }
+    std::string toString() const override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
+    }
+};

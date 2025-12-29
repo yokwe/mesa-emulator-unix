@@ -30,25 +30,31 @@
 
 
 //
-// BCDFile.h
+// ENRecord.cpp
 //
 
-#pragma once
+#include <cstdint>
 
-#include <string>
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
 #include "MesaBuffer.h"
 
-class BCDFile {
-    MesaBuffer mb;
-    bool       bcdFile;
-public:
-    BCDFile(const std::string& path);
+#include "ENRecord.h"
 
-    bool isBCDFile() const {
-        return bcdFile;
+MesaBuffer& ENRecord::read(MesaBuffer& bb) {
+    uint16_t nEntries;
+    bb.read(nEntries);
+    initialPC.reserve(nEntries);
+    for(int i = 0; i < nEntries; i++) {
+        initialPC.push_back(bb.get16());
     }
-    const MesaBuffer& mesaBuffer() const {
-        return mb;
+    return bb;
+}
+std::string ENRecord::toString() const {
+    std::string tmp;
+    for(size_t i = 0; i < initialPC.size(); i++) {
+        tmp += std_sprintf(" %d", initialPC[i]);
     }
-};
+    return std_sprintf("[%s]", tmp.substr(1));
+}

@@ -11,7 +11,6 @@ target_sources(
 		ByteBuffer.h
 		Debug.h
 		DiskFile.h
-		MesaBuffer.h
 		net.h
 		Perf.h
 		StringPrinter.h
@@ -24,7 +23,6 @@ target_sources(
 		BPF.cpp
 		ByteBuffer.cpp
 		DiskFile.cpp
-		MesaBuffer.cpp
 		net.cpp
 		Perf.cpp
 		StringPrinter.cpp

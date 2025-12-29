@@ -40,7 +40,7 @@
 
 #include "../util/Util.h"
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 constexpr const uint16_t T_LIMIT = 0177777;
 

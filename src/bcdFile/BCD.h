@@ -37,17 +37,15 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 
-#include "../util/Util.h"
-
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 #include "Timestamp.h"
 #include "FTIndex.h"
 #include "FTRecord.h"
-#include "SGIndex.h"
 #include "SGRecord.h"
+#include "ENRecord.h"
+#include "MTRecord.h"
 
 class BCD : public MesaBuffer::HasRead {
     MesaBuffer& read(MesaBuffer& bb) override;
@@ -104,8 +102,8 @@ public:
     std::map<uint16_t, std::string*> ssTable;
     std::map<uint16_t, FTRecord*>    ftTable;
     std::map<uint16_t, SGRecord*>    sgTable;
-    // std::map<uint16_t, ENRecord*>    enTable;
-    // std::map<uint16_t, MTRecord*>    mtTable;
+    std::map<uint16_t, ENRecord*>    enTable;
+    std::map<uint16_t, MTRecord*>    mtTable;
 
     void dump();
     void dumpTable();

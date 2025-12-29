@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <memory>
 #include <cstdint>
 #include <type_traits>
 #include <string>
@@ -61,6 +60,10 @@ public:
     MesaBuffer(uint8_t* data, uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
 
     MesaBuffer range(uint32_t wordOffset, uint32_t WordSize);
+
+    uint8_t* data() {
+        return myData;
+    }
 
     uint32_t byteSize() {
         return myByteSize;
@@ -133,10 +136,10 @@ public:
 
 class MesaBufferArray : public MesaBuffer {
 protected:
-    std::shared_ptr<uint8_t> myPointer;
+    uint8_t* myPointer;
 
 public:
-    MesaBufferArray(std::vector<uint8_t>& vector) : MesaBuffer(new uint8_t[vector.size()], vector.size()), myPointer(std::shared_ptr<uint8_t>(myData)) {
+    MesaBufferArray(std::vector<uint8_t>& vector) : MesaBuffer(new uint8_t[vector.size()], vector.size()), myPointer(myData) {
         std::copy(vector.begin(), vector.end(), myData); // copy vector to myData
     }
 };

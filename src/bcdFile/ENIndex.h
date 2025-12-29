@@ -30,25 +30,30 @@
 
 
 //
-// BCDFile.h
+// ENIndex.h
 //
 
 #pragma once
 
-#include <string>
+#include <cstdint>
 
-#include "MesaBuffer.h"
+#include "../util/Util.h"
 
-class BCDFile {
-    MesaBuffer mb;
-    bool       bcdFile;
-public:
-    BCDFile(const std::string& path);
+#include "Index.h"
 
-    bool isBCDFile() const {
-        return bcdFile;
+// forward declaration
+struct ENRecord;
+
+// ENIndex: TYPE = Table.Base RELATIVE POINTER [0..tLimit] TO ENRecord;
+// ENNull: ENIndex = LAST[ENIndex];
+struct ENIndex : public Index<"en", ENRecord> {
+    static const constexpr uint16_t EN_NULL = T_LIMIT;
+
+    bool isNull() const {
+        return index() == EN_NULL;
     }
-    const MesaBuffer& mesaBuffer() const {
-        return mb;
+    std::string toString() const override {
+        if (isNull()) return std_sprintf("%s-NULL", prefix);
+        return Index::toString();
     }
 };

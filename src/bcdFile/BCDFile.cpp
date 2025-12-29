@@ -40,7 +40,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 #include "BCD.h"
 //#include "Symbols.h"
@@ -48,24 +48,10 @@ static const Logger logger(__FILE__);
 #include "BCDFile.h"
 
 BCDFile::BCDFile(const std::string& path) {
-    std::ifstream ifs(path, std::ios::binary);
-
-    // Stop eating new lines in binary mode!!!
-    ifs.unsetf(std::ios::skipws);
-
-    // get its size:
-    std::streampos fileSize;
-
-    ifs.seekg(0, std::ios::end);
-    fileSize = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-
     std::vector<uint8_t> vector;
     ::readFile(path, vector);
 
     mb = MesaBufferFile(path, vector);
-
     auto wordVersionID = mb.get16();
 
     logger.info("wordVersionID  %d", wordVersionID);

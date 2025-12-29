@@ -35,11 +35,9 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "../util/Util.h"
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 #include "Timestamp.h"
 #include "NameRecord.h"

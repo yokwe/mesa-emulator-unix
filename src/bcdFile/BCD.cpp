@@ -38,12 +38,22 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/MesaBuffer.h"
+#include "MesaBuffer.h"
 
 #include "../mesa/Pilot.h"
 
 #include "BCD.h"
 #include "Symbol.h"
+
+#include "ENIndex.h"
+#include "ENRecord.h"
+#include "MTIndex.h"
+#include "MTRecord.h"
+#include "FTIndex.h"
+#include "FTRecord.h"
+#include "SGIndex.h"
+#include "SGRecord.h"
+#include "Timestamp.h"
 
 MesaBuffer& BCD::read(MesaBuffer& bb) {
     bb.pos(0);
@@ -125,7 +135,7 @@ void BCD::dump() {
     logger.info("ssTable  %d", ssTable.size());
     logger.info("ftTable  %d", ftTable.size());
     logger.info("sgTable  %d", sgTable.size());
-    // logger.info("enTable  %d", enTable.size());
+    logger.info("enTable  %d", enTable.size());
     // logger.info("mtTable  %d", mtTable.size());
 
 }
@@ -185,14 +195,14 @@ BCD BCD::getInstance(MesaBuffer& bb) {
     readTableSS(bb, bcd.ssOffset, bcd.ssLimit, bcd.ssTable);    
     readTable<FTRecord>(bb, bcd.ftOffset, bcd.ftLimit, bcd.ftTable);
     readTable<SGRecord>(bb, bcd.sgOffset, bcd.sgLimit, bcd.sgTable);
-    // readTable<ENRecord>(bb, bcd.enOffset, bcd.enLimit, bcd.enTable);
-    // readTable<MTRecord>(bb, bcd.mtOffset, bcd.mtLimit, bcd.mtTable);
+    readTable<ENRecord>(bb, bcd.enOffset, bcd.enLimit, bcd.enTable);
+    readTable<MTRecord>(bb, bcd.mtOffset, bcd.mtLimit, bcd.mtTable);
 
     NameRecord::setValue(bcd.ssTable);
     FTIndex::setValue(bcd.ftTable);
     SGIndex::setValue(bcd.sgTable);
-    // ENIndex::setValue(enTable);
-    // MTIndex::setValue(mtTable);
+    ENIndex::setValue(bcd.enTable);
+    MTIndex::setValue(bcd.mtTable);
 
     bcd.setSymbolOffset(bb);
 
@@ -200,11 +210,11 @@ BCD BCD::getInstance(MesaBuffer& bb) {
 }
 
 void BCD::dumpTable() {
-    for(const auto& e: ssTable) {
-        auto key = e.first;
-        auto value = e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
-    }
+    // for(const auto& e: ssTable) {
+    //     auto key = e.first;
+    //     auto value = e.second;
+    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
+    // }
     {
         int fileIndex = 0;
         for(const auto& e: ftTable) {
@@ -223,11 +233,11 @@ void BCD::dumpTable() {
     //     auto& value = *e.second;
     //     logger.info("%-8s  %s", std_sprintf("%s-%d", "en", key), value.toString());
     // }
-    // for(const auto& e: mtTable) {
-    //     auto key = e.first;
-    //     auto& value = *e.second;
-    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
-    // }
+    for(const auto& e: mtTable) {
+        auto key = e.first;
+        auto& value = *e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
+    }
 }
 
 

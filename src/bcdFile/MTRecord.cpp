@@ -30,25 +30,40 @@
 
 
 //
-// BCDFile.h
+// MTRecord.cpp
 //
 
-#pragma once
+#include <cstdint>
 
-#include <string>
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
 
 #include "MesaBuffer.h"
 
-class BCDFile {
-    MesaBuffer mb;
-    bool       bcdFile;
-public:
-    BCDFile(const std::string& path);
+#include "MTRecord.h"
 
-    bool isBCDFile() const {
-        return bcdFile;
-    }
-    const MesaBuffer& mesaBuffer() const {
-        return mb;
-    }
-};
+MesaBuffer& MTRecord::read(MesaBuffer& bb) {
+    uint16_t u8;
+    bb.read(name, file, config, code, sseg, links, u8, frameSize, entries, atoms);
+
+    linkLoc        = (LinkLocation)bitField(u8,  0, 1);
+    namedInstance  = (bool)bitField(u8,  2,  2);
+    initial        = (bool)bitField(u8,  3,  3);
+    boundsChecks   = (bool)bitField(u8,  4,  4);
+    nilChecks      = (bool)bitField(u8,  5,  5);
+    tableCompiled  = (bool)bitField(u8,  6,  6);
+    residentFrame  = (bool)bitField(u8,  7,  7);
+    crossJumped    = (bool)bitField(u8,  8,  8);
+    packageable    = (bool)bitField(u8,  9,  9);
+    packed         = (bool)bitField(u8, 10, 10);
+    linkspace      = (bool)bitField(u8, 11, 11);
+    spare0         = (bool)bitField(u8, 12, 12);
+    spare1         = (bool)bitField(u8, 13, 13);
+    spare2         = (bool)bitField(u8, 14, 14);
+    spare3         = (bool)bitField(u8, 15, 15);
+
+    return bb;
+}
+std::string MTRecord::toString() const {
+    return std_sprintf("[%s  %s  %s  %s]", name.toString(), file.toString(), code.toString(), sseg.toString());
+}

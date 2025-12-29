@@ -34,12 +34,12 @@
 //
 
 #include <string>
-#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <iterator>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include "MesaBuffer.h"
 
 #include "BCD.h"
 //#include "Symbols.h"
@@ -47,23 +47,39 @@ static const Logger logger(__FILE__);
 #include "BCDFile.h"
 
 BCDFile::BCDFile(const std::string& path) {
-    std::vector<uint8_t> vector;
-    ::readFile(path, vector);
+    std::ifstream ifs(path, std::ios::binary);
 
-    mb = MesaBufferFile(path, vector);
-    auto wordVersionID = mb.get16();
+    // Stop eating new lines in binary mode!!!
+    ifs.unsetf(std::ios::skipws);
 
-    logger.info("wordVersionID  %d", wordVersionID);
-    // logger.info("wrodSYM  %d", wordSYM);
+    // get its size:
+    ifs.seekg(0, std::ios::end);
+    mySize = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
 
-    bcdFile = (wordVersionID == BCD::VersionID);
-    mb.pos(0);
+    myData = new uint8_t[mySize];
 
-    logger.info("path     %s", path);
-    if (bcdFile) {
-        logger.info("This is bcd file.");
-    } else {
-        logger.error("This is not bcd file");
+    // read the data:
+    std::copy(
+        std::istream_iterator<uint8_t>(ifs),
+        std::istream_iterator<uint8_t>(),
+        myData);
+    
+    // sanity check
+    if (!isBCDFile()) {
+        logger.error("Not BCD file  %s", path);
         ERROR();
     }
 }
+
+BCDFile::~BCDFile() {
+    delete myData;
+}
+
+bool BCDFile::isBCDFile() const {
+    MesaBuffer bb(myData, mySize);
+    auto word0 = bb.get16();
+    logger.info("word0  %d", word0);
+    return word0 == BCD::VersionID;
+}
+

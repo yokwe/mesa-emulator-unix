@@ -40,15 +40,28 @@
 #include "MesaBuffer.h"
 
 class BCDFile {
-    MesaBuffer mb;
-    bool       bcdFile;
+    std::string myPath;
+    uint8_t*    myData;
+    uint32_t    mySize;
+
 public:
     BCDFile(const std::string& path);
+    ~BCDFile();
 
-    bool isBCDFile() const {
-        return bcdFile;
+    bool isBCDFile() const;
+
+    const std::string& path() {
+        return myPath;
     }
-    const MesaBuffer& mesaBuffer() const {
-        return mb;
+    const uint8_t* data() const {
+        return myData;
+    }
+    uint32_t size() const {
+        return mySize;
+    }
+
+    MesaBuffer mesaBuffer() const {
+        MesaBuffer ret(myData, mySize);
+        return ret;
     }
 };

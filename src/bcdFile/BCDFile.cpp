@@ -35,7 +35,6 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);

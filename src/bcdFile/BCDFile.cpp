@@ -77,7 +77,7 @@ BCDFile::~BCDFile() {
 }
 
 bool BCDFile::isBCDFile() const {
-    MesaBuffer bb(myData, mySize);
+    MesaByteBuffer bb(myData, mySize);
     auto word0 = bb.get16();
     logger.info("word0  %d", word0);
     return word0 == BCD::VersionID;

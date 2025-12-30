@@ -13,7 +13,7 @@ target_sources(
         ENRecord.h
         FTIndex.h
         FTRecord.h
-        MesaBuffer.h
+        MesaByteBuffer.h
         MTRecord.h
         MTIndex.h
         NameRecord.h
@@ -25,7 +25,7 @@ target_sources(
         BCD.cpp
         BCDFile.cpp
         ENRecord.cpp
-        MesaBuffer.cpp
+        MesaByteBuffer.cpp
         MTRecord.cpp
         SGRecord.cpp
         Timestamp.cpp

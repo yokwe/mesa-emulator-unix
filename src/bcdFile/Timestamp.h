@@ -38,13 +38,13 @@
 #include <cstdint>
 #include <string>
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 #include "../util/Util.h"
 
 
 // TimeStamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
 // Null: TimeStamp = TimeStamp[net: 0, host: 0, time: 0];
-class Timestamp : public MesaBuffer::HasRead, public HasToString {
+class Timestamp : public MesaByteBuffer::HasRead, public HasToString {
     uint8_t  net;
     uint8_t  host;
     uint32_t time;
@@ -54,7 +54,7 @@ public:
     Timestamp(uint8_t net_, uint8_t host_, uint32_t time_) :  net(net_), host(host_), time(time_) {}
     Timestamp() : net(0), host(0), time(0) {}
 
-    MesaBuffer& read(MesaBuffer& bb) override {
+    MesaByteBuffer& read(MesaByteBuffer& bb) override {
         bb.read(net, host, time);
         return bb;
     }

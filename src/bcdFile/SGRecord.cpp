@@ -40,7 +40,7 @@ static const Logger logger(__FILE__);
 
 #include "SGRecord.h"
 
-MesaBuffer& SGRecord::read(MesaBuffer& bb) {
+MesaByteBuffer& SGRecord::read(MesaByteBuffer& bb) {
     uint16_t word;
 
     bb.read(file, base, word);

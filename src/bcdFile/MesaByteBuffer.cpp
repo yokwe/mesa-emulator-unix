@@ -30,15 +30,15 @@
 
 
 //
-// MesaBuffer.cpp
+// MesaByteBuffer.cpp
 //
 
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
-void MesaBuffer::bytePos(uint32_t newValue) {
+void MesaByteBuffer::bytePos(uint32_t newValue) {
     if (newValue <= myByteSize) {
         myBytePos = newValue;
     } else {
@@ -49,7 +49,7 @@ void MesaBuffer::bytePos(uint32_t newValue) {
     }
 }
 
-uint8_t MesaBuffer::get8() {
+uint8_t MesaByteBuffer::get8() {
     const int readSize = 1;
 
     if ((myBytePos + readSize) <= myByteSize) {
@@ -64,7 +64,7 @@ uint8_t MesaBuffer::get8() {
         ERROR(); 
     }
 }
-uint16_t MesaBuffer::get16() {
+uint16_t MesaByteBuffer::get16() {
     const int readSize = 2;
 
     if ((myBytePos + readSize) <= myByteSize) {
@@ -79,7 +79,7 @@ uint16_t MesaBuffer::get16() {
         ERROR(); 
     }
 }
-uint32_t MesaBuffer::get32() {
+uint32_t MesaByteBuffer::get32() {
     const int readSize = 4;
 
     if ((myBytePos + readSize) <= myByteSize) {
@@ -98,7 +98,7 @@ uint32_t MesaBuffer::get32() {
     }
 }
 
-MesaBuffer MesaBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
+MesaByteBuffer MesaByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
     auto newByteOffset = wordOffset * 2;
     auto newByteSize = wordSize * 2;
 
@@ -111,5 +111,5 @@ MesaBuffer MesaBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
         logger.error("  oldByteSize    %u", oldByteSize);
         ERROR()
     }
-    return MesaBuffer(myData + newByteOffset, newByteSize);
+    return MesaByteBuffer(myData + newByteOffset, newByteSize);
 }

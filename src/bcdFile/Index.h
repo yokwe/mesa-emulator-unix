@@ -40,12 +40,12 @@
 
 #include "../util/Util.h"
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
 constexpr const uint16_t T_LIMIT = 0177777;
 
 template <StringLiteral PREFIX, class T>
-struct Index : public MesaBuffer::HasRead, public HasToString {
+struct Index : public MesaByteBuffer::HasRead, public HasToString {
     static inline const char* prefix = PREFIX;
 
     static inline std::set<Index*> indexSet;
@@ -184,7 +184,7 @@ public:
         }
     }
 
-    MesaBuffer& read(MesaBuffer& bb) override {
+    MesaByteBuffer& read(MesaByteBuffer& bb) override {
         uint16_t newValue;
         bb.read(newValue);
         index(newValue);

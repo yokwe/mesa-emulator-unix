@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
 class BCDFile {
     std::string myPath;
@@ -60,8 +60,8 @@ public:
         return mySize;
     }
 
-    MesaBuffer mesaBuffer() const {
-        MesaBuffer ret(myData, mySize);
+    MesaByteBuffer mesaByteBuffer() const {
+        MesaByteBuffer ret(myData, mySize);
         return ret;
     }
 };

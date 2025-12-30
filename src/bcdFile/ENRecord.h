@@ -41,14 +41,14 @@
 
 #include "../util/Util.h"
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
 
 // ENRecord: TYPE = RECORD [
 //   nEntries: CARDINAL, initialPC: ARRAY [0..0) OF PrincOps.BytePC];
-struct ENRecord : public MesaBuffer::HasRead, public HasToString {
+struct ENRecord : public MesaByteBuffer::HasRead, public HasToString {
     std::vector<uint16_t> initialPC;
 
-    MesaBuffer& read(MesaBuffer& bb) override;
+    MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
 };

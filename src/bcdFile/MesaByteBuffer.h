@@ -30,7 +30,7 @@
 
 
 //
-// MesaBuffer.h
+// MesaByteBuffer.h
 //
 
 #pragma once
@@ -41,7 +41,7 @@
 #include "../util/Util.h"
 
 
-class MesaBuffer {
+class MesaByteBuffer {
 protected:
     const uint8_t*  myData;
     const uint32_t  myByteSize;
@@ -56,9 +56,9 @@ public:
         return (uint8_t)(value >> 0);
     }
 
-    MesaBuffer(const uint8_t* data, const uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
+    MesaByteBuffer(const uint8_t* data, const uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
 
-    MesaBuffer range(uint32_t wordOffset, uint32_t WordSize);
+    MesaByteBuffer range(uint32_t wordOffset, uint32_t WordSize);
 
     const uint8_t* data() {
         return myData;
@@ -86,13 +86,13 @@ public:
     uint32_t get32();
 
     struct HasRead {
-        virtual MesaBuffer& read(MesaBuffer& bb) = 0;
+        virtual MesaByteBuffer& read(MesaByteBuffer& bb) = 0;
     };
-    MesaBuffer& read() {
+    MesaByteBuffer& read() {
         return *this;
     }
     template <class Head, class... Tail>
-    MesaBuffer& read(Head&& head, Tail&&... tail) {
+    MesaByteBuffer& read(Head&& head, Tail&&... tail) {
         constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
         constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
         constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
@@ -119,15 +119,15 @@ public:
         return read(std::forward<Tail>(tail)...);
     }
 
-    MesaBuffer& read(uint8_t& value) {
+    MesaByteBuffer& read(uint8_t& value) {
         value = get8();
         return *this;
     }
-    MesaBuffer& read(uint16_t& value) {
+    MesaByteBuffer& read(uint16_t& value) {
         value = get16();
         return *this;
     }
-    MesaBuffer& read(uint32_t& value) {
+    MesaByteBuffer& read(uint32_t& value) {
         value = get32();
         return *this;
     }

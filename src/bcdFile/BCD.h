@@ -38,7 +38,7 @@
 #include <cstdint>
 #include <string>
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
 #include "Timestamp.h"
 #include "FTIndex.h"
@@ -47,16 +47,16 @@
 #include "ENRecord.h"
 #include "MTRecord.h"
 
-class BCD : public MesaBuffer::HasRead {
-    MesaBuffer& read(MesaBuffer& bb) override;
-    void setSymbolOffset(MesaBuffer& bb);
+class BCD : public MesaByteBuffer::HasRead {
+    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    void setSymbolOffset(MesaByteBuffer& bb);
     
     uint32_t mySymbolOffset;
 
 public:
     static constexpr uint16_t VersionID = 6103;
 
-    static BCD getInstance(MesaBuffer& bb);
+    static BCD getInstance(MesaByteBuffer& bb);
 
 	uint16_t  versionIdent;
 	Timestamp version;

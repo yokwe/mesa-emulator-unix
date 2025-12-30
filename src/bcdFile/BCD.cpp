@@ -38,7 +38,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaBuffer.h"
+#include "MesaByteBuffer.h"
 
 #include "../mesa/Pilot.h"
 
@@ -55,7 +55,7 @@ static const Logger logger(__FILE__);
 #include "SGRecord.h"
 #include "Timestamp.h"
 
-MesaBuffer& BCD::read(MesaBuffer& bb) {
+MesaByteBuffer& BCD::read(MesaByteBuffer& bb) {
     bb.pos(0);
     bb.read(versionIdent);
     // sanity check
@@ -140,7 +140,7 @@ void BCD::dump() {
 
 }
 
-static void readTableSS(MesaBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
+static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
     logger.info("%s  %d  %d", __FUNCTION__, offset, limit);
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
@@ -163,7 +163,7 @@ static void readTableSS(MesaBuffer& baseBB, uint32_t offset, uint32_t limit, std
 }
 
 template<class T>
-static void readTable(MesaBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
+static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
     logger.info("%s  %d  %d", __FUNCTION__, offset, limit);
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
@@ -187,7 +187,7 @@ static void readTable(MesaBuffer& baseBB, uint32_t offset, uint32_t limit, std::
 }
 
 
-BCD BCD::getInstance(MesaBuffer& bb) {
+BCD BCD::getInstance(MesaByteBuffer& bb) {
     BCD bcd;
 
     bcd.read(bb);
@@ -254,7 +254,7 @@ void BCD::dumpIndex() {
     logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
 }
 
-void BCD::setSymbolOffset(MesaBuffer& bb) {
+void BCD::setSymbolOffset(MesaByteBuffer& bb) {
     mySymbolOffset = 0;
     if (nModules == 0) {
         // try Symbols::ALTO_BIAS

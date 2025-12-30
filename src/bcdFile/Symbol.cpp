@@ -1,0 +1,127 @@
+/*******************************************************************************
+ * Copyright (c) 2025, Yasuhiro Hasegawa
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *******************************************************************************/
+
+
+//
+// Symbol.cpp
+//
+
+#include <cstdint>
+
+#include "../util/Util.h"
+static const Logger logger(__FILE__);
+
+#include "MesaByteBuffer.h"
+
+#include "Symbol.h"
+
+Symbol Symbol::getInstance(MesaByteBuffer bb) {
+	// sanity check
+	checkVersionIdent(bb);
+
+	Symbol ret;
+
+	ret.read(bb);
+
+	return ret;
+}
+
+void Symbol::checkVersionIdent(MesaByteBuffer &bb) {
+    auto oldPos = bb.pos();
+    auto word = bb.get16();
+    bb.pos(oldPos);
+    if (word == Symbol::VersionID) return;
+    logger.error("Unexpected version  %d", word);
+    ERROR()
+}
+
+
+MesaByteBuffer& Symbol::read(MesaByteBuffer& bb) {
+	uint16_t u10;
+
+	bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);
+	bb.read(hvBlock, htBlock, ssBlock, outerPackBlock, innerPackBlock, constBlock);
+	bb.read(seBlock, ctxBlock, mdBlock, bodyBlock, extBlock, treeBlock, litBlock, sLitBlock, epMapBlock, spareBlock);
+	bb.read(fgRelPgBase, fgPgCount);
+
+	definitionsFile = bitField(u10, 15);
+
+	directoryCtx.index(bitField(u10, 1, 15));
+
+	return bb;
+}
+
+void Symbol::dump() {
+    logger.info("versionIdent    %5d", versionIdent);
+	logger.info("version            %s", version.toString());
+	logger.info("creator            %s", creator.toString());
+	logger.info("sourceVersion      %s", creator.toString());
+	logger.info("definitionsFile    %s", definitionsFile ? "YES" : "NO");
+	logger.info("directoryCtx       %s", directoryCtx.Index::toString());
+	logger.info("importCtx          %s", importCtx.Index::toString());
+	logger.info("outerCtx           %s", outerCtx.Index::toString());
+
+	logger.info("hvBlock         %5d  %5d", hvBlock.offset, hvBlock.size);
+	logger.info("htBlock         %5d  %5d", htBlock.offset, htBlock.size);
+	logger.info("ssBlock         %5d  %5d", ssBlock.offset, ssBlock.size);
+	logger.info("outerPackBlock  %5d  %5d", outerPackBlock.offset, outerPackBlock.size);
+	logger.info("innerPackBlock  %5d  %5d", innerPackBlock.offset, innerPackBlock.size);
+	logger.info("constBlock      %5d  %5d", constBlock.offset, constBlock.size);
+	logger.info("seBlock         %5d  %5d", seBlock.offset, seBlock.size);
+	logger.info("ctxBlock        %5d  %5d", ctxBlock.offset, ctxBlock.size);
+	logger.info("mdBlock         %5d  %5d", mdBlock.offset, mdBlock.size);
+	logger.info("bodyBlock       %5d  %5d", bodyBlock.offset, bodyBlock.size);
+	logger.info("extBlock        %5d  %5d", extBlock.offset, extBlock.size);
+	logger.info("treeBlock       %5d  %5d", treeBlock.offset, treeBlock.size);
+	logger.info("litBlock        %5d  %5d", litBlock.offset, litBlock.size);
+	logger.info("sLitBlock       %5d  %5d", sLitBlock.offset, sLitBlock.size);
+	logger.info("epMapBlock      %5d  %5d", epMapBlock.offset, epMapBlock.size);
+	logger.info("spareBlock      %5d  %5d", spareBlock.offset, spareBlock.size);
+	logger.info("fgRelPgBase     %5d", fgRelPgBase);
+	logger.info("fgPgCount       %5d", fgPgCount);
+
+	// logger.info("btTable         %5d", btTable.size());
+	// logger.info("ctxTable        %5d", ctxTable.size());
+	// logger.info("extTable        %5d", extTable.size());
+	// logger.info("htTable         %5d", htTable.size());
+	// logger.info("ltTable         %5d", ltTable.size());
+	// logger.info("mdTable         %5d", mdTable.size());
+	// logger.info("seTable         %5d", seTable.size());
+	// logger.info("treeTable       %5d", treeTable.size());
+
+	// BTIndex::stats();
+	// CTXIndex::stats();
+	// EXTIndex::stats();
+	// HTIndex::stats();
+	// LTIndex::stats();
+	// MDIndex::stats();
+	// SEIndex::stats();
+	// TreeIndex::stats();
+}

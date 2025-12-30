@@ -48,15 +48,11 @@
 #include "MTRecord.h"
 
 class BCD : public MesaByteBuffer::HasRead {
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
-    void setSymbolOffset(MesaByteBuffer& bb);
-    
-    uint32_t mySymbolOffset;
-
 public:
     static constexpr uint16_t VersionID = 6103;
 
     static BCD getInstance(MesaByteBuffer& bb);
+    static void checkVersionIdent(MesaByteBuffer& bb);
 
 	uint16_t  versionIdent;
 	Timestamp version;
@@ -109,11 +105,21 @@ public:
     void dumpTable();
     void dumpIndex();
 
-    bool hasSymbol() {
-        return mySymbolOffset;
+    struct Range {
+        const uint16_t offset;
+        const uint16_t size;
+
+        Range(uint16_t offset_, uint16_t size_) : offset(offset_), size(size_) {}
+    };
+    const std::vector<Range>& symbolRange() {
+        return mySymbolRange;
     }
-    uint32_t symbolOffset() {
-        return mySymbolOffset;
+    bool hasSymbol() {
+        return !mySymbolRange.empty();
     }
 
+private:
+    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+
+    std::vector<Range> mySymbolRange;
 };

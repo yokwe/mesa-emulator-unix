@@ -9,6 +9,7 @@ target_sources(
 	PUBLIC
 		BCD.h
 		BCDFile.h
+        CTXIndex.h
         ENIndex.h
         ENRecord.h
         FTIndex.h
@@ -20,6 +21,7 @@ target_sources(
         SGIndex.h
         SGRecord.h
         Symbol.h
+        Symbol.h
         Timestamp.h
     PRIVATE
         BCD.cpp
@@ -28,6 +30,7 @@ target_sources(
         MesaByteBuffer.cpp
         MTRecord.cpp
         SGRecord.cpp
+        Symbol.cpp
         Timestamp.cpp
 )
 

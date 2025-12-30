@@ -37,12 +37,71 @@
 
 #include <cstdint>
 
-class Symbol {
+#include "../util/Util.h"
+
+#include "MesaByteBuffer.h"
+#include "Timestamp.h"
+#include "CTXIndex.h"
+
+//   WordOffset: TYPE = CARDINAL;
+//   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
+struct BlockDescriptor : public MesaByteBuffer::HasRead, public HasToString {
+	uint16_t offset;
+	uint16_t size;
+
+	BlockDescriptor(): offset(0), size(0) {}
+
+	MesaByteBuffer& read(MesaByteBuffer& bb) override {
+		bb.read(offset, size);
+		return bb;
+	}
+	std::string toString() const override {
+		return std_sprintf("[%5d %5d]", offset, size);
+	}
+};
+
+class Symbol : public MesaByteBuffer::HasRead {
+    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+
 public:
     // VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
     static const uint16_t VersionID = 8140;
 
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
     static const uint16_t ALTO_BIAS = 1;
+
+	static Symbol getInstance(MesaByteBuffer bb);
+	static void checkVersionIdent(MesaByteBuffer& bb);
+
+    uint16_t        versionIdent;
+	Timestamp       version; 
+	Timestamp       creator;
+	Timestamp       sourceVersion;
+	bool            definitionsFile;
+	CTXIndex        directoryCtx;
+	CTXIndex        importCtx;
+	CTXIndex        outerCtx;
+	BlockDescriptor hvBlock;
+	BlockDescriptor htBlock;
+	BlockDescriptor ssBlock;
+	BlockDescriptor outerPackBlock;
+	BlockDescriptor innerPackBlock;
+	BlockDescriptor constBlock;
+	BlockDescriptor seBlock;
+	BlockDescriptor ctxBlock;
+	BlockDescriptor mdBlock;
+	BlockDescriptor bodyBlock;
+	BlockDescriptor extBlock;
+	BlockDescriptor treeBlock;
+	BlockDescriptor litBlock;
+	BlockDescriptor sLitBlock;
+	BlockDescriptor epMapBlock;
+	BlockDescriptor spareBlock;
+	uint16_t        fgRelPgBase;
+	uint16_t        fgPgCount;
+
+    void dump();
+    // void dumpTable();
+    // void dumpIndex();
 
 };

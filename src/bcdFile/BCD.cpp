@@ -132,11 +132,14 @@ void BCD::dump() {
     BCD_TABLE(at)  // atom table
     BCD_TABLE(ap)  // atom print table
 
-    logger.info("ssTable  %d", ssTable.size());
-    logger.info("ftTable  %d", ftTable.size());
-    logger.info("sgTable  %d", sgTable.size());
-    logger.info("enTable  %d", enTable.size());
+    logger.info("ssTable        %5d", ssTable.size());
+    logger.info("ftTable        %5d", ftTable.size());
+    logger.info("sgTable        %5d", sgTable.size());
+    logger.info("enTable        %5d", enTable.size());
     // logger.info("mtTable  %d", mtTable.size());
+	logger.info("nDummies       %5d", nDummies);
+
+    logger.info("symbolRange    %5d", this->mySymbolRange.size());
 
 }
 
@@ -188,6 +191,9 @@ static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, s
 
 
 BCD BCD::getInstance(MesaByteBuffer& bb) {
+    // sanity check
+    checkVersionIdent(bb);
+
     BCD bcd;
 
     bcd.read(bb);
@@ -204,9 +210,47 @@ BCD BCD::getInstance(MesaByteBuffer& bb) {
     ENIndex::setValue(bcd.enTable);
     MTIndex::setValue(bcd.mtTable);
 
-    bcd.setSymbolOffset(bb);
+    // build bcd.mySymbolRange
+    {
+        if (bcd.sgTable.empty()) {
+            uint32_t offset = Symbol::ALTO_BIAS * Environment::wordsPerPage;
+            uint32_t size = bb.size() - offset;
+
+            // sanity check
+            bb.pos(offset);
+            Symbol::checkVersionIdent(bb);
+
+            bcd.mySymbolRange.emplace_back(offset, size);
+            logger.info("mySymbolRange  A  %5d  %5d", offset, size);
+        } else {
+            for(const auto& e: bcd.sgTable) {
+                SGRecord& sgRecord  = *e.second;
+                if (!sgRecord.file.isSelf()) continue;
+                if (sgRecord.segClass != SGRecord::SegClass::SYMBOLS) continue;
+
+                uint32_t offset = (sgRecord.base - Symbol::ALTO_BIAS) * Environment::wordsPerPage;
+                uint32_t size   = sgRecord.pages * Environment::wordsPerPage;
+
+                // sanity check
+                bb.pos(offset);
+                Symbol::checkVersionIdent(bb);
+    
+                bcd.mySymbolRange.emplace_back(offset, size);
+                logger.info("mySymbolRange  B  %5d  %5d", offset, size);
+            }
+        }
+    }
 
     return bcd;
+}
+
+void BCD::checkVersionIdent(MesaByteBuffer &bb) {
+    auto oldPos = bb.pos();
+    auto word = bb.get16();
+    bb.pos(oldPos);
+    if (word == BCD::VersionID) return;
+    logger.error("Unexpected version  %d", word);
+    ERROR()
 }
 
 void BCD::dumpTable() {
@@ -252,42 +296,4 @@ void BCD::dumpIndex() {
     logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
     logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
     logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
-}
-
-void BCD::setSymbolOffset(MesaByteBuffer& bb) {
-    mySymbolOffset = 0;
-    if (nModules == 0) {
-        // try Symbols::ALTO_BIAS
-        uint32_t offset = Symbol::ALTO_BIAS * Environment::wordsPerPage;;
-        bb.pos(offset);
-        auto word = bb.get16();
-        if (word == Symbol::VersionID) mySymbolOffset = offset;
-        // sanity check
-        if (mySymbolOffset == 0) ERROR()
-    } else if (nModules == 1) {
-         // try symbol segemtn
-        int count = 0;
-        for(const auto& e: sgTable) {
-            const SGRecord& sgRecord = *e.second;
-            if (!sgRecord.file.isSelf()) continue;
-            
-            if (sgRecord.segClass == SGRecord::SegClass::SYMBOLS) {
-                uint32_t offset = (sgRecord.base - Symbol::ALTO_BIAS) * Environment::wordsPerPage;
-                bb.pos(offset);
-                auto word = bb.get16();
-                if (word == Symbol::VersionID) mySymbolOffset = offset;
-                count++;
-            }
-        }
-        // sanity check
-        if (count != 1) {
-            logger.error("Unexpected count");
-            logger.error("sgOffset %d", sgOffset);
-            logger.error("sgListm  %d", sgLimit);
-            logger.error("count    %d", count);
-            ERROR()
-        }
-    } else {
-        // more than one module
-    }
 }

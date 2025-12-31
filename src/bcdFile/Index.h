@@ -96,7 +96,7 @@ struct Index : public MesaByteBuffer::HasRead, public HasToString {
             if (e->_value) countHasValue++;
         }
 
-        logger.info("index  %-3s  %5d / %5d / %5d", prefix, countHasValue, countHasIndex, indexSet.size());
+        logger.info("index  %-4s  %5d / %5d / %5d", prefix, countHasValue, countHasIndex, indexSet.size());
     }
 
 private:

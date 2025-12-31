@@ -30,31 +30,39 @@
 
 
 //
-// HTIndex.h
+// MDRecord.h
 //
 
 #pragma once
 
-#include <cstdint>
-
 #include "../util/Util.h"
 
-#include "Index.h"
+#include "MesaByteBuffer.h"
 
-// forward declaration
-struct HTRecord;
+#include "Timestamp.h"
+#include "HTIndex.h"
+#include "CTXIndex.h"
 
-// HTIndex: TYPE = CARDINAL [0..Limit/2);
-// HTNull: HTIndex = FIRST[HTIndex];
-struct HTIndex : public Index<"ht", HTRecord> {
-    static const constexpr uint16_t HT_NULL = 0;
-    
-    bool isNull() const {
-        return index() == HT_NULL;
-    }
-    std::string toString() const override {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
-    }
-    const std::string& toValue() const;
+
+// MDRecord: TYPE = RECORD [
+//   stamp: TimeStamp.Stamp,
+//   moduleId: HTIndex,		-- hash entry for module name
+//   fileId: HTIndex,		-- hash entry for file name
+//   shared: BOOLEAN,		-- overrides PRIVATE, etc.
+//   exported: BOOLEAN,
+//   ctx: IncludedCTXIndex,	-- context of copied entries
+//   defaultImport: CTXIndex,	-- unnamed imported instance
+//   file: FileIndex];		-- associated file
+struct MDRecord : public MesaByteBuffer::HasRead, public HasToString {
+    Timestamp  stamp;
+    HTIndex    moduleId;
+    HTIndex    fileId;
+    bool       shared;
+    bool       exported;
+    CTXIndex   ctx;
+    CTXIndex   defaultImport;
+    uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
+
+    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    std::string toString() const override;
 };

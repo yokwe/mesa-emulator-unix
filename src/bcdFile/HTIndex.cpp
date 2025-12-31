@@ -30,31 +30,15 @@
 
 
 //
-// HTIndex.h
+// HTIndex.cpp
 //
 
-#pragma once
-
-#include <cstdint>
-
 #include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include "Index.h"
+#include "HTRecord.h"
+#include "HTIndex.h"
 
-// forward declaration
-struct HTRecord;
-
-// HTIndex: TYPE = CARDINAL [0..Limit/2);
-// HTNull: HTIndex = FIRST[HTIndex];
-struct HTIndex : public Index<"ht", HTRecord> {
-    static const constexpr uint16_t HT_NULL = 0;
-    
-    bool isNull() const {
-        return index() == HT_NULL;
-    }
-    std::string toString() const override {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
-    }
-    const std::string& toValue() const;
-};
+const std::string& HTIndex::toValue() const {
+    return value().toValue();
+}

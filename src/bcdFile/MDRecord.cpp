@@ -30,31 +30,32 @@
 
 
 //
-// HTIndex.h
+// MDRecord.cpp
 //
-
-#pragma once
 
 #include <cstdint>
 
 #include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include "Index.h"
+#include "MesaByteBuffer.h"
 
-// forward declaration
-struct HTRecord;
+#include "MDRecord.h"
 
-// HTIndex: TYPE = CARDINAL [0..Limit/2);
-// HTNull: HTIndex = FIRST[HTIndex];
-struct HTIndex : public Index<"ht", HTRecord> {
-    static const constexpr uint16_t HT_NULL = 0;
-    
-    bool isNull() const {
-        return index() == HT_NULL;
-    }
-    std::string toString() const override {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
-    }
-    const std::string& toValue() const;
-};
+MesaByteBuffer& MDRecord::read(MesaByteBuffer& bb) {
+    uint16_t word;
+    bb.read(stamp, moduleId, word, ctx, defaultImport, fileIndex);
+
+    fileId.index(bitField(word, 0, 12));
+    shared   = bitField(word, 13);
+    exported = bitField(word, 14, 15);
+
+    return bb;
+}
+
+std::string MDRecord::toString() const {
+    return std_sprintf("[[%s]  %s  %s  %s%s  %s  %s  %5d]",
+        stamp.toString(), moduleId.toValue(), fileId.toValue(),
+        shared ? "S" : "", exported ? "E" : "", ctx.Index::toString(), defaultImport.Index::toString(), fileIndex);
+}
+

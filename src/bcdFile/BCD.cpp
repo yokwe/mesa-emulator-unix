@@ -253,12 +253,17 @@ void BCD::checkVersionIdent(MesaByteBuffer &bb) {
     ERROR()
 }
 
+template <class T>
+static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
+    for(const auto& e: map) {
+        auto key = e.first;
+        auto value = e.second;
+        logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
+    }
+}
+
 void BCD::dumpTable() {
-    // for(const auto& e: ssTable) {
-    //     auto key = e.first;
-    //     auto value = e.second;
-    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "ss", key), value);
-    // }
+    // ::dumpTable("ft", ftTable);
     {
         int fileIndex = 0;
         for(const auto& e: ftTable) {
@@ -267,21 +272,9 @@ void BCD::dumpTable() {
             logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value.toString());
         }
     }
-    for(const auto& e: sgTable) {
-        auto key = e.first;
-        auto& value = *e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "sg", key), value.toString());
-    }
-    // for(const auto& e: enTable) {
-    //     auto key = e.first;
-    //     auto& value = *e.second;
-    //     logger.info("%-8s  %s", std_sprintf("%s-%d", "en", key), value.toString());
-    // }
-    for(const auto& e: mtTable) {
-        auto key = e.first;
-        auto& value = *e.second;
-        logger.info("%-8s  %s", std_sprintf("%s-%d", "mt", key), value.toString());
-    }
+    ::dumpTable("sg", sgTable);
+    // ::dumpTable("en", enTable);
+    ::dumpTable("mt", mtTable);
 }
 
 void BCD::dumpIndex() {

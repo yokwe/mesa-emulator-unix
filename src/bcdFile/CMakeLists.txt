@@ -14,6 +14,8 @@ target_sources(
         ENRecord.h
         FTIndex.h
         FTRecord.h
+        HTIndex.h
+        HTRecord.h
         MesaByteBuffer.h
         MTRecord.h
         MTIndex.h
@@ -27,6 +29,7 @@ target_sources(
         BCD.cpp
         BCDFile.cpp
         ENRecord.cpp
+        HTRecord.cpp
         MesaByteBuffer.cpp
         MTRecord.cpp
         SGRecord.cpp

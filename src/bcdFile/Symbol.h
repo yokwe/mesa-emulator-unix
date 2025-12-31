@@ -42,6 +42,7 @@
 #include "MesaByteBuffer.h"
 #include "Timestamp.h"
 #include "CTXIndex.h"
+#include "HTRecord.h"
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -62,6 +63,9 @@ struct BlockDescriptor : public MesaByteBuffer::HasRead, public HasToString {
 
 class Symbol : public MesaByteBuffer::HasRead {
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
+
+	std::string getSS(MesaByteBuffer& bb);
+	void readTableHT(MesaByteBuffer& bb);
 
 public:
     // VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa
@@ -100,8 +104,12 @@ public:
 	uint16_t        fgRelPgBase;
 	uint16_t        fgPgCount;
 
+	// contents of above table
+    std::map<uint16_t, HTRecord*>    htTable;
+
+
     void dump();
-    // void dumpTable();
+    void dumpTable();
     // void dumpIndex();
 
 };

@@ -149,6 +149,17 @@ void Symbol::dumpTable() {
 //	::dumpTable("tree", treeTable);
 }
 
+void Symbol::dumpIndex() {
+//	BTIndex::dump();
+//	CTXIndex::dump();
+//	HTIndex::dump();
+//	EXTIndex::dump();
+//	LTIndex::dump();
+//	MDIndex::dump();
+//	SEIndex::dump();
+//	TreeIndex::dump();
+}
+
 
 
 

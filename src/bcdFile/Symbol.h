@@ -77,32 +77,32 @@ public:
 	static Symbol getInstance(MesaByteBuffer bb);
 	static void checkVersionIdent(MesaByteBuffer& bb);
 
-    uint16_t        versionIdent;
-	Timestamp       version; 
-	Timestamp       creator;
-	Timestamp       sourceVersion;
+	uint16_t        versionIdent;    // version of symbol table structure
+	Timestamp       version;         // identifies object file
+	Timestamp       creator;         // identifies compiler
+	Timestamp       sourceVersion;   // identifies source file
 	bool            definitionsFile;
 	CTXIndex        directoryCtx;
 	CTXIndex        importCtx;
 	CTXIndex        outerCtx;
-	BlockDescriptor hvBlock;
-	BlockDescriptor htBlock;
-	BlockDescriptor ssBlock;
-	BlockDescriptor outerPackBlock;
-	BlockDescriptor innerPackBlock;
-	BlockDescriptor constBlock;
-	BlockDescriptor seBlock;
-	BlockDescriptor ctxBlock;
-	BlockDescriptor mdBlock;
-	BlockDescriptor bodyBlock;
-	BlockDescriptor extBlock;
-	BlockDescriptor treeBlock;
-	BlockDescriptor litBlock;
-	BlockDescriptor sLitBlock;
-	BlockDescriptor epMapBlock;
-	BlockDescriptor spareBlock;
-	uint16_t        fgRelPgBase;
-	uint16_t        fgPgCount;
+	BlockDescriptor hvBlock;         // hash vector
+	BlockDescriptor htBlock;         // hash table
+	BlockDescriptor ssBlock;         // packed string of all identifiers
+	BlockDescriptor outerPackBlock;  // outer pack
+	BlockDescriptor innerPackBlock;  // inner pack
+	BlockDescriptor constBlock;      // constant table
+	BlockDescriptor seBlock;         // semantic entry table
+	BlockDescriptor ctxBlock;        // context table
+	BlockDescriptor mdBlock;         // module table
+	BlockDescriptor bodyBlock;       // body table
+	BlockDescriptor extBlock;        // extension table
+	BlockDescriptor treeBlock;       // tree table
+	BlockDescriptor litBlock;        // literal table
+	BlockDescriptor sLitBlock;       // string literal table
+	BlockDescriptor epMapBlock;      // unused
+	BlockDescriptor spareBlock;      // unused
+	uint16_t        fgRelPgBase;     // starting page of fine grain table
+	uint16_t        fgPgCount;       // length of fine grain table
 
 	// contents of above table
     std::map<uint16_t, HTRecord*>    htTable;
@@ -110,6 +110,6 @@ public:
 
     void dump();
     void dumpTable();
-    // void dumpIndex();
+    void dumpIndex();
 
 };

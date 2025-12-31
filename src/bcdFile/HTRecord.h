@@ -56,7 +56,7 @@ struct HTRecord : public MesaByteBuffer::HasRead, public HasToString {
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
     
-    std::string toValue() const {
+    const std::string& toValue() const {
         return value;
     }
 };

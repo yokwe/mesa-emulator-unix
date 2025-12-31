@@ -255,9 +255,7 @@ void BCD::checkVersionIdent(MesaByteBuffer &bb) {
 
 template <class T>
 static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
-    for(const auto& e: map) {
-        auto key = e.first;
-        auto value = e.second;
+    for(const auto& [key, value]: map) {
         logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
     }
 }
@@ -266,10 +264,8 @@ void BCD::dumpTable() {
     // ::dumpTable("ft", ftTable);
     {
         int fileIndex = 0;
-        for(const auto& e: ftTable) {
-            auto key = e.first;
-            auto& value = *e.second;
-            logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value.toString());
+        for(const auto& [key, value]: ftTable) {
+            logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value->toString());
         }
     }
     ::dumpTable("sg", sgTable);

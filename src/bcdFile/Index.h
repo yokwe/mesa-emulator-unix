@@ -73,12 +73,11 @@ struct Index : public MesaByteBuffer::HasRead, public HasToString {
         indexSet.clear();
     }
     static void setValue(const std::map<uint16_t, T*>& valueMap) {
-        for(auto i = indexSet.begin(); i != indexSet.end(); i++) {
-            Index* p = *i;
+        for(const auto& p: indexSet) {
             if (p->noIndex) continue;
             auto index = p->_index;
             if (valueMap.contains(index)) {
-                p->_value   = valueMap.at(index);
+                p->_value = valueMap.at(index);
             }
         }
     }

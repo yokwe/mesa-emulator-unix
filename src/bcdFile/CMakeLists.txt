@@ -9,6 +9,8 @@ target_sources(
 	PUBLIC
 		BCD.h
 		BCDFile.h
+        BTIndex.h
+        BTRecord.h
         CTXIndex.h
         CTXRecord.h
         ENIndex.h
@@ -36,6 +38,7 @@ target_sources(
     PRIVATE
         BCD.cpp
         BCDFile.cpp
+        BTRecord.cpp
         CTXRecord.cpp
         ENRecord.cpp
         HTIndex.cpp

@@ -46,6 +46,7 @@
 //
 // forward declaration
 //
+struct BTRecord;
 struct HTRecord;
 struct MDRecord;
 struct CTXRecord;
@@ -109,7 +110,7 @@ public:
 	uint16_t        fgPgCount;       // length of fine grain table
 
 	// contents of above table
-	// std::map<uint16_t, BTRecord*>   btTable;
+	std::map<uint16_t, BTRecord*>   btTable;
 	std::map<uint16_t, CTXRecord*>  ctxTable;
 	// std::map<uint16_t, EXTRecord*>  extTable;
 	std::map<uint16_t, HTRecord*>   htTable;

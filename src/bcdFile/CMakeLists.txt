@@ -7,32 +7,36 @@ add_library(bcdFile STATIC)
 target_sources(
 	bcdFile
 	PUBLIC
-		BCD.h
-		BCDFile.h
+        BCD.h
+        BCDFile.h
         BTIndex.h
         BTRecord.h
         CTXIndex.h
         CTXRecord.h
         ENIndex.h
         ENRecord.h
+        EXTIndex.h
+        EXTRecord.h
         FTIndex.h
         FTRecord.h
         HTIndex.h
         HTRecord.h
+        Index.h
         LTIndex.h
+        LTRecord.h
         MDIndex.h
         MDRecord.h
         MesaByteBuffer.h
-        MTRecord.h
         MTIndex.h
+        MTRecord.h
         NameRecord.h
         SEIndex.h
         SERecord.h
         SGIndex.h
         SGRecord.h
         Symbol.h
-        Symbol.h
         Timestamp.h
+        Tree.h
         TreeIndex.h
         Type.h
     PRIVATE
@@ -43,6 +47,7 @@ target_sources(
         ENRecord.cpp
         HTIndex.cpp
         HTRecord.cpp
+        LTRecord.cpp
         MDRecord.cpp
         MesaByteBuffer.cpp
         MTRecord.cpp
@@ -50,6 +55,7 @@ target_sources(
         SGRecord.cpp
         Symbol.cpp
         Timestamp.cpp
+        Tree.cpp
         Type.cpp
 )
 

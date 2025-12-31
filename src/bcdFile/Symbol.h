@@ -39,6 +39,7 @@
 
 #include "../util/Util.h"
 
+#include "LTRecord.h"
 #include "MesaByteBuffer.h"
 #include "Timestamp.h"
 #include "CTXIndex.h"
@@ -51,6 +52,9 @@ struct HTRecord;
 struct MDRecord;
 struct CTXRecord;
 struct SERecord;
+struct EXTRecord;
+struct LTRecord;
+struct TreeNode;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -112,12 +116,12 @@ public:
 	// contents of above table
 	std::map<uint16_t, BTRecord*>   btTable;
 	std::map<uint16_t, CTXRecord*>  ctxTable;
-	// std::map<uint16_t, EXTRecord*>  extTable;
+	std::map<uint16_t, EXTRecord*>  extTable;
 	std::map<uint16_t, HTRecord*>   htTable;
-	// std::map<uint16_t, LTRecord*>   ltTable;
+	std::map<uint16_t, LTRecord*>   ltTable;
 	std::map<uint16_t, MDRecord*>   mdTable;
 	std::map<uint16_t, SERecord*>   seTable;
-	// std::map<uint16_t, TreeNode*>   treeTable;
+	std::map<uint16_t, TreeNode*>   treeTable;
 
 
     void dump();

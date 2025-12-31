@@ -1,5 +1,4 @@
 
-
 /*******************************************************************************
  * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
@@ -32,7 +31,7 @@
 
 
 //
-// TreeIndex.h
+// EXTIndex.h
 //
 
 #pragma once
@@ -44,18 +43,20 @@
 #include "Index.h"
 
 // forward declaration
-struct TreeNode;
+struct EXTRecord;
 
-// Index: TYPE = Base RELATIVE POINTER [0..Limit) TO Tree.Node;
-// NullIndex: Tree.Index = FIRST[Tree.Index];
-struct TreeIndex : public Index<"tree", TreeNode> {
-    static const constexpr uint16_t TreeIndex_NULL = 0;
+// ExtIndex: TYPE = Base RELATIVE POINTER [0..Limit) TO ExtRecord;
+// ExtNull: ExtIndex = LAST[ExtIndex];
+struct EXTIndex : public Index<"ext", EXTRecord> {
+    static const constexpr uint16_t EXT_NULL = T_LIMIT - 1;
     
+    EXTIndex(uint16_t index_, const EXTRecord* value_) : Index(index_, value_) {}
+
     bool isNull() const {
-        return index() == TreeIndex_NULL;
+        return index() == EXT_NULL;
     }
-    std::string toString() const {
+    std::string toString() const override {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+        return Index::toString();    
     }
 };

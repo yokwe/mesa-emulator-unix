@@ -1,5 +1,3 @@
-
-
 /*******************************************************************************
  * Copyright (c) 2025, Yasuhiro Hasegawa
  * All rights reserved.
@@ -32,30 +30,40 @@
 
 
 //
-// TreeIndex.h
+// EXTRecord.h
 //
 
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include "../util/Util.h"
 
-#include "Index.h"
+#include "MesaByteBuffer.h"
 
-// forward declaration
-struct TreeNode;
+#include "Type.h"
+#include "SEIndex.h"
+#include "Tree.h"
 
-// Index: TYPE = Base RELATIVE POINTER [0..Limit) TO Tree.Node;
-// NullIndex: Tree.Index = FIRST[Tree.Index];
-struct TreeIndex : public Index<"tree", TreeNode> {
-    static const constexpr uint16_t TreeIndex_NULL = 0;
+//ExtRecord: PUBLIC TYPE = RECORD [
+//  type (0:0..1): Symbols.ExtensionType[value..default],
+//  sei (0:2..15): Symbols.ISEIndex,
+//  tree (1:0..15): Tree.Link]
+struct EXTRecord : public MesaByteBuffer::HasRead, public HasToString {
+    ExtensionType type;
+    SEIndex       sei;
+    TreeLink      tree;
     
-    bool isNull() const {
-        return index() == TreeIndex_NULL;
+    MesaByteBuffer& read(MesaByteBuffer& bb) override {
+        uint16_t u0;
+        bb.read(u0, tree);
+
+        type = (ExtensionType)bitField(u0, 0, 1);
+        sei.index(bitField(u0, 2, 15));
+        return bb;
     }
-    std::string toString() const {
-        if (isNull()) return std_sprintf("%s-NULL", prefix);
-        return Index::toString();
+    std::string toString() const override {
+        return std_sprintf("[%s  %s  %s]", ::toString(type), sei.toString(), tree.toString());
     }
 };

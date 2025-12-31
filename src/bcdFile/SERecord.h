@@ -48,362 +48,362 @@
 #include "HTIndex.h"
 
 //SERecord: TYPE = RECORD [
-//  mark3(0:0..0), mark4(0:1..1): BOOLEAN,
-//  body(0:2..95): SELECT seTag(0:2..2): * FROM
-//    id => [
-//      extended(0:3..3): BOOLEAN,
-//      public(0:4..4): BOOLEAN,
-//      idCtx(0:5..15): CTXIndex,
-//      immutable(1:0..0), constant(1:1..1): BOOLEAN,
-//      idType(1:2..15): SEIndex,
-//      idInfo(2:0..15): Unspec,
-//      idValue(3:0..15): Unspec,
-//      hash(4:0..12): HTIndex,
-//      linkSpace(4:13..13): BOOLEAN,
-//      ctxLink(4:14..31): SELECT linkTag(4:14..15): * FROM
-//        terminal => [],
-//        sequential => [],
-//        linked => [link(5:0..15): ISEIndex]
-//        ENDCASE],
-//    cons => [
-//      typeInfo(0:3..63): SELECT typeTag(0:3..7): TypeClass FROM
-//        mode => [],
-//        basic => [
-//          ordered(0:8..8): BOOLEAN,
-//          code(0:9..15): [0..16),
-//          length(1:0..15): BitLength],
-//        enumerated => [
-//          ordered(0:8..8), machineDep(0:9..9): BOOLEAN,
-//          unpainted(0:10..10): BOOLEAN,     -- un- for backward compatiblity
-//          sparse(0:11..15): BOOLEAN,
-//          valueCtx(1:0..15): CTXIndex,
-//          nValues(2:0..15): CARDINAL],
-//        record => [
-//          hints(0:8..15): RECORD [
-//            comparable(0:0..0), assignable(0:1..1): BOOLEAN,
-//            unifield(0:2..2), variant(0:3..3), privateFields(0:4..4): BOOLEAN,
-//            refField(0:5..5), default(0:6..6), voidable(0:7..7): BOOLEAN],
-//          length(1:0..15): BitLength,
-//          argument(2:0..0), monitored(2:1..1), machineDep(2:2..2): BOOLEAN,
-//          painted(2:3..3): BOOLEAN,
-//          fieldCtx(2:4..14): CTXIndex,
-//          linkPart(2:15..31): SELECT linkTag(2:15..15): * FROM
-//            notLinked => [],
-//            linked => [linkType(3:0..15): SEIndex]
-//            ENDCASE],
-//        ref => [
-//          counted(0:8..8), ordered(0:9..9), readOnly(0:10..10), list(0:11..11), var(0:12..12), basing(0:13..15): BOOLEAN,
-//          refType(1:0..15): SEIndex],
-//        array => [
-//          packed(0:8..15): BOOLEAN,
-//          indexType(1:0..15): SEIndex,
-//          componentType(2:0..15): SEIndex],
-//        arraydesc => [
-//          var(0:8..8), readOnly(0::9..15): BOOLEAN,
-//          describedType(1:0..15): SEIndex],
-//        transfer => [
-//          safe(0:8..8): BOOLEAN,
-//          mode(0:9..15): TransferMode,
-//          typeIn(1:0..15), typeOut(2:0..15): CSEIndex],
-//        definition => [
-//          named(0:8..15): BOOLEAN,
-//          defCtx(1:0..15): CTXIndex],
-//        union => [
-//          hints(0:8..11): RECORD [
-//            equalLengths(0:0..0): BOOLEAN,
-//            refField(0:1..1), default(0:2..2), voidable(0:3..3): BOOLEAN],
-//          overlaid(0:12..12), controlled(0:13..13), machineDep(0:14..15): BOOLEAN,
-//          caseCtx(1:0..15): CTXIndex,
-//          tagSei(2:0..15): ISEIndex],
-//        sequence => [
-//          packed(0:8..8): BOOLEAN,
-//          controlled(0:9..9), machineDep(0:10..15): BOOLEAN,
-//          tagSei(1:0..15): ISEIndex,
-//          componentType(2:0..15): SEIndex],
-//        relative => [
-//          baseType(1:0..15): SEIndex,
-//          offsetType(2:0..15): SEIndex,
-//          resultType(3:0..15): SEIndex],
-//        subrange => [
-//          filled(0:8..8), empty(0:9..15): BOOLEAN,
-//          rangeType(1:0..15): SEIndex,
-//          origin(2:0..15): INTEGER,
-//          range(3:0..15): CARDINAL],
-//        long, real => [rangeType(1:0..15): SEIndex],
-//        opaque => [
-//          lengthKnown(0:8..15): BOOLEAN,
-//          length(1:0..15): BitLength,
-//          id(2:0..15): ISEIndex],
-//        zone => [counted(0:8..8), mds(0:9..15): BOOLEAN],
-//        any => [],
-//        nil => [],
-//        bits => [length(1:0..31): BitCount],   -- placed here to avoid
-//        ENDCASE],         -- changing symbol version id's
-//    ENDCASE];
-
-struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
-    struct ID : public HasToString {
-        struct TERMINAL : public HasToString  {
-            std::string toString() const override {
-                return "";
-            }
-        };
-        struct SEQUENTIAL : public HasToString {
-            std::string toString() const override {
-                return "";
-            }
-        };
-        struct LINKED : public MesaByteBuffer::HasRead, public HasToString {
-            SEIndex link;
-
-            MesaByteBuffer& read(MesaByteBuffer& bb) override {
-                return bb.read(link);
-            }
-            std::string toString() const override {
-                return std_sprintf("%s", link.Index::toString());
-            }
-        };
-
-        enum class Tag : uint16_t {
-            ENUM_VALUE(Type, TERMINAL)
-            ENUM_VALUE(Type, SEQUENTIAL)
-            ENUM_VALUE(Type, LINKED)
-        };
-        static std::string toString(Tag value);
-
-        bool     extended;
-        bool     public_;
-        CTXIndex idCtx;
-        bool     immutable;
-        bool     constant;
-        SEIndex  idType;
-        uint16_t idInfo;
-        uint16_t idValue;
-        HTIndex  hash;
-        bool     linkSpace;
-        Tag      tag;
-        std::variant<TERMINAL, SEQUENTIAL, LINKED> variant;
-
-        ID() : tag(Tag::TERMINAL), variant(TERMINAL{}) {}
-
-        void read(uint16_t u0, MesaByteBuffer& bb);
-        std::string toString() const override;
-    };
-    struct CONS : public HasToString {
-        struct MODE : public HasToString {
-            std::string toString() const override {
-                return "";
-            }
-        };
-        struct BASIC : public HasToString {
-            bool     ordered;
-            uint16_t code;    // [0..16)
-            uint16_t length;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct ENUMERATED : public HasToString {
-            bool     ordered;
-            bool     machineDep;
-            bool     unpainted;
-            bool     sparse;
-            CTXIndex valueCtx;
-            uint16_t nValues;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct RECORD : public HasToString {
-            struct NOT_LINKED : public HasToString {
+    //  mark3(0:0..0), mark4(0:1..1): BOOLEAN,
+    //  body(0:2..95): SELECT seTag(0:2..2): * FROM
+    //    id => [
+    //      extended(0:3..3): BOOLEAN,
+    //      public(0:4..4): BOOLEAN,
+    //      idCtx(0:5..15): CTXIndex,
+    //      immutable(1:0..0), constant(1:1..1): BOOLEAN,
+    //      idType(1:2..15): SEIndex,
+    //      idInfo(2:0..15): Unspec,
+    //      idValue(3:0..15): Unspec,
+    //      hash(4:0..12): HTIndex,
+    //      linkSpace(4:13..13): BOOLEAN,
+    //      ctxLink(4:14..31): SELECT linkTag(4:14..15): * FROM
+    //        terminal => [],
+    //        sequential => [],
+    //        linked => [link(5:0..15): ISEIndex]
+    //        ENDCASE],
+    //    cons => [
+    //      typeInfo(0:3..63): SELECT typeTag(0:3..7): TypeClass FROM
+    //        mode => [],
+    //        basic => [
+    //          ordered(0:8..8): BOOLEAN,
+    //          code(0:9..15): [0..16),
+    //          length(1:0..15): BitLength],
+    //        enumerated => [
+    //          ordered(0:8..8), machineDep(0:9..9): BOOLEAN,
+    //          unpainted(0:10..10): BOOLEAN,     -- un- for backward compatiblity
+    //          sparse(0:11..15): BOOLEAN,
+    //          valueCtx(1:0..15): CTXIndex,
+    //          nValues(2:0..15): CARDINAL],
+    //        record => [
+    //          hints(0:8..15): RECORD [
+    //            comparable(0:0..0), assignable(0:1..1): BOOLEAN,
+    //            unifield(0:2..2), variant(0:3..3), privateFields(0:4..4): BOOLEAN,
+    //            refField(0:5..5), default(0:6..6), voidable(0:7..7): BOOLEAN],
+    //          length(1:0..15): BitLength,
+    //          argument(2:0..0), monitored(2:1..1), machineDep(2:2..2): BOOLEAN,
+    //          painted(2:3..3): BOOLEAN,
+    //          fieldCtx(2:4..14): CTXIndex,
+    //          linkPart(2:15..31): SELECT linkTag(2:15..15): * FROM
+    //            notLinked => [],
+    //            linked => [linkType(3:0..15): SEIndex]
+    //            ENDCASE],
+    //        ref => [
+    //          counted(0:8..8), ordered(0:9..9), readOnly(0:10..10), list(0:11..11), var(0:12..12), basing(0:13..15): BOOLEAN,
+    //          refType(1:0..15): SEIndex],
+    //        array => [
+    //          packed(0:8..15): BOOLEAN,
+    //          indexType(1:0..15): SEIndex,
+    //          componentType(2:0..15): SEIndex],
+    //        arraydesc => [
+    //          var(0:8..8), readOnly(0::9..15): BOOLEAN,
+    //          describedType(1:0..15): SEIndex],
+    //        transfer => [
+    //          safe(0:8..8): BOOLEAN,
+    //          mode(0:9..15): TransferMode,
+    //          typeIn(1:0..15), typeOut(2:0..15): CSEIndex],
+    //        definition => [
+    //          named(0:8..15): BOOLEAN,
+    //          defCtx(1:0..15): CTXIndex],
+    //        union => [
+    //          hints(0:8..11): RECORD [
+    //            equalLengths(0:0..0): BOOLEAN,
+    //            refField(0:1..1), default(0:2..2), voidable(0:3..3): BOOLEAN],
+    //          overlaid(0:12..12), controlled(0:13..13), machineDep(0:14..15): BOOLEAN,
+    //          caseCtx(1:0..15): CTXIndex,
+    //          tagSei(2:0..15): ISEIndex],
+    //        sequence => [
+    //          packed(0:8..8): BOOLEAN,
+    //          controlled(0:9..9), machineDep(0:10..15): BOOLEAN,
+    //          tagSei(1:0..15): ISEIndex,
+    //          componentType(2:0..15): SEIndex],
+    //        relative => [
+    //          baseType(1:0..15): SEIndex,
+    //          offsetType(2:0..15): SEIndex,
+    //          resultType(3:0..15): SEIndex],
+    //        subrange => [
+    //          filled(0:8..8), empty(0:9..15): BOOLEAN,
+    //          rangeType(1:0..15): SEIndex,
+    //          origin(2:0..15): INTEGER,
+    //          range(3:0..15): CARDINAL],
+    //        long, real => [rangeType(1:0..15): SEIndex],
+    //        opaque => [
+    //          lengthKnown(0:8..15): BOOLEAN,
+    //          length(1:0..15): BitLength,
+    //          id(2:0..15): ISEIndex],
+    //        zone => [counted(0:8..8), mds(0:9..15): BOOLEAN],
+    //        any => [],
+    //        nil => [],
+    //        bits => [length(1:0..31): BitCount],   -- placed here to avoid
+    //        ENDCASE],         -- changing symbol version id's
+    //    ENDCASE];
+    
+    struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
+        struct ID : public HasToString {
+            struct TERMINAL : public HasToString  {
+                std::string toString() const override {
+                    return "";
+                }
+            };
+            struct SEQUENTIAL : public HasToString {
                 std::string toString() const override {
                     return "";
                 }
             };
             struct LINKED : public MesaByteBuffer::HasRead, public HasToString {
-                SEIndex linkType;
-
-                MesaByteBuffer& read(MesaByteBuffer& bb) override;
+                SEIndex link;
+    
+                MesaByteBuffer& read(MesaByteBuffer& bb) override {
+                    return bb.read(link);
+                }
+                std::string toString() const override {
+                    return link.toString();
+                }
+            };
+    
+            enum class Tag : uint16_t {
+                ENUM_VALUE(Type, TERMINAL)
+                ENUM_VALUE(Type, SEQUENTIAL)
+                ENUM_VALUE(Type, LINKED)
+            };
+            static std::string toString(Tag value);
+    
+            bool     extended;
+            bool     public_;
+            CTXIndex idCtx;
+            bool     immutable;
+            bool     constant;
+            SEIndex  idType;
+            uint16_t idInfo;
+            uint16_t idValue;
+            HTIndex  hash;
+            bool     linkSpace;
+            Tag      tag;
+            std::variant<TERMINAL, SEQUENTIAL, LINKED> variant;
+    
+            ID() : tag(Tag::TERMINAL), variant(TERMINAL{}) {}
+    
+            void read(uint16_t u0, MesaByteBuffer& bb);
+            std::string toString() const override;
+        };
+        struct CONS : public HasToString {
+            struct MODE : public HasToString {
+                std::string toString() const override {
+                    return "";
+                }
+            };
+            struct BASIC : public HasToString {
+                bool     ordered;
+                uint16_t code;    // [0..16)
+                uint16_t length;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
                 std::string toString() const override;
             };
-
-            enum class Tag : uint16_t {NOT_LINKED, LINKED};
-            static std::string toString(Tag value);
+            struct ENUMERATED : public HasToString {
+                bool     ordered;
+                bool     machineDep;
+                bool     unpainted;
+                bool     sparse;
+                CTXIndex valueCtx;
+                uint16_t nValues;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct RECORD : public HasToString {
+                struct NOT_LINKED : public HasToString {
+                    std::string toString() const override {
+                        return "";
+                    }
+                };
+                struct LINKED : public MesaByteBuffer::HasRead, public HasToString {
+                    SEIndex linkType;
+    
+                    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+                    std::string toString() const override;
+                };
+    
+                enum class Tag : uint16_t {NOT_LINKED, LINKED};
+                static std::string toString(Tag value);
+                
+                uint16_t hints;
+                uint16_t length;
+                bool     argument;
+                bool     monitored;
+                bool     machindDep;
+                bool     painted;
+                CTXIndex fieldCtx;
+                Tag      tag;
+                std::variant<NOT_LINKED, LINKED> variant;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct REF : public HasToString {
+                bool    counted;
+                bool    ordered;
+                bool    readOnly;
+                bool    list;
+                bool    var;
+                bool    basing;
+                SEIndex refType;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct ARRAY : public HasToString {
+                bool    packed;
+                SEIndex indexType;
+                SEIndex componentType;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct ARRAYDESC : public HasToString {
+                bool    var;
+                bool    readOnly;
+                SEIndex describedType;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct TRANSFER : public HasToString {
+                bool         safe;
+                TransferMode mode;
+                SEIndex      typeIn;
+                SEIndex      typeOut;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct DEFINITION : public HasToString {
+                bool named;
+                CTXIndex defCtx;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct UNION : public HasToString {
+                uint16_t hints;
+                bool     overlaid;
+                bool     controlled;
+                bool     machineDep;
+                CTXIndex caseCtx;
+                SEIndex  tagSei;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct SEQUENCE : public HasToString {
+                bool    packed;
+                bool    controlled;
+                bool    machindDep;
+                SEIndex tagSei;
+                SEIndex componentType;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct RELATIVE : public HasToString {
+                SEIndex baseType;
+                SEIndex offsetType;
+                SEIndex resultType;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct SUBRANGE : public HasToString {
+                bool     filled;
+                bool     empty;
+                SEIndex  rangeType;
+                int16_t  origin;
+                uint16_t range;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct LONG : public HasToString {
+                SEIndex rangeType;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct REAL : public HasToString {
+                SEIndex rangeType;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct OPAQUE : public HasToString {
+                bool     lengthKnown;
+                uint16_t length;
+                SEIndex  id;
+                
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct ZONE : public HasToString {
+                bool counted;
+                bool mds;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb);
+                std::string toString() const override;
+            };
+            struct ANY : public HasToString {
+                std::string toString() const override {
+                    return "";
+                }
+            };
+            struct NIL : public HasToString {
+                std::string toString() const override {
+                    return "";
+                }
+            };
+            struct BITS : public HasToString {
+                u_int16_t length;
+    
+                void read(uint16_t u0, MesaByteBuffer& bb) {
+                    (void)u0;
+                    bb.read(length);
+                }
+                std::string toString() const override {
+                    return std_sprintf("%d", length);
+                }
+            };
             
-            uint16_t hints;
-            uint16_t length;
-            bool     argument;
-            bool     monitored;
-            bool     machindDep;
-            bool     painted;
-            CTXIndex fieldCtx;
-            Tag      tag;
-            std::variant<NOT_LINKED, LINKED> variant;
-
+            TypeClass tag;
+            std::variant<
+                MODE, BASIC, ENUMERATED, RECORD, REF,
+                ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
+                SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
+                OPAQUE, ZONE, ANY, NIL, BITS
+            > variant;
+    
             void read(uint16_t u0, MesaByteBuffer& bb);
             std::string toString() const override;
+    
+            TRANSFER toTRANSFER() const;
+            SUBRANGE toSUBRANGE() const;
         };
-        struct REF : public HasToString {
-            bool    counted;
-            bool    ordered;
-            bool    readOnly;
-            bool    list;
-            bool    var;
-            bool    basing;
-            SEIndex refType;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
+    
+        enum class Tag : uint16_t {
+            ENUM_VALUE(Tag, ID)
+            ENUM_VALUE(Tag, CONS)
         };
-        struct ARRAY : public HasToString {
-            bool    packed;
-            SEIndex indexType;
-            SEIndex componentType;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct ARRAYDESC : public HasToString {
-            bool    var;
-            bool    readOnly;
-            SEIndex describedType;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct TRANSFER : public HasToString {
-            bool         safe;
-            TransferMode mode;
-            SEIndex      typeIn;
-            SEIndex      typeOut;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct DEFINITION : public HasToString {
-            bool named;
-            CTXIndex defCtx;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct UNION : public HasToString {
-            uint16_t hints;
-            bool     overlaid;
-            bool     controlled;
-            bool     machineDep;
-            CTXIndex caseCtx;
-            SEIndex  tagSei;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct SEQUENCE : public HasToString {
-            bool    packed;
-            bool    controlled;
-            bool    machindDep;
-            SEIndex tagSei;
-            SEIndex componentType;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct RELATIVE : public HasToString {
-            SEIndex baseType;
-            SEIndex offsetType;
-            SEIndex resultType;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct SUBRANGE : public HasToString {
-            bool     filled;
-            bool     empty;
-            SEIndex  rangeType;
-            int16_t  origin;
-            uint16_t range;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct LONG : public HasToString {
-            SEIndex rangeType;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct REAL : public HasToString {
-            SEIndex rangeType;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct OPAQUE : public HasToString {
-            bool     lengthKnown;
-            uint16_t length;
-            SEIndex  id;
-            
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct ZONE : public HasToString {
-            bool counted;
-            bool mds;
-
-            void read(uint16_t u0, MesaByteBuffer& bb);
-            std::string toString() const override;
-        };
-        struct ANY : public HasToString {
-            std::string toString() const override {
-                return "";
-            }
-        };
-        struct NIL : public HasToString {
-            std::string toString() const override {
-                return "";
-            }
-        };
-        struct BITS : public HasToString {
-            u_int16_t length;
-
-            void read(uint16_t u0, MesaByteBuffer& bb) {
-                (void)u0;
-                bb.read(length);
-            }
-            std::string toString() const override {
-                return std_sprintf("%d", length);
-            }
-        };
-        
-        TypeClass tag;
-        std::variant<
-            MODE, BASIC, ENUMERATED, RECORD, REF,
-            ARRAY, ARRAYDESC, TRANSFER, DEFINITION, UNION,
-            SEQUENCE, RELATIVE, SUBRANGE, LONG, REAL,
-            OPAQUE, ZONE, ANY, NIL, BITS
-        > variant;
-
-        void read(uint16_t u0, MesaByteBuffer& bb);
+        static std::string toString(Tag value); // 01
+    
+        Tag                   tag;
+        std::variant<ID, CONS> body;
+    
+        SERecord() : tag(Tag::ID), body(ID{}) {}
+    
+        ID   toID()   const;
+        CONS toCONS() const;
+    
+        MesaByteBuffer& read(MesaByteBuffer& bb) override;
         std::string toString() const override;
-
-        TRANSFER toTRANSFER() const;
-        SUBRANGE toSUBRANGE() const;
     };
-
-    enum class Tag : uint16_t {
-        ENUM_VALUE(Tag, ID)
-        ENUM_VALUE(Tag, CONS)
-    };
-    static std::string toString(Tag value); // 01
-
-    Tag                   tag;
-    std::variant<ID, CONS> body;
-
-    SERecord() : tag(Tag::ID), body(ID{}) {}
-
-    ID   toID()   const;
-    CONS toCONS() const;
-
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
-    std::string toString() const override;
-};

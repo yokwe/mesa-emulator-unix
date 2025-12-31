@@ -56,6 +56,6 @@ MesaByteBuffer& HTRecord::read(MesaByteBuffer& bb) {
 
 std::string HTRecord::toString() const {
     // return std_sprintf("[%d  %d  %5d  %5d  %s]", anyInternal, anyPublic, link.index(), ssIndex, value);
-       return std_sprintf("[%d  %d  %-8s  %s]", anyInternal, anyPublic, link.toString(), value);
+       return std_sprintf("[[%s%s]  %-8s  %s]", anyInternal ? "I" : "_", anyPublic ? "P" : "_", link.toString(), value);
 }
 

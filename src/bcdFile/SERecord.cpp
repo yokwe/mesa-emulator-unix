@@ -109,7 +109,7 @@ std::string SERecord::ID::toString() const {
 
     return
         std_sprintf("[%s  [%s]  %-8s  %5d  %5d  %-24s  %s  %s]",
-            idCtx.Index::toString(),
+            idCtx.toString(),
             flags,
             idType.toString(),
             idInfo,
@@ -150,7 +150,7 @@ std::string SERecord::CONS::ENUMERATED::toString() const {
         unpainted  ? "U" : "_",
         sparse     ? "S" : "_");
     return std_sprintf("[[%s]  %s  %d]",
-        flags, valueCtx.Index::toString(), nValues);
+        flags, valueCtx.toString(), nValues);
 }
 
 
@@ -204,7 +204,7 @@ std::string SERecord::CONS::RECORD::toString() const {
 
     std::string linkPartString = ::toString(variant);
     return std_sprintf("[[%s] %d  %s  %s]",
-        flags, length, fieldCtx.Index::toString(), linkPartString);
+        flags, length, fieldCtx.toString(), linkPartString);
 }
 
 //
@@ -215,7 +215,7 @@ MesaByteBuffer& SERecord::CONS::RECORD::LINKED::read(MesaByteBuffer& bb) {
     return bb;
 }
 std::string SERecord::CONS::RECORD::LINKED::toString() const {
-    return std_sprintf("[%s]", linkType.Index::toString());
+    return std_sprintf("[%s]", linkType.toString());
 }
 
 
@@ -240,7 +240,7 @@ std::string SERecord::CONS::REF::toString() const {
         var ? "V" : "_",
         basing ? "B" : "_");
     return std_sprintf("[[%s]  %s]",
-        flags, refType.Index::toString());
+        flags, refType.toString());
 }
 
 
@@ -252,7 +252,7 @@ void SERecord::CONS::ARRAY::read(uint16_t u0, MesaByteBuffer& bb) {
     bb.read(indexType, componentType);
 }
 std::string SERecord::CONS::ARRAY::toString() const {
-    return std_sprintf("[%d  %s  %s]", packed, indexType.Index::toString(), componentType.Index::toString());
+    return std_sprintf("[%d  %s  %s]", packed, indexType.toString(), componentType.toString());
 }
 
 
@@ -269,7 +269,7 @@ std::string SERecord::CONS::ARRAYDESC::toString() const {
         var      ? "V" : "_",
         readOnly ? "R" : "_"
     );
-    return std_sprintf("[[%s]  %s]", flags, describedType.Index::toString());
+    return std_sprintf("[[%s]  %s]", flags, describedType.toString());
 }
 
 
@@ -283,7 +283,7 @@ void SERecord::CONS::TRANSFER::read(uint16_t u0, MesaByteBuffer& bb) {
 }
 std::string SERecord::CONS::TRANSFER::toString() const {
     return std_sprintf("[%s  %s  %s  %s]",
-        safe ? "S" : "_", ::toString(mode), typeIn.Index::toString(), typeOut.Index::toString());
+        safe ? "S" : "_", ::toString(mode), typeIn.toString(), typeOut.toString());
 }
 
 
@@ -295,7 +295,7 @@ void SERecord::CONS::DEFINITION::read(uint16_t u0, MesaByteBuffer& bb) {
     bb.read(defCtx);
 }
 std::string SERecord::CONS::DEFINITION::toString() const {
-    return std_sprintf("[%s  %s]", named ? "N" : "_", defCtx.Index::toString());
+    return std_sprintf("[%s  %s]", named ? "N" : "_", defCtx.toString());
 }
 
 
@@ -317,7 +317,7 @@ std::string SERecord::CONS::UNION::toString() const {
         machineDep ? "M" : "_"
     );
     return std_sprintf("[[%s]  %s  %s]",
-        flags, caseCtx.Index::toString(), tagSei.Index::toString());
+        flags, caseCtx.toString(), tagSei.toString());
 }
 
 
@@ -336,7 +336,7 @@ std::string SERecord::CONS::SEQUENCE::toString() const {
         controlled ? "C" : "_",
         machindDep ? "M" : "_");
     return std_sprintf("[[%s]  %s  %s]",
-        flags, tagSei.Index::toString(), componentType.Index::toString());
+        flags, tagSei.toString(), componentType.toString());
 }
 
 //
@@ -348,7 +348,7 @@ void SERecord::CONS::RELATIVE::read(uint16_t u0, MesaByteBuffer& bb) {
 }
 std::string SERecord::CONS::RELATIVE::toString() const {
     return std_sprintf("[%s  %s  %s]",
-        baseType.Index::toString(), offsetType.Index::toString(), resultType.Index::toString());
+        baseType.toString(), offsetType.toString(), resultType.toString());
 }
 
 
@@ -368,7 +368,7 @@ std::string SERecord::CONS::SUBRANGE::toString() const {
         empty  ? "E" : "_"
     );
     return std_sprintf("[[%s]  %s  %d  %d]",
-        flags, rangeType.Index::toString(), origin, range);
+        flags, rangeType.toString(), origin, range);
 }
 
 
@@ -380,7 +380,7 @@ void SERecord::CONS::LONG::read(uint16_t u0, MesaByteBuffer& bb) {
     bb.read(rangeType);
 }
 std::string SERecord::CONS::LONG::toString() const {
-    return std_sprintf("[%s]", rangeType.Index::toString());
+    return std_sprintf("[%s]", rangeType.toString());
 }
 
 
@@ -392,7 +392,7 @@ void SERecord::CONS::REAL::read(uint16_t u0, MesaByteBuffer& bb) {
     bb.read(rangeType);
 }
 std::string SERecord::CONS::REAL::toString() const {
-    return std_sprintf("[%s]", rangeType.Index::toString());
+    return std_sprintf("[%s]", rangeType.toString());
 }
 
 
@@ -405,7 +405,7 @@ void SERecord::CONS::OPAQUE::read(uint16_t u0, MesaByteBuffer& bb) {
 }
 std::string SERecord::CONS::OPAQUE::toString() const {
     return std_sprintf("[%d  %d  %s]",
-        lengthKnown, length, id.Index::toString());
+        lengthKnown, length, id.toString());
 }
 
 

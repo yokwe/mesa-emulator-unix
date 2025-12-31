@@ -144,7 +144,6 @@ void BCD::dump() {
 }
 
 static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
-    logger.info("%s  %d  %d", __FUNCTION__, offset, limit);
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 
@@ -167,7 +166,6 @@ static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit,
 
 template<class T>
 static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
-    logger.info("%s  %d  %d", __FUNCTION__, offset, limit);
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 

@@ -42,7 +42,7 @@
 
 #include "MesaByteBuffer.h"
 
-constexpr const uint16_t T_LIMIT = 0177777;
+const constexpr uint16_t T_LIMIT = 0177777;
 
 template <StringLiteral PREFIX, class T>
 struct Index : public MesaByteBuffer::HasRead, public HasToString {

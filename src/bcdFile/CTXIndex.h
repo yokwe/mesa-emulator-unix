@@ -44,8 +44,8 @@
 // forward declaration
 struct CTXRecord;
 
-//CTXIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO CTXRecord;
-//CTXNull: CTXIndex = FIRST[CTXIndex];
+// CTXIndex: TYPE = Base RELATIVE ORDERED POINTER [0..3777B] TO CTXRecord;
+// CTXNull: CTXIndex = FIRST[CTXIndex];
 struct CTXIndex : public Index<"ctx", CTXRecord> {
     static const constexpr uint16_t CTX_NULL = 0;
     

@@ -49,7 +49,7 @@
 
 class BCD : public MesaByteBuffer::HasRead {
 public:
-    static constexpr uint16_t VersionID = 6103;
+    static const constexpr uint16_t VersionID = 6103;
 
     static BCD getInstance(MesaByteBuffer& bb);
     static void checkVersionIdent(MesaByteBuffer& bb);

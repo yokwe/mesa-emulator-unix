@@ -40,7 +40,92 @@ static const Logger logger(__FILE__);
 
 #include "MesaByteBuffer.h"
 
+#include "MDIndex.h"
+
 #include "Symbol.h"
+
+static std::string readSSTable(MesaByteBuffer& baseBB, const BlockDescriptor& block) {
+    uint16_t offset = block.offset;
+    uint16_t limit  = block.size;
+    auto bb = baseBB.range(offset, limit);
+
+	uint16_t length;
+	uint16_t maxLength;
+	bb.read(length, maxLength);
+
+	std::string ss;
+    for(int i = 0; i < maxLength; i++) {
+		uint8_t c = bb.get8();
+		if (i < length) ss += c;
+    }
+
+	// sanity check
+	if (bb.pos() != limit) {
+		logger.error("Unexpected length");
+		logger.error("  pos        %5d", bb.pos());
+		logger.error("  bytePos    %5d", bb.bytePos());
+		logger.error("  offset     %5d", offset);
+		logger.error("  limit      %5d", limit);
+		logger.error("  length     %5d", length);
+		logger.error("  maxLength  %5d", maxLength);
+	}
+	return ss;
+}
+static void readTableHT(MesaByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, HTRecord*>& table, const BlockDescriptor& ssBlock) {
+	const std::string ss = readSSTable(baseBB, ssBlock);
+
+    uint16_t offset = block.offset;
+    uint16_t limit  = block.size;
+    auto bb = baseBB.range(offset, limit);
+
+    uint16_t lastSSIndex = 0;
+    uint16_t index = 0;
+    for(;;) {
+        int pos = bb.pos();
+        if (limit <= pos) break;
+
+		HTRecord* record = new HTRecord;
+		record->read(bb);
+		// set value of record
+		record->value = ss.substr(lastSSIndex, record->ssIndex - lastSSIndex);
+
+        table[index++] = record;
+        lastSSIndex = record->ssIndex;
+    }
+	// sanity check
+	if (bb.pos() != limit) {
+		logger.error("Unexpected length");
+		logger.error("  pos        %5d", bb.pos());
+		logger.error("  bytePos    %5d", bb.bytePos());
+		logger.error("  offset     %5d", block.offset);
+		logger.error("  size       %5d", block.size);
+	}
+}
+
+
+template<class T>
+static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, T*>& table, std::string prefix) {
+	auto bb = baseBB.range(block.offset, block.size);
+	auto limit = block.size;
+    for(;;) {
+        int index = bb.pos();
+        if (limit <= index) break;
+		T* value = new T;
+        value->read(bb);
+        table[index] = value;
+    }
+	// sanity check
+	if (bb.pos() != limit) {
+		logger.error("Unexpected position");
+		logger.error("  prefix     %s", prefix);
+		logger.error("  pos        %5d", bb.pos());
+		logger.error("  bytePos    %5d", bb.bytePos());
+		logger.error("  offset     %5d", block.offset);
+		logger.error("  size       %5d", block.size);
+		ERROR()
+	}
+}
+
 
 Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	// sanity check
@@ -50,9 +135,13 @@ Symbol Symbol::getInstance(MesaByteBuffer bb) {
 
 	symbol.read(bb);
 
-	symbol.readTableHT(bb);
+	// read tables
+	::readTableHT(bb, symbol.htBlock, symbol.htTable, symbol.ssBlock);
+	::readTable(bb, symbol.mdBlock, symbol.mdTable, "md");
 
+	// set index value
 	HTIndex::setValue(symbol.htTable);
+	MDIndex::setValue(symbol.mdTable);
 
 	return symbol;
 }
@@ -116,16 +205,16 @@ void Symbol::dump() {
 	// logger.info("extTable        %5d", extTable.size());
 	logger.info("htTable         %5d", htTable.size());
 	// logger.info("ltTable         %5d", ltTable.size());
-	// logger.info("mdTable         %5d", mdTable.size());
+	logger.info("mdTable         %5d", mdTable.size());
 	// logger.info("seTable         %5d", seTable.size());
 	// logger.info("treeTable       %5d", treeTable.size());
 
 	// BTIndex::stats();
 	// CTXIndex::stats();
 	// EXTIndex::stats();
-	// HTIndex::stats();
+	HTIndex::stats();
 	// LTIndex::stats();
-	// MDIndex::stats();
+	MDIndex::stats();
 	// SEIndex::stats();
 	// TreeIndex::stats();
 }
@@ -144,7 +233,7 @@ void Symbol::dumpTable() {
 //	::dumpTable("ext", extTable);
 	::dumpTable("ht", htTable);
 //	::dumpTable("lt", ltTable);
-//	::dumpTable("md", mdTable);
+	::dumpTable("md", mdTable);
 //	::dumpTable("se", seTable);
 //	::dumpTable("tree", treeTable);
 }
@@ -159,66 +248,3 @@ void Symbol::dumpIndex() {
 //	SEIndex::dump();
 //	TreeIndex::dump();
 }
-
-
-
-
-void Symbol::readTableHT(MesaByteBuffer& baseBB) {
-	std::string ss = getSS(baseBB);
-
-	BlockDescriptor& block = htBlock;
-    uint16_t offset = block.offset;
-    uint16_t limit  = block.size;
-    auto bb = baseBB.range(offset, limit);
-
-    uint16_t lastSSIndex = 0;
-    uint16_t index = 0;
-    for(;;) {
-        int pos = bb.pos();
-        if (limit <= pos) break;
-
-		HTRecord* record = new HTRecord;
-		record->read(bb);
-		// set value of record
-		record->value = ss.substr(lastSSIndex, record->ssIndex - lastSSIndex);
-
-        htTable[index++] = record;
-        lastSSIndex = record->ssIndex;
-    }
-	// sanity check
-	if (bb.pos() != limit) {
-		logger.error("Unexpected length");
-		logger.error("  pos        %5d", bb.pos());
-		logger.error("  limit      %5d", limit);
-		logger.error("  index      %5d", index);
-	}
-}
-
-std::string Symbol::getSS(MesaByteBuffer& baseBB) {
-    uint16_t offset = ssBlock.offset;
-    uint16_t limit  = ssBlock.size;
-    auto bb = baseBB.range(offset, limit);
-
-	uint16_t length;
-	uint16_t maxLength;
-	bb.read(length, maxLength);
-
-	std::string ss;
-    for(int i = 0; i < maxLength; i++) {
-		uint8_t c = bb.get8();
-		if (i < length) ss += c;
-    }
-
-	// sanity check
-	if (bb.pos() != limit) {
-		logger.error("Unexpected length");
-		logger.error("  pos        %5d", bb.pos());
-		logger.error("  bytePos    %5d", bb.bytePos());
-		logger.error("  offset     %5d", offset);
-		logger.error("  limit      %5d", limit);
-		logger.error("  length     %5d", length);
-		logger.error("  maxLength  %5d", maxLength);
-	}
-	return ss;
-}
-

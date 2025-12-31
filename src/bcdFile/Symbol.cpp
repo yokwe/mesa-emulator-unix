@@ -221,11 +221,9 @@ void Symbol::dump() {
 
 template <class T>
 static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
-    for(const auto& e: map) {
-        auto key = e.first;
-        auto value = e.second;
+	for (auto const& [key, value] : map) {
         logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
-    }
+	}
 }
 void Symbol::dumpTable() {
 //	::dumpTable("bt", btTable);

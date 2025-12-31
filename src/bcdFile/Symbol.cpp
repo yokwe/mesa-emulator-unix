@@ -138,8 +138,10 @@ Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	// read tables
 	::readTableHT(bb, symbol.htBlock, symbol.htTable, symbol.ssBlock);
 	::readTable(bb, symbol.mdBlock, symbol.mdTable, "md");
+	::readTable(bb, symbol.ctxBlock, symbol.ctxTable, "ctx");
 
 	// set index value
+	CTXIndex::setValue(symbol.ctxTable);
 	HTIndex::setValue(symbol.htTable);
 	MDIndex::setValue(symbol.mdTable);
 
@@ -201,7 +203,7 @@ void Symbol::dump() {
 	logger.info("fgPgCount       %5d", fgPgCount);
 
 	// logger.info("btTable         %5d", btTable.size());
-	// logger.info("ctxTable        %5d", ctxTable.size());
+	logger.info("ctxTable        %5d", ctxTable.size());
 	// logger.info("extTable        %5d", extTable.size());
 	logger.info("htTable         %5d", htTable.size());
 	// logger.info("ltTable         %5d", ltTable.size());
@@ -210,7 +212,7 @@ void Symbol::dump() {
 	// logger.info("treeTable       %5d", treeTable.size());
 
 	// BTIndex::stats();
-	// CTXIndex::stats();
+	CTXIndex::stats();
 	// EXTIndex::stats();
 	HTIndex::stats();
 	// LTIndex::stats();
@@ -227,7 +229,7 @@ static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
 }
 void Symbol::dumpTable() {
 //	::dumpTable("bt", btTable);
-//	::dumpTable("ctx", ctxTable);
+	::dumpTable("ctx", ctxTable);
 //	::dumpTable("ext", extTable);
 	::dumpTable("ht", htTable);
 //	::dumpTable("lt", ltTable);

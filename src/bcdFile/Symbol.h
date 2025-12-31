@@ -44,6 +44,7 @@
 #include "CTXIndex.h"
 #include "HTRecord.h"
 #include "MDRecord.h"
+#include "CTXRecord.h"
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
@@ -104,7 +105,7 @@ public:
 
 	// contents of above table
 	// std::map<uint16_t, BTRecord*>   btTable;
-	// std::map<uint16_t, CTXRecord*>  ctxTable;
+	std::map<uint16_t, CTXRecord*>  ctxTable;
 	// std::map<uint16_t, EXTRecord*>  extTable;
 	std::map<uint16_t, HTRecord*>   htTable;
 	// std::map<uint16_t, LTRecord*>   ltTable;

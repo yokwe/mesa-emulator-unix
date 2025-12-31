@@ -10,6 +10,7 @@ target_sources(
 		BCD.h
 		BCDFile.h
         CTXIndex.h
+        CTXRecord.h
         ENIndex.h
         ENRecord.h
         FTIndex.h
@@ -30,9 +31,11 @@ target_sources(
         Symbol.h
         Timestamp.h
         TreeIndex.h
+        Type.h
     PRIVATE
         BCD.cpp
         BCDFile.cpp
+        CTXRecord.cpp
         ENRecord.cpp
         HTIndex.cpp
         HTRecord.cpp
@@ -42,6 +45,7 @@ target_sources(
         SGRecord.cpp
         Symbol.cpp
         Timestamp.cpp
+        Type.cpp
 )
 
 target_link_libraries(bcdFile util)

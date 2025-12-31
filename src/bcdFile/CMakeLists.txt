@@ -25,6 +25,7 @@ target_sources(
         MTIndex.h
         NameRecord.h
         SEIndex.h
+        SERecord.h
         SGIndex.h
         SGRecord.h
         Symbol.h
@@ -42,6 +43,7 @@ target_sources(
         MDRecord.cpp
         MesaByteBuffer.cpp
         MTRecord.cpp
+        SERecord.cpp
         SGRecord.cpp
         Symbol.cpp
         Timestamp.cpp

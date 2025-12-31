@@ -44,6 +44,15 @@ static const Logger logger(__FILE__);
 
 #include "Symbol.h"
 
+//
+// concrete definition
+//
+#include "HTRecord.h"
+#include "MDRecord.h"
+#include "CTXRecord.h"
+#include "SERecord.h"
+
+
 static std::string readSSTable(MesaByteBuffer& baseBB, const BlockDescriptor& block) {
     uint16_t offset = block.offset;
     uint16_t limit  = block.size;
@@ -139,11 +148,13 @@ Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	::readTableHT(bb, symbol.htBlock, symbol.htTable, symbol.ssBlock);
 	::readTable(bb, symbol.mdBlock, symbol.mdTable, "md");
 	::readTable(bb, symbol.ctxBlock, symbol.ctxTable, "ctx");
+	::readTable(bb, symbol.seBlock, symbol.seTable, "se");
 
 	// set index value
 	CTXIndex::setValue(symbol.ctxTable);
 	HTIndex::setValue(symbol.htTable);
 	MDIndex::setValue(symbol.mdTable);
+	SEIndex::setValue(symbol.seTable);
 
 	return symbol;
 }
@@ -208,7 +219,7 @@ void Symbol::dump() {
 	logger.info("htTable         %5d", htTable.size());
 	// logger.info("ltTable         %5d", ltTable.size());
 	logger.info("mdTable         %5d", mdTable.size());
-	// logger.info("seTable         %5d", seTable.size());
+	logger.info("seTable         %5d", seTable.size());
 	// logger.info("treeTable       %5d", treeTable.size());
 
 	// BTIndex::stats();
@@ -217,7 +228,7 @@ void Symbol::dump() {
 	HTIndex::stats();
 	// LTIndex::stats();
 	MDIndex::stats();
-	// SEIndex::stats();
+	SEIndex::stats();
 	// TreeIndex::stats();
 }
 
@@ -234,7 +245,7 @@ void Symbol::dumpTable() {
 	::dumpTable("ht", htTable);
 //	::dumpTable("lt", ltTable);
 	::dumpTable("md", mdTable);
-//	::dumpTable("se", seTable);
+	::dumpTable("se", seTable);
 //	::dumpTable("tree", treeTable);
 }
 

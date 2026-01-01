@@ -505,12 +505,6 @@ void SERecord::CONS::read(uint16_t u0, MesaByteBuffer& bb) {
 std::string SERecord::CONS::toString() const {
     return std_sprintf("[%s  %s]", ::toString(tag), ::toString(variant));
 }
-SERecord::CONS::TRANSFER SERecord::CONS::toTRANSFER() const {
-    return std::get<SERecord::CONS::TRANSFER>(variant);
-}
-SERecord::CONS::SUBRANGE SERecord::CONS::toSUBRANGE() const {
-    return std::get<SERecord::CONS::SUBRANGE>(variant);
-}
 
 
 //

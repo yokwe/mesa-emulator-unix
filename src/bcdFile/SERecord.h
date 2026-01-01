@@ -387,9 +387,19 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
-
-        TRANSFER toTRANSFER() const;
-        SUBRANGE toSUBRANGE() const;
+        
+        BASIC toBASIC() const {
+            return std::get<BASIC>(variant);
+        }
+        TRANSFER toTRANSFER() const {
+            return std::get<TRANSFER>(variant);
+        }
+        SUBRANGE toSUBRANGE() const {
+            return std::get<SUBRANGE>(variant);
+        }
+        bool isOPAQUE() const {
+            return tag == TypeClass::OPAQUE;
+        }
     };
 
     enum class Tag : uint16_t {
@@ -405,6 +415,12 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
     ID   toID()   const;
     CONS toCONS() const;
+    bool isID() const {
+        return tag == Tag::ID;
+    }
+    bool isCONS() const {
+        return tag == Tag::CONS;
+    }
 
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;

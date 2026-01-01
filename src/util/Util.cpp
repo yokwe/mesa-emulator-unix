@@ -257,7 +257,8 @@ std::string readFile(const std::string& path) {
 	return buffer.str();
 }
 void writeFile(const std::string& path, const std::string& string) {
-	std::filesystem::create_directories(path);
+	std::filesystem::path outPath(path);
+	std::filesystem::create_directories(outPath.parent_path());
     std::ofstream ofs;
     ofs.open(path);
     ofs << string;

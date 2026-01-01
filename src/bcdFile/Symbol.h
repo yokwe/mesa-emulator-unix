@@ -43,6 +43,7 @@
 #include "LTRecord.h"
 #include "MesaByteBuffer.h"
 #include "CTXIndex.h"
+#include "SEIndex.h"
 
 //
 // forward declaration
@@ -128,4 +129,6 @@ public:
     void dumpTable();
     void dumpIndex();
 
+	// utility methods
+	SEIndex nextSei(SEIndex sei);
 };

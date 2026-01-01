@@ -274,3 +274,33 @@ void Symbol::dumpIndex() {
 //	SEIndex::dump();
 //	TreeIndex::dump();
 }
+
+static SEIndex seNull{SEIndex::SE_NULL, 0};
+SEIndex Symbol::nextSei(SEIndex sei) {
+	// sanity check
+	if (sei.value().tag != SERecord::Tag::ID) ERROR()
+
+	if (sei.isNull()) return seNull;
+
+	using ID = SERecord::ID;
+	for(auto i = seTable.cbegin(); i != seTable.cend(); i++) {
+		if (i->first == sei.index()) {
+			auto& seRecord = *i->second;
+			auto id = seRecord.toID();
+			// next for SEQUENTIAL
+			auto next = i;
+			next++;
+			switch(id.tag) {
+				case ID::Tag::LINKED:
+					return id.toLINKED().link;
+				case ID::Tag::SEQUENTIAL:
+					return SEIndex(next->first, next->second);;
+				case ID::Tag::TERMINAL:
+					return seNull;
+				default:
+					ERROR()
+			}
+		}
+	}
+	ERROR()
+}

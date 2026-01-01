@@ -41,6 +41,8 @@
 #include "BCD.h"
 #include "Symbol.h"
 
+#include "SEIndex.h"
+
 namespace print_symbol {
 
 struct Context {
@@ -55,6 +57,24 @@ struct Context {
     Context(const std::string& outDir, const std::string& bcdPath);
 };
 
-void print(Context& context);
+
+template<typename T>
+bool isLast(T i, T end) {
+    i++;
+    return i == end;
+}
+
+void printHeader(Context& context);
+void printDirectory(Context& context);
+void printModule(Context& context);
+
+void printSymbol(Context& context, SEIndex sei, const std::string& colonString);
+
+
+inline void print(Context& context) {
+    printHeader(context);
+    printDirectory(context);
+    printModule(context);
+}
     
 }

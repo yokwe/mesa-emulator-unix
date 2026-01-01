@@ -46,6 +46,8 @@ static const Logger logger(__FILE__);
 
 #include "MDIndex.h"
 #include "MDRecord.h"
+#include "CTXRecord.h"
+#include "SERecord.h"
 
 #include "PrintSymbol.h"
 
@@ -70,7 +72,7 @@ Context::Context(const std::string& outDir, const std::string& bcdPath_) : bcdPa
     outPath = outputPath;
 }
 
-void print(Context& context) {
+void printHeader(Context& context) {
     auto& bcd = context.bcd;
     auto& symbol = context.symbol;
     auto& out = context.out;
@@ -83,6 +85,61 @@ void print(Context& context) {
         out.println("----");
         out.println();
     }
+}
+
+void printDirectory(Context& context) {
+    auto& symbol = context.symbol;
+    auto& out = context.out;
+
+	// Print Directory
+	{
+        if (!symbol.mdTable.empty()) {
+            out.println("DIRECTORY");
+            out.nest();
+
+            auto begin = symbol.mdTable.cbegin();
+            auto end = symbol.mdTable.cend();
+
+            for(auto i = begin; i != end; i++) {
+                auto index = i->first;
+                if (index == MDIndex::MD_OWN) continue;
+                auto& md = *(i->second);
+                out.println("%-30s %s%s", md.moduleId.toValue(), md.stamp.toString(), isLast(i, end) ? ";" : ",");
+            }
+
+            out.unnest();
+            out.println();
+		}
+	}
+}
+
+void printModule(Context& context) {
+    auto& symbol = context.symbol;
+    auto& out = context.out;
+
+    auto& own = *symbol.mdTable[MDIndex::MD_OWN];
+    out.println("%s %s = BEGIN", own.stamp.toString(), own.moduleId.toValue());
+    out.nest();
+
+    for(auto sei = symbol.outerCtx.value().seList; !sei.isNull(); sei = symbol.nextSei(sei)) {
+        printSymbol(context, sei, ": ");
+        out.println(";");
+    }
+
+    out.unnest();
+    out.println("END.");
+}
+
+void printSymbol(Context& context, SEIndex sei, const std::string& colonString) {
+    (void)sei; (void)colonString;
+    auto& symbol = context.symbol;
+    auto& out = context.out;
+    (void)symbol; (void)out;
+
+    auto id = sei.value().toID();
+    if (!id.hash.isNull()) out.print("%s%s", id.hash.toValue(), colonString);
+
+    logger.info("sei  %s  %s", sei.toString(), sei.value().toString());
 }
 
 }

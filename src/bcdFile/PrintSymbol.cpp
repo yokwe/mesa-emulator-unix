@@ -137,9 +137,47 @@ void printSymbol(Context& context, SEIndex sei, const std::string& colonString) 
     (void)symbol; (void)out;
 
     auto id = sei.value().toID();
-    if (!id.hash.isNull()) out.print("%s%s", id.hash.toValue(), colonString);
+
+    out.print("%s%s", id.hash.toValue(), colonString);
+    if (!id.public_) out.print("PRIVATE ");
+    if (sei.isType()) {
+        out.print("TYPE");
+        auto typeSei = symbol.toSEIndex(id.idInfo);
+        const auto& seRecord = typeSei.value();
+        if (seRecord.isCONS()) {
+            if (!seRecord.toCONS().isOPAQUE()) {
+                out.print(" = ");
+            }
+        } else {
+            out.print(" = ");
+        }
+
+		ValFormat vf = printType(context, typeSei, {});
+		printDefaultValue(context, sei, vf);
+    } else {
+        // FIXME
+    }
 
     logger.info("sei  %s  %s", sei.toString(), sei.value().toString());
+}
+
+ValFormat printType(Context& context, SEIndex sei, std::function<void()> dosub) {
+    (void)context; (void)sei; (void)dosub;
+    // FIXME
+    ValFormat ret;
+    return ret;
+}
+
+ValFormat getValFormat(Context& context, SEIndex tsei) {
+    (void)context; (void)tsei;
+    // FIXME
+    ValFormat ret;
+    return ret;
+}
+
+void printDefaultValue(Context& context, SEIndex sei, ValFormat vf) {
+    (void)context; (void)sei; (void)vf;
+    // FIXME
 }
 
 }

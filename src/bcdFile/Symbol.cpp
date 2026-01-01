@@ -304,3 +304,34 @@ SEIndex Symbol::nextSei(SEIndex sei) {
 	}
 	ERROR()
 }
+
+SEIndex Symbol::toSEIndex(uint16_t index) {
+	if (seTable.contains(index)) {
+		return SEIndex(index, seTable.at(index));
+	} else {
+		ERROR();
+//		return SEIndex(index);
+	}
+}
+
+//UnderType: PROC [h: Handle, type: SEIndex] RETURNS [CSEIndex] = {
+//  sei: SEIndex � type;
+//  WHILE sei # SENull DO
+//    WITH se: h.seb[sei] SELECT FROM
+//      id => {IF se.idType # typeTYPE THEN ERROR; sei � SymbolOps.ToSei[se.idInfo]};
+//      ENDCASE => EXIT;
+//    ENDLOOP;
+//  RETURN [LOOPHOLE[sei, CSEIndex]]};
+SEIndex Symbol::underType(SEIndex sei) {
+	while (!sei.isNull()) {
+		if (sei.value().isID()) {
+			auto se = sei.value().toID();
+			if (!se.idType.isType()) ERROR()
+			sei = toSEIndex(se.idInfo);
+		} else {
+			break;
+		}
+	}
+	return sei;
+}
+	

@@ -84,6 +84,14 @@ public:
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
     static const uint16_t ALTO_BIAS = 1;
 
+	//-- codes identifying the basic types (extensible)
+	//codeANY: CARDINAL = 0;
+	//codeINT: CARDINAL = 1;
+	//codeCHAR: CARDINAL = 2;
+	static const uint16_t CODE_ANY  = 0;
+	static const uint16_t CODE_INT  = 1;
+	static const uint16_t CODE_CHAR = 2;
+
 	static Symbol getInstance(MesaByteBuffer bb);
 	static void checkVersionIdent(MesaByteBuffer& bb);
 
@@ -131,4 +139,6 @@ public:
 
 	// utility methods
 	SEIndex nextSei(SEIndex sei);
+	SEIndex underType(SEIndex sei);
+	SEIndex toSEIndex(uint16_t index);
 };

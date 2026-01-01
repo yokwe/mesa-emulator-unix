@@ -188,6 +188,8 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
+
+        LINKED toLINKED() const;
     };
     struct CONS : public HasToString {
         struct MODE : public HasToString {
@@ -396,10 +398,10 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
     };
     static std::string toString(Tag value); // 01
 
-    Tag                   tag;
-    std::variant<ID, CONS> body;
+    Tag                    tag;
+    std::variant<ID, CONS> variant;
 
-    SERecord() : tag(Tag::ID), body(ID{}) {}
+    SERecord() : tag(Tag::ID), variant(ID{}) {}
 
     ID   toID()   const;
     CONS toCONS() const;

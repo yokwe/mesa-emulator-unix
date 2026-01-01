@@ -119,6 +119,12 @@ std::string SERecord::ID::toString() const {
             ctxLinkString);
 }
 
+SERecord::ID::LINKED SERecord::ID::toLINKED() const {
+    if (tag != Tag::LINKED) ERROR()
+    return std::get<SERecord::ID::LINKED>(variant);
+}
+
+
 
 //
 // SERecord::CONS::BASIC
@@ -532,14 +538,14 @@ MesaByteBuffer& SERecord::read(MesaByteBuffer& bb) {
     {
         ID id;
         id.read(u0, bb);
-        body = id;
+        variant = id;
     }
         break;
     case Tag::CONS:
     {
         CONS cons;
         cons.read(u0, bb);
-        body = cons;
+        variant = cons;
     }
         break;
     default:
@@ -549,14 +555,14 @@ MesaByteBuffer& SERecord::read(MesaByteBuffer& bb) {
     return bb;
 }
 std::string SERecord::toString() const {
-    return std_sprintf("[%s  %s]", toString(tag), ::toString(body));
+    return std_sprintf("[%s  %s]", toString(tag), ::toString(variant));
 }
 
 SERecord::ID   SERecord::toID() const {
     if (tag != Tag::ID) ERROR()
-    return std::get<SERecord::ID>(body);
+    return std::get<SERecord::ID>(variant);
 }
 SERecord::CONS SERecord::toCONS() const {
     if (tag != Tag::CONS) ERROR()
-    return std::get<SERecord::CONS>(body);
+    return std::get<SERecord::CONS>(variant);
 }

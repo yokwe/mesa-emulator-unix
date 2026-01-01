@@ -106,11 +106,11 @@ struct LTRecord : public MesaByteBuffer::HasRead, public HasToString {
 // NORICE
 //   size of LitRecod is 14 bits
 //   needs to shift 2 bit for 16 bit aligned data
-//LitRecord: TYPE = RECORD [
-//  SELECT litTag(0:0..0): * FROM
-//    word => [index(0:1..13): LTIndex],
-//    string => [index(0:1..13): STIndex]
-//    ENDCASE];
+// LitRecord: TYPE = RECORD [
+//   SELECT litTag(0:0..0): * FROM
+//     word => [index(0:1..13): LTIndex],
+//     string => [index(0:1..13): STIndex]
+//     ENDCASE];
 struct LitRecord : public HasToString {
     enum class Tag : uint16_t {
         ENUM_VALUE(Tag, WORD)
@@ -125,7 +125,7 @@ struct LitRecord : public HasToString {
             index.index(bitField(u0, 1, 13));
         }
         std::string toString() const override {
-            return std_sprintf("[%s]", index.Index::toString());
+            return std_sprintf("[%s]", index.toString());
         }
     };
     struct STRING : public HasToString {

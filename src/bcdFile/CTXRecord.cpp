@@ -103,7 +103,7 @@ CTXRecord::INCLUDED::INCLUDED(uint16_t u1, MesaByteBuffer& bb) {
 }
 std::string CTXRecord::INCLUDED::toString() const {
     return std_sprintf("[%s  %s  %s %s%s%s%s]",
-        chain.Index::toString(),
+        chain.toString(),
         CTXRecord::toString(copied),
         map.toString(),
         closed ? " closed" : "",
@@ -119,7 +119,7 @@ CTXRecord::IMPORTED::IMPORTED(uint16_t u1) {
     includeIndex.index(bitField(u1, 5, 15));
 }
 std::string CTXRecord::IMPORTED::toString() const {
-    return includeIndex.Index::toString();
+    return includeIndex.toString();
 }
 
 //
@@ -161,7 +161,7 @@ std::string CTXRecord::toString() const {
 
     std::string variantString = std::visit([](auto& x) { return x.toString(); }, variant);
     return std_sprintf("[%s  %s  %s  %s  %s]",
-        flags, seList.Index::toString(), ::toString(level), toString(tag), variantString);
+        flags, seList.toString(), ::toString(level), toString(tag), variantString);
 }
 CTXRecord::SIMPLE   CTXRecord::toSIMPLE() {
     return std::get<CTXRecord::SIMPLE>(variant);

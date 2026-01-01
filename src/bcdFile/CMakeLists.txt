@@ -10,7 +10,7 @@ target_sources(
         BCD.h
         BCDFile.h
         BTIndex.h
-        BTRecord.h
+        BodyRecord.h
         CTXIndex.h
         CTXRecord.h
         ENIndex.h
@@ -42,7 +42,7 @@ target_sources(
     PRIVATE
         BCD.cpp
         BCDFile.cpp
-        BTRecord.cpp
+        BodyRecord.cpp
         CTXRecord.cpp
         ENRecord.cpp
         HTIndex.cpp

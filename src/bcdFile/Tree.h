@@ -72,7 +72,7 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
             index.index(bitField(u0, 2, 15));
         }
         std::string toString() const {
-            return std_sprintf("[%s]", index.Index::toString());
+            return std_sprintf("[%s]", index.toString());
         }
     };
     struct HASH : public HasToString {
@@ -82,7 +82,7 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
             index.index(bitField(u0, 2, 15));
         }
         std::string toString() const {
-            return std_sprintf("[%s]", index.Index::toString());
+            return std_sprintf("[%s]", index.toString());
         }
     };
     struct SYMBOL : public HasToString {
@@ -92,7 +92,7 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
             index.index(bitField(u0, 2, 15));
         }
         std::string toString() const {
-            return std_sprintf("[%s]", index.Index::toString());
+            return std_sprintf("[%s]", index.toString());
         }
     };
     struct LITERAL : public HasToString {

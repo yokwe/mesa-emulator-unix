@@ -52,7 +52,7 @@ static const Logger logger(__FILE__);
 //
 #include "HTRecord.h"
 
-#include "BTRecord.h"
+#include "BodyRecord.h"
 #include "MDRecord.h"
 #include "CTXRecord.h"
 #include "SERecord.h"
@@ -152,21 +152,21 @@ Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	symbol.read(bb);
 
 	// read tables
-	::readTable(bb, symbol.bodyBlock, symbol.btTable, "bt");
+	::readTable(bb, symbol.bodyBlock, symbol.bodyTable, "body");
 	::readTable(bb, symbol.ctxBlock, symbol.ctxTable, "ctx");
 	::readTable(bb, symbol.extBlock, symbol.extTable, "ext");
 	::readTable(bb, symbol.htBlock, symbol.htTable, symbol.ssBlock);
-	::readTable(bb, symbol.litBlock, symbol.ltTable, "lt");
+	::readTable(bb, symbol.litBlock, symbol.litTable, "lit");
 	::readTable(bb, symbol.mdBlock, symbol.mdTable, "md");
 	::readTable(bb, symbol.seBlock, symbol.seTable, "se");
 	::readTable(bb, symbol.treeBlock, symbol.treeTable, "tree");
 
 	// set index value
-	BTIndex::setValue(symbol.btTable);
+	BTIndex::setValue(symbol.bodyTable);
 	CTXIndex::setValue(symbol.ctxTable);
 	EXTIndex::setValue(symbol.extTable);
 	HTIndex::setValue(symbol.htTable);
-	LTIndex::setValue(symbol.ltTable);
+	LTIndex::setValue(symbol.litTable);
 	MDIndex::setValue(symbol.mdTable);
 	SEIndex::setValue(symbol.seTable);
 	TreeIndex::setValue(symbol.treeTable);
@@ -205,9 +205,9 @@ void Symbol::dump() {
 	logger.info("creator            %s", creator.toString());
 	logger.info("sourceVersion      %s", creator.toString());
 	logger.info("definitionsFile    %s", definitionsFile ? "YES" : "NO");
-	logger.info("directoryCtx       %s", directoryCtx.Index::toString());
-	logger.info("importCtx          %s", importCtx.Index::toString());
-	logger.info("outerCtx           %s", outerCtx.Index::toString());
+	logger.info("directoryCtx       %s", directoryCtx.toString());
+	logger.info("importCtx          %s", importCtx.toString());
+	logger.info("outerCtx           %s", outerCtx.toString());
 
 	logger.info("hvBlock         %5d  %5d", hvBlock.offset, hvBlock.size);
 	logger.info("htBlock         %5d  %5d", htBlock.offset, htBlock.size);
@@ -228,11 +228,11 @@ void Symbol::dump() {
 	logger.info("fgRelPgBase     %5d", fgRelPgBase);
 	logger.info("fgPgCount       %5d", fgPgCount);
 
-	logger.info("btTable         %5d", btTable.size());
+	logger.info("bodyTable       %5d", bodyTable.size());
 	logger.info("ctxTable        %5d", ctxTable.size());
 	logger.info("extTable        %5d", extTable.size());
 	logger.info("htTable         %5d", htTable.size());
-	logger.info("ltTable         %5d", ltTable.size());
+	logger.info("litTable        %5d", litTable.size());
 	logger.info("mdTable         %5d", mdTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
@@ -254,11 +254,11 @@ static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
 	}
 }
 void Symbol::dumpTable() {
-	::dumpTable("bt", btTable);
+	::dumpTable("body", bodyTable);
 	::dumpTable("ctx", ctxTable);
 	::dumpTable("ext", extTable);
 	::dumpTable("ht", htTable);
-	::dumpTable("lt", ltTable);
+	::dumpTable("lt", litTable);
 	::dumpTable("md", mdTable);
 	::dumpTable("se", seTable);
 	::dumpTable("tree", treeTable);

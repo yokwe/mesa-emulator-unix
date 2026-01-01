@@ -42,15 +42,15 @@
 #include "Index.h"
 
 // forward declaration
-struct BTRecord;
+struct BodyRecord;
 
 // BTIndex: TYPE = Base RELATIVE POINTER [0..Limit) TO BodyRecord;
 // BTNull: BTIndex = LAST[BTIndex];
-struct BTIndex : public Index<"bt", BTRecord> {
+struct BTIndex : public Index<"bt", BodyRecord> {
     static const constexpr uint16_t BT_NULL = 0x3FFF;
     
     // BTIndex() : Index() {}
-    // BTIndex(uint16_t index_, const BTRecord* value_) : Index(index_, value_) {}
+    // BTIndex(uint16_t index_, const BodyRecord* value_) : Index(index_, value_) {}
     // BTIndex(uint16_t index_) : Index(index_) {}
 
     bool isNull() const {

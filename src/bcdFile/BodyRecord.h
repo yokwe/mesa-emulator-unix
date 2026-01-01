@@ -30,7 +30,7 @@
 
 
 //
-// BTRecord.h
+// BodyRecord.h
 //
 
 #pragma once
@@ -137,7 +137,7 @@ struct BodyInfo : public MesaByteBuffer::HasRead, public HasToString {
 //    Other => [relOffset(8:1..15): [0..LAST[CARDINAL]/2]]
 //    ENDCASE];
 
-struct BTRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
     enum class Tag {
         ENUM_VALUE(Tag, CALLABLE)
         ENUM_VALUE(Tag, OTHER)

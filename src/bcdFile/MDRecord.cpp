@@ -56,6 +56,6 @@ MesaByteBuffer& MDRecord::read(MesaByteBuffer& bb) {
 std::string MDRecord::toString() const {
     return std_sprintf("[[%s]  %s  %s  %s%s  %s  %s  %5d]",
         stamp.toString(), moduleId.toValue(), fileId.toValue(),
-        shared ? "S" : "", exported ? "E" : "", ctx.Index::toString(), defaultImport.Index::toString(), fileIndex);
+        shared ? "S" : "", exported ? "E" : "", ctx.toString(), defaultImport.toString(), fileIndex);
 }
 

@@ -30,7 +30,7 @@
 
 
 //
-// BTRecord.cpp
+// BodyRecord.cpp
 //
 
 #include <string>
@@ -40,7 +40,7 @@
 static const Logger logger(__FILE__);
 
 #include "MesaByteBuffer.h"
-#include "BTRecord.h"
+#include "BodyRecord.h"
 
 #undef  ENUM_VALUE
 #define ENUM_VALUE(enum,value) {enum::value, #value},
@@ -98,7 +98,7 @@ void BodyInfo::INTERNAL::read(uint16_t u0, MesaByteBuffer& bb) {
     bb.read(thread, frameSize);
 }
 std::string BodyInfo::INTERNAL::toString() const {
-    return std_sprintf("[%s %s %d]", bodyTree.Index::toString(), thread.Index::toString(), frameSize);
+    return std_sprintf("[%s %s %d]", bodyTree.toString(), thread.toString(), frameSize);
 }
 void BodyInfo::EXTERNAL::read(uint16_t u0, MesaByteBuffer& bb) {
     bytes = bitField(u0, 1, 15);
@@ -137,9 +137,9 @@ std::string BodyInfo::toString() const {
 }
 
 //
-// BTRecord = BodyRecord
+// BodyRecord = BodyRecord
 //
-std::string BTRecord::toString(Tag value) {
+std::string BodyRecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
         ENUM_VALUE(Tag, CALLABLE)
         ENUM_VALUE(Tag, OTHER)
@@ -152,17 +152,17 @@ std::string BTRecord::toString(Tag value) {
 }
 
 //
-// BTRecord::CALLABLE::OUTER
+// BodyRecord::CALLABLE::OUTER
 //
-void BTRecord::CALLABLE::OUTER::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::OUTER::read(uint16_t u11, MesaByteBuffer& bb) {
     (void)u11;
     (void)bb;
 }
 
 //
-// BTRecord::CALLABLE::INNER
+// BodyRecord::CALLABLE::INNER
 //
-void BTRecord::CALLABLE::INNER::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::INNER::read(uint16_t u11, MesaByteBuffer& bb) {
     frameOffset = bitField(u11, 2, 15);
     (void)bb;
     // NOTICE
@@ -171,16 +171,16 @@ void BTRecord::CALLABLE::INNER::read(uint16_t u11, MesaByteBuffer& bb) {
 }
 
 //
-// BTRecord::CALLABLE::CATCH
+// BodyRecord::CALLABLE::CATCH
 //
-void BTRecord::CALLABLE::CATCH::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::CATCH::read(uint16_t u11, MesaByteBuffer& bb) {
     (void)u11;
     bb.read(index); // 12
 }
 //
-// BTRecord::CALLABLE
+// BodyRecord::CALLABLE
 //
-std::string BTRecord::CALLABLE::toString(Tag value) {
+std::string BodyRecord::CALLABLE::toString(Tag value) {
     static std::map<Tag, std::string> map {
         ENUM_VALUE(Tag, OUTER)
         ENUM_VALUE(Tag, INNER)
@@ -192,7 +192,7 @@ std::string BTRecord::CALLABLE::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-void BTRecord::CALLABLE::read(uint16_t u8, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::read(uint16_t u8, MesaByteBuffer& bb) {
     uint16_t u9, u10, u11;
     bb.read(u9, u10, u11);
 
@@ -234,7 +234,7 @@ void BTRecord::CALLABLE::read(uint16_t u8, MesaByteBuffer& bb) {
         ERROR()
     }
 }
-std::string BTRecord::CALLABLE::toString() const {
+std::string BodyRecord::CALLABLE::toString() const {
     std::string variantString = ::toString(variant);
     std::string flags = std_sprintf("[%s%s%s%s%s%s %X]",
         inline_   ? "I" : "_",
@@ -245,39 +245,39 @@ std::string BTRecord::CALLABLE::toString() const {
         internal  ? "I" : "_",
         hints);
     return std_sprintf("[%s  %s  %d  %s  %s  %s]",
-        id.Index::toString(),
-        ioType.Index::toString(),
+        id.toString(),
+        ioType.toString(),
         entryIndex,
         flags,
         toString(tag),
         variantString);
 }
 
-BTRecord::CALLABLE::OUTER BTRecord::CALLABLE::toOUTER() {
-    return std::get<BTRecord::CALLABLE::OUTER>(variant);
+BodyRecord::CALLABLE::OUTER BodyRecord::CALLABLE::toOUTER() {
+    return std::get<BodyRecord::CALLABLE::OUTER>(variant);
 }
-BTRecord::CALLABLE::INNER BTRecord::CALLABLE::toINNER() {
-    return std::get<BTRecord::CALLABLE::INNER>(variant);
+BodyRecord::CALLABLE::INNER BodyRecord::CALLABLE::toINNER() {
+    return std::get<BodyRecord::CALLABLE::INNER>(variant);
 }
-BTRecord::CALLABLE::CATCH BTRecord::CALLABLE::toCATCH() {
-    return std::get<BTRecord::CALLABLE::CATCH>(variant);
+BodyRecord::CALLABLE::CATCH BodyRecord::CALLABLE::toCATCH() {
+    return std::get<BodyRecord::CALLABLE::CATCH>(variant);
 }
 
 //
-// BTRecord::OTHER
+// BodyRecord::OTHER
 //
-void BTRecord::OTHER::read(uint16_t u8, MesaByteBuffer& bb) {
+void BodyRecord::OTHER::read(uint16_t u8, MesaByteBuffer& bb) {
     relOffset = bitField(u8, 1, 15);
     (void)bb;
 }
-std::string BTRecord::OTHER::toString() const {
+std::string BodyRecord::OTHER::toString() const {
     return std_sprintf("[%d]", relOffset);
 }
 
 //
-// BTRecord
+// BodyRecord
 //
-MesaByteBuffer& BTRecord::read(MesaByteBuffer& bb) {
+MesaByteBuffer& BodyRecord::read(MesaByteBuffer& bb) {
     uint16_t u3, u8;
     bb.read(link, firstSon, type, u3, sourceIndex, info, u8);
 
@@ -304,22 +304,22 @@ MesaByteBuffer& BTRecord::read(MesaByteBuffer& bb) {
     }
     return bb;
 }
-std::string BTRecord::toString() const {
+std::string BodyRecord::toString() const {
     std::string variantString = ::toString(variant);
     return std_sprintf("[%s  %s  %s  %s  %s  %d  %s  %s  %s]",
         link.toString(),
         firstSon.toString(),
-        type.Index::toString(),
-        localCtx.Index::toString(),
+        type.toString(),
+        localCtx.toString(),
         ::toString(level),
         sourceIndex,
         info.toString(),
         toString(tag),
         variantString);
 }
-BTRecord::CALLABLE BTRecord::toCALLABLE() const {
-    return std::get<BTRecord::CALLABLE>(variant);
+BodyRecord::CALLABLE BodyRecord::toCALLABLE() const {
+    return std::get<BodyRecord::CALLABLE>(variant);
 }
-BTRecord::OTHER BTRecord::toOTHER() const {
-    return std::get<BTRecord::OTHER>(variant);
+BodyRecord::OTHER BodyRecord::toOTHER() const {
+    return std::get<BodyRecord::OTHER>(variant);
 }

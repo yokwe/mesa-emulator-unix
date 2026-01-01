@@ -30,7 +30,7 @@
 
 
 //
-// STRecord.cpp
+// SGRecord.cpp
 //
 
 #include <cstdint>

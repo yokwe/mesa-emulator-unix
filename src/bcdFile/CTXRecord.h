@@ -43,7 +43,6 @@
 #include "MesaByteBuffer.h"
 
 #include "Type.h"
-
 #include "MDIndex.h"
 #include "CTXIndex.h"
 #include "SEIndex.h"

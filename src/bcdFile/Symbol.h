@@ -39,9 +39,9 @@
 
 #include "../util/Util.h"
 
+#include "Type.h"
 #include "LTRecord.h"
 #include "MesaByteBuffer.h"
-#include "Timestamp.h"
 #include "CTXIndex.h"
 
 //

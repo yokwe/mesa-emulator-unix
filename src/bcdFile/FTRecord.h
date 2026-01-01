@@ -39,7 +39,7 @@
 
 #include "MesaByteBuffer.h"
 
-#include "Timestamp.h"
+#include "Type.h"
 #include "NameRecord.h"
 
 // FTRecord: TYPE = RECORD [name: NameRecord, version: VersionStamp];

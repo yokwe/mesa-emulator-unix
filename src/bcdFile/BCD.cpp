@@ -45,6 +45,7 @@ static const Logger logger(__FILE__);
 #include "BCD.h"
 #include "Symbol.h"
 
+#include "Type.h"
 #include "ENIndex.h"
 #include "ENRecord.h"
 #include "MTIndex.h"
@@ -53,7 +54,6 @@ static const Logger logger(__FILE__);
 #include "FTRecord.h"
 #include "SGIndex.h"
 #include "SGRecord.h"
-#include "Timestamp.h"
 
 MesaByteBuffer& BCD::read(MesaByteBuffer& bb) {
     bb.pos(0);

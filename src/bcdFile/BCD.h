@@ -40,7 +40,7 @@
 
 #include "MesaByteBuffer.h"
 
-#include "Timestamp.h"
+#include "Type.h"
 #include "FTIndex.h"
 #include "FTRecord.h"
 #include "SGRecord.h"

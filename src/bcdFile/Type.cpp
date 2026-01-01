@@ -40,6 +40,24 @@ static const Logger logger(__FILE__);
 
 #include "Type.h"
 
+//
+// Timestamp
+//
+Timestamp Timestamp::getNull() {
+    static Timestamp ret(0, 0, 0);
+    return ret;
+}
+static std::string toTimestamp(uint32_t unixTime) {
+	time_t temp = unixTime;
+    struct tm tm;
+    localtime_r(&temp, &tm);
+    return std_sprintf("%04d%02d%02d#%02d%02d%02d", 1900 + tm.tm_year, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+}
+std::string Timestamp::toString() const {
+    return isNull() ? "#NULL" : std_sprintf("%s#%03d#%03d", toTimestamp(Util::toUnixTime(time)), net, host);
+}
+
+
 
 #undef  ENUM_VALUE
 #define ENUM_VALUE(enum,value) {enum::value, #value},

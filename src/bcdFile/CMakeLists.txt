@@ -35,7 +35,6 @@ target_sources(
         SGIndex.h
         SGRecord.h
         Symbol.h
-        Timestamp.h
         Tree.h
         TreeIndex.h
         Type.h
@@ -54,7 +53,6 @@ target_sources(
         SERecord.cpp
         SGRecord.cpp
         Symbol.cpp
-        Timestamp.cpp
         Tree.cpp
         Type.cpp
 )

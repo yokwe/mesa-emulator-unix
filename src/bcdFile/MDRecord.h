@@ -39,7 +39,7 @@
 
 #include "MesaByteBuffer.h"
 
-#include "Timestamp.h"
+#include "Type.h"
 #include "HTIndex.h"
 #include "CTXIndex.h"
 

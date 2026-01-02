@@ -69,9 +69,6 @@ struct Index : public MesaByteBuffer::HasRead, public HasToString {
         //     ERROR()
         }
     }
-    static void clear() {
-        indexSet.clear();
-    }
     static void setValue(const std::map<uint16_t, T*>& valueMap) {
         for(const auto& p: indexSet) {
             if (p->noIndex) continue;
@@ -80,6 +77,7 @@ struct Index : public MesaByteBuffer::HasRead, public HasToString {
                 p->_value = valueMap.at(index);
             }
         }
+        indexSet.clear();
     }
     static void dump() {
         for(const auto& e: indexSet) {

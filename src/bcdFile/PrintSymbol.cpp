@@ -53,6 +53,13 @@ static const Logger logger(__FILE__);
 
 namespace print_symbol {
 
+template <class T>
+static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
+    for (auto const& [key, value] : map) {
+        logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
+    }
+}
+    
 Context::Context(const std::string& outDir, const std::string& bcdPath_) : bcdPath(bcdPath_), bcdFile(bcdPath) {
     auto bb = bcdFile.mesaByteBuffer();
     bcd = BCD::getInstance(bb);
@@ -61,6 +68,7 @@ Context::Context(const std::string& outDir, const std::string& bcdPath_) : bcdPa
     symbol = Symbol::getInstance(bb.range(range.offset, range.size));
 
     symbol.dump();
+    dumpTable("se", symbol.seTable);
 
     std::filesystem::path inputPath(bcdPath);
     std::filesystem::path outputPath = outDir;

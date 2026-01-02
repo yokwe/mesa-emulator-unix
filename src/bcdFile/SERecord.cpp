@@ -552,11 +552,11 @@ std::string SERecord::toString() const {
     return std_sprintf("[%s  %s]", toString(tag), ::toString(variant));
 }
 
-SERecord::ID   SERecord::toID() const {
+const SERecord::ID&   SERecord::toID() const {
     if (tag != Tag::ID) ERROR()
     return std::get<SERecord::ID>(variant);
 }
-SERecord::CONS SERecord::toCONS() const {
+const SERecord::CONS& SERecord::toCONS() const {
     if (tag != Tag::CONS) ERROR()
     return std::get<SERecord::CONS>(variant);
 }

@@ -413,8 +413,8 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
     SERecord() : tag(Tag::ID), variant(ID{}) {}
 
-    ID   toID()   const;
-    CONS toCONS() const;
+    const ID&   toID()   const;
+    const CONS& toCONS() const;
     bool isID() const {
         return tag == Tag::ID;
     }

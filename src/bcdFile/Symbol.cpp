@@ -47,18 +47,25 @@ static const Logger logger(__FILE__);
 
 #include "Symbol.h"
 
+#include "BTIndex.h"
+#include "CTXIndex.h"
+#include "EXTIndex.h"
+#include "HTIndex.h"
 #include "LTIndex.h"
+#include "MDIndex.h"
+#include "SEIndex.h"
+#include "TreeIndex.h"
 
 //
 // concrete definition
 //
-#include "HTRecord.h"
-
 #include "BodyRecord.h"
-#include "MDRecord.h"
 #include "CTXRecord.h"
-#include "SERecord.h"
 #include "EXTRecord.h"
+#include "HTRecord.h"
+#include "LTRecord.h"
+#include "MDRecord.h"
+#include "SERecord.h"
 #include "Tree.h"
 
 

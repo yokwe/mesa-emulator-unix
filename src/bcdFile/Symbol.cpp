@@ -38,6 +38,8 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "Type.h"
+
 #include "MesaByteBuffer.h"
 
 #include "MDIndex.h"
@@ -280,15 +282,6 @@ SEIndex Symbol::nextSei(SEIndex sei) {
 	ERROR()
 }
 
-SEIndex Symbol::toSEIndex(uint16_t index) {
-	if (seTable.contains(index)) {
-		return SEIndex(index, seTable.at(index));
-	} else {
-		ERROR();
-//		return SEIndex(index);
-	}
-}
-
 //UnderType: PROC [h: Handle, type: SEIndex] RETURNS [CSEIndex] = {
 //  sei: SEIndex � type;
 //  WHILE sei # SENull DO
@@ -309,4 +302,50 @@ SEIndex Symbol::underType(SEIndex sei) {
 	}
 	return sei;
 }
-	
+
+SEIndex Symbol::typeLink(SEIndex sei) {
+	sei = underType(sei);
+	const auto& cons = sei.value().toCONS();
+	if (cons.isRECORD()) {
+		const auto& record = cons.toRECORD();
+		if (record.tag == SERecord::CONS::RECORD::Tag::LINKED) {
+			return record.toLINKED().linkType;
+		}
+	}
+	return seNull;
+}    
+
+//XferMode: PROC [h: Handle, type: SEIndex] RETURNS [TransferMode] = {
+//  sei: CSEIndex = UnderType[h, type];
+//  RETURN [WITH t: h.seb[sei] SELECT FROM transfer => t.mode, ENDCASE => none]};
+TransferMode Symbol::xferMode(SEIndex type) {
+	auto sei = underType(type);
+	const auto& cons = sei.value().toCONS();
+	return cons.tag == TypeClass::TRANSFER ? cons.toTRANSFER().mode : TransferMode::NONE;
+}
+
+SEIndex Symbol::toSEIndex(uint16_t index) {
+	if (seTable.contains(index)) {
+		return SEIndex(index, seTable.at(index));
+	} else {
+		ERROR();
+//		return SEIndex(index);
+	}
+}
+
+static BTIndex btNull{BTIndex::BT_NULL, 0};
+BTIndex Symbol::toBTIndex(uint16_t index) {
+	if (bodyTable.contains(index)) {
+		return BTIndex(index, bodyTable.at(index));
+	} else {
+		return btNull;
+	}
+}
+
+static EXTIndex extNull{EXTIndex::EXT_NULL, 0};
+EXTIndex Symbol::toEXTIndex(SEIndex sei) {
+	for(const auto& [key, value]: extTable) {		
+		if (value->sei == sei) return EXTIndex(key, value);
+	}
+	return extNull;
+}

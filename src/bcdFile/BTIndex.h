@@ -49,8 +49,8 @@ struct BodyRecord;
 struct BTIndex : public Index<"bt", BodyRecord> {
     static const constexpr uint16_t BT_NULL = 0x3FFF;
     
-    // BTIndex() : Index() {}
-    // BTIndex(uint16_t index_, const BodyRecord* value_) : Index(index_, value_) {}
+    BTIndex() : Index() {}
+    BTIndex(uint16_t index_, const BodyRecord* value_) : Index(index_, value_) {}
     // BTIndex(uint16_t index_) : Index(index_) {}
 
     bool isNull() const {

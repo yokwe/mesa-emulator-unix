@@ -35,6 +35,9 @@
 
 #pragma once
 
+#include <functional>
+#include <variant>
+
 #include "../util/StringPrinter.h"
 
 #include "BCDFile.h"
@@ -43,8 +46,7 @@
 
 #include "Type.h"
 #include "SEIndex.h"
-#include <functional>
-#include <variant>
+#include "Tree.h"
 
 namespace print_symbol {
 
@@ -169,5 +171,7 @@ inline void print(Context& context) {
 ValFormat getValFormat(Context& context, SEIndex tsei);
 ValFormat printType(Context& context, SEIndex sei, std::function<void()> dosub);
 void printDefaultValue(Context& context, SEIndex sei, ValFormat vf);
+void printTypedVal(Context& context, uint16_t value, ValFormat vf);
+void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot = false);
 
 }

@@ -56,5 +56,11 @@ struct CTXIndex : public Index<"ctx", CTXRecord> {
         if (isNull()) return std_sprintf("%s-NULL", prefix);
         return Index::toString();
     }
+
+    //StandardContext: TYPE = CTXIndex[CTXNull+SIZE[simple CTXRecord]..CTXNull+6*SIZE[simple CTXRecord]];
+    //StandardContext: TYPE = CTXIndex[2..12];
+    bool isStandardContext() const {
+        return 2 <= index() && index() <= 12;
+    }
 };
 

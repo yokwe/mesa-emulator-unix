@@ -62,6 +62,8 @@ struct BodyLink : public MesaByteBuffer::HasRead, public HasToString {
     Which   which;
     BTIndex index;
 
+    BodyLink() : which(Which::SIBLING) {}
+
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
 };

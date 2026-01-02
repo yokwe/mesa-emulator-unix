@@ -40,6 +40,7 @@ static const Logger logger(__FILE__);
 
 #include "../util/StringPrinter.h"
 
+#include "Type.h"
 #include "BCDFile.h"
 #include "BCD.h"
 #include "Symbol.h"
@@ -48,6 +49,9 @@ static const Logger logger(__FILE__);
 #include "MDRecord.h"
 #include "CTXRecord.h"
 #include "SERecord.h"
+#include "BodyRecord.h"
+#include "EXTRecord.h"
+
 
 #include "PrintSymbol.h"
 
@@ -139,14 +143,13 @@ void printModule(Context& context) {
 }
 
 void printSymbol(Context& context, SEIndex sei, const std::string& colonString) {
-    (void)sei; (void)colonString;
     auto& symbol = context.symbol;
     auto& out = context.out;
     (void)symbol; (void)out;
 
     auto id = sei.value().toID();
-
     out.print("%s%s", id.hash.toValue(), colonString);
+
     if (!id.public_) out.print("PRIVATE ");
     if (sei.isType()) {
         out.print("TYPE");
@@ -164,28 +167,179 @@ void printSymbol(Context& context, SEIndex sei, const std::string& colonString) 
 		printDefaultValue(context, sei, vf);
     } else {
         // FIXME
-    }
+        auto typeSei = id.idType;
+		if (id.immutable && (!id.constant)) {
+			switch (symbol.xferMode(typeSei)) {
+			case TransferMode::NONE:
+			case TransferMode::PROCESS:
+                out.print("READONLY ");
+				break;
+			default:
+				break;
+			}
+		}
+		ValFormat vf = printType(context, typeSei, {});
+        if (id.constant) {
+            out.print(" = ");
+            if (vf.tag == ValFormat::Tag::TRANSFER) {
+                auto bti = symbol.toBTIndex(id.idInfo);
+                if (!bti.isNull()) {
+                    const auto& bt = bti.value();
+                    auto mode = vf.toTRANSFER().mode;
+                    if (mode == TransferMode::SIGNAL || mode == TransferMode::ERROR_) {
+                        out.print("CODE");
+					} else if (bt.toCALLABLE().inline_) {
+                        out.print("INLINE");
+					} else {
+                        out.print("BODY");
+					}
+                } else {
+                    if (id.extended) {
+                        out.print("OPCODE");
+                    } else {
+                        printTypedVal(context, id.idValue, vf);
+                    }
+                }
+            } else {
+				if (id.extended) {
+                    auto exi = symbol.toEXTIndex(sei);
+					printTreeLink(context, exi.value().tree, vf, 0, false);
+				} else {
+					const auto& underType = symbol.underType(typeSei).value();
+					if (underType.toCONS().tag == TypeClass::SUBRANGE) {
+						printTypedVal(context, id.idValue + underType.toCONS().toSUBRANGE().origin, vf);
+					} else {
+						printTypedVal(context, id.idValue, vf);
+					}
+				}
 
-    logger.info("sei  %s  %s", sei.toString(), sei.value().toString());
+            }
+        }
+    }
 }
 
 ValFormat printType(Context& context, SEIndex sei, std::function<void()> dosub) {
-    (void)context; (void)sei; (void)dosub;
+    auto& symbol = context.symbol;
+    auto& out = context.out;
+//    logger.info("printType  %s", sei.value().toString());
+
     // FIXME
-    ValFormat ret;
-    return ret;
+    ValFormat vf = getValFormat(context, sei);
+    const auto& se = sei.value();
+    switch(se.tag) {
+    case SERecord::Tag::ID:
+    {
+        const auto& id = se.toID();
+        for (;;) {
+            const SEIndex next = symbol.typeLink(sei);
+            if (next.isNull())
+                break;
+            if (sei.value().tag == SERecord::Tag::ID) {
+                out.print("%s ", id.hash.toValue());
+            }
+            sei = next;
+        }
+        if (!id.idCtx.isStandardContext()) {
+            const CTXRecord& c = id.idCtx.value();
+            switch (c.tag) {
+            case CTXRecord::Tag::INCLUDED:
+                out.print("%s.", c.toINCLUDED().module.value().moduleId.toValue());
+                break;
+            case CTXRecord::Tag::SIMPLE:
+                /* putCurrentModuleDot(out); */
+                break;
+            default:
+                break;
+            }
+        }
+        out.print(id.hash.toValue());
+        if (dosub) dosub();
+    }
+        break;
+    case SERecord::Tag::CONS:
+        // FIXME
+        out.print("-- printType CONS -- ");
+        break;
+    default:
+        ERROR()
+    }
+
+
+    return vf;
 }
 
 ValFormat getValFormat(Context& context, SEIndex tsei) {
     (void)context; (void)tsei;
-    // FIXME
-    ValFormat ret;
-    return ret;
+    auto& symbol = context.symbol;
+
+    const auto& t = tsei.value();
+    switch(t.tag) {
+    case SERecord::Tag::ID:
+        return getValFormat(context, symbol.underType(tsei));
+    case SERecord::Tag::CONS:
+    {
+        const auto& cons = t.toCONS();
+        switch(cons.tag) {
+        case TypeClass::BASIC:
+            switch(cons.toBASIC().code) {
+            case Symbol::CODE_ANY:
+                return ValFormat::getUNSIGNED();
+            case Symbol::CODE_INT:
+                return ValFormat::getSIGNED();
+            case Symbol::CODE_CHAR:
+                return ValFormat::getCHAR();
+            default:
+                ERROR()
+            }
+            break;
+        case TypeClass::ENUMERATED:
+            return ValFormat::getENUM(tsei);
+        case TypeClass::ARRAY:
+            return ValFormat::getARRAY(cons.toARRAY().componentType);
+        case TypeClass::TRANSFER:
+            return ValFormat::getTRANSFER(cons.toTRANSFER().mode);
+        case TypeClass::RELATIVE:
+            return getValFormat(context, cons.toRELATIVE().offsetType);
+        case TypeClass::SUBRANGE:
+            {
+                const auto& subrange = cons.toSUBRANGE();
+                auto vf = getValFormat(context, subrange.rangeType);
+                if (vf.tag == ValFormat::Tag::SIGNED && subrange.origin == 0) vf = ValFormat::getUNSIGNED();
+                return vf;
+            }
+            break;
+        case TypeClass::LONG:
+            return getValFormat(context, cons.toLONG().rangeType);
+        case TypeClass::REF:
+            return ValFormat::getREF();
+        default:
+            return ValFormat::getOTHER();
+        }
+    }
+    default:
+        ERROR()
+    }
 }
 
 void printDefaultValue(Context& context, SEIndex sei, ValFormat vf) {
     (void)context; (void)sei; (void)vf;
     // FIXME
+    auto& out = context.out;
+    out.print("-- %s --", __FUNCTION__);
+}
+
+void printTypedVal(Context& context, uint16_t value, ValFormat vf) {
+    (void)context; (void)value; (void)vf;
+    // FIXME
+    auto& out = context.out;
+    out.print("-- %s --", __FUNCTION__);
+}
+
+void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot) {
+    (void)context; (void)tree; (void)vf; (void) recur; (void)sonOfDot;
+    // FIXME
+    auto& out = context.out;
+    out.print("-- %s --", __FUNCTION__);
 }
 
 }

@@ -37,6 +37,7 @@
 
 #include <set>
 #include <map>
+#include <source_location>
 
 #include "../util/Util.h"
 
@@ -107,7 +108,7 @@ public:
     Index() : _index(55555), _value(0), noIndex(true) {
         addIndex(this);
     }
-    Index(uint16_t index_, const T* value_) : _index(index_), _value(value_), noIndex(value_ == 0) {}
+    Index(uint16_t index_, const T* value_) : _index(index_), _value(value_), noIndex(false) {}
     Index(uint16_t index_) : Index(index_, 0) {}
 
     // copy constructor
@@ -144,9 +145,11 @@ public:
     //
     // index
     //
-    uint16_t index() const {
+    uint16_t index(std::source_location location = std::source_location::current()) const {
         if (noIndex) {
             logger.error("index has no value");
+            logger.error("  prefix  %s", prefix);
+            LogSourceLocation::error(logger, location);
             ERROR()
         } else {
             return _index;

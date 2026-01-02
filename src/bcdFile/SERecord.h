@@ -246,6 +246,10 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
             void read(uint16_t u0, MesaByteBuffer& bb);
             std::string toString() const override;
+
+            const LINKED& toLINKED() const {
+                return std::get<LINKED>(variant);
+            }
         };
         struct REF : public HasToString {
             bool    counted;
@@ -399,8 +403,23 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
         const SUBRANGE& toSUBRANGE() const {
             return std::get<SUBRANGE>(variant);
         }
+        const LONG& toLONG() const {
+            return std::get<LONG>(variant);
+        }
+        const ARRAY& toARRAY() const {
+            return std::get<ARRAY>(variant);
+        }
+        const RELATIVE& toRELATIVE() const {
+            return std::get<RELATIVE>(variant);
+        }
+        const RECORD& toRECORD() const {
+            return std::get<RECORD>(variant);
+        }
         bool isOPAQUE() const {
             return tag == TypeClass::OPAQUE;
+        }
+        bool isRECORD() const {
+            return tag == TypeClass::RECORD;
         }
     };
 

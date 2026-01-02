@@ -44,6 +44,8 @@
 #include "MesaByteBuffer.h"
 #include "CTXIndex.h"
 #include "SEIndex.h"
+#include "BTIndex.h"
+#include "EXTIndex.h"
 
 //
 // forward declaration
@@ -140,4 +142,8 @@ public:
 	SEIndex nextSei(SEIndex sei);
 	SEIndex underType(SEIndex sei);
 	SEIndex toSEIndex(uint16_t index);
+	SEIndex typeLink(SEIndex sei);
+	TransferMode xferMode(SEIndex sei);
+	BTIndex toBTIndex(uint16_t index);
+	EXTIndex toEXTIndex(SEIndex sei);
 };

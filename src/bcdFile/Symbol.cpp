@@ -257,13 +257,11 @@ SEIndex Symbol::nextSei(SEIndex sei) {
 	// sanity check
 	if (sei.value().tag != SERecord::Tag::ID) ERROR()
 
-	if (sei.isNull()) return seNull;
-
 	using ID = SERecord::ID;
 	for(auto i = seTable.cbegin(); i != seTable.cend(); i++) {
-		if (i->first == sei.index()) {
-			auto& seRecord = *i->second;
-			auto id = seRecord.toID();
+		auto [key, value] = *i;
+		if (key == sei.index()) {
+			const auto& id = value->toID();
 			// next for SEQUENTIAL
 			auto next = i;
 			next++;

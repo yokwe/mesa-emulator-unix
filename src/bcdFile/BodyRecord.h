@@ -191,9 +191,15 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
         void read(uint16_t u8, MesaByteBuffer& bb);
         std::string toString() const override;
 
-        OUTER toOUTER();
-        INNER toINNER();
-        CATCH toCATCH();
+        const OUTER& toOUTER() {
+            return std::get<OUTER>(variant);
+        }
+        const INNER& toINNER() {
+            return std::get<INNER>(variant);
+        }
+        const CATCH& toCATCH() {
+            return std::get<CATCH>(variant);
+        }
     };
     struct OTHER : public HasToString {
         uint16_t relOffset;
@@ -215,6 +221,10 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
 
-    CALLABLE toCALLABLE() const;
-    OTHER    toOTHER() const;
+    const CALLABLE& toCALLABLE() const {
+        return std::get<CALLABLE>(variant);
+    }
+    const OTHER&    toOTHER() const {
+        return std::get<OTHER>(variant);
+    }
 };

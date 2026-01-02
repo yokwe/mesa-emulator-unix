@@ -253,16 +253,6 @@ std::string BodyRecord::CALLABLE::toString() const {
         variantString);
 }
 
-BodyRecord::CALLABLE::OUTER BodyRecord::CALLABLE::toOUTER() {
-    return std::get<BodyRecord::CALLABLE::OUTER>(variant);
-}
-BodyRecord::CALLABLE::INNER BodyRecord::CALLABLE::toINNER() {
-    return std::get<BodyRecord::CALLABLE::INNER>(variant);
-}
-BodyRecord::CALLABLE::CATCH BodyRecord::CALLABLE::toCATCH() {
-    return std::get<BodyRecord::CALLABLE::CATCH>(variant);
-}
-
 //
 // BodyRecord::OTHER
 //
@@ -316,10 +306,4 @@ std::string BodyRecord::toString() const {
         info.toString(),
         toString(tag),
         variantString);
-}
-BodyRecord::CALLABLE BodyRecord::toCALLABLE() const {
-    return std::get<BodyRecord::CALLABLE>(variant);
-}
-BodyRecord::OTHER BodyRecord::toOTHER() const {
-    return std::get<BodyRecord::OTHER>(variant);
 }

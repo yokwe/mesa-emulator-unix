@@ -142,13 +142,13 @@ struct ValFormat {
     }
 
 
-    ENUM toENUM () {
+    const ENUM& toENUM () {
         return std::get<ENUM>(variant);
     }
-    ARRAY toARRAY () {
+    const ARRAY& toARRAY () {
         return std::get<ARRAY>(variant);
     }
-    TRANSFER toTRANSFER () {
+    const TRANSFER& toTRANSFER () {
         return std::get<TRANSFER>(variant);
     }
 };

@@ -189,7 +189,9 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
 
-        LINKED toLINKED() const;
+        const LINKED& toLINKED() const {
+            return std::get<LINKED>(variant);
+        }
     };
     struct CONS : public HasToString {
         struct MODE : public HasToString {
@@ -388,13 +390,13 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
         
-        BASIC toBASIC() const {
+        const BASIC& toBASIC() const {
             return std::get<BASIC>(variant);
         }
-        TRANSFER toTRANSFER() const {
+        const TRANSFER& toTRANSFER() const {
             return std::get<TRANSFER>(variant);
         }
-        SUBRANGE toSUBRANGE() const {
+        const SUBRANGE& toSUBRANGE() const {
             return std::get<SUBRANGE>(variant);
         }
         bool isOPAQUE() const {
@@ -413,8 +415,12 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
     SERecord() : tag(Tag::ID), variant(ID{}) {}
 
-    const ID&   toID()   const;
-    const CONS& toCONS() const;
+    const ID&   toID()   const {
+        return std::get<ID>(variant);
+    }
+    const CONS& toCONS() const {
+        return std::get<CONS>(variant);
+    }
     bool isID() const {
         return tag == Tag::ID;
     }

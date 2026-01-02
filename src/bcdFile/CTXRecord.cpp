@@ -163,15 +163,3 @@ std::string CTXRecord::toString() const {
     return std_sprintf("[%s  %s  %s  %s  %s]",
         flags, seList.toString(), ::toString(level), toString(tag), variantString);
 }
-CTXRecord::SIMPLE   CTXRecord::toSIMPLE() {
-    return std::get<CTXRecord::SIMPLE>(variant);
-}
-CTXRecord::INCLUDED CTXRecord::toINCLUDED() {
-    return std::get<CTXRecord::INCLUDED>(variant);
-}
-CTXRecord::IMPORTED CTXRecord::toIMPORTED() {
-    return std::get<CTXRecord::IMPORTED>(variant);
-}
-CTXRecord::NIL      CTXRecord::toNIL() {
-    return std::get<CTXRecord::NIL>(variant);
-}

@@ -103,12 +103,6 @@ std::string LTRecord::toString() const {
         toString(tag),
         variantString);
 }
-LTRecord::SHORT LTRecord::toSHORT() {
-    return std::get<LTRecord::SHORT>(variant);
-}
-LTRecord::LONG  LTRecord::toLONG() {
-    return std::get<LTRecord::LONG>(variant);
-}
 
 
 //
@@ -149,10 +143,4 @@ void LitRecord::read(uint16_t u0) {
 std::string LitRecord::toString() const {
     std::string varintString = ::toString(variant);
     return std_sprintf("[%s  %s]", toString(tag), varintString);
-}
-LitRecord::WORD   LitRecord::toWORD() {
-    return std::get<LitRecord::WORD>(variant);
-}
-LitRecord::STRING LitRecord::toSTRING() {
-    return std::get<LitRecord::STRING>(variant);
 }

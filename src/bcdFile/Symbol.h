@@ -135,7 +135,6 @@ public:
 
     void dump();
     void dumpTable();
-    void dumpIndex();
 
 	// utility methods
 	SEIndex nextSei(SEIndex sei);

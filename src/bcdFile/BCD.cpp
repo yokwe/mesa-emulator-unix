@@ -55,6 +55,114 @@ static const Logger logger(__FILE__);
 #include "SGIndex.h"
 #include "SGRecord.h"
 
+static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
+    if (limit == 0) return;
+    auto bb = baseBB.range(offset, limit);
+
+    bb.pos(2);
+    bb.get8();
+    for(;;) {
+        auto index = bb.pos();
+        if (limit <= index) break;
+        auto bytePos = bb.bytePos();
+
+        std::string* value = new std::string;
+        auto length = bb.get8();
+        for(int i = 0; i < length; i++) {
+            *value += bb.get8();
+        }
+        int ssIndex = bytePos - 3;
+        table[ssIndex] = value;
+   }
+}
+template<class T>
+static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
+    if (limit == 0) return;
+    auto bb = baseBB.range(offset, limit);
+
+    bb.pos(0);
+    for(;;) {
+        auto index = bb.pos();
+        if (limit <= index) break;
+
+        T* value = new T;
+        value->read(bb);
+        table[index] = value;
+    }
+	// sanity check
+	if (bb.pos() != limit) {
+		logger.error("Unexpected length");
+		logger.error("  pos        %5d", bb.pos());
+		logger.error("  limit      %5d", limit);
+		logger.error("  index      %5d", index);
+	}
+}
+
+BCD BCD::getInstance(MesaByteBuffer& bb) {
+    // sanity check
+    checkVersionIdent(bb);
+
+    BCD bcd;
+
+    bcd.read(bb);
+
+    // read table
+    readTableSS(bb, bcd.ssOffset, bcd.ssLimit, bcd.ssTable);    
+    readTable<FTRecord>(bb, bcd.ftOffset, bcd.ftLimit, bcd.ftTable);
+    readTable<SGRecord>(bb, bcd.sgOffset, bcd.sgLimit, bcd.sgTable);
+    readTable<ENRecord>(bb, bcd.enOffset, bcd.enLimit, bcd.enTable);
+    readTable<MTRecord>(bb, bcd.mtOffset, bcd.mtLimit, bcd.mtTable);
+
+    // set index value
+    NameRecord::setValue(bcd.ssTable);
+    FTIndex::setValue(bcd.ftTable);
+    SGIndex::setValue(bcd.sgTable);
+    ENIndex::setValue(bcd.enTable);
+    MTIndex::setValue(bcd.mtTable);
+
+    // build bcd.mySymbolRange
+    {
+        if (bcd.sgTable.empty()) {
+            uint32_t offset = Symbol::ALTO_BIAS * Environment::wordsPerPage;
+            uint32_t size = bb.size() - offset;
+
+            // sanity check
+            bb.pos(offset);
+            Symbol::checkVersionIdent(bb);
+
+            bcd.mySymbolRange.emplace_back(offset, size);
+            logger.info("mySymbolRange  A  %5d  %5d", offset, size);
+        } else {
+            for(const auto& e: bcd.sgTable) {
+                SGRecord& sgRecord  = *e.second;
+                if (!sgRecord.file.isSelf()) continue;
+                if (sgRecord.segClass != SGRecord::SegClass::SYMBOLS) continue;
+
+                uint32_t offset = (sgRecord.base - Symbol::ALTO_BIAS) * Environment::wordsPerPage;
+                uint32_t size   = sgRecord.pages * Environment::wordsPerPage;
+
+                // sanity check
+                bb.pos(offset);
+                Symbol::checkVersionIdent(bb);
+    
+                bcd.mySymbolRange.emplace_back(offset, size);
+                logger.info("mySymbolRange  B  %5d  %5d", offset, size);
+            }
+        }
+    }
+
+    return bcd;
+}
+
+void BCD::checkVersionIdent(MesaByteBuffer &bb) {
+    auto oldPos = bb.pos();
+    auto word = bb.get16();
+    bb.pos(oldPos);
+    if (word == BCD::VersionID) return;
+    logger.error("Unexpected version  %d", word);
+    ERROR()
+}
+
 MesaByteBuffer& BCD::read(MesaByteBuffer& bb) {
     bb.pos(0);
     bb.read(versionIdent);
@@ -136,119 +244,10 @@ void BCD::dump() {
     logger.info("ftTable        %5d", ftTable.size());
     logger.info("sgTable        %5d", sgTable.size());
     logger.info("enTable        %5d", enTable.size());
-    // logger.info("mtTable  %d", mtTable.size());
+    logger.info("mtTable        %5d", mtTable.size());
 	logger.info("nDummies       %5d", nDummies);
 
     logger.info("symbolRange    %5d", this->mySymbolRange.size());
-
-}
-
-static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
-    if (limit == 0) return;
-    auto bb = baseBB.range(offset, limit);
-
-    bb.pos(2);
-    bb.get8();
-    for(;;) {
-        auto index = bb.pos();
-        if (limit <= index) break;
-        auto bytePos = bb.bytePos();
-
-        std::string* value = new std::string;
-        auto length = bb.get8();
-        for(int i = 0; i < length; i++) {
-            *value += bb.get8();
-        }
-        int ssIndex = bytePos - 3;
-        table[ssIndex] = value;
-   }
-}
-
-template<class T>
-static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
-    if (limit == 0) return;
-    auto bb = baseBB.range(offset, limit);
-
-    bb.pos(0);
-    for(;;) {
-        auto index = bb.pos();
-        if (limit <= index) break;
-
-        T* value = new T;
-        value->read(bb);
-        table[index] = value;
-    }
-	// sanity check
-	if (bb.pos() != limit) {
-		logger.error("Unexpected length");
-		logger.error("  pos        %5d", bb.pos());
-		logger.error("  limit      %5d", limit);
-		logger.error("  index      %5d", index);
-	}
-}
-
-
-BCD BCD::getInstance(MesaByteBuffer& bb) {
-    // sanity check
-    checkVersionIdent(bb);
-
-    BCD bcd;
-
-    bcd.read(bb);
-
-    readTableSS(bb, bcd.ssOffset, bcd.ssLimit, bcd.ssTable);    
-    readTable<FTRecord>(bb, bcd.ftOffset, bcd.ftLimit, bcd.ftTable);
-    readTable<SGRecord>(bb, bcd.sgOffset, bcd.sgLimit, bcd.sgTable);
-    readTable<ENRecord>(bb, bcd.enOffset, bcd.enLimit, bcd.enTable);
-    readTable<MTRecord>(bb, bcd.mtOffset, bcd.mtLimit, bcd.mtTable);
-
-    NameRecord::setValue(bcd.ssTable);
-    FTIndex::setValue(bcd.ftTable);
-    SGIndex::setValue(bcd.sgTable);
-    ENIndex::setValue(bcd.enTable);
-    MTIndex::setValue(bcd.mtTable);
-
-    // build bcd.mySymbolRange
-    {
-        if (bcd.sgTable.empty()) {
-            uint32_t offset = Symbol::ALTO_BIAS * Environment::wordsPerPage;
-            uint32_t size = bb.size() - offset;
-
-            // sanity check
-            bb.pos(offset);
-            Symbol::checkVersionIdent(bb);
-
-            bcd.mySymbolRange.emplace_back(offset, size);
-            logger.info("mySymbolRange  A  %5d  %5d", offset, size);
-        } else {
-            for(const auto& e: bcd.sgTable) {
-                SGRecord& sgRecord  = *e.second;
-                if (!sgRecord.file.isSelf()) continue;
-                if (sgRecord.segClass != SGRecord::SegClass::SYMBOLS) continue;
-
-                uint32_t offset = (sgRecord.base - Symbol::ALTO_BIAS) * Environment::wordsPerPage;
-                uint32_t size   = sgRecord.pages * Environment::wordsPerPage;
-
-                // sanity check
-                bb.pos(offset);
-                Symbol::checkVersionIdent(bb);
-    
-                bcd.mySymbolRange.emplace_back(offset, size);
-                logger.info("mySymbolRange  B  %5d  %5d", offset, size);
-            }
-        }
-    }
-
-    return bcd;
-}
-
-void BCD::checkVersionIdent(MesaByteBuffer &bb) {
-    auto oldPos = bb.pos();
-    auto word = bb.get16();
-    bb.pos(oldPos);
-    if (word == BCD::VersionID) return;
-    logger.error("Unexpected version  %d", word);
-    ERROR()
 }
 
 template <class T>
@@ -257,30 +256,9 @@ static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
         logger.info("%-8s  %s", std_sprintf("%s-%d", prefix, key), value->toString());
     }
 }
-
 void BCD::dumpTable() {
     // ::dumpTable("ft", ftTable);
-    {
-        int fileIndex = 0;
-        for(const auto& [key, value]: ftTable) {
-            logger.info("%-8s  %5d  %s", std_sprintf("%s-%d", "ft", key), fileIndex++, value->toString());
-        }
-    }
     ::dumpTable("sg", sgTable);
     // ::dumpTable("en", enTable);
     ::dumpTable("mt", mtTable);
-}
-
-void BCD::dumpIndex() {
-//    NameRecord::dump();
-    FTIndex::dump();
-    SGIndex::dump();
-    ENIndex::dump();
-    MTIndex::dump();
-
-    logger.info("NameRecord indexSet  %d", NameRecord::indexSet.size());
-    logger.info("FTIndex    indexSet  %d", FTIndex::indexSet.size());
-    logger.info("SGIndex    indexSet  %d", SGIndex::indexSet.size());
-    logger.info("ENIndex    indexSet  %d", ENIndex::indexSet.size());
-    logger.info("MTIndex    indexSet  %d", MTIndex::indexSet.size());
 }

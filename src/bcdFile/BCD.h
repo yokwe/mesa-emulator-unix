@@ -103,7 +103,6 @@ public:
 
     void dump();
     void dumpTable();
-    void dumpIndex();
 
     struct Range {
         const uint16_t offset;

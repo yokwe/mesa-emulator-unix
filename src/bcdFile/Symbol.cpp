@@ -117,8 +117,6 @@ static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std:
 		logger.error("  size       %5d", block.size);
 	}
 }
-
-
 template<class T>
 static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, T*>& table, std::string prefix) {
 	auto bb = baseBB.range(block.offset, block.size);
@@ -141,7 +139,6 @@ static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std:
 		ERROR()
 	}
 }
-
 
 Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	// sanity check
@@ -182,7 +179,6 @@ void Symbol::checkVersionIdent(MesaByteBuffer &bb) {
     logger.error("Unexpected version  %d", word);
     ERROR()
 }
-
 
 MesaByteBuffer& Symbol::read(MesaByteBuffer& bb) {
 	uint16_t u10;
@@ -236,15 +232,6 @@ void Symbol::dump() {
 	logger.info("mdTable         %5d", mdTable.size());
 	logger.info("seTable         %5d", seTable.size());
 	logger.info("treeTable       %5d", treeTable.size());
-
-	BTIndex::stats();
-	CTXIndex::stats();
-	EXTIndex::stats();
-	HTIndex::stats();
-	LTIndex::stats();
-	MDIndex::stats();
-	SEIndex::stats();
-	TreeIndex::stats();
 }
 
 template <class T>
@@ -264,16 +251,6 @@ void Symbol::dumpTable() {
 	::dumpTable("tree", treeTable);
 }
 
-void Symbol::dumpIndex() {
-//	BTIndex::dump();
-//	CTXIndex::dump();
-//	EXTIndex::dump();
-//	HTIndex::dump();
-//	LTIndex::dump();
-//	MDIndex::dump();
-//	SEIndex::dump();
-//	TreeIndex::dump();
-}
 
 static SEIndex seNull{SEIndex::SE_NULL, 0};
 SEIndex Symbol::nextSei(SEIndex sei) {

@@ -48,7 +48,11 @@ struct HTRecord;
 // HTNull: HTIndex = FIRST[HTIndex];
 struct HTIndex : public Index<"ht", HTRecord> {
     static const constexpr uint16_t HT_NULL = 0;
-    
+
+    HTIndex() : Index() {}
+    HTIndex(uint16_t index_, const HTRecord* value_) : Index(index_, value_) {}
+    HTIndex(uint16_t index_) : Index(index_) {}
+
     bool isNull() const {
         return index() == HT_NULL;
     }

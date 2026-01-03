@@ -69,30 +69,30 @@ MesaByteBuffer& TreeLink::read(MesaByteBuffer& bb) {
     switch(tag) {
     case Tag::SUBTREE:
     {
-        SUBTREE value_;
-        value_.read(u0);
-        value = value_;
+        SUBTREE value;
+        value.read(u0);
+        variant = value;
     }
         break;
     case Tag::HASH:
     {
-        HASH value_;
-        value_.read(u0);
-        value = value_;
+        HASH value;
+        value.read(u0);
+        variant = value;
     }
         break;
     case Tag::SYMBOL:
     {
-        SYMBOL value_;
-        value_.read(u0);
-        value = value_;
+        SYMBOL value;
+        value.read(u0);
+        variant = value;
     }
         break;
     case Tag::LITERAL:
     {
-        LITERAL value_;
-        value_.read(u0);
-        value = value_;
+        LITERAL value;
+        value.read(u0);
+        variant = value;
     }
         break;
     default:
@@ -102,8 +102,8 @@ MesaByteBuffer& TreeLink::read(MesaByteBuffer& bb) {
     return bb;
 }
 std::string TreeLink::toString() const {
-    std::string valueString = ::toString(value);
-    return std_sprintf("[%s  %s]", toString(tag), valueString);
+    std::string variantString = ::toString(variant);
+    return std_sprintf("[%s  %s]", toString(tag), variantString);
 }
 
 //

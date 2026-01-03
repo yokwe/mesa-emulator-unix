@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025, Yasuhiro Hasegawa
+ * Copyright (c) 2026, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <string>
-
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
-
-#include "../bcd/BCDFile.h"
-#include "../bcd/BCD.h"
-#include "../bcd/Symbols.h"
 
 int main(int, char**) {
 	logger.info("START");
@@ -46,28 +40,7 @@ int main(int, char**) {
 	setSignalHandler(SIGSEGV);
 
 	{
-//		std::string path = "tmp/bcd/MesaRuntime.symbols";
-//		std::string path = "tmp/bcd/UnpackedPilotKernel.bcd";
-//		std::string path = "tmp/bcd/File.bcd";
-		std::string path = "tmp/bcd/FileImpl.bcd";
-//		std::string path = "tmp/bcd/LoaderCoreImplA.bcd";
-//		std::string path = "tmp/bcd/LoaderCoreImplB.bcd";
-//		std::string path = "tmp/bcd/LoaderCoreImplC.bcd";
-
-		BCDFile bcdFile(path);
-		ByteBuffer bb = bcdFile.getByteBuffer();
-		BCD bcd = BCD::getInstance(bb);
-
-		bcd.dump();
-//		bcd.dumpTable();
-//		bcd.dumpIndex();
-
-		if (bcd.hasSymbol()) {
-			Symbols symbols = Symbols::getInstance(bb, bcd.getSymbolOffset());
-			symbols.dump();
-			symbols.dumpTable();
-			symbols.dumpIndex();
-		}
+		// Write you code here
 	}
 
 	logger.info("STOP");

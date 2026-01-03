@@ -7,6 +7,6 @@ add_executable (
   main.cpp
   )
 
-add_dependencies(main bcd util)
+add_dependencies(main util)
 
-target_link_libraries (main bcd util)
+target_link_libraries (main util)

@@ -65,11 +65,11 @@ tclMesa:
 floppy:
 	/usr/bin/time cmake --build build --target floppy
 
-print-symbol: src/util/Perf.inc src/util/trace.inc
-	/usr/bin/time cmake --build build --target print-symbol
-
 bcdFile: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target bcdFile
+
+print-bcdFile: src/util/Perf.inc src/util/trace.inc
+	/usr/bin/time cmake --build build --target print-bcdFile
 
 #
 # run-XXX
@@ -96,7 +96,7 @@ run-floppy: floppy
 	/bin/echo -n >${BUILD_DIR}/run/floppy.log
 	LOG4CXX_CONFIGURATION=data/log4j-config-floppy.xml ${BUILD_DIR}/floppy/floppy
 
-run-print-symbol: print-symbol
-	/bin/echo -n >${BUILD_DIR}/run/print-symbol.log
-	LOG4CXX_CONFIGURATION=data/log4j-config-print-symbol.xml /usr/bin/time ${BUILD_DIR}/print-symbol/print-symbol
+run-print-bcdFile: print-bcdFile
+	/bin/echo -n >${BUILD_DIR}/run/print-bcdFile.log
+	LOG4CXX_CONFIGURATION=data/log4j-config-print-bcdFile.xml /usr/bin/time ${BUILD_DIR}/print-bcdFile/print-bcdFile
 

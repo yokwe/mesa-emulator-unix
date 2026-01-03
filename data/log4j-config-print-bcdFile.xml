@@ -13,7 +13,7 @@
     </appender>
 
     <appender name="File" class="org.apache.log4j.FileAppender">
-        <param name="file" value="build/run/print-symbol.log" />
+        <param name="file" value="build/run/print-bcdFile.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <!--
             <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} %-5p %-16c %m%n"/>

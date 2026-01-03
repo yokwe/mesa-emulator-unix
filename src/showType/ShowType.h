@@ -30,7 +30,7 @@
 
 
 //
-// PrintSymbol.h
+// ShowType.h
 //
 
 #pragma once
@@ -40,21 +40,15 @@
 
 #include "../util/StringPrinter.h"
 
-#include "BCDFile.h"
-#include "BCD.h"
-#include "Symbol.h"
+#include "../bcdFile/BCDFile.h"
+#include "../bcdFile/BCD.h"
+#include "../bcdFile/Symbol.h"
 
-#include "Type.h"
-#include "SEIndex.h"
-#include "Tree.h"
+#include "../bcdFile/Type.h"
+#include "../bcdFile/SEIndex.h"
+#include "../bcdFile/Tree.h"
 
-namespace print_symbol {
-
-template<typename T>
-bool isLast(T i, T end) {
-    i++;
-    return i == end;
-}
+namespace ShowType {
 
 struct Context {
     std::string   bcdPath;
@@ -65,8 +59,26 @@ struct Context {
     std::string   outPath;
     StringPrinter out;
 
+    // from ITShowType
+    std::string   module;
+
+    bool          defaultPublic = true; // outer RECORD is public or private?
+    bool          showBits      = true; // if TRUE, show bit positions even if not MACHINE DEPENDENT
+
     Context(const std::string& outDir, const std::string& bcdPath);
 };
+
+// This is top level function
+void print(Context& context);
+
+void printHeader(Context& context);
+void printDirectory(Context& context);
+void printModule(Context& context);
+
+
+//
+// AMesa/14.0/Sword/Private/ITShowType.mesa
+//
 
 //EnumeratedSEIndex: TYPE = Table.Base RELATIVE POINTER [0..Table.Limit)
 //  TO enumerated cons Symbols.SERecord;
@@ -85,9 +97,6 @@ struct Context {
 struct ValFormat {
     enum class Tag {SIGNED, UNSIGNED, CHAR, ENUM, ARRAY, TRANSFER, REF, OTHER};
 
-    struct SIGNED {};
-    struct UNSIGNED {};
-    struct CHAR {};
     struct ENUM {
         SEIndex esei;
         ENUM(SEIndex esei_) : esei(esei_) {}
@@ -100,78 +109,69 @@ struct ValFormat {
         TransferMode mode;
         TRANSFER(TransferMode mode_) : mode(mode_) {}
     };
-    struct REF {};
-    struct OTHER {};
-    using VariantType = std::variant<SIGNED, UNSIGNED, CHAR, ENUM, ARRAY, TRANSFER, REF, OTHER>;
 
-    Tag tag;
-    VariantType variant;
+    using Variant = std::variant<std::monostate, ENUM, ARRAY, TRANSFER>;
 
-    ValFormat() : tag(Tag::OTHER), variant(OTHER{}) {}
-    ValFormat(Tag tag_, VariantType variant_) : tag(tag_), variant(variant_) {}
+    Tag     tag;
+    Variant variant;
 
-    static ValFormat getUNSIGNED() {
-        ValFormat ret(Tag::UNSIGNED, UNSIGNED{});
-        return ret;
-    }
+    ValFormat(Tag tag_, Variant variant_) : tag(tag_), variant(variant_) {}
+    ValFormat(Tag tag_) : tag(tag_) {}
+
+
     static ValFormat getSIGNED() {
-        ValFormat ret(Tag::SIGNED, SIGNED{});
-        return ret;
+        return ValFormat(Tag::SIGNED);
+    }
+    static ValFormat getUNSIGNED() {
+        return ValFormat(Tag::UNSIGNED);
     }
     static ValFormat getCHAR() {
-        ValFormat ret(Tag::CHAR, CHAR{});
-        return ret;
+        return ValFormat(Tag::CHAR);
     }
     static ValFormat getENUM(SEIndex esei) {
-        ValFormat ret(Tag::ENUM, ENUM(esei));
-        return ret;
+        return ValFormat(Tag::ENUM, ENUM{esei});
     }
     static ValFormat getARRAY(SEIndex componentType) {
-        ValFormat ret(Tag::ARRAY, ARRAY(componentType));
-        return ret;
+        return ValFormat(Tag::ARRAY, ARRAY{componentType});
     }
     static ValFormat getTRANSFER(TransferMode mode) {
-        ValFormat ret(Tag::ARRAY, TRANSFER(mode));
-        return ret;
+        return ValFormat(Tag::ARRAY, TRANSFER{mode});
     }
     static ValFormat getREF() {
-        ValFormat ret(Tag::REF, REF{});
-        return ret;
+        return ValFormat(Tag::REF);
     }
     static ValFormat getOTHER() {
-        ValFormat ret(Tag::OTHER, OTHER{});
-        return ret;
+        return ValFormat(Tag::OTHER);
     }
 
-
-    const ENUM& toENUM () {
+    const ENUM& toENUM() {
         return std::get<ENUM>(variant);
     }
-    const ARRAY& toARRAY () {
+    const ARRAY& toARRAY() {
         return std::get<ARRAY>(variant);
     }
-    const TRANSFER& toTRANSFER () {
+    const TRANSFER& toTRANSFER() {
         return std::get<TRANSFER>(variant);
     }
 };
 
+void printThis(Context& context, SEIndex sei);
 
-void printHeader(Context& context);
-void printDirectory(Context& context);
-void printModule(Context& context);
-
-void printSymbol(Context& context, SEIndex sei, const std::string& colonString);
-
-inline void print(Context& context) {
-    printHeader(context);
-    printDirectory(context);
-    printModule(context);
-}
-
-ValFormat getValFormat(Context& context, SEIndex tsei);
-ValFormat printType(Context& context, SEIndex sei, std::function<void()> dosub);
+void printSym(Context& context, SEIndex sei, const std::string& colongstring);
+void printTyedVal(Context& context, uint16_t val, ValFormat vf);
+void getBitSpec(Context& context, SEIndex isei, std::string& bitspec);
+void outArgType(Context& context, SEIndex sei);
+void printFieldCtx(Context& context, CTXIndex ctx, bool md = false);
+void printHti(Context& context, HTIndex hti);
+void printSei(Context& context, SEIndex sei);
+void putEnum(Context& context, uint16_t val, SEIndex esei);
+ValFormat getValFormat(SEIndex tsei);
+ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub);
+bool isVar(SEIndex tsei);
+void putModeName(Context& context, TransferMode n);
 void printDefaultValue(Context& context, SEIndex sei, ValFormat vf);
-void printTypedVal(Context& context, uint16_t value, ValFormat vf);
 void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot = false);
+void putCurrentModuleDot(Context& context);
+
 
 }

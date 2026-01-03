@@ -30,7 +30,6 @@ target_sources(
         MTIndex.h
         MTRecord.h
         NameRecord.h
-        PrintSymbol.h
         SEIndex.h
         SERecord.h
         SGIndex.h
@@ -51,7 +50,6 @@ target_sources(
         MDRecord.cpp
         MesaByteBuffer.cpp
         MTRecord.cpp
-        PrintSymbol.cpp
         SERecord.cpp
         SGRecord.cpp
         Symbol.cpp

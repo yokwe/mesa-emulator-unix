@@ -80,6 +80,21 @@ void printModule(Context& context);
 // AMesa/14.0/Sword/Private/ITShowType.mesa
 //
 
+// BitAddress: TYPE = RECORD[
+//     wd: [0..LAST[CARDINAL]/WordLength],	-- word displacement
+//     bd: [0..WordLength)];   			-- bit displacement
+union BitAddress {
+    uint16_t u;
+    union {
+        uint16_t bd :  4;
+        uint16_t wd : 12;
+    };
+};
+inline BitAddress toBitAddr(uint16_t ba) {
+    BitAddress ret = {.u = ba};
+    return ret;
+}
+
 //EnumeratedSEIndex: TYPE = Table.Base RELATIVE POINTER [0..Table.Limit)
 //  TO enumerated cons Symbols.SERecord;
 //
@@ -97,6 +112,9 @@ void printModule(Context& context);
 struct ValFormat {
     enum class Tag {SIGNED, UNSIGNED, CHAR, ENUM, ARRAY, TRANSFER, REF, OTHER};
 
+    struct SIGNED {};
+    struct UNSIGNED {};
+    struct CHAR {};
     struct ENUM {
         SEIndex esei;
         ENUM(SEIndex esei_) : esei(esei_) {}
@@ -109,24 +127,35 @@ struct ValFormat {
         TransferMode mode;
         TRANSFER(TransferMode mode_) : mode(mode_) {}
     };
+    struct REF {};
+    struct OTHER {};
 
-    using Variant = std::variant<std::monostate, ENUM, ARRAY, TRANSFER>;
+    using Variant = std::variant<SIGNED, UNSIGNED, CHAR, ENUM, ARRAY, TRANSFER, REF, OTHER>;
 
     Tag     tag;
     Variant variant;
 
     ValFormat(Tag tag_, Variant variant_) : tag(tag_), variant(variant_) {}
-    ValFormat(Tag tag_) : tag(tag_) {}
+    ValFormat() : ValFormat(Tag::OTHER, OTHER{}) {}
 
+    DEFINE_VARIANT_METHOD(SIGNED)
+    DEFINE_VARIANT_METHOD(UNSIGNED)
+    DEFINE_VARIANT_METHOD(CHAR)
+    DEFINE_VARIANT_METHOD(ENUM)
+    DEFINE_VARIANT_METHOD(ARRAY)
+    DEFINE_VARIANT_METHOD(TRANSFER)
+    DEFINE_VARIANT_METHOD(REF)
+    DEFINE_VARIANT_METHOD(OTHER)
 
+    
     static ValFormat getSIGNED() {
-        return ValFormat(Tag::SIGNED);
+        return ValFormat(Tag::SIGNED, SIGNED{});
     }
     static ValFormat getUNSIGNED() {
-        return ValFormat(Tag::UNSIGNED);
+        return ValFormat(Tag::UNSIGNED, UNSIGNED{});
     }
     static ValFormat getCHAR() {
-        return ValFormat(Tag::CHAR);
+        return ValFormat(Tag::CHAR, CHAR{});
     }
     static ValFormat getENUM(SEIndex esei) {
         return ValFormat(Tag::ENUM, ENUM{esei});
@@ -138,20 +167,10 @@ struct ValFormat {
         return ValFormat(Tag::ARRAY, TRANSFER{mode});
     }
     static ValFormat getREF() {
-        return ValFormat(Tag::REF);
+        return ValFormat(Tag::REF, REF{});
     }
     static ValFormat getOTHER() {
-        return ValFormat(Tag::OTHER);
-    }
-
-    const ENUM& toENUM() {
-        return std::get<ENUM>(variant);
-    }
-    const ARRAY& toARRAY() {
-        return std::get<ARRAY>(variant);
-    }
-    const TRANSFER& toTRANSFER() {
-        return std::get<TRANSFER>(variant);
+        return ValFormat(Tag::OTHER, OTHER{});
     }
 };
 
@@ -165,13 +184,13 @@ void printFieldCtx(Context& context, CTXIndex ctx, bool md = false);
 void printHti(Context& context, HTIndex hti);
 void printSei(Context& context, SEIndex sei);
 void putEnum(Context& context, uint16_t val, SEIndex esei);
-ValFormat getValFormat(SEIndex tsei);
+ValFormat getValFormat(Context& context, SEIndex tsei);
 ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub);
 bool isVar(SEIndex tsei);
 void putModeName(Context& context, TransferMode n);
 void printDefaultValue(Context& context, SEIndex sei, ValFormat vf);
 void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot = false);
 void putCurrentModuleDot(Context& context);
-
+void printTypedVal(Context& context, uint16_t val, ValFormat vf);
 
 }

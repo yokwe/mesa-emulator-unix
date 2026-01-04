@@ -54,6 +54,7 @@ SEIndex  toSei(const Symbol& symbol, uint16_t sei);
 
 // context management
 SEIndex nextSe(const Symbol& symbol, SEIndex sei);
+SEIndex firstCtxSe(const Symbol& symbol, CTXIndex ctx);
 
 // type manipulation
 SEIndex underType(const Symbol& symbol, SEIndex sei);

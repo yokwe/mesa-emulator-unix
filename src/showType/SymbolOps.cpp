@@ -40,6 +40,7 @@ static const Logger logger(__FILE__);
 #include "../bcdFile/Type.h"
 #include "../bcdFile/SEIndex.h"
 #include "../bcdFile/SERecord.h"
+#include "../bcdFile/CTXRecord.h"
 
 #include "SymbolOps.h"
 
@@ -47,7 +48,9 @@ namespace SymbolOps {
 //
 
 static SEIndex seNull{SEIndex::SE_NULL, 0};
-SEIndex nextSei(const Symbol& symbol, SEIndex sei) {
+SEIndex nextSe(const Symbol& symbol, SEIndex sei) {
+	if (sei.isNull()) return seNull;
+
 	// sanity check
 	if (sei.value().tag != SERecord::Tag::ID) ERROR()
 
@@ -74,6 +77,10 @@ SEIndex nextSei(const Symbol& symbol, SEIndex sei) {
 		}
 	}
 	ERROR()
+}
+SEIndex firstCtxSe(const Symbol& symbol, CTXIndex ctx) {
+	(void)symbol;
+	return ctx.isNull() ? seNull : ctx.value().seList;
 }
 
 //UnderType: PROC [h: Handle, type: SEIndex] RETURNS [CSEIndex] = {

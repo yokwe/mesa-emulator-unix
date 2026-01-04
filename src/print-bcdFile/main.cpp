@@ -47,8 +47,8 @@ int main(int, char**) {
 		std::string outDir  = "tmp/symbol/";
 
 //		std::string bcdPath = "tmp/bcd/Environment.bcd";
-		std::string bcdPath = "tmp/bcd/File.bcd";
-//		std::string bcdPath = "tmp/bcd/FileImpl.bcd";
+		std::string bcdPath = "tmp/bcd/Symbols.bcd";
+//		std::string bcdPath = "tmp/bcd/File.bcd";
 		
 		// create context
 		auto context = ShowType::Context(outDir, bcdPath);

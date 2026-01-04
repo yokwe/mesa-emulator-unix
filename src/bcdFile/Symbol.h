@@ -86,10 +86,10 @@ public:
     //  altoBias: CARDINAL = 1;  -- AMesa/14.0/Compiler/Friends/FilePack.mesa
     static const uint16_t ALTO_BIAS = 1;
 
-	//-- codes identifying the basic types (extensible)
-	//codeANY: CARDINAL = 0;
-	//codeINT: CARDINAL = 1;
-	//codeCHAR: CARDINAL = 2;
+	// -- codes identifying the basic types (extensible)
+	// codeANY: CARDINAL = 0;
+	// codeINT: CARDINAL = 1;
+	// codeCHAR: CARDINAL = 2;
 	static const uint16_t CODE_ANY  = 0;
 	static const uint16_t CODE_INT  = 1;
 	static const uint16_t CODE_CHAR = 2;
@@ -138,12 +138,4 @@ public:
     void dump();
     void dumpTable();
 
-	// utility methods
-	SEIndex nextSei(SEIndex sei);
-	SEIndex underType(SEIndex sei);
-	SEIndex toSEIndex(uint16_t index);
-	SEIndex typeLink(SEIndex sei);
-	TransferMode xferMode(SEIndex sei);
-	BTIndex toBTIndex(uint16_t index);
-	EXTIndex toEXTIndex(SEIndex sei);
 };

@@ -522,7 +522,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         auto& underType = SymbolOps::underType(symbol, ref.refType).value();
                         if (underType.toCONS().isBASIC()) {
                             const auto& basic = underType.toCONS().toBASIC();
-                            if (basic.code && !ref.readOnly) break;
+                            if (basic.code == SEIndex::TYPE_ANY && !ref.readOnly) break;
                         }
                         out.print(" TO ");
                         if (ref.readOnly) out.print("READONLY ");

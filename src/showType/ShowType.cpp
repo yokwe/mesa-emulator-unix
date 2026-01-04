@@ -33,7 +33,6 @@
 // ShowType.cpp
 //
 
-#include <cmath>
 #include <functional>
 #include <string>
 #include <filesystem>
@@ -47,6 +46,7 @@ static const Logger logger(__FILE__);
 #include "../bcdFile/MDRecord.h"
 #include "../bcdFile/CTXRecord.h"
 #include "../bcdFile/SERecord.h"
+#include "../bcdFile/BodyRecord.h"
 
 #include "SymbolOps.h"
 
@@ -54,8 +54,6 @@ static const Logger logger(__FILE__);
 
 namespace ShowType {
 //
-static void NoSub() {}
-
 template <class T>
 static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
     for (auto const& [key, value] : map) {
@@ -228,7 +226,7 @@ void printSym(Context& context, SEIndex sei, const std::string& colongstring) {
         } else {
             out.print(" = ");
         }
-        auto vf = printType(context, typeSei, {});
+        auto vf = printType(context, typeSei, noSub);
         printDefaultValue(context, sei, vf);
     } else {
         auto typeSei = id.idType;
@@ -236,7 +234,7 @@ void printSym(Context& context, SEIndex sei, const std::string& colongstring) {
             auto xferMode = SymbolOps::xferMode(symbol, typeSei);
             if (xferMode == TransferMode::NONE || xferMode == TransferMode::PROCESS) out.print("READONLY ");
         }
-        auto vf = printType(context, typeSei, NoSub);
+        auto vf = printType(context, typeSei, noSub);
         if (id.constant) {
             if (vf.isTRANSFER()) {
                 auto transfer = vf.toTRANSFER();
@@ -260,9 +258,11 @@ void printSym(Context& context, SEIndex sei, const std::string& colongstring) {
                     printTreeLink(context, SymbolOps::findExtension(symbol, sei).tree, vf, 0);
                 } else {
                     auto underTypeSei = SymbolOps::underType(symbol, typeSei);
-                    if (underTypeSei.value().toCONS().tag == TypeClass::SUBRANGE) {
+                    if (underTypeSei.value().toCONS().isSUBRANGE()) {
                         const auto& subrange = underTypeSei.value().toCONS().toSUBRANGE();
-                        printTypedVal(context, id.idValue + subrange.origin, vf);
+                        printTypedVal(context, sei.value().toID().idValue + subrange.origin, vf);
+                    } else {
+                        printTypedVal(context, sei.value().toID().idValue, vf);
                     }
                 }
             }
@@ -389,7 +389,6 @@ void printFieldCtx(Context &context, CTXIndex ctx, bool md) {
 }
 
 void printTypedVal(Context& context, uint16_t val, ValFormat vf) {
-    context.out.print("<< %s >>", __FUNCTION__); // FIXME
     auto& out = context.out;
 
     bool loophole = false;
@@ -439,16 +438,12 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
         // print module qualification of last ID in chain
         const auto& id = tsei.value().toID();
         if (!id.idCtx.isStandardContext()) {
-            switch(id.idCtx.value().tag) {
-            case CTXRecord::Tag::INCLUDED:
+            const auto& c = id.idCtx.value();
+            if (c.isINCLUDED()) {
                 printHti(context, id.idCtx.value().toINCLUDED().module.value().moduleId);
                 out.print(".");
-                break;
-            case CTXRecord::Tag::SIMPLE:
+            } else if (c.isSIMPLE()) {
                 putCurrentModuleDot(context);
-                break;
-            default:
-                break;
             }
         }
         // finally print that last ID
@@ -461,31 +456,88 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
         const auto& cons = tsei.value().toCONS();
         switch(cons.tag) {
             case TypeClass::ENUMERATED:
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-                context.out.print("<< %s ENUMERATED >>", __FUNCTION__); // FIXME
+            {
+                auto enumarated = cons.toENUMERATED();
+                if (enumarated.machineDep) out.print("MACHINE DEPENDENT ");
+                bool first = true;
+                uint16_t v = 0;
+                out.print("{");
+                for(auto isei = SymbolOps::firstCtxSe(symbol, enumarated.valueCtx);
+                    !isei.isNull();
+                    isei = SymbolOps::nextSe(symbol, isei)
+                ) {
+                    if (first) first = false;
+                    else out.print(", ");
+                    const auto& id = isei.value().toID();
+                    if (enumarated.machineDep || context.showBits) {
+                        auto hti = id.hash;
+                        auto sv = id.idValue;
+                        if (!hti.isNull()) printSei(context, isei);
+                        if (sv != v || hti.isNull() || context.showBits) out.print("(%u)", sv);
+                        v = sv + 1;                        
+                    } else printSei(context, isei);
+                }
+                out.print("}");
+            }
                 break;
             case TypeClass::RECORD:
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-                context.out.print("<< %s RECORD >>", __FUNCTION__); // FIXME
+                {
+                    auto record = cons.toRECORD();
+                    if (record.fieldCtx.value().level != ContextLevel::LZ) {
+                        auto fctx = record.fieldCtx;
+                        for(auto [key, value]: symbol.bodyTable) {
+                            const auto& entry = *value;
+                            if (entry.isCALLABLE()) {
+                                const auto& callable = entry.toCALLABLE();
+                                if (entry.localCtx == fctx) {
+                                    printSei(context, callable.id);
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        auto dp = context.defaultPublic;
+                        if (context.defaultPublic && record.hints.privateFields) {
+                            out.print("PRIVATE ");
+                            context.defaultPublic = false;
+                        }
+                        if (record.monitored) out.print("MONITORED ");
+                        if (record.machindDep) out.print("MACHINE DEPENDENT ");
+                        out.print("RECORD ");
+                        printFieldCtx(context, record.fieldCtx, record.machindDep || context.showBits);
+                        context.defaultPublic = dp;
+                    }
+                }
                 break;
             case TypeClass::REF:
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-                context.out.print("<< %s REF >>", __FUNCTION__); // FIXME
+                {
+                    const auto& ref = cons.toREF();
+                    if (ref.var) {
+                        out.print(ref.readOnly ? "READONLY " : "VAR ");
+                    } else {
+                        if (ref.ordered) out.print("ORDERED ");
+                        if (ref.basing) out.print("BASE ");
+                        out.print("POINTER");
+                        dosub();
+                        auto& underType = SymbolOps::underType(symbol, ref.refType).value();
+                        if (underType.toCONS().isBASIC()) {
+                            const auto& basic = underType.toCONS().toBASIC();
+                            if (basic.code && !ref.readOnly) break;
+                        }
+                        out.print(" TO ");
+                        if (ref.readOnly) out.print("READONLY ");
+                    }
+                    printType(context, ref.refType, noSub);
+                }
                 break;
             case TypeClass::ARRAY:
             {
                 const auto& array = cons.toARRAY();
                 if (array.packed) out.print("PACKED ");
                 out.print("ARRAY ");
-                printType(context, array.indexType, NoSub);
+                printType(context, array.indexType, noSub);
                 out.print(" OF ");
-                printType(context, array.componentType, NoSub);
+                printType(context, array.componentType, noSub);
             }
                 break;
             case TypeClass::ARRAYDESC:
@@ -493,7 +545,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                 const auto& arraydesc = cons.toARRAYDESC();
                 out.print("DESCRIPTOR FOR ");
                 if (arraydesc.readOnly) out.print("READONLY ");
-                printType(context, arraydesc.describedType, NoSub);
+                printType(context, arraydesc.describedType, noSub);
             }
                 break;
             case TypeClass::TRANSFER:
@@ -519,7 +571,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
             case TypeClass::RELATIVE:
             {
                 const auto& relative = cons.toRELATIVE();
-                if (!relative.baseType.isNull()) printType(context, relative.baseType, NoSub);
+                if (!relative.baseType.isNull()) printType(context, relative.baseType, noSub);
                 out.print(" RELATIVE ");
                 printType(context, relative.offsetType, dosub);
             }
@@ -543,19 +595,9 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                 if (sequnce.tagSei.value().toID().public_ != context.defaultPublic) {
                     out.print(context.defaultPublic ? "PRIVATE " : "PUBLID ");
                 }
-                switch(tagType.value().tag) {
-                    case SERecord::Tag::ID:
-                        printType(context, tagType, NoSub);
-                        break;
-                    case SERecord::Tag::CONS:
-                        out.print("*");
-                        break;
-                    default:
-                        ERROR();
-                }
-                printType(context, tagType, NoSub);
+                printType(context, tagType, noSub);
                 out.print(" OF ");
-                printType(context, sequnce.componentType, NoSub);
+                printType(context, sequnce.componentType, noSub);
             }
                 break;
             case TypeClass::SUBRANGE:
@@ -603,7 +645,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
             {
                 auto rangeType = cons.toLONG().rangeType;
                 if (!ShowType::isVar(rangeType)) out.print("LONG ");
-                printType(context, rangeType, NoSub);
+                printType(context, rangeType, noSub);
             }
                 break;
             case TypeClass::REAL:
@@ -623,8 +665,10 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
 }
 
 void printDefaultValue(Context& context, SEIndex sei, ValFormat vf) {
-    (void)sei, (void)vf;
-    context.out.print("<< %s >>", __FUNCTION__); // FIXME
+    auto [extType, tree] = SymbolOps::findExtension(context.symbol, sei);
+    if (extType != ExtensionType::DEFAULT) return;
+    context.out.print(" = ");
+    printTreeLink(context, tree, vf, false);
 }
 
 void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot) {

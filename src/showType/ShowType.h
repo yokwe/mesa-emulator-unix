@@ -174,6 +174,8 @@ struct ValFormat {
     }
 };
 
+inline void noSub() {}
+
 void printThis(Context& context, SEIndex sei);
 
 void printSym(Context& context, SEIndex sei, const std::string& colongstring);

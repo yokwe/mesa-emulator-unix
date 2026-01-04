@@ -234,7 +234,18 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             enum class Tag : uint16_t {NOT_LINKED, LINKED};
             static std::string toString(Tag value);
             
-            uint16_t hints;
+            struct hints {
+                bool comparable;
+                bool assignable;
+                bool unifield;
+                bool variant;
+                bool privateFields;
+                bool refField;
+                bool default_;
+                bool voidable;
+            };
+
+            hints    hints;
             uint16_t length;
             bool     argument;
             bool     monitored;

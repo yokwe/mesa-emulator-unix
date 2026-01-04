@@ -169,9 +169,17 @@ std::string SERecord::CONS::RECORD::toString(Tag value) {
     ERROR();
 }
 void SERecord::CONS::RECORD::read(uint16_t u0, MesaByteBuffer& bb) {
+    hints.comparable    = bitField(u0,  8);
+    hints.assignable    = bitField(u0,  9);
+    hints.unifield      = bitField(u0, 10);
+    hints.variant       = bitField(u0, 11);
+    hints.privateFields = bitField(u0, 12);
+    hints.refField      = bitField(u0, 13);
+    hints.default_      = bitField(u0, 14);
+    hints.voidable      = bitField(u0, 15);
+
     uint16_t u2;
 
-    hints      = bitField(u0, 8, 15);
     bb.read(length, u2);
     argument   = bitField(u2,  0);
     monitored  = bitField(u2,  1);

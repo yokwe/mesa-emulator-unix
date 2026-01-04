@@ -40,6 +40,7 @@
 #include "../bcdFile/Type.h"
 #include "../bcdFile/SEIndex.h"
 #include "../bcdFile/BTIndex.h"
+#include "../bcdFile/Tree.h"
 
 namespace SymbolOps {
 //
@@ -60,5 +61,13 @@ SEIndex firstCtxSe(const Symbol& symbol, CTXIndex ctx);
 SEIndex underType(const Symbol& symbol, SEIndex sei);
 SEIndex typeLink(const Symbol& symbol, SEIndex sei);
 TransferMode xferMode(const Symbol& symbol, SEIndex sei);
+
+// information returning procedures
+struct FindExtensionResult {
+    ExtensionType type;
+    TreeLink      tree;
+    FindExtensionResult(ExtensionType type_, TreeLink tree_) : type(type_), tree(tree_) {}
+};
+FindExtensionResult findExtension(const Symbol& symbol, SEIndex sei);
 
 }

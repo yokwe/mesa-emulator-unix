@@ -41,6 +41,7 @@ static const Logger logger(__FILE__);
 #include "../bcdFile/SEIndex.h"
 #include "../bcdFile/SERecord.h"
 #include "../bcdFile/CTXRecord.h"
+#include "../bcdFile/EXTRecord.h"
 
 #include "SymbolOps.h"
 
@@ -143,5 +144,12 @@ BTIndex toBti(const Symbol& symbol, uint16_t index) {
 	}
 }
 
+TreeLink treeLinkNull{};
+FindExtensionResult findExtension(const Symbol& symbol, SEIndex sei) {
+	for(const auto& [key, value]: symbol.extTable) {
+		if (value->sei == sei) return FindExtensionResult(value->type, value->tree);
+	}
+	return FindExtensionResult(ExtensionType::NONE, treeLinkNull);
+}
 
 }

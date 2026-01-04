@@ -111,20 +111,6 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
 
     TreeLink() : tag(Tag::SUBTREE), variant(SUBTREE{}) {}
 
-    const SUBTREE& toSUBTREE() const {
-        return std::get<SUBTREE>(variant);
-    }
-    const HASH& toHASH() const {
-        return std::get<HASH>(variant);
-    }
-    const SYMBOL& toSYMBOL() const {
-        return std::get<SYMBOL>(variant);
-    }
-    const LITERAL& toLITERAL() const {
-        return std::get<LITERAL>(variant);
-    }
-
-
     // Null: Tree.Link = [subtree[index: Tree.NullIndex]];
     bool isNull() {
         return tag == Tag::SUBTREE && toSUBTREE().index.isNull();
@@ -132,6 +118,11 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
 
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
+
+    DEFINE_VARIANT_METHOD(SUBTREE)
+    DEFINE_VARIANT_METHOD(HASH)
+    DEFINE_VARIANT_METHOD(SYMBOL)
+    DEFINE_VARIANT_METHOD(LITERAL)
 };
 
 // NodeName: TYPE = {

@@ -123,16 +123,8 @@ struct CTXRecord : public MesaByteBuffer::HasRead, public HasToString {
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
 
-    const SIMPLE&   toSIMPLE() const {
-        return std::get<CTXRecord::SIMPLE>(variant);
-    }
-    const INCLUDED& toINCLUDED() const {
-        return std::get<CTXRecord::INCLUDED>(variant);
-    }
-    const IMPORTED& toIMPORTED() const {
-        return std::get<CTXRecord::IMPORTED>(variant);
-    }
-    const NIL&      toNIL() const {
-        return std::get<CTXRecord::NIL>(variant);
-    }
+    DEFINE_VARIANT_METHOD(SIMPLE)
+    DEFINE_VARIANT_METHOD(INCLUDED)
+    DEFINE_VARIANT_METHOD(IMPORTED)
+    DEFINE_VARIANT_METHOD(NIL)
 };

@@ -99,12 +99,8 @@ struct LTRecord : public MesaByteBuffer::HasRead, public HasToString {
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
 
-    const SHORT& toSHORT() {
-        return std::get<SHORT>(variant);
-    }
-    const LONG&  toLONG() {
-        return std::get<LONG>(variant);
-    }
+    DEFINE_VARIANT_METHOD(SHORT)
+    DEFINE_VARIANT_METHOD(LONG)
 };
 
 // NORICE
@@ -148,10 +144,6 @@ struct LitRecord : public HasToString {
     void read(uint16_t u0);
     std::string toString() const override;
 
-    const WORD&   toWORD() {
-        return std::get<WORD>(variant);
-    }
-    const STRING& toSTRING() {
-        return std::get<STRING>(variant);
-    }
+    DEFINE_VARIANT_METHOD(WORD)
+    DEFINE_VARIANT_METHOD(STRING)
 };

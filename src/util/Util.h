@@ -283,6 +283,12 @@ inline const char* getBuildDir() {
 	return BUILD_DIR;
 }
 
+// macro that support variant
+#define DEFINE_VARIANT_METHOD(name) \
+const name& to##name() const { return std::get<name>(variant); } \
+bool is##name() const { return tag == decltype(tag)::name; }
+
+
 //
 // for use const char* as template parameter
 //

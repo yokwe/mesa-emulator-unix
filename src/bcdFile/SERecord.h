@@ -189,9 +189,9 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
 
-        const LINKED& toLINKED() const {
-            return std::get<LINKED>(variant);
-        }
+        DEFINE_VARIANT_METHOD(TERMINAL)
+        DEFINE_VARIANT_METHOD(SEQUENTIAL)
+        DEFINE_VARIANT_METHOD(LINKED)
     };
     struct CONS : public HasToString {
         struct MODE : public HasToString {
@@ -247,9 +247,8 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             void read(uint16_t u0, MesaByteBuffer& bb);
             std::string toString() const override;
 
-            const LINKED& toLINKED() const {
-                return std::get<LINKED>(variant);
-            }
+            DEFINE_VARIANT_METHOD(NOT_LINKED)
+            DEFINE_VARIANT_METHOD(LINKED)
         };
         struct REF : public HasToString {
             bool    counted;
@@ -393,34 +392,27 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
         void read(uint16_t u0, MesaByteBuffer& bb);
         std::string toString() const override;
-        
-        const BASIC& toBASIC() const {
-            return std::get<BASIC>(variant);
-        }
-        const TRANSFER& toTRANSFER() const {
-            return std::get<TRANSFER>(variant);
-        }
-        const SUBRANGE& toSUBRANGE() const {
-            return std::get<SUBRANGE>(variant);
-        }
-        const LONG& toLONG() const {
-            return std::get<LONG>(variant);
-        }
-        const ARRAY& toARRAY() const {
-            return std::get<ARRAY>(variant);
-        }
-        const RELATIVE& toRELATIVE() const {
-            return std::get<RELATIVE>(variant);
-        }
-        const RECORD& toRECORD() const {
-            return std::get<RECORD>(variant);
-        }
-        bool isOPAQUE() const {
-            return tag == TypeClass::OPAQUE;
-        }
-        bool isRECORD() const {
-            return tag == TypeClass::RECORD;
-        }
+
+        DEFINE_VARIANT_METHOD(MODE)
+        DEFINE_VARIANT_METHOD(BASIC)
+        DEFINE_VARIANT_METHOD(ENUMERATED)
+        DEFINE_VARIANT_METHOD(RECORD)
+        DEFINE_VARIANT_METHOD(REF)
+        DEFINE_VARIANT_METHOD(ARRAY)
+        DEFINE_VARIANT_METHOD(ARRAYDESC)
+        DEFINE_VARIANT_METHOD(TRANSFER)
+        DEFINE_VARIANT_METHOD(DEFINITION)
+        DEFINE_VARIANT_METHOD(UNION)
+        DEFINE_VARIANT_METHOD(SEQUENCE)
+        DEFINE_VARIANT_METHOD(RELATIVE)
+        DEFINE_VARIANT_METHOD(SUBRANGE)
+        DEFINE_VARIANT_METHOD(LONG)
+        DEFINE_VARIANT_METHOD(REAL)
+        DEFINE_VARIANT_METHOD(OPAQUE)
+        DEFINE_VARIANT_METHOD(ZONE)
+        DEFINE_VARIANT_METHOD(ANY)
+        DEFINE_VARIANT_METHOD(NIL)
+        DEFINE_VARIANT_METHOD(BITS)
     };
 
     enum class Tag : uint16_t {
@@ -434,19 +426,9 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
     SERecord() : tag(Tag::ID), variant(ID{}) {}
 
-    const ID&   toID()   const {
-        return std::get<ID>(variant);
-    }
-    const CONS& toCONS() const {
-        return std::get<CONS>(variant);
-    }
-    bool isID() const {
-        return tag == Tag::ID;
-    }
-    bool isCONS() const {
-        return tag == Tag::CONS;
-    }
-
     MesaByteBuffer& read(MesaByteBuffer& bb) override;
     std::string toString() const override;
+
+    DEFINE_VARIANT_METHOD(ID)
+    DEFINE_VARIANT_METHOD(CONS)
 };

@@ -56,7 +56,6 @@ struct SEIndex : public Index<"se", SERecord> {
 
     SEIndex() : Index() {}
     SEIndex(uint16_t index_, const SERecord* value_) : Index(index_, value_) {}
-    SEIndex(uint16_t index_) : Index(index_) {}
     
     bool isNull() const {
         return index() == SE_NULL;

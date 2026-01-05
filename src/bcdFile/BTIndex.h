@@ -51,7 +51,6 @@ struct BTIndex : public Index<"bt", BodyRecord> {
     
     BTIndex() : Index() {}
     BTIndex(uint16_t index_, const BodyRecord* value_) : Index(index_, value_) {}
-    // BTIndex(uint16_t index_) : Index(index_) {}
 
     bool isNull() const {
         return index() == BT_NULL;

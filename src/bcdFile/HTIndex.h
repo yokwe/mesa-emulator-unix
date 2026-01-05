@@ -51,7 +51,6 @@ struct HTIndex : public Index<"ht", HTRecord> {
 
     HTIndex() : Index() {}
     HTIndex(uint16_t index_, const HTRecord* value_) : Index(index_, value_) {}
-    HTIndex(uint16_t index_) : Index(index_) {}
 
     bool isNull() const {
         return index() == HT_NULL;

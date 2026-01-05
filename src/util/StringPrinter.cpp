@@ -52,16 +52,16 @@ StringPrinter& StringPrinter::newLine() {
     std::string wholeLine;
 
     // add line to buffer
-    // add TAB
-    for(int i = 0; i < tabLevel; i++) wholeLine += TAB;
-    // add line
     wholeLine += line;
 
     logger.info("XX %s", wholeLine);
 
     buffer += wholeLine;
     buffer += NEW_LINE;
+
+    // prepare for next line
     line.clear();
+    for(int i = 0; i < tabLevel; i++) line += TAB;
 
     return *this;
 }

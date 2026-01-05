@@ -74,8 +74,8 @@ public:
     //
     // tab
     //
-    StringPrinter& nest();
-    StringPrinter& unnest();
+    StringPrinter& nest();   // decrease tab level of next line
+    StringPrinter& unnest(); // increase tab level of next line
 
     //
     // print

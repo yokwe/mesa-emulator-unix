@@ -729,6 +729,93 @@ void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, boo
     switch(tree.tag) {
         case TreeLink::Tag::SUBTREE:
             out.print("<< %s SUBTREE >>", __FUNCTION__); // FIXME
+            {
+                const auto& subtree = tree.toSUBTREE();
+                const auto& node = subtree.index.value();
+                switch(node.name) {
+                case NodeName::ALL:
+                {
+                    out.print("ALL[");
+                    if (vf.isARRAY()) {
+                        const auto& array = vf.toARRAY();
+                        printTreeLink(
+                            context, node.son[0], getValFormat(context, array.componentType), recur + 1);
+                    } else {
+                        if (node.nSons == 1) printTreeLink(context, node.son[0], vf, recur + 1);
+                        else ERROR()
+                    }
+                    out.print("]");
+                }
+                    break;
+                case NodeName::MWCONST:
+                case NodeName::CASE:
+                case NodeName::LOOPHOLE:
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    break;
+                case NodeName::NIL:
+                    out.print("NIL");
+                    break;
+                case NodeName::VOID:
+                    out.print("NULL");
+                    break;
+                case NodeName::DOT:
+                case NodeName::CDOT:
+                    if(node.nSons != 2) ERROR()
+                    printTreeLink(context, node.son[0], ValFormat::getOTHER(), recur + 1, true);
+                    out.print(".");
+                    printTreeLink(context, node.son[1], ValFormat::getOTHER(), recur + 1, true);
+                    break;
+                case NodeName::FIRST:
+                    out.print("FIRST[");
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::LAST:
+                    out.print("LAST[");
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::SIZE:
+                    out.print("SIZE[");
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::LENGTHEN:
+                    out.print("LONG[");
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::CONSTRUCT:
+                    out.print("[");
+                    if (node.nSons == 2) printTreeLink(context, node.son[1], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::UNION:
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    out.print("[");
+                    printTreeLink(context, node.son[1], vf, recur + 1);
+                    out.print("]");
+                    break;
+                case NodeName::LIST:
+                    for(int j = 0; j < node.nSons - 1; j++) {
+                        printTreeLink(context, node.son[j], ValFormat::getOTHER(), recur + 1);
+                    }
+                    if (node.nSons) printTreeLink(context, node.son[node.nSons - 1], ValFormat::getOTHER(), recur + 1);
+                    break;
+                case NodeName::LONG_TC:
+                    out.print("LONG ");
+                    printTreeLink(context, node.son[0], vf, recur + 1);
+                    break;
+                case NodeName::UPARROW:
+                    {
+                        printTreeLink(context, node.son[0], vf, recur + 1);
+                        out.print("### UPARRWO ###"); // FIXME
+                    }
+                    break;
+                default:
+                    out.print("(compliated expression)");
+                }
+            }
             break;
         case TreeLink::Tag::HASH:
             printHti(context, tree.toHASH().index);

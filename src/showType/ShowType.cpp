@@ -137,8 +137,8 @@ void printDirectory(Context& context) {
     if (symbol.mdTable.size() == 1) return; // if only MD_OWN
 
 	// Print Directory
-    out.println("DIRECTORY");
     out.nest();
+    out.println("DIRECTORY");
 
     auto begin = symbol.mdTable.cbegin();
     auto end = symbol.mdTable.cend();
@@ -159,8 +159,8 @@ void printModule(Context& context) {
     auto& out = context.out;
 
     auto& own = *symbol.mdTable[MDIndex::MD_OWN];
-    out.println("%s %s = BEGIN", own.stamp.toString(), own.moduleId.toValue());
     out.nest();
+    out.println("%s %s = BEGIN", own.stamp.toString(), own.moduleId.toValue());
 
     for(auto sei = symbol.outerCtx.value().seList; !sei.isNull(); sei = SymbolOps::nextSe(symbol, sei)) {
         printSym(context, sei, ": ");
@@ -168,6 +168,7 @@ void printModule(Context& context) {
     }
 
     out.unnest();
+    out.println();
     out.println("END.");
 }
 
@@ -408,6 +409,7 @@ void printTypedVal(Context& context, uint16_t val, ValFormat vf) {
     case ValFormat::Tag::REF:
         if (val == 0) out.print("NIL");
         else loophole = true;
+        break;
     default:
         loophole = true;
     }
@@ -460,7 +462,8 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                 if (enumarated.machineDep) out.print("MACHINE DEPENDENT ");
                 bool first = true;
                 uint16_t v = 0;
-                out.print("{");
+                out.nest();
+                out.println("{");
                 for(auto isei = SymbolOps::firstCtxSe(symbol, enumarated.valueCtx);
                     !isei.isNull();
                     isei = SymbolOps::nextSe(symbol, isei)
@@ -476,6 +479,8 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         v = sv + 1;                        
                     } else printSei(context, isei);
                 }
+//                out.println();
+                out.unnest();
                 out.print("}");
             }
                 break;
@@ -502,8 +507,8 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         }
                         if (record.monitored) out.print("MONITORED ");
                         if (record.machindDep) out.print("MACHINE DEPENDENT ");
-                        out.println("RECORD ");
                         out.nest();
+                        out.println("RECORD ");
                         printFieldCtx(context, record.fieldCtx, record.machindDep || context.showBits);
                         out.unnest();
                         context.defaultPublic = dp;
@@ -582,8 +587,8 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                     out.print(context.defaultPublic ? "PRIVATE " : "PUBLIC ");
                 if (tagType.value().isID()) printType(context, tagType, noSub);
                 if (tagType.value().isCONS()) out.print("*");
+                out.nest();
                 out.println(" FROM");
-                out.nest(); // ??
                 SEIndex temp;
                 for(auto isei = SymbolOps::firstCtxSe(symbol, union_.caseCtx);
                     !isei.isNull();
@@ -597,7 +602,9 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         printSei(context, temp);
                     }
                     out.print(" => ");
+                    out.nest();
                     printFieldCtx(context, varRec.value().toCONS().toRECORD().fieldCtx, union_.machineDep || context.showBits);
+                    out.unnest();
                     out.println(",");
                 }
 //                out.println();
@@ -858,9 +865,7 @@ void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, boo
                                 loophole = true;
                                 break;
                             }
-                            if (loophole) {
-                                out.print("LOOPHOLE[%u]", longValue);
-                            }
+                            if (loophole)  out.print("LOOPHOLE[%u]", longValue);
                         } else putWordSeq(context, long_.value);
                     }
                         break;

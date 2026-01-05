@@ -75,9 +75,9 @@ struct LTRecord : public MesaByteBuffer::HasRead, public HasToString {
         }
     };
     struct LONG : public MesaByteBuffer::HasRead, public HasToString {
-        uint16_t             codeIndex;
-        uint16_t             length;
-        std::vector<uint8_t> value;
+        uint16_t              codeIndex;
+        uint16_t              length;
+        std::vector<uint16_t> value;
 
         MesaByteBuffer& read(MesaByteBuffer& bb) override;
         std::string toString() const override;

@@ -85,14 +85,13 @@ void printModule(Context& context);
 //     bd: [0..WordLength)];   			-- bit displacement
 union BitAddress {
     uint16_t u;
-    union {
+    struct {
         uint16_t bd :  4;
         uint16_t wd : 12;
     };
 };
 inline BitAddress toBitAddr(uint16_t ba) {
-    BitAddress ret = {.u = ba};
-    return ret;
+    return BitAddress{ba};
 }
 
 //EnumeratedSEIndex: TYPE = Table.Base RELATIVE POINTER [0..Table.Limit)

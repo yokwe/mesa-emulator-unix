@@ -196,9 +196,7 @@ void getBitSpec(Context& context, SEIndex isei, std::string& bitspec) {
     uint16_t s = id.idInfo;
     bitspec.clear();
     bitspec += std_sprintf(" (%d", a.wd + 0);
-    if (s) {
-        bitspec += std_sprintf(":%d..%d", a.bd + 0, a.bd + s - 1);
-    }
+    if (s)  bitspec += std_sprintf(":%d..%d", a.bd + 0, a.bd + s - 1);
     bitspec += "): ";
 }
 
@@ -379,8 +377,7 @@ void printFieldCtx(Context &context, CTXIndex ctx, bool md) {
     bool first = true;
     for(; !isei.isNull(); isei = SymbolOps::nextSe(symbol, isei)) {
         if (first) first = false;
-        else out.print(", ");
-
+        else out.println(", ");
         if (md) getBitSpec(context, isei, bitspec);
         printSym(context, isei, bitspec);
         printDefaultValue(context, isei, getValFormat(context, isei.value().toID().idType));
@@ -467,7 +464,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                     isei = SymbolOps::nextSe(symbol, isei)
                 ) {
                     if (first) first = false;
-                    else out.print(", ");
+                    else out.println(", ");
                     const auto& id = isei.value().toID();
                     if (enumarated.machineDep || context.showBits) {
                         auto hti = id.hash;
@@ -503,8 +500,10 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         }
                         if (record.monitored) out.print("MONITORED ");
                         if (record.machindDep) out.print("MACHINE DEPENDENT ");
-                        out.print("RECORD ");
+                        out.println("RECORD ");
+                        out.nest();
                         printFieldCtx(context, record.fieldCtx, record.machindDep || context.showBits);
+                        out.unnest();
                         context.defaultPublic = dp;
                     }
                 }
@@ -563,10 +562,46 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
             }
                 break;
             case TypeClass::UNION:
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-            ///////////////////////////////////////
-                context.out.print("<< %s UNION >>", __FUNCTION__); // FIXME
+            {
+                const auto& union_ = cons.toUNION();
+                auto tagSei = union_.tagSei;
+                out.print("SELECT ");
+                if (!union_.controlled) out.print(union_.overlaid ? "OVERLAID " : "COMPUTED ");
+                else {
+                    printSei(context, tagSei);
+                    if (union_.machineDep || context.showBits) {
+                        std::string bitspec;
+                        getBitSpec(context, tagSei, bitspec);
+                        out.print(bitspec);
+                    } else out.print(": ");
+                }
+                const auto tagType = tagSei.value().toID().idType;
+                if (tagSei.value().toID().public_ != context.defaultPublic)
+                    out.print(context.defaultPublic ? "PRIVATE " : "PUBLIC ");
+                if (tagType.value().isID()) printType(context, tagType, noSub);
+                if (tagType.value().isCONS()) out.print("*");
+                out.println(" FROM");
+                out.nest(); // ??
+                SEIndex temp;
+                for(auto isei = SymbolOps::firstCtxSe(symbol, union_.caseCtx);
+                    !isei.isNull();
+                    isei = temp) {
+                    printSei(context, isei);
+                    SEIndex varRec = SymbolOps::underType(symbol, SymbolOps::toSei(symbol, isei.value().toID().idInfo));
+                    for(temp = SymbolOps::nextSe(symbol, isei);
+                        !temp.isNull() && SymbolOps::toSei(symbol, temp.value().toID().idInfo) == isei;
+                        temp = SymbolOps::nextSe(symbol, temp)) {
+                        out.print(", ");
+                        printSei(context, temp);
+                    }
+                    out.print(" => ");
+                    printFieldCtx(context, varRec.value().toCONS().toRECORD().fieldCtx, union_.machineDep || context.showBits);
+                    out.println(",");
+                }
+//                out.println();
+                out.print("ENDCASE");
+                out.unnest();
+            }
                 break;
             case TypeClass::RELATIVE:
             {

@@ -47,6 +47,8 @@ static const Logger logger(__FILE__);
 #include "../bcdFile/CTXRecord.h"
 #include "../bcdFile/SERecord.h"
 #include "../bcdFile/BodyRecord.h"
+#include "../bcdFile/LTIndex.h"
+#include "../bcdFile/LTRecord.h"
 
 #include "SymbolOps.h"
 
@@ -706,9 +708,92 @@ void printDefaultValue(Context& context, SEIndex sei, ValFormat vf) {
     printTreeLink(context, tree, vf, false);
 }
 
+void putWordSeq(Context& context, const std::vector<uint16_t>& vector) {
+    auto& out = context.out;
+
+    std::string string;
+    for(auto e: vector) {
+        string += std_sprintf("%04X", e);
+    }
+    out.print("(%d)[%s]", vector.size(), string);
+}
+
 void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot) {
-    (void)tree, (void)vf, (void)recur, (void)sonOfDot;
-    context.out.print("<< %s >>", __FUNCTION__); // FIXME
+    (void)vf;
+    const auto& symbol = context.symbol;
+    auto& out = context.out;
+
+    if (tree.isNull()) return;
+    if (30 < recur) ERROR()
+
+    switch(tree.tag) {
+        case TreeLink::Tag::SUBTREE:
+            out.print("<< %s SUBTREE >>", __FUNCTION__); // FIXME
+            break;
+        case TreeLink::Tag::HASH:
+            printHti(context, tree.toHASH().index);
+            break;
+        case TreeLink::Tag::SYMBOL:
+            if (!sonOfDot && tree.toSYMBOL().index.value().toID().idCtx == symbol.outerCtx)
+                putCurrentModuleDot(context);
+            printSei(context, tree.toSYMBOL().index);
+            break;
+        case TreeLink::Tag::LITERAL:
+            {
+                const auto index = tree.toLITERAL().index;
+                switch(index.tag) {
+                case LitRecord::Tag::WORD:
+                {
+                    const auto& word = index.toWORD().index.value();
+                    switch(word.tag) {
+                    case LTRecord::Tag::SHORT:
+                        printTypedVal(context, word.toSHORT().value, vf);
+                        break;
+                    case LTRecord::Tag::LONG:
+                    {
+                        const auto& long_ = word.toLONG();
+                        if (long_.length == 2) {
+                            uint32_t longValue = long_.value[1] << 16| long_.value[0];
+                            bool loophole = false;
+                            switch(vf.tag) {
+                            case ValFormat::Tag::SIGNED:
+                                out.print("%d", longValue);
+                                break;
+                            case ValFormat::Tag::UNSIGNED:
+                                out.print("%u", longValue);
+                                break;
+                            case ValFormat::Tag::TRANSFER:
+                            case ValFormat::Tag::REF:
+                                if (longValue == 0) out.print("NIL");
+                                else loophole = true;
+                                break;
+                            default:
+                                loophole = true;
+                                break;
+                            }
+                            if (loophole) {
+                                out.print("LOOPHOLE[%u]", longValue);
+                            }
+                        } else putWordSeq(context, long_.value);
+                    }
+                        break;
+                    default: ERROR()
+                    }
+                }
+                    break;
+                case LitRecord::Tag::STRING:
+                {
+                    const auto& string = index.toSTRING();
+                    out.print("(LONG STRING %d)", string.index);
+                }
+                    break;
+                default: ERROR()
+                }
+            }
+            break;
+        default:
+            ERROR()
+    }
 }
 
 }

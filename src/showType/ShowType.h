@@ -37,6 +37,7 @@
 
 #include <functional>
 #include <variant>
+#include <vector>
 
 #include "../util/StringPrinter.h"
 
@@ -193,5 +194,6 @@ void printDefaultValue(Context& context, SEIndex sei, ValFormat vf);
 void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, bool sonOfDot = false);
 void putCurrentModuleDot(Context& context);
 void printTypedVal(Context& context, uint16_t val, ValFormat vf);
+void putWordSeq(Context& context, const std::vector<uint16_t>& vector);
 
 }

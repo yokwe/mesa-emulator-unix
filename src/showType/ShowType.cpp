@@ -168,7 +168,6 @@ void printModule(Context& context) {
     }
 
     out.unnest();
-    out.println();
     out.println("END.");
 }
 
@@ -376,16 +375,21 @@ void printFieldCtx(Context &context, CTXIndex ctx, bool md) {
     if (!md) bitspec += ": ";
     if (!isei.isNull() && isei.value().toID().idCtx != ctx)
         isei = SymbolOps::nextSe(symbol, isei);
-    out.print("[");
-    bool first = true;
-    for(; !isei.isNull(); isei = SymbolOps::nextSe(symbol, isei)) {
-        if (first) first = false;
-        else out.println(", ");
-        if (md) getBitSpec(context, isei, bitspec);
-        printSym(context, isei, bitspec);
-        printDefaultValue(context, isei, getValFormat(context, isei.value().toID().idType));
+
+    if (isei.isNull()) { // special for empty case
+        out.print("[]");
+    } else {
+        out.println("[");
+        bool first = true;
+        for(; !isei.isNull(); isei = SymbolOps::nextSe(symbol, isei)) {
+            if (first) first = false;
+            else out.println(", ");
+            if (md) getBitSpec(context, isei, bitspec);
+            printSym(context, isei, bitspec);
+            printDefaultValue(context, isei, getValFormat(context, isei.value().toID().idType));
+        }
+        out.print("]");    
     }
-    out.print("]");
 }
 
 void printTypedVal(Context& context, uint16_t val, ValFormat vf) {
@@ -508,7 +512,7 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                         if (record.monitored) out.print("MONITORED ");
                         if (record.machindDep) out.print("MACHINE DEPENDENT ");
                         out.nest();
-                        out.println("RECORD ");
+                        out.print("RECORD ");
                         printFieldCtx(context, record.fieldCtx, record.machindDep || context.showBits);
                         out.unnest();
                         context.defaultPublic = dp;
@@ -559,12 +563,19 @@ ValFormat printType(Context& context, SEIndex tsei, std::function<void()> dosub)
                 const auto& transfer = cons.toTRANSFER();
                 putModeName(context, transfer.mode);
                 if (!transfer.typeIn.isNull()) {
+                    out.nest();
                     out.print(" ");
                     outArgType(context, transfer.typeIn);
+                    out.unnest();
                 }
                 if (!transfer.typeOut.isNull()) {
-                    out.print(" RETURNS ");
+                    out.nest();
+                    out.println();
+                    out.print("RETURNS ");
+                    out.nest();
                     outArgType(context, transfer.typeOut);
+                    out.unnest();
+                    out.unnest();
                 }
             }
                 break;
@@ -735,7 +746,6 @@ void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, boo
 
     switch(tree.tag) {
         case TreeLink::Tag::SUBTREE:
-            out.print("<< %s SUBTREE >>", __FUNCTION__); // FIXME
             {
                 const auto& subtree = tree.toSUBTREE();
                 const auto& node = subtree.index.value();
@@ -820,7 +830,7 @@ void printTreeLink(Context& context, TreeLink tree, ValFormat vf, int recur, boo
                     }
                     break;
                 default:
-                    out.print("(compliated expression)");
+                    out.print("(complicated expression  %s)", toString(node.name));
                 }
             }
             break;

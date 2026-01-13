@@ -48,7 +48,7 @@ distclean-cmake:
 	rm -rf ${BUILD_DIR}
 
 distclean-macos:
-	find . -type f -name '._*' -print -delete
+	find . -type f -name '._*' -o -name '.DS_Store' -print -delete
 
 main: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target main

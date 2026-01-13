@@ -244,9 +244,6 @@ void XFER(ControlLink dst, ShortControlLink src, XferType type, int freeFlag = 0
 	}
 
 	LinkType linkType = ControlLinkType(nDst);
-	//Trace::Context context;
-	//context.setXFER(dst, src, type, freeFlag, linkType, PSB, GFI, savedPC, MDS, LF);
-
 	switch (linkType) {
 	case LinkType::oldProcedure : {
 		ProcDesc proc = {MakeProcDesc(nDst)};
@@ -384,9 +381,6 @@ void E_EFCB() {
 }
 // zLFC - 0355
 void  E_LFC() {
-//	Trace::Context context;
-//	context.setLFC(0, 0, XferType::call, 0, LinkType::newProcedure, PSB, GFI, savedPC, MDS, LF);
-
 	CARDINAL nPC = GetCodeWord();
 	if (DEBUG_SHOW_OPCODE) logger.debug("TRACE %6o  LFC %04X", savedPC, nPC);
 	*StoreMds(LO_OFFSET(LF, pc)) = PC;

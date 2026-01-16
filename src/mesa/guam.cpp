@@ -106,24 +106,27 @@ void getConfig(Config& config_) {
 static void loadGerm(std::string& path) {
 	logger.info("germ  path    = %s", path);
 
-	CARD32 mapSize = 0;
-	DiskFile::Page* map = (DiskFile::Page*)Util::mapFile(path, mapSize);
-	CARD32 mapPageSize = mapSize / sizeof(DiskFile::Page);
-	logger.info("germ  size = %d  %04X", mapPageSize, mapPageSize);
+	DiskFile diskFile;
+	diskFile.attach(path);
+	logger.info("germ  size = %d  %04X", diskFile.getSize(), diskFile.getSize());
 
 	// first page goes to mGFT
-	CARD16 *p = memory::peek(mGFT);
-	for(CARD32 i = 0; i < mapPageSize; i++) {
-		if (i == (int)GermOpsImpl::pageEndGermVM) {
+	CARD16* page =  memory::peek(mGFT);
+
+	auto maxPageSize = diskFile.getMaxBlock();
+	for(CARD32 pageNo = 0; pageNo < maxPageSize; pageNo++) {
+		// sanity check
+		if (pageNo == (int)GermOpsImpl::pageEndGermVM) {
 			logger.fatal("i == pageEndGermVM");
-			exit(1);
+			ERROR()
 		}
 
-		Util::byteswap(map[i].word, p, PageSize);
+		diskFile.readPage(pageNo, page);
+		Util::byteswap(page, page, PageSize);
 
-		p = memory::peek(((i + 1) * PageSize));
+		page = memory::peek(((pageNo + 1) * PageSize));
 	}
-	Util::unmapFile(map);
+	diskFile.detach();
 }
 static void setSwitch(System::Switches& switches, unsigned char c) {
 	logger.info("setSwitch %c %3o", c, c);

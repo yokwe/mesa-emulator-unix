@@ -81,12 +81,14 @@ public:
 	void setDiskDCBType(DiskIOFaceGuam::DiskDCBType *dcb);
 	void setFloppyDCBType(FloppyIOFaceGuam::FloppyDCBType *dcb);
 
-	CARD32 getBlockSize() {
-		return size / Environment::bytesPerPage;
-	}
-
 	const std::string& getPath() {
 		return path;
+	}
+	CARD32 getSize() {
+		return size;
+	}
+	CARD32 getMaxBlock() {
+		return maxBlock;
 	}
 
 	CARD32 getBlock(DiskIOFaceGuam::DiskIOCBType* iocb) {

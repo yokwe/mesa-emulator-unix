@@ -340,7 +340,7 @@ public:
 static std::map<void*, MapInfo>mapInfoMap;
 int MapInfo::count = 0;
 
-void* Util::mapFile  (const std::string& path, uint32_t& mapSize) {
+Util::MapFileResult Util::mapFile  (const std::string& path) {
 	// sanity check
 	if (!std::filesystem::exists(path)) {
 		logger.error("unexpected path");
@@ -354,21 +354,22 @@ void* Util::mapFile  (const std::string& path, uint32_t& mapSize) {
 	CHECK_SYSCALL(mapInfo.fd, open(path.c_str(), O_RDWR))
 	mapInfo.size = std::filesystem::file_size(path);
 	mapInfo.page = mmap(nullptr, mapInfo.size, PROT_READ | PROT_WRITE, MAP_SHARED, mapInfo.fd, 0);
+	// sanity check
+	if (std::numeric_limits<uint32_t>::max() < mapInfo.size) ERROR()
 	if (mapInfo.page == MAP_FAILED) ERROR()
 	
 	mapInfoMap.insert({mapInfo.page, mapInfo});
 	logger.info("mapFile    %d  size = %8X  path = %s", mapInfo.id, (uint32_t)mapInfo.size, mapInfo.path);
 
-	mapSize = mapInfo.size;
-	return mapInfo.page;
+	return Util::MapFileResult(mapInfo.page, (uint32_t)mapInfo.size);
 }
-void  Util::unmapFile(void* page) {
-	if (!mapInfoMap.contains(page)) {
-		logger.error("unexpected page");
-		logger.error("  page  %p", page);
+void  Util::unmapFile(void* mapPage) {
+	if (!mapInfoMap.contains(mapPage)) {
+		logger.error("unexpected mapPage");
+		logger.error("  mapPage  %p", mapPage);
 		ERROR()
 	}
-	const MapInfo& mapInfo = mapInfoMap[page];
+	const MapInfo& mapInfo = mapInfoMap[mapPage];
 
 	logger.info("unmapFile  %d  size = %8X  path = %s", mapInfo.id, (uint32_t)mapInfo.size, mapInfo.path);
 

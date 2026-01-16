@@ -340,8 +340,14 @@ public:
 
 	static std::string toString(uint32_t unixTime);
 
-	static void*   mapFile  (const std::string& path, uint32_t& mapSize);
-	static void    unmapFile(void* page);
+	struct MapFileResult {
+		void*     mapPage;
+		uint32_t  mapSize;
+
+		MapFileResult(void* mapPage_, uint32_t mapSize_) : mapPage(mapPage_), mapSize(mapSize_) {}
+	};
+	static MapFileResult mapFile(const std::string& path);
+	static void          unmapFile(void* mapPage);
 
 	static void    byteswap  (uint16_t* source, uint16_t* dest, int size);
 

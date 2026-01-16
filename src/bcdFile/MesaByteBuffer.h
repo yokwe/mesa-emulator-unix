@@ -40,6 +40,8 @@
 
 #include "../util/Util.h"
 
+#include "../mesa/Pilot.h"
+
 
 class MesaByteBuffer {
 protected:
@@ -55,6 +57,12 @@ public:
     static uint8_t lowByte(uint16_t value) {
         return (uint8_t)(value >> 0);
     }
+    static uint32_t byteValueToWordValue(uint32_t byteValue) {
+        return (byteValue + Environment::bytesPerWord - 1) / Environment::bytesPerWord;
+    }
+    static uint32_t wordValueToByteValue(uint32_t wordValue) {
+        return wordValue * Environment::bytesPerWord;
+    }
 
     MesaByteBuffer(const uint8_t* data, const uint32_t size) : myData(data), myByteSize(size), myBytePos(0) {}
 
@@ -68,17 +76,17 @@ public:
         return myByteSize;
     }
     uint32_t size() {
-        return (byteSize() + 1) / 2;
+        return byteValueToWordValue(byteSize());
     }
     void bytePos(uint32_t newValue);
     uint32_t bytePos() {
         return myBytePos;
     }
     void pos(uint32_t wordPos) {
-        bytePos(wordPos * 2);
+        bytePos(wordValueToByteValue(wordPos));
     }
     uint32_t pos() {
-        return (bytePos() + 1) / 2;
+        return byteValueToWordValue(bytePos());
     }
 
     uint8_t  get8();

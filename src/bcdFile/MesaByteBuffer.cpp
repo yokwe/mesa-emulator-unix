@@ -99,8 +99,8 @@ uint32_t MesaByteBuffer::get32() {
 }
 
 MesaByteBuffer MesaByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
-    auto newByteOffset = wordOffset * 2;
-    auto newByteSize = wordSize * 2;
+    auto newByteOffset = wordValueToByteValue(wordOffset);
+    auto newByteSize = wordValueToByteValue(wordSize);
 
     // sanity check
     auto oldByteSize = myByteSize;

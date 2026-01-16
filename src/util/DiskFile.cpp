@@ -72,8 +72,10 @@ void DiskFile::attach(const std::string& path_) {
 	path = path_;
 	logger.info("DiskFile::attach %s", path);
 
-	page = (Page*)Util::mapFile(path, size);
-	maxBlock = getBlockSize();
+	auto [mapPage, mapSize] = Util::mapFile(path_);
+	page     = (Page*)mapPage;
+	size     = mapSize;
+	maxBlock = size / Environment::bytesPerPage;
 }
 
 void DiskFile::detach() {

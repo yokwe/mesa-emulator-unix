@@ -47,8 +47,9 @@ static const Logger logger(__FILE__);
 
 StreamBoot::StreamBoot(std::string path_) : Stream("BOOT", CoProcessorServerIDs::bootAgentID) {
 	path = path_;
-	map  = (uint16_t*)Util::mapFile(path, mapSize);
-	mapSize /= Environment::bytesPerWord;
+	auto [mapPage_, mapSize_] = Util::mapFile(path);
+	mapPage = (uint16_t*)mapPage_;
+	mapSize = mapSize_ / Environment::bytesPerWord;
 	pos = 0;
 	logger.info("%3d %-8s %s", serverID, name, path);
 }
@@ -111,7 +112,7 @@ uint16_t StreamBoot::write  (CoProcessorIOFaceGuam::CoProcessorFCBType *fcb, CoP
 	uint32_t  nextPos = pos + size;
 	if (DEBUG_SHOW_STREAM_BOOT) logger.info("DATA %4X => %4X", pos * Environment::bytesPerWord, nextPos * Environment::bytesPerWord);
 
-	Util::byteswap(map + pos, buffer, size);
+	Util::byteswap(mapPage + pos, buffer, size);
 	pos = nextPos;
 	tr.bytesWritten = size * Environment::bytesPerWord;
 

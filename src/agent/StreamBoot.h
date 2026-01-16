@@ -52,7 +52,7 @@ public:
 
 private:
 	std::string  path;
-	uint16_t* map;
+	uint16_t* mapPage;
 	uint32_t  mapSize;
 	uint32_t  pos;
 };

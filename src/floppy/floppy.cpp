@@ -35,6 +35,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "ByteBuffer.h"
 #include "floppy.h"
 
 void FloppyDisk::readSector(int sector, ByteBuffer& bb, uint32_t count) {

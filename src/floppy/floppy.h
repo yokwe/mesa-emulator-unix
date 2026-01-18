@@ -34,8 +34,11 @@
 
 #pragma once
 
-#include "../util/ByteBuffer.h"
+#include <vector>
+
 #include "../util/DiskFile.h"
+
+#include "ByteBuffer.h"
 
 class FloppyDisk {
 	DiskFile   diskFile;

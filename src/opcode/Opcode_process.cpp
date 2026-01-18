@@ -40,8 +40,8 @@
 static const Logger logger(__FILE__);
 
 #include "../util/Perf.h"
-#include "../util/trace.h"
 
+#include "../mesa/MesaBasic.h"
 #include "../mesa/Type.h"
 #include "../mesa/memory.h"
 #include "../mesa/Function.h"
@@ -260,9 +260,6 @@ BusyWait:
 // 10.2.1 Monitor Entry
 
 // EnerFailed: PROC[m: LONG POINTER TO Monitor]
-// EnterFailed calls Reschedule at it's end.
-// Also EnterFailed is called at very end of opcode implementation of ME and MR
-// So even if RequestReschedule is thrown within Reschedule, it is fine.
 static void EnterFailed(LONG_POINTER m) {
 	PsbLink link = {*FetchPda(OFFSET_PDA3(block, PSB, link))};
 	link.failed = 1;
@@ -381,11 +378,7 @@ inline PsbIndex Fault(FaultIndex fi) {
 	NotifyWakeup(PDA + OFFSET_PDA3(fault, fi, condition));
 	PC = savedPC;
 	SP = savedSP;
-	try {
-		Reschedule(1);
-	} catch (RequestReschedule& e) {
-		ERROR();
-	}
+	Reschedule(1);
 	return faulted;
 }
 // FaultOne: PROC[fi: FaultIndex, parameter: UNSPEC]

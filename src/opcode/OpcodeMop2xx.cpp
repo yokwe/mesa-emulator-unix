@@ -38,7 +38,6 @@
 static const Logger logger(__FILE__);
 
 #include "../mesa/memory.h"
-#include "../mesa/processor.h"
 #include "../mesa/Pilot.h"
 
 

@@ -36,6 +36,7 @@
 #pragma once
 
 #include <cstdint>
+#include <source_location>
 
 typedef uint8_t  CARD8;
 typedef uint16_t CARD16;
@@ -70,3 +71,12 @@ typedef CARD32 LONG_CARDINAL;
 #define OFFSET4(s,m,n,p) (CARD32)(OFFSET3(s,m,n) + ((offsetof(s,m[0].p) - offsetof(s,m[0])))     / sizeof(CARD16))
 
 #define ELEMENTSOF(t) ((CARD32)(sizeof(t) / sizeof(t[0])))
+
+
+class Abort {
+public:
+    const std::source_location location;
+    Abort(std::source_location location_ = std::source_location::current()) : location(location_) {}
+};
+
+#define ERROR_Abort() { throw Abort(); }

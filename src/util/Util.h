@@ -200,19 +200,6 @@ struct ErrorError {
 
 #define ERROR() { logBackTrace(); ErrorError errorError; LogSourceLocation::fatal(logger, errorError.location, "ERROR  "); throw errorError; }
 
-class Abort {
-public:
-	const std::source_location location;
-	Abort(std::source_location location_ = std::source_location::current()) : location(location_) {}
-};
-#define ERROR_Abort() { throw Abort(); }
-
-class RequestReschedule {
-public:
-	const std::source_location location;
-	RequestReschedule(std::source_location location_ = std::source_location::current()) : location(location_) {}
-};
-#define ERROR_RequestReschedule() { throw RequestReschedule(); }
 
 void logBackTrace();
 void setSignalHandler(int signum = SIGSEGV);
@@ -250,20 +237,6 @@ std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock:
 #define LOG_SYSCALL2(retVar, errNo, syscall)   { retVar = syscall; errNo = errno; if (retVar < 0) { logger.error("%s = %d", #syscall, retVar);  LOG_ERRNO(errNo)         } }
 #define CHECK_SYSCALL2(retVar, errNo, syscall) { retVar = syscall; errNo = errno; if (retVar < 0) { logger.error("%s = %d", #syscall, retVar);  LOG_ERRNO(errNo) ERROR() } }
 
-// Helper macro to make toString for enum class
-#define TO_STRING_PROLOGUE(e) \
-	typedef e ENUM; \
-	static std::map<ENUM, std::string> map({
-#define MAP_ENTRY(m) {ENUM::m, #m},
-#define TO_STRING_EPILOGUE \
-	}); \
-	if (map.contains(value)) { \
-		return map[value]; \
-	} else { \
-		logger.error("Unknown value = %d", (int)value); \
-		ERROR(); \
-		return std_sprintf("%d", (int)value); \
-	}
 
 // Helper macro for enum
 //#define ENUM_VALUE(enum,value) {enum::value, #value},

@@ -44,18 +44,24 @@
 class ByteBuffer {
     static const int bytesPerWord = 2;
 
-protected:
-    uint8_t*  myData;
-    uint32_t  myByteSize;
-    
-    uint32_t  myBytePos;
-
-    uint32_t byteValueToWordValue(uint32_t byteValue) {
+    static uint32_t byteValueToWordValue(uint32_t byteValue) {
         return (byteValue + bytesPerWord - 1) / bytesPerWord;
     }
-    uint32_t wordValueToByteValue(uint32_t wordValue) {
+    static uint32_t wordValueToByteValue(uint32_t wordValue) {
         return wordValue * bytesPerWord;
     }
+
+    struct Impl {
+        virtual const char* name() = 0;
+        virtual uint32_t get32(uint8_t* data, uint32_t pos) = 0;
+    };
+
+    Impl&     myImpl;
+    uint8_t*  myData;
+    uint32_t  myByteSize;
+    uint32_t  myBytePos;
+
+    ByteBuffer(Impl& impl, uint8_t* data, uint32_t byteSize) : myImpl(impl), myData(data), myByteSize(byteSize), myBytePos(0) {}
 
     void checkByteRange(uint32_t bytePos, uint32_t readSize) {
         checkBytePos(bytePos);
@@ -69,16 +75,9 @@ protected:
     uint16_t get16(uint32_t bytePos) {
         return (myData[bytePos + 0] << 8) | (myData[bytePos + 1] << 0);
     }
-
-    // netowrk order for 32bit value  high half and low half
-    uint32_t get32Network(uint32_t bytePos) {
-        return (myData[bytePos + 0] << 24) | (myData[bytePos + 1] << 16) | (myData[bytePos + 2] << 8) | (myData[bytePos + 3] << 0);
+    uint32_t get32(uint32_t bytePos) {
+        return myImpl.get32(myData, bytePos);
     }
-    // mesa order for 32bit value  low half and high half
-    uint32_t get32Mesa(uint32_t bytePos) {
-        return (myData[bytePos + 0] << 8) | (myData[bytePos + 1] << 0) | (myData[bytePos + 2] << 24) | (myData[bytePos + 3] << 16);
-    }
-
 public:
     static uint8_t highByte(uint16_t value) {
         return (uint8_t)(value >> 8);
@@ -87,8 +86,42 @@ public:
         return (uint8_t)(value >> 0);
     }
 
-    ByteBuffer(uint8_t* data, const uint32_t byteSize) : myData(data), myByteSize(byteSize), myBytePos(0) {}
-    virtual ~ByteBuffer() = default;
+    struct Mesa {
+        static inline struct : public Impl {
+            const char* name() override {
+                return "MESA";
+            }
+            // mesa order for 32bit value  low half and high half
+            uint32_t get32(uint8_t* data, uint32_t pos) override {
+                return (data[pos + 0] << 8) | (data[pos + 1] << 0) | (data[pos + 2] << 24) | (data[pos + 3] << 16);
+            }
+        } impl;
+
+        static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
+            return ByteBuffer(impl, data, size);
+        }
+    };
+    struct Net {
+        static inline struct : public Impl {
+            const char* name() override {
+                return "NET";
+            }
+            // netowrk order for 32bit value  high half and low half
+            uint32_t get32(uint8_t* data, uint32_t pos) override {
+                return (data[pos + 0] << 24) | (data[pos + 1] << 16) | (data[pos + 2] << 8) | (data[pos + 3] << 0);
+            }
+        } impl;
+    
+        static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
+            return ByteBuffer(impl, data, size);
+        }
+    };
+
+    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize);
+
+    const char* name() {
+        return myImpl.name();
+    }
 
     const uint8_t* data() {
         return myData;
@@ -130,7 +163,14 @@ public:
         myBytePos += readSize;
         return ret;
     }
-    virtual uint32_t get32() = 0;
+    uint32_t get32() {
+        const uint32_t readSize = 4;
+
+        checkByteRange(myBytePos, readSize);
+        auto ret = get32(myBytePos);
+        myBytePos += readSize;
+        return ret;
+    }
 
     struct HasRead {
         virtual ByteBuffer& read(ByteBuffer& bb) = 0;
@@ -177,66 +217,5 @@ public:
     ByteBuffer& read(uint32_t& value) {
         value = get32();
         return *this;
-    }
-};
-
-class MesaByteBuffer: public ByteBuffer {
-public:
-    MesaByteBuffer(uint8_t* data, const uint32_t size) : ByteBuffer(data, size) {}
-
-    MesaByteBuffer range(uint32_t wordOffset, uint32_t wordSize) {
-        auto bytePos  = wordValueToByteValue(wordOffset);
-        auto readSize = wordValueToByteValue(wordSize);
-        if (myByteSize < (bytePos + readSize)) {
-            // fix readSize
-            logger.info("unexpected value  readSize   %d   myByteSize  %d", readSize, myByteSize);
-            readSize = myByteSize - bytePos;
-        }
-        // sanity check
-        checkByteRange(bytePos, readSize);
-
-        return MesaByteBuffer(myData + bytePos, readSize);
-    }
-
-    uint32_t get32() override {
-        const uint32_t readSize = 4;
-
-        // sanity check
-        checkByteRange(myBytePos, readSize);
-
-        auto ret = ByteBuffer::get32Mesa(myBytePos);
-        myBytePos += readSize;
-        return ret; 
-    }
-};
-
-
-class NetworkByteBuffer: public ByteBuffer {
-public:
-    NetworkByteBuffer(uint8_t* data, const uint32_t byteSize) : ByteBuffer(data, byteSize) {}
-
-    NetworkByteBuffer range(uint32_t wordOffset, uint32_t wordSize) {
-        auto bytePos  = wordValueToByteValue(wordOffset);
-        auto readSize = wordValueToByteValue(wordSize);
-        if (myByteSize < (bytePos + readSize)) {
-            // fix readSize
-            logger.info("unexpected value  readSize   %d   myByteSize  %d", readSize, myByteSize);
-            readSize = myByteSize - bytePos;
-        }
-        // sanity check
-        checkByteRange(bytePos, readSize);
-        
-        return NetworkByteBuffer(myData + bytePos, readSize);
-    }
-
-    uint32_t get32() override {
-        const uint32_t readSize = 4;
-
-        // sanity check
-        checkByteRange(myBytePos, myBytePos + readSize);
-
-        auto ret = ByteBuffer::get32Network(myBytePos);
-        myBytePos += readSize;
-        return ret; 
     }
 };

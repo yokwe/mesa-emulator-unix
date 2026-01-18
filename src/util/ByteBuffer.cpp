@@ -46,3 +46,17 @@ void ByteBuffer::checkBytePos(uint32_t bytePos) {
     logger.error("  size     %u", myByteSize);
     ERROR();
 }
+
+ByteBuffer ByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
+    auto bytePos  = wordValueToByteValue(wordOffset);
+    auto readSize = wordValueToByteValue(wordSize);
+    if (myByteSize < (bytePos + readSize)) {
+        // fix readSize
+        logger.info("unexpected value  readSize   %d   myByteSize  %d", readSize, myByteSize);
+        readSize = myByteSize - bytePos;
+    }
+    // sanity check
+    checkByteRange(bytePos, readSize);
+    
+    return ByteBuffer(myImpl, myData + bytePos, readSize);
+}

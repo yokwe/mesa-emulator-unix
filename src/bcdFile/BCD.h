@@ -51,8 +51,8 @@ class BCD : public ByteBuffer::HasRead {
 public:
     static const constexpr uint16_t VersionID = 6103;
 
-    static BCD getInstance(MesaByteBuffer& bb);
-    static void checkVersionIdent(MesaByteBuffer& bb);
+    static BCD getInstance(ByteBuffer& bb);
+    static void checkVersionIdent(ByteBuffer& bb);
 
 	uint16_t  versionIdent;
 	Timestamp version;

@@ -55,7 +55,7 @@ static const Logger logger(__FILE__);
 #include "SGIndex.h"
 #include "SGRecord.h"
 
-static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
+static void readTableSS(ByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, std::string*>& table) {
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 
@@ -76,7 +76,7 @@ static void readTableSS(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit,
    }
 }
 template<class T>
-static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
+static void readTable(ByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::map<uint16_t, T*>& table) {
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 
@@ -98,7 +98,7 @@ static void readTable(MesaByteBuffer& baseBB, uint32_t offset, uint32_t limit, s
 	}
 }
 
-BCD BCD::getInstance(MesaByteBuffer& bb) {
+BCD BCD::getInstance(ByteBuffer& bb) {
     // sanity check
     checkVersionIdent(bb);
 
@@ -154,7 +154,7 @@ BCD BCD::getInstance(MesaByteBuffer& bb) {
     return bcd;
 }
 
-void BCD::checkVersionIdent(MesaByteBuffer &bb) {
+void BCD::checkVersionIdent(ByteBuffer &bb) {
     auto oldPos = bb.pos();
     auto word = bb.get16();
     bb.pos(oldPos);

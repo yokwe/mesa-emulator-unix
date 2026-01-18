@@ -60,8 +60,8 @@ public:
         return mySize;
     }
 
-    MesaByteBuffer mesaByteBuffer() const {
-        MesaByteBuffer ret(myData, mySize);
+    ByteBuffer mesaByteBuffer() const {
+        auto ret = ByteBuffer::Mesa::getInstance(myData, mySize);
         return ret;
     }
 };

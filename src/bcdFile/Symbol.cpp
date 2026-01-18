@@ -69,7 +69,7 @@ static const Logger logger(__FILE__);
 #include "Tree.h"
 
 
-static std::string readSSTable(MesaByteBuffer& baseBB, const BlockDescriptor& block) {
+static std::string readSSTable(ByteBuffer& baseBB, const BlockDescriptor& block) {
     uint16_t offset = block.offset;
     uint16_t limit  = block.size;
     auto bb = baseBB.range(offset, limit);
@@ -96,7 +96,7 @@ static std::string readSSTable(MesaByteBuffer& baseBB, const BlockDescriptor& bl
 	}
 	return ss;
 }
-static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, HTRecord*>& table, const BlockDescriptor& ssBlock) {
+static void readTable(ByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, HTRecord*>& table, const BlockDescriptor& ssBlock) {
 	const std::string ss = readSSTable(baseBB, ssBlock);
 
     uint16_t offset = block.offset;
@@ -127,7 +127,7 @@ static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std:
 	}
 }
 template<class T>
-static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, T*>& table, std::string prefix) {
+static void readTable(ByteBuffer& baseBB, const BlockDescriptor& block, std::map<uint16_t, T*>& table, std::string prefix) {
 	auto bb = baseBB.range(block.offset, block.size);
 	auto limit = block.size;
     for(;;) {
@@ -149,7 +149,7 @@ static void readTable(MesaByteBuffer& baseBB, const BlockDescriptor& block, std:
 	}
 }
 
-Symbol Symbol::getInstance(MesaByteBuffer bb) {
+Symbol Symbol::getInstance(ByteBuffer bb) {
 	// sanity check
 	checkVersionIdent(bb);
 
@@ -180,7 +180,7 @@ Symbol Symbol::getInstance(MesaByteBuffer bb) {
 	return symbol;
 }
 
-void Symbol::checkVersionIdent(MesaByteBuffer &bb) {
+void Symbol::checkVersionIdent(ByteBuffer &bb) {
     auto oldPos = bb.pos();
     auto word = bb.get16();
     bb.pos(oldPos);

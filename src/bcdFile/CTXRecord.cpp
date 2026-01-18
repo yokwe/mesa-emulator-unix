@@ -38,7 +38,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "CTXRecord.h"
 
@@ -87,7 +87,7 @@ std::string CTXRecord::SIMPLE::toString() const {
 //
 // CTXRecord::included
 //
-CTXRecord::INCLUDED::INCLUDED(uint16_t u1, MesaByteBuffer& bb) {
+CTXRecord::INCLUDED::INCLUDED(uint16_t u1, ByteBuffer& bb) {
     uint16_t u2;
     uint16_t u3;
 
@@ -125,7 +125,7 @@ std::string CTXRecord::IMPORTED::toString() const {
 //
 // CTXReord
 //
-MesaByteBuffer& CTXRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& CTXRecord::read(ByteBuffer& bb) {
     uint16_t u0, u1;
     bb.read(u0, u1);
 

@@ -38,11 +38,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "ENRecord.h"
 
-MesaByteBuffer& ENRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& ENRecord::read(ByteBuffer& bb) {
     uint16_t nEntries;
     bb.read(nEntries);
     initialPC.reserve(nEntries);

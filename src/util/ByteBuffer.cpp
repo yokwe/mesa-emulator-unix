@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2025, Yasuhiro Hasegawa
+ * Copyright (c) 2026, Yasuhiro Hasegawa
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,25 +30,19 @@
 
 
 //
-// ENRecord.h
+// ByteBuffer.cpp
 //
 
-#pragma once
-
-#include <cstdint>
-#include <vector>
-#include <string>
-
 #include "../util/Util.h"
+static const Logger logger(__FILE__);
 
-#include "../util/ByteBuffer.h"
+#include "ByteBuffer.h"
 
+void ByteBuffer::checkBytePos(uint32_t bytePos) {
+    if (bytePos < myByteSize) return;
 
-// ENRecord: TYPE = RECORD [
-//   nEntries: CARDINAL, initialPC: ARRAY [0..0) OF PrincOps.BytePC];
-struct ENRecord : public ByteBuffer::HasRead, public HasToString {
-    std::vector<uint16_t> initialPC;
-
-    ByteBuffer& read(ByteBuffer& bb) override;
-    std::string toString() const override;
-};
+    logger.error("Unexpected values  %s", __FUNCTION__);
+    logger.error("  bytePos  %u", bytePos);
+    logger.error("  size     %u", myByteSize);
+    ERROR();
+}

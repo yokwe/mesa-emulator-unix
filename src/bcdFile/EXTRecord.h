@@ -40,7 +40,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "SEIndex.h"
@@ -50,12 +50,12 @@
 //  type (0:0..1): Symbols.ExtensionType[value..default],
 //  sei (0:2..15): Symbols.ISEIndex,
 //  tree (1:0..15): Tree.Link]
-struct EXTRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct EXTRecord : public ByteBuffer::HasRead, public HasToString {
     ExtensionType type;
     SEIndex       sei;
     TreeLink      tree;
     
-    MesaByteBuffer& read(MesaByteBuffer& bb) override {
+    ByteBuffer& read(ByteBuffer& bb) override {
         uint16_t u0;
         bb.read(u0, tree);
 

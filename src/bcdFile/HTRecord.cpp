@@ -38,11 +38,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "HTRecord.h"
 
-MesaByteBuffer& HTRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& HTRecord::read(ByteBuffer& bb) {
     uint16_t u0;
 
     bb.read(u0, ssIndex);

@@ -38,7 +38,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "../mesa/Pilot.h"
 
@@ -163,7 +163,7 @@ void BCD::checkVersionIdent(MesaByteBuffer &bb) {
     ERROR()
 }
 
-MesaByteBuffer& BCD::read(MesaByteBuffer& bb) {
+ByteBuffer& BCD::read(ByteBuffer& bb) {
     bb.pos(0);
     bb.read(versionIdent);
     // sanity check

@@ -26,7 +26,6 @@ target_sources(
         LTRecord.h
         MDIndex.h
         MDRecord.h
-        MesaByteBuffer.h
         MTIndex.h
         MTRecord.h
         NameRecord.h
@@ -48,7 +47,6 @@ target_sources(
         HTRecord.cpp
         LTRecord.cpp
         MDRecord.cpp
-        MesaByteBuffer.cpp
         MTRecord.cpp
         SERecord.cpp
         SGRecord.cpp

@@ -38,11 +38,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "MTRecord.h"
 
-MesaByteBuffer& MTRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& MTRecord::read(ByteBuffer& bb) {
     uint16_t u8;
     bb.read(name, file, config, code, sseg, links, u8, frameSize, entries, atoms);
 

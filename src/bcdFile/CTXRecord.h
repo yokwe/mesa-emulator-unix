@@ -40,7 +40,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "MDIndex.h"
@@ -64,7 +64,7 @@
 //     imported => [includeLink(1:5..15): IncludedCTXIndex],
 //     nil => []
 //     ENDCASE];
-struct CTXRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct CTXRecord : public ByteBuffer::HasRead, public HasToString {
     //Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
     enum class Closure : uint16_t {
         ENUM_VALUE(Closure, NONE)
@@ -88,7 +88,7 @@ struct CTXRecord : public MesaByteBuffer::HasRead, public HasToString {
         bool     closed, complete, restricted;
         bool     reset;
         
-        INCLUDED(uint16_t u1, MesaByteBuffer& bb);
+        INCLUDED(uint16_t u1, ByteBuffer& bb);
         std::string toString() const override;
     };
     struct IMPORTED : public HasToString {
@@ -120,7 +120,7 @@ struct CTXRecord : public MesaByteBuffer::HasRead, public HasToString {
 
     CTXRecord() : mark(false), varUpdated(false), seList(), level(ContextLevel::LZ), tag(Tag::NIL), variant(NIL{}) {}
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 
     DEFINE_VARIANT_METHOD(SIMPLE)

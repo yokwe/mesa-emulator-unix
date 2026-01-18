@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 class BCDFile {
     std::string myPath;

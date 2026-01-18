@@ -38,7 +38,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "SERecord.h"
 
@@ -63,7 +63,7 @@ std::string SERecord::ID::toString(Tag value) {
     ERROR();
 }
 
-void SERecord::ID::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::ID::read(uint16_t u0, ByteBuffer& bb) {
     uint16_t u1, u4;
 
     bb.read(u1, idInfo, idValue, u4);
@@ -123,7 +123,7 @@ std::string SERecord::ID::toString() const {
 //
 // SERecord::CONS::BASIC
 //
-void SERecord::CONS::BASIC::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::BASIC::read(uint16_t u0, ByteBuffer& bb) {
     ordered = bitField(u0, 8);
     code    = bitField(9, 15);
     bb.read(length);
@@ -136,7 +136,7 @@ std::string SERecord::CONS::BASIC::toString() const {
 //
 // SERecord::CONS::ENUMERATED
 //
-void SERecord::CONS::ENUMERATED::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::ENUMERATED::read(uint16_t u0, ByteBuffer& bb) {
     ordered    = bitField(u0,  8);
     machineDep = bitField(u0,  9);
     unpainted  = bitField(u0, 10);
@@ -168,7 +168,7 @@ std::string SERecord::CONS::RECORD::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-void SERecord::CONS::RECORD::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::RECORD::read(uint16_t u0, ByteBuffer& bb) {
     hints.comparable    = bitField(u0,  8);
     hints.assignable    = bitField(u0,  9);
     hints.unifield      = bitField(u0, 10);
@@ -218,7 +218,7 @@ std::string SERecord::CONS::RECORD::toString() const {
 //
 // SERecord::CONS::RECORD::LINKED
 //
-MesaByteBuffer& SERecord::CONS::RECORD::LINKED::read(MesaByteBuffer& bb) {
+ByteBuffer& SERecord::CONS::RECORD::LINKED::read(ByteBuffer& bb) {
     bb.read(linkType);
     return bb;
 }
@@ -230,7 +230,7 @@ std::string SERecord::CONS::RECORD::LINKED::toString() const {
 //
 // SERecord::CONS::REF
 //
-void SERecord::CONS::REF::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::REF::read(uint16_t u0, ByteBuffer& bb) {
     counted  = bitField(u0,  8);
     ordered  = bitField(u0,  9);
     readOnly = bitField(u0, 10);
@@ -255,7 +255,7 @@ std::string SERecord::CONS::REF::toString() const {
 //
 // SERecord::CONS::ARRAY
 //
-void SERecord::CONS::ARRAY::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::ARRAY::read(uint16_t u0, ByteBuffer& bb) {
     packed = bitField(u0, 8, 15);
     bb.read(indexType, componentType);
 }
@@ -267,7 +267,7 @@ std::string SERecord::CONS::ARRAY::toString() const {
 //
 // SERecord::CONS::ARRAYDESC
 //
-void SERecord::CONS::ARRAYDESC::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::ARRAYDESC::read(uint16_t u0, ByteBuffer& bb) {
     var = bitField(u0, 8);
     readOnly = bitField(u0, 9, 15);
     bb.read(describedType);
@@ -284,7 +284,7 @@ std::string SERecord::CONS::ARRAYDESC::toString() const {
 //
 // SERecord::CONS::TRANSFER
 //
-void SERecord::CONS::TRANSFER::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::TRANSFER::read(uint16_t u0, ByteBuffer& bb) {
     safe = bitField(u0, 8);
     mode = (TransferMode)bitField(u0, 9, 15);
     bb.read(typeIn, typeOut);
@@ -298,7 +298,7 @@ std::string SERecord::CONS::TRANSFER::toString() const {
 //
 // SERecord::CONS::DEFINITION
 //
-void SERecord::CONS::DEFINITION::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::DEFINITION::read(uint16_t u0, ByteBuffer& bb) {
     named = bitField(u0, 8, 15);
     bb.read(defCtx);
 }
@@ -310,7 +310,7 @@ std::string SERecord::CONS::DEFINITION::toString() const {
 //
 // SERecord::CONS::UNION
 //
-void SERecord::CONS::UNION::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::UNION::read(uint16_t u0, ByteBuffer& bb) {
     hints      = bitField(u0,  8, 11);
     overlaid   = bitField(u0, 12);
     controlled = bitField(u0, 13);
@@ -332,7 +332,7 @@ std::string SERecord::CONS::UNION::toString() const {
 //
 // SERecord::CONS::SEQUENCE
 //
-void SERecord::CONS::SEQUENCE::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::SEQUENCE::read(uint16_t u0, ByteBuffer& bb) {
     packed     = bitField(u0, 8);
     controlled = bitField(u0, 9);
     machindDep = bitField(u0, 10, 15);
@@ -350,7 +350,7 @@ std::string SERecord::CONS::SEQUENCE::toString() const {
 //
 // SERecord::CONS::RELATIVE
 //
-void SERecord::CONS::RELATIVE::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::RELATIVE::read(uint16_t u0, ByteBuffer& bb) {
     (void)u0;
     bb.read(baseType, offsetType, resultType);
 }
@@ -363,7 +363,7 @@ std::string SERecord::CONS::RELATIVE::toString() const {
 //
 // SERecord::CONS::SUBRANGE
 //
-void SERecord::CONS::SUBRANGE::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::SUBRANGE::read(uint16_t u0, ByteBuffer& bb) {
     filled = bitField(u0, 8);
     empty  = bitField(u0, 9, 15);
     uint16_t uorigin;
@@ -383,7 +383,7 @@ std::string SERecord::CONS::SUBRANGE::toString() const {
 //
 // SERecord::CONS::LONG
 //
-void SERecord::CONS::LONG::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::LONG::read(uint16_t u0, ByteBuffer& bb) {
     (void)u0;
     bb.read(rangeType);
 }
@@ -395,7 +395,7 @@ std::string SERecord::CONS::LONG::toString() const {
 //
 // SERecord::CONS::REAL
 //
-void SERecord::CONS::REAL::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::REAL::read(uint16_t u0, ByteBuffer& bb) {
     (void)u0;
     bb.read(rangeType);
 }
@@ -407,7 +407,7 @@ std::string SERecord::CONS::REAL::toString() const {
 //
 // SERecord::CONS::OPAQUE
 //
-void SERecord::CONS::OPAQUE::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::OPAQUE::read(uint16_t u0, ByteBuffer& bb) {
     lengthKnown = bitField(u0, 8, 15);
     bb.read(length, id);
 }
@@ -420,7 +420,7 @@ std::string SERecord::CONS::OPAQUE::toString() const {
 //
 // SERecord::CONS::ZONE
 //
-void SERecord::CONS::ZONE::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::ZONE::read(uint16_t u0, ByteBuffer& bb) {
     (void)bb;
     counted = bitField(u0, 8);
     mds     = bitField(u0, 9, 15);
@@ -436,7 +436,7 @@ std::string SERecord::CONS::ZONE::toString() const {
 // SERecord::CONS
 //
 #define CASE_BODY(typeName) { typeName value; value.read(u0, bb); variant = value; }
-void SERecord::CONS::read(uint16_t u0, MesaByteBuffer& bb) {
+void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
     tag = (TypeClass)bitField(u0, 3, 7);
     switch(tag) {
         
@@ -523,7 +523,7 @@ std::string SERecord::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-MesaByteBuffer& SERecord::read(MesaByteBuffer& bb) {
+ByteBuffer& SERecord::read(ByteBuffer& bb) {
     uint16_t u0;
 
     bb.read(u0);

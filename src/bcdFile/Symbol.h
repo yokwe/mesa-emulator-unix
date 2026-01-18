@@ -41,7 +41,7 @@
 
 #include "Type.h"
 #include "LTRecord.h"
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 #include "CTXIndex.h"
 #include "SEIndex.h"
 #include "BTIndex.h"
@@ -61,13 +61,13 @@ struct TreeNode;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
-struct BlockDescriptor : public MesaByteBuffer::HasRead, public HasToString {
+struct BlockDescriptor : public ByteBuffer::HasRead, public HasToString {
 	uint16_t offset;
 	uint16_t size;
 
 	BlockDescriptor(): offset(0), size(0) {}
 
-	MesaByteBuffer& read(MesaByteBuffer& bb) override {
+	ByteBuffer& read(ByteBuffer& bb) override {
 		bb.read(offset, size);
 		return bb;
 	}
@@ -76,8 +76,8 @@ struct BlockDescriptor : public MesaByteBuffer::HasRead, public HasToString {
 	}
 };
 
-class Symbol : public MesaByteBuffer::HasRead {
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+class Symbol : public ByteBuffer::HasRead {
+    ByteBuffer& read(ByteBuffer& bb) override;
 
 public:
     // VersionID: CARDINAL = 08140; -- AMesa/14.0/Compiler/Friends/SymbolSegment.mesa

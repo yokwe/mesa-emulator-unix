@@ -37,17 +37,17 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "NameRecord.h"
 
 // FTRecord: TYPE = RECORD [name: NameRecord, version: VersionStamp];
-struct FTRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct FTRecord : public ByteBuffer::HasRead, public HasToString {
     NameRecord name;
     Timestamp version;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override {
+    ByteBuffer& read(ByteBuffer& bb) override {
         bb.read(name, version);
         return bb;
     }

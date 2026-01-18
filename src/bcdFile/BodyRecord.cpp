@@ -39,7 +39,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 #include "BodyRecord.h"
 
 #undef  ENUM_VALUE
@@ -60,7 +60,7 @@ std::string BodyLink::toString(Which value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-MesaByteBuffer& BodyLink::read(MesaByteBuffer& bb) {
+ByteBuffer& BodyLink::read(ByteBuffer& bb) {
     uint16_t u0;
 
     bb.read(u0);
@@ -93,21 +93,21 @@ std::string BodyInfo::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-void BodyInfo::INTERNAL::read(uint16_t u0, MesaByteBuffer& bb) {
+void BodyInfo::INTERNAL::read(uint16_t u0, ByteBuffer& bb) {
     bodyTree.index(bitField(u0, 1, 15));
     bb.read(thread, frameSize);
 }
 std::string BodyInfo::INTERNAL::toString() const {
     return std_sprintf("[%s %s %d]", bodyTree.toString(), thread.toString(), frameSize);
 }
-void BodyInfo::EXTERNAL::read(uint16_t u0, MesaByteBuffer& bb) {
+void BodyInfo::EXTERNAL::read(uint16_t u0, ByteBuffer& bb) {
     bytes = bitField(u0, 1, 15);
     bb.read(startIndex, indexLength);
 }
 std::string BodyInfo::EXTERNAL::toString() const {
     return std_sprintf("[%d %d %d]", bytes, startIndex, indexLength);
 }
-MesaByteBuffer& BodyInfo::read(MesaByteBuffer& bb) {
+ByteBuffer& BodyInfo::read(ByteBuffer& bb) {
     uint16_t u0;
     bb.read(u0);
     tag = (Tag)bitField(u0, 0);
@@ -154,7 +154,7 @@ std::string BodyRecord::toString(Tag value) {
 //
 // BodyRecord::CALLABLE::OUTER
 //
-void BodyRecord::CALLABLE::OUTER::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::OUTER::read(uint16_t u11, ByteBuffer& bb) {
     (void)u11;
     (void)bb;
 }
@@ -162,7 +162,7 @@ void BodyRecord::CALLABLE::OUTER::read(uint16_t u11, MesaByteBuffer& bb) {
 //
 // BodyRecord::CALLABLE::INNER
 //
-void BodyRecord::CALLABLE::INNER::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::INNER::read(uint16_t u11, ByteBuffer& bb) {
     frameOffset = bitField(u11, 2, 15);
     (void)bb;
     // NOTICE
@@ -173,7 +173,7 @@ void BodyRecord::CALLABLE::INNER::read(uint16_t u11, MesaByteBuffer& bb) {
 //
 // BodyRecord::CALLABLE::CATCH
 //
-void BodyRecord::CALLABLE::CATCH::read(uint16_t u11, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::CATCH::read(uint16_t u11, ByteBuffer& bb) {
     (void)u11;
     bb.read(index); // 12
 }
@@ -192,7 +192,7 @@ std::string BodyRecord::CALLABLE::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-void BodyRecord::CALLABLE::read(uint16_t u8, MesaByteBuffer& bb) {
+void BodyRecord::CALLABLE::read(uint16_t u8, ByteBuffer& bb) {
     uint16_t u9, u10, u11;
     bb.read(u9, u10, u11);
 
@@ -256,7 +256,7 @@ std::string BodyRecord::CALLABLE::toString() const {
 //
 // BodyRecord::OTHER
 //
-void BodyRecord::OTHER::read(uint16_t u8, MesaByteBuffer& bb) {
+void BodyRecord::OTHER::read(uint16_t u8, ByteBuffer& bb) {
     relOffset = bitField(u8, 1, 15);
     (void)bb;
 }
@@ -267,7 +267,7 @@ std::string BodyRecord::OTHER::toString() const {
 //
 // BodyRecord
 //
-MesaByteBuffer& BodyRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& BodyRecord::read(ByteBuffer& bb) {
     uint16_t u3, u8;
     bb.read(link, firstSon, type, u3, sourceIndex, info, u8);
 

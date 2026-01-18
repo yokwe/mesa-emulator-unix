@@ -41,7 +41,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "BTIndex.h"
@@ -52,7 +52,7 @@
 // NOTICE
 //   size of BodyLink is 15 bits
 //BodyLink: TYPE = RECORD [which(0:0..0): {sibling(0), parent(1)}, index(0:1..14): BTIndex];
-struct BodyLink : public MesaByteBuffer::HasRead, public HasToString {
+struct BodyLink : public ByteBuffer::HasRead, public HasToString {
     enum class Which {
         ENUM_VALUE(Which, SIBLING)
         ENUM_VALUE(Which, PARENT)
@@ -64,7 +64,7 @@ struct BodyLink : public MesaByteBuffer::HasRead, public HasToString {
 
     BodyLink() : which(Which::SIBLING) {}
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 };
 
@@ -81,7 +81,7 @@ struct BodyLink : public MesaByteBuffer::HasRead, public HasToString {
 //      bytes(0:1..15): [0..LAST[CARDINAL]/2],
 //      startIndex(1:0..15), indexLength(2:0..15): CARDINAL]
 //    ENDCASE];
-struct BodyInfo : public MesaByteBuffer::HasRead, public HasToString {
+struct BodyInfo : public ByteBuffer::HasRead, public HasToString {
     enum class Tag {
         ENUM_VALUE(Tag, INTERNAL)
         ENUM_VALUE(Tag, EXTERNAL)
@@ -93,7 +93,7 @@ struct BodyInfo : public MesaByteBuffer::HasRead, public HasToString {
         TreeIndex thread;
         uint16_t  frameSize;
 
-        void read(uint16_t u0, MesaByteBuffer& bb);
+        void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
     };
     struct EXTERNAL : public HasToString {
@@ -101,14 +101,14 @@ struct BodyInfo : public MesaByteBuffer::HasRead, public HasToString {
         uint16_t startIndex;
         uint16_t indexLength;
 
-        void read(uint16_t u0, MesaByteBuffer& bb);
+        void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
     };
 
     Tag tag;
     std::variant<INTERNAL, EXTERNAL> variant;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 };
 
@@ -139,7 +139,7 @@ struct BodyInfo : public MesaByteBuffer::HasRead, public HasToString {
 //    Other => [relOffset(8:1..15): [0..LAST[CARDINAL]/2]]
 //    ENDCASE];
 
-struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct BodyRecord : public ByteBuffer::HasRead, public HasToString {
     enum class Tag {
         ENUM_VALUE(Tag, CALLABLE)
         ENUM_VALUE(Tag, OTHER)
@@ -155,7 +155,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
         static std::string toString(Tag);
 
         struct OUTER : public HasToString {
-            void read(uint16_t u11, MesaByteBuffer& bb);
+            void read(uint16_t u11, ByteBuffer& bb);
             std::string toString() const override {
                 return "";
             }
@@ -163,7 +163,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
         struct INNER : public HasToString {
             uint16_t frameOffset;
 
-            void read(uint16_t u11, MesaByteBuffer& bb);
+            void read(uint16_t u11, ByteBuffer& bb);
             std::string toString() const override {
                 return std_sprintf("%d", frameOffset);
             }
@@ -171,7 +171,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
         struct CATCH : public HasToString {
             uint16_t index;
 
-            void read(uint16_t u11, MesaByteBuffer& bb);
+            void read(uint16_t u11, ByteBuffer& bb);
             std::string toString() const override {
                 return std_sprintf("%d", index);
             }
@@ -190,7 +190,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
         Tag      tag;
         std::variant<OUTER, INNER, CATCH> variant;
 
-        void read(uint16_t u8, MesaByteBuffer& bb);
+        void read(uint16_t u8, ByteBuffer& bb);
         std::string toString() const override;
 
         DEFINE_VARIANT_METHOD(OUTER)
@@ -201,7 +201,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
     struct OTHER : public HasToString {
         uint16_t relOffset;
 
-        void read(uint16_t u8, MesaByteBuffer& bb);
+        void read(uint16_t u8, ByteBuffer& bb);
         std::string toString() const override;
     };
 
@@ -215,7 +215,7 @@ struct BodyRecord : public MesaByteBuffer::HasRead, public HasToString {
     Tag          tag;
     std::variant<CALLABLE, OTHER> variant;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 
     DEFINE_VARIANT_METHOD(CALLABLE)

@@ -37,7 +37,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "HTIndex.h"
@@ -53,7 +53,7 @@
 //   ctx: IncludedCTXIndex,	-- context of copied entries
 //   defaultImport: CTXIndex,	-- unnamed imported instance
 //   file: FileIndex];		-- associated file
-struct MDRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct MDRecord : public ByteBuffer::HasRead, public HasToString {
     Timestamp  stamp;
     HTIndex    moduleId;
     HTIndex    fileId;
@@ -63,6 +63,6 @@ struct MDRecord : public MesaByteBuffer::HasRead, public HasToString {
     CTXIndex   defaultImport;
     uint16_t   fileIndex;  // this is not FTIndex but index of ftTable element.  0 means first entry of ftTable. 1 means second entry of ftTable
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 };

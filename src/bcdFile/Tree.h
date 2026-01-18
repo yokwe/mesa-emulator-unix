@@ -42,7 +42,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "TreeIndex.h"
 #include "HTIndex.h"
@@ -56,7 +56,7 @@
 //    symbol => [index(0:2..15): Symbols.ISEIndex],
 //    literal => [info(0:2..15): Literals.LitRecord]
 //    ENDCASE];
-struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
+struct TreeLink final : public ByteBuffer::HasRead, public HasToString {
     enum class Tag : uint16_t {
         ENUM_VALUE(Tag, SUBTREE)
         ENUM_VALUE(Tag, HASH)
@@ -116,7 +116,7 @@ struct TreeLink final : public MesaByteBuffer::HasRead, public HasToString {
         return tag == Tag::SUBTREE && toSUBTREE().index.isNull();
     }
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 
     DEFINE_VARIANT_METHOD(SUBTREE)
@@ -425,7 +425,7 @@ std::string toString(NodeName);
 //  nSons (0: 13..15): [0..MaxNSons],
 //  info (1): Info,
 //  son (2): ARRAY [1..1) OF Link];
-struct TreeNode : public MesaByteBuffer::HasRead, public HasToString {
+struct TreeNode : public ByteBuffer::HasRead, public HasToString {
     bool     free;
     NodeName name;
     bool     attr1;
@@ -436,6 +436,6 @@ struct TreeNode : public MesaByteBuffer::HasRead, public HasToString {
     uint16_t info;
     std::vector<TreeLink> son;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 };

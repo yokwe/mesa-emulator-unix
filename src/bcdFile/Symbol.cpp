@@ -40,7 +40,7 @@ static const Logger logger(__FILE__);
 
 #include "Type.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "MDIndex.h"
 #include "EXTIndex.h"
@@ -189,7 +189,7 @@ void Symbol::checkVersionIdent(MesaByteBuffer &bb) {
     ERROR()
 }
 
-MesaByteBuffer& Symbol::read(MesaByteBuffer& bb) {
+ByteBuffer& Symbol::read(ByteBuffer& bb) {
 	uint16_t u10;
 
 	bb.read(versionIdent, version, creator, sourceVersion, u10, importCtx, outerCtx);

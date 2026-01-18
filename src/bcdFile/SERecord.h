@@ -40,7 +40,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "CTXIndex.h"
@@ -141,7 +141,7 @@
 //        ENDCASE],         -- changing symbol version id's
 //    ENDCASE];
 
-struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
+struct SERecord : public ByteBuffer::HasRead, public HasToString {
     struct ID : public HasToString {
         struct TERMINAL : public HasToString  {
             std::string toString() const override {
@@ -153,10 +153,10 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
                 return "";
             }
         };
-        struct LINKED : public MesaByteBuffer::HasRead, public HasToString {
+        struct LINKED : public ByteBuffer::HasRead, public HasToString {
             SEIndex link;
 
-            MesaByteBuffer& read(MesaByteBuffer& bb) override {
+            ByteBuffer& read(ByteBuffer& bb) override {
                 return bb.read(link);
             }
             std::string toString() const override {
@@ -186,7 +186,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
         ID() : tag(Tag::TERMINAL), variant(TERMINAL{}) {}
 
-        void read(uint16_t u0, MesaByteBuffer& bb);
+        void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
 
         DEFINE_VARIANT_METHOD(TERMINAL)
@@ -204,7 +204,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             uint16_t code;    // [0..16)
             uint16_t length;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct ENUMERATED : public HasToString {
@@ -215,7 +215,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             CTXIndex valueCtx;
             uint16_t nValues;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct RECORD : public HasToString {
@@ -224,10 +224,10 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
                     return "";
                 }
             };
-            struct LINKED : public MesaByteBuffer::HasRead, public HasToString {
+            struct LINKED : public ByteBuffer::HasRead, public HasToString {
                 SEIndex linkType;
 
-                MesaByteBuffer& read(MesaByteBuffer& bb) override;
+                ByteBuffer& read(ByteBuffer& bb) override;
                 std::string toString() const override;
             };
 
@@ -255,7 +255,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             Tag      tag;
             std::variant<NOT_LINKED, LINKED> variant;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
 
             DEFINE_VARIANT_METHOD(NOT_LINKED)
@@ -270,7 +270,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             bool    basing;
             SEIndex refType;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct ARRAY : public HasToString {
@@ -278,7 +278,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             SEIndex indexType;
             SEIndex componentType;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct ARRAYDESC : public HasToString {
@@ -286,7 +286,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             bool    readOnly;
             SEIndex describedType;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct TRANSFER : public HasToString {
@@ -295,14 +295,14 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             SEIndex      typeIn;
             SEIndex      typeOut;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct DEFINITION : public HasToString {
             bool named;
             CTXIndex defCtx;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct UNION : public HasToString {
@@ -313,7 +313,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             CTXIndex caseCtx;
             SEIndex  tagSei;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct SEQUENCE : public HasToString {
@@ -323,7 +323,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             SEIndex tagSei;
             SEIndex componentType;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct RELATIVE : public HasToString {
@@ -331,7 +331,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             SEIndex offsetType;
             SEIndex resultType;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct SUBRANGE : public HasToString {
@@ -341,19 +341,19 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             int16_t  origin;
             uint16_t range;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct LONG : public HasToString {
             SEIndex rangeType;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct REAL : public HasToString {
             SEIndex rangeType;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct OPAQUE : public HasToString {
@@ -361,14 +361,14 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             uint16_t length;
             SEIndex  id;
             
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct ZONE : public HasToString {
             bool counted;
             bool mds;
 
-            void read(uint16_t u0, MesaByteBuffer& bb);
+            void read(uint16_t u0, ByteBuffer& bb);
             std::string toString() const override;
         };
         struct ANY : public HasToString {
@@ -384,7 +384,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
         struct BITS : public HasToString {
             u_int16_t length;
 
-            void read(uint16_t u0, MesaByteBuffer& bb) {
+            void read(uint16_t u0, ByteBuffer& bb) {
                 (void)u0;
                 bb.read(length);
             }
@@ -401,7 +401,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
             OPAQUE, ZONE, ANY, NIL, BITS
         > variant;
 
-        void read(uint16_t u0, MesaByteBuffer& bb);
+        void read(uint16_t u0, ByteBuffer& bb);
         std::string toString() const override;
 
         DEFINE_VARIANT_METHOD(MODE)
@@ -437,7 +437,7 @@ struct SERecord : public MesaByteBuffer::HasRead, public HasToString {
 
     SERecord() : tag(Tag::ID), variant(ID{}) {}
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 
     DEFINE_VARIANT_METHOD(ID)

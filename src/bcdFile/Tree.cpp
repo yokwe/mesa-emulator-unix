@@ -38,7 +38,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Tree.h"
 
@@ -61,7 +61,7 @@ std::string TreeLink::toString(Tag value) {
     logger.error("  value  %d", (uint16_t)value);
     ERROR();
 }
-MesaByteBuffer& TreeLink::read(MesaByteBuffer& bb) {
+ByteBuffer& TreeLink::read(ByteBuffer& bb) {
     uint16_t u0;
 
     bb.read(u0);
@@ -322,7 +322,7 @@ std::string toString(NodeName value) {
 //
 // TreeNode
 //
-MesaByteBuffer& TreeNode::read(MesaByteBuffer& bb) {
+ByteBuffer& TreeNode::read(ByteBuffer& bb) {
     uint16_t u0;
     bb.read(u0, info);
 

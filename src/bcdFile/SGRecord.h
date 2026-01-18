@@ -39,14 +39,14 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "FTIndex.h"
 
 // SGRecord: TYPE = RECORD [
 //   file: FTIndex, base: CARDINAL,
 //   pages: [0..256), extraPages: [0..64), class: SegClass];
-struct SGRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct SGRecord : public ByteBuffer::HasRead, public HasToString {
     // SegClass: TYPE = {code, symbols, acMap, other};
     enum class SegClass {
         CODE, SYMBOLS, AC_MAP, OTHER,
@@ -58,6 +58,6 @@ struct SGRecord : public MesaByteBuffer::HasRead, public HasToString {
     uint16_t    extraPages;
     SegClass    segClass;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 };

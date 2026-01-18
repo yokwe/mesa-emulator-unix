@@ -42,7 +42,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "LTIndex.h"
 
@@ -57,29 +57,29 @@
 //      length(2:0..15): CARDINAL,
 //      value(3): WordSequence]
 //    ENDCASE];
-struct LTRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct LTRecord : public ByteBuffer::HasRead, public HasToString {
     enum class Tag : uint16_t {
         ENUM_VALUE(Kind, SHORT)
         ENUM_VALUE(Kind, LONG)
     };
     static std::string toString(Tag);
 
-    struct SHORT : public MesaByteBuffer::HasRead, public HasToString {
+    struct SHORT : public ByteBuffer::HasRead, public HasToString {
         uint16_t value;
 
-        MesaByteBuffer& read(MesaByteBuffer& bb) override {
+        ByteBuffer& read(ByteBuffer& bb) override {
             return bb.read(value);
         }
         std::string toString() const override {
             return std_sprintf("[%d]", value);
         }
     };
-    struct LONG : public MesaByteBuffer::HasRead, public HasToString {
+    struct LONG : public ByteBuffer::HasRead, public HasToString {
         uint16_t              codeIndex;
         uint16_t              length;
         std::vector<uint16_t> value;
 
-        MesaByteBuffer& read(MesaByteBuffer& bb) override;
+        ByteBuffer& read(ByteBuffer& bb) override;
         std::string toString() const override;
     };
 
@@ -96,7 +96,7 @@ struct LTRecord : public MesaByteBuffer::HasRead, public HasToString {
     Tag                       tag;
     std::variant<SHORT, LONG> variant;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
 
     DEFINE_VARIANT_METHOD(SHORT)

@@ -39,12 +39,12 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 
 // TimeStamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
 // Null: TimeStamp = TimeStamp[net: 0, host: 0, time: 0];
-class Timestamp : public MesaByteBuffer::HasRead, public HasToString {
+class Timestamp : public ByteBuffer::HasRead, public HasToString {
     uint8_t  net;
     uint8_t  host;
     uint32_t time;
@@ -54,7 +54,7 @@ public:
     Timestamp(uint8_t net_, uint8_t host_, uint32_t time_) :  net(net_), host(host_), time(time_) {}
     Timestamp() : net(0), host(0), time(0) {}
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override {
+    ByteBuffer& read(ByteBuffer& bb) override {
         bb.read(net, host, time);
         return bb;
     }

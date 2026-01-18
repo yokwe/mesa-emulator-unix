@@ -38,7 +38,7 @@
 #include <cstdint>
 #include <string>
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "Type.h"
 #include "FTIndex.h"
@@ -47,7 +47,7 @@
 #include "ENRecord.h"
 #include "MTRecord.h"
 
-class BCD : public MesaByteBuffer::HasRead {
+class BCD : public ByteBuffer::HasRead {
 public:
     static const constexpr uint16_t VersionID = 6103;
 
@@ -118,7 +118,7 @@ public:
     }
 
 private:
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
 
     std::vector<Range> mySymbolRange;
 };

@@ -8,6 +8,7 @@ target_sources(
 	util
 	PUBLIC
 		BPF.h
+		ByteBuffer.h
 		Debug.h
 		DiskFile.h
 		net.h
@@ -20,6 +21,7 @@ target_sources(
 		watchdog.h
 	PRIVATE
 		BPF.cpp
+		ByteBuffer.cpp
 		DiskFile.cpp
 		net.cpp
 		Perf.cpp

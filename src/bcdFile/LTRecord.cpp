@@ -39,7 +39,7 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "LTRecord.h"
 
@@ -61,7 +61,7 @@ std::string LTRecord::toString(Tag value) {
     ERROR();
 }
 
-MesaByteBuffer& LTRecord::LONG::read(MesaByteBuffer& bb) {
+ByteBuffer& LTRecord::LONG::read(ByteBuffer& bb) {
     bb.read(codeIndex, length);
     for(int i = 0; i < length; i++) {
         value.push_back(bb.get16());
@@ -75,7 +75,7 @@ std::string LTRecord::LONG::toString() const {
     }
     return std_sprintf("[%d, (%d)%s]", codeIndex, length, string);
 }
-MesaByteBuffer& LTRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& LTRecord::read(ByteBuffer& bb) {
     uint16_t u0;
     bb.read(u0);
     tag = (Tag)bitField(u0, 13, 15);

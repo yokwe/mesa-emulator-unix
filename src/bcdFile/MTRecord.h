@@ -37,7 +37,7 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "NameRecord.h"
 #include "FTIndex.h"
@@ -46,12 +46,12 @@
 
 //   CodeDesc: TYPE = RECORD [
     //     sgi: SGIndex, offset, length: CARDINAL];
-    struct CodeDesc: public MesaByteBuffer::HasRead, public HasToString {
+    struct CodeDesc: public ByteBuffer::HasRead, public HasToString {
         SGIndex  sgi;
         uint16_t offset;
         uint16_t length;
     
-        MesaByteBuffer& read(MesaByteBuffer& bb) override {
+        ByteBuffer& read(ByteBuffer& bb) override {
             bb.read(sgi, offset, length);
             return bb;
         }
@@ -82,7 +82,7 @@
     //     framesize: [0..PrincOps.MaxFrameSize),
     //     entries: ENIndex,
     //     atoms: ATIndex];
-    struct MTRecord : public MesaByteBuffer::HasRead, public HasToString {
+    struct MTRecord : public ByteBuffer::HasRead, public HasToString {
         // LinkLocation: TYPE = {frame, code, dontcare};
         enum class LinkLocation {
             FRAME, CODE, DONTCARE,
@@ -113,6 +113,6 @@
         ENIndex      entries;
         uint16_t     atoms;
     
-        MesaByteBuffer& read(MesaByteBuffer& bb) override;
+        ByteBuffer& read(ByteBuffer& bb) override;
         std::string toString() const override;
     };

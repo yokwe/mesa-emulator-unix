@@ -39,21 +39,21 @@
 
 #include "../util/Util.h"
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 #include "HTIndex.h"
 
 //HTRecord: TYPE = RECORD [
 //  anyInternal, anyPublic: BOOLEAN,
 //  link: HTIndex,
 //  ssIndex: CARDINAL];
-struct HTRecord : public MesaByteBuffer::HasRead, public HasToString {
+struct HTRecord : public ByteBuffer::HasRead, public HasToString {
     bool        anyInternal;
     bool        anyPublic;
     HTIndex     link;
     uint16_t    ssIndex;
     std::string value;
 
-    MesaByteBuffer& read(MesaByteBuffer& bb) override;
+    ByteBuffer& read(ByteBuffer& bb) override;
     std::string toString() const override;
     
     const std::string& toValue() const {

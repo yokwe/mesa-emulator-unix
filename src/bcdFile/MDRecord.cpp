@@ -38,11 +38,11 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "MesaByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "MDRecord.h"
 
-MesaByteBuffer& MDRecord::read(MesaByteBuffer& bb) {
+ByteBuffer& MDRecord::read(ByteBuffer& bb) {
     uint16_t word;
     bb.read(stamp, moduleId, word, ctx, defaultImport, fileIndex);
 

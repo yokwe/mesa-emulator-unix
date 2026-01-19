@@ -53,7 +53,16 @@ class ByteBuffer {
 
     struct Impl {
         virtual const char* name() = 0;
+
+        // 8
+        virtual uint8_t  get8(uint8_t* data, uint32_t pos) = 0;
+        virtual void     put8(uint8_t* data, uint32_t pos, uint8_t value) = 0;
+        // 16
+        virtual uint16_t get16(uint8_t* data, uint32_t pos) = 0;
+        virtual void     put16(uint8_t* data, uint32_t pos, uint16_t value) = 0;
+        // 32
         virtual uint32_t get32(uint8_t* data, uint32_t pos) = 0;
+        virtual void     put32(uint8_t* data, uint32_t pos, uint32_t value) = 0;
     };
 
     Impl&     myImpl;
@@ -63,20 +72,31 @@ class ByteBuffer {
 
     ByteBuffer(Impl& impl, uint8_t* data, uint32_t byteSize) : myImpl(impl), myData(data), myByteSize(byteSize), myBytePos(0) {}
 
-    void checkByteRange(uint32_t bytePos, uint32_t readSize) {
+    void checkByteRange(uint32_t bytePos, uint32_t readSize) const {
         checkBytePos(bytePos);
         checkBytePos(bytePos + readSize - 1);
     }
-    void checkBytePos(uint32_t pos);
+    void checkBytePos(uint32_t pos) const;
 
+    // getX
     uint8_t get8(uint32_t bytePos) {
-        return myData[bytePos];
+        return myImpl.get8(myData, bytePos);
     }
     uint16_t get16(uint32_t bytePos) {
-        return (myData[bytePos + 0] << 8) | (myData[bytePos + 1] << 0);
+        return myImpl.get16(myData, bytePos);
     }
     uint32_t get32(uint32_t bytePos) {
         return myImpl.get32(myData, bytePos);
+    }
+    // putX
+    void put8(uint32_t bytePos, uint8_t value) const {
+        myImpl.put8(myData, bytePos, value);
+    }
+    void put16(uint32_t bytePos, uint16_t value) const {
+        myImpl.put16(myData, bytePos, value);
+    }
+    void put32(uint32_t bytePos, uint32_t value) const {
+        myImpl.put32(myData, bytePos, value);
     }
 public:
     static uint8_t highByte(uint16_t value) {
@@ -91,9 +111,31 @@ public:
             const char* name() override {
                 return "MESA";
             }
+            // 8
+            uint8_t  get8(uint8_t* data, uint32_t pos) override {
+                return data[pos];
+            }
+            void     put8(uint8_t* data, uint32_t pos, uint8_t value) override {
+                data[pos] = value;
+            }
+            // 16
+            uint16_t get16(uint8_t* data, uint32_t pos) override {
+                return (data[pos + 0] << 8) | (data[pos + 1] << 0);
+            }
+            void     put16(uint8_t* data, uint32_t pos, uint16_t value) override {
+                data[pos + 0] = (uint8_t)(value >> 8);
+                data[pos + 1] = (uint8_t)(value >> 0);
+            }
+            // 32
             // mesa order for 32bit value  low half and high half
             uint32_t get32(uint8_t* data, uint32_t pos) override {
                 return (data[pos + 0] << 8) | (data[pos + 1] << 0) | (data[pos + 2] << 24) | (data[pos + 3] << 16);
+            }
+            void     put32(uint8_t* data, uint32_t pos, uint32_t value) override {
+                data[pos + 0] = (uint8_t)(value >>  8);
+                data[pos + 1] = (uint8_t)(value >>  0);
+                data[pos + 2] = (uint8_t)(value >> 24);
+                data[pos + 3] = (uint8_t)(value >> 16);
             }
         } impl;
 
@@ -106,9 +148,31 @@ public:
             const char* name() override {
                 return "NET";
             }
+            // 8
+            uint8_t  get8(uint8_t* data, uint32_t pos) override {
+                return data[pos];
+            }
+            void     put8(uint8_t* data, uint32_t pos, uint8_t value) override {
+                data[pos] = value;
+            }
+            // 16
+            uint16_t get16(uint8_t* data, uint32_t pos) override {
+                return (data[pos + 0] << 8) | (data[pos + 1] << 0);
+            }
+            void     put16(uint8_t* data, uint32_t pos, uint16_t value) override {
+                data[pos + 0] = (uint8_t)(value >> 8);
+                data[pos + 1] = (uint8_t)(value >> 0);
+            }
+            // 32
             // netowrk order for 32bit value  high half and low half
             uint32_t get32(uint8_t* data, uint32_t pos) override {
                 return (data[pos + 0] << 24) | (data[pos + 1] << 16) | (data[pos + 2] << 8) | (data[pos + 3] << 0);
+            }
+            void     put32(uint8_t* data, uint32_t pos, uint32_t value) override {
+                data[pos + 0] = (uint8_t)(value >> 24);
+                data[pos + 1] = (uint8_t)(value >> 16);
+                data[pos + 2] = (uint8_t)(value >>  8);
+                data[pos + 3] = (uint8_t)(value >>  0);
             }
         } impl;
     
@@ -117,36 +181,37 @@ public:
         }
     };
 
-    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize);
+    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) const;
 
-    const char* name() {
+    const char* name() const {
         return myImpl.name();
     }
 
-    const uint8_t* data() {
+    const uint8_t* data() const {
         return myData;
     }
 
-    uint32_t byteSize() {
+    uint32_t byteSize() const {
         return myByteSize;
     }
-    uint32_t size() {
+    uint32_t size() const {
         return byteValueToWordValue(byteSize());
     }
     void bytePos(uint32_t bytePos) {
         checkBytePos(bytePos);
         myBytePos = bytePos;
     }
-    uint32_t bytePos() {
+    uint32_t bytePos() const {
         return myBytePos;
     }
     void pos(uint32_t wordPos) {
         bytePos(wordValueToByteValue(wordPos));
     }
-    uint32_t pos() {
+    uint32_t pos() const {
         return byteValueToWordValue(bytePos());
     }
     
+    // getX
     uint8_t get8() {
         const uint32_t readSize = 1;
 
@@ -172,6 +237,33 @@ public:
         return ret;
     }
 
+    // putX
+    void put8(uint8_t value) {
+        const uint32_t readSize = 1;
+
+        checkByteRange(myBytePos, readSize);
+        put8(myBytePos, value);
+        myBytePos += readSize;
+    }
+    void put16(uint16_t value) {
+        const uint32_t readSize = 2;
+
+        checkByteRange(myBytePos, readSize);
+        put16(myBytePos, value);
+        myBytePos += readSize;
+    }
+    void put32(uint32_t value) {
+        const uint32_t readSize = 2;
+
+        checkByteRange(myBytePos, readSize);
+        put32(myBytePos, value);
+        myBytePos += readSize;
+    }
+
+
+    //
+    // HasRead and read(...)
+    //
     struct HasRead {
         virtual ByteBuffer& read(ByteBuffer& bb) = 0;
     };
@@ -218,4 +310,57 @@ public:
         value = get32();
         return *this;
     }
+    ByteBuffer& read(int value) = delete;
+
+
+    //
+    // HasWrite and write(...)
+    //
+    struct HasWrite {
+        virtual ByteBuffer& write(ByteBuffer& bb) const = 0;
+    };
+    ByteBuffer& write() {
+        return *this;
+    }
+    template <class Head, class... Tail>
+    ByteBuffer& write(Head&& head, Tail&&... tail) {
+        constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
+        constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
+        constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
+        constexpr auto is_class    = std::is_class_v<std::remove_reference_t<Head>>;
+
+    //		logger.info("write head  %s!  %d  |  %d  %d  |  %d", demangle(typeid(head).name()), sizeof(head), is_uint16_t, is_uint32_t, is_class);
+
+        if constexpr (is_uint8_t || is_uint16_t || is_uint32_t) {
+            write(head);
+        } else {
+            if constexpr (is_class) {
+                constexpr auto has_write = std::is_base_of_v<HasWrite, std::remove_reference_t<Head>>;
+                if constexpr (has_write) {
+                    head.write(*this);
+                } else {
+                    logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+                    ERROR()
+                }
+            } else {
+                logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+                ERROR()
+            }
+        }
+        return read(std::forward<Tail>(tail)...);
+    }
+    ByteBuffer& write(uint8_t value) {
+        put8(value);
+        return *this;
+    }
+    ByteBuffer& write(uint16_t value) {
+        put16(value);
+        return *this;
+    }
+    ByteBuffer& write(uint32_t value) {
+        put32(value);
+        return *this;
+    }
+    ByteBuffer& write(int value) = delete;
+
 };

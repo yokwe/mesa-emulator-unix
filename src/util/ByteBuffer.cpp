@@ -38,7 +38,7 @@ static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
-void ByteBuffer::checkBytePos(uint32_t bytePos) {
+void ByteBuffer::checkBytePos(uint32_t bytePos) const {
     if (bytePos < myByteSize) return;
 
     logger.error("Unexpected values  %s", __FUNCTION__);
@@ -47,7 +47,7 @@ void ByteBuffer::checkBytePos(uint32_t bytePos) {
     ERROR();
 }
 
-ByteBuffer ByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) {
+ByteBuffer ByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) const {
     auto bytePos  = wordValueToByteValue(wordOffset);
     auto readSize = wordValueToByteValue(wordSize);
     if (myByteSize < (bytePos + readSize)) {

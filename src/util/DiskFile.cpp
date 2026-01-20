@@ -36,35 +36,33 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
-#include "../util/DiskFile.h"
+#include "DiskFile.h"
 
-void DiskFile::readPage(CARD32 block, CARD16 *buffer, CARD32 sizeInWord) {
-	if (maxBlock <= block) {
-		logger.fatal("block = %d  maxBlock = %d", block, maxBlock);
+void DiskFile::readPage(uint32_t pageNo, uint16_t *buffer) {
+	if (pageSize <= pageNo) {
+		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	memcpy(buffer, page + block, sizeInWord * Environment::bytesPerWord);
+	memcpy(buffer, page + pageNo, sizeof(Page));
 }
-void DiskFile::writePage(CARD32 block, CARD16 *buffer, CARD32 sizeInWord) {
-	if (maxBlock <= block) {
-		logger.fatal("block = %d  maxBlock = %d", block, maxBlock);
+void DiskFile::writePage(uint32_t pageNo, uint16_t *buffer) {
+	if (pageSize <= pageNo) {
+		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	memcpy(page + block, buffer, sizeInWord * Environment::bytesPerWord);
+	memcpy(page + pageNo, buffer, sizeof(Page));
 }
-void DiskFile::zeroPage(CARD32 block) {
-	if (maxBlock <= block) {
-		logger.fatal("block = %d  maxBlock = %d", block, maxBlock);
-		ERROR();
-	}
-	bzero(page + block, SIZE(Page));
+void DiskFile::zeroPage(uint32_t pageNo) {
+	Page buffer;
+	bzero(&buffer, sizeof buffer);
+	writePage(pageNo, buffer.data);
 }
-int DiskFile::verifyPage(CARD32 block, CARD16 *buffer) {
-	if (maxBlock <= block) {
-		logger.fatal("block = %d  maxBlock = %d", block, maxBlock);
+int DiskFile::verifyPage(uint32_t pageNo, uint16_t *buffer) {
+	if (pageSize <= pageNo) {
+		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	return memcmp(page + block, buffer, sizeof(Page));
+	return memcmp(page + pageNo, buffer, sizeof(Page));
 }
 
 void DiskFile::attach(const std::string& path_) {
@@ -74,8 +72,8 @@ void DiskFile::attach(const std::string& path_) {
 
 	auto [mapPage, mapSize] = Util::mapFile(path_);
 	page     = (Page*)mapPage;
-	size     = mapSize;
-	maxBlock = size / Environment::bytesPerPage;
+	byteSize = mapSize;
+	pageSize = byteSize / sizeof(Page);
 }
 
 void DiskFile::detach() {
@@ -85,45 +83,6 @@ void DiskFile::detach() {
 
 	Util::unmapFile(page);
 	page              = 0;
-	size              = 0;
-	maxBlock          = 0;
-	numberOfCylinders = 0;
-	numberOfHeads     = 0;
-	sectorsPerTrack   = 0;
-}
-
-void DiskFile::setDiskDCBType(DiskIOFaceGuam::DiskDCBType *dcb) {
-	dcb->deviceType         = Device::T_anyPilotDisk;
-	dcb->numberOfHeads      = DISK_NUMBER_OF_HEADS;
-	dcb->sectorsPerTrack    = DISK_SECTORS_PER_TRACK;
-	dcb->numberOfCylinders  = size / (dcb->numberOfHeads * dcb->sectorsPerTrack * sizeof(Page));
-	dcb->agentDeviceData[0] = 0;
-	dcb->agentDeviceData[1] = 0;
-	dcb->agentDeviceData[2] = 0;
-	dcb->agentDeviceData[3] = 0;
-	dcb->agentDeviceData[4] = 0;
-	dcb->agentDeviceData[5] = 0;
-
-	if (size != (CARD32)(dcb->numberOfHeads * dcb->sectorsPerTrack * dcb->numberOfCylinders * sizeof(Page))) ERROR();
-
-	numberOfCylinders = dcb->numberOfCylinders;
-	numberOfHeads     = dcb->numberOfHeads;
-	sectorsPerTrack   = dcb->sectorsPerTrack;
-}
-
-void DiskFile::setFloppyDCBType(FloppyIOFaceGuam::FloppyDCBType *dcb) {
-	dcb->deviceType         = Device::T_microFloppy; // Don't use Device::T_anyFloppy
-	dcb->numberOfHeads      = FLOPPY_NUMBER_OF_HEADS;
-	dcb->sectorsPerTrack    = FLOPPY_SECTORS_PER_TRACK;
-	dcb->numberOfCylinders  = size / (dcb->numberOfHeads * dcb->sectorsPerTrack * sizeof(Page));
-	dcb->ready              = 1;
-	dcb->diskChanged        = 1;
-	dcb->twoSided           = 1;
-	dcb->suggestedTries     = 1;
-
-	if (size != (CARD32)(dcb->numberOfHeads * dcb->sectorsPerTrack * dcb->numberOfCylinders * sizeof(Page))) ERROR();
-
-	numberOfCylinders = dcb->numberOfCylinders;
-	numberOfHeads     = dcb->numberOfHeads;
-	sectorsPerTrack   = dcb->sectorsPerTrack;
+	byteSize          = 0;
+	pageSize          = 0;
 }

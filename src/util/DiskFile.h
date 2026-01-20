@@ -37,86 +37,42 @@
 
 #include <string>
 
-#include "../mesa/Constant.h"
-#include "../mesa/Pilot.h"
-
 
 class DiskFile {
 public:
-	static const CARD32 DISK_NUMBER_OF_HEADS       =  2;
-	static const CARD32 DISK_SECTORS_PER_TRACK     = 16;
-
-	static const CARD32 FLOPPY_NUMBER_OF_HEADS     =  2;
-	static const CARD32 FLOPPY_SECTORS_PER_TRACK   = 18;
-
-	struct Page { CARD16 word[PageSize]; };
+	static const uint32_t PAGE_SIZE = 256;
+	struct Page {
+		uint16_t data[PAGE_SIZE];
+	};
 
 	// default constructor
 	DiskFile() {
-		page              = 0;
-		size              = 0;
-		maxBlock          = 0;
-		numberOfCylinders = 0;
-		numberOfHeads     = 0;
-		sectorsPerTrack   = 0;
+		page     = 0;
+		byteSize = 0;
+		pageSize = 0;
 	}
 
 	void attach(const std::string& path);
 	void detach();
 
-	void readPage(CARD32 block, CARD16 *buffer) {
-		readPage(block, buffer, SIZE(Page));
-	}
-	void readPage(CARD32 block, CARD16 *buffer, CARD32 sizeInWord);
-
-	void writePage(CARD32 block, CARD16 *buffer) {
-		writePage(block, buffer, SIZE(Page));
-	}
-	void writePage(CARD32 block, CARD16 *buffer, CARD32 sizeInWord);
-
-	void zeroPage(CARD32 block);
-
-	int verifyPage(CARD32 block, CARD16 *buffer);
-
-	void setDiskDCBType(DiskIOFaceGuam::DiskDCBType *dcb);
-	void setFloppyDCBType(FloppyIOFaceGuam::FloppyDCBType *dcb);
+	void readPage  (uint32_t pageNo, uint16_t *buffer);
+	void writePage (uint32_t pageNo, uint16_t *buffer);
+	int  verifyPage(uint32_t pageNo, uint16_t *buffer);
+	void zeroPage  (uint32_t pageNo);
 
 	const std::string& getPath() {
 		return path;
 	}
-	CARD32 getSize() {
-		return size;
+	uint32_t getByteSize() {
+		return byteSize;
 	}
-	CARD32 getMaxBlock() {
-		return maxBlock;
-	}
-
-	CARD32 getBlock(DiskIOFaceGuam::DiskIOCBType* iocb) {
-		const CARD32 C = iocb->diskAddress.cylinder;
-		const CARD32 H = iocb->diskAddress.head;
-		const CARD32 S = iocb->diskAddress.sector;
-		CARD32 block = ((C * numberOfHeads + H) * sectorsPerTrack + S);
-
-		return block;
-	}
-
-	CARD32 getBlock(FloppyIOFaceGuam::FloppyIOCBType* iocb) {
-		const CARD32 C = iocb->operation.address.cylinder;
-		const CARD32 H = iocb->operation.address.head;
-		// Sector in Floppy is [1..maxSectorsPerTrack)
-		const CARD32 S = iocb->operation.address.sector - 1;
-		CARD32 block = (C * numberOfHeads + H) * sectorsPerTrack + S;
-
-		return block;
+	uint32_t getPageSize() {
+		return pageSize;
 	}
 
 private:
 	std::string path;
-	Page  *page;
-	CARD32 size;
-	CARD32 maxBlock;
-	//
-	CARD32 numberOfCylinders;
-	CARD32 numberOfHeads;
-	CARD32 sectorsPerTrack;
+	Page*       page;
+	uint32_t    byteSize;
+	uint32_t    pageSize;
 };

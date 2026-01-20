@@ -33,7 +33,7 @@
 // ByteBuffer.cpp
 //
 
-#include "../util/Util.h"
+#include "Util.h"
 static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"

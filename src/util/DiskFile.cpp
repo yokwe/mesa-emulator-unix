@@ -33,7 +33,7 @@
 // DiskFile.cpp
 //
 
-#include "../util/Util.h"
+#include "Util.h"
 static const Logger logger(__FILE__);
 
 #include "DiskFile.h"

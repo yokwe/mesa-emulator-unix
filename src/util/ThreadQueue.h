@@ -39,7 +39,7 @@
 #include <functional>
 #include <mutex>
 
-#include "../util/Util.h"
+#include "Util.h"
 
 
 namespace thread_queue {

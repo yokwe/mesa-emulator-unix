@@ -35,12 +35,12 @@
 
 #pragma once
 
+#include "../util/DiskFile.h"
+#include "../util/ThreadQueue.h"
+
 #include "../mesa/Pilot.h"
 
 #include "Agent.h"
-#include "../util/DiskFile.h"
-
-#include "../util/ThreadQueue.h"
 
 class AgentDisk : public Agent {
 	using DiskFCBType  = DiskIOFaceGuam::DiskFCBType;
@@ -49,14 +49,14 @@ class AgentDisk : public Agent {
 public:
 	class Item {
 	public:
-		CARD16        interruptSelector;
+		DiskFCBType*  fcb;
 		DiskIOCBType* iocb;
 		DiskFile*     diskFile;
 
-		Item(DiskIOCBType* iocb_, DiskFile* diskFile_, CARD16 interruptSelector_) :
-			interruptSelector(interruptSelector_), iocb(iocb_), diskFile(diskFile_) {}
+		Item(DiskFCBType* fcb_, DiskIOCBType* iocb_, DiskFile* diskFile_) :
+			fcb(fcb_), iocb(iocb_), diskFile(diskFile_) {}
 		Item(const Item& that) :
-			interruptSelector(that.interruptSelector), iocb(that.iocb), diskFile(that.diskFile) {}
+			fcb(that.fcb), iocb(that.iocb), diskFile(that.diskFile) {}
 	};
 
 	class IOThread : public thread_queue::ThreadQueueProcessor<Item> { 
@@ -72,7 +72,6 @@ public:
 	static const inline auto fcbSize_ = SIZE(DiskFCBType) + SIZE(DiskDCBType);
 	AgentDisk() : Agent(index_, name_, fcbSize_) {
 		fcb      = 0;
-		dcb      = 0;
 		diskFile = 0;
 	}
 
@@ -84,7 +83,10 @@ public:
 	}
 
 private:
+	static const constexpr CARD32 PAGE_SIZE_IN_BYTE       = sizeof(DiskFile::Page);
+	static const constexpr CARD32 DISK_NUMBER_OF_HEADS    =  2;
+	static const constexpr CARD32 DISK_SECTORS_PER_TRACK  = 16;
+
 	DiskFCBType* fcb      = 0;
-	DiskDCBType* dcb      = 0;
 	DiskFile*    diskFile = 0;
 };

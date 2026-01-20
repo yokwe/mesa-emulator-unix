@@ -108,13 +108,13 @@ static void loadGerm(std::string& path) {
 
 	DiskFile diskFile;
 	diskFile.attach(path);
-	logger.info("germ  size = %d  %04X", diskFile.getSize(), diskFile.getSize());
+	logger.info("germ  size = %d  %04X", diskFile.getByteSize(), diskFile.getByteSize());
 
 	// first page goes to mGFT
 	CARD16* page =  memory::peek(mGFT);
 
-	auto maxPageSize = diskFile.getMaxBlock();
-	for(CARD32 pageNo = 0; pageNo < maxPageSize; pageNo++) {
+	auto pageSize = diskFile.getPageSize();
+	for(CARD32 pageNo = 0; pageNo < pageSize; pageNo++) {
 		// sanity check
 		if (pageNo == (int)GermOpsImpl::pageEndGermVM) {
 			logger.fatal("i == pageEndGermVM");

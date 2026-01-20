@@ -51,17 +51,29 @@ static const Logger logger(__FILE__);
 using namespace DiskIOFaceGuam;
 using namespace PilotDiskFace;
 
-static const CARD32 DEBUG_DONT_USE_THREAD = 0;
+static CARD32 getBlock(DiskDCBType* dcb, DiskIOCBType* iocb) {
+	CARD32 H = dcb->numberOfHeads;
+	CARD32 S = dcb->sectorsPerTrack;
+
+	return (H * iocb->diskAddress.cylinder + iocb->diskAddress.head) * S + iocb->diskAddress.sector;
+}
 
 void AgentDisk::IOThread::process(const Item& item) {
-	auto iocb = item.iocb;
-	auto diskFile = item.diskFile;
-	auto interruptSelector = item.interruptSelector;
-
 	std::chrono::steady_clock::time_point time_start;
 	if (PERF_ENABLE) time_start = std::chrono::steady_clock::now();
 
-	CARD32 block = diskFile->getBlock(iocb);
+	auto fcb = item.fcb;
+	auto iocb = item.iocb;
+	auto diskFile = item.diskFile;
+	auto dcb = fcb->dcbs + iocb->deviceIndex;
+	auto interruptSelector = fcb->interruptSelector;
+
+	// CARD32 C = iocb->diskAddress.cylinder;
+	// CARD32 H = iocb->diskAddress.head;
+	// CARD32 S = iocb->diskAddress.sector;
+	// CARD32 block = (C * dcb->numberOfHeads + H) * dcb->sectorsPerTrack + S;
+
+	CARD32 block = getBlock(dcb, iocb);
 
 	//"AGENT %s %d", name, fcb->command
 	Command command = (Command)iocb->command;
@@ -121,19 +133,20 @@ void AgentDisk::IOThread::process(const Item& item) {
 		break;
 	}
 
+	PERF_COUNT(disk, process)
+	processor::notifyInterrupt(interruptSelector);
+
 	if (PERF_ENABLE) {
 		auto time_stop = std::chrono::steady_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(time_stop - time_start).count();
 		PERF_ADD(disk, process_time, duration)
 	}
-
-	PERF_COUNT(disk, process)
-	processor::notifyInterrupt(interruptSelector);
 }
 
 
 void AgentDisk::Initialize() {
 	if (fcbAddress == 0) ERROR();
+	if (diskFile == 0) ERROR();
 
 	fcb = (DiskFCBType*)memory::peek(fcbAddress);
 	fcb->nextIOCB = 0;
@@ -142,10 +155,25 @@ void AgentDisk::Initialize() {
 	fcb->agentStopped = 1;
 	fcb->numberOfDCBs = 1;
 
-	if (fcb->numberOfDCBs == 0) ERROR();
+	if (fcb->numberOfDCBs != 1) ERROR(); // support only one disk
 
-	dcb = fcb->dcbs;
-	diskFile->setDiskDCBType(dcb);
+	// initialize dcb using diskSize
+	auto diskByteSize = diskFile->getByteSize();
+	auto dcb = fcb->dcbs + 0; // dcb points first entry of dcbs
+	dcb->deviceType         = Device::T_anyPilotDisk;
+	dcb->numberOfHeads      = DISK_NUMBER_OF_HEADS;
+	dcb->sectorsPerTrack    = DISK_SECTORS_PER_TRACK;
+	dcb->numberOfCylinders  = diskByteSize / (dcb->numberOfHeads * dcb->sectorsPerTrack * PAGE_SIZE_IN_BYTE);
+	dcb->agentDeviceData[0] = 0;
+	dcb->agentDeviceData[1] = 0;
+	dcb->agentDeviceData[2] = 0;
+	dcb->agentDeviceData[3] = 0;
+	dcb->agentDeviceData[4] = 0;
+	dcb->agentDeviceData[5] = 0;
+
+	// sanity check
+	if (diskByteSize != (CARD32)(dcb->numberOfHeads * dcb->sectorsPerTrack * dcb->numberOfCylinders * PAGE_SIZE_IN_BYTE)) ERROR();
+
 	logger.info("AGENT %s  CHS = %5d %2d %2d  %s", name, dcb->numberOfCylinders, dcb->numberOfHeads, dcb->sectorsPerTrack, diskFile->getPath());
 }
 
@@ -174,10 +202,13 @@ void AgentDisk::Call() {
 	DiskIOCBType *iocb = (DiskIOCBType *)Store(nextIOCB);
 	for(;;) {
 		// sanity check
-		CARD16 deviceIndex = iocb->deviceIndex;
-		if (fcb->numberOfDCBs <= deviceIndex) {
-			logger.fatal("AGENT %s deviceIndex = %d", name, deviceIndex);
-			ERROR();
+		{
+			auto numberOfDCBs = fcb->numberOfDCBs;
+			auto deviceIndex = iocb->deviceIndex;
+			if (numberOfDCBs <= deviceIndex) {
+				logger.fatal("AGENT %s numberOfDCBs = %d  deviceIndex = %d", name, numberOfDCBs, deviceIndex);
+				ERROR();
+			}	
 		}
 		Command command = (Command)iocb->command;
 		switch(command) {
@@ -190,79 +221,12 @@ void AgentDisk::Call() {
 			ERROR();
 		}
 
-		if (DEBUG_DONT_USE_THREAD) {
-			CARD32 block = diskFile->getBlock(iocb);
-
-			switch(command) {
-			case Command::read: {
-//				logger.debug("IOThread::process %4d READ   %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
-
-				CARD32 dataPtr = iocb->dataPtr;
-				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = memory::peek(dataPtr);
-					diskFile->readPage(block++, buffer);
-					dataPtr += PageSize;
-				}
-				//
-				iocb->pageCount = 0;
-				iocb->status = (CARD16)Status::goodCompletion;
-				//
-				PERF_COUNT(disk, read)
-			}
-				break;
-			case Command::write: {
-//				logger.debug("IOThread::process %4d WRITE  %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
-
-				CARD32 dataPtr = iocb->dataPtr;
-				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = memory::peek(dataPtr);
-					diskFile->writePage(block++, buffer);
-					dataPtr += PageSize;
-				}
-				//
-				iocb->pageCount = 0;
-				iocb->status = (CARD16)Status::goodCompletion;
-				//
-				PERF_COUNT(disk, write)
-			}
-				break;
-			case Command::verify: {
-//				logger.debug("IOThread::process %4d VERIFY %08X + %3d dataPtr = %08X  nextIOCB = %08X", iocb->deviceIndex, block, iocb->pageCount, iocb->dataPtr, iocb->nextIOCB);
-
-				int ret = 0;
-				CARD32 dataPtr = iocb->dataPtr;
-				for(int i = 0; i < iocb->pageCount; i++) {
-					CARD16 *buffer = memory::peek(dataPtr);
-					ret |= diskFile->verifyPage(block++, buffer);
-					dataPtr += PageSize;
-				}
-				//
-				iocb->pageCount = 0;
-				iocb->status = ret ? (CARD16)Status::dataVerifyError : (CARD16)Status::goodCompletion;
-				//
-				PERF_COUNT(disk, verify)
-			}
-				break;
-			default:
-				logger.fatal("AGENT %s command = %d", name, command);
-				ERROR();
-			}
-		} else {
-			Item item(iocb, diskFile, fcb->interruptSelector);
-			ioThread.push(item);
-		}
+		Item item(fcb, iocb, diskFile);
+		ioThread.push(item);
 
 		if (iocb->nextIOCB == 0) break;
 		// advance to next IOCB
 		nextIOCB = iocb->nextIOCB;
 		iocb = (DiskIOCBType *)Store(nextIOCB);
 	}
-
-	if (DEBUG_DONT_USE_THREAD) {
-		processor::notifyInterrupt(fcb->interruptSelector);
-	}
-
-	// notify with interrupt
-	//WP |= fcb->interruptSelector;
-	//processor::notifyInterrupt(fcb->interruptSelector);
 }

@@ -40,17 +40,20 @@
 
 
 class AgentFloppy : public Agent {
+	using FloppyFCBType  = FloppyIOFaceGuam::FloppyFCBType;
+	using FloppyDCBType  = FloppyIOFaceGuam::FloppyDCBType;
+	using FloppyIOCBType = FloppyIOFaceGuam::FloppyIOCBType;
+
 public:
-	// 1 means LITTLE ENDIAN, 0 means BIG ENDIAN
-	// Little endian is better. because od command of intel cpu use little endian
-	static const int USE_LITTLE_ENDIAN = 1;
+	static const CARD32 PAGE_SIZE_IN_BYTE        = sizeof(DiskFile::Page);
+	static const CARD32 FLOPPY_NUMBER_OF_HEADS   =  2;
+	static const CARD32 FLOPPY_SECTORS_PER_TRACK = 18;
 
 	static const inline auto index_ = GuamInputOutput::AgentDeviceIndex::floppy;
 	static const inline auto name_ = "Floppy";
-	static const inline auto fcbSize_ = SIZE(FloppyIOFaceGuam::FloppyFCBType) + SIZE(FloppyIOFaceGuam::FloppyDCBType);
+	static const inline auto fcbSize_ = SIZE(FloppyFCBType) + SIZE(FloppyDCBType);
 	AgentFloppy() : Agent(index_, name_, fcbSize_) {
 		fcb = 0;
-		dcb = 0;
 	}
 
 	CARD32 getFCBSize();
@@ -63,7 +66,6 @@ public:
 	}
 
 private:
-	FloppyIOFaceGuam::FloppyFCBType* fcb;
-	FloppyIOFaceGuam::FloppyDCBType* dcb;
-	DiskFile*                        diskFile;
+	FloppyFCBType* fcb;
+	DiskFile*      diskFile;
 };

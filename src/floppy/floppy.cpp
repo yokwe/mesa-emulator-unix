@@ -35,7 +35,12 @@
 #include "../util/Util.h"
 static const Logger logger(__FILE__);
 
+#include "../util/DiskFile.h"
+
 #include "ByteBuffer.h"
+
+#include "../agent/AgentFloppy.h"
+
 #include "floppy.h"
 
 void FloppyDisk::readSector(int sector, ByteBuffer& bb, uint32_t count) {
@@ -43,18 +48,18 @@ void FloppyDisk::readSector(int sector, ByteBuffer& bb, uint32_t count) {
         logger.fatal("sector = %d", sector);
         ERROR();
     }
-    uint16_t buffer[PageSize];
+    DiskFile::Page buffer;
     for(uint32_t i = 0; i < count; i++) {
-        diskFile.readPage((sector - 1) + i, (CARD16*)buffer, PageSize);
-        Util::byteswap(buffer, buffer, PageSize);
-        bb.write(Environment::bytesPerPage, (uint8_t*)buffer);
+        diskFile.readPage((sector - 1) + i, (CARD16*)buffer.data);
+        Util::byteswap(buffer.data, buffer.data, DiskFile::PAGE_SIZE);
+        bb.write(sizeof(DiskFile::Page), (uint8_t*)buffer.data);
     }
     bb.rewind();
 }
 
 
 SectorNine::SectorNine(FloppyDisk& floppyDisk) {
-    ByteBuffer bb(Environment::bytesPerPage);
+    ByteBuffer bb(sizeof(DiskFile::Page));
     floppyDisk.readSector(9, bb);
 
     bb.read(seal, version, cylinders, tracksPerCylinder, sectorsPerTrack);
@@ -71,12 +76,12 @@ SectorNine::SectorNine(FloppyDisk& floppyDisk) {
         logger.fatal("cylinders = %6d", cylinders);
         ERROR();
     }
-    if (tracksPerCylinder != DiskFile::FLOPPY_NUMBER_OF_HEADS) {
-        logger.fatal("tracksPerCylinder = %6d  FLOPPY_NUMBER_OF_HEADS = %6d", tracksPerCylinder, DiskFile::FLOPPY_NUMBER_OF_HEADS);
+    if (tracksPerCylinder != AgentFloppy::FLOPPY_NUMBER_OF_HEADS) {
+        logger.fatal("tracksPerCylinder = %6d  FLOPPY_NUMBER_OF_HEADS = %6d", tracksPerCylinder, AgentFloppy::FLOPPY_NUMBER_OF_HEADS);
         ERROR();
     }
-    if (sectorsPerTrack != DiskFile::FLOPPY_SECTORS_PER_TRACK) {
-        logger.fatal("sectorsPerTrack = %6d  FLOPPY_SECTORS_PER_TRACK = %6d", tracksPerCylinder, DiskFile::FLOPPY_SECTORS_PER_TRACK);
+    if (sectorsPerTrack != AgentFloppy::FLOPPY_SECTORS_PER_TRACK) {
+        logger.fatal("sectorsPerTrack = %6d  FLOPPY_SECTORS_PER_TRACK = %6d", tracksPerCylinder, AgentFloppy::FLOPPY_SECTORS_PER_TRACK);
         ERROR();
     }
 
@@ -125,7 +130,7 @@ void FileList::Entry::dump() const {
 
 
 FileList::FileList(FloppyDisk& floppyDisk, uint32_t fileList, uint32_t fileListSize) {
-    uint32_t dataSize = Environment::bytesPerPage * fileListSize;
+    uint32_t dataSize = sizeof(DiskFile::Page) * fileListSize;
     ByteBuffer bb(dataSize);
     floppyDisk.readSector(fileList, bb, fileListSize);
 
@@ -162,7 +167,7 @@ void FileList::dump() const {
 
 
 FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry& entry) {
-    ByteBuffer bb(Environment::bytesPerPage * entry.size);
+    ByteBuffer bb(sizeof(DiskFile::Page) * entry.size);
     floppyDisk.readSector(entry.location, bb, entry.size);
 
     bb.
@@ -200,7 +205,7 @@ FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry
 
     // sanitcy check
     auto contentsPos = bb.position();
-    if (contentsPos != Environment::bytesPerPage) ERROR();
+    if (contentsPos != sizeof(DiskFile::Page)) ERROR();
 
     // file contents
     for(uint32_t i = 0; i < totalSizeInBytes; i++) {

@@ -97,8 +97,23 @@ void AgentFloppy::Initialize() {
 	fcb->agentStopped = 1;
 	fcb->numberOfDCBs = 1;
 
-	dcb = fcb->dcbs;
-	diskFile->setFloppyDCBType(fcb->dcbs);
+	if (fcb->numberOfDCBs != 1) ERROR(); // support only one disk
+
+	// initialize dcb using diskSize
+	auto diskByteSize = diskFile->getByteSize();
+	auto dcb = fcb->dcbs + 0; // dcb points first entry of dcbs
+	dcb->deviceType         = Device::T_microFloppy; // Don't use Device::T_anyFloppy
+	dcb->numberOfHeads      = FLOPPY_NUMBER_OF_HEADS;
+	dcb->sectorsPerTrack    = FLOPPY_SECTORS_PER_TRACK;
+	dcb->numberOfCylinders  = diskByteSize / (dcb->numberOfHeads * dcb->sectorsPerTrack * PAGE_SIZE_IN_BYTE);
+	dcb->ready              = 1;
+	dcb->diskChanged        = 1;
+	dcb->twoSided           = 1;
+	dcb->suggestedTries     = 1;
+
+	// sanity check
+	if (diskByteSize != (CARD32)(dcb->numberOfHeads * dcb->sectorsPerTrack * dcb->numberOfCylinders * PAGE_SIZE_IN_BYTE)) ERROR();
+
 	logger.debug("AGENT %s  CHS = %5d %2d %2d  %s", name, dcb->numberOfCylinders, dcb->numberOfHeads, dcb->sectorsPerTrack, diskFile->getPath());
 }
 
@@ -122,7 +137,7 @@ void AgentFloppy::Call() {
 		if (DEBUG_SHOW_AGENT_FLOPPY) logger.debug("AGENT %s fcb->nextIOCB == 0", name);
 		return; // Return if there is no IOCB
 	}
-	FloppyIOFaceGuam::FloppyIOCBType *iocb = (FloppyIOFaceGuam::FloppyIOCBType *)Store(fcb->nextIOCB);
+	FloppyIOCBType *iocb = (FloppyIOCBType *)Store(fcb->nextIOCB);
 	for(;;) {
 		const CARD16 deviceIndex = iocb->operation.device;
 		if (fcb->numberOfDCBs <= deviceIndex) {
@@ -159,17 +174,7 @@ void AgentFloppy::Call() {
 			for(int i = 0; i < iocb->operation.count; i++) {
 				CARD32 sector = diskAddressToSector(dcb, iocb->operation.address);
 				CARD16 *buffer = Store(iocb->operation.dataPtr);
-				if (USE_LITTLE_ENDIAN) {
-					// Assume cpu is big endian
-					// sector starts from one. so need to minus one to use with diskFile
-					diskFile->readPage(sector - 1, buffer, iocb->sectorLength);
-				} else {
-					DiskFile::Page page;
-					// sector starts from one. so need to minus one to use with diskFile
-					diskFile->readPage(sector - 1, page.word, iocb->sectorLength);
-					// Assume cpu is big endian
-					Util::byteswap(page.word, buffer, iocb->sectorLength);
-				}
+				diskFile->readPage(sector - 1, buffer);
 				if (iocb->operation.incrementDataPointer) {
 					iocb->operation.dataPtr += iocb->sectorLength;
 				}
@@ -195,17 +200,7 @@ void AgentFloppy::Call() {
 			for(int i = 0; i < iocb->operation.count; i++) {
 				CARD32 sector = diskAddressToSector(dcb, iocb->operation.address);
 				CARD16 *buffer = Fetch(iocb->operation.dataPtr);
-				if (USE_LITTLE_ENDIAN) {
-					// Assume CPU is big endian
-					// sector starts from one. so need to minus one to use with diskFile
-					diskFile->writePage(sector - 1, buffer, iocb->sectorLength);
-				} else {
-					DiskFile::Page page;
-					// Assume CPU is big endian
-					Util::byteswap(buffer, page.word, iocb->sectorLength);
-					// sector starts from one. so need to minus one to use with diskFile
-					diskFile->writePage(sector - 1, page.word, iocb->sectorLength);
-				}
+				diskFile->writePage(sector - 1, buffer);
 				if (iocb->operation.incrementDataPointer) {
 					iocb->operation.dataPtr += iocb->sectorLength;
 					sector++;
@@ -249,6 +244,5 @@ void AgentFloppy::Call() {
 	}
 
 	// notify with interrupt
-	//WP |= fcb->interruptSelector;
 	processor::notifyInterrupt(fcb->interruptSelector);
 }

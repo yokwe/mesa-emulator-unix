@@ -223,7 +223,7 @@ static std::unordered_map<CARD16, const char*> mp_message_map = {
     {906, "Germ and running Pilot have different version numbers"},
     {907, "reschedule error, typically because of page or frame fault (Pilot bug)"},
     {909, "Germ SIGNAL or ERROR (Pilot bug)"},
-    {910, "Germ action running (e.g. inLoad, outLoad)"},
+    {910, "Germ action running"}, // inLoad outLoad
     {911, "Germ and physical volume have incompatible version numbers"},
     {912, "Germ and boot file have incompatible version numbers"},
     {913, "no physical boot file installed"},
@@ -232,7 +232,7 @@ static std::unordered_map<CARD16, const char*> mp_message_map = {
     {916, "boot file won't fit in real memory"},
     {917, "talking to ethernet debugger"},
     {919, "Germ transferred control back to caller (who has hung)"},
-    {920, "Germ driver running (e.g. disk, ether, floppy)"},
+    {920, "Germ driver running"}, // disk, ether, floppy
     {921, "hard error on device being booted"},
     {922, "operation on boot device no completed in expected time"},
     {923, "broken link in chained boot file (try reinstalling)"},

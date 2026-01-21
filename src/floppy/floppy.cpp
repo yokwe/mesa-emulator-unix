@@ -50,7 +50,7 @@ ByteBuffer FloppyDisk::readSector(uint32_t sector, uint32_t count) {
         bb.write(page);
     }
 
-    bb.pos(0);
+    bb.flip();
     return bb;
 }
 

@@ -59,7 +59,8 @@ static void readTableSS(ByteBuffer& baseBB, uint32_t offset, uint32_t limit, std
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 
-    bb.pos(2);
+    bb.get8();
+    bb.get8();
     bb.get8();
     for(;;) {
         auto index = bb.pos();
@@ -80,7 +81,6 @@ static void readTable(ByteBuffer& baseBB, uint32_t offset, uint32_t limit, std::
     if (limit == 0) return;
     auto bb = baseBB.range(offset, limit);
 
-    bb.pos(0);
     for(;;) {
         auto index = bb.pos();
         if (limit <= index) break;
@@ -124,14 +124,16 @@ BCD BCD::getInstance(ByteBuffer& bb) {
     {
         if (bcd.sgTable.empty()) {
             uint32_t offset = Symbol::ALTO_BIAS * Environment::wordsPerPage;
-            uint32_t size = bb.size() - offset;
+            uint32_t size = bb.capacity() - offset;
 
             // sanity check
-            bb.pos(offset);
-            Symbol::checkVersionIdent(bb);
+            
+            {
+                auto bb2 = bb.range(offset, size);
+                Symbol::checkVersionIdent(bb2);
+            }
 
             bcd.mySymbolRange.emplace_back(offset, size);
-            logger.info("mySymbolRange  A  %5d  %5d", offset, size);
         } else {
             for(const auto& e: bcd.sgTable) {
                 SGRecord& sgRecord  = *e.second;
@@ -142,11 +144,12 @@ BCD BCD::getInstance(ByteBuffer& bb) {
                 uint32_t size   = sgRecord.pages * Environment::wordsPerPage;
 
                 // sanity check
-                bb.pos(offset);
-                Symbol::checkVersionIdent(bb);
-    
+                {
+                    auto bb2 = bb.range(offset, size);
+                    Symbol::checkVersionIdent(bb2);
+                }
+
                 bcd.mySymbolRange.emplace_back(offset, size);
-                logger.info("mySymbolRange  B  %5d  %5d", offset, size);
             }
         }
     }
@@ -155,16 +158,15 @@ BCD BCD::getInstance(ByteBuffer& bb) {
 }
 
 void BCD::checkVersionIdent(ByteBuffer &bb) {
-    auto oldPos = bb.pos();
+    bb.mark();
     auto word = bb.get16();
-    bb.pos(oldPos);
-    if (word == BCD::VersionID) return;
-    logger.error("Unexpected version  %d", word);
-    ERROR()
+	bb.reset();
+	auto versionID = BCD::VersionID;
+    if (word == versionID) return;
+    logger.error("Unexpected version  %d  %d", word, versionID);
 }
 
 ByteBuffer& BCD::read(ByteBuffer& bb) {
-    bb.pos(0);
     bb.read(versionIdent);
     // sanity check
     if (versionIdent != VersionID) ERROR();

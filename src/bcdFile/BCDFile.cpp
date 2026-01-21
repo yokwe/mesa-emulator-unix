@@ -66,20 +66,12 @@ BCDFile::BCDFile(const std::string& path) {
         myData);
     
     // sanity check
-    if (!isBCDFile()) {
-        logger.error("Not BCD file  %s", path);
-        ERROR();
+    {
+        auto bb = byteBuffer();
+        BCD::checkVersionIdent(bb);    
     }
 }
 
 BCDFile::~BCDFile() {
     delete myData;
 }
-
-bool BCDFile::isBCDFile() const {
-    auto bb = ByteBuffer::Mesa::getInstance(myData, mySize);
-    auto word0 = bb.get16();
-    logger.info("word0  %d", word0);
-    return word0 == BCD::VersionID;
-}
-

@@ -48,8 +48,6 @@ public:
     BCDFile(const std::string& path);
     ~BCDFile();
 
-    bool isBCDFile() const;
-
     const std::string& path() {
         return myPath;
     }
@@ -60,8 +58,7 @@ public:
         return mySize;
     }
 
-    ByteBuffer mesaByteBuffer() const {
-        auto ret = ByteBuffer::Mesa::getInstance(myData, mySize);
-        return ret;
+    ByteBuffer byteBuffer() const {
+        return ByteBuffer::Mesa::getInstance(myData, mySize);
     }
-};
+    };

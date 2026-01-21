@@ -63,7 +63,7 @@ static void dumpTable(const char* prefix, const std::map<uint16_t, T*>& map) {
     }
 }
 Context::Context(const std::string& outDir, const std::string& bcdPath_) : bcdPath(bcdPath_), bcdFile(bcdPath) {
-    auto bb = bcdFile.mesaByteBuffer();
+    auto bb = bcdFile.byteBuffer();
 
     // set bcd
     bcd = BCD::getInstance(bb);
@@ -73,11 +73,12 @@ Context::Context(const std::string& outDir, const std::string& bcdPath_) : bcdPa
         const auto& symbolRange = bcd.symbolRange();
         if (symbolRange.size() != 1) ERROR();
         const auto& range = symbolRange.at(0);
-        symbol = Symbol::getInstance(bb.range(range.offset, range.size));    
+        auto bb2 = bb.range(range.offset, range.size);
+        symbol = Symbol::getInstance(bb2);    
     }
 
     // for debug
-    dumpTable("se", symbol.seTable);
+    //dumpTable("se", symbol.seTable);
 
     // set outPath
     {

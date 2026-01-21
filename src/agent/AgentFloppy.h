@@ -45,7 +45,7 @@ class AgentFloppy : public Agent {
 	using FloppyIOCBType = FloppyIOFaceGuam::FloppyIOCBType;
 
 public:
-	static const CARD32 PAGE_SIZE_IN_BYTE        = sizeof(DiskFile::Page);
+	static const CARD32 PAGE_SIZE_IN_BYTE        = DiskFile::PAGE_SIZE_IN_BYTE;
 	static const CARD32 FLOPPY_NUMBER_OF_HEADS   =  2;
 	static const CARD32 FLOPPY_SECTORS_PER_TRACK = 18;
 

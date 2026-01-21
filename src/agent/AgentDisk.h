@@ -83,7 +83,7 @@ public:
 	}
 
 private:
-	static const constexpr CARD32 PAGE_SIZE_IN_BYTE       = sizeof(DiskFile::Page);
+	static const constexpr CARD32 PAGE_SIZE_IN_BYTE       = DiskFile::PAGE_SIZE_IN_BYTE;
 	static const constexpr CARD32 DISK_NUMBER_OF_HEADS    =  2;
 	static const constexpr CARD32 DISK_SECTORS_PER_TRACK  = 16;
 

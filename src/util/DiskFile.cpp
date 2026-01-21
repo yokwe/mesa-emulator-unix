@@ -33,56 +33,76 @@
 // DiskFile.cpp
 //
 
+#include <bit>
+
 #include "Util.h"
 static const Logger logger(__FILE__);
 
 #include "DiskFile.h"
+
+ByteBuffer& DiskFile::Page::read(ByteBuffer& bb) {
+	for(auto& e: data) {
+		e = bb.get16();
+	}
+	return bb;
+}
+ByteBuffer& DiskFile::Page::write(ByteBuffer& bb) const {
+	for(const auto e: data) {
+		bb.put16(e);
+	}
+	return bb;
+}
+void DiskFile::Page::byteswap() {
+	for(auto& e: data) {
+		e = std::byteswap(e);
+	}
+}
 
 void DiskFile::readPage(uint32_t pageNo, uint16_t *buffer) {
 	if (pageSize <= pageNo) {
 		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	memcpy(buffer, page + pageNo, sizeof(Page));
+	memcpy(buffer, pageData + pageNo, PAGE_SIZE_IN_BYTE);
 }
 void DiskFile::writePage(uint32_t pageNo, uint16_t *buffer) {
 	if (pageSize <= pageNo) {
 		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	memcpy(page + pageNo, buffer, sizeof(Page));
+	memcpy(pageData + pageNo, buffer, PAGE_SIZE_IN_BYTE);
 }
 void DiskFile::zeroPage(uint32_t pageNo) {
-	Page buffer;
-	bzero(&buffer, sizeof buffer);
-	writePage(pageNo, buffer.data);
+	PageData pageData;
+	bzero(pageData, sizeof pageData);
+	writePage(pageNo, pageData);
 }
 int DiskFile::verifyPage(uint32_t pageNo, uint16_t *buffer) {
 	if (pageSize <= pageNo) {
 		logger.fatal("pageNo = %d  pageSize = %d", pageNo, pageSize);
 		ERROR();
 	}
-	return memcmp(page + pageNo, buffer, sizeof(Page));
+	return memcmp(pageData + pageNo, buffer, PAGE_SIZE_IN_BYTE);
 }
 
 void DiskFile::attach(const std::string& path_) {
-	if (page != 0) ERROR();
+	if (pageData != 0) ERROR();
 	path = path_;
 	logger.info("DiskFile::attach %s", path);
 
 	auto [mapPage, mapSize] = Util::mapFile(path_);
-	page     = (Page*)mapPage;
+	pageData = (PageData*)mapPage;
 	byteSize = mapSize;
-	pageSize = byteSize / sizeof(Page);
+	pageSize = byteSize / PAGE_SIZE_IN_BYTE;
 }
 
 void DiskFile::detach() {
-	if (page == 0) return; // not attached
+	if (pageData == 0) return; // not attached
 
 	logger.info("DiskFile::detach %s", path);
 
-	Util::unmapFile(page);
-	page              = 0;
-	byteSize          = 0;
-	pageSize          = 0;
+	Util::unmapFile(pageData);
+	pageData = 0;
+	byteSize = 0;
+	pageSize = 0;
 }

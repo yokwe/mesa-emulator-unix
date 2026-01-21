@@ -35,19 +35,30 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
+
+#include "ByteBuffer.h"
 
 
 class DiskFile {
 public:
 	static const uint32_t PAGE_SIZE = 256;
-	struct Page {
-		uint16_t data[PAGE_SIZE];
+	static const uint32_t PAGE_SIZE_IN_BYTE = PAGE_SIZE * sizeof(uint16_t);
+
+	using PageData = uint16_t[PAGE_SIZE];
+	struct Page : public ByteBuffer::HasRead, public ByteBuffer::HasWrite {
+		PageData data;
+
+		ByteBuffer& read(ByteBuffer& bb) override;
+		ByteBuffer& write(ByteBuffer& bb) const override;
+
+		void byteswap();
 	};
 
 	// default constructor
 	DiskFile() {
-		page     = 0;
+		pageData = 0;
 		byteSize = 0;
 		pageSize = 0;
 	}
@@ -59,6 +70,16 @@ public:
 	void writePage (uint32_t pageNo, uint16_t *buffer);
 	int  verifyPage(uint32_t pageNo, uint16_t *buffer);
 	void zeroPage  (uint32_t pageNo);
+
+	void readPage  (uint32_t pageNo, Page& page) {
+		readPage(pageNo, page.data);
+	}
+	void writePage (uint32_t pageNo, Page& page) {
+		writePage(pageNo, page.data);
+	}
+	int  verifyPage(uint32_t pageNo, Page& page) {
+		return verifyPage(pageNo, page.data);
+	}
 
 	const std::string& getPath() {
 		return path;
@@ -72,7 +93,7 @@ public:
 
 private:
 	std::string path;
-	Page*       page;
+	PageData*   pageData;
 	uint32_t    byteSize;
 	uint32_t    pageSize;
 };

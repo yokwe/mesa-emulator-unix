@@ -53,108 +53,75 @@ class ByteBuffer {
     }
 
     struct Impl {
-        uint32_t mySize;
-        std::shared_ptr<uint8_t> myData;
+        const char* myName;
+        uint32_t    mySize;
+        uint8_t*    myData;
 
-        static void deleter(uint8_t* myData) {
-            logger.info("deleter  myData  %p", myData);
-        }
-    
-        Impl() : mySize(0), myData(0) {}
-        Impl(uint32_t size) : mySize(size), myData(new uint8_t[mySize], deleter) {}
+        Impl(const char* name) : myName(name), mySize(0), myData(0) {}
+        Impl(const char* name, uint32_t size) : myName(name), mySize(size), myData(new uint8_t[mySize]) {}
 
         virtual ~Impl() {
+            delete[] myData;
+            myName = 0;
             mySize = 0;
             myData = 0;
         }
 
-        virtual const char* name() = 0;
-
-        // 8
-        virtual uint8_t  get8(uint8_t* data, uint32_t pos) = 0;
-        virtual void     put8(uint8_t* data, uint32_t pos, uint8_t value) = 0;
-        // 16
-        virtual uint16_t get16(uint8_t* data, uint32_t pos) = 0;
-        virtual void     put16(uint8_t* data, uint32_t pos, uint16_t value) = 0;
         // 32
         virtual uint32_t get32(uint8_t* data, uint32_t pos) = 0;
         virtual void     put32(uint8_t* data, uint32_t pos, uint32_t value) = 0;
     };
-    static void deleter(Impl* impl) {
-        logger.info("deleter  impl  %p  %u", impl->myData.get(), impl->mySize);
-    }
-
+    
+    static inline const uint32_t BAD_MARK = ~0;
 
     std::shared_ptr<Impl> myImpl;
     uint8_t*  myData;
-    uint32_t  myByteSize;
-    uint32_t  myBytePos;
- 
-    ByteBuffer(std::shared_ptr<Impl> impl, uint8_t* data, uint32_t byteSize) : myImpl(impl), myData(data), myByteSize(byteSize), myBytePos(0) {}
+    uint32_t  myByteCapacity;  // cpacity of myData
+    uint32_t  myBytePos;       // current position for read and write
+    uint32_t  myByteLimit;     // written size
+    uint32_t  myByteMark;
 
-    void checkByteRange(uint32_t bytePos, uint32_t readSize) const {
-        checkBytePos(bytePos);
-        checkBytePos(bytePos + readSize - 1);
-    }
-    void checkBytePos(uint32_t pos) const;
+    // valid range of myBytePos   is [0..myByteCapacity)
+    // valid range of myByteLimit is [myBytePos..myByteCapacity)
+    void checkBeforeRead(uint32_t byteSize);
+    void checkBeforeWrite(uint32_t byteSize);
 
-    // getX
+
+    ByteBuffer(std::shared_ptr<Impl> impl, uint8_t* data, uint32_t byteCapacity) :
+        myImpl(impl), myData(data), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(0), myByteMark(BAD_MARK) {}
+    ByteBuffer(std::shared_ptr<Impl> impl, uint8_t* data, uint32_t byteCapacity, uint32_t byteLimit) :
+        myImpl(impl), myData(data), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(byteLimit), myByteMark(BAD_MARK) {}
+
+    // 8
     uint8_t get8(uint32_t bytePos) {
-        return myImpl->get8(myData, bytePos);
+        return myData[bytePos];
     }
+    void put8(uint32_t bytePos, uint8_t value) const {
+        myData[bytePos] = value;
+    }
+    // 16
     uint16_t get16(uint32_t bytePos) {
-        return myImpl->get16(myData, bytePos);
+        return (myData[bytePos + 0] << 8) | (myData[bytePos + 1] << 0);
     }
+    void put16(uint32_t bytePos, uint16_t value) const {
+        myData[bytePos + 0] = value >> 8;
+        myData[bytePos + 1] = value >> 0;
+    }
+    // 32
     uint32_t get32(uint32_t bytePos) {
         return myImpl->get32(myData, bytePos);
     }
-    // putX
-    void put8(uint32_t bytePos, uint8_t value) const {
-        myImpl->put8(myData, bytePos, value);
-    }
-    void put16(uint32_t bytePos, uint16_t value) const {
-        myImpl->put16(myData, bytePos, value);
-    }
-    void put32(uint32_t bytePos, uint32_t value) const {
+    void put32(uint32_t bytePos, uint32_t value) {
         myImpl->put32(myData, bytePos, value);
     }
+
 public:
-    ~ByteBuffer() {
-        myData     = 0;
-        myByteSize = 0;
-        myBytePos  = 0;
-    }
-
-    static uint8_t highByte(uint16_t value) {
-        return (uint8_t)(value >> 8);
-    }
-    static uint8_t lowByte(uint16_t value) {
-        return (uint8_t)(value >> 0);
-    }
-
-    struct Mesa {
+    class Mesa {
+        static inline const char* NAME = "MESA";
         struct MyImpl : public Impl {
-            MyImpl() : Impl() {}
-            MyImpl(uint32_t size) : Impl(size) {}
+            MyImpl() : Impl(NAME) {}
+            MyImpl(uint32_t size) : Impl(NAME, size) {}
 
-            const char* name() override {
-                return "MESA";
-            }
-            // 8
-            uint8_t  get8(uint8_t* data, uint32_t pos) override {
-                return data[pos];
-            }
-            void     put8(uint8_t* data, uint32_t pos, uint8_t value) override {
-                data[pos] = value;
-            }
-            // 16
-            uint16_t get16(uint8_t* data, uint32_t pos) override {
-                return (data[pos + 0] << 8) | (data[pos + 1] << 0);
-            }
-            void     put16(uint8_t* data, uint32_t pos, uint16_t value) override {
-                data[pos + 0] = (uint8_t)(value >> 8);
-                data[pos + 1] = (uint8_t)(value >> 0);
-            }
             // 32
             // mesa order for 32bit value  low half and high half
             uint32_t get32(uint8_t* data, uint32_t pos) override {
@@ -167,39 +134,22 @@ public:
                 data[pos + 3] = (uint8_t)(value >> 16);
             }
         };
-
+    public:
         static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
-            static std::shared_ptr<MyImpl> myImpl(new MyImpl(), deleter);
-            return ByteBuffer(myImpl, data, size);
+            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
+            return ByteBuffer(myImpl, data, size, size);
         }
         static ByteBuffer getInstance(uint32_t size) {
-            std::shared_ptr<MyImpl> myImpl(new MyImpl(size), deleter);
-            return ByteBuffer(myImpl, myImpl->myData.get(), size);
+            std::shared_ptr<MyImpl> myImpl(new MyImpl(size));
+            return ByteBuffer(myImpl, myImpl->myData, size);
         }
     };
-    struct Net {
+    class Net {
+        static inline const char* NAME = "NET";
         struct MyImpl : public Impl {
-            MyImpl() : Impl() {}
-            MyImpl(uint32_t size) : Impl(size) {}
+            MyImpl() : Impl(NAME) {}
+            MyImpl(uint32_t size) : Impl(NAME, size) {}
 
-            const char* name() override {
-                return "NET";
-            }
-            // 8
-            uint8_t  get8(uint8_t* data, uint32_t pos) override {
-                return data[pos];
-            }
-            void     put8(uint8_t* data, uint32_t pos, uint8_t value) override {
-                data[pos] = value;
-            }
-            // 16
-            uint16_t get16(uint8_t* data, uint32_t pos) override {
-                return (data[pos + 0] << 8) | (data[pos + 1] << 0);
-            }
-            void     put16(uint8_t* data, uint32_t pos, uint16_t value) override {
-                data[pos + 0] = (uint8_t)(value >> 8);
-                data[pos + 1] = (uint8_t)(value >> 0);
-            }
             // 32
             // netowrk order for 32bit value  high half and low half
             uint32_t get32(uint8_t* data, uint32_t pos) override {
@@ -212,94 +162,160 @@ public:
                 data[pos + 3] = (uint8_t)(value >>  0);
             }
         };
-
+    public:
         static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
-            static std::shared_ptr<MyImpl> myImpl(new MyImpl(), deleter);
-            return ByteBuffer(myImpl, data, size);
+            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
+            return ByteBuffer(myImpl, data, size, size);
         }
         static ByteBuffer getInstance(uint32_t size) {
-            std::shared_ptr<MyImpl> myImpl(new MyImpl(size), deleter);
-            return ByteBuffer(myImpl, myImpl->myData.get(), size);
+            std::shared_ptr<MyImpl> myImpl(new MyImpl(size));
+            return ByteBuffer(myImpl, myImpl->myData, size);
         }
     };
+
+    static uint8_t highByte(uint16_t value) {
+        return (uint8_t)(value >> 8);
+    }
+    static uint8_t lowByte(uint16_t value) {
+        return (uint8_t)(value >> 0);
+    }
+
+
+    ~ByteBuffer() {
+        myData          = 0;
+        myByteCapacity  = 0;
+        myBytePos       = 0;
+        myByteLimit     = 0;
+    }
 
     ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) const;
 
     const char* name() const {
-        return myImpl->name();
+        return myImpl->myName;
     }
 
     const uint8_t* data() const {
         return myData;
     }
 
-    uint32_t byteSize() const {
-        return myByteSize;
+    //
+    // clear -- make ByteBufer ready for write
+    //
+    void clear() {
+        myByteLimit = 0;
+        myBytePos   = 0;
     }
-    uint32_t size() const {
-        return byteValueToWordValue(byteSize());
+    //
+    // flip -- make ByteBuffer ready for read from start after write
+    //
+    void flip() {
+        myByteLimit = myBytePos;
+        myBytePos   = 0;
     }
-    void bytePos(uint32_t bytePos) {
-        checkBytePos(bytePos);
-        myBytePos = bytePos;
+    //
+    // rewind -- make ByteBuffer ready for read from start
+    //
+    void rewind() {
+        myBytePos = 0;
     }
+    //
+    // mark -- mark position for later reset
+    //
+    void mark();
+    //
+    // reset -- move to last mark position
+    //
+    void reset();
+
+
+    //
+    // capacity
+    //
+    uint32_t byteCapacity() const {
+        return myByteCapacity;
+    }
+    uint32_t capacity() const {
+        return byteValueToWordValue(byteCapacity());
+    }
+    //
+    // pos
+    //
     uint32_t bytePos() const {
         return myBytePos;
-    }
-    void pos(uint32_t wordPos) {
-        bytePos(wordValueToByteValue(wordPos));
     }
     uint32_t pos() const {
         return byteValueToWordValue(bytePos());
     }
+    //
+    // limit
+    //
+    uint32_t byteLimit() const {
+        return myByteLimit;
+    }
+    uint32_t limit() const {
+        return byteValueToWordValue(byteLimit());
+    }
+    //
+    // remains
+    //
+    uint32_t byteRemains() {
+        return myByteLimit - myBytePos;
+    }
+    uint32_t remains() {
+        return byteValueToWordValue(byteRemains());
+    }
+
     
     // getX
     uint8_t get8() {
-        const uint32_t readSize = 1;
+        const uint32_t byteSize = 1;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeRead(byteSize);
         auto ret = get8(myBytePos);
-        myBytePos += readSize;
+        myBytePos += byteSize;
         return ret;
     }
     uint16_t get16() {
-        const uint32_t readSize = 2;
+        const uint32_t byteSize = 2;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeRead(byteSize);
         auto ret = get16(myBytePos);
-        myBytePos += readSize;
+        myBytePos += byteSize;
         return ret;
     }
     uint32_t get32() {
-        const uint32_t readSize = 4;
+        const uint32_t byteSize = 4;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeRead(byteSize);
         auto ret = get32(myBytePos);
-        myBytePos += readSize;
+        myBytePos += byteSize;
         return ret;
     }
 
     // putX
     void put8(uint8_t value) {
-        const uint32_t readSize = 1;
+        const uint32_t byteSize = 1;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeWrite(byteSize);
         put8(myBytePos, value);
-        myBytePos += readSize;
+        myBytePos += byteSize;
+        myByteLimit = myBytePos;
     }
     void put16(uint16_t value) {
-        const uint32_t readSize = 2;
+        const uint32_t byteSize = 2;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeWrite(byteSize);
         put16(myBytePos, value);
-        myBytePos += readSize;
+        myBytePos += byteSize;
+        myByteLimit = myBytePos;
     }
     void put32(uint32_t value) {
-        const uint32_t readSize = 2;
+        const uint32_t byteSize = 4;
 
-        checkByteRange(myBytePos, readSize);
+        checkBeforeWrite(byteSize);
         put32(myBytePos, value);
-        myBytePos += readSize;
+        myBytePos += byteSize;
+        myByteLimit = myBytePos;
     }
 
 
@@ -352,7 +368,9 @@ public:
         value = get32();
         return *this;
     }
-    ByteBuffer& read(int value) = delete;
+    ByteBuffer& read(int      value) = delete;
+    ByteBuffer& read(int64_t  value) = delete;
+    ByteBuffer& read(uint64_t value) = delete;
 
 
     //
@@ -403,6 +421,8 @@ public:
         put32(value);
         return *this;
     }
-    ByteBuffer& write(int value) = delete;
+    ByteBuffer& write(int      value) = delete;
+    ByteBuffer& write(int64_t  value) = delete;
+    ByteBuffer& write(uint64_t value) = delete;
 
     };

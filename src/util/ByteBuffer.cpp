@@ -38,25 +38,55 @@ static const Logger logger(__FILE__);
 
 #include "ByteBuffer.h"
 
-void ByteBuffer::checkBytePos(uint32_t bytePos) const {
-    if (bytePos < myByteSize) return;
 
-    logger.error("Unexpected values  %s", __FUNCTION__);
-    logger.error("  bytePos  %u", bytePos);
-    logger.error("  size     %u", myByteSize);
-    ERROR();
+// valid range of myBytePos   is [0..myByteCapacity)
+// valid range of myByteLimit is [myBytePos..myByteCapacity)
+
+void ByteBuffer::checkBeforeRead(uint32_t byteSize) {
+    auto newBytePos = myBytePos + byteSize;
+    if (newBytePos <= myByteLimit) return;
+
+    logger.error("Unexpected value  %s", __FUNCTION__);
+    logger.error("  byteSize  %u", byteSize);
+    logger.error("  name      %s", myImpl->myName);
+    logger.error("  data      %p", myData);
+    logger.error("  capacity  %u", myByteCapacity);
+    logger.error("  pos       %u", myBytePos);
+    logger.error("  limit     %u", myByteLimit);
+    ERROR()
+}
+void ByteBuffer::checkBeforeWrite(uint32_t byteSize) {
+    auto newBytePos = myBytePos + byteSize;
+    if (newBytePos <= myByteCapacity) return;
+
+    logger.error("Unexpected value  %s", __FUNCTION__);
+    logger.error("  byteSize  %u", byteSize);
+    logger.error("  name      %s", myImpl->myName);
+    logger.error("  data      %p", myData);
+    logger.error("  capacity  %u", myByteCapacity);
+    logger.error("  pos       %u", myBytePos);
+    logger.error("  limit     %u", myByteLimit);
+    ERROR()
 }
 
 ByteBuffer ByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) const {
     auto bytePos  = wordValueToByteValue(wordOffset);
     auto readSize = wordValueToByteValue(wordSize);
-    if (myByteSize < (bytePos + readSize)) {
+    if (myByteCapacity < (bytePos + readSize)) {
         // fix readSize
-        logger.info("unexpected value  readSize   %d   myByteSize  %d", readSize, myByteSize);
-        readSize = myByteSize - bytePos;
-    }
-    // sanity check
-    checkByteRange(bytePos, readSize);
-    
-    return ByteBuffer(myImpl, myData + bytePos, readSize);
+        auto newReadSize = myByteCapacity - bytePos;
+//        logger.warn("%s  Adjust readSize from %d to %d", __FUNCTION__, readSize, newReadSize);
+        readSize = newReadSize;
+    }    
+    return ByteBuffer(myImpl, myData + bytePos, readSize, readSize);
+}
+
+void ByteBuffer::mark() {
+    if (myByteMark != BAD_MARK) ERROR()
+    myByteMark = myBytePos;
+}
+void ByteBuffer::reset() {
+    if (myByteMark == BAD_MARK) ERROR()
+    myBytePos = myByteMark;
+    myByteMark = BAD_MARK;
 }

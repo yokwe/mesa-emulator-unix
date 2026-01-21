@@ -36,31 +36,27 @@
 static const Logger logger(__FILE__);
 
 #include "../util/DiskFile.h"
-
-#include "ByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 #include "../agent/AgentFloppy.h"
 
 #include "floppy.h"
 
-void FloppyDisk::readSector(int sector, ByteBuffer& bb, uint32_t count) {
-    if (sector <= 0) {
-        logger.fatal("sector = %d", sector);
-        ERROR();
-    }
-    DiskFile::Page buffer;
+ByteBuffer FloppyDisk::readSector(uint32_t sector, uint32_t count) {
+    DiskFile::Page page;
+    auto bb = ByteBuffer::Mesa::getInstance(DiskFile::PAGE_SIZE_IN_BYTE * count);
     for(uint32_t i = 0; i < count; i++) {
-        diskFile.readPage((sector - 1) + i, (CARD16*)buffer.data);
-        Util::byteswap(buffer.data, buffer.data, DiskFile::PAGE_SIZE);
-        bb.write(sizeof(DiskFile::Page), (uint8_t*)buffer.data);
+        diskFile.readPage((sector - 1) + i, page);
+        bb.write(page);
     }
-    bb.rewind();
+
+    bb.pos(0);
+    return bb;
 }
 
 
 SectorNine::SectorNine(FloppyDisk& floppyDisk) {
-    ByteBuffer bb(sizeof(DiskFile::Page));
-    floppyDisk.readSector(9, bb);
+    auto bb = floppyDisk.readSector(9);
 
     bb.read(seal, version, cylinders, tracksPerCylinder, sectorsPerTrack);
     // sanity check
@@ -130,9 +126,7 @@ void FileList::Entry::dump() const {
 
 
 FileList::FileList(FloppyDisk& floppyDisk, uint32_t fileList, uint32_t fileListSize) {
-    uint32_t dataSize = sizeof(DiskFile::Page) * fileListSize;
-    ByteBuffer bb(dataSize);
-    floppyDisk.readSector(fileList, bb, fileListSize);
+    auto bb = floppyDisk.readSector(fileList, fileListSize);
 
     bb.read(seal, version);
     // sanity check
@@ -167,8 +161,7 @@ void FileList::dump() const {
 
 
 FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry& entry) {
-    ByteBuffer bb(sizeof(DiskFile::Page) * entry.size);
-    floppyDisk.readSector(entry.location, bb, entry.size);
+    auto bb = floppyDisk.readSector(entry.location, entry.size);
 
     bb.
     // Identity attributes
@@ -203,9 +196,9 @@ FloppyLeaderPage::FloppyLeaderPage(FloppyDisk& floppyDisk, const FileList::Entry
         if (i < clientDataLength) clientData.push_back(w);
     }
 
-    // sanitcy check
-    auto contentsPos = bb.position();
-    if (contentsPos != sizeof(DiskFile::Page)) ERROR();
+    // sanity check
+    auto contentsPos = bb.pos();
+    if (contentsPos != DiskFile::PAGE_SIZE) ERROR();
 
     // file contents
     for(uint32_t i = 0; i < totalSizeInBytes; i++) {

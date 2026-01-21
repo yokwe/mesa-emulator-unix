@@ -37,8 +37,7 @@
 #include <vector>
 
 #include "../util/DiskFile.h"
-
-#include "ByteBuffer.h"
+#include "../util/ByteBuffer.h"
 
 class FloppyDisk {
 	DiskFile   diskFile;
@@ -68,10 +67,11 @@ public:
 		diskFile.detach();
 	}
 
-	void readSector(int sector, ByteBuffer& bb, uint32_t count);
-	void readSector(int sector, ByteBuffer& bb) {
-		readSector(sector, bb, 1);
+	ByteBuffer readSector(uint32_t sector, uint32_t count);
+	ByteBuffer readSector(uint32_t sector) {
+		return readSector(sector, 1);
 	}
+
 };
 
 //

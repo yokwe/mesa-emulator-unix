@@ -389,7 +389,7 @@ public:
                 ERROR()
             }
         }
-        return read(std::forward<Tail>(tail)...);
+        return write(std::forward<Tail>(tail)...);
     }
     ByteBuffer& write(uint8_t value) {
         put8(value);
@@ -405,4 +405,4 @@ public:
     }
     ByteBuffer& write(int value) = delete;
 
-};
+    };

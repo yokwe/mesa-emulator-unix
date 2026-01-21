@@ -149,7 +149,7 @@ static void readTable(ByteBuffer& baseBB, const BlockDescriptor& block, std::map
 	}
 }
 
-Symbol Symbol::getInstance(ByteBuffer bb) {
+Symbol Symbol::getInstance(ByteBuffer& bb) {
 	// sanity check
 	checkVersionIdent(bb);
 
@@ -180,12 +180,13 @@ Symbol Symbol::getInstance(ByteBuffer bb) {
 	return symbol;
 }
 
-void Symbol::checkVersionIdent(ByteBuffer &bb) {
-    auto oldPos = bb.pos();
+void Symbol::checkVersionIdent(ByteBuffer& bb) {
+	bb.mark();
     auto word = bb.get16();
-    bb.pos(oldPos);
-    if (word == Symbol::VersionID) return;
-    logger.error("Unexpected version  %d", word);
+	bb.reset();
+	auto versionID = Symbol::VersionID;
+    if (word == versionID) return;
+    logger.error("Unexpected version  %d  %d", word, versionID);
     ERROR()
 }
 

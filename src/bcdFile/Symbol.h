@@ -94,7 +94,7 @@ public:
 	static const uint16_t CODE_INT  = 1;
 	static const uint16_t CODE_CHAR = 2;
 
-	static Symbol getInstance(ByteBuffer bb);
+	static Symbol getInstance(ByteBuffer& bb);
 	static void checkVersionIdent(ByteBuffer& bb);
 
 	uint16_t        versionIdent;    // version of symbol table structure

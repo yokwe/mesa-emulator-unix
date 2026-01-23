@@ -50,6 +50,9 @@ distclean-cmake:
 distclean-macos:
 	find . -type f -name '._*' -o -name '.DS_Store' -print -delete
 
+tcpdump-xns:
+	sudo tcpdump ether proto 0x0600
+
 main: src/util/Perf.inc src/util/trace.inc
 	/usr/bin/time cmake --build build --target main
 	

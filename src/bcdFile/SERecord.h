@@ -165,9 +165,9 @@ struct SERecord : public ByteBuffer::HasRead, public HasToString {
         };
 
         enum class Tag : uint16_t {
-            ENUM_VALUE(Type, TERMINAL)
-            ENUM_VALUE(Type, SEQUENTIAL)
-            ENUM_VALUE(Type, LINKED)
+            ENUM_NAME(Type, TERMINAL)
+            ENUM_NAME(Type, SEQUENTIAL)
+            ENUM_NAME(Type, LINKED)
         };
         static std::string toString(Tag value);
 
@@ -427,8 +427,8 @@ struct SERecord : public ByteBuffer::HasRead, public HasToString {
     };
 
     enum class Tag : uint16_t {
-        ENUM_VALUE(Tag, ID)
-        ENUM_VALUE(Tag, CONS)
+        ENUM_NAME(Tag, ID)
+        ENUM_NAME(Tag, CONS)
     };
     static std::string toString(Tag value); // 01
 

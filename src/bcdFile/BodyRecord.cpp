@@ -42,8 +42,8 @@ static const Logger logger(__FILE__);
 #include "../util/ByteBuffer.h"
 #include "BodyRecord.h"
 
-#undef  ENUM_VALUE
-#define ENUM_VALUE(enum,value) {enum::value, #value},
+#undef  ENUM_NAME
+#define ENUM_NAME(enum,name) {enum::name, #name},
 
 
 //
@@ -51,8 +51,8 @@ static const Logger logger(__FILE__);
 //
 std::string BodyLink::toString(Which value) {
     static std::map<Which, std::string> map {
-        ENUM_VALUE(Which, SIBLING)
-        ENUM_VALUE(Which, PARENT)
+        ENUM_NAME(Which, SIBLING)
+        ENUM_NAME(Which, PARENT)
     };
 
     if (map.contains(value)) return map[value];
@@ -84,8 +84,8 @@ std::string BodyLink::toString() const {
 //
 std::string BodyInfo::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, INTERNAL)
-        ENUM_VALUE(Tag, EXTERNAL)
+        ENUM_NAME(Tag, INTERNAL)
+        ENUM_NAME(Tag, EXTERNAL)
     };
 
     if (map.contains(value)) return map[value];
@@ -141,8 +141,8 @@ std::string BodyInfo::toString() const {
 //
 std::string BodyRecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, CALLABLE)
-        ENUM_VALUE(Tag, OTHER)
+        ENUM_NAME(Tag, CALLABLE)
+        ENUM_NAME(Tag, OTHER)
     };
 
     if (map.contains(value)) return map[value];
@@ -182,9 +182,9 @@ void BodyRecord::CALLABLE::CATCH::read(uint16_t u11, ByteBuffer& bb) {
 //
 std::string BodyRecord::CALLABLE::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, OUTER)
-        ENUM_VALUE(Tag, INNER)
-        ENUM_VALUE(Tag, CATCH)
+        ENUM_NAME(Tag, OUTER)
+        ENUM_NAME(Tag, INNER)
+        ENUM_NAME(Tag, CATCH)
     };
 
     if (map.contains(value)) return map[value];

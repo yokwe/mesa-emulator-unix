@@ -43,8 +43,8 @@ static const Logger logger(__FILE__);
 #include "SERecord.h"
 
 
-#undef  ENUM_VALUE
-#define ENUM_VALUE(enum,value) {enum::value, #value},
+#undef  ENUM_NAME
+#define ENUM_NAME(enum,name) {enum::name, #name},
 
 
 //
@@ -52,9 +52,9 @@ static const Logger logger(__FILE__);
 //
 std::string SERecord::ID::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, TERMINAL)
-        ENUM_VALUE(Tag, SEQUENTIAL)
-        ENUM_VALUE(Tag, LINKED)
+        ENUM_NAME(Tag, TERMINAL)
+        ENUM_NAME(Tag, SEQUENTIAL)
+        ENUM_NAME(Tag, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -159,8 +159,8 @@ std::string SERecord::CONS::ENUMERATED::toString() const {
 //
 std::string SERecord::CONS::RECORD::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, NOT_LINKED)
-        ENUM_VALUE(Tag, LINKED)
+        ENUM_NAME(Tag, NOT_LINKED)
+        ENUM_NAME(Tag, LINKED)
     };
 
     if (map.contains(value)) return map[value];
@@ -514,8 +514,8 @@ std::string SERecord::CONS::toString() const {
 //
 std::string SERecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, ID)
-        ENUM_VALUE(Tag, CONS)
+        ENUM_NAME(Tag, ID)
+        ENUM_NAME(Tag, CONS)
     };
 
     if (map.contains(value)) return map[value];

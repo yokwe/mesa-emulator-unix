@@ -59,8 +59,8 @@
 //    ENDCASE];
 struct LTRecord : public ByteBuffer::HasRead, public HasToString {
     enum class Tag : uint16_t {
-        ENUM_VALUE(Kind, SHORT)
-        ENUM_VALUE(Kind, LONG)
+        ENUM_NAME(Kind, SHORT)
+        ENUM_NAME(Kind, LONG)
     };
     static std::string toString(Tag);
 
@@ -113,8 +113,8 @@ struct LTRecord : public ByteBuffer::HasRead, public HasToString {
 //     ENDCASE];
 struct LitRecord : public HasToString {
     enum class Tag : uint16_t {
-        ENUM_VALUE(Tag, WORD)
-        ENUM_VALUE(Tag, STRING)
+        ENUM_NAME(Tag, WORD)
+        ENUM_NAME(Tag, STRING)
     };
     static std::string toString(Tag);
 

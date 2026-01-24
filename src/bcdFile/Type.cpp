@@ -59,14 +59,14 @@ std::string Timestamp::toString() const {
 
 
 
-#undef  ENUM_VALUE
-#define ENUM_VALUE(enum,value) {enum::value, #value},
+#undef  ENUM_NAME
+#define ENUM_NAME(enum,name) {enum::name, #name},
 
 std::string toString(ContextLevel value) {
     static std::map<ContextLevel, std::string> map {
-        ENUM_VALUE(ContextLevel, LZ)
-        ENUM_VALUE(ContextLevel, LG)
-        ENUM_VALUE(ContextLevel, LL)
+        ENUM_NAME(ContextLevel, LZ)
+        ENUM_NAME(ContextLevel, LG)
+        ENUM_NAME(ContextLevel, LL)
     };
 
     if (map.contains(value)) return map[value];
@@ -78,10 +78,10 @@ std::string toString(ContextLevel value) {
 
 std::string toString(ExtensionType value) {
     static std::map<ExtensionType, std::string> map {
-		ENUM_VALUE(ExtensionType, VALUE)
-		ENUM_VALUE(ExtensionType, FORM)
-		ENUM_VALUE(ExtensionType, DEFAULT)
-		ENUM_VALUE(ExtensionType, NONE)
+		ENUM_NAME(ExtensionType, VALUE)
+		ENUM_NAME(ExtensionType, FORM)
+		ENUM_NAME(ExtensionType, DEFAULT)
+		ENUM_NAME(ExtensionType, NONE)
     };
 
     if (map.contains(value)) return map[value];
@@ -92,32 +92,32 @@ std::string toString(ExtensionType value) {
 
 std::string toString(TypeClass value) {
     static std::map<TypeClass, std::string> map {
-        ENUM_VALUE(TypeClass, MODE)
-        ENUM_VALUE(TypeClass, BASIC)
-        ENUM_VALUE(TypeClass, ENUMERATED)
-        ENUM_VALUE(TypeClass, RECORD)
-        ENUM_VALUE(TypeClass, REF)
+        ENUM_NAME(TypeClass, MODE)
+        ENUM_NAME(TypeClass, BASIC)
+        ENUM_NAME(TypeClass, ENUMERATED)
+        ENUM_NAME(TypeClass, RECORD)
+        ENUM_NAME(TypeClass, REF)
         //
-        ENUM_VALUE(TypeClass, ARRAY)
-        ENUM_VALUE(TypeClass, ARRAYDESC)
-        ENUM_VALUE(TypeClass, TRANSFER)
-        ENUM_VALUE(TypeClass, DEFINITION)
-        ENUM_VALUE(TypeClass, UNION)
+        ENUM_NAME(TypeClass, ARRAY)
+        ENUM_NAME(TypeClass, ARRAYDESC)
+        ENUM_NAME(TypeClass, TRANSFER)
+        ENUM_NAME(TypeClass, DEFINITION)
+        ENUM_NAME(TypeClass, UNION)
         //
-        ENUM_VALUE(TypeClass, SEQUENCE)
-        ENUM_VALUE(TypeClass, RELATIVE)
-        ENUM_VALUE(TypeClass, SUBRANGE)
-        ENUM_VALUE(TypeClass, LONG) 
-        ENUM_VALUE(TypeClass, REAL)
+        ENUM_NAME(TypeClass, SEQUENCE)
+        ENUM_NAME(TypeClass, RELATIVE)
+        ENUM_NAME(TypeClass, SUBRANGE)
+        ENUM_NAME(TypeClass, LONG) 
+        ENUM_NAME(TypeClass, REAL)
         //
-        ENUM_VALUE(TypeClass, OPAQUE)
-        ENUM_VALUE(TypeClass, ZONE)
-        ENUM_VALUE(TypeClass, ANY)
-        ENUM_VALUE(TypeClass, NIL)
-        ENUM_VALUE(TypeClass, BITS)
-        ENUM_VALUE(TypeClass, BITS)
+        ENUM_NAME(TypeClass, OPAQUE)
+        ENUM_NAME(TypeClass, ZONE)
+        ENUM_NAME(TypeClass, ANY)
+        ENUM_NAME(TypeClass, NIL)
+        ENUM_NAME(TypeClass, BITS)
+        ENUM_NAME(TypeClass, BITS)
 		//
-		ENUM_VALUE(TypeClass, FIXEDSEQUENCE)
+		ENUM_NAME(TypeClass, FIXEDSEQUENCE)
     };
 
     if (map.contains(value)) return map[value];
@@ -128,13 +128,13 @@ std::string toString(TypeClass value) {
 
 std::string toString(TransferMode value) {
     static std::map<TransferMode, std::string> map {
-		ENUM_VALUE(TransferMode, PROC)
-		ENUM_VALUE(TransferMode, PORT)
-		ENUM_VALUE(TransferMode, SIGNAL)
-		ENUM_VALUE(TransferMode, ERROR_)
-		ENUM_VALUE(TransferMode, PROCESS)
-		ENUM_VALUE(TransferMode, PROGRAM)
-		ENUM_VALUE(TransferMode, NONE)
+		ENUM_NAME(TransferMode, PROC)
+		ENUM_NAME(TransferMode, PORT)
+		ENUM_NAME(TransferMode, SIGNAL)
+		ENUM_NAME(TransferMode, ERROR_)
+		ENUM_NAME(TransferMode, PROCESS)
+		ENUM_NAME(TransferMode, PROGRAM)
+		ENUM_NAME(TransferMode, NONE)
     };
 
     if (map.contains(value)) return map[value];

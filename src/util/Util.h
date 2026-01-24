@@ -239,8 +239,10 @@ std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock:
 
 
 // Helper macro for enum
-//#define ENUM_VALUE(enum,value) {enum::value, #value},
-#define ENUM_VALUE(enum,value) value,
+#define ENUM_NAME(enum,name) name,
+//#define ENUM_NAME(enum,name) {enum::name, #name},
+#define ENUM_NAME_VALUE(enum,name,value) name = value,
+//#define ENUM_NAME_VALUE(enum,name,value) { enum :: name, #name },
 
 // bitFiled is used in symbols
 uint16_t bitField(uint16_t word, int startBit, int stopBit);

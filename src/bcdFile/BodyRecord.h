@@ -54,8 +54,8 @@
 //BodyLink: TYPE = RECORD [which(0:0..0): {sibling(0), parent(1)}, index(0:1..14): BTIndex];
 struct BodyLink : public ByteBuffer::HasRead, public HasToString {
     enum class Which {
-        ENUM_VALUE(Which, SIBLING)
-        ENUM_VALUE(Which, PARENT)
+        ENUM_NAME(Which, SIBLING)
+        ENUM_NAME(Which, PARENT)
     };
     static std::string toString(Which);
 
@@ -83,8 +83,8 @@ struct BodyLink : public ByteBuffer::HasRead, public HasToString {
 //    ENDCASE];
 struct BodyInfo : public ByteBuffer::HasRead, public HasToString {
     enum class Tag {
-        ENUM_VALUE(Tag, INTERNAL)
-        ENUM_VALUE(Tag, EXTERNAL)
+        ENUM_NAME(Tag, INTERNAL)
+        ENUM_NAME(Tag, EXTERNAL)
     };
     static std::string toString(Tag);
 
@@ -141,16 +141,16 @@ struct BodyInfo : public ByteBuffer::HasRead, public HasToString {
 
 struct BodyRecord : public ByteBuffer::HasRead, public HasToString {
     enum class Tag {
-        ENUM_VALUE(Tag, CALLABLE)
-        ENUM_VALUE(Tag, OTHER)
+        ENUM_NAME(Tag, CALLABLE)
+        ENUM_NAME(Tag, OTHER)
     };
     static std::string toString(Tag);
 
     struct CALLABLE : public HasToString {
         enum class Tag : uint16_t {
-            ENUM_VALUE(Tag, OUTER)
-            ENUM_VALUE(Tag, INNER)
-            ENUM_VALUE(Tag, CATCH)
+            ENUM_NAME(Tag, OUTER)
+            ENUM_NAME(Tag, INNER)
+            ENUM_NAME(Tag, CATCH)
         };
         static std::string toString(Tag);
 

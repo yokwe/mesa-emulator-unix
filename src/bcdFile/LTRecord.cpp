@@ -43,16 +43,16 @@ static const Logger logger(__FILE__);
 
 #include "LTRecord.h"
 
-#undef  ENUM_VALUE
-#define ENUM_VALUE(enum,value) {enum::value, #value},
+#undef  ENUM_NAME
+#define ENUM_NAME(enum,name) {enum::name, #name},
 
 //
 // LTRecord
 //
 std::string LTRecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, SHORT)
-        ENUM_VALUE(Tag, LONG)
+        ENUM_NAME(Tag, SHORT)
+        ENUM_NAME(Tag, LONG)
     };
 
     if (map.contains(value)) return map[value];
@@ -110,8 +110,8 @@ std::string LTRecord::toString() const {
 //
 std::string LitRecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, WORD)
-        ENUM_VALUE(Tag, STRING)
+        ENUM_NAME(Tag, WORD)
+        ENUM_NAME(Tag, STRING)
     };
 
     if (map.contains(value)) return map[value];

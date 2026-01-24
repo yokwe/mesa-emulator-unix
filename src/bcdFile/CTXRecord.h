@@ -67,10 +67,10 @@
 struct CTXRecord : public ByteBuffer::HasRead, public HasToString {
     //Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
     enum class Closure : uint16_t {
-        ENUM_VALUE(Closure, NONE)
-        ENUM_VALUE(Closure, UNIT)
-        ENUM_VALUE(Closure, RC)
-        ENUM_VALUE(Closure, FULL)
+        ENUM_NAME(Closure, NONE)
+        ENUM_NAME(Closure, UNIT)
+        ENUM_NAME(Closure, RC)
+        ENUM_NAME(Closure, FULL)
     };
     static std::string toString(Closure value);
 
@@ -104,10 +104,10 @@ struct CTXRecord : public ByteBuffer::HasRead, public HasToString {
     };
 
     enum class Tag {
-        ENUM_VALUE(Type, SIMPLE)
-        ENUM_VALUE(Type, INCLUDED)
-        ENUM_VALUE(Type, IMPORTED)
-        ENUM_VALUE(Type, NIL)
+        ENUM_NAME(Type, SIMPLE)
+        ENUM_NAME(Type, INCLUDED)
+        ENUM_NAME(Type, IMPORTED)
+        ENUM_NAME(Type, NIL)
     };
     static std::string toString(Tag value);
 

@@ -42,15 +42,15 @@ static const Logger logger(__FILE__);
 
 #include "CTXRecord.h"
 
-#undef  ENUM_VALUE
-#define ENUM_VALUE(enum,value) {enum::value, #value},
+#undef  ENUM_NAME
+#define ENUM_NAME(enum,name) {enum::name, #name},
 
 std::string CTXRecord::toString(Closure value) {
     static std::map<Closure, std::string> map {
-        ENUM_VALUE(Closure, NONE)
-        ENUM_VALUE(Closure, UNIT)
-        ENUM_VALUE(Closure, RC)
-        ENUM_VALUE(Closure, FULL)
+        ENUM_NAME(Closure, NONE)
+        ENUM_NAME(Closure, UNIT)
+        ENUM_NAME(Closure, RC)
+        ENUM_NAME(Closure, FULL)
     };
 
     if (map.contains(value)) return map[value];
@@ -61,10 +61,10 @@ std::string CTXRecord::toString(Closure value) {
 
 std::string CTXRecord::toString(Tag value) {
     static std::map<Tag, std::string> map {
-        ENUM_VALUE(Tag, SIMPLE)
-        ENUM_VALUE(Tag, INCLUDED)
-        ENUM_VALUE(Tag, IMPORTED)
-        ENUM_VALUE(Tag, NIL)
+        ENUM_NAME(Tag, SIMPLE)
+        ENUM_NAME(Tag, INCLUDED)
+        ENUM_NAME(Tag, IMPORTED)
+        ENUM_NAME(Tag, NIL)
     };
 
     if (map.contains(value)) return map[value];

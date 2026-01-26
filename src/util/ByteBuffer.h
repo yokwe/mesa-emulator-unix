@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include <span>
 
 #include "Util.h"
 
@@ -163,6 +164,10 @@ public:
             }
         };
     public:
+        static ByteBuffer getInstance() {
+            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
+            return ByteBuffer(myImpl, 0, 0);
+        }
         static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
             static std::shared_ptr<MyImpl> myImpl(new MyImpl());
             return ByteBuffer(myImpl, data, size, size);
@@ -186,9 +191,26 @@ public:
         myByteCapacity  = 0;
         myBytePos       = 0;
         myByteLimit     = 0;
+        myByteMark      = BAD_MARK;
     }
 
-    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) const;
+    ByteBuffer byteRange(uint32_t byteOffset, uint32_t byteSize) const;
+    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) const {
+        auto byteOffset  = wordValueToByteValue(wordOffset);
+        auto byteSize = wordValueToByteValue(wordSize);
+        return byteRange(byteOffset, byteSize);
+    }
+    ByteBuffer rangeRemains() const {
+        return byteRange(myBytePos, byteRemains());
+    }
+
+    std::span<uint8_t> toSpan() const {
+        return std::span<uint8_t>{myData, myByteLimit};
+    }
+
+    std::string toString() {
+        return toHexString(myByteLimit, myData);
+    }
 
     const char* name() const {
         return myImpl->myName;
@@ -255,13 +277,16 @@ public:
     uint32_t limit() const {
         return byteValueToWordValue(byteLimit());
     }
+    bool empty() const {
+        return byteLimit() == 0;
+    }
     //
     // remains
     //
-    uint32_t byteRemains() {
+    uint32_t byteRemains() const {
         return myByteLimit - myBytePos;
     }
-    uint32_t remains() {
+    uint32_t remains() const {
         return byteValueToWordValue(byteRemains());
     }
 
@@ -293,13 +318,22 @@ public:
     }
 
     // putX
+    void put(std::span<uint8_t> span) {
+        auto byteSize = span.size();
+
+        checkBeforeWrite(byteSize);
+        for(auto e: span) {
+            put8(myBytePos++, e);
+        }
+        if (myByteLimit < myBytePos) myByteLimit = myBytePos;
+    }
     void put8(uint8_t value) {
         const uint32_t byteSize = 1;
 
         checkBeforeWrite(byteSize);
         put8(myBytePos, value);
         myBytePos += byteSize;
-        myByteLimit = myBytePos;
+        if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
     void put16(uint16_t value) {
         const uint32_t byteSize = 2;
@@ -307,7 +341,7 @@ public:
         checkBeforeWrite(byteSize);
         put16(myBytePos, value);
         myBytePos += byteSize;
-        myByteLimit = myBytePos;
+        if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
     void put32(uint32_t value) {
         const uint32_t byteSize = 4;
@@ -315,43 +349,66 @@ public:
         checkBeforeWrite(byteSize);
         put32(myBytePos, value);
         myBytePos += byteSize;
-        myByteLimit = myBytePos;
+        if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
-
 
     //
     // HasRead and read(...)
     //
     struct HasRead {
         virtual ByteBuffer& read(ByteBuffer& bb) = 0;
+        virtual ~HasRead() = default;
     };
     ByteBuffer& read() {
         return *this;
     }
     template <class Head, class... Tail>
     ByteBuffer& read(Head&& head, Tail&&... tail) {
-        constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
-        constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
-        constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
-        constexpr auto is_class    = std::is_class_v<std::remove_reference_t<Head>>;
+        using T = std::remove_cv_t<std::remove_reference_t<Head>>;
+        constexpr auto is_uint8_t  = std::is_same_v<T, uint8_t>;
+        constexpr auto is_uint16_t = std::is_same_v<T, uint16_t>;
+        constexpr auto is_uint32_t = std::is_same_v<T, uint32_t>;
+        constexpr auto is_class    = std::is_class_v<T>;
+        constexpr auto is_enum     = std::is_scoped_enum_v<T>;
 
-    //		logger.info("read head  %s!  %d  |  %d  %d  |  %d", demangle(typeid(head).name()), sizeof(head), is_uint16_t, is_uint32_t, is_class);
+//		logger.info("read head  %2d  |  %d  %d  |  %d  %d  | %s", sizeof(head), is_uint16_t, is_uint32_t, is_class, is_enum, demangle(typeid(head).name()));
 
         if constexpr (is_uint8_t || is_uint16_t || is_uint32_t) {
             read(head);
-        } else {
-            if constexpr (is_class) {
-                constexpr auto has_read = std::is_base_of_v<HasRead, std::remove_reference_t<Head>>;
-                if constexpr (has_read) {
-                    head.read(*this);
-                } else {
-                    logger.error("Unexptected type  %s", demangle(typeid(head).name()));
-                    ERROR()
-                }
+        } else if constexpr (is_enum) {
+            using UT = std::underlying_type_t<T>;
+            constexpr auto ut_uint8_t  = std::is_same_v<UT, uint8_t>;
+            constexpr auto ut_uint16_t = std::is_same_v<UT, uint16_t>;
+            constexpr auto ut_uint32_t = std::is_same_v<UT, uint32_t>;
+
+//    		logger.info("enum class  %d  %d  %d", ut_uint8_t, ut_uint16_t, ut_uint32_t);
+            if constexpr (ut_uint8_t) {
+                uint8_t t;
+                read(t);
+                head = static_cast<std::remove_cv_t<std::remove_reference_t<Head>>>(t);
+            } else if constexpr(ut_uint16_t) {
+                uint16_t t;
+                read(t);
+                head = static_cast<std::remove_cv_t<std::remove_reference_t<Head>>>(t);
+            } else if constexpr (ut_uint32_t) {
+                uint32_t t;
+                read(t);
+                head = static_cast<std::remove_cv_t<std::remove_reference_t<Head>>>(t);
             } else {
-                logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+                logger.error("Unexpected type  %s", demangle(typeid(head).name()));
+                ERROR()    
+            }
+        } else if constexpr (is_class) {
+            constexpr auto has_read = std::is_base_of_v<HasRead, std::remove_reference_t<Head>>;
+            if constexpr (has_read) {
+                head.read(*this);
+            } else {
+                logger.error("Unexpected type  %s", demangle(typeid(head).name()));
                 ERROR()
             }
+        } else {
+            logger.error("Unexpected type  %s", demangle(typeid(head).name()));
+            ERROR()
         }
         return read(std::forward<Tail>(tail)...);
     }
@@ -378,34 +435,55 @@ public:
     //
     struct HasWrite {
         virtual ByteBuffer& write(ByteBuffer& bb) const = 0;
+        virtual ~HasWrite() = default;
     };
     ByteBuffer& write() {
         return *this;
     }
     template <class Head, class... Tail>
     ByteBuffer& write(Head&& head, Tail&&... tail) {
-        constexpr auto is_uint8_t  = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint8_t>::value;
-        constexpr auto is_uint16_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint16_t>::value;
-        constexpr auto is_uint32_t = std::is_same<std::remove_cv_t<std::remove_reference_t<Head>>, uint32_t>::value;
-        constexpr auto is_class    = std::is_class_v<std::remove_reference_t<Head>>;
+        using T = std::remove_cv_t<std::remove_reference_t<Head>>;
+        constexpr auto is_uint8_t  = std::is_same_v<T, uint8_t>;
+        constexpr auto is_uint16_t = std::is_same_v<T, uint16_t>;
+        constexpr auto is_uint32_t = std::is_same_v<T, uint32_t>;
+        constexpr auto is_class    = std::is_class_v<T>;
+        constexpr auto is_enum     = std::is_scoped_enum_v<T>;
 
-    //		logger.info("write head  %s!  %d  |  %d  %d  |  %d", demangle(typeid(head).name()), sizeof(head), is_uint16_t, is_uint32_t, is_class);
+//		logger.info("read head  %2d  |  %d  %d  |  %d  %d  | %s", sizeof(head), is_uint16_t, is_uint32_t, is_class, is_enum, demangle(typeid(head).name()));
 
         if constexpr (is_uint8_t || is_uint16_t || is_uint32_t) {
             write(head);
-        } else {
-            if constexpr (is_class) {
-                constexpr auto has_write = std::is_base_of_v<HasWrite, std::remove_reference_t<Head>>;
-                if constexpr (has_write) {
-                    head.write(*this);
-                } else {
-                    logger.error("Unexptected type  %s", demangle(typeid(head).name()));
-                    ERROR()
-                }
+        } else if constexpr (is_enum) {
+            using UT = std::underlying_type_t<T>;
+            constexpr auto ut_uint8_t  = std::is_same_v<UT, uint8_t>;
+            constexpr auto ut_uint16_t = std::is_same_v<UT, uint16_t>;
+            constexpr auto ut_uint32_t = std::is_same_v<UT, uint32_t>;
+
+//    		logger.info("enum class  %d  %d  %d", ut_uint8_t, ut_uint16_t, ut_uint32_t);
+            if constexpr (ut_uint8_t) {
+                auto t = static_cast<uint8_t>(head);
+                write(t);
+            } else if constexpr(ut_uint16_t) {
+                auto t = static_cast<uint16_t>(head);
+                write(t);
+            } else if constexpr (ut_uint32_t) {
+                auto t = static_cast<uint32_t>(head);
+                write(t);
             } else {
-                logger.error("Unexptected type  %s", demangle(typeid(head).name()));
+                logger.error("Unexpected type  %s", demangle(typeid(head).name()));
+                ERROR()    
+            }
+        } else if constexpr (is_class) {
+            constexpr auto has_write = std::is_base_of_v<HasWrite, std::remove_reference_t<Head>>;
+            if constexpr (has_write) {
+                head.write(*this);
+            } else {
+                logger.error("Unexpected type  %s", demangle(typeid(head).name()));
                 ERROR()
             }
+        } else {
+            logger.error("Unexpected type  %s", demangle(typeid(head).name()));
+            ERROR()
         }
         return write(std::forward<Tail>(tail)...);
     }
@@ -425,4 +503,4 @@ public:
     ByteBuffer& write(int64_t  value) = delete;
     ByteBuffer& write(uint64_t value) = delete;
 
-    };
+};

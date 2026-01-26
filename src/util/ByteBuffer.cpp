@@ -69,16 +69,14 @@ void ByteBuffer::checkBeforeWrite(uint32_t byteSize) {
     ERROR()
 }
 
-ByteBuffer ByteBuffer::range(uint32_t wordOffset, uint32_t wordSize) const {
-    auto bytePos  = wordValueToByteValue(wordOffset);
-    auto readSize = wordValueToByteValue(wordSize);
-    if (myByteCapacity < (bytePos + readSize)) {
+ByteBuffer ByteBuffer::byteRange(uint32_t byteOffset, uint32_t byteSize) const {
+    if (myByteCapacity < (byteOffset + byteSize)) {
         // fix readSize
-        auto newReadSize = myByteCapacity - bytePos;
-//        logger.warn("%s  Adjust readSize from %d to %d", __FUNCTION__, readSize, newReadSize);
-        readSize = newReadSize;
+        auto newByteSize = myByteCapacity - byteOffset;
+//        logger.warn("%s  Adjust readSize from %d to %d", __FUNCTION__, readSize, newByteSize);
+        byteSize = newByteSize;
     }    
-    return ByteBuffer(myImpl, myData + bytePos, readSize, readSize);
+    return ByteBuffer(myImpl, myData + byteOffset, byteSize, byteSize);
 }
 
 void ByteBuffer::mark() {

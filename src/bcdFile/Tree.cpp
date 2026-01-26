@@ -102,7 +102,7 @@ ByteBuffer& TreeLink::read(ByteBuffer& bb) {
     return bb;
 }
 std::string TreeLink::toString() const {
-    std::string variantString = ::toString(variant);
+    std::string variantString = ::toStringVariant(variant);
     return std_sprintf("[%s  %s]", toString(tag), variantString);
 }
 

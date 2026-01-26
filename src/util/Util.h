@@ -244,6 +244,13 @@ std::chrono::system_clock::time_point to_system_clock(std::chrono::steady_clock:
 #define ENUM_NAME_VALUE(enum,name,value) name = value,
 //#define ENUM_NAME_VALUE(enum,name,value) { enum :: name, #name },
 
+struct ScopedEnumHash {
+    template <typename T>
+    std::size_t operator()(T t) const {
+        return static_cast<std::size_t>(t);
+    }
+};
+
 // bitFiled is used in symbols
 uint16_t bitField(uint16_t word, int startBit, int stopBit);
 inline uint16_t bitField(uint16_t word, int startBit) {
@@ -288,13 +295,14 @@ struct StringLiteral {
 
 struct HasToString {
     virtual std::string toString() const = 0;
+	virtual ~HasToString() = default;
 };
 template <typename T>
 concept Stringable = std::derived_from<T, HasToString>;
 
 // use this template function to call toString method of the class in std::varinat
 template<class T>
-std::string toString(T a) {
+std::string toStringVariant(T a) {
 	return std::visit([](auto& x) -> std::string { return x.toString(); }, a);
 }
 

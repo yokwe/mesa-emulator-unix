@@ -98,7 +98,7 @@ ByteBuffer& LTRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string LTRecord::toString() const {
-    std::string variantString = ::toString(variant);
+    std::string variantString = ::toStringVariant(variant);
     return std_sprintf("[%s %s]",
         toString(tag),
         variantString);
@@ -141,6 +141,6 @@ void LitRecord::read(uint16_t u0) {
     }
 }
 std::string LitRecord::toString() const {
-    std::string varintString = ::toString(variant);
+    std::string varintString = ::toStringVariant(variant);
     return std_sprintf("[%s  %s]", toString(tag), varintString);
 }

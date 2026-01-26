@@ -132,7 +132,7 @@ ByteBuffer& BodyInfo::read(ByteBuffer& bb) {
     return bb;
 }
 std::string BodyInfo::toString() const {
-    std::string variantString = ::toString(variant);
+    std::string variantString = ::toStringVariant(variant);
     return std_sprintf("[%s  %s]", toString(tag), variantString);
 }
 
@@ -235,7 +235,7 @@ void BodyRecord::CALLABLE::read(uint16_t u8, ByteBuffer& bb) {
     }
 }
 std::string BodyRecord::CALLABLE::toString() const {
-    std::string variantString = ::toString(variant);
+    std::string variantString = ::toStringVariant(variant);
     std::string flags = std_sprintf("[%s%s%s%s%s%s %X]",
         inline_   ? "I" : "_",
         monitored ? "M" : "_",
@@ -295,7 +295,7 @@ ByteBuffer& BodyRecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string BodyRecord::toString() const {
-    std::string variantString = ::toString(variant);
+    std::string variantString = ::toStringVariant(variant);
     return std_sprintf("[%s  %s  %s  %s  %s  %d  %s  %s  %s]",
         link.toString(),
         firstSon.toString(),

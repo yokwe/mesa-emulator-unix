@@ -105,7 +105,7 @@ std::string SERecord::ID::toString() const {
         linkSpace ? "L" : "_"
     );
 
-    std::string ctxLinkString = ::toString(variant);
+    std::string ctxLinkString = ::toStringVariant(variant);
 
     return
         std_sprintf("[%s  [%s]  %-8s  %5d  %5d  %-24s  %s  %s]",
@@ -210,7 +210,7 @@ std::string SERecord::CONS::RECORD::toString() const {
         machindDep ? "M" : "_",
         painted    ? "P" : "_");
 
-    std::string linkPartString = ::toString(variant);
+    std::string linkPartString = ::toStringVariant(variant);
     return std_sprintf("[[%s] %d  %s  %s]",
         flags, length, fieldCtx.toString(), linkPartString);
 }
@@ -505,7 +505,7 @@ void SERecord::CONS::read(uint16_t u0, ByteBuffer& bb) {
     }
 }
 std::string SERecord::CONS::toString() const {
-    return std_sprintf("[%s  %s]", ::toString(tag), ::toString(variant));
+    return std_sprintf("[%s  %s]", ::toString(tag), ::toStringVariant(variant));
 }
 
 
@@ -551,5 +551,5 @@ ByteBuffer& SERecord::read(ByteBuffer& bb) {
     return bb;
 }
 std::string SERecord::toString() const {
-    return std_sprintf("[%s  %s]", toString(tag), ::toString(variant));
+    return std_sprintf("[%s  %s]", toString(tag), ::toStringVariant(variant));
 }

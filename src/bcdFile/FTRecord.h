@@ -43,7 +43,7 @@
 #include "NameRecord.h"
 
 // FTRecord: TYPE = RECORD [name: NameRecord, version: VersionStamp];
-struct FTRecord : public ByteBuffer::HasRead, public HasToString {
+struct FTRecord : public HasRead, public HasToString {
     NameRecord name;
     Timestamp version;
 

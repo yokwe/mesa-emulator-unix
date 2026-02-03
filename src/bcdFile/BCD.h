@@ -47,7 +47,7 @@
 #include "ENRecord.h"
 #include "MTRecord.h"
 
-class BCD : public ByteBuffer::HasRead {
+class BCD : public HasRead {
 public:
     static const constexpr uint16_t VersionID = 6103;
 

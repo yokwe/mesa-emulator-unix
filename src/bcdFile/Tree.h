@@ -56,7 +56,7 @@
 //    symbol => [index(0:2..15): Symbols.ISEIndex],
 //    literal => [info(0:2..15): Literals.LitRecord]
 //    ENDCASE];
-struct TreeLink final : public ByteBuffer::HasRead, public HasToString {
+struct TreeLink final : public HasRead, public HasToString {
     enum class Tag : uint16_t {
         ENUM_NAME(Tag, SUBTREE)
         ENUM_NAME(Tag, HASH)
@@ -425,7 +425,7 @@ std::string toString(NodeName);
 //  nSons (0: 13..15): [0..MaxNSons],
 //  info (1): Info,
 //  son (2): ARRAY [1..1) OF Link];
-struct TreeNode : public ByteBuffer::HasRead, public HasToString {
+struct TreeNode : public HasRead, public HasToString {
     bool     free;
     NodeName name;
     bool     attr1;

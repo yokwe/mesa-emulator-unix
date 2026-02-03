@@ -46,7 +46,7 @@
 
 // ENRecord: TYPE = RECORD [
 //   nEntries: CARDINAL, initialPC: ARRAY [0..0) OF PrincOps.BytePC];
-struct ENRecord : public ByteBuffer::HasRead, public HasToString {
+struct ENRecord : public HasRead, public HasToString {
     std::vector<uint16_t> initialPC;
 
     ByteBuffer& read(ByteBuffer& bb) override;

@@ -44,7 +44,7 @@ static const Logger logger(__FILE__);
 
 ByteBuffer FloppyDisk::readSector(uint32_t sector, uint32_t count) {
     DiskFile::Page page;
-    auto bb = ByteBuffer::Mesa::getInstance(DiskFile::PAGE_SIZE_IN_BYTE * count);
+    auto bb = ByteBuffer(DiskFile::PAGE_SIZE_IN_BYTE * count);
     for(uint32_t i = 0; i < count; i++) {
         diskFile.readPage((sector - 1) + i, page);
         bb.write(page);

@@ -59,6 +59,6 @@ public:
     }
 
     ByteBuffer byteBuffer() const {
-        return ByteBuffer::Mesa::getInstance(myData, mySize);
+        return ByteBuffer(myData, mySize);
     }
-    };
+};

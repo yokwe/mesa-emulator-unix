@@ -46,7 +46,7 @@ ByteBuffer& DiskFile::Page::read(ByteBuffer& bb) {
 	}
 	return bb;
 }
-ByteBuffer& DiskFile::Page::write(ByteBuffer& bb) const {
+ByteBuffer& DiskFile::Page::write(ByteBuffer& bb) {
 	for(const auto e: data) {
 		bb.put16(e);
 	}

@@ -46,7 +46,7 @@
 // SGRecord: TYPE = RECORD [
 //   file: FTIndex, base: CARDINAL,
 //   pages: [0..256), extraPages: [0..64), class: SegClass];
-struct SGRecord : public ByteBuffer::HasRead, public HasToString {
+struct SGRecord : public HasRead, public HasToString {
     // SegClass: TYPE = {code, symbols, acMap, other};
     enum class SegClass {
         CODE, SYMBOLS, AC_MAP, OTHER,

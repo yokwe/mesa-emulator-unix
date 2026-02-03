@@ -57,14 +57,14 @@
 //      length(2:0..15): CARDINAL,
 //      value(3): WordSequence]
 //    ENDCASE];
-struct LTRecord : public ByteBuffer::HasRead, public HasToString {
+struct LTRecord : public HasRead, public HasToString {
     enum class Tag : uint16_t {
         ENUM_NAME(Kind, SHORT)
         ENUM_NAME(Kind, LONG)
     };
     static std::string toString(Tag);
 
-    struct SHORT : public ByteBuffer::HasRead, public HasToString {
+    struct SHORT : public HasRead, public HasToString {
         uint16_t value;
 
         ByteBuffer& read(ByteBuffer& bb) override {
@@ -74,7 +74,7 @@ struct LTRecord : public ByteBuffer::HasRead, public HasToString {
             return std_sprintf("[%d]", value);
         }
     };
-    struct LONG : public ByteBuffer::HasRead, public HasToString {
+    struct LONG : public HasRead, public HasToString {
         uint16_t              codeIndex;
         uint16_t              length;
         std::vector<uint16_t> value;

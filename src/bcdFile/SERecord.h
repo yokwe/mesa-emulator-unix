@@ -141,7 +141,7 @@
 //        ENDCASE],         -- changing symbol version id's
 //    ENDCASE];
 
-struct SERecord : public ByteBuffer::HasRead, public HasToString {
+struct SERecord : public HasRead, public HasToString {
     struct ID : public HasToString {
         struct TERMINAL : public HasToString  {
             std::string toString() const override {
@@ -153,7 +153,7 @@ struct SERecord : public ByteBuffer::HasRead, public HasToString {
                 return "";
             }
         };
-        struct LINKED : public ByteBuffer::HasRead, public HasToString {
+        struct LINKED : public HasRead, public HasToString {
             SEIndex link;
 
             ByteBuffer& read(ByteBuffer& bb) override {
@@ -224,7 +224,7 @@ struct SERecord : public ByteBuffer::HasRead, public HasToString {
                     return "";
                 }
             };
-            struct LINKED : public ByteBuffer::HasRead, public HasToString {
+            struct LINKED : public HasRead, public HasToString {
                 SEIndex linkType;
 
                 ByteBuffer& read(ByteBuffer& bb) override;

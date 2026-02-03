@@ -47,11 +47,11 @@ public:
 	static const uint32_t PAGE_SIZE_IN_BYTE = PAGE_SIZE * sizeof(uint16_t);
 
 	using PageData = uint16_t[PAGE_SIZE];
-	struct Page : public ByteBuffer::HasRead, public ByteBuffer::HasWrite {
+	struct Page : public HasRead, public HasWrite {
 		PageData data;
 
 		ByteBuffer& read(ByteBuffer& bb) override;
-		ByteBuffer& write(ByteBuffer& bb) const override;
+		ByteBuffer& write(ByteBuffer& bb) override;
 
 		void byteswap();
 	};

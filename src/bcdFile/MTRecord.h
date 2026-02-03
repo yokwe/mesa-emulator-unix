@@ -46,7 +46,7 @@
 
 //   CodeDesc: TYPE = RECORD [
     //     sgi: SGIndex, offset, length: CARDINAL];
-    struct CodeDesc: public ByteBuffer::HasRead, public HasToString {
+    struct CodeDesc: public HasRead, public HasToString {
         SGIndex  sgi;
         uint16_t offset;
         uint16_t length;
@@ -82,7 +82,7 @@
     //     framesize: [0..PrincOps.MaxFrameSize),
     //     entries: ENIndex,
     //     atoms: ATIndex];
-    struct MTRecord : public ByteBuffer::HasRead, public HasToString {
+    struct MTRecord : public HasRead, public HasToString {
         // LinkLocation: TYPE = {frame, code, dontcare};
         enum class LinkLocation {
             FRAME, CODE, DONTCARE,

@@ -61,7 +61,7 @@ struct TreeNode;
 
 //   WordOffset: TYPE = CARDINAL;
 //   BlockDescriptor: TYPE = RECORD [offset: WordOffset, size: CARDINAL];
-struct BlockDescriptor : public ByteBuffer::HasRead, public HasToString {
+struct BlockDescriptor : public HasRead, public HasToString {
 	uint16_t offset;
 	uint16_t size;
 
@@ -76,7 +76,7 @@ struct BlockDescriptor : public ByteBuffer::HasRead, public HasToString {
 	}
 };
 
-class Symbol : public ByteBuffer::HasRead {
+class Symbol : public HasRead {
     ByteBuffer& read(ByteBuffer& bb) override;
 
 public:

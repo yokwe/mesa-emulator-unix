@@ -53,7 +53,7 @@
 //   ctx: IncludedCTXIndex,	-- context of copied entries
 //   defaultImport: CTXIndex,	-- unnamed imported instance
 //   file: FileIndex];		-- associated file
-struct MDRecord : public ByteBuffer::HasRead, public HasToString {
+struct MDRecord : public HasRead, public HasToString {
     Timestamp  stamp;
     HTIndex    moduleId;
     HTIndex    fileId;

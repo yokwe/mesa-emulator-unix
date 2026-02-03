@@ -46,7 +46,7 @@
 //  anyInternal, anyPublic: BOOLEAN,
 //  link: HTIndex,
 //  ssIndex: CARDINAL];
-struct HTRecord : public ByteBuffer::HasRead, public HasToString {
+struct HTRecord : public HasRead, public HasToString {
     bool        anyInternal;
     bool        anyPublic;
     HTIndex     link;

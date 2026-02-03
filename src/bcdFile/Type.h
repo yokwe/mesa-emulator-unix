@@ -44,7 +44,7 @@
 
 // TimeStamp: TYPE = RECORD [net, host: [0..377B], time: LONG CARDINAL];
 // Null: TimeStamp = TimeStamp[net: 0, host: 0, time: 0];
-class Timestamp : public ByteBuffer::HasRead, public HasToString {
+class Timestamp : public HasRead, public HasToString {
     uint8_t  net;
     uint8_t  host;
     uint32_t time;

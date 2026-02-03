@@ -45,7 +45,7 @@
 const constexpr uint16_t T_LIMIT = 0177777;
 
 template <StringLiteral PREFIX, class T>
-struct Index : public ByteBuffer::HasRead, public HasToString {
+struct Index : public HasRead, public HasToString {
     static inline const char* prefix = PREFIX;
 
     static inline std::set<Index*> indexSet;

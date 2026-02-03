@@ -50,7 +50,7 @@
 //  type (0:0..1): Symbols.ExtensionType[value..default],
 //  sei (0:2..15): Symbols.ISEIndex,
 //  tree (1:0..15): Tree.Link]
-struct EXTRecord : public ByteBuffer::HasRead, public HasToString {
+struct EXTRecord : public HasRead, public HasToString {
     ExtensionType type;
     SEIndex       sei;
     TreeLink      tree;

@@ -37,145 +37,63 @@
 
 #include <cstdint>
 #include <memory>
-#include <type_traits>
 #include <span>
 
 #include "Util.h"
 
+class ByteBuffer;
+struct HasRead {
+    virtual ByteBuffer& read(ByteBuffer& bb) = 0;
+    virtual ~HasRead() = default;
+};
 
-class ByteBuffer {
-    static const int bytesPerWord = 2;
+struct HasWrite {
+    virtual ByteBuffer& write(ByteBuffer& bb) = 0;
+    virtual ~HasWrite() = default;
+};
 
-    static uint32_t byteValueToWordValue(uint32_t byteValue) {
-        return (byteValue + bytesPerWord - 1) / bytesPerWord;
+class ByteBuffer : public HasRead, public HasWrite, public HasToString {
+    static const bool USE_MESA_BYTE_ORDER = true;
+
+    static const uint32_t BYTES_PER_WORD = 2;
+    static uint32_t toWordValue(uint32_t byteValue) {
+        return (byteValue + BYTES_PER_WORD - 1) / BYTES_PER_WORD;
     }
-    static uint32_t wordValueToByteValue(uint32_t wordValue) {
-        return wordValue * bytesPerWord;
+    static uint32_t toByteValue(uint32_t wordValue) {
+        return wordValue * BYTES_PER_WORD;
     }
-
-    struct Impl {
-        const char* myName;
-        uint32_t    mySize;
-        uint8_t*    myData;
-
-        Impl(const char* name) : myName(name), mySize(0), myData(0) {}
-        Impl(const char* name, uint32_t size) : myName(name), mySize(size), myData(new uint8_t[mySize]) {}
-
-        virtual ~Impl() {
-            delete[] myData;
-            myName = 0;
-            mySize = 0;
-            myData = 0;
-        }
-
-        // 32
-        virtual uint32_t get32(uint8_t* data, uint32_t pos) = 0;
-        virtual void     put32(uint8_t* data, uint32_t pos, uint32_t value) = 0;
-    };
     
     static inline const uint32_t BAD_MARK = ~0;
 
-    std::shared_ptr<Impl> myImpl;
+    std::shared_ptr<uint8_t[]> myStorage;
+
     uint8_t*  myData;
     uint32_t  myByteCapacity;  // cpacity of myData
     uint32_t  myBytePos;       // current position for read and write
     uint32_t  myByteLimit;     // written size
     uint32_t  myByteMark;
 
+    ByteBuffer(uint8_t* data, uint32_t byteCapacity, uint32_t byteLimit) :
+        myStorage(0), myData(data), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(byteLimit), myByteMark(BAD_MARK) {}
+    ByteBuffer(std::shared_ptr<uint8_t[]> storage, uint32_t byteCapacity, uint32_t byteLimit) :
+        myStorage(storage), myData(myStorage.get()), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(byteLimit), myByteMark(BAD_MARK) {}
+    
     // valid range of myBytePos   is [0..myByteCapacity)
     // valid range of myByteLimit is [myBytePos..myByteCapacity)
     void checkBeforeRead(uint32_t byteSize);
     void checkBeforeWrite(uint32_t byteSize);
-
-
-    ByteBuffer(std::shared_ptr<Impl> impl, uint8_t* data, uint32_t byteCapacity) :
-        myImpl(impl), myData(data), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(0), myByteMark(BAD_MARK) {}
-    ByteBuffer(std::shared_ptr<Impl> impl, uint8_t* data, uint32_t byteCapacity, uint32_t byteLimit) :
-        myImpl(impl), myData(data), myByteCapacity(byteCapacity), myBytePos(0), myByteLimit(byteLimit), myByteMark(BAD_MARK) {}
-
-    // 8
-    uint8_t get8(uint32_t bytePos) {
-        return myData[bytePos];
-    }
-    void put8(uint32_t bytePos, uint8_t value) const {
-        myData[bytePos] = value;
-    }
-    // 16
-    uint16_t get16(uint32_t bytePos) {
-        return (myData[bytePos + 0] << 8) | (myData[bytePos + 1] << 0);
-    }
-    void put16(uint32_t bytePos, uint16_t value) const {
-        myData[bytePos + 0] = value >> 8;
-        myData[bytePos + 1] = value >> 0;
-    }
-    // 32
-    uint32_t get32(uint32_t bytePos) {
-        return myImpl->get32(myData, bytePos);
-    }
-    void put32(uint32_t bytePos, uint32_t value) {
-        myImpl->put32(myData, bytePos, value);
-    }
-
+        
 public:
-    class Mesa {
-        static inline const char* NAME = "MESA";
-        struct MyImpl : public Impl {
-            MyImpl() : Impl(NAME) {}
-            MyImpl(uint32_t size) : Impl(NAME, size) {}
+    ByteBuffer() : ByteBuffer(0, 0, 0) {}
+    ByteBuffer(uint8_t* data, uint32_t byteSize) : ByteBuffer(data, byteSize, byteSize) {}
+    ByteBuffer(uint32_t byteSize) : ByteBuffer(std::make_shared<uint8_t[]>(byteSize), byteSize, 0) {}
 
-            // 32
-            // mesa order for 32bit value  low half and high half
-            uint32_t get32(uint8_t* data, uint32_t pos) override {
-                return (data[pos + 0] << 8) | (data[pos + 1] << 0) | (data[pos + 2] << 24) | (data[pos + 3] << 16);
-            }
-            void     put32(uint8_t* data, uint32_t pos, uint32_t value) override {
-                data[pos + 0] = (uint8_t)(value >>  8);
-                data[pos + 1] = (uint8_t)(value >>  0);
-                data[pos + 2] = (uint8_t)(value >> 24);
-                data[pos + 3] = (uint8_t)(value >> 16);
-            }
-        };
-    public:
-        static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
-            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
-            return ByteBuffer(myImpl, data, size, size);
-        }
-        static ByteBuffer getInstance(uint32_t size) {
-            std::shared_ptr<MyImpl> myImpl(new MyImpl(size));
-            return ByteBuffer(myImpl, myImpl->myData, size);
-        }
-    };
-    class Net {
-        static inline const char* NAME = "NET";
-        struct MyImpl : public Impl {
-            MyImpl() : Impl(NAME) {}
-            MyImpl(uint32_t size) : Impl(NAME, size) {}
-
-            // 32
-            // netowrk order for 32bit value  high half and low half
-            uint32_t get32(uint8_t* data, uint32_t pos) override {
-                return (data[pos + 0] << 24) | (data[pos + 1] << 16) | (data[pos + 2] << 8) | (data[pos + 3] << 0);
-            }
-            void     put32(uint8_t* data, uint32_t pos, uint32_t value) override {
-                data[pos + 0] = (uint8_t)(value >> 24);
-                data[pos + 1] = (uint8_t)(value >> 16);
-                data[pos + 2] = (uint8_t)(value >>  8);
-                data[pos + 3] = (uint8_t)(value >>  0);
-            }
-        };
-    public:
-        static ByteBuffer getInstance() {
-            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
-            return ByteBuffer(myImpl, 0, 0);
-        }
-        static ByteBuffer getInstance(uint8_t* data, uint32_t size) {
-            static std::shared_ptr<MyImpl> myImpl(new MyImpl());
-            return ByteBuffer(myImpl, data, size, size);
-        }
-        static ByteBuffer getInstance(uint32_t size) {
-            std::shared_ptr<MyImpl> myImpl(new MyImpl(size));
-            return ByteBuffer(myImpl, myImpl->myData, size);
-        }
+    ~ByteBuffer() {
+        myData          = 0;
+        myByteCapacity  = 0;
+        myBytePos       = 0;
+        myByteLimit     = 0;
+        myByteMark      = BAD_MARK;
     };
 
     static uint8_t highByte(uint16_t value) {
@@ -185,38 +103,26 @@ public:
         return (uint8_t)(value >> 0);
     }
 
-
-    ~ByteBuffer() {
-        myData          = 0;
-        myByteCapacity  = 0;
-        myBytePos       = 0;
-        myByteLimit     = 0;
-        myByteMark      = BAD_MARK;
-    }
-
-    ByteBuffer byteRange(uint32_t byteOffset, uint32_t byteSize) const;
-    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) const {
-        auto byteOffset  = wordValueToByteValue(wordOffset);
-        auto byteSize = wordValueToByteValue(wordSize);
+    ByteBuffer byteRange(uint32_t byteOffset, uint32_t byteSize);
+    ByteBuffer range(uint32_t wordOffset, uint32_t wordSize) {
+        auto byteOffset  = toByteValue(wordOffset);
+        auto byteSize = toByteValue(wordSize);
         return byteRange(byteOffset, byteSize);
     }
-    ByteBuffer rangeRemains() const {
-        return byteRange(myBytePos, byteRemains());
+    ByteBuffer rangeRemains() {
+        auto byteSize = byteRemains();
+        return ByteBuffer(myData + myBytePos, byteSize, byteSize);
     }
 
     std::span<uint8_t> toSpan() const {
         return std::span<uint8_t>{myData, myByteLimit};
     }
 
-    std::string toString() {
+    std::string toString() const override {
         return toHexString(myByteLimit, myData);
     }
 
-    const char* name() const {
-        return myImpl->myName;
-    }
-
-    const uint8_t* data() const {
+    const uint8_t* data() {
         return myData;
     }
 
@@ -253,20 +159,20 @@ public:
     //
     // capacity
     //
-    uint32_t byteCapacity() const {
+    uint32_t byteCapacity() {
         return myByteCapacity;
     }
-    uint32_t capacity() const {
-        return byteValueToWordValue(byteCapacity());
+    uint32_t capacity() {
+        return toWordValue(byteCapacity());
     }
     //
     // pos
     //
-    uint32_t bytePos() const {
+    uint32_t bytePos() {
         return myBytePos;
     }
-    uint32_t pos() const {
-        return byteValueToWordValue(bytePos());
+    uint32_t pos() {
+        return toWordValue(bytePos());
     }
     //
     // limit
@@ -274,91 +180,107 @@ public:
     uint32_t byteLimit() const {
         return myByteLimit;
     }
-    uint32_t limit() const {
-        return byteValueToWordValue(byteLimit());
+    uint32_t limit() {
+        return toWordValue(byteLimit());
     }
-    bool empty() const {
+    bool empty() {
         return byteLimit() == 0;
     }
     //
     // remains
     //
-    uint32_t byteRemains() const {
+    uint32_t byteRemains() {
         return myByteLimit - myBytePos;
     }
-    uint32_t remains() const {
-        return byteValueToWordValue(byteRemains());
+    uint32_t remains() {
+        return toWordValue(byteRemains());
     }
 
     
     // getX
+    // std::span<uint8_t> getSpan() {
+    //     std::span<uint8_t> ret {myData + myBytePos, myByteLimit - myBytePos};
+    //     myBytePos = myByteLimit;
+    //     return ret;
+    // }
     uint8_t get8() {
-        const uint32_t byteSize = 1;
-
-        checkBeforeRead(byteSize);
-        auto ret = get8(myBytePos);
-        myBytePos += byteSize;
+        checkBeforeRead(1);
+        uint8_t ret = myData[myBytePos++];;
         return ret;
     }
     uint16_t get16() {
-        const uint32_t byteSize = 2;
-
-        checkBeforeRead(byteSize);
-        auto ret = get16(myBytePos);
-        myBytePos += byteSize;
+        checkBeforeRead(2);
+        uint16_t ret = 0;
+        ret |= myData[myBytePos++] <<  8;
+        ret |= myData[myBytePos++] <<  0;
         return ret;
     }
     uint32_t get32() {
-        const uint32_t byteSize = 4;
-
-        checkBeforeRead(byteSize);
-        auto ret = get32(myBytePos);
-        myBytePos += byteSize;
+        checkBeforeRead(4);
+        uint32_t ret = 0;
+        if constexpr (USE_MESA_BYTE_ORDER) {
+            ret |= myData[myBytePos++] <<  8;
+            ret |= myData[myBytePos++] <<  0;
+            ret |= myData[myBytePos++] << 24;
+            ret |= myData[myBytePos++] << 16;
+        } else {
+            ret |= myData[myBytePos++] << 24;
+            ret |= myData[myBytePos++] << 16;
+            ret |= myData[myBytePos++] <<  8;
+            ret |= myData[myBytePos++] <<  0;
+        }
         return ret;
     }
 
     // putX
-    void put(std::span<uint8_t> span) {
+    void putSpan(const std::span<uint8_t>& span) {
         auto byteSize = span.size();
+        if (byteSize == 0) return;
 
         checkBeforeWrite(byteSize);
-        for(auto e: span) {
-            put8(myBytePos++, e);
+        for(const auto e: span) {
+            myData[myBytePos++] = e;
         }
         if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
     void put8(uint8_t value) {
-        const uint32_t byteSize = 1;
+        checkBeforeWrite(1);
+        myData[myBytePos++] = value;
 
-        checkBeforeWrite(byteSize);
-        put8(myBytePos, value);
-        myBytePos += byteSize;
         if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
     void put16(uint16_t value) {
-        const uint32_t byteSize = 2;
+        checkBeforeWrite(2);
+        myData[myBytePos++] = value >> 8;
+        myData[myBytePos++] = value >> 0;
 
-        checkBeforeWrite(byteSize);
-        put16(myBytePos, value);
-        myBytePos += byteSize;
         if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
     void put32(uint32_t value) {
-        const uint32_t byteSize = 4;
+        checkBeforeWrite(4);
+        if constexpr (USE_MESA_BYTE_ORDER) {
+            myData[myBytePos++] = value >>  8;
+            myData[myBytePos++] = value >>  0;    
+            myData[myBytePos++] = value >> 24;
+            myData[myBytePos++] = value >> 16;
+        } else {
+            myData[myBytePos++] = value >> 24;
+            myData[myBytePos++] = value >> 16;
+            myData[myBytePos++] = value >>  8;
+            myData[myBytePos++] = value >>  0;    
+        }
 
-        checkBeforeWrite(byteSize);
-        put32(myBytePos, value);
-        myBytePos += byteSize;
         if (myByteLimit < myBytePos) myByteLimit = myBytePos;
     }
 
     //
     // HasRead and read(...)
     //
-    struct HasRead {
-        virtual ByteBuffer& read(ByteBuffer& bb) = 0;
-        virtual ~HasRead() = default;
-    };
+    ByteBuffer& read(ByteBuffer& value) override {
+        value = rangeRemains();
+        return *this;
+    }
+    // read() for template function read
     ByteBuffer& read() {
         return *this;
     }
@@ -399,7 +321,7 @@ public:
                 ERROR()    
             }
         } else if constexpr (is_class) {
-            constexpr auto has_read = std::is_base_of_v<HasRead, std::remove_reference_t<Head>>;
+            constexpr auto has_read = std::is_base_of_v<HasRead, T>;
             if constexpr (has_read) {
                 head.read(*this);
             } else {
@@ -433,10 +355,11 @@ public:
     //
     // HasWrite and write(...)
     //
-    struct HasWrite {
-        virtual ByteBuffer& write(ByteBuffer& bb) const = 0;
-        virtual ~HasWrite() = default;
-    };
+   ByteBuffer& write(ByteBuffer& value) override {
+        putSpan(value.toSpan());
+        return *this;
+    }
+    // write() for temlate function write
     ByteBuffer& write() {
         return *this;
     }
@@ -474,7 +397,7 @@ public:
                 ERROR()    
             }
         } else if constexpr (is_class) {
-            constexpr auto has_write = std::is_base_of_v<HasWrite, std::remove_reference_t<Head>>;
+            constexpr auto has_write = std::is_base_of_v<HasWrite, T>;
             if constexpr (has_write) {
                 head.write(*this);
             } else {
@@ -503,4 +426,8 @@ public:
     ByteBuffer& write(int64_t  value) = delete;
     ByteBuffer& write(uint64_t value) = delete;
 
+    ByteBuffer& write(std::span<uint8_t> span) {
+        putSpan(span);
+        return *this;
+    }
 };

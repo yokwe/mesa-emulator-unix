@@ -64,7 +64,7 @@
 //     imported => [includeLink(1:5..15): IncludedCTXIndex],
 //     nil => []
 //     ENDCASE];
-struct CTXRecord : public ByteBuffer::HasRead, public HasToString {
+struct CTXRecord : public HasRead, public HasToString {
     //Closure: TYPE = {none, unit, rc, full};  -- completeness of copied contexts
     enum class Closure : uint16_t {
         ENUM_NAME(Closure, NONE)

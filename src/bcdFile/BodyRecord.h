@@ -52,7 +52,7 @@
 // NOTICE
 //   size of BodyLink is 15 bits
 //BodyLink: TYPE = RECORD [which(0:0..0): {sibling(0), parent(1)}, index(0:1..14): BTIndex];
-struct BodyLink : public ByteBuffer::HasRead, public HasToString {
+struct BodyLink : public HasRead, public HasToString {
     enum class Which {
         ENUM_NAME(Which, SIBLING)
         ENUM_NAME(Which, PARENT)
@@ -81,7 +81,7 @@ struct BodyLink : public ByteBuffer::HasRead, public HasToString {
 //      bytes(0:1..15): [0..LAST[CARDINAL]/2],
 //      startIndex(1:0..15), indexLength(2:0..15): CARDINAL]
 //    ENDCASE];
-struct BodyInfo : public ByteBuffer::HasRead, public HasToString {
+struct BodyInfo : public HasRead, public HasToString {
     enum class Tag {
         ENUM_NAME(Tag, INTERNAL)
         ENUM_NAME(Tag, EXTERNAL)
@@ -139,7 +139,7 @@ struct BodyInfo : public ByteBuffer::HasRead, public HasToString {
 //    Other => [relOffset(8:1..15): [0..LAST[CARDINAL]/2]]
 //    ENDCASE];
 
-struct BodyRecord : public ByteBuffer::HasRead, public HasToString {
+struct BodyRecord : public HasRead, public HasToString {
     enum class Tag {
         ENUM_NAME(Tag, CALLABLE)
         ENUM_NAME(Tag, OTHER)

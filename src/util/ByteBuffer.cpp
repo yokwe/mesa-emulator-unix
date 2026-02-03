@@ -48,7 +48,6 @@ void ByteBuffer::checkBeforeRead(uint32_t byteSize) {
 
     logger.error("Unexpected value  %s", __FUNCTION__);
     logger.error("  byteSize  %u", byteSize);
-    logger.error("  name      %s", myImpl->myName);
     logger.error("  data      %p", myData);
     logger.error("  capacity  %u", myByteCapacity);
     logger.error("  pos       %u", myBytePos);
@@ -61,7 +60,6 @@ void ByteBuffer::checkBeforeWrite(uint32_t byteSize) {
 
     logger.error("Unexpected value  %s", __FUNCTION__);
     logger.error("  byteSize  %u", byteSize);
-    logger.error("  name      %s", myImpl->myName);
     logger.error("  data      %p", myData);
     logger.error("  capacity  %u", myByteCapacity);
     logger.error("  pos       %u", myBytePos);
@@ -69,14 +67,14 @@ void ByteBuffer::checkBeforeWrite(uint32_t byteSize) {
     ERROR()
 }
 
-ByteBuffer ByteBuffer::byteRange(uint32_t byteOffset, uint32_t byteSize) const {
+ByteBuffer ByteBuffer::byteRange(uint32_t byteOffset, uint32_t byteSize) {
     if (myByteCapacity < (byteOffset + byteSize)) {
         // fix readSize
         auto newByteSize = myByteCapacity - byteOffset;
 //        logger.warn("%s  Adjust readSize from %d to %d", __FUNCTION__, readSize, newByteSize);
         byteSize = newByteSize;
     }    
-    return ByteBuffer(myImpl, myData + byteOffset, byteSize, byteSize);
+    return ByteBuffer(myData + byteOffset, byteSize, byteSize);
 }
 
 void ByteBuffer::mark() {
